@@ -136,7 +136,7 @@ class FinalscreeningController extends Controller
             }
             /// Notify users
             Finalscreening::where('step_id', $request->step)->where('company_id', $request->company)->update(['datetime' => $request->date, 'duration' => $request->duration,
-                'zoom_id' => $zoom['data']['id'], 'start_url	' =>  $zoom['data']['start_url'], 'join_url' =>  $zoom['data']['join_url']]);
+                'zoom_id' => $zoom['data']['id'], 'start_url' =>  $zoom['data']['start_url'], 'join_url' =>  $zoom['data']['join_url']]);
             return Redirect::back()->with('message', 'Meeting added successfully.');
         } else {return Redirect::back()->with('message2', 'Error');}
     }
