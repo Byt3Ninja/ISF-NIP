@@ -38,7 +38,16 @@
                                     <div style="width: 70%;float: {{$l=='ar'?'right':'left'}};">
                                     <select class="select2 form-control" id="FormSelect"  onchange="window.open('/admin/show-builder/'+this.options[this.selectedIndex].value,'_self');">
                                         @foreach(App\BuilderForm::all() as $form)
-                                        <option value="{{$form->id}}" {{$title->id==$form->id?"selected":""}}>{{$form->form_name}}</option>
+                                        <option value="{{$form->id}}" {{$title->id==$form->id?"selected":""}}>
+                                            {{ $form->form_name }} 
+                                            @if( $form->cycles->count() )
+                                            ( 
+                                                @foreach( $form->cycles as $cycle )
+                                                {{ $cycle->title }} @if( !$loop->last ) - @endif
+                                                @endforeach
+                                            )
+                                            @endif
+                                        </option>
                                         @endforeach
                                     </select></div>
                                     &nbsp;&nbsp;
