@@ -264,17 +264,17 @@
                     <input type="hidden" name="type" id="type5" value="5">
                     <input type="hidden" name="arr" id="sarr" value="{{isset($step)?$step->arr+1:1}}">
                     <input type="hidden" name="stype" id="stype" value="1">
-                    <div id="menu1">
-                    <label>{{__('cycles.Choose form')}}: </label>
-                    <div class="form-group mb-0">
-                        <select class="select form-control" name="FormSelect" required>
-                            @foreach(\App\BuilderForm::all() as $form)
-                            <option value="{{$form->id}}" >{{$form->form_name}}</option>
-                            @endforeach
-                        </select>
+                    <div class="mb-2" id="menu1">
+                        <label>{{__('cycles.Choose form')}}: </label>
+                        <div class="form-group mb-0">
+                            <select class="select form-control" name="FormSelect" required>
+                                @foreach(\App\BuilderForm::all() as $form)
+                                <option value="{{$form->id}}" >{{$form->form_name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    </div>
-                    <div id="menu2">
+                    <div class="mb-2" id="menu2">
                         <label>{{__('cycles.Choose screening type')}}: </label>
                         <div class="form-group mb-0">
                             <select class="select form-control" name="ScreeningSelect" required>
@@ -332,6 +332,27 @@
                 <div class="modal-body">
                     <input type="hidden" name="sid" id="sid" >
                     <input type="hidden" name="type" id="type7" value="8">
+                    <div class="mb-2" id="mmenu1">
+                        <label>{{__('cycles.Choose form')}}: </label>
+                        <div class="form-group mb-0">
+                            <select class="select form-control" id="mFormSelect" name="mFormSelect" required>
+                                @foreach(\App\BuilderForm::all() as $form)
+                                <option value="{{$form->id}}" >{{$form->form_name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-2" id="mmenu2">
+                        <label>{{__('cycles.Choose screening type')}}: </label>
+                        <div class="form-group mb-0">
+                            <select class="select form-control" id="mScreeningSelect" name="mScreeningSelect" required>
+                                <option selected disabled> {{__('cycles.Select type')}}</option>
+                                <option value="onetoall">{{__('cycles.Assign One to all users')}}</option>
+                                <option value="grouptoall">{{__('cycles.Assign Group to all users')}}</option>
+                                <option value="grouptogroup">{{__('cycles.Assign Group to group of users')}}</option>
+                            </select>
+                        </div>
+                    </div>
                     <label>{{__('cycles.Form title')}}: </label>
                     <div class="form-group">
                         <input id='mtitle' name='title' type="text" placeholder="{{__('cycles.Title')}}" class="form-control" required>
@@ -459,7 +480,19 @@
                 case 1:
                     $.ajax({
                         type: "POST", url: "/admin/cycles/modify",data: {"type" : 7,"sid" : id,"cycleid" : 0,},
-                        success: function (response) {
+                        success: function (response)
+                        {
+                            step = response.stype;
+                            let menu = $('#mmenu'+step);
+                            $('#mmenu1,#mmenu2').hide();
+                            if( response.data !== null )
+                            {
+                                if( step == 1 || step == 5 ) { $('#mFormSelect').val( response.data ); }
+                                if( step == 2 ) { $('#mScreeningSelect').val( response.data ); }
+                            }
+                            if( menu !== null) { menu.show(); }
+                            if( step == 5 ) { $('#mmenu1').show(); }
+
                             $('#sid').val(response.id);
                             $('#mtitle').val(response.title);$('#mdescription').val(response.description);
                             $('#mfromDate').val(response.from);$('#mtoDate').val(response.to);
