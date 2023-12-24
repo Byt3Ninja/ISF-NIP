@@ -126,7 +126,12 @@
                                     <div class="media">
                                         <i class="livicon-evo mr-2" data-options="name: {{$svgs[$step->stype-1]}}.svg; size: 50px; style: original;"></i>
                                         <div class="media-body">
-                                            <h5 class="mt-0"><span id="{{$step->id}}-step" class="carr">{{$step->arr}}</span>-&nbsp;{{$step->title}}</h5>
+                                            <h5 class="mt-0">
+                                                <span id="{{$step->id}}-step" class="carr">{{$step->arr}}</span>-&nbsp;{{$step->title}}
+                                                @if( $step->stype == 1 && !empty( $step->form ) )
+                                                <small>( {{__('cycles.Custom Form')}} &nbsp;-&nbsp; {{$step->form->form_name}} )</small>
+                                                @endif
+                                            </h5>
                                             {{ __("cycles.Start From") }} {{ !empty( $step->from ) ? $step->from->format("d-m") : "-" }}, {{ __("cycles.to") }} {{ !empty( $step->to ) ? $step->to->format("d-m-Y") : "-" }}
                                         </div>
                                         <a href="javascript:void(0)" onclick="ModifyStep(1,{{$step->id}})" id="{{$step->id}}" title="{{__('cycles.Edit Title and dates')}}">
@@ -273,10 +278,10 @@
                         <label>{{__('cycles.Choose screening type')}}: </label>
                         <div class="form-group mb-0">
                             <select class="select form-control" name="ScreeningSelect" required>
-                                    <option selected disabled> {{__('cycles.Select type')}}</option>
-                                    <option value="onetoall">{{__('cycles.Assign One to all users')}}</option>
-                                    <option value="grouptoall">{{__('cycles.Assign Group to all users')}}</option>
-                                        <option value="grouptogroup">{{__('cycles.Assign Group to group of users')}}</option>
+                                <option selected disabled> {{__('cycles.Select type')}}</option>
+                                <option value="onetoall">{{__('cycles.Assign One to all users')}}</option>
+                                <option value="grouptoall">{{__('cycles.Assign Group to all users')}}</option>
+                                <option value="grouptogroup">{{__('cycles.Assign Group to group of users')}}</option>
                             </select>
                         </div>
                     </div>
