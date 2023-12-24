@@ -1869,6 +1869,21 @@ INSERT INTO `screenings` (`step_id`, `user_id`, `panel`, `users`, `created_at`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `sectors`
+--
+
+CREATE TABLE `sectors` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name_en` VARCHAR(500) NULL DEFAULT NULL,
+  `name_ar` VARCHAR(500) NULL DEFAULT NULL,
+  `parent_id` INT(11) NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `services`
 --
 
@@ -2625,6 +2640,12 @@ ALTER TABLE `screenings`
   ADD PRIMARY KEY (`step_id`,`user_id`,`panel`);
 
 --
+-- Indexes for table `sectors`
+--
+ALTER TABLE `sectors`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `services`
 --
 ALTER TABLE `services`
@@ -2904,6 +2925,12 @@ ALTER TABLE `room_bookings`
 --
 ALTER TABLE `schedules`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+
+--
+-- AUTO_INCREMENT for table `sectors`
+--
+ALTER TABLE `sectors`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `services`

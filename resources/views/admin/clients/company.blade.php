@@ -1,3 +1,6 @@
+@php
+    $name = 'name_' . $l;
+@endphp
 @extends('layouts.admin')
 @section('title', __('admin.My company') )
 @section('subTitle', __('admin.Edit the Company information'))
@@ -77,7 +80,6 @@
                                                 </div>
                                             </div>
                                             @php
-                                                $name = 'name_'.$l;
                                                 if($client->company) {$stateID = $client->company->state_id;} else {$stateID=0;}
                                             @endphp
                                             <div class="col-md-6 col-12">
@@ -98,24 +100,48 @@
                                                         <select class="form-control" required
                                                             id="city_id" name='city_id'>
                                                             <option value="">{{ __('admin.City')}} </option>
-                                                            @php $name = 'name_'.$l; @endphp
                                                             @if(isset($client->company) &&  $client->company->city_id != null)
-                                                                <option value="{{$client->company->city_id}}" selected> {{$client->company->city->{'name_'.$l} }}</option>
+                                                                <option value="{{$client->company->city_id}}" selected> {{$client->company->city->{$name} }}</option>
                                                             @endif
                                                         </select>
                                                 </div>
                                             </div>
+                                            @php
+                                                $sectors = [];
+                                                $_sectors = App\Sector::get();
+                                                foreach( $_sectors->where("parent_id", 0) as $sector )
+                                                {
+                                                    if( !array_key_exists( $sector->id, $sectors ) )
+                                                    {
+                                                        $sectors[$sector->id] = ["id" => $sector->id, "name" => $sector->$name, "sectors" => []];
+                                                    }
+                                                }
+                                                foreach( $_sectors->where("parent_id", "!=", 0) as $sector )
+                                                {
+                                                    if( !array_key_exists( $sector->parent_id, $sectors ) ) { continue; }
+                                                    else
+                                                    {
+                                                        $sectors[$sector->parent_id]["sectors"][] = ["id" => $sector->id, "val" => $sector->name_en, "name" => $sector->$name];
+                                                    }
+                                                }
+                                            @endphp
                                             <div class="col-md-6 col-12">
                                                 <div class="form-group">
                                                     <label for="sector">{{ __('admin.Sector')}} *</label>
                                                     <select id="selectsector" class="form-control" required onchange="ssector(this.options[this.selectedIndex].value)" name='sector'>
-                                                        <option value="{{($client->company)? $client->company->sector:''}}">{{($client->company)? __($client->company->sector): __('admin.Select Sector') }}</option>
+                                                        {{--  <option value="{{($client->company)? $client->company->sector:''}}">{{($client->company)? __($client->company->sector): __('admin.Select Sector') }}</option>
                                                         <option value="Industrial">{{ __('Industrial')}}</option>
                                                         <option value="Agriculture">{{ __('Agriculture')}}</option>
                                                         <option value="Commercial">{{ __('Commercial')}}</option>
                                                         <option value="Technology">{{ __('Technology')}}</option>
-                                                        <option value="Other">{{ __('Other')}}</option>
-
+                                                        <option value="Other">{{ __('Other')}}</option>  --}}
+                                                        @foreach( $sectors as $sector_group )
+                                                        <optgroup label="{{ $sector_group['name'] }}">
+                                                            @foreach( $sector_group["sectors"] as $sector )
+                                                            <option value="{{ $sector['val'] }}">{{ $sector['name'] }}</option>
+                                                            @endforeach
+                                                        </optgroup>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                             </div>
