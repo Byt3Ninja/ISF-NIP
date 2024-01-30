@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class MeetingController extends Controller
 {
-    use ZoomMeetingTrait;
+    // use ZoomMeetingTrait;
 
     const MEETING_TYPE_INSTANT = 1;
     const MEETING_TYPE_SCHEDULE = 2;

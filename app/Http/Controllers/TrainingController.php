@@ -17,7 +17,7 @@ use App\Traits\ZoomMeetingTrait;
 
 class TrainingController extends Controller
 {
-    use ZoomMeetingTrait;
+    // use ZoomMeetingTrait;
 
     const MEETING_TYPE_INSTANT = 1;
     const MEETING_TYPE_SCHEDULE = 2;
