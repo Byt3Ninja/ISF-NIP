@@ -34,6 +34,7 @@ class IndexController extends Controller
 
     public function home()
     {
+        return view('auth.login')->with('t', $this->t);
         $CR = Route::getFacadeRoot()->current()->uri();
         if ($CR == "about") {
             $about = App\Settings::findorfail('10');
