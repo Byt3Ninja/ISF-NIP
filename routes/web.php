@@ -258,4 +258,4 @@ Route::get('/callback/{provider}', 'SocialController@callback');
 Route::get('/auth/google', 'SocialController@redirectToGoogle');
 Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
 
-URL::forceScheme("https");
+if( request()->secure() ) { URL::forceScheme("https"); }
