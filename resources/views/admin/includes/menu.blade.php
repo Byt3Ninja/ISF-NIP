@@ -24,6 +24,14 @@
                         <span class="menu-title">{{__('admin.Profile')}}</span>
                     </a>
                 </li>
+                @if( auth()->user()->hasRole('Admin') )
+                <li class="{{Request::is('*organizations')?'active':''}} nav-item">
+                    <a href="{{route('organizations.index')}}">
+                        <i class="menu-livicon" data-icon="building"></i>
+                        <span class="menu-title" >{{__('admin.Manage Organizations')}}</span>
+                    </a>
+                </li>
+                @else
                 @if(auth()->user()->HaveCompany==1)
                     <li class="{{Request::is('*myCompany')?'active':''}} nav-item">
                         <a href="{{route('my_company')}}">
@@ -31,6 +39,7 @@
                             <span class="menu-title" >{{__('admin.My company')}}</span>
                         </a>
                     </li>
+                @endif
                 @endif
                 <li class="{{Request::is('*calendar*')?'active':''}} nav-item">
                     <a href="{{route('calendar')}}">

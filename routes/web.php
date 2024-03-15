@@ -105,6 +105,7 @@ Route::group(['prefix' => 'admin','middleware'=>['auth', 'verified']],function()
 	Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
 	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
 	//Client's company
+    Route::resource('organizations', 'organizationsController');
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
 	Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
 	//like a service
