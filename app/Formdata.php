@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Formdata extends Model
 {
-    protected $fillable = ['field_id', 'company_id', 'user_id', 'form_id','step_id', 'question', 'answer', 'screening', 'comments'];
+    protected $fillable = ['organization_id', 'field_id', 'company_id', 'user_id', 'form_id','step_id', 'question', 'answer', 'screening', 'comments'];
     protected $table ='form_data';
     protected $primaryKey = ['field_id', 'company_id'];
     public $incrementing = false;

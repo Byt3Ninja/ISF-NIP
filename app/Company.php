@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Company extends Model
 {
     use Auditable;
-    protected $fillable = ['state_id', 'city_id', 'name_en', 'name_ar', 'address_en', 'sector', 'address_ar', 'phone', 'fax', 'email', 'website',
+    protected $fillable = ['organization_id', 'state_id', 'city_id', 'name_en', 'name_ar', 'address_en', 'sector', 'address_ar', 'phone', 'fax', 'email', 'website',
         'est_date','idea','problem','solution','team_num', 'stage','raised_fund','investors','founder','employees','facebook', 'twitter',
         'linkedin', 'youtube', 'google_map', 'logo','cycle','step','approved','approved_by'];
 

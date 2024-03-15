@@ -11,6 +11,7 @@ class Organization extends Model
 {
 	use Auditable;
 	protected $fillable = [
+		'organization_id',
 		'name_ar',
 		'name_en',
 		'email',

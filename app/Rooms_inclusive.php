@@ -3,7 +3,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 class Rooms_inclusive extends Model
 {
-    protected $fillable = ['room_id','inclusive_id','user_added'];
+    protected $fillable = ['organization_id', 'room_id','inclusive_id','user_added'];
 
     public function inclusive()
     {

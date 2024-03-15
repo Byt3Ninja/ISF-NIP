@@ -9,5 +9,5 @@ class Press extends Model
 {
     use Auditable;
     protected $table = 'press';
-    protected $fillable = ['img_url','url','order', 'en_title', 'ar_title','user_added'];
+    protected $fillable = ['organization_id', 'img_url','url','order', 'en_title', 'ar_title','user_added'];
 }

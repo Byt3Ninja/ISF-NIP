@@ -11,9 +11,7 @@ class Calendar extends Model
     public function user() {
         return $this->belongsTo(User::class);
     }
-    protected $fillable = [
-        'title', 'start', 'end','body','user_id','color','allDay','isPrivate',
-    ];
+    protected $fillable = ['organization_id', 'title', 'start', 'end','body','user_id','color','allDay','isPrivate', ];
     protected $casts = [
         'allDay' => 'boolean','isPrivate'=> 'boolean',
     ];

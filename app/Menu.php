@@ -12,7 +12,7 @@ class Menu extends Model
 
   protected $table = 'menus';
 
-  protected $fillable = array('parent_id','title','ar_title','url','target','order');
+  protected $fillable = ['organization_id', 'parent_id','title','ar_title','url','target','order'];
 
   public function parent()
   {

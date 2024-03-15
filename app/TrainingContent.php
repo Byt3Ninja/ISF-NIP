@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TrainingContent extends Model
 {
-    protected $fillable = ['training_id', 'title', 'dsc', 'arr', 'content', 'user_id',];
+    protected $fillable = ['organization_id', 'training_id', 'title', 'dsc', 'arr', 'content', 'user_id',];
 
     function user() {
         return $this->belongsTo(User::class);

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Service extends Model
 {
-    protected $fillable = ['service_category_id', 'name_en', 'name_ar','price', 'description_en', 'description_ar', 'img_url'];
+    protected $fillable = ['organization_id', 'service_category_id', 'name_en', 'name_ar','price', 'description_en', 'description_ar', 'img_url'];
 
     public function serviceCategory(){
        return $this->belongsTo(ServiceCategory::class);
