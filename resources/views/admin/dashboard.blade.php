@@ -9,22 +9,45 @@
 @section('content')
  <!-- BEGIN: Content-->
  @php
-     //Counts
-     $messages = App\Messenger::where('receiver',Auth::user()->id)->whereNull('read')->count();
-     $servrequests = App\ServicesRequests::whereNull('approved')->count();
-     $mentrequests = App\MentorshipRequest::whereNull('approved')->count();
-     $managers = App\User::join('model_has_roles','id','=','model_id')->where('role_id',5)->count();
-     $cmessages = App\Messages::where('read','<>',1)->count();
-     $startups= \App\Company::count();
-     $mentors = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
-     $judgers = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
-     //Charts
-     $usersgov = App\User::join('states','state_id','=','states.id')
-                ->select('name_en as state_en','name_ar as state_ar', DB::raw('count(*) as total'))
-                ->groupBy('name_en','name_ar');
-     $usersgender = App\User::select('gender', DB::raw('count(*) as total'))
-                ->groupBy('gender');
+    //Counts
+    $messages = App\Messenger::where('receiver',Auth::user()->id)->whereNull('read');
+    if( !is_null( $organization_id ) ) { $messages = $messages->where('organization_id', $organization_id); }
+    $messages = $messages->count();
 
+    $servrequests = App\ServicesRequests::whereNull('approved');
+    if( !is_null( $organization_id ) ) { $servrequests = $servrequests->where('organization_id', $organization_id); }
+    $servrequests = $servrequests->count();
+
+    $mentrequests = App\MentorshipRequest::whereNull('approved');
+    if( !is_null( $organization_id ) ) { $mentrequests = $mentrequests->where('organization_id', $organization_id); }
+    $mentrequests = $mentrequests->count();
+
+    $managers = App\User::join('model_has_roles','id','=','model_id')->where('role_id',5);
+    if( !is_null( $organization_id ) ) { $managers = $managers->where('users.organization_id', $organization_id); }
+    $managers = $managers->count();
+
+    $cmessages = App\Messages::where('read','<>',1);
+    if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
+    $cmessages = $cmessages->count();
+
+    $startups= !is_null( $organization_id ) ? \App\Company::where('organization_id', $organization_id)->count() : \App\Company::count();
+    
+    $mentors = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6);
+    if( !is_null( $organization_id ) ) { $mentors = $mentors->where('users.organization_id', $organization_id); }
+    $mentors = $mentors->count();
+
+    $judgers = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7);
+    if( !is_null( $organization_id ) ) { $judgers = $judgers->where('users.organization_id', $organization_id); }
+    $judgers = $judgers->count();
+
+    //Charts
+    $usersgov = App\User::join('states','state_id','=','states.id')->select('name_en as state_en','name_ar as state_ar', DB::raw('count(*) as total'));
+    if( !is_null( $organization_id ) ) { $usersgov = $usersgov->where('users.organization_id', $organization_id); }        
+    $usersgov = $usersgov->groupBy('name_en','name_ar');
+
+    $usersgender = App\User::select('gender', DB::raw('count(*) as total'));
+    if( !is_null( $organization_id ) ) { $usersgender = $usersgender->where('users.organization_id', $organization_id); }
+    $usersgender = $usersgender->groupBy('gender');
 
  @endphp
     <div class="app-content content">

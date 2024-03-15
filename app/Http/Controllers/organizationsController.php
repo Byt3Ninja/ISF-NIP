@@ -69,6 +69,7 @@ class organizationsController extends Controller
 
 		$user->organization_id = $organization->id;
 		$user->password = Hash::make( $request->password );
+		$user->email_verified_at = date('Y-m-d H:i:s');
 		$user->save();
 		return redirect()->route('organizations.index')->with( ['msg' => 'StoredSuccessfully'] );
 	}

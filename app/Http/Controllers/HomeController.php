@@ -33,7 +33,7 @@ class HomeController extends Controller
     public function index()
     {
         $user = auth()->user();
-        if ($user->hasanyRole('Admin|Editor|Manager'))
+        if ($user->hasanyRole('Admin|Editor|Manager|organizationManager'))
             return view('admin.dashboard');
         elseif ($user->hasRole('Registered|Page Manager|Pages Editor')) {
             return view('admin.clients.dashboard');
