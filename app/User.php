@@ -74,4 +74,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function mrating(){
         return (MentorshipRequest::where('mentor_id',$this->id)->avg('rating'));
     }
+    public function organization(){
+        return $this->hasOne(Organization::class,'user_id');
+    }
 }

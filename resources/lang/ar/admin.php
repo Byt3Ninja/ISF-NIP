@@ -70,7 +70,7 @@ return [
 	'Organizations`s List' => 'قائمة المؤسسات',
 	'Change your account password' => 'تغير كلمة المرور',
 	'English Organization Name' => 'إسم المؤسسة باللغة الإنجليزية',
-	'Arabic Organization Name' => 'إسم المؤسسة باللغة الانجليزية',
+	'Arabic Organization Name' => 'إسم المؤسسة باللغة العربية',
 	'Organization Status' => 'حالة المؤسسة',
 	'Edit the Company information' => 'تعديل بيانات الشركة',
 	'State' => 'المنطقة',

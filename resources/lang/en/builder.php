@@ -16,5 +16,7 @@ return [
 'deleting form' => 'Are you sure, deleting this form and it\'s contents',
 'Form' => 'Form',
     'ID' => 'ID',
+    'Choose Organization'=>'Choose Organization'
+
 ];
 

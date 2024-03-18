@@ -34,8 +34,8 @@ class organizationsController extends Controller
 
 	public function create()
 	{
-		$roles = Role::all();
-		return view('admin.organizations.create', compact('roles'));
+//		$roles = Role::all();
+		return view('admin.organizations.create');
 	}
 
 	public function store(Request $request)
@@ -70,6 +70,7 @@ class organizationsController extends Controller
 		$user->organization_id = $organization->id;
 		$user->password = Hash::make( $request->password );
 		$user->email_verified_at = date('Y-m-d H:i:s');
+        $user->HaveCompany=0;
 		$user->save();
 		return redirect()->route('organizations.index')->with( ['msg' => 'StoredSuccessfully'] );
 	}

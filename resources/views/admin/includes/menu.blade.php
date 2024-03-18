@@ -32,6 +32,7 @@
                     </a>
                 </li>
                 @else
+
                 @if(auth()->user()->HaveCompany==1)
                     <li class="{{Request::is('*myCompany')?'active':''}} nav-item">
                         <a href="{{route('my_company')}}">
@@ -47,10 +48,12 @@
                         <span class="menu-title">{{__('admin.Calendar')}}</span>
                     </a>
                 </li>
-<?php
-$unread = \App\Messenger::where('receiver',Auth::user()->id)->whereNull('read')->count();
-$l=='ar'?$arrow='left':$arrow='right';
-?>
+        <?php
+        $cmessages = App\Messages::where('read',0);
+        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
+        $unread = $cmessages->count();
+        $l=='ar'?$arrow='left':$arrow='right';
+        ?>
                 <li class="{{Request::is('admin/inbox','admin/outbox','admin/mymsg','admin/sendmessage')?'sidebar-group-active open':''}} nav-item "><a href="#"><i class="menu-livicon" data-icon="comments"></i>
                         <span class="menu-title" >{{__('admin.My messages')}}</span>
                     </a>
@@ -170,6 +173,7 @@ $l=='ar'?$arrow='left':$arrow='right';
                             </li>
                         </ul>
                     </li>
+                    @if(!Auth::user()->hasanyRole("organizationManager"))
                     <li class="{{Request::is('*services*','','admin/requests/all','admin/room*')?'sidebar-group-active open':''}} nav-item">
                         <a href="#"><i class="menu-livicon" data-icon="loader-10"></i><span class="menu-title"
                             > {{__('admin.Services')}}</span></a>
@@ -192,6 +196,7 @@ $l=='ar'?$arrow='left':$arrow='right';
                             </li>
                         </ul>
                     </li>
+                    @endif
                 @endcan
                 @can('view_user')
                     <li class="{{Request::is('*users*')?'sidebar-group-active open':''}} nav-item">
