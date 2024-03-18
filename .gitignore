@@ -4,6 +4,9 @@
 /storage/*.key
 /vendor
 /docker_volumes
+sail
+Dockerfile
+docker-compose.yml
 .env
 .env.backup
 .phpunit.result.cache
