@@ -27,7 +27,12 @@ class CyclesController extends Controller
     public function index($id=0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $cycles = Cycle::orderBy('start','DESC')->get();
+
+        $organization_id=auth()->user()->organization_id;
+
+        $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->orderBy('start','DESC')->get();
         $steps=null;
         if( count( $cycles ) > 0 )
         {
@@ -62,7 +67,14 @@ class CyclesController extends Controller
             /// Edit Cycle
             $private = null;
             if ($request->private) {$private=sha1(now());}
-            Cycle::where('id',$id)->update(['title'=>$request->title, 'description'=>$request->description,'start'=>Carbon::parse($request->start), 'end'=>Carbon::parse($request->end), 'private'=>$private]);
+            Cycle::where('id',$id)->update([
+                'organization_id'=>$request->organization_id,
+                'title'=>$request->title,
+                'description'=>$request->description,
+                'start'=>Carbon::parse($request->start),
+                'end'=>Carbon::parse($request->end),
+                'private'=>$private
+            ]);
             return redirect()->back()->with('message', 'Saved');
         }
         elseif( $type == 2 )
@@ -70,8 +82,16 @@ class CyclesController extends Controller
             /// Save Cycle
             $private = null;
             if ($request->private) {$private=sha1(now());}
-            Cycle::insert(['title'=>$request->title, 'description'=>$request->description, 'start'=>Carbon::parse($request->start), 'end'=>Carbon::parse($request->end), 'private'=>$private]);
-            return redirect()->back()->with('message', 'Saved');
+            $createdCycle = Cycle::create([
+                'organization_id'=>$request->organization_id,
+                'title'=>$request->title,
+                'description'=>$request->description,
+                'start'=>Carbon::parse($request->start),
+                'end'=>Carbon::parse($request->end),
+                'private'=>$private
+            ]);
+
+            return redirect(route('index.cycle',$createdCycle->id))->with('message', 'Saved');
         }
         elseif( $type == 3 )
         {

@@ -68,7 +68,7 @@
                                     <fieldset class="input-group">
                                             <select id="ccycle" class="select form-control" onchange="window.open('/admin/cycles/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($cycles as $cycle)
-                                                    <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.Start')}} {{$cycle->start->format('d-m')}} {{__('cycles.to')}} {{$cycle->end->format('d-m')}})</option>
+                                                    <option value="{{$cycle->id}}" data-organization="{{ $cycle->organization_id }}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.Start')}} {{$cycle->start->format('d-m')}} {{__('cycles.to')}} {{$cycle->end->format('d-m')}}) - {{ optional($cycle->organization)->name_ar }}</option>
                                                 @endforeach
                                             </select>
                                         <div class="input-group-append">
@@ -206,6 +206,18 @@
                 </button>
             </div>
                 <div class="modal-body">
+                    @if(is_null(auth()->user()->organization_id))
+                        <label>{{__('builder.Choose Organization')}}: </label>
+                        <div class="form-group ">
+                            <select class="select form-control" id="organization_id" name="organization_id" required>
+                                @foreach(\App\Organization::all() as $org)
+                                    <option value="{{$org->id}}" >{{$org->name_ar}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @else
+                        <input type="hidden" name="organization_id" value="{{auth()->user()->organization_id}}" id="organization_id">
+                    @endif
                     <label>{{__('cycles.Cycle title')}}: </label>
                     <div class="form-group">
                         <input type="hidden" name="type" id="type">
@@ -267,10 +279,10 @@
                     <div class="mb-2" id="menu1">
                         <label>{{__('cycles.Choose form')}}: </label>
                         <div class="form-group mb-0">
-                            <select class="select form-control" name="FormSelect" required>
-                                @foreach(\App\BuilderForm::all() as $form)
-                                <option value="{{$form->id}}" >{{$form->form_name}}</option>
-                                @endforeach
+                            <select class="select form-control" name="FormSelect" id="FormSelect" required>
+{{--                                @foreach(\App\BuilderForm::all() as $form)--}}
+{{--                                <option value="{{$form->id}}" >{{$form->form_name}}</option>--}}
+{{--                                @endforeach--}}
                             </select>
                         </div>
                     </div>
@@ -336,9 +348,9 @@
                         <label>{{__('cycles.Choose form')}}: </label>
                         <div class="form-group mb-0">
                             <select class="select form-control" id="mFormSelect" name="mFormSelect" required>
-                                @foreach(\App\BuilderForm::all() as $form)
-                                <option value="{{$form->id}}" >{{$form->form_name}}</option>
-                                @endforeach
+{{--                                @foreach(\App\BuilderForm::all() as $form)--}}
+{{--                                <option value="{{$form->id}}" >{{$form->form_name}}</option>--}}
+{{--                                @endforeach--}}
                             </select>
                         </div>
                     </div>
@@ -429,6 +441,7 @@
                         success: function (response) {
                             $('#title').val(response.title);$('#description').val(response.description);
                             $('#cycleid').val(cycle);$('#type').val(1);$('#start').val(response.start);$('#end').val(response.end);
+                            $('#organization_id').val(response.organization_id)
                             if (response.private) {$('#customSwitch3').attr('checked','checked');$('#cyclelink').html('{{__('cycles.Join URL')}}');$('#cyclelink').attr('href', '/admin/cycles/view/' + response.id + '?id=' + response.private);}
                             $('#cycleForm').modal('show');
                         },
@@ -466,8 +479,35 @@
                     let steptxt = $('#StepSelect').find(":selected").text();
                     let menu = $('#menu'+step);
                     $('#menu1,#menu2').hide();
-                    if (menu !== null) {menu.show();}
-                    if (step==='5'){$('#menu1').show();}
+                    if (menu !== null) {
+                        $.ajax({
+                            url: '{{ url("admin/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
+                            success: function (response) {
+                                $('#FormSelect').empty()
+                                $('#FormSelect').append(response)
+                                menu.show();
+                            },
+                            error: function (error) {
+                                console.log(error);
+                                alert("Error Occurred, Try again!");
+                            }
+                        });
+
+                    }
+                    if (step==='5'){
+                        $.ajax({
+                            url: '{{ url("admin/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
+                            success: function (response) {
+                                $('#FormSelect').empty()
+                                $('#FormSelect').append(response)
+                                $('#menu1').show();
+                            },
+                            error: function (error) {
+                                console.log(error);
+                                alert("Error Occurred, Try again!");
+                            }
+                        });
+                    }
                     $('#stype').val(step);
                     $('#formtitle').text(steptxt);
                     $('#stepForm').modal('show');
@@ -490,8 +530,36 @@
                                 if( step == 1 || step == 5 ) { $('#mFormSelect').val( response.data ); }
                                 if( step == 2 ) { $('#mScreeningSelect').val( response.data ); }
                             }
-                            if( menu !== null) { menu.show(); }
-                            if( step == 5 ) { $('#mmenu1').show(); }
+                            if( menu !== null) {
+                                $.ajax({
+                                    url: '{{ url("admin/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
+                                    success: function (response) {
+                                        $('#mFormSelect').empty()
+                                        $('#mFormSelect').append(response)
+                                        menu.show();
+                                    },
+                                    error: function (error) {
+                                        console.log(error);
+                                        alert("Error Occurred, Try again!");
+                                    }
+                                });
+
+                            }
+                            if( step == 5 ) {
+                                $.ajax({
+                                    url: '{{ url("admin/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
+                                    success: function (response) {
+                                        $('#mFormSelect').empty()
+                                        $('#mFormSelect').append(response)
+                                        $('#mmenu1').show();
+                                    },
+                                    error: function (error) {
+                                        console.log(error);
+                                        alert("Error Occurred, Try again!");
+                                    }
+                                });
+
+                            }
 
                             $('#sid').val(response.id);
                             $('#mtitle').val(response.title);$('#mdescription').val(response.description);

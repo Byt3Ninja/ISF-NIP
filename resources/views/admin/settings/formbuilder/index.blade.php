@@ -111,7 +111,7 @@
                         </div>
                     </div>
                 @else
-                    <input type="hidden" value="{{auth()->user()->organization_id}}" id="organization_id">
+                    <input type="hidden" name="organization_id" value="{{auth()->user()->organization_id}}" id="organization_id">
                 @endif
 
                     <label>{{__('builder.new form')}}: </label>

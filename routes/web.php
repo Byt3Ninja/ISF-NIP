@@ -167,13 +167,15 @@ Route::group(['prefix' => 'admin','middleware'=>['auth', 'verified']],function()
     Route::post('form/{id}/save-form', 'FormBuilderController@saveForm')->name('save.form');
     Route::post('builder/{set}', 'FormBuilderController@modifyForm');
     Route::post('submit-form', 'FormBuilderController@handleFormRequest')->name('submit.form');
+    Route::get('builder/organization/{id}','FormBuilderController@builderByOrganization');
     //Cycles
-    Route::get('cycles/{id?}','CyclesController@index');
+    Route::get('cycles/{id?}','CyclesController@index')->name('index.cycle');
     Route::get('cycles/{id}/registered','CyclesController@users');
     Route::post('cycles/modify','CyclesController@modify');
     Route::get('cycles/view/{c?}/{s?}','CyclesController@view');
     Route::post('cycles/save','CyclesController@saveForm');
     Route::get('cycles/my/{id}','CyclesController@my');
+
     //Sceening
     Route::get('screening','ScreeningController@index');
     Route::post('screening/update','ScreeningController@update');

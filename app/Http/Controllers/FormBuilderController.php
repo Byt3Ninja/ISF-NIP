@@ -131,6 +131,7 @@ class FormBuilderController extends Controller
      * show the form
      */
     public function showForm($id) {
+
         $this->preProcessingCheck('view_forms');
         $form_id_toshow = $id;
         $the_form = BuilderForm::findOrFail($form_id_toshow);
@@ -326,5 +327,14 @@ class FormBuilderController extends Controller
             return response()->json($request->id);
         }
 
+    }
+
+    public function builderByOrganization($organization_id){
+        $builders = BuilderForm::where('organization_id',$organization_id)->get();
+        $appear = '';
+        foreach ($builders as $builder){
+            $appear .= "<option value=".$builder->id." >".$builder->form_name."</option>";
+        }
+        return $appear;
     }
 }
