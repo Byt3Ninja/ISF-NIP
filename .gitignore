@@ -4,6 +4,8 @@
 /storage/*.key
 /vendor
 /docker_volumes
+/docker_volumes/nginx
+/docker_volumes/db
 sail
 Dockerfile
 docker-compose.yml
