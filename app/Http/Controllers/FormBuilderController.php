@@ -329,7 +329,7 @@ class FormBuilderController extends Controller
 
     }
 
-    public function builderByOrganization($organization_id){
+    public function builderByOrganization($organization_id=0){
         $builders = BuilderForm::where('organization_id',$organization_id)->get();
         $appear = '';
         foreach ($builders as $builder){
