@@ -49,11 +49,19 @@ class CyclesController extends Controller
     public function users($id)
     {
         $this->preProcessingCheck('edit_cycles');
+        $organization_id=auth()->user()->organization_id;
+
         if( $id == 0 )
         {
-            $cycles = Cycle::orderBy('id','DESC')->get();
+            $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->where('organization_id',$organization_id);
+            })->orderBy('id','DESC')->get();
             $id = $cycles->pluck('id')[0];
-        } else { $cycles = Cycle::all(); }
+        } else {
+            $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->get();
+        }
         return view('admin.settings.cycles.users',compact('cycles','id'));
     }
 

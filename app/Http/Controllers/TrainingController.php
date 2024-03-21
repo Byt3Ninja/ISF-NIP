@@ -155,7 +155,14 @@ class TrainingController extends Controller
     public function results($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $sessions = TrainingSession::where('type','online')->orderBy('datetime')->get();
+        $organization_id=auth()->user()->organization_id;
+        $sessions = TrainingSession::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->whereHas('step',function ($query) use ($organization_id){
+                $query->whereHas('cycle',function ($qer) use ($organization_id){
+                    $qer->where('organization_id',$organization_id);
+                });
+            });
+        })->where('type','online')->orderBy('datetime')->get();
         if ($id == 0) {
             $id = $sessions->pluck('id')->first();
             $csession = TrainingSession::where('type','online')->where('id', $id)->first();
