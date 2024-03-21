@@ -122,6 +122,9 @@ class CyclesController extends Controller
         }
         elseif( $type == 5 )
         {
+            if (is_null($request->fromDate)||is_null($request->toDate)){
+                return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+            }
             /// add new step
             $stype = $request->stype;
             $data = null;
@@ -140,22 +143,34 @@ class CyclesController extends Controller
                         ]);
                     }}
             } elseif ($stype==2) {
+                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+                }
                 // add Screening
                 Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => $request->ScreeningSelect,
                     'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
             } elseif ($stype==3) {
+                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+                }
                 // add step
                 Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => null,
                     'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
             } elseif ($stype==4) {
+                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+                }
                 // add training
                 Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype,'list'=>$request->RecordedSelect, 'data' => null,
                     'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
             } elseif ($stype==5) {
+                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+                }
                 // add service
             $data = $request->FinalScreeningSelect;
             $fform = $request->FormSelect;
-            if (!$fform) {return redirect()->back()->with('message', 'You must add form first'); }
+            if (!$fform) {return redirect()->back()->with('message2', 'You must add form first'); }
             $id = Step::insertGetId(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => $data,
                 'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
                 // make a copy of form fields

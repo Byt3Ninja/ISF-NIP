@@ -11,7 +11,7 @@ class Step extends Model
 
     public function cycle()
     {
-        return $this->belongsTo(Cycle::class);
+        return $this->belongsTo(Cycle::class,'cycle_id');
     }
 
     public function form()

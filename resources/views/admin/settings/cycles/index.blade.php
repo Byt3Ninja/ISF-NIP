@@ -488,7 +488,7 @@
                                 menu.show();
                             },
                             error: function (error) {
-
+                                console.log(error);
                                 alert("Error Occurred, Try again!");
                             }
                         });

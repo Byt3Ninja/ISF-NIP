@@ -396,4 +396,6 @@ return [
 	'stage_prototype' => 'Prototype',
 	'stage_ready_product' => 'Ready product',
 	'stage_company_in_market' => 'Company in the marke',
+    'add start and end date first'=>'Start and End date must added first'
+
 ];
