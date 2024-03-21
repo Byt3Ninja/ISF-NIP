@@ -28,8 +28,14 @@ class Organization extends Model
 	/**
 	 * @return BelongsTo
 	 **/
-	public function user()
+    public function getNameAttribute($key){
+
+        return $this->attributes['name_'.app()->getLocale()];
+    }
+
+    public function user()
 	{
 		return $this->belongsTo(User::class, 'user_id', 'id');
 	}
+
 }

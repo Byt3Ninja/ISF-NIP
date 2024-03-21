@@ -64,7 +64,7 @@
                                     <fieldset class="input-group">
                                             <select id="ccycle" class="select form-control" onchange="window.open('/admin/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
                                                 @foreach($cycles as $cycle)
-                                                    <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.Start')}} {{$cycle->start->format('d-m')}})</option>
+                                                    <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.Start')}} {{$cycle->start->format('d-m')}}) - {{ optional($cycle->organization)->name }} </option>
                                                 @endforeach
                                             </select>
                                         <div class="input-group-append">

@@ -157,12 +157,26 @@ class ScreeningController extends Controller
     public function results($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $steps = Step::where('stype', 2)->orderBy('from')->get();
+        $organization_id=auth()->user()->organization_id;
+
+        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->where('stype', 2)->orderBy('from')->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
-            $cstep = Step::where('stype', 2)->where('id', $id)->first();
+            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('stype', 2)->where('id', $id)->first();
         } else {
-            $cstep = Step::where('stype', 2)->where('id', $id)->first();
+            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('stype', 2)->where('id', $id)->first();
         }
         $judges = User::join('screenings', 'user_id', 'id')->where('step_id', $id)->get();
         $form = null;

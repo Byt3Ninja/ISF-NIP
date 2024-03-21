@@ -39,7 +39,7 @@
                                     <select class="select2 form-control" id="FormSelect"  onchange="window.open('/admin/show-builder/'+this.options[this.selectedIndex].value,'_self');">
                                         @foreach($builderForms as $form)
                                         <option value="{{$form->id}}" {{$title->id==$form->id?"selected":""}}>
-                                            {{ $form->form_name }} {{ !is_null($form->organization)?' - '.$form->organization->name_ar:'' }}
+                                            {{ $form->form_name }} {{ !is_null($form->organization)?' - '.$form->organization->name:'' }}
                                             @if( $form->cycles->count() )
 
                                                 @foreach( $form->cycles as $cycle )
@@ -105,7 +105,7 @@
                         <div class="form-group mb-0">
                             <select class="select form-control" id="organization_id" name="organization_id" required>
                                 @foreach(\App\Organization::all() as $org)
-                                    <option value="{{$org->id}}" >{{$org->name_ar}}</option>
+                                    <option value="{{$org->id}}" >{{$org->name}}</option>
                                 @endforeach
                             </select>
                         </div>

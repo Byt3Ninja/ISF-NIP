@@ -57,7 +57,7 @@
                             <select id="ccycle" class="select form-control" onchange="window.open('/admin/training/sessions/'+this.options[this.selectedIndex].value,'_self');">
                                 @foreach($steps as $step)
                               	@php if($step->id==$id){$ccycle=$step->cycle->id;} @endphp
-                                    <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} ({{$step->cycle->title}}-{{__('cycles.Start')." ". $step->cycle->start->format('d-m')}})</option>
+                                    <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} ({{$step->cycle->title}}-{{__('cycles.Start')." ". $step->cycle->start->format('d-m')}}) - {{ optional(optional($step->cycle)->organization)->name }}</option>
                                 @endforeach
                             </select>
                             <div class="input-group-append">

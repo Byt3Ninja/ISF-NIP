@@ -70,7 +70,7 @@
                                     <fieldset class="input-group">
                                             <select id="cstep" class="select form-control" onchange="window.open('/admin/mentorship/view/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($cycles as $cycle)
-                                                    <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.from')}} {{$cycle->start->format('d-M')}} {{__('cycles.to')}} {{$cycle->end->format('d-M-Y')}})</option>
+                                                    <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.from')}} {{$cycle->start->format('d-M')}} {{__('cycles.to')}} {{$cycle->end->format('d-M-Y')}}) - {{ optional($cycle->organization)->name }}</option>
                                                 @endforeach
                                                 @if(!$id)
                                                     <option>  {{__('cycles.No records saved')}} - ({{__('cycles.Manage Cycle')}}).</option>
