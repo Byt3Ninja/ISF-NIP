@@ -771,7 +771,8 @@ body.footer-hidden footer {
 }
 
 .main-menu .navbar-header .navbar-brand .brand-logo {
-  background : url("/images/logo/admin-logo.png") no-repeat;
+  background : url("/images/logo/arweqah.png") no-repeat;
+  background-size: contain;
   height : 27px;
   width : 35px;
   float : right;
