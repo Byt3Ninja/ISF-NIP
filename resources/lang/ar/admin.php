@@ -395,5 +395,8 @@ return [
 	'stage_prototype' => 'نموذج أولي',
 	'stage_ready_product' => 'منتج جاهز',
 	'stage_company_in_market' => 'شركة بالسوق',
-    'add start and end date first'=>'يجب ادخل تاريخ البدء و الانتهاء اولا'
+    'add start and end date first'=>'يجب ادخل تاريخ البدء و الانتهاء اولا',
+    'color'=>'اللون',
+    'Organization Manager English Name'=>'اسم مدير المؤسسة باللغة الانجليزية',
+    'Organization Manager Arabic Name'=>'اسم مدير المؤسسة باللغة العربية'
 ];

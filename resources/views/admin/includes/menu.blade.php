@@ -1,9 +1,14 @@
         <div class="navbar-header">
             <ul class="nav navbar-nav flex-row">
                 <li class="nav-item mr-auto"><a class="navbar-brand" href="/admin">
-                        <div class="brand-logo"></div>
-                        <h2 class="brand-text mb-0">{{config('app.name')}}</h2>
-                    </a></li>
+                        @if(!is_null(auth()->user()->organization_id))
+                            <img  src="/191014/{{auth()->user()->organization->img_url}}" alt="avatar" height="40" width="70">
+                        @else
+                        <img  src="/images/logo/arweqah.png" alt="avatar" height="40" width="70">
+                        @endif
+                        <h2 class="brand-text mb-0">{{ is_null(auth()->user()->organization_id)?config('app.name') : auth()->user()->organization->{'name_'.$l} }}</h2>
+                    </a>
+                </li>
                 <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i
                             class="bx bx-x d-block d-xl-none font-medium-4 primary"></i><i
                             class="toggle-icon bx bx-disc font-medium-4 d-none d-xl-block primary"
@@ -24,14 +29,7 @@
                         <span class="menu-title">{{__('admin.Profile')}}</span>
                     </a>
                 </li>
-                @if( auth()->user()->hasRole('Admin') )
-                <li class="{{Request::is('*organizations')?'active':''}} nav-item">
-                    <a href="{{route('organizations.index')}}">
-                        <i class="menu-livicon" data-icon="building"></i>
-                        <span class="menu-title" >{{__('admin.Manage Organizations')}}</span>
-                    </a>
-                </li>
-                @else
+
 
                 @if(auth()->user()->HaveCompany==1)
                     <li class="{{Request::is('*myCompany')?'active':''}} nav-item">
@@ -40,7 +38,6 @@
                             <span class="menu-title" >{{__('admin.My company')}}</span>
                         </a>
                     </li>
-                @endif
                 @endif
                 <li class="{{Request::is('*calendar*')?'active':''}} nav-item">
                     <a href="{{route('calendar')}}">
@@ -114,6 +111,14 @@
                 <li class=" navigation-header"><span>{{__('admin.Portal Settings')}}</span>
                 </li>
                 @endcanany
+                @if( auth()->user()->hasRole('Admin') )
+                    <li class="{{Request::is('*organizations')?'active':''}} nav-item">
+                        <a href="{{route('organizations.index')}}">
+                            <i class="menu-livicon" data-icon="building"></i>
+                            <span class="menu-title" >{{__('admin.Manage Organizations')}}</span>
+                        </a>
+                    </li>
+                @endif
                 @can ('edit_forms')
                     <li class="{{Request::is('admin/show-builder*','admin/show-form*')?'active':''}} nav-item"><a href="/admin/show-builder">
                             <i class="menu-livicon" data-icon="thumbnails-big"></i>

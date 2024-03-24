@@ -398,14 +398,14 @@
 </div>
 @stop
 @section('pagescripts')
-    @php ($ccycle = \App\Cycle::findOrFail($id))
+    @php ($ccycle = \App\Cycle::find($id))
     <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
     <script src="/js/jquery.datetimepicker.full.min.js"></script>
     <script>
         $('.date').datetimepicker({timepicker:false,format:'Y-m-d'});
         $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({format:'Y-m-d',
-            minDate:'{{$ccycle->start->format('Y/m/d')}}',
-            maxDate:'{{$ccycle->end->format('Y/m/d')}}',
+            minDate:'{{!is_null($ccycle)??$ccycle->start->format('Y/m/d')}}',
+            maxDate:'{{!is_null($ccycle)??$ccycle->end->format('Y/m/d')}}',
             timepicker:false});
         $(document).ready(function () {
             let drake =  dragula([document.getElementById('basic-list-group')]);

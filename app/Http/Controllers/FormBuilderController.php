@@ -215,7 +215,8 @@ class FormBuilderController extends Controller
         $fields = Field::all()->mapWithKeys(function ($field) {
             return [$field->id => $field->field_type];
         });
-
+//dd($request);
+//dd($request->all(all));
         // data from ajax request
         $field_data = collect(json_decode($request->form_fields_data));
 

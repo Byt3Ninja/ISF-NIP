@@ -51,6 +51,7 @@
 											<tr class="table-light">
 												<th>#</th>
 												<th>{{__('admin.Name')}}</th>
+												<th>{{__('admin.Image')}}</th>
 												<th>{{__('admin.Email')}}</th>
 												<th>{{__('admin.Phone')}}</th>
 												<th>@can('delete_user'){{__('admin.Delete')}}@endcan</th>
@@ -61,6 +62,14 @@
 											<tr>
 												<td><a href="{{route('organizations.edit', ['id' => $organization->id])}}">{{$organization->id}}</a></td>
 												<td style="font-size: small;"><a href="{{route('organizations.edit', ['id' => $organization->id])}}"> {{ $organization->{'name_'.$l} }}</a></td>
+
+												<td>
+													<div class="media align-items-center">
+														<a class="media-left mr-50" href="{{route('organizations.edit', ['id' => $organization->id])}}">
+															<img src="/191014/{{$organization->img_url??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="" height="40" >
+														</a>
+													</div>
+												</td>
 												<td style="font-size: small;">{{$organization->user->email}}</td>
 												<td style="font-size: small;">{{$organization->user->phone}}</td>
 												<td style="padding: 0px;font-size: small;">
