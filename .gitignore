@@ -3,6 +3,13 @@
 /public/storage
 /storage/*.key
 /vendor
+
+.env.backup
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
 /docker_volumes
 /docker_volumes/nginx
 /docker_volumes/db
@@ -10,9 +17,3 @@ sail
 Dockerfile
 docker-compose.yml
 .env
-.env.backup
-.phpunit.result.cache
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
