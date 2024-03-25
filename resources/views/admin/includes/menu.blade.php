@@ -126,9 +126,21 @@
                     </li>
                 @endcan
                 @can ('edit_cycles')
-                    <li class="{{Request::is('admin/cycles*')?'active':''}} nav-item"><a href="/admin/cycles">
-                            <i class="menu-livicon" data-icon="retweet"></i>
-                            <span class="menu-title" >{{__('admin.Cycles')}}</span></a>
+{{--                    <li class="{{Request::is('admin/cycles*')?'active':''}} nav-item"><a href="/admin/cycles">--}}
+{{--                            <i class="menu-livicon" data-icon="retweet"></i>--}}
+{{--                            <span class="menu-title" >{{__('admin.Cycles')}}</span></a>--}}
+{{--                    </li>--}}
+                    <li class="{{Request::is('admin/cycles*')?'sidebar-group-active open':''}} nav-item">
+                        <a href="#"><i class="menu-livicon" data-icon="retweet"></i><span class="menu-title"
+                            > {{__('admin.Cycles')}}</span></a>
+                        <ul class="menu-content">
+                            <li class="{{Request::is('/admin/cycles*')?'active':''}}"><a href="/admin/cycles"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
+                                    > {{__('cycles.steps')}}</span></a>
+                            </li>
+                            <li class="{{Request::is('admin/cycles/*/registered')?'active':''}}"><a href="/admin/cycles/0/registered"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
+                                    > {{__('cycles.Users')}}</span></a>
+                            </li>
+                        </ul>
                     </li>
 
                     <li class="{{Request::is('admin/screening*')?'sidebar-group-active open':''}} nav-item">
