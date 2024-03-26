@@ -18,7 +18,7 @@ use App\Notifications\TemplateEmail;
 
 class MentorsController extends Controller
 {
-//     use ZoomMeetingTrait;
+     use ZoomMeetingTrait;
 
     const MEETING_TYPE_INSTANT = 1;
     const MEETING_TYPE_SCHEDULE = 2;
