@@ -118,7 +118,7 @@ class ScreeningController extends Controller
         foreach ($answers as $answer) {
 
             Formdata::where('field_id', $answer->field_id)->where('company_id', $request->company_id)
-                ->update(['screening' . $user => $request->{'w' . $answer->field_id}, 'comments' . $user => $request->{'c' . $answer->field_id}]);
+                ->update(['screening->' . $user => $request->{'w' . $answer->field_id}, 'comments->' . $user => $request->{'c' . $answer->field_id}]);
         }
         return Redirect::route('admin')->with('msg', 'Saved');
     }
