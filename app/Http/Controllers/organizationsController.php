@@ -34,8 +34,8 @@ class organizationsController extends Controller
 
 	public function create()
 	{
-		$roles = Role::all();
-		return view('admin.organizations.create', compact('roles'));
+//		$roles = Role::all();
+		return view('admin.organizations.create');
 	}
 
 	public function store(Request $request)
@@ -65,11 +65,23 @@ class organizationsController extends Controller
 		$organization->name_en = $request->name_en;
 		$organization->status = intval( $request->status ) == 1 || $request->status === true ? 1 : 0;
 		$organization->user_id = $user->id;
+		$organization->color = $request->color;
+        if ($request->hasFile('img_url')) {
+            //store the image
+            $img_url = $request->file('img_url');
+            //get the path of the stores image
+            $img_url = $img_url->store('organizations', ['disk' => 'public_uploads']);
+            //resize
+            Image::make(Storage::disk('public_uploads')->path($img_url))->resize('35px', '27px', function($con) {$con->aspectRatio();})->save();
+            //update
+             $organization->img_url= $img_url;
+        }
 		$organization->save();
 
 		$user->organization_id = $organization->id;
 		$user->password = Hash::make( $request->password );
 		$user->email_verified_at = date('Y-m-d H:i:s');
+        $user->HaveCompany=0;
 		$user->save();
 		return redirect()->route('organizations.index')->with( ['msg' => 'StoredSuccessfully'] );
 	}

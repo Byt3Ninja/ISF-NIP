@@ -156,6 +156,17 @@
 											</div>
 										</div>
 										<div class="row">
+											<div class="col-md-3">
+												<div class="card">
+													<div class="card-content">
+														<div class="card-body">
+															<img style="width: 100%;" class="img-responsive pad" src="/191014/{{$organization->img_url ??'../images/placeholder.jpg' }}">
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="row">
 											<div class="col-12 d-flex justify-content-end">
 												<button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
 											</div>

@@ -1,13 +1,24 @@
-        <div class="navbar-header">
+        <div class="navbar-header" style="margin-bottom: 50px">
             <ul class="nav navbar-nav flex-row">
                 <li class="nav-item mr-auto"><a class="navbar-brand" href="/admin">
-                        <div class="brand-logo"></div>
-                        <h2 class="brand-text mb-0">{{config('app.name')}}</h2>
-                    </a></li>
-                <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i
-                            class="bx bx-x d-block d-xl-none font-medium-4 primary"></i><i
-                            class="toggle-icon bx bx-disc font-medium-4 d-none d-xl-block primary"
-                            data-ticon="bx-disc"></i></a></li>
+                        @if(!is_null(auth()->user()->organization_id))
+                            <img  src="/191014/{{auth()->user()->organization->img_url}}" alt="avatar" height="40" width="80">
+                        @else
+                        <img  src="/images/logo/arweqah.png" alt="avatar" height="50" width="80">
+                        @endif
+                    </a>
+                </li> <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i
+                                class="bx bx-x d-block d-xl-none font-medium-4 primary"></i><i
+                                class="toggle-icon bx bx-disc font-medium-4 d-none d-xl-block primary"
+                                data-ticon="bx-disc"></i></a></li>
+
+                <li class="nav-item mr-auto"><a class="navbar-brand" href="/admin">
+
+                        <h2 class="brand-text mb-0" style="padding-right:0!important;">{{ is_null(auth()->user()->organization_id)?config('app.name') : auth()->user()->organization->{'name_'.$l} }}</h2>
+                    </a>
+                </li>
+
+
             </ul>
         </div>
         <div class="shadow-bottom"></div>
@@ -24,14 +35,8 @@
                         <span class="menu-title">{{__('admin.Profile')}}</span>
                     </a>
                 </li>
-                @if( auth()->user()->hasRole('Admin') )
-                <li class="{{Request::is('*organizations')?'active':''}} nav-item">
-                    <a href="{{route('organizations.index')}}">
-                        <i class="menu-livicon" data-icon="building"></i>
-                        <span class="menu-title" >{{__('admin.Manage Organizations')}}</span>
-                    </a>
-                </li>
-                @else
+
+
                 @if(auth()->user()->HaveCompany==1)
                     <li class="{{Request::is('*myCompany')?'active':''}} nav-item">
                         <a href="{{route('my_company')}}">
@@ -40,17 +45,18 @@
                         </a>
                     </li>
                 @endif
-                @endif
                 <li class="{{Request::is('*calendar*')?'active':''}} nav-item">
                     <a href="{{route('calendar')}}">
                         <i class="menu-livicon" data-icon="calendar"></i>
                         <span class="menu-title">{{__('admin.Calendar')}}</span>
                     </a>
                 </li>
-<?php
-$unread = \App\Messenger::where('receiver',Auth::user()->id)->whereNull('read')->count();
-$l=='ar'?$arrow='left':$arrow='right';
-?>
+        <?php
+        $cmessages = App\Messages::where('read',0);
+        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
+        $unread = $cmessages->count();
+        $l=='ar'?$arrow='left':$arrow='right';
+        ?>
                 <li class="{{Request::is('admin/inbox','admin/outbox','admin/mymsg','admin/sendmessage')?'sidebar-group-active open':''}} nav-item "><a href="#"><i class="menu-livicon" data-icon="comments"></i>
                         <span class="menu-title" >{{__('admin.My messages')}}</span>
                     </a>
@@ -111,6 +117,14 @@ $l=='ar'?$arrow='left':$arrow='right';
                 <li class=" navigation-header"><span>{{__('admin.Portal Settings')}}</span>
                 </li>
                 @endcanany
+                @if( auth()->user()->hasRole('Admin') )
+                    <li class="{{Request::is('*organizations')?'active':''}} nav-item">
+                        <a href="{{route('organizations.index')}}">
+                            <i class="menu-livicon" data-icon="building"></i>
+                            <span class="menu-title" >{{__('admin.Manage Organizations')}}</span>
+                        </a>
+                    </li>
+                @endif
                 @can ('edit_forms')
                     <li class="{{Request::is('admin/show-builder*','admin/show-form*')?'active':''}} nav-item"><a href="/admin/show-builder">
                             <i class="menu-livicon" data-icon="thumbnails-big"></i>
@@ -118,9 +132,21 @@ $l=='ar'?$arrow='left':$arrow='right';
                     </li>
                 @endcan
                 @can ('edit_cycles')
-                    <li class="{{Request::is('admin/cycles*')?'active':''}} nav-item"><a href="/admin/cycles">
-                            <i class="menu-livicon" data-icon="retweet"></i>
-                            <span class="menu-title" >{{__('admin.Cycles')}}</span></a>
+{{--                    <li class="{{Request::is('admin/cycles*')?'active':''}} nav-item"><a href="/admin/cycles">--}}
+{{--                            <i class="menu-livicon" data-icon="retweet"></i>--}}
+{{--                            <span class="menu-title" >{{__('admin.Cycles')}}</span></a>--}}
+{{--                    </li>--}}
+                    <li class="{{Request::is('admin/cycles*')?'sidebar-group-active open':''}} nav-item">
+                        <a href="#"><i class="menu-livicon" data-icon="retweet"></i><span class="menu-title"
+                            > {{__('admin.Cycles')}}</span></a>
+                        <ul class="menu-content">
+                            <li class="{{Request::is('/admin/cycles*')?'active':''}}"><a href="/admin/cycles"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
+                                    > {{__('cycles.steps')}}</span></a>
+                            </li>
+                            <li class="{{Request::is('admin/cycles/*/registered')?'active':''}}"><a href="/admin/cycles/0/registered"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
+                                    > {{__('cycles.Users')}}</span></a>
+                            </li>
+                        </ul>
                     </li>
 
                     <li class="{{Request::is('admin/screening*')?'sidebar-group-active open':''}} nav-item">
@@ -170,6 +196,7 @@ $l=='ar'?$arrow='left':$arrow='right';
                             </li>
                         </ul>
                     </li>
+                    @if(!Auth::user()->hasanyRole("organizationManager"))
                     <li class="{{Request::is('*services*','','admin/requests/all','admin/room*')?'sidebar-group-active open':''}} nav-item">
                         <a href="#"><i class="menu-livicon" data-icon="loader-10"></i><span class="menu-title"
                             > {{__('admin.Services')}}</span></a>
@@ -192,6 +219,7 @@ $l=='ar'?$arrow='left':$arrow='right';
                             </li>
                         </ul>
                     </li>
+                    @endif
                 @endcan
                 @can('view_user')
                     <li class="{{Request::is('*users*')?'sidebar-group-active open':''}} nav-item">

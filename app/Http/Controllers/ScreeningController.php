@@ -21,15 +21,34 @@ class ScreeningController extends Controller
     public function index($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $steps = Step::where('stype', 2)->orderBy('from')->get();
+        $organization_id=auth()->user()->organization_id;
+        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->where('stype', 2)->orderBy('from')->get();
         $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
-            $cstep = Step::where('stype', 2)->where('id', $id)->first();
+            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('stype', 2)->where('id', $id)->first();
         } else {
-            $cstep = Step::where('stype', 2)->where('id', $id)->first();
+            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('stype', 2)->where('id', $id)->first();
         }
-        if ($cstep) {$form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();}
+        if ($cstep) {
+            $form = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
+        }
         else {$form=[];}
         $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
         return view('admin.settings.screening.index', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs'));
@@ -138,12 +157,26 @@ class ScreeningController extends Controller
     public function results($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $steps = Step::where('stype', 2)->orderBy('from')->get();
+        $organization_id=auth()->user()->organization_id;
+
+        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->where('stype', 2)->orderBy('from')->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
-            $cstep = Step::where('stype', 2)->where('id', $id)->first();
+            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('stype', 2)->where('id', $id)->first();
         } else {
-            $cstep = Step::where('stype', 2)->where('id', $id)->first();
+            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('stype', 2)->where('id', $id)->first();
         }
         $judges = User::join('screenings', 'user_id', 'id')->where('step_id', $id)->get();
         $form = null;

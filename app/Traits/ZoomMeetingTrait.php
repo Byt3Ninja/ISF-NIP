@@ -10,6 +10,7 @@ use Log;
 trait ZoomMeetingTrait
 {
     public $client;
+
     public $jwt;
     public $headers;
 
@@ -24,16 +25,38 @@ trait ZoomMeetingTrait
         ];
     }
 
-    public function generateZoomToken()
+//    ===================> old function <=====================
+//    public function  getAccessToken()
+//    {
+//        $key = env('ZOOM_API_KEY', '');
+//        $secret = env('ZOOM_API_SECRET', '');
+//        $payload = [
+//            'iss' => $key,
+//            'exp' => strtotime('+1 minute'),
+//        ];
+//
+//        return \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
+//    }
+    protected function generateZoomToken()
     {
-        $key = env('ZOOM_API_KEY', '');
-        $secret = env('ZOOM_API_SECRET', '');
-        $payload = [
-            'iss' => $key,
-            'exp' => strtotime('+1 minute'),
-        ];
 
-        return \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
+
+        $client = new Client([
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode(env('ZOOM_CLIENT_ID','') . ':' . env('ZOOM_CLIENT_SECRET','')),
+                'Host' => 'zoom.us',
+            ],
+        ]);
+
+        $response = $client->request('POST', "https://zoom.us/oauth/token", [
+            'form_params' => [
+                'grant_type' => 'account_credentials',
+                'account_id' => env('ZOOM_ACCOUNT_ID','') ,
+            ],
+        ]);
+
+        $responseBody = json_decode($response->getBody(), true);
+        return $responseBody['access_token'];
     }
 
     private function retrieveZoomUrl()

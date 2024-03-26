@@ -27,7 +27,12 @@ class CyclesController extends Controller
     public function index($id=0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $cycles = Cycle::orderBy('start','DESC')->get();
+
+        $organization_id=auth()->user()->organization_id;
+
+        $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->orderBy('start','DESC')->get();
         $steps=null;
         if( count( $cycles ) > 0 )
         {
@@ -44,11 +49,19 @@ class CyclesController extends Controller
     public function users($id)
     {
         $this->preProcessingCheck('edit_cycles');
+        $organization_id=auth()->user()->organization_id;
+
         if( $id == 0 )
         {
-            $cycles = Cycle::orderBy('id','DESC')->get();
+            $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->where('organization_id',$organization_id);
+            })->orderBy('id','DESC')->get();
             $id = $cycles->pluck('id')[0];
-        } else { $cycles = Cycle::all(); }
+        } else {
+            $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->get();
+        }
         return view('admin.settings.cycles.users',compact('cycles','id'));
     }
 
@@ -62,7 +75,14 @@ class CyclesController extends Controller
             /// Edit Cycle
             $private = null;
             if ($request->private) {$private=sha1(now());}
-            Cycle::where('id',$id)->update(['title'=>$request->title, 'description'=>$request->description,'start'=>Carbon::parse($request->start), 'end'=>Carbon::parse($request->end), 'private'=>$private]);
+            Cycle::where('id',$id)->update([
+                'organization_id'=>$request->organization_id,
+                'title'=>$request->title,
+                'description'=>$request->description,
+                'start'=>Carbon::parse($request->start),
+                'end'=>Carbon::parse($request->end),
+                'private'=>$private
+            ]);
             return redirect()->back()->with('message', 'Saved');
         }
         elseif( $type == 2 )
@@ -70,8 +90,16 @@ class CyclesController extends Controller
             /// Save Cycle
             $private = null;
             if ($request->private) {$private=sha1(now());}
-            Cycle::insert(['title'=>$request->title, 'description'=>$request->description, 'start'=>Carbon::parse($request->start), 'end'=>Carbon::parse($request->end), 'private'=>$private]);
-            return redirect()->back()->with('message', 'Saved');
+            $createdCycle = Cycle::create([
+                'organization_id'=>$request->organization_id,
+                'title'=>$request->title,
+                'description'=>$request->description,
+                'start'=>Carbon::parse($request->start),
+                'end'=>Carbon::parse($request->end),
+                'private'=>$private
+            ]);
+
+            return redirect(route('index.cycle',$createdCycle->id))->with('message', 'Saved');
         }
         elseif( $type == 3 )
         {
@@ -102,6 +130,9 @@ class CyclesController extends Controller
         }
         elseif( $type == 5 )
         {
+            if (is_null($request->fromDate)||is_null($request->toDate)){
+                return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+            }
             /// add new step
             $stype = $request->stype;
             $data = null;
@@ -120,22 +151,34 @@ class CyclesController extends Controller
                         ]);
                     }}
             } elseif ($stype==2) {
+                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+                }
                 // add Screening
                 Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => $request->ScreeningSelect,
                     'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
             } elseif ($stype==3) {
+                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+                }
                 // add step
                 Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => null,
                     'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
             } elseif ($stype==4) {
+                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+                }
                 // add training
                 Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype,'list'=>$request->RecordedSelect, 'data' => null,
                     'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
             } elseif ($stype==5) {
+                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
+                }
                 // add service
             $data = $request->FinalScreeningSelect;
             $fform = $request->FormSelect;
-            if (!$fform) {return redirect()->back()->with('message', 'You must add form first'); }
+            if (!$fform) {return redirect()->back()->with('message2', 'You must add form first'); }
             $id = Step::insertGetId(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => $data,
                 'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
                 // make a copy of form fields

@@ -37,28 +37,28 @@
                                 <fieldset class="form-group">
                                     <div style="width: 70%;float: {{$l=='ar'?'right':'left'}};">
                                     <select class="select2 form-control" id="FormSelect"  onchange="window.open('/admin/show-builder/'+this.options[this.selectedIndex].value,'_self');">
-                                        @foreach(App\BuilderForm::all() as $form)
+                                        @foreach($builderForms as $form)
                                         <option value="{{$form->id}}" {{$title->id==$form->id?"selected":""}}>
-                                            {{ $form->form_name }} 
+                                            {{ $form->form_name }} {{ !is_null($form->organization)?' - '.$form->organization->name:'' }}
                                             @if( $form->cycles->count() )
-                                            ( 
+
                                                 @foreach( $form->cycles as $cycle )
                                                 {{ $cycle->title }} @if( !$loop->last ) - @endif
                                                 @endforeach
-                                            )
+
                                             @endif
                                         </option>
                                         @endforeach
                                     </select></div>
-                                    &nbsp;&nbsp;
                                     <span>
-                                    <button class="btn btn-primary" onclick="DoChange(0,{{$title->id}},'{{$title->form_name}}')">
+                                    <button class="btn btn-primary" onclick="showForm(0,{{$title->id}},'{{$title->form_name}}',{{ $title->organization_id }})">
                                         <i class="bx bx-edit"></i> <span class="align-middle ml-25">{{__('builder.Edit')}}</span>
                                     </button>
-                                    <button class="btn btn-info" onclick="DoChange(1,{{$title->id}},'{{$title->form_name}}')">
+                                    <button class="btn btn-info" onclick="showForm(1,{{$title->id}},'{{$title->form_name}} {{__('builder.Copy.')}}')">
                                         <i class="bx bx-copy" ></i> <span class="align-middle ml-25">{{__('builder.Copy')}}</span>
                                     </button>
-                                    <button class="btn btn-success" onclick="DoChange(2,0,null)">
+
+                                    <button class="btn btn-success" onclick="showForm(2,0,null)">
                                         <i class="bx bx-star" ></i> <span class="align-middle ml-25">{{__('builder.New')}}</span>
                                     </button>
                                     <button class="btn btn-danger" onclick="DoChange(3,{{$title->id}},null)">
@@ -74,7 +74,7 @@
                         <div class="card-header" style="padding-bottom: 0px;">
                             <p>{{__('builder.Drag')}}<a href="/admin/show-form/{{$title->id}}"> ({{__('builder.Preview')}})</a>.</p>
                         </div>
-<hr>
+                    <hr>
                     <div class="section">
                         <div class="row" id="builder-app"></div>
                         <div id="modal-root"></div>
@@ -86,18 +86,81 @@
         </div>
     </div>
 </div>
+
+<!--Modify custom form step Modal -->
+<div class="modal fade text-left" id="AddForm" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel33" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel33">{{__('builder.new form')}}</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="bx bx-x"></i>
+                    </button>
+                </div>
+            <div class="modal-body">
+                @if(is_null(auth()->user()->organization_id))
+                    <div class="mb-2" id="mmenu1">
+                        <label>{{__('builder.Choose Organization')}}: </label>
+                        <div class="form-group mb-0">
+                            <select class="select form-control" id="organization_id" name="organization_id" required>
+                                @foreach(\App\Organization::all() as $org)
+                                    <option value="{{$org->id}}" >{{$org->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                @else
+                    <input type="hidden" name="organization_id" value="{{auth()->user()->organization_id}}" id="organization_id">
+                @endif
+
+                    <label>{{__('builder.new form')}}: </label>
+                    <div class="form-group">
+                        <input id='mtitle' name='title' type="text" placeholder="{{__('cycles.Title')}}" class="form-control" required>
+                    </div>
+
+                </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                        <i class="bx bx-x d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">{{__('cycles.Close')}}</span>
+                    </button>
+                    <button type="button" class="btn btn-primary ml-1" id="modelSubmit" >
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">{{__('cycles.Save')}}</span>
+                    </button>
+                </div>
+        </div>
+    </div>
+</div>
 @stop
 @section('pagescripts')
     <script>
         document.body.classList.add("menu-collapsed");
-        function DoChange(set, id, title) {
-            if (set===0)
-            {
-                title = prompt("{{__('builder.new title')}}",title);
+
+        function showForm(set,id , title , organization_id){
+
+            $('#mtitle').val(title);
+            if(typeof(organization_id) != "undefined"){
+                $('#organization_id').val(organization_id)
+            }
+            $('#modelSubmit').attr('onclick',`DoChange(${set},${id},'${title}',${organization_id})`)
+            $('#AddForm').modal('show')
+        }
+
+        function DoChange(set, id, title,organization_id=0) {
+            if (set===0) {
+                title=$('#mtitle').val();
+                organization_id= $('#organization_id').val();
+                {{--title = prompt("{{__('builder.new title')}}",title);--}}
             } else if (set===1) {
-                title = prompt("{{__('builder.new copied')}}:", title + ' {{__('builder.Copy.')}}');
+                title=$('#mtitle').val();
+                organization_id= $('#organization_id').val();
+{{--                title = prompt("{{__('builder.new copied')}}:", title + ' {{__('builder.Copy.')}}');--}}
             } else if (set===2) {
-                title = prompt("{{__('builder.new form')}}");
+                {{--title = prompt("{{__('builder.new form')}}");--}}
+                title=$('#mtitle').val();
+                organization_id= $('#organization_id').val();
             }  else if (set===3) {
                 title = confirm("{{__('builder.deleting form')}}?")
             }
@@ -113,13 +176,14 @@
                 data: {
                     "id": id,
                     "title" : title,
+                    "organization_id" : organization_id
                 },
                 success: function (response) {
-                    console.log(response);
+                    // console.log(response);
                     location.href = '/admin/show-builder/'+  response;
                 },
                 error:function(error){
-                    console.log(error);
+                    // console.log(error);
                     alert("Error Occurred, Try again!");
                 }
             });

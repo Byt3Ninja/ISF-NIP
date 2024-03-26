@@ -70,7 +70,7 @@ return [
 	'Organizations`s List' => 'قائمة المؤسسات',
 	'Change your account password' => 'تغير كلمة المرور',
 	'English Organization Name' => 'إسم المؤسسة باللغة الإنجليزية',
-	'Arabic Organization Name' => 'إسم المؤسسة باللغة الانجليزية',
+	'Arabic Organization Name' => 'إسم المؤسسة باللغة العربية',
 	'Organization Status' => 'حالة المؤسسة',
 	'Edit the Company information' => 'تعديل بيانات الشركة',
 	'State' => 'المنطقة',
@@ -395,4 +395,8 @@ return [
 	'stage_prototype' => 'نموذج أولي',
 	'stage_ready_product' => 'منتج جاهز',
 	'stage_company_in_market' => 'شركة بالسوق',
+    'add start and end date first'=>'يجب ادخل تاريخ البدء و الانتهاء اولا',
+    'color'=>'اللون',
+    'Organization Manager English Name'=>'اسم مدير المؤسسة باللغة الانجليزية',
+    'Organization Manager Arabic Name'=>'اسم مدير المؤسسة باللغة العربية'
 ];

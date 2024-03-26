@@ -17,7 +17,7 @@ use App\Traits\ZoomMeetingTrait;
 
 class TrainingController extends Controller
 {
-    // use ZoomMeetingTrait;
+     use ZoomMeetingTrait;
 
     const MEETING_TYPE_INSTANT = 1;
     const MEETING_TYPE_SCHEDULE = 2;
@@ -155,7 +155,14 @@ class TrainingController extends Controller
     public function results($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $sessions = TrainingSession::where('type','online')->orderBy('datetime')->get();
+        $organization_id=auth()->user()->organization_id;
+        $sessions = TrainingSession::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->whereHas('step',function ($query) use ($organization_id){
+                $query->whereHas('cycle',function ($qer) use ($organization_id){
+                    $qer->where('organization_id',$organization_id);
+                });
+            });
+        })->where('type','online')->orderBy('datetime')->get();
         if ($id == 0) {
             $id = $sessions->pluck('id')->first();
             $csession = TrainingSession::where('type','online')->where('id', $id)->first();
@@ -170,7 +177,12 @@ class TrainingController extends Controller
     }
     public function sessions($id=0) {
         $this->preProcessingCheck('edit_cycles');
-        $steps = Step::where('stype',4)->get();
+        $organization_id=auth()->user()->organization_id;
+        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->where('stype',4)->get();
         if ($id == 0) {$id = $steps->pluck('id')->first();}
         $sessions = TrainingSession::where('step_id',$id)->orderBy('datetime','ASC')->get();
         $online = Training::get();

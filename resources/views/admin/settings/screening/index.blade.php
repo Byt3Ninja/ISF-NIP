@@ -67,7 +67,7 @@
                                             <select id="cstep" class="select form-control" onchange="window.open('/admin/'+this.options[this.selectedIndex].value+'/screening','_self');">
                                                 @foreach($steps as $step)
                                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} ({{__('cycles.Cycle')}} "{{$step->cycle->title}}" -
-                                                        {{__('cycles.Start')}} {{$step->from->format('d-m')}})</option>
+                                                        {{__('cycles.Start')}} {{$step->from->format('d-m')}}) - {{ optional(optional($step->cycle)->organization)->name }}</option>
                                                 @endforeach
                                             </select>
                                         <div class="input-group-append">

@@ -30,7 +30,12 @@ class FinalscreeningController extends Controller
     public function index($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $steps = Step::where('stype', 5)->orderBy('from')->get();
+        $organization_id=auth()->user()->organization_id;
+        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->where('stype', 5)->orderBy('from')->get();
         $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
@@ -143,7 +148,12 @@ class FinalscreeningController extends Controller
     public function results(Request $request,$id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $steps = Step::where('stype', 5)->orderBy('from')->get();
+        $organization_id=auth()->user()->organization_id;
+        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->where('stype', 5)->orderBy('from')->get();
 
         if ($id == 0) {
             $id = $steps->pluck('id')->first();

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Validator, DB, Mail};
 use App\BuilderForm;
@@ -10,16 +11,32 @@ use App\Field;
 
 class FormBuilderController extends Controller
 {
+
     /**
      * show the builder
      */
     public function showBuilder($id=1) {
         $this->preProcessingCheck('edit_forms');
-        $title = BuilderForm::find($id);
+        $organization_id=auth()->user()->organization_id;
+        $title = BuilderForm::where('id',$id)->when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->first();
         if (!$title){
-            $title = BuilderForm::first();
+            $title = BuilderForm::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->where('organization_id',$organization_id);
+            })->first();
             if (!$title){
-                $title = BuilderForm::firstOrCreate(['form_name'=>'New Empty Form']);
+                if (!is_null($organization_id)){
+                    $title = BuilderForm::firstOrCreate([
+                        'form_name'=>'New Empty Form',
+                        'organization_id'=>$organization_id
+                    ]);
+                }else{
+                    $title = BuilderForm::firstOrCreate([
+                        'form_name'=>'New Empty Form',
+                        'organization_id'=>Organization::first()->id
+                    ]);
+                }
             }
             $id = $title->id;
         }
@@ -28,7 +45,10 @@ class FormBuilderController extends Controller
         });
 
 
-        $builder_fields = BuilderField::where('builder_form_id', $id)->orderBy('id', 'asc');
+
+        $builder_fields = BuilderField::where([
+            'builder_form_id'=>$id,
+        ])->orderBy('id', 'asc');
 
         if($builder_fields->exists()) {
 
@@ -92,7 +112,14 @@ class FormBuilderController extends Controller
             });
         }
 
+        if (!is_null(auth()->user()->organization_id)){
+            $builderForms = BuilderForm::where('organization_id',auth()->user()->organization_id)->get();
+        }else{
+            $builderForms = BuilderForm::all();
+        }
+
         $data = [
+            'builderForms'=>$builderForms,
             'title' => 'form builder',
             'builder_data' => $builder_fields->exists()? $field_data->flatten(1)->toArray() : []
         ];
@@ -104,6 +131,7 @@ class FormBuilderController extends Controller
      * show the form
      */
     public function showForm($id) {
+
         $this->preProcessingCheck('view_forms');
         $form_id_toshow = $id;
         $the_form = BuilderForm::findOrFail($form_id_toshow);
@@ -187,7 +215,8 @@ class FormBuilderController extends Controller
         $fields = Field::all()->mapWithKeys(function ($field) {
             return [$field->id => $field->field_type];
         });
-
+//dd($request);
+//dd($request->all(all));
         // data from ajax request
         $field_data = collect(json_decode($request->form_fields_data));
 
@@ -270,6 +299,7 @@ class FormBuilderController extends Controller
             // make a copy
             $form = new BuilderForm;
             $form->form_name = $request->title;
+            $form->organization_id = $request->organization_id;
             $form->save();
             $new = BuilderField::where('builder_form_id',$request->id)->orderBy('id')->get();
             if (count($new)>0) {
@@ -284,6 +314,7 @@ class FormBuilderController extends Controller
             // create new
             $new = new BuilderForm;
             $new->form_name = $request->title;
+            $new->organization_id = $request->organization_id;
             $new->save();
             return response()->json($new->id);
         } elseif ($set==3) {
@@ -293,9 +324,18 @@ class FormBuilderController extends Controller
             return response()->json();
         } else {
             //rename
-            BuilderForm::where('id',$request->id)->update(['form_name'=>$request->title]);
+            BuilderForm::where('id',$request->id)->update(['form_name'=>$request->title,'organization_id'=>$request->organization_id]);
             return response()->json($request->id);
         }
 
+    }
+
+    public function builderByOrganization($organization_id=0){
+        $builders = BuilderForm::where('organization_id',$organization_id)->get();
+        $appear = '';
+        foreach ($builders as $builder){
+            $appear .= "<option value=".$builder->id." >".$builder->form_name."</option>";
+        }
+        return $appear;
     }
 }

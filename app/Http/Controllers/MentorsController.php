@@ -18,7 +18,7 @@ use App\Notifications\TemplateEmail;
 
 class MentorsController extends Controller
 {
-    // use ZoomMeetingTrait;
+//     use ZoomMeetingTrait;
 
     const MEETING_TYPE_INSTANT = 1;
     const MEETING_TYPE_SCHEDULE = 2;
@@ -28,17 +28,31 @@ class MentorsController extends Controller
     public function index($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        if($id==0){$id = Cycle::orderBy('start','DESC')->pluck('id')->first();}
+        $organization_id=auth()->user()->organization_id;
+
+        if($id==0){$id = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->orderBy('start','DESC')->pluck('id')->first();}
         $companies = Company::where('cycle',$id)->where('step','>',0)->get();
         $mentors = CyclesMentors::where('cycle_id',$id)->get();
-        return view('admin.settings.mentorship.index', compact( 'mentors','id','companies'));
+        $cycles= Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->get();
+        return view('admin.settings.mentorship.index', compact( 'mentors','id','companies','cycles'));
     }
     public function list($id = 0){
         $this->preProcessingCheck('edit_cycles');
-        if($id==0){$id = Cycle::orderBy('start','DESC')->pluck('id')->first();}
+        $organization_id=auth()->user()->organization_id;
+
+        if($id==0){$id = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->orderBy('start','DESC')->pluck('id')->first();}
         $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
         $clist = CyclesMentors::where('cycle_id',$id)->pluck('user_id')->toArray();
-        return view('admin.settings.mentorship.assign', compact( 'mentors','id','clist'));
+        $cycles= Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
+            return $q->where('organization_id',$organization_id);
+        })->get();
+        return view('admin.settings.mentorship.assign', compact( 'mentors','id','clist','cycles'));
     }
     public function assign($id ,Request $request){
         $this->preProcessingCheck('edit_cycles');
