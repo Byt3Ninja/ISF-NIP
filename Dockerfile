@@ -63,6 +63,7 @@ RUN docker-php-source extract \
 COPY . /var/www/html
 
 RUN composer install
+RUN php artisan optimize:clear
 
 # Copy existing application directory permissions
 # COPY --chown=sail:sail . /var/www/html
