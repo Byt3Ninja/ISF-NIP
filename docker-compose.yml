@@ -8,6 +8,7 @@ services:
         volumes:
             - '.:/var/www/html'
             - './docker_volumes/php/local.ini:/usr/local/etc/php/conf.d/local.ini'
+            - './vendor:/var/www/html/vendor'
         # ports:
         #     - "8000:8000"
         networks:
@@ -21,7 +22,7 @@ services:
         restart: always
         ports:
             - "80:80"
-            - "448:448"
+            - "443:443"
         volumes:
             - ./:/var/www/html
             - ./docker_volumes/nginx/conf.d:/etc/nginx/conf.d
