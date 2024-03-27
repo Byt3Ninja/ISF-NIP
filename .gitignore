@@ -1,6 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
+/public/191014
 /storage/*.key
 /vendor
 /docker_volumes
