@@ -76,10 +76,31 @@
 														<option value="0" {{ intval( $organization->status ) == 1 || $organization->status === false ? 'selected' : '' }} >{{ __('admin.Not Active') }}</option>
 													</select>
 												</fieldset>
+												<fieldset class="form-group">
+													<label for="name_en">{{ __('admin.color')}}</label>
+													<input value="{{ $organization->color }}" name="color" type="text" class="form-control" id="color" placeholder="{{ __('admin.color') }}" required />
+												</fieldset>
+												<fieldset class="form-group">
+													<label for="basicInput">{{ __('admin.Image')}}</label>
+													<div class="input-group">
+														<div class="input-group-prepend">
+                                                            <span class="input-group-text"
+																  id="inputGroupFileAddon01">{{ __('admin.Upload')}}</span>
+														</div>
+														<div class="custom-file">
+															<input type="file" class="custom-file-input" id="img_url"
+																   name="img_url" accept="image/*" style="direction: ltr;"
+																   aria-describedby="inputGroupFileAddon00">
+															<label class="custom-file-label"
+																   for="inputGroupFile00">{{ __('admin.SelectFile')}}</label>
+														</div>
+													</div>
+												</fieldset>
+
 											</div>
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
-													<label for="basicInput">{{ __('admin.English Name')}}</label>
+													<label for="basicInput">{{__('admin.Organization Manager English Name')}}</label>
 													<div class="row">
 														<div class="col-md-6">
 															<input  name="first_name_en" type="text"
@@ -97,7 +118,7 @@
 													</div>
 												</fieldset>
 												<fieldset class="form-group">
-													<label for="basicInput">{{__('admin.Arabic Name')}}</label>
+													<label for="basicInput">{{__('admin.Organization Manager Arabic Name')}}</label>
 													<div class="row">
 														<div class="col-md-6">
 															<input value="{{ $user->first_name_ar }}" name="first_name_ar" type="text"
@@ -155,6 +176,7 @@
 												</fieldset>
 											</div>
 										</div>
+
 										<div class="row">
 											<div class="col-md-3">
 												<div class="card">

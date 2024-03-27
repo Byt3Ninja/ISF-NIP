@@ -399,6 +399,8 @@ return [
     'add start and end date first'=>'Start and End date must added first',
     'color'=>'Color',
     'Organization Manager English Name'=>'Organization Manager English Name',
-    'Organization Manager Arabic Name'=>'Organization Manager Arabic Name'
+    'Organization Manager Arabic Name'=>'Organization Manager Arabic Name',
+    'Arabic UserName'=>'Arabic User Name',
+    'English UserName'=>'English User Name',
 
 ];

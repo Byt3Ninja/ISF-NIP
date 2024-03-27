@@ -398,5 +398,7 @@ return [
     'add start and end date first'=>'يجب ادخل تاريخ البدء و الانتهاء اولا',
     'color'=>'اللون',
     'Organization Manager English Name'=>'اسم مدير المؤسسة باللغة الانجليزية',
-    'Organization Manager Arabic Name'=>'اسم مدير المؤسسة باللغة العربية'
+    'Organization Manager Arabic Name'=>'اسم مدير المؤسسة باللغة العربية',
+    'Arabic UserName'=>'اسم المستخدم باللغة العربية',
+    'English UserName'=>'اسم المستخدم باللغة الانجليزية'
 ];

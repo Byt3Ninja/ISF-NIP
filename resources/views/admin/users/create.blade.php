@@ -59,7 +59,7 @@
                                             <div class="col-md-12">
 
                                                 <fieldset class="form-group">
-                                                    <label for="basicInput">{{ __('admin.English Name')}}</label>
+                                                    <label for="basicInput">{{ __('admin.English UserName')}}</label>
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <input  name="first_name_en" type="text"
@@ -77,7 +77,7 @@
                                                     </div>
                                                 </fieldset>
                                                 <fieldset class="form-group">
-                                                    <label for="basicInput">{{__('admin.Arabic Name')}}</label>
+                                                    <label for="basicInput">{{__('admin.Arabic UserName')}}</label>
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <input value="{{old('first_name_ar')}}" name="first_name_ar" type="text"

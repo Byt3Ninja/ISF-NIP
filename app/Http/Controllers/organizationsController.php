@@ -126,6 +126,20 @@ class organizationsController extends Controller
 		$organization->name_ar = $request->name_ar;
 		$organization->name_en = $request->name_en;
 		$organization->status = intval( $request->status ) == 1 || $request->status === true ? 1 : 0;
+		$organization->color = $request->color;
+        if ($request->hasFile('img_url')) {
+            // remove old image
+//            unlink(public_path('/191014/'));
+
+            //store the image
+            $img_url = $request->file('img_url');
+            //get the path of the stores image
+            $img_url = $img_url->store('organizations', ['disk' => 'public_uploads']);
+            //resize
+            Image::make(Storage::disk('public_uploads')->path($img_url))->save();
+            //update
+            $organization->img_url= $img_url;
+        }
 		$organization->save();
 		$user = $organization->user;
 		$user->update( $request->except( $except ) );
