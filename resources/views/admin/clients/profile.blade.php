@@ -62,7 +62,7 @@
                                                                 id="first_name_en" style="direction: ltr;"
                                                                 placeholder="{{ __('admin.First Name') }}" required
                                                                 autocomplete="first_name_en" autofocus />
-                                                            <label for="first_name_en">{{__('admin.English Name')}}</label>
+                                                            <label for="first_name_en">{{__('admin.English UserName')}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6 col-12">
@@ -104,7 +104,7 @@
                                                                 id="first_name_ar" style="direction: rtl;"
                                                                 placeholder="{{ __('admin.First Name') }}" required
                                                                 autocomplete="first_name_ar" autofocus />
-                                                <label for="first_name_ar">{{__('admin.Arabic Name')}}</label>
+                                                <label for="first_name_ar">{{__('admin.Arabic UserName')}}</label>
                                                 </div>
                                             </div>
                                             <div class="col-md-6 col-12">
