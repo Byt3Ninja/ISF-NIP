@@ -343,7 +343,7 @@ str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->ratin
                     }});
             }
             function approve(id,stat){
-                prompt('Please Wait ! Sending Request ........')
+                // alert('Please Wait ! Sending Request ?')
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
                     type: "POST", url: "/admin/mentors/modify",

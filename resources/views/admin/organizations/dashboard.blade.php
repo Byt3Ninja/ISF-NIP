@@ -300,7 +300,7 @@
 @section('pagescripts')
         <script>
             function approve(id,stat){
-                prompt('Please Wait ! Sending Request ........')
+                // prompt('Please Wait ! Sending Request ........')
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
                     type: "POST", url: "/admin/mentors/modify",
