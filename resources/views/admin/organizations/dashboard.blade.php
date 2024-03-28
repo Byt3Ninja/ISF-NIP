@@ -14,9 +14,7 @@
         $messages = App\Messenger::where('receiver',auth()->id())->whereNull('read');
         $messages = $messages->count();
 
-        $mentrequests = App\MentorshipRequest::where('organization_id',$organization_id)->whereNull('approved');
-        $mentrequests = $mentrequests->count();
-
+        $mentrequests = App\MentorshipRequest::where('organization_id',$organization_id)->count();
 
         $startups= \App\Company::whereHas('cycledata',function ($q) use ($organization_id){
             $q->where('organization_id',$organization_id);
@@ -24,6 +22,7 @@
 
         $cycles = App\Cycle::where('organization_id',$organization_id);
         $cycles_count = $cycles->count();
+        $latest_cycles= $cycles->latest()->limit(10)->get();
 
         $forms = App\BuilderForm::where('organization_id',$organization_id);
         $forms_count = $forms->count();
@@ -34,16 +33,8 @@
             });
         })->count();
 
-//
-//        $mentors = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6);
-//        if( !is_null( $organization_id ) ) { $mentors = $mentors->where('users.organization_id', $organization_id); }
-//        $mentors = $mentors->count();
-//
-//        $judgers = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7);
-//        if( !is_null( $organization_id ) ) { $judgers = $judgers->where('users.organization_id', $organization_id); }
-//        $judgers = $judgers->count();
-
-
+        $mentorshipRequests = App\MentorshipRequest::where('organization_id',$organization_id)
+        ->whereNull('approved')->latest()->limit(5)->get();
 
     @endphp
     <div class="app-content content">
@@ -74,7 +65,7 @@
                     </div>
                 @endif
                 <div class="col-12">
-                    <div class="row" >
+                    <div class="row">
                         <div class="col-sm-3 col-12 dashboard-users-success">
                             <div class="card text-center">
                                 <div class="card-content">
@@ -168,6 +159,132 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title align-items-center">
+                                        <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Latest 5 Cycles") }}
+                                        :
+                                    </h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card ">
+                                        <div class="table-responsive">
+                                            <table class="table" id="">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th class="text-center">{{__('cycles.Title')}}</th>
+                                                    <th class="text-center">{{__('cycles.Valid from')}}</th>
+                                                    <th class="text-center">{{__('cycles.Valid to')}}</th>
+                                                    <th class="text-center">{{__('cycles.Users')}}</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                @foreach($latest_cycles as $cycle)
+                                                    <tr>
+                                                        <td class="text-center"> {{ $cycle->title }} </td>
+                                                        <td class="text-center"> {{ $cycle->start->format('d-m-Y') }} </td>
+                                                        <td class="text-center"> {{ $cycle->end->format('d-m-Y') }} </td>
+                                                        <td class="text-center">
+                                                            <button class="btn btn-light-info"
+                                                                    onclick="window.location.href='/admin/cycles/{{$cycle->id}}/registered'">
+                                                                <i class="bx bxs-user"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title align-items-center">
+                                        <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Latest 5 Mentorship Requests") }} :
+                                    </h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card ">
+                                        <div class="table-responsive">
+                                            <table class="table mb-0" id="userstable">
+                                                <thead class="thead-dark">
+                                                <tr>
+                                                    <th>{{__('cycles.Company')}}</th>
+                                                    <th>{{__('cycles.User/Title')}}</th>
+                                                    <th>{{__('cycles.Mentor')}}</th>
+                                                    <th>{{__('cycles.Date/Time')}}</th>
+                                                    <th>{{__('cycles.Actions')}}</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                @foreach($mentorshipRequests as $session)
+                                                    <tr>
+                                                        <td>
+                                                            <div class="media align-items-center">
+                                                                <a class="media-left mr-50" href="/admin/companyProfile/{{$session->user->company->id}}">
+                                                                    <img src="/191014/{{$session->user->company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                </a>
+                                                                <a href="/admin/companyProfile/{{$session->user->company->id}}">
+                                                                    <div class="media align-items-center">
+                                                                        {{$session->user->company->{'name_'.$l} }}
+                                                                    </div>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="media align-items-center">
+                                                                <a class="media-left mr-50" href="/admin/users/{{$session->user->company->user->id}}/edit">
+                                                                    <img src="/191014/{{$session->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                </a>
+                                                                <a href="/admin/users/{{$session->user_id}}/edit">
+                                                                    <div class="media-body">
+                                                                        <h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
+                                                                        <span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
+                                                                    </div>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div style="cursor: pointer;" class="chip mr-1" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
+                                                                <div class="chip-body">
+                                                                    <div class="avatar">
+                                                                        <img class="img-fluid" src="/191014/{{$session->mentor->img_url??'users/avatar.jpg'}}" alt="Mentor photo" height="20" width="20">
+                                                                    </div>
+                                                                    <span class="chip-text">
+{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}
+                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            {{$session->zoom_date}}
+                                                            <br>({{$session->period}}M)
+                                                        </td>
+
+
+                                                        <td>
+                                                            <button title="Approve" onclick="approve({{$session->id}},'Yes')" type="button" class="btn btn-icon rounded-circle btn-light-success">
+                                                                    <i class="bx bx-check-square"></i></button>
+                                                            <button title="Dispprove" onclick="approve({{$session->id}}, 'No')" type="button" class="btn btn-icon rounded-circle btn-light-danger">
+                                                                    <i class="bx bxs-x-square"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -181,117 +298,21 @@
     <script src="/app-assets/vendors/js/extensions/swiper.min.js"></script>
 @stop
 @section('pagescripts')
-{{--    <script>--}}
-
-{{--        $(window).on("load", function () {--}}
-{{--            var $primary = '#5A8DEE',--}}
-{{--                $success = '#39DA8A',--}}
-{{--                $danger = '#FF5B5C',--}}
-{{--                $warning = '#FDAC41',--}}
-{{--                $info = '#00CFDD',--}}
-{{--                $label_color = '#475F7B',--}}
-{{--                grid_line_color = '#dae1e7';--}}
-{{--            var themeColors = [$primary, $warning, $danger, $success, $info, $label_color,$primary, $warning, $danger, $success, $info, $label_color,--}}
-{{--                $primary, $warning, $danger, $success, $info, $label_color,$primary, $warning, $danger, $success, $info, $label_color];--}}
-
-{{--            // Bar Chart--}}
-{{--            // --------------------------------------------}}
-{{--            //Get the context of the Chart canvas element we want to select--}}
-{{--            var barChartctx = $("#bar-chart");--}}
-{{--            // Chart Options--}}
-{{--            var barchartOptions = {--}}
-{{--                // Elements options apply to all of the options unless overridden in a dataset--}}
-{{--                // In this case, we are setting the border of each bar to be 2px wide--}}
-{{--                elements: {--}}
-{{--                    rectangle: {--}}
-{{--                        borderWidth: 2,--}}
-{{--                        borderSkipped: 'left'--}}
-{{--                    }--}}
-{{--                },--}}
-{{--                responsive: true,--}}
-{{--                maintainAspectRatio: false,--}}
-{{--                responsiveAnimationDuration: 500,--}}
-{{--                legend: { display: false },--}}
-{{--                scales: {--}}
-{{--                    xAxes: [{--}}
-{{--                        display: true,--}}
-{{--                        gridLines: {--}}
-{{--                            color: grid_line_color,--}}
-{{--                        },--}}
-{{--                        scaleLabel: {--}}
-{{--                            display: true,--}}
-{{--                        }--}}
-{{--                    }],--}}
-{{--                    yAxes: [{--}}
-{{--                        display: true,--}}
-{{--                        gridLines: {--}}
-{{--                            color: grid_line_color,--}}
-{{--                        },--}}
-{{--                        scaleLabel: {--}}
-{{--                            display: true,--}}
-{{--                        },--}}
-{{--                        ticks: {--}}
-{{--                            stepSize: 10--}}
-{{--                        },--}}
-{{--                    }],--}}
-{{--                },--}}
-{{--                title: {--}}
-{{--                    display: true,--}}
-{{--                    text: '{{__('admin.totalregisteredusers')}}'--}}
-{{--                },--}}
-{{--            };--}}
-{{--            // Chart Data--}}
-{{--            var barchartData = {--}}
-{{--                labels: {!!$usersgov->pluck('state_'.$l)->toJson()!!},--}}
-{{--                datasets: [{--}}
-{{--                    label: "Total",--}}
-{{--                    data: {!!$usersgov->pluck('total')->toJson()!!},--}}
-{{--                    backgroundColor: themeColors,--}}
-{{--                    borderColor: "transparent"--}}
-{{--                }]--}}
-{{--            };--}}
-{{--            var barChartconfig = {--}}
-{{--                type: 'bar',--}}
-{{--                // Chart Options--}}
-{{--                options: barchartOptions,--}}
-{{--                data: barchartData--}}
-{{--            };--}}
-{{--            // Create the chart--}}
-{{--            var barChart = new Chart(barChartctx, barChartconfig);--}}
-{{--            // Pie Chart--}}
-{{--            // ----------------------------------}}
-{{--            //Get the context of the Chart canvas element we want to select--}}
-{{--            var pieChartctx = $("#simple-pie-chart");--}}
-{{--            // Chart Options--}}
-{{--            var piechartOptions = {--}}
-{{--                responsive: true,--}}
-{{--                maintainAspectRatio: false,--}}
-{{--                responsiveAnimationDuration: 500,--}}
-{{--                title: {--}}
-{{--                    display: true,--}}
-{{--                    text: '{{__('admin.totalregisteredusers')}}'--}}
-{{--                }--}}
-{{--            };--}}
-{{--            // Chart Data--}}
-{{--            var piechartData = {--}}
-{{--                labels: ['{{__('admin.Female')}}','{{__('admin.Male')}}'],--}}
-{{--                datasets: [{--}}
-{{--                    label: "{{__('admin.totalregistered')}}",--}}
-{{--                    data: {!!$usersgender->pluck('total')->toJson()!!},--}}
-{{--                    backgroundColor: themeColors,--}}
-{{--                }]--}}
-{{--            };--}}
-{{--            var pieChartconfig = {--}}
-{{--                type: 'pie',--}}
-{{--                // Chart Options--}}
-{{--                options: piechartOptions,--}}
-{{--                data: piechartData--}}
-{{--            };--}}
-{{--            // Create the chart--}}
-{{--            var pieSimpleChart = new Chart(pieChartctx, pieChartconfig);--}}
-
-{{--        });--}}
-{{--    </script>--}}
-
+        <script>
+            function approve(id,stat){
+                alert('Please Wait ! Sending Request ........')
+                $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+                $.ajax({
+                    type: "POST", url: "/admin/mentors/modify",
+                    data: {"id": id,"stat": stat,'rtype':6,},
+                    success: function (response) {
+                        location.reload();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        alert("Error Occurred, Try again!");
+                    }});
+            }
+        </script>
 
 @stop

@@ -403,6 +403,8 @@ return [
     'Arabic UserName'=>'Arabic User Name',
     'English UserName'=>'English User Name',
     'Subscribe Startups'=>'Subscribe Startups For Cycles',
-    'Forms'=>'Forms'
+    'Forms'=>'Forms',
+    'Latest 5 Cycle'=>'Latest 5 Cycles',
+    'Latest 5 Mentorship Requests'=>'Latest 5 Mentorship Requests'
 
 ];

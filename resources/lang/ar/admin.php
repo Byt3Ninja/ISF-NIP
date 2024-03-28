@@ -402,5 +402,7 @@ return [
     'Arabic UserName'=>'اسم المستخدم باللغة العربية',
     'English UserName'=>'اسم المستخدم باللغة الانجليزية',
     'Subscribe Startups'=>'الشركات المشاركة بالبرامج',
-    'Forms'=>'النماذج'
+    'Forms'=>'النماذج',
+    'Latest 5 Cycles'=>'أخر 5 برامج مضافة حديثا',
+    'Latest 5 Mentorship Requests'=>'أخر 5 طلبات الارشاد ( لم يتم الموافقة عليهم )'
 ];
