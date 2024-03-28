@@ -457,7 +457,7 @@
 																@endif
 															</td>
 															<td>
-																<button onclick="request({{$mentor->user_id}},'{{$mentor->user->{'first_name_'.$l} }} {{$mentor->user->{'last_name_'.$l} }}')" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-light-primary">
+																<button onclick="request({{$mentor->user_id}},'{{$mentor->user->{'first_name_'.$l} }} {{$mentor->user->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-light-primary">
 																	<i class="bx bxs-conversation"></i>
 																</button>
 															</td>
@@ -481,6 +481,7 @@
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
 		<div class="modal-content">
 			<form method="post" action="/admin/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+
 				<div class="modal-header">
 					<h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"> <i class="bx bx-x"></i> </button>
@@ -488,6 +489,8 @@
 				<div class="modal-body">
 					@csrf
 					<input type="hidden" name="mentorid" value="0" id="mentorid">
+					<input type="hidden" name="organization_id" id="addOrganizationID">
+					<input type="hidden" name="cycle_id" id="addCycleID">
 					<div>
 						<h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
 						<span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
@@ -530,6 +533,7 @@
 		</div>
 	</div>
 </div>
+
 @if( $notrated_men or $notrated_ser )
 	<div class="modal fade text-left" id="RequestRate" tabindex="-1" role="dialog" aria-labelledby="RequestRate" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -634,6 +638,7 @@
 		</div>
 	</div>
 @endif
+
 @stop
 @section('scripts')
 	<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
@@ -685,7 +690,7 @@
 			timepicker: true
 		});
 
-		function request(id,mentor) {
+		function request(id,mentor,organization_id=null,cycle_id=null) {
 			$('#mentorid').val(id);
 			$('#rname').html(mentor);
 			$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
@@ -710,6 +715,8 @@
 							}
 						});
 					} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
+					$('#addOrganizationID').val(organization_id);
+					$('#addCycleID').val(cycle_id);
 					$('#SendRequest').modal('show');
 				}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
 			});

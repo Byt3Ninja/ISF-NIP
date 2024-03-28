@@ -75,8 +75,11 @@ class MentorsController extends Controller
                 $fileName = $request->file('file_url');
                 $fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
             }
-            MentorshipRequest::insert(['mentor_id' => $request->mentorid, 'user_id' => Auth::id(), 'comment' => $request->notes,
-                'zoom_date' => $request->date, 'period' => $request->period, 'fileurl' => $fileName]);
+            MentorshipRequest::insert([
+                'mentor_id' => $request->mentorid, 'user_id' => Auth::id(), 'comment' => $request->notes,
+                'zoom_date' => $request->date, 'period' => $request->period, 'fileurl' => $fileName,
+                'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id
+            ]);
             // Notify Admin here
             event(new WebMessage('NewMent', Auth::user()->first_name_en .' '. Auth::user()->last_name_en));
             return back()->with(['msg' => 'Request successfully added','class'=>'success']);

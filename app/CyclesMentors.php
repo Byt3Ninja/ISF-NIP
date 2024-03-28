@@ -18,4 +18,9 @@ class CyclesMentors extends Model
     public function mrating(){
         return (MentorshipRequest::where('mentor_id',$this->user_id)->avg('rating'));
     }
+    public function cycle()
+    {
+        return $this->hasOne(Cycle::class,'id','cycle_id');
+    }
+
 }
