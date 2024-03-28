@@ -400,5 +400,7 @@ return [
     'Organization Manager English Name'=>'اسم مدير المؤسسة باللغة الانجليزية',
     'Organization Manager Arabic Name'=>'اسم مدير المؤسسة باللغة العربية',
     'Arabic UserName'=>'اسم المستخدم باللغة العربية',
-    'English UserName'=>'اسم المستخدم باللغة الانجليزية'
+    'English UserName'=>'اسم المستخدم باللغة الانجليزية',
+    'Subscribe Startups'=>'الشركات المشاركة بالبرامج',
+    'Forms'=>'النماذج'
 ];

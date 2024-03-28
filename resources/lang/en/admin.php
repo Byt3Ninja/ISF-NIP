@@ -402,5 +402,7 @@ return [
     'Organization Manager Arabic Name'=>'Organization Manager Arabic Name',
     'Arabic UserName'=>'Arabic User Name',
     'English UserName'=>'English User Name',
+    'Subscribe Startups'=>'Subscribe Startups For Cycles',
+    'Forms'=>'Forms'
 
 ];
