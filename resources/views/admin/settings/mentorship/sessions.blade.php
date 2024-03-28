@@ -2,27 +2,10 @@
 @section('style')
     <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-    <style>
-        /* Loader CSS */
-        .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none; /* Hide initially */
-        }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
 @stop
 @section('content')
-    <div id="loader" class="loader"></div>
+
 <!-- BEGIN: Content-->
     <div class="app-content content">
         <div class="content-overlay"></div>
@@ -360,13 +343,12 @@ str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->ratin
                     }});
             }
             function approve(id,stat){
-                $('#loader').show();
+                alert('Please Wait ! Sending Request ........')
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
                     type: "POST", url: "/admin/mentors/modify",
                     data: {"id": id,"stat": stat,'rtype':6,},
                     success: function (response) {
-                        $('#loader').hide();
                         location.reload();
                     },
                     error: function (error) {
