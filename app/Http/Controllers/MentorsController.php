@@ -95,8 +95,11 @@ class MentorsController extends Controller
           	$data = ['topic'=>$topic, "start_time"=>$request->date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
           	$zoom = $this->create($data);
           	if (!$zoom['success']) {return back()->with(['message2' => "Error, can't create zoom meeting."]);}
-            MentorshipRequest::insert(['mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
-                'admin_id' => Auth::id(), 'start_url' => $zoom['data']['start_url'], 'join_url' => $zoom['data']['join_url'], 'zoom_date' => $request->date, 'period' => $request->period]);
+            MentorshipRequest::insert([
+                'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
+                'admin_id' => Auth::id(), 'start_url' => $zoom['data']['start_url'], 'join_url' => $zoom['data']['join_url'],
+                'zoom_date' => $request->date, 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
+            ]);
             /// notify user via Mail
             /// Notify Mentor
                     $rname = User::findOrFail($request->mentorid);
@@ -127,12 +130,20 @@ class MentorsController extends Controller
     public function sessions(Request $request)
     {
         $this->preProcessingCheck('edit_cycles');
+        $organization_id=auth()->user()->organization_id;
+
         if ($request->show == 'all') {
-            $sessions = MentorshipRequest::get();
+            $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->where('organization_id',$organization_id);
+            })->get();
         } elseif ($request->show == 'approved')  {
-            $sessions = MentorshipRequest::whereNotNull('start_url')->get();
+            $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->where('organization_id',$organization_id);
+            })->whereNotNull('start_url')->get();
         } else {
-            $sessions = MentorshipRequest::whereNull('approved')->get();
+            $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->where('organization_id',$organization_id);
+            })->whereNull('approved')->get();
         }
         return view('admin.settings.mentorship.sessions', compact( 'sessions'));
     }

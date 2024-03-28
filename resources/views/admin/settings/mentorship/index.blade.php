@@ -186,7 +186,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <button onclick="add({{$company->user->id}})" type="button" class="btn btn-icon rounded-circle btn-light-success">
+                                    <button onclick="add({{$company->user->id}},{{ $company->cycledata->organization_id }},{{ $company->cycle }})" type="button" class="btn btn-icon rounded-circle btn-light-success">
                                         <i class="bx bx-plus"></i></button>
                                 </td>
                             </tr>
@@ -218,6 +218,8 @@
                     @csrf
                     <input type="hidden" name="mentorid" value="0" id="mentorid">
                     <input type="hidden" name="userid" value="0" id="userid">
+                    <input type="hidden" name="organization_id" id="addOrganizationID">
+                    <input type="hidden" name="cycle_id" id="addCycleID">
                     <div class="form-group" id="showdates">
                         <label>{{__('cycles.Date/Time')}}:</label>
                         <input class='date width-200 form-control' type="text" id="date" name="date" value="" required>
@@ -277,11 +279,13 @@
         </script>
         <script>
             $('.date').datetimepicker({timepicker:true,format:'Y-m-d H:i'});
-            function add(id) {
+            function add(id,organization_id,cycle_id) {
                 let mentor = $('input[name="mentor"]:checked').val();
                 if (mentor) {
                     $('#userid').val(id);
                     $('#mentorid').val(mentor);
+                    $('#addOrganizationID').val(organization_id);
+                    $('#addCycleID').val(cycle_id);
                     $('#SendRequest').modal('show');
                 } else {
                     alert("{{('cycles.Please select mentor first, and try again')}}!");
