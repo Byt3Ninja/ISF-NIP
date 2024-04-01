@@ -19,7 +19,18 @@
                                 <ol class="breadcrumb p-0 mb-0">
                                     <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
                                     </li>
-									<li class="breadcrumb-item active">{{__('cycles.New requests')}}
+									<li class="breadcrumb-item active">
+
+                                        @if(Request()->show=='all')
+                                            {{__('cycles.All requests')}}
+                                        @elseif(!Request()->show)
+                                            {{__('cycles.New requests only')}}
+                                        @elseif(Request()->show=='approved')
+                                            {{__('cycles.approved requests')}}
+                                        @elseif(Request()->show=='disapproved')
+                                            {{__('cycles.disapproved requests')}}
+                                        @endif
+
                                     </li>
                                 </ol>
                             </div>
@@ -61,12 +72,13 @@
     <div class="card">
         <div class="card-header">
             <div class="card-title">
-                @if (Request()->show)
-                    <a href="/admin/mentorship/sessions" class="btn btn-primary glow width-200">{{__('cycles.New requests only')}}</a>
-                @else
-                    <a href="/admin/mentorship/sessions?show=all" class="btn btn-primary glow width-200">{{__('cycles.All requests')}}</a>
-                    <a href="/admin/mentorship/sessions?show=approved" class="btn btn-success glow width-200">{{__('cycles.approved requests')}}</a>
-                @endif
+{{--                @if (Request()->show)--}}
+                <a href="/admin/mentorship/sessions?show=all" class="btn btn-light-primary glow width-200 {{ Request()->show=='all'?'active':'' }}">{{__('cycles.All requests')}}</a>
+                <a href="/admin/mentorship/sessions" class="btn btn-light-warning glow width-200 {{ !Request()->show?'active':'' }}">{{__('cycles.New requests only')}}</a>
+                <a href="/admin/mentorship/sessions?show=approved" class="btn btn-light-success glow width-200 {{ Request()->show=='approved'?'active':'' }}">{{__('cycles.approved requests')}}</a>
+                <a href="/admin/mentorship/sessions?show=disapproved" class="btn btn-light-danger glow width-200 {{ Request()->show=='disapproved'?'active':'' }}">{{__('cycles.disapproved requests')}}</a>
+                {{--                @else--}}
+{{--                @endif--}}
             </div>
         </div>
             <div class="card-body">
