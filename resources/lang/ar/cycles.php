@@ -59,7 +59,7 @@ return [
     'Title' => 'العنوان',
     'Save' => 'حفظ',
     'steps' => 'المراحل',
-    'Cycle Registered Users' => 'المستخدمين المسجلين بهذه البرنامج',
+    'Cycle Registered Users' => 'الشركات المسجلين بهذه البرنامج',
     'Company' => 'الشركة',
     'User/Title' => 'اسم المستخدم/ الوظيفة',
     'Mobile' => 'رقم الموبايل',

@@ -59,7 +59,7 @@ return [
     'Title' => 'Title',
     'Save' => 'Save',
     'steps' => 'Steps',
-    'Cycle Registered Users' => 'Cycle Registered Users',
+    'Cycle Registered Users' => 'Cycle Registered Startups',
     'Company' => 'Company',
     'User/Title' => 'User/Title',
     'Mobile' => 'Mobile',

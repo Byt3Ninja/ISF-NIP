@@ -177,7 +177,7 @@
                                                     <th class="text-center">{{__('cycles.Title')}}</th>
                                                     <th class="text-center">{{__('cycles.Valid from')}}</th>
                                                     <th class="text-center">{{__('cycles.Valid to')}}</th>
-                                                    <th class="text-center">{{__('cycles.Users')}}</th>
+                                                    <th class="text-center">{{__('admin.Startups')}}</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
