@@ -233,6 +233,7 @@
                     </li>
                     @endif
                 @endcan
+                @if(!Auth::user()->hasanyRole("organizationManager"))
                 @can('view_user')
                     <li class="{{Request::is('*users*')?'sidebar-group-active open':''}} nav-item">
                         <a href="#"><i class="menu-livicon" data-icon="users"></i><span class="menu-title"
@@ -346,5 +347,6 @@
                         </li>
                     @endif
                 @endcan
+                @endif
             </ul>
         </div>
