@@ -160,7 +160,7 @@ class UserController extends Controller
                 //store the image
                $img_url = $request->file('img_url');
                //get the path of the stores image
-               $img_url = $img_url->store('services', ['disk' => 'public_uploads']);
+               $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
                //update
                 $result = $user->update($request->except(['img_url']) + ['img_url' => $img_url]);
 

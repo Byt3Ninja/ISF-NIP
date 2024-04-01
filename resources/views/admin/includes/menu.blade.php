@@ -144,7 +144,7 @@
                                     > {{__('cycles.steps')}}</span></a>
                             </li>
                             <li class="{{Request::is('admin/cycles/*/registered')?'active':''}}"><a href="/admin/cycles/0/registered"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
-                                    > {{__('cycles.Users')}}</span></a>
+                                    > {{__('admin.Startups')}}</span></a>
                             </li>
                         </ul>
                     </li>
@@ -168,7 +168,19 @@
                             </li>
                             <li class="{{Request::is('admin/mentorship/view*')?'active':''}}"><a href="/admin/mentorship/view"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item" > {{__('admin.Manage')}}</span></a>
                             </li>
-                            <li class="{{Request::is('admin/mentorship/sessions*')?'active':''}}"><a href="/admin/mentorship/sessions"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item" > {{__('admin.Sessions')}}</span></a>
+{{--                            <li class="{{Request::is('admin/mentorship/sessions*')?'active':''}}"><a href="/admin/mentorship/sessions"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item" > {{__('admin.Sessions')}}</span></a>--}}
+{{--                            </li>--}}
+
+                            <li class="{{Request::is('admin/mentorship/sessions*')?'sidebar-group-active open':''}} nav-item">
+                                <a href="#"><i class="bx bx-slider"></i><span class="menu-title"
+                                    > {{__('admin.Sessions')}}</span></a>
+                                <ul class="menu-content">
+                                    <li class="{{Request::is('/admin/mentorship/sessions?show=all')?'active':''}}"><a href="/admin/mentorship/sessions?show=all"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item" > {{__('cycles.All requests')}}</span></a>
+                                    <li class="{{Request::is('/admin/mentorship/sessions')?'active':''}}"><a href="/admin/mentorship/sessions"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item" > {{__('cycles.New requests only')}}</span></a>
+                                    <li class="{{Request::is('/admin/mentorship/sessions?show=approved')?'active':''}}"><a href="/admin/mentorship/sessions?show=approved"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item" > {{__('cycles.approved requests')}}</span></a>
+                                    <li class="{{Request::is('/admin/mentorship/sessions?show=disapproved')?'active':''}}"><a href="/admin/mentorship/sessions?show=disapproved"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item" > {{__('cycles.disapproved requests')}}</span></a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </li>

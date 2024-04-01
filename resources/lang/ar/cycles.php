@@ -120,6 +120,7 @@ return [
     'New requests only' => 'الطلبات الجديدة فقط',
     'All requests' => 'كافة الطلبات',
     'approved requests' => 'الطلبات الموافق عليها',
+    'disapproved requests' => 'الطلبات المرفوضة',
     'Modify mentorship session' => 'تعديل بيانات الجلسة',
     'Approve & notify users' => 'الموافقة وإخطار المستخدمين',
     'Mentor' => 'المرشد',

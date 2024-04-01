@@ -140,6 +140,10 @@ class MentorsController extends Controller
             $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
             })->whereNotNull('start_url')->get();
+        } elseif ($request->show == 'disapproved')  {
+            $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->where('organization_id',$organization_id);
+            })->where('approved','No')->get();
         } else {
             $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);

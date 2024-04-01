@@ -73,7 +73,7 @@
                                             </select>
                                         <div class="input-group-append">
                                     <button class="btn btn-secondary" onclick="window.location.href='/admin/cycles/{{$id}}/registered'">
-                                                <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('cycles.Users')}}</span>
+                                                <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('admin.Startups')}}</span>
                                     </button>
                                     <button class="btn btn-primary" onclick="DoChange(1)">
                                         <i class="bx bx-edit"></i> <span class="align-middle ml-25">{{__('cycles.Edit')}}</span>

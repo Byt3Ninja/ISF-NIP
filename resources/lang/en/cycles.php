@@ -122,6 +122,7 @@ return [
     'New requests only' => 'New requests only',
     'All requests' => 'All requests',
     'approved requests' => 'approved requests',
+    'disapproved requests' => 'Disapproved requests',
     'Modify mentorship session' => 'Modify mentorship session',
     'Approve & notify users' => 'Approve & notify users',
     'Mentor' => 'Mentor',

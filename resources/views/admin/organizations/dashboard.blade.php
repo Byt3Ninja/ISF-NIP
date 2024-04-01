@@ -84,7 +84,7 @@
                         <div class="col-sm-3 col-12 dashboard-users-danger">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/mentorship/sessions">
+                                    <a href="/admin/training/sessions">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-light-warning mx-auto mb-50">
                                                 <i class="bx bxs-timer font-medium-5"></i>
@@ -99,7 +99,7 @@
                         <div class="col-sm-3 col-12 dashboard-users-danger">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/mentorship/sessions">
+                                    <a href="/admin/mentorship/sessions?show=all">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
                                                 <i class="bx bxs-help-circle font-medium-5"></i>
@@ -145,7 +145,7 @@
                         <div class="col-sm-6 col-12 dashboard-users-success">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/inbox">
+                                    <a href="/admin/show-builder">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-light mx-auto mb-50">
                                                 <i class="bx bxs-building font-medium-5"></i>
