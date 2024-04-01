@@ -249,7 +249,12 @@ class UserController extends Controller
 
     public function companies () {
         $this->preProcessingCheck('view_user');
-        $companies = Company::get();
+        $organization_id=auth()->user()->organization_id;
+        $companies = Company::when(!is_null($organization_id),function ($query) use($organization_id){
+            return $query->whereHas('cycledata',function ($q) use ($organization_id){
+                $q->where('organization_id',$organization_id);
+            });
+        })->get();
         return view('admin/users/companies')->with('companies',$companies);
     }
 }
