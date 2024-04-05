@@ -229,7 +229,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-12 col-12">
+                                            <div class="col-md-6 col-12">
                                                 <div class="form-label-group mt-75">
                                                     <input style="direction: ltr" type="email" class="form-control" id="email"
                                                            placeholder="{{ __('admin.E-mail') }} *"
@@ -267,7 +267,7 @@
                                             </div>
                                             <div class="col-md-12 col-12">
                                                 <div class="form-group">
-                                                    <label for="problem">{{ __('admin.problem')}}</label>
+                                                    <label for="problem">{{ __('admin.Problem Solution')}}</label>
                                                     <textarea class="form-control" id="problem" name='problem' placeholder="{{__('admin.problem')}}">{{($client->company)? $client->company->problem:old('problem')}}</textarea>
                                                 </div>
                                             </div>

@@ -406,6 +406,7 @@ return [
     'Subscribe Startups'=>'Subscribe Startups For Cycles',
     'Forms'=>'Forms',
     'Latest 5 Cycle'=>'Latest 5 Cycles',
-    'Latest 5 Mentorship Requests'=>'Latest 5 Mentorship Requests'
+    'Latest 5 Mentorship Requests'=>'Latest 5 Mentorship Requests',
+    'Problem Solution'=>'Problem Solution'
 
 ];
