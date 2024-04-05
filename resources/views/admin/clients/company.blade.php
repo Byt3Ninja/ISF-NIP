@@ -268,7 +268,7 @@
                                             <div class="col-md-12 col-12">
                                                 <div class="form-group">
                                                     <label for="problem">{{ __('admin.Problem Solution')}}</label>
-                                                    <textarea class="form-control" id="problem" name='problem' placeholder="{{__('admin.problem')}}">{{($client->company)? $client->company->problem:old('problem')}}</textarea>
+                                                    <textarea class="form-control" id="problem" name='problem' placeholder="{{ __('admin.Problem Solution')}}">{{($client->company)? $client->company->problem:old('problem')}}</textarea>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-12">
