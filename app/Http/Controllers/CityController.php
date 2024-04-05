@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\City;
+use App\State;
 use Illuminate\Http\Request;
 class CityController extends Controller
 {
@@ -14,6 +15,12 @@ class CityController extends Controller
       $cities = City::where('state_id', request()->input('state_id',0))->pluck(lang('name')." as neme",'id');
       return response()->json($cities);
     }
+    public function states()
+    {
+      $states = State::where('country_id', request()->input('country_id',0))->pluck(lang('name')." as name",'id');
+      return response()->json($states);
+    }
+
 
     /**
      * Show the form for creating a new resource.

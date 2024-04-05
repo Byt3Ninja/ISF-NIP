@@ -76,6 +76,7 @@ return [
 	'Organization Status' => 'Status',
 	'Edit the Company information' => 'Edit the Company information',
 	'State' => 'State',
+    'Country'=>'Country',
 	'City' => 'City',
 	'English Address' => 'English Address',
 	'Arabic Address' => 'Arabic Address',

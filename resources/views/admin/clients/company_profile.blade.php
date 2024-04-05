@@ -25,6 +25,9 @@
                             <div class="media-body pt-25">
                                 <h4 class="media-heading"><span class="users-view-name">{{ $company->{'name_'.$l} }}</span></h4>
                                 <h5>
+                                    {{ $company->country->{'name_'.$l} }}
+                                </h5>
+                                <h5>
                                     {{ $company->state->{'name_'.$l} }}
                                 </h5>
                                 <h5>

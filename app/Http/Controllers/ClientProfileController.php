@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Country;
 use App\Http\Requests\UpdateClientProfileRequest;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
 use App\UsersBio;
@@ -30,9 +31,11 @@ class ClientProfileController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit(){
+//        dd(auth()->id());
         try{
             $client = Auth::user();
-            return view('admin/clients/profile', compact('client'));
+            $countries = Country::all();
+            return view('admin/clients/profile', compact('client','countries'));
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);

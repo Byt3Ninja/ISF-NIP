@@ -74,6 +74,7 @@ return [
 	'Organization Status' => 'حالة المؤسسة',
 	'Edit the Company information' => 'تعديل بيانات الشركة',
 	'State' => 'المنطقة',
+    'Country'=>'الدولة',
 	'City' => 'المدينة',
 	'English Address' => 'مقر الشركة باللغة الانجليزية',
 	'Arabic Address' => 'مقر الشركة باللغة العربية',

@@ -82,19 +82,33 @@
                                             @php
                                                 if($client->company) {$stateID = $client->company->state_id;} else {$stateID=0;}
                                             @endphp
-                                            <div class="col-md-6 col-12">
+                                            <div class="col-md-4 col-12">
+                                                <div class="form-group">
+                                                    <label for="state_id">{{ __('admin.Country')}}</label>
+
+                                                    <select class="form-control" required
+                                                            id="country_id" name='country_id'>
+                                                        <option value="">{{ __('admin.Country')}}</option>
+                                                        @foreach($countries as $country)
+                                                            <option value="{{$country->id}}" {{($country->id==$client->country_id)? 'selected':''}}>{{$country->{'name_'.$l} }}</option>
+                                                        @endforeach
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-12">
                                                 <div class="form-group">
                                                     <label for="state_id">{{ __('admin.State')}} *</label>
                                                         <select class="form-control" required
                                                             id="state_id" name='state_id'>
                                                             <option value="">{{ __('admin.State')}}</option>
                                                             @foreach($states as $state)
-                                                                <option value="{{$state->id}}" {{($state->id==$stateID)? 'selected':''}}>{{$state->$name}}</option>
+                                                                <option value="{{$state->id}}"  {{($state->id==$stateID)? 'selected':''}}>{{$state->$name}}</option>
                                                             @endforeach
                                                         </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 col-12">
+                                            <div class="col-md-4 col-12">
                                                 <div class="form-group">
                                                     <label for="city_id">{{ __('admin.City')}} *</label>
                                                         <select class="form-control" required
@@ -125,7 +139,7 @@
                                                     }
                                                 }
                                             @endphp
-                                            <div class="col-md-6 col-12">
+                                            <div class="col-md-12 col-12">
                                                 <div class="form-group">
                                                     <label for="sector">{{ __('admin.Sector')}} *</label>
                                                     <select id="selectsector" class="form-control" required onchange="ssector(this.options[this.selectedIndex].value)" name='sector'>
@@ -397,32 +411,63 @@
 <script>
 $(document).ready(function() {
   	$('#est_date').datetimepicker({timepicker:false,format:'Y-m-d'});
-    $('#state_id').change(function() {
-        var $city = $('#city_id');
-        var currentCity = '{{ ($client->company)? $client->company->city_id:0 }}';
-        var selected = '';
-
-        $.ajax({
-            url: "{{ route('cities.index') }}",
-            data: {
-                state_id: $(this).val()
-            },
-            success: function(data) {
-                $city.html('<option value="" >{{ __('admin.City')}}</option>');
-                $.each(data, function(id, value) {
-                    if(currentCity == id){
-                        selected = 'selected';
-                    }else{
-                        selected = '';
-                    }
-
-                    $city.append('<option value="'+id+' '+selected+'">'+value+'</option>');
-                });
-                $('#city').show(150);
-            }
-        });
+    getStates($('#country_id').val());
+    $('#country_id').change(function () {
+        getStates($(this).val());
+    });
+    $('#state_id').change(function () {
+        getCities($(this).val());
     });
 });
+function getStates(country_id){
+    var $state = $('#state_id');
+    var currentState = '{{ $client->company->state_id }}';
+    var selected = '';
+    $.ajax({
+        url: "{{ route('get_states_by_country') }}",
+        data: {
+            country_id: country_id
+        },
+        success: function (data) {
+            $state.html('<option value="" >{{ __('admin.State')}}</option>');
+            $.each(data, function (id, value) {
+                // selected = '';
+                if (currentState === id) {
+                    selected = 'selected';
+                    getCities(id)
+                } else {
+                    selected = '';
+                }
+                $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
+                $('#city_id').html('<option value="" >{{ __('admin.City')}}</option>');
+            });
+            $('#state').show(150);
+        }
+    });
+}
+function getCities(state_id){
+    var $city = $('#city_id');
+    var currentCity = '{{ $client->company->city_id }}';
+    var selected = '';
+    $.ajax({
+        url: "{{ route('cities.index') }}",
+        data: {
+            state_id: state_id
+        },
+        success: function(data) {
+            $city.html('<option value="" >{{ __('admin.City')}}</option>');
+            $.each(data, function(id, value) {
+                if(currentCity == id){
+                    selected = 'selected';
+                }else{
+                    selected = '';
+                }
+                $city.append('<option value="'+id+'" '+selected+' >'+value+'</option>');
+            });
+            $('#city').show(150);
+        }
+    });
+}
 </script>
 <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
 <script>
@@ -438,5 +483,6 @@ $(document).ready(function() {
             }
         }
     }
+
 </script>
 @stop
