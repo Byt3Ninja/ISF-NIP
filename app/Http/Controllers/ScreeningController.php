@@ -180,7 +180,10 @@ class ScreeningController extends Controller
         }
         $judges = User::join('screenings', 'user_id', 'id')->where('step_id', $id)->get();
         $form = null;
-        if ($cstep) {$form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();}
+        if ($cstep) {
+            $form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->first();
+        }
+//        dd( $form);
         $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
         return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs'));
     }
