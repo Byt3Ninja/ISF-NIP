@@ -231,12 +231,13 @@
 
                                             <div class="col-md-6 col-12">
                                                 <div class="form-label-group mt-75">
+                                                    <label for="email">{{ __('admin.E-mail') }} *</label>
                                                     <input style="direction: ltr" type="email" class="form-control" id="email"
                                                            placeholder="{{ __('admin.E-mail') }} *"
                                                            value="{{($client->company)? $client->company->email:old('email')}}"
                                                            name="email"
                                                            required autocomplete="new-email">
-                                                    <label for="email">{{ __('admin.E-mail') }} *</label>
+
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-12">
