@@ -136,7 +136,7 @@
                                                     <div class="form-group">
                                                         <select name="state[]" class="select2 form-control" multiple="multiple">
                                                             @foreach(App\State::get() as $type)
-                                                                <option value="{{$type->id}}">{{$type->{'name_'.$l} }}</option>
+                                                                <option value="{{$type->id}}">{{$type->{'name_'.$l}  }} - {{ $type->country->{'name_'.$l} }}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
