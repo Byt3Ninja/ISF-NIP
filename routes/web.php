@@ -47,7 +47,7 @@ Route::get('event/{id}','IndexController@event');
 Route::post('eventregister','IndexController@eventregister');
 
 Auth::routes(['verify' => true]);
-Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],function(){
+Route::group(['prefix' => 'admin','middleware'=>['auth', 'verified']],function(){
 ####################### Overall System Admin Routes ###############
 	// All Logged users
 	Route::get('/', 'HomeController@index')->name('admin');
