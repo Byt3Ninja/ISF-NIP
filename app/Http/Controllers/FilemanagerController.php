@@ -10,7 +10,7 @@ class FilemanagerController extends Controller
     public function index() {
         if (Auth::user()->can('manage_myfiles')){
             return view('admin.filemanager');}
-            else {return redirect('admin');}
+            else {return redirect('dashboard');}
     }
     public function showfile($id,$filename) {
         if (Auth::id() == $id || Auth::user()->can('view_allfiles')) {
@@ -27,7 +27,7 @@ class FilemanagerController extends Controller
     public function allfiles() {
         if (Auth::user()->can('manage_myfiles')){
             return view('admin.filemanager');}
-        else {return redirect('admin');}
+        else {return redirect('dashboard');}
     }
     public function trainingfile($filename) {
             $storagePath = storage_path('app/training/files/' . $filename);
@@ -42,7 +42,7 @@ class FilemanagerController extends Controller
             $storagePath = storage_path('app/users/' . $id . '/' . $filename);
             return response()->file($storagePath);
         } else {
-            return redirect('admin');
+            return redirect('dashboard');
         }
     }
 }

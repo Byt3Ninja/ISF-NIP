@@ -114,7 +114,7 @@ class MessengerController extends Controller
     public function savemessage(Request $request) {
         $cuser = Auth::user();
 	    if ($request->type==1) {
-            if (!$request->users) { return redirect('/admin')->with(['msg' => 'MessageError', 'class' => 'danger']);}
+            if (!$request->users) { return redirect('/dashboard')->with(['msg' => 'MessageError', 'class' => 'danger']);}
             foreach ($request->users as $key=>$rec) {
                 $new = new Messenger();
                 $new->sender = $cuser->id;
@@ -135,7 +135,7 @@ class MessengerController extends Controller
                 /// End of send
             }
         } elseif ($request->type==2) {
-            if (!$request->mentors) { return redirect('/admin')->with(['msg' => 'MessageError', 'class' => 'danger']);}
+            if (!$request->mentors) { return redirect('/dashboard')->with(['msg' => 'MessageError', 'class' => 'danger']);}
             foreach ($request->mentors as $key=>$rec) {
                 $new = new Messenger();
                 $new->sender = $cuser->id;
@@ -168,7 +168,7 @@ class MessengerController extends Controller
             $new->Save();
             event(new WebMessage('mymsg', $name));
         }
-        return redirect('/admin')->with(['msg' => 'MessageSent', 'class' => 'success']);
+        return redirect('/dashboard')->with(['msg' => 'MessageSent', 'class' => 'success']);
     }
 
 

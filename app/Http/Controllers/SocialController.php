@@ -22,7 +22,7 @@
       return redirect()->to('/login')->withErrors(['social'=>'error']);
       }
       	auth()->login($user);
-        return redirect()->to('/admin');
+        return redirect()->to('/dashboard');
     }
 
     function createUser($getInfo,$provider){
@@ -67,7 +67,7 @@
         			}
             if($finduser){
               	auth()->login($finduser);
-                return redirect('/admin');
+                return redirect('/dashboard');
             }else{
                 $name = explode(" ",$guser->name);
                 $newUser = User::create([
