@@ -18,7 +18,7 @@
                             <div class="card-header">
 @can ('manage_log')
 @if (count($auditLogs)>0)           <a href="/reports/audit-log" class="btn btn-primary glow">{{__('audit.Download all records')}}</a>
-                                    <a href="#" id="deleteAll" data-url="/admin/audit-logs/0" class="btn btn-danger glow">{{__('audit.Empty Log table')}}</a> @endif
+                                    <a href="#" id="deleteAll" data-url="/dashboard/audit-logs/0" class="btn btn-danger glow">{{__('audit.Empty Log table')}}</a> @endif
 @endcan
                             </div>
                             <div class="card-content">

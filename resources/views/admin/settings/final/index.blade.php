@@ -63,7 +63,7 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select step from list to manage')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/admin/'+this.options[this.selectedIndex].value+'/final','_self');">
+                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/final','_self');">
                                                 @foreach($steps as $step)
                                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} ({{__('cycles.Cycle')}} "{{$step->cycle->title}}" - {{__('cycles.Start')}} {{$step->from->format('d-m')}}) - {{ optional(optional($step->cycle)->organization)->name }}</option>
                                                 @endforeach
@@ -75,7 +75,7 @@
                                     <button class="btn btn-danger" onclick="DoChange(2)" >
                                         <i class="bx bx-trash"></i> <span class="align-middle ml-25">{{__('cycles.Delete')}}</span>
                                     </button>
-                                            <button class="btn btn-secondary" onclick="window.location.href='/admin/final/results/{{$id}}'">
+                                            <button class="btn btn-secondary" onclick="window.location.href='/dashboard/final/results/{{$id}}'">
                                                 <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('cycles.Results')}}</span>
                                             </button>
                                     <a class="btn btn-success" href="/dashboard/cycles/{{$cstep->cycle_id??null}}">
@@ -108,7 +108,7 @@
 
     <div class="col-xl-12 col-md-12 col-sm-12">
                         <div class="card">
-                            <form action="/admin/final/update" method="POST" enctype="multipart/form-data">
+                            <form action="/dashboard/final/update" method="POST" enctype="multipart/form-data">
                                 {!! csrf_field() !!}
                             <div class="card-header border-bottom">
                                 <h4>{{$cstep->title}} <small class="text-muted"> {{__('cycles.from')}} {{$cstep->from->format('d-m')}} {{__('cycles.to')}} {{$cstep->to->format('d-m-Y')}}</small></h4>
@@ -288,7 +288,7 @@
 <div class="modal fade text-left" id="addzoom" tabindex="-1" role="dialog" aria-labelledby="addzoom" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
-            <form method="post" action="/admin/final/addzoom" enctype="multipart/form-data" autocomplete="off">
+            <form method="post" action="/dashboard/final/addzoom" enctype="multipart/form-data" autocomplete="off">
                 <div class="modal-header bg-primary">
                     <h4 class="modal-title white">{{__('cycles.Add new zoom session')}}</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -343,11 +343,11 @@
                     if (confirm('{{__('cycles.sure delete step')}}'))
                     {
                         $.ajax({
-                            type: "POST", url: "/admin/cycles/modify",
+                            type: "POST", url: "/dashboard/cycles/modify",
                             data: {"stepid": {{$cstep->id??0}}, "type" : 6,},
                             success: function (response) {
                                 console.log(response);
-                                location.href = '/admin/final';
+                                location.href = '/dashboard/final';
                             },
                             error: function (error) {
                                 console.log(error);

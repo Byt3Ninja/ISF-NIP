@@ -42,7 +42,7 @@
                                             @endif
 
                                                 @if(count($fields) > 0)
-                                        <form method="post" action="/admin/cycles/save" enctype="multipart/form-data">
+                                        <form method="post" action="/dashboard/cycles/save" enctype="multipart/form-data">
                                             {!! csrf_field() !!}
                                             <div class="row">
                                                 <div class="col-md-12">

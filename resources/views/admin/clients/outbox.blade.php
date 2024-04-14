@@ -128,7 +128,7 @@
         function OpenModal(id){
             $.ajax({
                 type: "GET",
-                url: "/admin/openmsg",
+                url: "/dashboard/openmsg",
                 data:{"id":id,"type":2},
                 success: function (response) {
                     $('#from').text("'"+ response['subject'] +"' {{__('To')}}: " + response['first_name_{{$l=='ar'?'ar':'en'}}'] + " "  + response['last_name_{{$l=='ar'?'ar':'en'}}']);
@@ -142,7 +142,7 @@
             });
         }
     function delme(id) {
-        var url = '/admin/messages/delete';
+        var url = '/dashboard/messages/delete';
         var id = id;
         var token = '{{ csrf_token() }}';
         Swal.fire({

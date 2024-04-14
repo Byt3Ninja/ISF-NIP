@@ -124,7 +124,7 @@
 						<i class="bx bx-x"></i>
 					</button>
 				</div>
-				<form method="post" action="/admin/send_message" enctype="multipart/form-data">
+				<form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
 					{!! csrf_field() !!}
 					<input type="hidden" name="sender" value="{{Auth::user()->id}}">
 					<input type="hidden" name="receiver" id="rid" value="">
@@ -236,7 +236,7 @@
 		let id =  $('#resid').val();
 		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
 		$.ajax({
-			type: "POST", url: "/admin/requests/approve",
+			type: "POST", url: "/dashboard/requests/approve",
 			data: {"id": id, "stat": stat, "comment": comment },
 			success: function (response) {
 				location.reload();

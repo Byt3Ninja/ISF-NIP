@@ -109,7 +109,7 @@ class TrainingController extends Controller
                 }
             }
             TrainingContent::updateOrCreate(['id'=>$id],['title'=>$request->title,'content'=>$request->tcontent,'training_id'=>$request->training_id,'user_id'=>Auth::id(),'arr'=>$arr]);
-            return redirect('/admin/training/all/'. $request->training_id)->with(['class'=>'success','message'=>'Saved']);
+            return redirect('/dashboard/training/all/'. $request->training_id)->with(['class'=>'success','message'=>'Saved']);
         }
         return back()->withInput()->with(['class'=>'danger','message'=>'Error']);
     }
@@ -133,7 +133,7 @@ class TrainingController extends Controller
         $this->preProcessingCheck('edit_cycles');
         $fileName = $request->file('file');
         $fileName = $fileName->store('photos', ['disk' => 'TrainingDisk']);
-        return response()->json(['location'=> '/admin/training/'.$fileName]); //env('APP_URL'). full URL
+        return response()->json(['location'=> '/dashboard/training/'.$fileName]); //env('APP_URL'). full URL
     }
     public function my($id,Request $request) {
             $step = Auth::user()->company->step;

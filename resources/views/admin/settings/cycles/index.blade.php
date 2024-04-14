@@ -66,13 +66,13 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select cycle from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="ccycle" class="select form-control" onchange="window.open('/admin/cycles/'+this.options[this.selectedIndex].value,'_self');">
+                                            <select id="ccycle" class="select form-control" onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($cycles as $cycle)
                                                     <option value="{{$cycle->id}}" data-organization="{{ $cycle->organization_id }}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.Start')}} {{$cycle->start->format('d-m')}} {{__('cycles.to')}} {{$cycle->end->format('d-m')}}) - {{ optional($cycle->organization)->name }}</option>
                                                 @endforeach
                                             </select>
                                         <div class="input-group-append">
-                                    <button class="btn btn-secondary" onclick="window.location.href='/admin/cycles/{{$id}}/registered'">
+                                    <button class="btn btn-secondary" onclick="window.location.href='/dashboard/cycles/{{$id}}/registered'">
                                                 <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('admin.Startups')}}</span>
                                     </button>
                                     <button class="btn btn-primary" onclick="DoChange(1)">
@@ -415,7 +415,7 @@
                 for (let i = 0; i<badges.length-1; ++i) {badges[i].innerText=i+1;let id = badges[i].id.split('-');ids.push(id[0]);}
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
-                    type: "POST", url: "/admin/cycles/modify",
+                    type: "POST", url: "/dashboard/cycles/modify",
                     data: {
                         "steps": ids,
                         "type" : 4,
@@ -434,7 +434,7 @@
             switch (set) {
                 case 1:
                     $.ajax({
-                        type: "POST", url: "/admin/cycles/modify",
+                        type: "POST", url: "/dashboard/cycles/modify",
                         data: {
                             "cycleid": cycle,
                         },
@@ -442,7 +442,7 @@
                             $('#title').val(response.title);$('#description').val(response.description);
                             $('#cycleid').val(cycle);$('#type').val(1);$('#start').val(response.start);$('#end').val(response.end);
                             $('#organization_id').val(response.organization_id)
-                            if (response.private) {$('#customSwitch3').attr('checked','checked');$('#cyclelink').html('{{__('cycles.Join URL')}}');$('#cyclelink').attr('href', '/admin/cycles/view/' + response.id + '?id=' + response.private);}
+                            if (response.private) {$('#customSwitch3').attr('checked','checked');$('#cyclelink').html('{{__('cycles.Join URL')}}');$('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);}
                             $('#cycleForm').modal('show');
                         },
                         error: function (error) {
@@ -461,13 +461,13 @@
                     if (confirm('{{__('cycles.sure delete cycle')}}?')) {
                     if (confirm('{{__('cycles.cant undo')}}'))
                     {$.ajax({
-                            type: "POST", url: "/admin/cycles/modify",
+                            type: "POST", url: "/dashboard/cycles/modify",
                             data: {
                                 "cycleid": cycle, "type" : 3,
                             },
                             success: function (response) {
                                 console.log(response);
-                                location.href = '/admin/cycles';
+                                location.href = '/dashboard/cycles';
                             },
                             error: function (error) {
                                 console.log(error);
@@ -519,7 +519,7 @@
             switch (set) {
                 case 1:
                     $.ajax({
-                        type: "POST", url: "/admin/cycles/modify",data: {"type" : 7,"sid" : id,"cycleid" : 0,},
+                        type: "POST", url: "/dashboard/cycles/modify",data: {"type" : 7,"sid" : id,"cycleid" : 0,},
                         success: function (response)
                         {
                             step = response.stype;
@@ -581,11 +581,11 @@
                     let ids = [];
                     for (let a = 0; a<badges.length; ++a) {badges[a].innerText=a+1;let id = badges[a].id.split('-');ids.push(id[0]);}
                     $.ajax({
-                        type: "POST", url: "/admin/cycles/modify",
+                        type: "POST", url: "/dashboard/cycles/modify",
                         data: {"stepid": id,"steps": ids, "type" : 6,},
                         success: function (response) {
                             console.log(response);
-                            location.href = '/admin/cycles/'+$('#ccycle').find(":selected").val();
+                            location.href = '/dashboard/cycles/'+$('#ccycle').find(":selected").val();
                         },
                         error: function (error) {
                             console.log(error);

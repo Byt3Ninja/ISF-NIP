@@ -4,7 +4,7 @@
 @stop
 @section('title', __('audit.Portal Log') )
 @section('subTitle', __('audit.Log record'))
-@section('index_url', '/admin/audit-logs')
+@section('index_url', '/dashboard/audit-logs')
 @section('content')
 <!-- BEGIN: Content-->
 <div class="app-content content">

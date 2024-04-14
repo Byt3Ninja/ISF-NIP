@@ -9,7 +9,7 @@
 @section('content')
 
 @if(!Auth::user()->bio)
-{!!redirect('/admin/myProfile#bio')!!}
+{!!redirect('/dashboard/myProfile#bio')!!}
 @endif
 @php
     $s_latest = \App\Service::orderBy('created_at','DESC')->take(5)->get();
@@ -356,7 +356,7 @@
 <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
-            <form method="post" action="/admin/mentors/modify" enctype="multipart/form-data" autocomplete="off">
+            <form method="post" action="/dashboard/mentors/modify" enctype="multipart/form-data" autocomplete="off">
             <div class="modal-header">
                 <h4 class="modal-title">{{__('dashboard.Add new')}} <span id="rname"></span></h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -430,7 +430,7 @@
             //delete
             if (confirm("{{__('dashboard.sure del schedule')}}")) {
                 $.ajax({
-                    type: "POST", url: "/admin/mentors/modify",
+                    type: "POST", url: "/dashboard/mentors/modify",
                     data: {"id": id, "rtype": type,},
                     success: function (response) {
                         location.reload();
@@ -443,7 +443,7 @@
             }} else if (type===2) {
             //Enable-disable
             $.ajax({
-                type: "POST", url: "/admin/mentors/modify",
+                type: "POST", url: "/dashboard/mentors/modify",
                 data: {"id": id, "rtype": type,"stat":stat},
                 success: function (response) {
                     location.reload();},
@@ -454,7 +454,7 @@
         } else if (type===1) {
             // Edit current
             $.ajax({
-                type: "POST", url: "/admin/mentors/modify",
+                type: "POST", url: "/dashboard/mentors/modify",
                 data: {"id": id, "rtype": type,},
                 success: function (response) {
                     switchtypes(response.type);

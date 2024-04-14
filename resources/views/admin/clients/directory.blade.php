@@ -202,7 +202,7 @@
         function openservice(id) {
             $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
             $.ajax({
-                type: "POST", url: "/admin/directory/"+id,
+                type: "POST", url: "/dashboard/directory/"+id,
                 success: function (response) {
                     let img ='<img class="img-fluid" src="/191014/'+response.img_url+'">';
                     $('#title').text(response.name_{{$l}});
@@ -229,7 +229,7 @@
             }
             console.log(id+'-'+comment);
             $.ajax({
-                type: "POST", url: "/admin/servicerequest",
+                type: "POST", url: "/dashboard/servicerequest",
                 data: {"id": id, "comment": comment,"datetime":datetime, },
                 success: function (response) {
                     console.log(response);

@@ -64,7 +64,7 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select step from list to manage')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/admin/'+this.options[this.selectedIndex].value+'/screening','_self');">
+                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/screening','_self');">
                                                 @foreach($steps as $step)
                                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} ({{__('cycles.Cycle')}} "{{$step->cycle->title}}" -
                                                         {{__('cycles.Start')}} {{$step->from->format('d-m')}}) - {{ optional(optional($step->cycle)->organization)->name }}</option>
@@ -77,7 +77,7 @@
                                     <button class="btn btn-danger" onclick="DoChange(2)" >
                                         <i class="bx bx-trash"></i> <span class="align-middle ml-25">{{__('cycles.Delete')}}</span>
                                     </button>
-                                            <button class="btn btn-secondary" onclick="window.location.href='/admin/screening/results/{{$id}}'">
+                                            <button class="btn btn-secondary" onclick="window.location.href='/dashboard/screening/results/{{$id}}'">
                                                 <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('cycles.Results')}}</span>
                                             </button>
                                     <a class="btn btn-success" href="/dashboard/cycles/{{$cstep->cycle_id}}">
@@ -136,7 +136,7 @@
                 <hr style="margin:-10px 0 25px 0;">
                 <div class="card-body">
                     <div class="card-text">
-                        <form action="/admin/screening/update" method="POST" enctype="multipart/form-data">
+                        <form action="/dashboard/screening/update" method="POST" enctype="multipart/form-data">
                             {!! csrf_field() !!}
                             <input type="hidden" value="{{$cstep->id}}" name="step">
                             <input type="hidden" name="fid" value="{{$form->id??''}}">
@@ -336,11 +336,11 @@
                     if (confirm('{{__('cycles.Are you sure, Delete current step and all its contents?')}}'))
                     {
                         $.ajax({
-                            type: "POST", url: "/admin/cycles/modify",
+                            type: "POST", url: "/dashboard/cycles/modify",
                             data: {"stepid": {{$cstep->id??0}}, "type" : 6,},
                             success: function (response) {
                                 console.log(response);
-                                location.href = '/admin/screening';
+                                location.href = '/dashboard/screening';
                             },
                             error: function (error) {
                                 console.log(error);
@@ -353,7 +353,7 @@
         function openusers(panel) {
             $('#pid').val(panel);
             $('#cpanel').text(panel);
-            let theurl = "/admin/screening/get/{{$form->id??0}}/{{$cstep->id??0}}/"+panel;
+            let theurl = "/dashboard/screening/get/{{$form->id??0}}/{{$cstep->id??0}}/"+panel;
             $.ajax({
                 type: "GET", url:theurl ,
                 success: function (response) {

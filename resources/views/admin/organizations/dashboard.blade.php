@@ -188,7 +188,7 @@
                                                         <td class="text-center"> {{ $cycle->end->format('d-m-Y') }} </td>
                                                         <td class="text-center">
                                                             <button class="btn btn-light-info"
-                                                                    onclick="window.location.href='/admin/cycles/{{$cycle->id}}/registered'">
+                                                                    onclick="window.location.href='/dashboard/cycles/{{$cycle->id}}/registered'">
                                                                 <i class="bx bxs-user"></i>
                                                             </button>
                                                         </td>
@@ -303,7 +303,7 @@
                 // prompt('Please Wait ! Sending Request ........')
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
-                    type: "POST", url: "/admin/mentors/modify",
+                    type: "POST", url: "/dashboard/mentors/modify",
                     data: {"id": id,"stat": stat,'rtype':6,},
                     success: function (response) {
                         location.reload();

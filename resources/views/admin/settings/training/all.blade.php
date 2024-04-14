@@ -53,7 +53,7 @@
                     <div class="card-body">
                         <span>{{__('cycles.Select course')}}</span>
                         <fieldset class="input-group">
-                            <select id="ccycle" class="select form-control" onchange="window.open('/admin/training/all/'+this.options[this.selectedIndex].value,'_self');">
+                            <select id="ccycle" class="select form-control" onchange="window.open('/dashboard/training/all/'+this.options[this.selectedIndex].value,'_self');">
                                 @foreach($courses as $course)
                                     <option value="{{$course->id}}" {{$course->id==$id?'selected':''}}>{{$course->title}}</option>
                                 @endforeach
@@ -135,7 +135,7 @@
 <div class="modal fade text-left" id="edittraining" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
-            <form method="post" action="/admin/training/store" enctype="multipart/form-data">
+            <form method="post" action="/dashboard/training/store" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h4 class="modal-title">{{__('cycles.Modify training course')}} </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -213,7 +213,7 @@
                     $('#edittraining').modal('show');
                 } else {
                     $.ajax({
-                        type: "GET", url: "/admin/training/edit/"+id,
+                        type: "GET", url: "/dashboard/training/edit/"+id,
                         success: function (response) {
                         $('#id').val(id);
                         $('#title').val(response.title);
@@ -230,8 +230,8 @@
             }}
 
             function deleteme(id,type) {
-                let url = '/admin/training/delcontent/'+id;
-                if (type===1) {url = '/admin/training/delete/'+id;}
+                let url = '/dashboard/training/delcontent/'+id;
+                if (type===1) {url = '/dashboard/training/delete/'+id;}
                 let token = '{{ csrf_token() }}';
                 Swal.fire({
                     title: "{{__('admin.SureDelete')}}",
@@ -251,7 +251,7 @@
                                         '{{__('admin.Course Deleted')}}.',
                                         'success'
                                     );
-                                    if (type===1) {window.location.href='/admin/training/all';} else {location.reload();}
+                                    if (type===1) {window.location.href='/dashboard/training/all';} else {location.reload();}
                                 }
                             ).fail(
                                 function(error) {

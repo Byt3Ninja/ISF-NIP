@@ -35,7 +35,7 @@
                                 </div>
                                 <div class="card-content">
                                     <div class="card-body">
-                                        <form class="form" id="basicForm" action= "/admin/updateevent/{{$getevents->id}}" method="post" enctype="multipart/form-data">
+                                        <form class="form" id="basicForm" action= "/dashboard/updateevent/{{$getevents->id}}" method="post" enctype="multipart/form-data">
                							 {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="row">

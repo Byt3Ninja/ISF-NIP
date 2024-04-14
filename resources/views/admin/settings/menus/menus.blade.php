@@ -90,7 +90,7 @@
 														<td>{{$getMenusA->target}}</td>
                                                         <td><a href="/dashboard/edit_menu/{{$getMenusA->id}}"><i class="bx
 bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/admin/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
+                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/dashboard/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
 													@else
 													 <td class="primary">{{$getMenusA->order}}- <b>{{ $getMenusA->ar_title}}</b></td>
@@ -98,7 +98,7 @@ bx-edit-alt"> </i></a> |
                                                         <td>{{$getMenusA->url}}</td>
 														<td>{{$getMenusA->target}}</td>
                                                         <td><a href="/edit_menu/{{$getMenusA->id}}"><i class="bx bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/admin/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
+                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/dashboard/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
 													@foreach($getMenusA->children->sortby('order') as $subMenuItem)
 													<tr>
@@ -107,7 +107,7 @@ bx-edit-alt"> </i></a> |
                                                         <td>{{$subMenuItem->url}}</td>
 														<td>{{$subMenuItem->target}}</td>
                                                         <td><a href="/edit_menu/{{$subMenuItem->id}}"><i class="bx bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/admin/delete_menu/'.$subMenuItem->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
+                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/dashboard/delete_menu/'.$subMenuItem->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
 
 													@endforeach
@@ -153,7 +153,7 @@ bx-edit-alt"> </i></a> |
 														<td>{{$getMenusA->target}}</td>
                                                         <td><a href="/dashboard/edit_menu/{{$getMenusA->id}}"><i class="bx
 bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/admin/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
+                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/dashboard/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
                             	@endforeach
 								<tr><td colspan="5" class="text-bold-600">{{__('settings.FooterLineMenu')}}</td></tr>
@@ -165,7 +165,7 @@ bx-edit-alt"> </i></a> |
 														<td>{{$getMenusA->target}}</td>
                                                         <td><a href="edit_menu/{{$getMenusA->id}}"><i class="bx
 bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/admin/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
+                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/dashboard/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
                             	@endforeach
                                                 </tbody>

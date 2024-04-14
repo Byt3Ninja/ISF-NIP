@@ -78,7 +78,7 @@ $title=App\BuilderForm::findOrFail($id);
                                     <button class="btn btn-primary">
                                         <i class="bx bx-paper-plane" aria-hidden="true"></i> {{$l=='ar'?'ارسال':'Submit'}}
                                     </button>
-                                    <button class="btn btn-warning" type="button" onclick="location.href='/admin/show-builder/{{ $id }}';">
+                                    <button class="btn btn-warning" type="button" onclick="location.href='/dashboard/show-builder/{{ $id }}';">
                                         <i class="bx bx-arrow-back" aria-hidden="true"></i> {{$l=='ar'?'تحرير':'Edit'}}
                                     </button>
                                 </div>

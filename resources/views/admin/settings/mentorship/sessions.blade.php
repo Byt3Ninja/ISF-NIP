@@ -210,7 +210,7 @@ str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->ratin
 <div class="modal fade text-left" id="ModifyRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
-            <form method="post" action="/admin/mentorship/modify" enctype="multipart/form-data">
+            <form method="post" action="/dashboard/mentorship/modify" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h4 class="modal-title">{{__('cycles.Modify mentorship session')}} </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -290,7 +290,7 @@ str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->ratin
             function edit(id) {
                     $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                     $.ajax({
-                        type: "POST", url: "/admin/mentorship/session",
+                        type: "POST", url: "/dashboard/mentorship/session",
                         data: {"id": id,},
                         success: function (response) {
                         $('#sid').val(id);
@@ -310,7 +310,7 @@ str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->ratin
             function mentor(id,name,rating) {
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
-                    type: "POST", url: "/admin/mentors/modify",
+                    type: "POST", url: "/dashboard/mentors/modify",
                     data: {"id": id, "rtype": 5,},
                     success: function (response) {
                         $('#mentorstable tr').remove();
@@ -358,7 +358,7 @@ str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->ratin
                 // alert('Please Wait ! Sending Request ?')
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
-                    type: "POST", url: "/admin/mentors/modify",
+                    type: "POST", url: "/dashboard/mentors/modify",
                     data: {"id": id,"stat": stat,'rtype':6,},
                     success: function (response) {
                         location.reload();

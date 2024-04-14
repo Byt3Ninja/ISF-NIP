@@ -99,7 +99,7 @@
                     <p><b>{{__('messages.Date')}}: </b> <span id="date"></span></p>
                     <p><b>{{__('messages.Message')}}:</b></p>  <span id="message"></span>
                 </div>
-                <form method="post" action="/admin/send_message" enctype="multipart/form-data">
+                <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
                     <div class="modal-body">
                         <p><b>{{__('messages.SendReply')}}:</b></p>
                         {!! csrf_field() !!}
@@ -163,7 +163,7 @@
     function OpenModal(id){
         $.ajax({
             type: "GET",
-            url: "/admin/openmsg",
+            url: "/dashboard/openmsg",
             data:{"id":id,"type":1},
             success: function (response) {
                 var trrow = $("#" + 'read' + id);

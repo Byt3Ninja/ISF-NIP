@@ -62,13 +62,13 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select cycle from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="ccycle" class="select form-control" onchange="window.open('/admin/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
+                                            <select id="ccycle" class="select form-control" onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
                                                 @foreach($cycles as $cycle)
                                                     <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.Start')}} {{$cycle->start->format('d-m')}}) - {{ optional($cycle->organization)->name }} </option>
                                                 @endforeach
                                             </select>
                                         <div class="input-group-append">
-                                    <button class="btn btn-secondary" onclick="window.location.href='/admin/cycles/{{$id}}'">
+                                    <button class="btn btn-secondary" onclick="window.location.href='/dashboard/cycles/{{$id}}'">
                                                 <i class="bx bx-spreadsheet"></i> <span class="align-middle ml-25">{{__('cycles.steps')}}</span>
                                     </button>
                                     <button class="btn btn-primary" onclick="DoChange(1)">
@@ -274,14 +274,14 @@
             switch (set) {
                 case 1:
                     $.ajax({
-                        type: "POST", url: "/admin/cycles/modify",
+                        type: "POST", url: "/dashboard/cycles/modify",
                         data: {
                             "cycleid": cycle,
                         },
                         success: function (response) {
                             $('#title').val(response.title);$('#description').val(response.description);
                             $('#cycleid').val(cycle);$('#type').val(1);$('#start').val(response.start);$('#end').val(response.end);
-                            if (response.private) {$('#customSwitch3').attr('checked','checked');$('#cyclelink').html('{{__('cycles.Join URL')}}');$('#cyclelink').attr('href', '/admin/cycles/view/' + response.id + '?id=' + response.private);}
+                            if (response.private) {$('#customSwitch3').attr('checked','checked');$('#cyclelink').html('{{__('cycles.Join URL')}}');$('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);}
                             $('#cycleForm').modal('show');
                         },
                         error: function (error) {
@@ -299,13 +299,13 @@
                 case 3:
                     if (confirm('{{__('cycles.sure delete cycle')}}'))
                     {$.ajax({
-                        type: "POST", url: "/admin/cycles/modify",
+                        type: "POST", url: "/dashboard/cycles/modify",
                         data: {
                             "cycleid": cycle, "type" : 3,
                         },
                         success: function (response) {
                             console.log(response);
-                            location.href = '/admin/cycles';
+                            location.href = '/dashboard/cycles';
                         },
                         error: function (error) {
                             console.log(error);
@@ -328,14 +328,14 @@
             if (confirm("{{__('cycles.sure change step')}}")) {
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
-                    type: "POST", url: "/admin/screening/changestep",
+                    type: "POST", url: "/dashboard/screening/changestep",
                     data: {
                         "company": company,
                         "step" : step,
                     },
                     success: function (response) {
                         console.log(response);
-                        location.href = '/admin/cycles/{{$id}}/registered';
+                        location.href = '/dashboard/cycles/{{$id}}/registered';
                     },
                     error: function (error) {
                         console.log(error);

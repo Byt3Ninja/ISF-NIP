@@ -68,7 +68,7 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select cycle from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/admin/mentorship/view/'+this.options[this.selectedIndex].value,'_self');">
+                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/mentorship/view/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($cycles as $cycle)
                                                     <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.from')}} {{$cycle->start->format('d-M')}} {{__('cycles.to')}} {{$cycle->end->format('d-M-Y')}}) - {{ optional($cycle->organization)->name }}</option>
                                                 @endforeach
@@ -207,7 +207,7 @@
 <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
-            <form method="post" action="/admin/mentorship/add" enctype="multipart/form-data" autocomplete="off">
+            <form method="post" action="/dashboard/mentorship/add" enctype="multipart/form-data" autocomplete="off">
                 <div class="modal-header">
                     <h4 class="modal-title">{{__('cycles.Add new mentorship session')}} <span id="rname"></span></h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -294,7 +294,7 @@
             function mentor(id,name,rating) {
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
-                    type: "POST", url: "/admin/mentors/modify",
+                    type: "POST", url: "/dashboard/mentors/modify",
                     data: {"id": id, "rtype": 5,},
                     success: function (response) {
                         $('#mentorstable tr').remove();

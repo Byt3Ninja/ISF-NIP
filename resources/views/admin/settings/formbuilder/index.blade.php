@@ -36,7 +36,7 @@
                                 <span>{{__('builder.Select from')}}:</span>
                                 <fieldset class="form-group">
                                     <div style="width: 70%;float: {{$l=='ar'?'right':'left'}};">
-                                    <select class="select2 form-control" id="FormSelect"  onchange="window.open('/admin/show-builder/'+this.options[this.selectedIndex].value,'_self');">
+                                    <select class="select2 form-control" id="FormSelect"  onchange="window.open('/dashboard/show-builder/'+this.options[this.selectedIndex].value,'_self');">
                                         @foreach($builderForms as $form)
                                         <option value="{{$form->id}}" {{$title->id==$form->id?"selected":""}}>
                                             {{ $form->form_name }} {{ !is_null($form->organization)?' - '.$form->organization->name:'' }}
@@ -172,7 +172,7 @@
             });
             $.ajax({
                 type: "POST",
-                url: "/admin/builder/" + set,
+                url: "/dashboard/builder/" + set,
                 data: {
                     "id": id,
                     "title" : title,
@@ -180,7 +180,7 @@
                 },
                 success: function (response) {
                     // console.log(response);
-                    location.href = '/admin/show-builder/'+  response;
+                    location.href = '/dashboard/show-builder/'+  response;
                 },
                 error:function(error){
                     // console.log(error);
@@ -189,7 +189,7 @@
             });
         }
         window._rav = window._rav || {};
-        _rav.save_route = "{{ '/admin/form/'.$title->id.'/save-form' }}";
+        _rav.save_route = "{{ '/dashboard/form/'.$title->id.'/save-form' }}";
         _rav.boardData = @json($builder_data);
     </script>
     <script src="{{ asset('js/formbuilder.js') }}"></script>

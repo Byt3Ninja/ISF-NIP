@@ -63,7 +63,7 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select cycle from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/admin/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
+                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($cycles as $cycle)
                                                     <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} {{__('cycles.from')}} {{$cycle->start->format('d-m')}} {{__('cycles.to')}} {{$cycle->end->format('d-m-Y')}} - {{ optional($cycle->organization)->name }}</option>
                                                 @endforeach
@@ -107,7 +107,7 @@
                         </div>
                         <div class="card-body">
                             <div class="card ">
-                                <form action= "/admin/mentorship/assign/{{$id}}" method="POST" enctype="multipart/form-data">
+                                <form action= "/dashboard/mentorship/assign/{{$id}}" method="POST" enctype="multipart/form-data">
                                     {!! csrf_field() !!}
                                     <input type="hidden" name="cycle" value="{{$id}}">
                                 <div class="table-responsive">

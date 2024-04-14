@@ -59,7 +59,7 @@
                                                 <br>
                                                 <h5 class="primary">{{__('cycles.answer submit')}}:</h5>
                                                 <br>
-                                        <form method="post" action="/admin/final/save" enctype="multipart/form-data">
+                                        <form method="post" action="/dashboard/final/save" enctype="multipart/form-data">
                                             {!! csrf_field() !!}
                                             <div class="row">
                                                 <div class="col-md-12">

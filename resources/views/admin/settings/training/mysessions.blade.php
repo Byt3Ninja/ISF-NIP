@@ -151,7 +151,7 @@
         function ShowDetails(training) {
             $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
             $.ajax({
-                type: "POST", url: "/admin/trainings/getdsc/"+training,
+                type: "POST", url: "/dashboard/trainings/getdsc/"+training,
                 success: function (response) {
                     $('#dsctitle').html(response.title);
                     $('#dsc').html(response.dsc);

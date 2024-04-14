@@ -32,7 +32,7 @@
                                 </div>
                                 <div class="card-content">
                                     <div class="card-body">
-<form class="form-horizontal form-bordered" id="basicForm" action= "/admin/store_menu" method="POST" enctype="multipart/form-data">
+<form class="form-horizontal form-bordered" id="basicForm" action= "/dashboard/store_menu" method="POST" enctype="multipart/form-data">
                							 {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="row">

@@ -51,7 +51,7 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <form method="post" action="/admin/sendmessage" enctype="multipart/form-data">
+                                    <form method="post" action="/dashboard/sendmessage" enctype="multipart/form-data">
                                         <div class="modal-body">
                                             {!! csrf_field() !!}
                                     <h4 class="card-title d-flex align-items-center">

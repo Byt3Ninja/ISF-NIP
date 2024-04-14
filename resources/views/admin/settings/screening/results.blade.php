@@ -64,13 +64,13 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select screening from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/admin/screening/results/'+this.options[this.selectedIndex].value,'_self');">
+                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/screening/results/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($steps as $step)
                                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} ({{__('cycles.Cycle')}} "{{$step->cycle->title}}" - {{__('cycles.Start')}} {{$step->from->format('d-m')}}) - {{ optional(optional($step->cycle)->organization)->name }}</option>
                                                 @endforeach
                                             </select>
                                         <div class="input-group-append">
-                                            <button class="btn btn-secondary" onclick="window.location.href='/admin/cycles/{{$cstep->cycle_id}}/registered'">
+                                            <button class="btn btn-secondary" onclick="window.location.href='/dashboard/cycles/{{$cstep->cycle_id}}/registered'">
                                                 <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('cycles.Users')}}</span>
                                             </button>
                                     <a class="btn btn-primary" href="/dashboard/{{$id}}/screening">
@@ -266,21 +266,21 @@
                 if (confirm("{{__('cycles.sure change step')}}")) {
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
-                    type: "POST", url: "/admin/screening/changestep",
+                    type: "POST", url: "/dashboard/screening/changestep",
                     data: {
                         "company": company,
                         "step" : step,
                     },
                     success: function (response) {
                         console.log(response);
-                        location.href = '/admin/screening/results/{{$id}}';
+                        location.href = '/dashboard/screening/results/{{$id}}';
                     },
                     error: function (error) {
                         console.log(error);
                         alert("Error Occurred, arrange failed");
                     }});
             } else {
-                location.href = '/admin/screening/results/{{$id}}';
+                location.href = '/dashboard/screening/results/{{$id}}';
             }}
     </script>
 @stop

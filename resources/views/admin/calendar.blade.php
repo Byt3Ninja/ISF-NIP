@@ -89,7 +89,7 @@
                                 var end = start;
                                 var allDay= 1;
                                 $.ajax({
-                                    url: SITEURL + "/admin/calendarAjax",
+                                    url: SITEURL + "/dashboard/calendarAjax",
                                     data: {
                                         title: title,
                                         start: start,
@@ -119,7 +119,7 @@
                     AllEvents: {
                         text: '{{$l=='ar'?'الأحداث':'Events!'}}',
                         click: function() {
-                           window.open('/admin/allevents','_Self')
+                           window.open('/dashboard/allevents','_Self')
                         }
                     }
                 },
@@ -128,7 +128,7 @@
                     center: 'title',
                     right: 'month,agendaWeek,agendaDay @can('manage_events') AllEvents @endcan '
                 },
-                events: SITEURL + "/admin/calendar",
+                events: SITEURL + "/dashboard/calendar",
                 eventTextColor:'#fff',
                 displayEventTime: true,
                 editable: false,
@@ -159,7 +159,7 @@
                         end = end.replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
                         @endif
                         $.ajax({
-                            url: SITEURL + "/admin/calendarAjax",
+                            url: SITEURL + "/dashboard/calendarAjax",
                             data: {
                                 title: title,
                                 start: start,
@@ -203,7 +203,7 @@
                         @endif
 
                     $.ajax({
-                        url: SITEURL + '/admin/calendarAjax',
+                        url: SITEURL + '/dashboard/calendarAjax',
                         data: {
                             title: event.title,
                             start: start,
@@ -236,7 +236,7 @@
                     @endif
 
                     $.ajax({
-                        url: SITEURL + '/admin/calendarAjax',
+                        url: SITEURL + '/dashboard/calendarAjax',
                         data: {
                             title: event.title,
                             start: start,
@@ -257,7 +257,7 @@
                         return false;
                     }
                     else if (event.calendarId==='c') {
-                        window.open('/admin/cycles/'+event.id, "_self");
+                        window.open('/dashboard/cycles/'+event.id, "_self");
                         return false;
                     }
                     else if (event.calendarId==='p') {
@@ -276,7 +276,7 @@
         function openmodal(modal,id) {
             $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
             $.ajax({
-                type: "POST", url: "/admin/calendar/view",data: {"type" : modal,"id" : id},
+                type: "POST", url: "/dashboard/calendar/view",data: {"type" : modal,"id" : id},
                 success: function (response) {
                     $('#title').html(response.title);
                     $('#body').html(response.body);
@@ -284,7 +284,7 @@
                     $('#end').html("<b>{{__('admin.End')}}: </b> "+ response.end);
                     if ( response.user_id === {{Auth::id()}} ) {
                         $('#edit').show();
-                        $('#edit').attr('href','/admin/calendar/'+id+'/edit')
+                        $('#edit').attr('href','/dashboard/calendar/'+id+'/edit')
                     }
                     $('#viewevent').modal('show');
                 },

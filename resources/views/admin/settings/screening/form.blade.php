@@ -75,7 +75,7 @@
                                                 </div>
                                             @endif
                                                 @if(count($answers) > 0)
-                                        <form method="post" action="/admin/screening/save" enctype="multipart/form-data">
+                                        <form method="post" action="/dashboard/screening/save" enctype="multipart/form-data">
                                             {!! csrf_field() !!}
                                             <input type="hidden" name="company_id" value="{{$answers->pluck(['company_id'])->first()}}" />
                                             <input type="hidden" name="form_id" value="{{$answers->pluck(['form_id'])->first()}}" />

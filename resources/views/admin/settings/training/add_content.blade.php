@@ -46,7 +46,7 @@
                                 </div>
                                 <div class="card-content">
                                     <div class="card-body">
-                                  	 <form class="form-horizontal form-bordered" id="basicForm" action= "/admin/training/storecontent" method="POST" enctype="multipart/form-data">
+                                  	 <form class="form-horizontal form-bordered" id="basicForm" action= "/dashboard/training/storecontent" method="POST" enctype="multipart/form-data">
                							 {!! csrf_field() !!}
                                          <input type="hidden" value="{{$id}}" name="training_id">
                                             <div class="form-body">

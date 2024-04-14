@@ -480,7 +480,7 @@
 <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
 		<div class="modal-content">
-			<form method="post" action="/admin/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+			<form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
 
 				<div class="modal-header">
 					<h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
@@ -543,7 +543,7 @@
 						<h4 class="modal-title primary">{{__('dashboard.Rate')}} {{__('dashboard.service')}}: "{{$notrated_ser->service->{'name_'.$l} }}" <span class="primary" id="rname"></span></h4>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close"> <i class="bx bx-x"></i> </button>
 					</div>
-					<form method="post" action="/admin/directory/{{$notrated_ser->id}}/rate" enctype="multipart/form-data" autocomplete="off">
+					<form method="post" action="/dashboard/directory/{{$notrated_ser->id}}/rate" enctype="multipart/form-data" autocomplete="off">
 						@csrf
 						<div class="modal-body">
 							<input type="hidden" name="rate" value="0" id="rate">
@@ -590,7 +590,7 @@
 						<h4 class="modal-title primary">{{__('dashboard.Rate mentorship session with')}} : {{$notrated_men->mentor->{'first_name_'.$l} }} {{$notrated_men->mentor->{'last_name_'.$l} }}<span class="primary" id="rname"></span></h4>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close"> <i class="bx bx-x"></i> </button>
 					</div>
-					<form method="post" action="/admin/mentorship/rate" enctype="multipart/form-data" autocomplete="off">
+					<form method="post" action="/dashboard/mentorship/rate" enctype="multipart/form-data" autocomplete="off">
 						@csrf
 						<div class="modal-body">
 							<input type="hidden" name="id" value="{{$notrated_men->id}}">
@@ -695,7 +695,7 @@
 			$('#rname').html(mentor);
 			$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
 			$.ajax({
-				type: "POST", url: "/admin/mentors/modify",
+				type: "POST", url: "/dashboard/mentors/modify",
 				data: {"id": id, "rtype": 5,},
 				success: function (response) {
 					$('#SendRequest li').remove();

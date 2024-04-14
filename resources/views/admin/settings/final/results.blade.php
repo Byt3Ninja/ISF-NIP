@@ -62,14 +62,14 @@
                                     <div class="card-body">
                                         <span>{{__('cycles.Select step from list to manage')}}</span>
                                         <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/admin/final/results/'+this.options[this.selectedIndex].value,'_self');">
+                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/final/results/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($steps as $step)
                                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} ({{__('cycles.Cycle')}} "{{$step->cycle->title}}" - {{__('cycles.Start')}} {{$step->from->format('d-m')}}) - {{ optional(optional($step->cycle)->organization)->name }}</option>
                                                 @endforeach
                                             </select>
                                             <div class="input-group-append">
 
-                                                <button class="btn btn-primary" onclick="window.location.href='/admin/{{$id}}/final'">
+                                                <button class="btn btn-primary" onclick="window.location.href='/dashboard/{{$id}}/final'">
                                                     <i class="bx bx-cog"></i> <span class="align-middle ml-25">{{__('cycles.Manage')}}</span>
                                                 </button>
                                                 <a class="btn btn-success" href="/dashboard/cycles/{{$cstep->cycle_id??null}}">
@@ -80,7 +80,7 @@
                                         <br>
                                         <span>{{__('cycles.Select registered company')}}:</span>
                                         <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/admin/final/results/{{$id}}?c='+this.options[this.selectedIndex].value,'_self');">
+                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/final/results/{{$id}}?c='+this.options[this.selectedIndex].value,'_self');">
                                                 <option value="0">{{__('cycles.Select Company')}}</option>
                                                 @foreach($companies as $company)
                                                     <option value="{{$company->id}}" {{$c?$company->id == $c->id?'selected':'' :''}}>{{ $company->{'name_'.$l} }} ({{__('cycles.Added By')}} {{$company->user->{'first_name_'.$l} }} {{$company->user->{'last_name_'.$l} }})</option>

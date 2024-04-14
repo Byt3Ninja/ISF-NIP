@@ -63,13 +63,13 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select training from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/admin/training/results/'+this.options[this.selectedIndex].value,'_self');">
+                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/training/results/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($sessions as $step)
                                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} - {{$step->step->title}} ({{__('cycles.Cycle')}} "{{$step->step->cycle->title}}" - {{__('cycles.Start')}} {{$step->step->from->format('d-m')}}) - {{ optional(optional(optional($step->step)->cycle)->organization)->name }}</option>
                                                 @endforeach
                                             </select>
                                         <div class="input-group-append">
-                                            <button class="btn btn-secondary" onclick="window.location.href='/admin/cycles/{{$csession->step->cycle->id}}/registered'">
+                                            <button class="btn btn-secondary" onclick="window.location.href='/dashboard/cycles/{{$csession->step->cycle->id}}/registered'">
                                                 <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('cycles.Users')}}</span>
                                             </button>
                                     <a class="btn btn-success" href="/dashboard/cycles/{{$csession->step->cycle->id}}">
@@ -212,21 +212,21 @@
                 if (confirm("{{__('cycles.sure change step')}}")) {
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                 $.ajax({
-                    type: "POST", url: "/admin/screening/changestep",
+                    type: "POST", url: "/dashboard/screening/changestep",
                     data: {
                         "company": company,
                         "step" : step,
                     },
                     success: function (response) {
                         console.log(response);
-                        location.href = '/admin/training/results/{{$id}}';
+                        location.href = '/dashboard/training/results/{{$id}}';
                     },
                     error: function (error) {
                         console.log(error);
                         alert("Error Occurred, arrange failed");
                     }});
             } else {
-                location.href = '/admin/training/results/{{$id}}';
+                location.href = '/dashboard/training/results/{{$id}}';
             }}
     </script>
 @stop

@@ -337,7 +337,7 @@
                     <i class="bx bx-x"></i>
                 </button>
             </div>
-            <form method="post" action="/admin/send_message" enctype="multipart/form-data">
+            <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
                 {!! csrf_field() !!}
                 <input type="hidden" name="sender" value="{{Auth::user()->id}}">
                 <input type="hidden" name="receiver" value="{{$user->id}}">

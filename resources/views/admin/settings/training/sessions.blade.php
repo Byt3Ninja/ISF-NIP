@@ -54,7 +54,7 @@
                     <div class="card-body">
                         <span>{{__('cycles.Select Step')}}</span>
                         <fieldset class="input-group">
-                            <select id="ccycle" class="select form-control" onchange="window.open('/admin/training/sessions/'+this.options[this.selectedIndex].value,'_self');">
+                            <select id="ccycle" class="select form-control" onchange="window.open('/dashboard/training/sessions/'+this.options[this.selectedIndex].value,'_self');">
                                 @foreach($steps as $step)
                               	@php if($step->id==$id){$ccycle=$step->cycle->id;} @endphp
                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} ({{$step->cycle->title}}-{{__('cycles.Start')." ". $step->cycle->start->format('d-m')}}) - {{ optional(optional($step->cycle)->organization)->name }}</option>
@@ -158,7 +158,7 @@
 <div class="modal fade text-left" id="addsession" tabindex="-1" role="dialog" aria-labelledby="addsession" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" action="/admin/training/addsession" enctype="multipart/form-data" autocomplete="off">
+            <form method="post" action="/dashboard/training/addsession" enctype="multipart/form-data" autocomplete="off">
                 <div class="modal-header">
                     <h4 class="modal-title">{{__('cycles.Add new training session')}} </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -239,7 +239,7 @@
 <div class="modal fade text-left" id="editsession" tabindex="-1" role="dialog" aria-labelledby="editsession" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" action="/admin/training/editsession" enctype="multipart/form-data" autocomplete="off">
+            <form method="post" action="/dashboard/training/editsession" enctype="multipart/form-data" autocomplete="off">
                 <div class="modal-header">
                     <h4 class="modal-title">{{__('cycles.Edit training session')}} </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -335,7 +335,7 @@
         <script>
             $('#datetime,#enddate,#edatetime,#eenddate').datetimepicker({timepicker:true,format:'Y-m-d H:i'});
             function deleteme(id) {
-                let url = '/admin/training/delsession/'+id;
+                let url = '/dashboard/training/delsession/'+id;
                 let token = '{{ csrf_token() }}';
                 Swal.fire({
                     title: "{{__('admin.SureDelete')}}",
@@ -354,7 +354,7 @@
                                         '{{__('admin.Deleted')}}!',
                                         '{{__('admin.Course Deleted')}}.',
                                         'success');
-                                    window.location.href='/admin/training/sessions/{{$id}}';
+                                    window.location.href='/dashboard/training/sessions/{{$id}}';
                                 }).fail(function(error) {console.log(error);});
                         }else{console.log('Canceled')}});    }
 
@@ -371,7 +371,7 @@
                 function editme(training) {
                     $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                     $.ajax({
-                        type: "POST", url: "/admin/training/session", data: {"id": training,},
+                        type: "POST", url: "/dashboard/training/session", data: {"id": training,},
                         success: function (response) {
                             let type = response.type;
                             $('#ctype').hide();

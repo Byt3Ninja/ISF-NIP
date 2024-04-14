@@ -35,7 +35,7 @@
                                 </div>
                                 <div class="card-content">
                                     <div class="card-body">
-                                  	 <form class="form-horizontal form-bordered" id="basicForm" action= "/admin/storeevent" method="post" enctype="multipart/form-data">
+                                  	 <form class="form-horizontal form-bordered" id="basicForm" action= "/dashboard/storeevent" method="post" enctype="multipart/form-data">
                							 {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="row">

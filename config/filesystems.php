@@ -63,19 +63,19 @@ return [
         'UsersDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads'),
-            'url' => env('APP_URL').'/admin/uploads',
+            'url' => env('APP_URL').'/dashboard/uploads',
             'visibility' => 'private',
         ],
         'TrainingDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/training'),
-            'url' => env('APP_URL').'/admin/training',
+            'url' => env('APP_URL').'/dashboard/training',
             'visibility' => 'private',
         ],
         'PrivateDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/users'),
-            'url' => env('APP_URL').'/admin/private',
+            'url' => env('APP_URL').'/dashboard/private',
             'visibility' => 'private',
         ],
         's3' => [

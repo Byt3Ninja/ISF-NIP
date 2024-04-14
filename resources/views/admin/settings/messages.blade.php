@@ -86,7 +86,7 @@
                                                         <td>
                                                             <a href="javascript:void(0);" onclick="makeread({{$getmsg->id}});"><i id="ico{{$getmsg->id}}" class='bx bxs-{{$getmsg->read?"inbox":"envelope"}}'> </i></a> |
                                                             <a data-toggle="modal" id="msg" data-target="#MessageModal" onclick="OpenModal({{$getmsg->id}})" href="javascript:void(0);"><i class="bx bxs-show"> </i></a> |
-                                   <a onclick="return confirm('{{__('Are you sure?')}}');" href="{{URL::to('/admin/deletemsg/'.$getmsg->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
+                                   <a onclick="return confirm('{{__('Are you sure?')}}');" href="{{URL::to('/dashboard/deletemsg/'.$getmsg->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
 												@endforeach
                                                 </tbody>
@@ -207,7 +207,7 @@
             ico.attr('class','bx bxs-inbox');
             $.ajax({
                 type: "GET",
-                url: "/admin/openonemsg/" + id,
+                url: "/dashboard/openonemsg/" + id,
                 success: function (response) {
                     console.log(response);
                     $('#Title').text(response[0]['subject'] + " {{__('messages.From')}}: " + response[0]['name']);
@@ -224,7 +224,7 @@
                     } else {
                         $('#replyby').html('');
                     }
-                    $('#DelMe').attr('href','/admin/deletemsg/'+id)
+                    $('#DelMe').attr('href','/dashboard/deletemsg/'+id)
                 },
                 error:function(error){
                     console.log(error);

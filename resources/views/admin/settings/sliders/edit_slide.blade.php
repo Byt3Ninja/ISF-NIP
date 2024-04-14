@@ -32,7 +32,7 @@
                                 </div>
                                 <div class="card-content">
                                     <div class="card-body">
-                                        <form class="form" id="basicForm" action= "/admin/update_slide/{{$getslider->id}}" method="POST" enctype="multipart/form-data">
+                                        <form class="form" id="basicForm" action= "/dashboard/update_slide/{{$getslider->id}}" method="POST" enctype="multipart/form-data">
                							 {!! csrf_field() !!}
                                             <div class="form-body">
                                                 <div class="row">

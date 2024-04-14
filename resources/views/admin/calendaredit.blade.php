@@ -3,7 +3,7 @@
     <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 @stop
 @section('title', __('admin.Calendar') )
-@section('index_url', '/admin/calendar' )
+@section('index_url', '/dashboard/calendar' )
 @section('subTitle', __('admin.Edit event'))
 @section('content')
 <!-- BEGIN: Content-->
@@ -41,7 +41,7 @@
                                             </div>
                                         </div>
                                     @endif
-                                    <form method="post" action="/admin/calendar/{{$cal->id}}/update">
+                                    <form method="post" action="/dashboard/calendar/{{$cal->id}}/update">
                                         {!! csrf_field() !!}
                                         <div class="row">
                                             <div class="col-md-12">
