@@ -14,7 +14,7 @@
 							<h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.Services requests')}}</h5>
 							<div class="breadcrumb-wrapper col-12">
 								<ol class="breadcrumb p-0 mb-0">
-									<li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+									<li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
 									</li>
 									<li class="breadcrumb-item active">{{__('cycles.Show new requests')}}
 									</li>
@@ -33,7 +33,7 @@
 								<div class="card">
 									<div class="card-header"><br>
 										@if ($countold)
-										<a href="/admin/requests/old" class="btn btn-primary glow">{{__('cycles.Show old records')}}</a>
+										<a href="/dashboard/requests/old" class="btn btn-primary glow">{{__('cycles.Show old records')}}</a>
 											@endif
 									</div>
 									<div class="card-content">
@@ -60,10 +60,10 @@
 															<td>
 																@if( !empty( $rec->user->company ) )
 																	<div class="media align-items-center">
-																		<a class="media-left mr-50" href="/admin/companyProfile/{{$rec->user->company->id}}">
+																		<a class="media-left mr-50" href="/dashboard/companyProfile/{{$rec->user->company->id}}">
 																			<img src="/191014/{{$rec->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
 																		</a>
-																		<a href="/admin/companyProfile/{{$rec->user->company->id}}">
+																		<a href="/dashboard/companyProfile/{{$rec->user->company->id}}">
 																			<div class="media-body">
 																				<h6 class="media-heading mb-0">{{ $user }}</h6>
 																				<span class="font-small-2">{{$rec->user->{'title_'.$l} }}
@@ -103,7 +103,7 @@
 											<h4 class="card-title">{{__('cycles.No Received Requests')}}</h4>
 											@if ($countold)
 												<br>
-												<a href="/admin/requests/old" class="btn btn-primary glow">{{__('cycles.Show old records')}}</a>
+												<a href="/dashboard/requests/old" class="btn btn-primary glow">{{__('cycles.Show old records')}}</a>
 											@endif
 										</div>
 									</div>

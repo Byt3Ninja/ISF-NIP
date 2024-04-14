@@ -15,7 +15,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.Screening')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('cycles.Manage Screening')}}
                                     </li>
@@ -80,7 +80,7 @@
                                             <button class="btn btn-secondary" onclick="window.location.href='/admin/screening/results/{{$id}}'">
                                                 <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('cycles.Results')}}</span>
                                             </button>
-                                    <a class="btn btn-success" href="/admin/cycles/{{$cstep->cycle_id}}">
+                                    <a class="btn btn-success" href="/dashboard/cycles/{{$cstep->cycle_id}}">
                                          <i class="bx bx-pencil"></i> <span class="align-middle ml-25">{{__('cycles.Cycle')}}</span>
                                     </a>
                                         </div>
@@ -215,7 +215,7 @@
                 <h4 class="card-title">{{ __('cycles.Error') }}</h4>
             </div>
                 <div class="card-body">
-                    {{__('cycles.No records screening from')}} <a href="/admin/cycles">{{__('cycles.Cycles')}}</a>.
+                    {{__('cycles.No records screening from')}} <a href="/dashboard/cycles">{{__('cycles.Cycles')}}</a>.
                 </div>
         </div>
     @endif

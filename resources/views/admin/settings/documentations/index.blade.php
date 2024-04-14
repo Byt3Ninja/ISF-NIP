@@ -67,7 +67,7 @@
                                                         <td>{{$doc->menu_en}}</td>
                                                         <td>{{__($doc->role) }}</td>
                                                         <td>
-                                                            <a title="View" target="_blank" href="/admin/documentation/{{$doc->id}}" class="btn btn-icon rounded-circle btn-light-primary">
+                                                            <a title="View" target="_blank" href="/dashboard/documentation/{{$doc->id}}" class="btn btn-icon rounded-circle btn-light-primary">
                                                                 <i class="bx bx-show"></i></a>
                                                             @can('manage_documentation')
                                                             <a title="Edit" href="{{route('documentation.edit', ['id' => $doc->id])}}" class="btn btn-icon rounded-circle btn-light-success">

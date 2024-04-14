@@ -9,7 +9,7 @@
 <div class="main-menu menu-fixed menu-{{session('layout')=='light'?'light':'dark'}} menu-accordion menu-shadow" data-scroll-to-active="true">
     <div class="navbar-header">
         <ul class="nav navbar-nav flex-row">
-            <li class="nav-item mr-auto"><a class="navbar-brand" href="/admin">
+            <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
                     <div class="brand-logo"></div>
                     <h2 class="brand-text mb-0">{{config('app.name')}}</h2>
                 </a></li>
@@ -20,7 +20,7 @@
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
             @foreach($menu as $item)
-            <li class="{{$doc->id==$item->id?'active':''}}"><a href="/admin/documentation/view/{{$item->id}}">
+            <li class="{{$doc->id==$item->id?'active':''}}"><a href="/dashboard/documentation/view/{{$item->id}}">
                     <i class="bx {{$item->id==1?'bx-home':'bx-bookmark'}}"></i><span class="menu-title" >{{ $item->{'menu_'.$l} }}</span></a>
             </li>
              @endforeach
@@ -36,7 +36,7 @@
                         <h5 class="content-header-title float-left pr-1 mb-0">{{ $doc->{'menu_'.$l} }}</h5>
                         <div class="breadcrumb-wrapper">
                             <ol class="breadcrumb p-0 mb-0">
-                                <li class="breadcrumb-item active"><a href="/admin/documentation/view">الرئيسية</a>
+                                <li class="breadcrumb-item active"><a href="/dashboard/documentation/view">الرئيسية</a>
                                 </li>
                             </ol>
                         </div>
@@ -49,7 +49,7 @@
             <div class="card">
                 <div class="card-header">
                     @if ($doc->id==1)
-                    <a href="/admin">
+                    <a href="/dashboard">
                         <h2> <img src="/images/logo/admin-logo.png"> VI-Portal v1</h2></a>
                     <h4 id="basic-forms" class="card-title">{{$l=='ar'?'الإصدار الأول من برنامج الحاضنة الإفتراضية':'Virtual incubation portal version 1.0'}}
                     </h4>

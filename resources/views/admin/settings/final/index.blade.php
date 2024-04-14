@@ -15,7 +15,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.Final Screening')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('cycles.Manage Final Screening')}}
                                     </li>
@@ -78,7 +78,7 @@
                                             <button class="btn btn-secondary" onclick="window.location.href='/admin/final/results/{{$id}}'">
                                                 <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('cycles.Results')}}</span>
                                             </button>
-                                    <a class="btn btn-success" href="/admin/cycles/{{$cstep->cycle_id??null}}">
+                                    <a class="btn btn-success" href="/dashboard/cycles/{{$cstep->cycle_id??null}}">
                                          <i class="bx bx-pencil"></i> <span class="align-middle ml-25">{{__('cycles.Cycle')}}</span>
                                     </a>
                                         </div>
@@ -93,7 +93,7 @@
                                         <h4 class="card-title">{{ __('cycles.Error') }}</h4>
                                     </div>
                                         <div class="card-body">
-                                            {{__('cycles.No records Add final')}} <a href="/admin/cycles">{{__('cycles.Cycle')}}</a>.
+                                            {{__('cycles.No records Add final')}} <a href="/dashboard/cycles">{{__('cycles.Cycle')}}</a>.
                                         </div>
 
                                 </div>
@@ -159,10 +159,10 @@
                                                                        name='users[]' value="{{$company->id}}">
                                                                 <label for="checkbox{{$company->id}}">
                                                             <div class="media align-items-center">
-                                                                <a class="media-left mr-50" href="/admin/companyProfile/{{$company->id}}">
+                                                                <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
                                                                     <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                 </a>
-                                                                <a href="/admin/companyProfile/{{$company->id}}">
+                                                                <a href="/dashboard/companyProfile/{{$company->id}}">
                                                                     <div class="media align-items-center">
                                                                         {{$company->{'name_'.$l} }}
                                                                     </div>
@@ -173,10 +173,10 @@
                                                         </td>
                                                         <td>
                                                             <div class="media align-items-center">
-                                                                <a class="media-left mr-50" href="/admin/users/{{$company->user->id}}/edit">
+                                                                <a class="media-left mr-50" href="/dashboard/users/{{$company->user->id}}/edit">
                                                                     <img src="/191014/{{$company->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                 </a>
-                                                                <a href="/admin/users/{{$company->user->id}}/edit">
+                                                                <a href="/dashboard/users/{{$company->user->id}}/edit">
                                                                     <div class="media-body">
                                                                         <h6 class="media-heading mb-0">{{$company->user->{'first_name_'.$l} }} {{$company->user->{'last_name_'.$l} }}</h6>
                                                                         <span class="font-small-2">{{$company->user->{'title_'.$l} }}</span>

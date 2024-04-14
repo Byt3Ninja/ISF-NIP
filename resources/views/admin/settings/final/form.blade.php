@@ -48,7 +48,7 @@
                                                             <a class="media-left mr-50">
                                                                 <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
-                                                            <a href="/admin/companyProfile/{{$company->id}}">
+                                                            <a href="/dashboard/companyProfile/{{$company->id}}">
                                                                 <div class="media align-items-center">
                                                                     {{$company->{'name_'.$l} }}
                                                                 </div>

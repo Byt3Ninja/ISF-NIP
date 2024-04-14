@@ -15,7 +15,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.Cycles Mentors')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('cycles.Manage Cycle mentors')}}
                                     </li>
@@ -72,10 +72,10 @@
                                                     @endif
                                             </select>
                                         <div class="input-group-append">
-                                    <a class="btn btn-success" href="/admin/cycles/{{$id}}">
+                                    <a class="btn btn-success" href="/dashboard/cycles/{{$id}}">
                                          <i class="bx bx-pencil"></i> <span class="align-middle ml-25">{{__('cycles.Manage Cycle')}}</span>
                                     </a>
-                                            <a class="btn btn-primary" href="/admin/mentorship/view/{{$id}}">
+                                            <a class="btn btn-primary" href="/dashboard/mentorship/view/{{$id}}">
                                                 <i class="bx bx-chat"></i> <span class="align-middle ml-25">{{__('cycles.Manage sessions')}}</span>
                                             </a>
                                         </div>

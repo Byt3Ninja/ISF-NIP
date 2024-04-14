@@ -22,7 +22,7 @@
                                             {{__('admin.Company')}}
                                         </dt>
                                         <dd class="col-sm-9">
-                                            <a class="media-left mr-50" href="/admin/companyProfile/{{$company->id}}">
+                                            <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
                                                 <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                 <div class="media-body">
                                                     <h6 class="media-heading mb-0">{{$company->{'name_'.$l} }} </h6>
@@ -36,7 +36,7 @@
                                            {{__('admin.Added by')}}
                                         </dt>
                                         <dd class="col-sm-9">
-                                            <a class="media-left mr-50" href="/admin/companyProfile/{{$company->id}}">
+                                            <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
                                                 <img src="/191014/{{$company->user->img_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 
                                                 <div class="media-body">
@@ -114,7 +114,7 @@
                                                 <div class="col-12 d-flex justify-content-end">
                                                     <button type="submit"
                                                             class="btn btn-primary mr-1 mb-1">{{__('admin.submit')}}</button>
-                                                    <a href="/admin"
+                                                    <a href="/dashboard"
                                                             class="btn btn-warning mr-1 mb-1">{{__('admin.Back')}}</a>
                                                 </div>
                                             </div>

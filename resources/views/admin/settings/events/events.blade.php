@@ -14,7 +14,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.eventsettings')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
                                     <li class="breadcrumb-item active">{{__('settings.EditEvents')}}
                                     </li>
@@ -25,8 +25,8 @@
                 </div>
             </div>
 			<div class="invoice-create-btn mb-1">
-						<a href="/admin/addevent" class="btn btn-primary glow">{{__('settings.AddNew')}}</a>
-                        <a href="/admin/calendar" class="btn btn-success glow">{{__('admin.Calendar')}}</a>
+						<a href="/dashboard/addevent" class="btn btn-primary glow">{{__('settings.AddNew')}}</a>
+                        <a href="/dashboard/calendar" class="btn btn-success glow">{{__('admin.Calendar')}}</a>
             </div>
             	<div class="content-body">
                 <section id="basic-datatable">
@@ -85,7 +85,7 @@
 							 							<td>{!!$event->published?'<a target="_blank" href="/event/'.$event->id.'">/event/'.$event->id.'</a>':__('admin.NotPublished') !!}</td>
                                                         <td>
 												<a href="/reports/events/{{$event->id}}"><i class="bx bx-download"> </i></a> |
-												<a href="/admin/editevent/{{$event->id}}"><i class="bx bx-edit-alt"> </i></a> |
+												<a href="/dashboard/editevent/{{$event->id}}"><i class="bx bx-edit-alt"> </i></a> |
                                    <a onclick="return confirm('Are you sure, delete event & all its registered users?');" href="{{URL::to('admin/deleteevent/'.$event->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
 												@endforeach

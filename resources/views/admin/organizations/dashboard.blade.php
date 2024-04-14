@@ -69,7 +69,7 @@
                         <div class="col-sm-3 col-12 dashboard-users-success">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/companies">
+                                    <a href="/dashboard/companies">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
                                                 <i class="bx bx-briefcase-alt font-medium-5"></i>
@@ -84,7 +84,7 @@
                         <div class="col-sm-3 col-12 dashboard-users-danger">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/training/sessions">
+                                    <a href="/dashboard/training/sessions">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-light-warning mx-auto mb-50">
                                                 <i class="bx bxs-timer font-medium-5"></i>
@@ -99,7 +99,7 @@
                         <div class="col-sm-3 col-12 dashboard-users-danger">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/mentorship/sessions?show=all">
+                                    <a href="/dashboard/mentorship/sessions?show=all">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
                                                 <i class="bx bxs-help-circle font-medium-5"></i>
@@ -114,7 +114,7 @@
                         <div class="col-sm-3 col-12 dashboard-users-success">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/inbox">
+                                    <a href="/dashboard/inbox">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
                                                 <i class="bx bxs-conversation font-medium-5"></i>
@@ -130,7 +130,7 @@
                         <div class="col-sm-6 col-12 dashboard-users-success">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/cycles">
+                                    <a href="/dashboard/cycles">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-info mx-auto mb-50">
                                                 <i class="bx bx-bookmark-plus font-medium-5"></i>
@@ -145,7 +145,7 @@
                         <div class="col-sm-6 col-12 dashboard-users-success">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/admin/show-builder">
+                                    <a href="/dashboard/show-builder">
                                         <div class="card-body py-1">
                                             <div class="badge-circle badge-circle-lg badge-circle-light mx-auto mb-50">
                                                 <i class="bx bxs-building font-medium-5"></i>
@@ -227,10 +227,10 @@
                                                     <tr>
                                                         <td>
                                                             <div class="media align-items-center">
-                                                                <a class="media-left mr-50" href="/admin/companyProfile/{{$session->user->company->id}}">
+                                                                <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                                     <img src="/191014/{{$session->user->company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                 </a>
-                                                                <a href="/admin/companyProfile/{{$session->user->company->id}}">
+                                                                <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                                     <div class="media align-items-center">
                                                                         {{$session->user->company->{'name_'.$l} }}
                                                                     </div>
@@ -239,10 +239,10 @@
                                                         </td>
                                                         <td>
                                                             <div class="media align-items-center">
-                                                                <a class="media-left mr-50" href="/admin/users/{{$session->user->company->user->id}}/edit">
+                                                                <a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
                                                                     <img src="/191014/{{$session->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                 </a>
-                                                                <a href="/admin/users/{{$session->user_id}}/edit">
+                                                                <a href="/dashboard/users/{{$session->user_id}}/edit">
                                                                     <div class="media-body">
                                                                         <h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
                                                                         <span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>

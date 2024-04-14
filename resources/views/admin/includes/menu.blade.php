@@ -1,6 +1,6 @@
         <div class="navbar-header" style="margin-bottom: 50px">
             <ul class="nav navbar-nav flex-row">
-                <li class="nav-item mr-auto"><a class="navbar-brand" href="/admin">
+                <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
                         @if(!is_null(auth()->user()->organization_id))
                             <img  src="/191014/{{auth()->user()->organization->img_url}}" alt="avatar" height="40" width="80">
                         @else
@@ -12,7 +12,7 @@
                                 class="toggle-icon bx bx-disc font-medium-4 d-none d-xl-block primary"
                                 data-ticon="bx-disc"></i></a></li>
 
-                <li class="nav-item mr-auto"><a class="navbar-brand" href="/admin">
+                <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
 
                         <h2 class="brand-text mb-0" style="padding-right:0!important;">{{ is_null(auth()->user()->organization_id)?config('app.name') : auth()->user()->organization->{'name_'.$l} }}</h2>
                     </a>

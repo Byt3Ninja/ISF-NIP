@@ -43,7 +43,7 @@
 @if (Auth::guest())
                             <a href="/login" class="thm-btn">{{__('Login')}}</a>
 @else
-                            <a title="{{__('My account')}}" href="/admin"><i class="fa fa-user" style="font-size: 1.5em;color: #0e5583;"></i></a>
+                            <a title="{{__('My account')}}" href="/dashboard"><i class="fa fa-user" style="font-size: 1.5em;color: #0e5583;"></i></a>
                             <a  title="{{__('Sign out')}}" onclick="event.preventDefault();document.getElementById('logout-form').submit();" href="{{ route('logout') }}">
                                 <i class="fa fa-sign-out" style="font-size: 1.5em;color: #d43d71;padding:15px {{$l=='ar'?'25px 0 0':'0 0 25px'}};"></i></a>
                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

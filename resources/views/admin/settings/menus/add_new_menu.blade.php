@@ -11,9 +11,9 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.Menusettings')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="/admin/menus"><i class="bx bx-menu"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard/menus"><i class="bx bx-menu"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('settings.AddNew')}}
                                     </li>

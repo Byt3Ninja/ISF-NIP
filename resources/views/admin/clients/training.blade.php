@@ -15,7 +15,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.View training content')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{$ccontent->title}}
                                     </li>
@@ -45,7 +45,7 @@
                                         <ul class="widget-timeline mb-0">
                                             @foreach($contents as $key=>$content)
                                                 <li class="timeline-items timeline-icon-{{$ccontent->id==$content->id?'primary':'secondary' }} active">
-                                                    <a href="/admin/training/my/{{$content->training_id}}?c={{$content->id}}">
+                                                    <a href="/dashboard/training/my/{{$content->training_id}}?c={{$content->id}}">
                                                         <div class="timeline-time">
                                                             @if ($content->done())
                                                                 <i title="Completed {{$content->done()}}" class="bx bxs-check-circle primary"></i>

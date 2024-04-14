@@ -192,7 +192,7 @@
                                                 <fieldset class="form-group">
                                                     <label for="basicInput">{{ __('admin.HaveCompany')}}</label>
                                                     @if ($user->company)
-                                                    <a href="/admin/companyProfile/{{$user->company->id}}" class="btn btn-sm border float-right">{{ __('admin.CompanyProfile') }}</a>
+                                                    <a href="/dashboard/companyProfile/{{$user->company->id}}" class="btn btn-sm border float-right">{{ __('admin.CompanyProfile') }}</a>
                                                     @endif
                                                         <ul class="list-unstyled mb-0">
                                                         <li class="d-inline-block mr-2 mb-1">

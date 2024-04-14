@@ -39,7 +39,7 @@
                     <div class="col-12 col-sm-2 px-0 d-flex justify-content-end align-items-center px-1 mb-2">
                         <a href="{{ url()->previous() }}" class="btn btn-sm mr-25 border"><i class="bx bx-arrow-back font-small-3"></i> </a>
                         @if (isset(Auth::user()->company()->first()->id) && $company->id == Auth::user()->company()->first()->id)
-                            <a href="/admin/myCompany" class="btn btn-sm mr-25 border"><i class="bx bx-edit font-small-3"></i></a>
+                            <a href="/dashboard/myCompany" class="btn btn-sm mr-25 border"><i class="bx bx-edit font-small-3"></i></a>
                         @else
 
                         <a data-toggle="modal" data-target="#MessageModal" href="javascript:void(0);" class="btn btn-sm mr-25 border"><i class="bx bx-envelope font-small-3"></i></a>

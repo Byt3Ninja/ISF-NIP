@@ -55,7 +55,7 @@
                     <div class="col-sm-3 col-12 dashboard-users-success">
                         <div class="card text-center">
                             <div class="card-content">
-                                <a href="/admin/directory">
+                                <a href="/dashboard/directory">
                                     <div class="card-body py-1">
                                         <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
                                             <i class="bx bx bx-briefcase-alt font-medium-5"></i>
@@ -70,7 +70,7 @@
                     <div class="col-sm-3 col-12 dashboard-users-danger">
                         <div class="card text-center">
                             <div class="card-content">
-                                <a href="/admin/inbox">
+                                <a href="/dashboard/inbox">
                                     <div class="card-body py-1">
                                         <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
                                             <i class="bx bxs-message font-medium-5"></i>
@@ -130,7 +130,7 @@
                                     @foreach($s_latest as $serv)
                                         <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
                                             <div class="widget-todo-title-area d-flex align-items-center">
-                                                <a href="/admin/directory?find={{$serv->{'name_'.$l} }}">
+                                                <a href="/dashboard/directory?find={{$serv->{'name_'.$l} }}">
                                             <span class="widget-todo-title ml-50 text-secondary">
 
                 <i class="bx bx-link text-primary"></i>
@@ -138,7 +138,7 @@
                                             </div>
                                             <div class="widget-todo-item-action d-flex align-items-center">
                                                 <div class="badge badge-pill badge-light-primary mr-1">
-                                                    <a href="/admin/directory?type={{$serv->serviceCategory->id}}">
+                                                    <a href="/dashboard/directory?type={{$serv->serviceCategory->id}}">
                                                         {{$serv->serviceCategory->{'name_'.$l} }}
                                                     </a>
                                                 </div>
@@ -176,7 +176,7 @@
                                     @foreach($e_latest as $event)
                                         <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
                                             <div class="widget-todo-title-area d-flex align-items-center">
-                                                <a href="/admin/calendar">
+                                                <a href="/dashboard/calendar">
                                             <span class="widget-todo-title ml-50 text-secondary">
                 <i class="bx bx-calendar-event text-primary"></i>
                                                 {{$event->title}}</span></a>
@@ -193,7 +193,7 @@
                                         <div class="widget-todo-title-area d-flex align-items-center">
                                             <span class="widget-todo-title ml-50">
                                      <i class="bx bxs-bell-ring text-danger"></i>
-                                                {{__('dashboard.No Events added')}} '<a href="/admin/calendar">{{__('dashboard.Add yours now')}}</a>'.</span>
+                                                {{__('dashboard.No Events added')}} '<a href="/dashboard/calendar">{{__('dashboard.Add yours now')}}</a>'.</span>
                                         </div>
                                     </div>
                                 @endif
@@ -254,7 +254,7 @@
                                                         <a class="media-left mr-50">
                                                             <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                         </a>
-                                                    <a href="/admin/screening/{{$form->id}}/{{$company->id}}">
+                                                    <a href="/dashboard/screening/{{$form->id}}/{{$company->id}}">
                                                     <div class="media align-items-center">
                                                     {{$company->{'name_'.$l} }}
                                                     </div>
@@ -266,7 +266,7 @@
                                                         <a class="media-left mr-50">
                                                             <img src="/191014/{{$company->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                         </a>
-                                                        <a href="/admin/screening/{{$form->id}}/{{$company->id}}">
+                                                        <a href="/dashboard/screening/{{$form->id}}/{{$company->id}}">
                                                             <div class="media-body">
                                                                 <h6 class="media-heading mb-0">{{$company->user->{'first_name_'.$l} }} {{$company->user->{'last_name_'.$l} }}</h6>
                                                                 <span class="font-small-2">{{$company->user->{'title_'.$l} }}</span>
@@ -351,7 +351,7 @@
                                                                         <a class="media-left mr-50">
                                                                             <img src="/191014/{{$fcompany->company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                         </a>
-                                                                        <a href="/admin/companyProfile/{{$fcompany->company_id}}">
+                                                                        <a href="/dashboard/companyProfile/{{$fcompany->company_id}}">
                                                                             <div class="media align-items-center">
                                                                                 {{$fcompany->company->{'name_'.$l} }}
                                                                             </div>
@@ -363,7 +363,7 @@
                                                                         <a class="media-left mr-50">
                                                                             <img src="/191014/{{$fcompany->company->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                         </a>
-                                                                        <a href="/admin/companyProfile/{{$fcompany->company_id}}">
+                                                                        <a href="/dashboard/companyProfile/{{$fcompany->company_id}}">
                                                                             <div class="media-body">
                                                                                 <h6 class="media-heading mb-0">{{$fcompany->company->user->{'first_name_'.$l} }} {{$fcompany->company->user->{'last_name_'.$l} }}</h6>
                                                                                 <span class="font-small-2">{{$fcompany->company->user->{'title_'.$l} }}</span>
@@ -385,7 +385,7 @@
                                                                         <a href="{{$fcompany->join_url}}" target="_blank">
                                                                             <button title="Join" type="button" class="btn btn-icon rounded-circle btn-light-primary">
                                                                                 <i class="bx bx-user"></i></button></a>
-                                                                        <a href="/admin/final/{{$step->id}}/{{$fcompany->company_id}}" target="_blank">
+                                                                        <a href="/dashboard/final/{{$step->id}}/{{$fcompany->company_id}}" target="_blank">
                                                                         <button title="Open form" type="button" class="btn btn-icon rounded-circle btn-light-success">
                                                                             <i class="bx bx-file"></i></button></a>
                                                                     @else

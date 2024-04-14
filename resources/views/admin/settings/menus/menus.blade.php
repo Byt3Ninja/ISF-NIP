@@ -12,7 +12,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.Menusettings')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
                                     <li class="breadcrumb-item active"> {{__('settings.EditSettings')}}
                                     </li>
@@ -23,8 +23,8 @@
                 </div>
             </div>
 			<div class="invoice-create-btn mb-1">
-						<a href="/admin/add_menu" class="btn btn-primary glow">{{__('settings.AddNew')}}</a>
-                        <a href="/admin" class="btn btn-success glow">{{__('settings.BackHome')}}</a>
+						<a href="/dashboard/add_menu" class="btn btn-primary glow">{{__('settings.AddNew')}}</a>
+                        <a href="/dashboard" class="btn btn-success glow">{{__('settings.BackHome')}}</a>
             </div>
             <div class="content-body">
                 <!-- Zero configuration table -->
@@ -88,7 +88,7 @@
                                                         <td>{{$getMenusA->title}}</td>
                                                         <td>{{$getMenusA->url}}</td>
 														<td>{{$getMenusA->target}}</td>
-                                                        <td><a href="/admin/edit_menu/{{$getMenusA->id}}"><i class="bx
+                                                        <td><a href="/dashboard/edit_menu/{{$getMenusA->id}}"><i class="bx
 bx-edit-alt"> </i></a> |
                                    <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/admin/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
@@ -151,7 +151,7 @@ bx-edit-alt"> </i></a> |
                                                         <td>{{$getMenusA->title}}</td>
                                                         <td>{{$getMenusA->url}}</td>
 														<td>{{$getMenusA->target}}</td>
-                                                        <td><a href="/admin/edit_menu/{{$getMenusA->id}}"><i class="bx
+                                                        <td><a href="/dashboard/edit_menu/{{$getMenusA->id}}"><i class="bx
 bx-edit-alt"> </i></a> |
                                    <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('/admin/delete_menu/'.$getMenusA->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>

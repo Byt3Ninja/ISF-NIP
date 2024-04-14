@@ -16,7 +16,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.all online training steps')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('cycles.view all')}}
                                     </li>
@@ -64,7 +64,7 @@
                                 <button type="button" class="btn btn-primary block" data-toggle="modal" data-target="#addsession">
                                     <i class="bx bx-plus-circle"></i> <span class="align-middle ml-25">{{__('cycles.Add new training')}}</span>
                                 </button>
-                              <a class="btn btn-success" href="/admin/cycles/{{$ccycle}}">
+                              <a class="btn btn-success" href="/dashboard/cycles/{{$ccycle}}">
                                          <i class="bx bx-pencil"></i> <span class="align-middle ml-25">{{__('cycles.Cycle')}}</span>
                                     </a>
                             </div>
@@ -114,7 +114,7 @@
                                     @elseif ($session->type=='offline')
                                         <b>{{__('cycles.trainer name')}}:</b> {{$session->trainer_name}}<br><b>{{__('cycles.training location')}}:</b> {{$session->location}} <br>
                                     @else
-                                        <a href="/admin/training/all/{{$session->location}}">{{__('cycles.Display course contents')}} </a>
+                                        <a href="/dashboard/training/all/{{$session->location}}">{{__('cycles.Display course contents')}} </a>
                                     @endif
 
                                 </td>
@@ -145,7 +145,7 @@
                 </div>
                 <hr style="margin:-10px 0 5px 0;">
                 <div class="card-body">
-                    {{__('cycles.No training sessions into cycles') }}, <a href="/admin/cycles">{{__('cycles.Back to Manage cycles')}}</a>.
+                    {{__('cycles.No training sessions into cycles') }}, <a href="/dashboard/cycles">{{__('cycles.Back to Manage cycles')}}</a>.
                 </div>
             </div>
         </div>

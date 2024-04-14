@@ -59,7 +59,7 @@
                     <div class="col-sm-3 col-12 dashboard-users-success">
                         <div class="card text-center">
                             <div class="card-content">
-                                <a href="/admin/directory">
+                                <a href="/dashboard/directory">
                                     <div class="card-body py-1">
                                         <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
                                             <i class="bx bx bx-briefcase-alt font-medium-5"></i>
@@ -74,7 +74,7 @@
                     <div class="col-sm-3 col-12 dashboard-users-danger">
                         <div class="card text-center">
                             <div class="card-content">
-                                <a href="/admin/inbox">
+                                <a href="/dashboard/inbox">
                                     <div class="card-body py-1">
                                         <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
                                             <i class="bx bxs-message font-medium-5"></i>
@@ -133,7 +133,7 @@
                                     @foreach($s_latest as $serv)
                                         <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
                                             <div class="widget-todo-title-area d-flex align-items-center">
-                                                <a href="/admin/directory?find={{$serv->{'name_'.$l} }}">
+                                                <a href="/dashboard/directory?find={{$serv->{'name_'.$l} }}">
                                             <span class="widget-todo-title ml-50 text-secondary">
 
                 <i class="bx bx-link text-primary"></i>
@@ -141,7 +141,7 @@
                                             </div>
                                             <div class="widget-todo-item-action d-flex align-items-center">
                                                 <div class="badge badge-pill badge-light-primary mr-1">
-                                                    <a href="/admin/directory?type={{$serv->serviceCategory->id}}">
+                                                    <a href="/dashboard/directory?type={{$serv->serviceCategory->id}}">
                                                         {{$serv->serviceCategory->{'name_'.$l} }}
                                                     </a>
                                                 </div>
@@ -179,7 +179,7 @@
                                     @foreach($e_latest as $event)
                                         <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
                                             <div class="widget-todo-title-area d-flex align-items-center">
-                                                <a href="/admin/calendar">
+                                                <a href="/dashboard/calendar">
                                             <span class="widget-todo-title ml-50 text-secondary">
                 <i class="bx bx-calendar-event text-primary"></i>
                                                 {{$event->title}}</span></a>
@@ -196,7 +196,7 @@
                                         <div class="widget-todo-title-area d-flex align-items-center">
                                             <span class="widget-todo-title ml-50">
                                      <i class="bx bxs-bell-ring text-danger"></i>
-                                                {{__('dashboard.No Events added')}} '<a href="/admin/calendar">{{__('dashboard.Add yours now')}}</a>'.</span>
+                                                {{__('dashboard.No Events added')}} '<a href="/dashboard/calendar">{{__('dashboard.Add yours now')}}</a>'.</span>
                                         </div>
                                     </div>
                                 @endif
@@ -304,10 +304,10 @@
                                             <tr>
                                                 <td>{{$key+1}}</td>
                                                 <td>
-                                                    <a class="media-left mr-50" href="/admin/companyProfile/{{$session->user->company->id}}">
+                                                    <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                         <img src="/191014/{{$session->user->company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                     </a>
-                                                    <a href="/admin/companyProfile/{{$session->user->company->id}}">
+                                                    <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                         <div class="media align-items-center">
                                                             {{$session->user->company->{'name_'.$l} }}
                                                         </div>

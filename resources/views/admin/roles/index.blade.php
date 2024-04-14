@@ -64,7 +64,7 @@
                                                         </td>
                                                         <td style="line-height: 1.8em;">
                                                             @foreach($role->permissions as $key => $item)
-                                                             <a href="/admin/permissions/{{$item->id}}/edit"><span class="badge badge-pill badge-primary">{{ $item->name }}</span></a>
+                                                             <a href="/dashboard/permissions/{{$item->id}}/edit"><span class="badge badge-pill badge-primary">{{ $item->name }}</span></a>
                                                             @endforeach
                                                         </td>
                                                         <td>

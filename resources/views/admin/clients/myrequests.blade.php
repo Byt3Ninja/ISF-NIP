@@ -14,7 +14,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('admin.Services')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
                                     <li class="breadcrumb-item active">{{__('admin.Show my services requests')}}
                                     </li>
@@ -32,7 +32,7 @@
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header"><br>
-                                        <a href="/admin/directory" class="btn btn-primary glow">{{__('admin.Back to services')}}</a>
+                                        <a href="/dashboard/directory" class="btn btn-primary glow">{{__('admin.Back to services')}}</a>
                                     </div>
                                     <div class="card-content">
                                         <div class="card-body card-dashboard">
@@ -84,7 +84,7 @@
                                             <h4 class="card-title">{{__('admin.No Requests')}}</h4>
                                         </div>
                                         <div class="card-body">
-                                            <a href="/admin/directory" class="btn btn-primary glow">{{__('admin.Show all services')}}</a>
+                                            <a href="/dashboard/directory" class="btn btn-primary glow">{{__('admin.Show all services')}}</a>
                                         </div>
                                     </div>
                                 </div>

@@ -14,7 +14,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.Pagesettings')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
                                     <li class="breadcrumb-item active">{{__('settings.EditSettings')}}
                                     </li>
@@ -25,8 +25,8 @@
                 </div>
             </div>
 			<div class="invoice-create-btn mb-1">
-						<a href="/admin/addpage" class="btn btn-primary glow">{{__('settings.AddNew')}}</a>
-                        <a href="/admin" class="btn btn-success glow">{{__('settings.BackHome')}}</a>
+						<a href="/dashboard/addpage" class="btn btn-primary glow">{{__('settings.AddNew')}}</a>
+                        <a href="/dashboard" class="btn btn-success glow">{{__('settings.BackHome')}}</a>
             </div>
             	<div class="content-body">
                 <section id="basic-datatable">
@@ -98,7 +98,7 @@
 
 								@endif
 							</td>
-                                                        <td><a href="/admin/editpage/{{$page->id}}"><i class="bx bx-edit-alt"> </i></a> |
+                                                        <td><a href="/dashboard/editpage/{{$page->id}}"><i class="bx bx-edit-alt"> </i></a> |
                                    <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('admin/deletepage/'.$page->id ?? null)}}"><i class="bx bx-trash"> </i></a>
                                                   |         @if($page->published) <a target="_blank" href="/page/{{$page->url}}"><i class="bx bx-show-alt"> </i></a>
                                                             @else <i class="bx bx-hide"> </i>@endif

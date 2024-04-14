@@ -14,7 +14,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.Training results')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('cycles.Show training results')}}
                                     </li>
@@ -72,7 +72,7 @@
                                             <button class="btn btn-secondary" onclick="window.location.href='/admin/cycles/{{$csession->step->cycle->id}}/registered'">
                                                 <i class="bx bxs-user"></i> <span class="align-middle ml-25">{{__('cycles.Users')}}</span>
                                             </button>
-                                    <a class="btn btn-success" href="/admin/cycles/{{$csession->step->cycle->id}}">
+                                    <a class="btn btn-success" href="/dashboard/cycles/{{$csession->step->cycle->id}}">
                                          <i class="bx bx-pencil"></i> <span class="align-middle ml-25">{{__('cycles.Cycle')}}</span>
                                     </a>
                                         </div>
@@ -111,10 +111,10 @@
                             <tr>
                                 <td>
                                     <div class="media align-items-center">
-                                        <a class="media-left mr-50" href="/admin/companyProfile/{{$company->id}}">
+                                        <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
                                             <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                         </a>
-                                        <a href="/admin/companyProfile/{{$company->id}}">
+                                        <a href="/dashboard/companyProfile/{{$company->id}}">
                                             <div class="media align-items-center">
                                                 {{$company->{'name_'.$l} }}
                                             </div>
@@ -123,10 +123,10 @@
                                 </td>
                                 <td>
                                     <div class="media align-items-center">
-                                        <a class="media-left mr-50" href="/admin/users/{{$company->user->id}}/edit">
+                                        <a class="media-left mr-50" href="/dashboard/users/{{$company->user->id}}/edit">
                                             <img src="/191014/{{$company->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                         </a>
-                                        <a href="/admin/users/{{$company->user->id}}/edit">
+                                        <a href="/dashboard/users/{{$company->user->id}}/edit">
                                             <div class="media-body">
                                                 <h6 class="media-heading mb-0">{{$company->user->{'first_name_'.$l} }} {{$company->user->{'last_name_'.$l} }}</h6>
                                                 <span class="font-small-2">{{$company->user->{'title_'.$l} }}</span>
@@ -171,7 +171,7 @@
                 </div>
                 <hr style="margin:-10px 0 5px 0;">
                 <div class="card-body">
-                    {{__('cycles.No training courses into cycles')}}, <a href="/admin/cycles"> {{__('cycles.Back to Manage cycles')}}</a>.
+                    {{__('cycles.No training courses into cycles')}}, <a href="/dashboard/cycles"> {{__('cycles.Back to Manage cycles')}}</a>.
                 </div>
             </div>
         </div>

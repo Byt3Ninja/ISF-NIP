@@ -21,12 +21,12 @@ isset(Auth::user()->company()->first()->id)?$companyid=Auth::user()->company()->
                     <ul class="nav navbar-nav float-right">
                         <li class="nav-item d-lg-block"><a class="nav-link nav-link-search"
                         @if(Request::is('admin/documentation/view*'))
-                        href="/admin" ><i class="ficon bx bx-arrow-back">
+                        href="/dashboard" ><i class="ficon bx bx-arrow-back">
                         @else
-                        href="/admin/documentation/view" ><i class="ficon bx bx-help-circle">
+                        href="/dashboard/documentation/view" ><i class="ficon bx bx-help-circle">
                         @endif
                                 </i></a></li>
-                        <li class="nav-item d-lg-block"><a class="nav-link nav-link-search" href="/admin/dark?l={{session('layout')??'dark'}}" ><i class="ficon bx {{session('icon')??'bx-moon'}}"></i></a></li>
+                        <li class="nav-item d-lg-block"><a class="nav-link nav-link-search" href="/dashboard/dark?l={{session('layout')??'dark'}}" ><i class="ficon bx {{session('icon')??'bx-moon'}}"></i></a></li>
                         @hasrole('Admin|Manager')
                         <li class="nav-item nav-search"><a class="nav-link nav-link-search"><i class="ficon bx bx-search"></i></a>
                             <div class="search-input">
@@ -60,7 +60,7 @@ isset(Auth::user()->company()->first()->id)?$companyid=Auth::user()->company()->
                                 <li class="scrollable-container media-list" data-count="0" >
 
                                     @if ($messages)
-                                        <a class="d-flex justify-content-between" href="/admin/inbox">
+                                        <a class="d-flex justify-content-between" href="/dashboard/inbox">
                                             <div class="media d-flex align-items-center">
                                                 <div class="media-left pr-0">
                                                     <div class="mr-1"><i class="bx bxs-envelope bx-md"></i></div>
@@ -73,7 +73,7 @@ isset(Auth::user()->company()->first()->id)?$companyid=Auth::user()->company()->
                                     @endif
                                     @hasanyrole('Admin|Manager')
                                     @if ($msgs)
-                                    <a class="d-flex justify-content-between" href="/admin/mymsg">
+                                    <a class="d-flex justify-content-between" href="/dashboard/mymsg">
                                         <div class="media d-flex align-items-center">
                                             <div class="media-left pr-0">
                                                 <div class="mr-1"><i class="bx bxs-envelope bx-md"></i></div>
@@ -95,9 +95,9 @@ isset(Auth::user()->company()->first()->id)?$companyid=Auth::user()->company()->
                                 </span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right pb-0">
-							<a class="dropdown-item" href="/admin/myProfile"><i class="bx bx-user mr-50"></i>{{ __('admin.Profile') }}</a>
+							<a class="dropdown-item" href="/dashboard/myProfile"><i class="bx bx-user mr-50"></i>{{ __('admin.Profile') }}</a>
 @if ($companyid)
-                            <a class="dropdown-item" href="/admin/myCompany"><i class="bx bxs-factory mr-50"></i>{{ __('admin.Company') }}</a>
+                            <a class="dropdown-item" href="/dashboard/myCompany"><i class="bx bxs-factory mr-50"></i>{{ __('admin.Company') }}</a>
 @endif
                                 <div class="dropdown-divider mb-0"></div><a class="dropdown-item" href="{{ route('logout') }}"  onclick="event.preventDefault();document.getElementById('logout-form').submit();"><i class="bx bx-power-off mr-50"></i> {{ __('admin.Logout') }}</a>
 							<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

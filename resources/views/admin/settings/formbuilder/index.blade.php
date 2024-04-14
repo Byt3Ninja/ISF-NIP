@@ -72,7 +72,7 @@
             <div class="col-xl-12 col-md-12 col-sm-12">
                 <div class="card">
                         <div class="card-header" style="padding-bottom: 0px;">
-                            <p>{{__('builder.Drag')}}<a href="/admin/show-form/{{$title->id}}"> ({{__('builder.Preview')}})</a>.</p>
+                            <p>{{__('builder.Drag')}}<a href="/dashboard/show-form/{{$title->id}}"> ({{__('builder.Preview')}})</a>.</p>
                         </div>
                     <hr>
                     <div class="section">

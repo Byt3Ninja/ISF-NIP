@@ -26,7 +26,7 @@ $title=App\BuilderForm::findOrFail($id);
             <div class="col-xl-12 col-md-12 col-sm-12">
                 <div class="card">
                         <div class="card-header" style="padding-bottom: 0px;">
-                            <h4 class="card-title"><b>{{__('builder.Form')}}: </b>{{$title->form_name}}, <b>{{__('builder.ID')}}: </b> {{$title->id}} <a href="/admin/show-builder/{{$id}}">({{__('builder.Edit')}})</a>.</h4>
+                            <h4 class="card-title"><b>{{__('builder.Form')}}: </b>{{$title->form_name}}, <b>{{__('builder.ID')}}: </b> {{$title->id}} <a href="/dashboard/show-builder/{{$id}}">({{__('builder.Edit')}})</a>.</h4>
 
                         </div>
                     <hr>

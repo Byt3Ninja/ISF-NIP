@@ -12,7 +12,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('admin.Messages')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
                                     <li class="breadcrumb-item active">{{__('messages.ShowMessages')}}
                                     </li>
@@ -73,7 +73,7 @@
                                                         <td>{{$n++}}</td>
                                                         <td>
                                                             @if ($getmsg->internal_id)
-                                                            <a href="/admin/users/{{$getmsg->internal_id}}/edit">{{$getmsg->name}} ({{__('admin.user')}})</a>
+                                                            <a href="/dashboard/users/{{$getmsg->internal_id}}/edit">{{$getmsg->name}} ({{__('admin.user')}})</a>
                                                             @else
                                                              {{$getmsg->name}}
                                                             @endif
@@ -104,7 +104,7 @@
             </div>
             <hr style="margin:-10px 0 5px 0;">
             <div class="card-body">
-                <h5>   {{__('messages.NoMessages')}} - <a href="/admin">{{__('admin.Back')}}</a>. </h5>
+                <h5>   {{__('messages.NoMessages')}} - <a href="/dashboard">{{__('admin.Back')}}</a>. </h5>
             </div>
         </div>
 

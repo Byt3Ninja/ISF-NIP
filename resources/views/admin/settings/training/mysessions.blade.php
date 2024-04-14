@@ -15,7 +15,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.My training courses & sessions')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('cycles.view all')}}
                                     </li>
@@ -78,7 +78,7 @@
                                     @elseif ($session->type=='offline')
                                         <b>{{__('cycles.trainer name')}}:</b> {{$session->trainer_name}}<br><b>{{__('cycles.training location')}}:</b> {{$session->location}} <br>
                                     @else
-                                        <a title="Show course contents" href="/admin/training/my/{{$session->location}}">{{__('cycles.Display course contents')}} </a>
+                                        <a title="Show course contents" href="/dashboard/training/my/{{$session->location}}">{{__('cycles.Display course contents')}} </a>
                                     @endif
                                 </td>
                             </tr>
@@ -100,7 +100,7 @@
                 </div>
 
                 <div class="card-body">
-                    {{__('cycles.No training sessions added yet') }}, <a href="/admin">{{__('cycles.Back')}}</a>.
+                    {{__('cycles.No training sessions added yet') }}, <a href="/dashboard">{{__('cycles.Back')}}</a>.
                 </div>
             </div>
         </div>

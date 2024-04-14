@@ -14,7 +14,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('admin.Companies')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('admin.Display all companies data')}}
                                     </li>
@@ -85,10 +85,10 @@
                                     </td>
                                     <td>
                                         <div class="media align-items-center">
-                                            <a class="media-left mr-50" href="/admin/companyProfile/{{$company->id}}">
+                                            <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
                                                 <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                             </a>
-                                            <a href="/admin/companyProfile/{{$company->id}}">
+                                            <a href="/dashboard/companyProfile/{{$company->id}}">
                                                 <div class="media align-items-center">
                                                     {{$company->{'name_'.$l} }}
                                                 </div>

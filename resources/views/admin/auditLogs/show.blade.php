@@ -90,7 +90,7 @@
                                     <td>
                                     <div class="card-footer p-0">
                         <span class=" float-sm-right d-flex flex-sm-row flex-column justify-content-end">
-                       <a href="/admin/audit-logs"> <button class="btn btn-primary">{{__('audit.Back')}}</button></a>
+                       <a href="/dashboard/audit-logs"> <button class="btn btn-primary">{{__('audit.Back')}}</button></a>
                                 </span>
                                     </div>
                                     </td>

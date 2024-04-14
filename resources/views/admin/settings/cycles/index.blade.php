@@ -16,7 +16,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.Cycles')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('cycles.Manage Cycles')}}
                                     </li>
@@ -157,10 +157,10 @@
                                                 $set = $step->id.'/final/';
                                             }
                                         @endphp
-                                        <a href="/admin/{{$set}}" id="{{$step->id}}">
+                                        <a href="/dashboard/{{$set}}" id="{{$step->id}}">
                                             <span class="badge badge-secondary badge-pill"><i style="font-size: 15px;" class="bx bx-cog" title="{{__('cycles.Step settings')}}"></i></span>
                                         </a>&nbsp;
-                                        <a href="/admin/{{$link}}" id="{{$step->id}}">
+                                        <a href="/dashboard/{{$link}}" id="{{$step->id}}">
                                             <span class="badge badge-primary badge-pill"><i style="font-size: 15px;" class="bx bx-show" title="{{__('cycles.view step results')}}"></i></span>
                                         </a>
                                     </div>

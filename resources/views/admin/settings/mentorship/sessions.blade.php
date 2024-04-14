@@ -17,7 +17,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.Mentorship requests')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">
 
@@ -73,10 +73,10 @@
         <div class="card-header">
             <div class="card-title">
 {{--                @if (Request()->show)--}}
-                <a href="/admin/mentorship/sessions?show=all" class="btn btn-light-primary glow width-200 {{ Request()->show=='all'?'active':'' }}">{{__('cycles.All requests')}}</a>
-                <a href="/admin/mentorship/sessions" class="btn btn-light-warning glow width-200 {{ !Request()->show?'active':'' }}">{{__('cycles.New requests only')}}</a>
-                <a href="/admin/mentorship/sessions?show=approved" class="btn btn-light-success glow width-200 {{ Request()->show=='approved'?'active':'' }}">{{__('cycles.approved requests')}}</a>
-                <a href="/admin/mentorship/sessions?show=disapproved" class="btn btn-light-danger glow width-200 {{ Request()->show=='disapproved'?'active':'' }}">{{__('cycles.disapproved requests')}}</a>
+                <a href="/dashboard/mentorship/sessions?show=all" class="btn btn-light-primary glow width-200 {{ Request()->show=='all'?'active':'' }}">{{__('cycles.All requests')}}</a>
+                <a href="/dashboard/mentorship/sessions" class="btn btn-light-warning glow width-200 {{ !Request()->show?'active':'' }}">{{__('cycles.New requests only')}}</a>
+                <a href="/dashboard/mentorship/sessions?show=approved" class="btn btn-light-success glow width-200 {{ Request()->show=='approved'?'active':'' }}">{{__('cycles.approved requests')}}</a>
+                <a href="/dashboard/mentorship/sessions?show=disapproved" class="btn btn-light-danger glow width-200 {{ Request()->show=='disapproved'?'active':'' }}">{{__('cycles.disapproved requests')}}</a>
                 {{--                @else--}}
 {{--                @endif--}}
             </div>
@@ -102,10 +102,10 @@
                             <tr>
                                 <td>
                                     <div class="media align-items-center">
-                                        <a class="media-left mr-50" href="/admin/companyProfile/{{$session->user->company->id}}">
+                                        <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                             <img src="/191014/{{$session->user->company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                         </a>
-                                        <a href="/admin/companyProfile/{{$session->user->company->id}}">
+                                        <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                             <div class="media align-items-center">
                                                 {{$session->user->company->{'name_'.$l} }}
                                             </div>
@@ -114,10 +114,10 @@
                                 </td>
                                 <td>
                                     <div class="media align-items-center">
-                                        <a class="media-left mr-50" href="/admin/users/{{$session->user->company->user->id}}/edit">
+                                        <a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
                                             <img src="/191014/{{$session->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                         </a>
-                                        <a href="/admin/users/{{$session->user_id}}/edit">
+                                        <a href="/dashboard/users/{{$session->user_id}}/edit">
                                             <div class="media-body">
                                                 <h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
                                                 <span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
@@ -172,7 +172,7 @@ str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->ratin
                                         <i class="bx bx-user"></i></button></a>
                                   @endif
                                   @if($session->fileurl)
-                                            <a href="/admin/private/{{$session->fileurl}}" target="_blank" title="Download attched" class="btn btn-icon rounded-circle btn-light-primary">
+                                            <a href="/dashboard/private/{{$session->fileurl}}" target="_blank" title="Download attched" class="btn btn-icon rounded-circle btn-light-primary">
                                                     <i class="bx bx-download"></i></a>
                                   @endif
                                 </td>

@@ -62,7 +62,7 @@
 					<div class="col-sm-3 col-12 dashboard-users-danger">
 						<div class="card text-center">
 							<div class="card-content">
-								<a href="/admin/directory">
+								<a href="/dashboard/directory">
 									<div class="card-body py-1">
 										<div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
 											<i class="bx bx bx-briefcase-alt font-medium-5"></i>
@@ -77,7 +77,7 @@
 					<div class="col-sm-3 col-12 dashboard-users-danger">
 						<div class="card text-center">
 							<div class="card-content">
-								<a href="/admin/requests/mine">
+								<a href="/dashboard/requests/mine">
 									<div class="card-body py-1">
 										<div class="badge-circle badge-circle-lg badge-circle-light-secondary mx-auto mb-50">
 											<i class="bx bxs-megaphone font-medium-5"></i>
@@ -92,7 +92,7 @@
 					<div class="col-sm-3 col-12 dashboard-users-danger">
 						<div class="card text-center">
 							<div class="card-content">
-								<a href="/admin/mentorship/mine">
+								<a href="/dashboard/mentorship/mine">
 									<div class="card-body py-1">
 										<div class="badge-circle badge-circle-lg badge-circle-light-info mx-auto mb-50">
 											<i class="bx bxs-graduation font-medium-5"></i>
@@ -107,7 +107,7 @@
 					<div class="col-sm-3 col-12 dashboard-users-success">
 						<div class="card text-center">
 							<div class="card-content">
-								<a href="/admin/inbox">
+								<a href="/dashboard/inbox">
 									<div class="card-body py-1">
 										<div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
 											<i class="bx bxs-message font-medium-5"></i>
@@ -134,13 +134,13 @@
 									@foreach($s_latest as $serv)
 										<div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
 											<div class="widget-todo-title-area d-flex align-items-center">
-												<a href="/admin/directory?find={{$serv->{'name_'.$l} }}">
+												<a href="/dashboard/directory?find={{$serv->{'name_'.$l} }}">
 													<span class="widget-todo-title ml-50 text-secondary"> <i class="bx bx-link text-primary"></i> {{$serv->{'name_'.$l} }}</span>
 												</a>
 											</div>
 											<div class="widget-todo-item-action d-flex align-items-center">
 												<div class="badge badge-pill badge-light-primary mr-1">
-													<a href="/admin/directory?type={{$serv->serviceCategory->id}}"> {{$serv->serviceCategory->{'name_'.$l} }} </a>
+													<a href="/dashboard/directory?type={{$serv->serviceCategory->id}}"> {{$serv->serviceCategory->{'name_'.$l} }} </a>
 												</div>
 											</div>
 										</div>
@@ -170,7 +170,7 @@
 									@foreach( $e_latest as $event )
 										<div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
 											<div class="widget-todo-title-area d-flex align-items-center">
-												<a href="/admin/calendar">
+												<a href="/dashboard/calendar">
 													<span class="widget-todo-title ml-50 text-secondary"> <i class="bx bx-calendar-event text-primary"></i> {{$event->title}}</span>
 												</a>
 											</div>
@@ -184,7 +184,7 @@
 										<div class="widget-todo-title-area d-flex align-items-center">
 											<span class="widget-todo-title ml-50">
 												<i class="bx bxs-bell-ring text-danger"></i>
-												{{__('dashboard.No Events added')}}, '<a href="/admin/calendar">{{__('dashboard.Add yours now')}}</a>'.
+												{{__('dashboard.No Events added')}}, '<a href="/dashboard/calendar">{{__('dashboard.Add yours now')}}</a>'.
 											</span>
 										</div>
 									</div>
@@ -227,7 +227,7 @@
 												if( $cs == $step->id ) { $stat="Started"; $ctype=$step->stype; }
 												$trtype = $flink = null;
 												if( Auth::user()->company->approved ) { $flink='my/'.Auth::user()->company->step; } else { $flink='view/'.Auth::user()->company->cycle; }
-												$links = ['','<a href="/admin/cycles/'.$flink.'">', '','','<a href="/admin/training/my">',''];
+												$links = ['','<a href="/dashboard/cycles/'.$flink.'">', '','','<a href="/dashboard/training/my">',''];
 											@endphp
 											<div class="col text-center" style="opacity:{{$s==0?"0.4":"1"}};">
 												{!! $links[$step->stype]&&$stat=='Started' ? $links[$step->stype] : '' !!}
@@ -263,14 +263,14 @@
 									@if( $ctype == 0 )
 										<hr><h6>{{__('dashboard.Sorry your submitted data doesn\'t meet the Cycle requirements')}}.</h6>
 									@elseif( $ctype == 1 )
-										<hr><h6><a href="/admin/cycles/{{$flink}}">{{__('dashboard.Click here')}}</a> {{__('dashboard.to fill your data')}}.</h6>
+										<hr><h6><a href="/dashboard/cycles/{{$flink}}">{{__('dashboard.Click here')}}</a> {{__('dashboard.to fill your data')}}.</h6>
 									@elseif( $ctype == 2 )
 										<hr><h6>{{__('dashboard.Please wait till Incubator team review your data to start the next Cycle step')}}.</h6>
 									@elseif( $ctype == 3 )
 										<hr><h6>{{__('dashboard.Below Mentors list to get any support, click request icon to check Mentor Schedule & request a meeting')}}.</h6>
 									@elseif( $ctype == 4 )
 										@php( $mytraining = \App\Step::findOrFail( Auth::user()->company->step ) )
-										<hr><h6>{{__('dashboard.Your training step started')}}, <a href="/admin/training/my">{{__('dashboard.Click here')}}</a> {{__('dashboard.to view your training list')}}.</h6>
+										<hr><h6>{{__('dashboard.Your training step started')}}, <a href="/dashboard/training/my">{{__('dashboard.Click here')}}</a> {{__('dashboard.to view your training list')}}.</h6>
 										<p>{{$mytraining->description}}</p>
 									@elseif( $ctype == 5 )
 										@php( $myfinal = \App\Finalscreening::where('company_id', Auth::user()->company->id )->where('step_id', Auth::user()->company->step )->first())
@@ -316,7 +316,7 @@
 														{{$cycle->description}}
 													</p>
 													<small class="text-muted">{{__('dashboard.start from')}} {{$cycle->start->format('d-m-Y')}}</small>
-													<a href="/admin/cycles/view/{{$cycle->id}}" class="btn btn-primary float-right">{{__('dashboard.Join')}}</a>
+													<a href="/dashboard/cycles/view/{{$cycle->id}}" class="btn btn-primary float-right">{{__('dashboard.Join')}}</a>
 												</div>
 											</div>
 										@endforeach
@@ -345,7 +345,7 @@
 							<div class="card-header border-bottom">
 								<h4 class="card-title d-flex align-items-center">
 									<i class='bx bxs-megaphone font-medium-4 mr-1'></i>{{__('dashboard.My Latest training')}} :: 
-									<a href="/admin/training/my">{{__('dashboard.Show all')}}</a>
+									<a href="/dashboard/training/my">{{__('dashboard.Show all')}}</a>
 								</h4>
 								<div class="heading-elements">
 									<ul class="list-inline mb-0">
@@ -384,7 +384,7 @@
 															@elseif ($session->type=='offline')
 																<b>{{__('cycles.trainer name')}}:</b> {{$session->trainer_name}}<br><b>{{__('cycles.training location')}}:</b> {{$session->location}} <br>
 															@else
-																<a href="/admin/training/my/{{$session->location}}">{{__('cycles.Display course contents')}} </a>
+																<a href="/dashboard/training/my/{{$session->location}}">{{__('cycles.Display course contents')}} </a>
 															@endif
 														</td>
 													</tr>

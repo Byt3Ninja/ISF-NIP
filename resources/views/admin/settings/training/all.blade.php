@@ -16,7 +16,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.all courses')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
 									<li class="breadcrumb-item active">{{__('cycles.all Training courses')}}
                                     </li>
@@ -85,7 +85,7 @@
     <div class="card">
         <div class="card-header">
             @if (isset($course))
-            <a class="btn btn-primary glow" href="/admin/training/addcontent/{{$id}}" >{{__('cycles.Add new content')}}</a>
+            <a class="btn btn-primary glow" href="/dashboard/training/addcontent/{{$id}}" >{{__('cycles.Add new content')}}</a>
                 @endif
         </div>
             <div class="card-body">
@@ -109,11 +109,11 @@
                                 <td>{{$content->created_at}}</td>
                                 <td>{{$content->user->{'first_name_'.$l} }} {{$content->user->{'last_name_'.$l} }}</td>
                                 <td>
-                                    <a title="Edit" href="/admin/training/editcontent/{{$content->id}}" class="btn btn-icon rounded-circle btn-light-success">
+                                    <a title="Edit" href="/dashboard/training/editcontent/{{$content->id}}" class="btn btn-icon rounded-circle btn-light-success">
                                         <i class="bx bx-edit"></i></a>
                                     <button title="Delete" onclick="deleteme({{$content->id}},0)" type="button" class="btn btn-icon rounded-circle btn-light-danger">
                                         <i class="bx bx-trash"></i></button>
-                                    <a title="Edit" href="/admin/training/viewcontent/{{$content->id}}" class="btn btn-icon rounded-circle btn-light-primary">
+                                    <a title="Edit" href="/dashboard/training/viewcontent/{{$content->id}}" class="btn btn-icon rounded-circle btn-light-primary">
                                         <i class="bx bx-show"></i></a>
                                 </td>
                             </tr>

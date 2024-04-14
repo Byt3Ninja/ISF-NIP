@@ -14,7 +14,7 @@
                             <h5 class="content-header-title float-left pr-1 mb-0">{{__('admin.Mentorship requests')}}</h5>
                             <div class="breadcrumb-wrapper col-12">
                                 <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/admin"><i class="bx bx-home-alt"></i></a>
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
                                     <li class="breadcrumb-item active">{{__('admin.Show my requests')}}
                                     </li>
@@ -32,7 +32,7 @@
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header"><br>
-                                        <a href="/admin" class="btn btn-primary glow">{{__('admin.Back to Dashboard')}}</a>
+                                        <a href="/dashboard" class="btn btn-primary glow">{{__('admin.Back to Dashboard')}}</a>
                                     </div>
                                     <div class="card-content">
                                         <div class="card-body card-dashboard">
@@ -103,7 +103,7 @@
                                              <h4 class="card-title">{{__('admin.No Requests')}}</h4>
                                         </div>
                                          <div class="card-body">
-                                             <a href="/admin" class="btn btn-primary glow">{{__('admin.Back to Dashboard')}}</a>
+                                             <a href="/dashboard" class="btn btn-primary glow">{{__('admin.Back to Dashboard')}}</a>
                                          </div>
                                     </div>
                                 </div>
