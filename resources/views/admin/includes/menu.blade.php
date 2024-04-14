@@ -52,8 +52,8 @@
                     </a>
                 </li>
         <?php
-        $cmessages = App\Messages::where('read',0);
-        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
+        $cmessages = App\Messages::where('receiver',auth()->id())->where('read',0);
+//        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
         $unread = $cmessages->count();
         $l=='ar'?$arrow='left':$arrow='right';
         ?>
