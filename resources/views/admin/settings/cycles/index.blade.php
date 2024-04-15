@@ -481,7 +481,7 @@
                     $('#menu1,#menu2').hide();
                     if (menu !== null) {
                         $.ajax({
-                            url: '{{ url("admin/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
+                            url: '{{ url("dashboard/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
                             success: function (response) {
                                 $('#FormSelect').empty()
                                 $('#FormSelect').append(response)
@@ -496,7 +496,7 @@
                     }
                     if (step==='5'){
                         $.ajax({
-                            url: '{{ url("admin/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
+                            url: '{{ url("dashboard/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
                             success: function (response) {
                                 $('#FormSelect').empty()
                                 $('#FormSelect').append(response)
@@ -532,7 +532,7 @@
                             }
                             if( menu !== null) {
                                 $.ajax({
-                                    url: '{{ url("admin/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
+                                    url: '{{ url("dashboard/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
                                     success: function (response) {
                                         $('#mFormSelect').empty()
                                         $('#mFormSelect').append(response)
@@ -547,7 +547,7 @@
                             }
                             if( step == 5 ) {
                                 $.ajax({
-                                    url: '{{ url("admin/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
+                                    url: '{{ url("dashboard/builder/organization/")  }}'+'/'+$("#ccycle option:selected").data('organization'),
                                     success: function (response) {
                                         $('#mFormSelect').empty()
                                         $('#mFormSelect').append(response)
