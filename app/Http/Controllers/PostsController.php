@@ -38,7 +38,7 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
 			$newpost->published = $request->input('published');
             $newpost->user_id = Auth::user()->id;
             $newpost->Save();
-            return redirect('admin/posts')->with('message', 'StoredSuccessfully');
+            return redirect('dashboard/posts')->with('message', 'StoredSuccessfully');
     }
     public function myposts(){
         $this->preProcessingCheck('manage_posts');
@@ -73,7 +73,7 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
 	if($request->input('created_at')){$updatepost->created_at = $request->input('created_at');}
             $updatepost->user_id = Auth::user()->id;
             $updatepost->Save();
-         return redirect('admin/posts')->with('message', 'StoredSuccessfully');
+         return redirect('dashboard/posts')->with('message', 'StoredSuccessfully');
     }
     public function deletepost($id)
     {

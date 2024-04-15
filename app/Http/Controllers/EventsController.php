@@ -50,7 +50,7 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
 			$newevent->published = $published;
             $newevent->user_id = Auth::user()->id;
             $newevent->Save();
-            return redirect('admin/allevents')->with('message','StoredSuccessfully');
+            return redirect('dashboard/allevents')->with('message','StoredSuccessfully');
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -96,7 +96,7 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
 			$updateevent->published = $published;
             $updateevent->user_id = Auth::user()->id;
             $updateevent->Save();
-         return redirect('admin/allevents')->with('message','StoredSuccessfully');
+         return redirect('dashboard/allevents')->with('message','StoredSuccessfully');
     }
     public function deleteevent($id)
     {

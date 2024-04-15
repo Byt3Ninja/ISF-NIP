@@ -39,7 +39,7 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
             $newpage->published = $request->input('published');
             $newpage->user_id = Auth::user()->id;
             $newpage->Save();
-            return redirect('admin/pages')->with('message', 'StoredSuccessfully');
+            return redirect('dashboard/pages')->with('message', 'StoredSuccessfully');
     }
     public function mypages(){
         $this->preProcessingCheck('manage_pages');

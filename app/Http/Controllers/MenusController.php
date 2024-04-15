@@ -25,7 +25,7 @@ class MenusController extends Controller
 			$newMenu->target = $request->input('target');
             $newMenu->user_added = Auth::user()->id;
             $newMenu->Save();
-            return redirect('admin/menus')->with('message', 'StoredSuccessfully');
+            return redirect('dashboard/menus')->with('message', 'StoredSuccessfully');
     }
     public function myMenus(){
         $this->preProcessingCheck('manage_menus');
@@ -51,7 +51,7 @@ class MenusController extends Controller
 			$updateMenu->target = $request->input('target');
             $updateMenu->user_added = Auth::user()->id;
             $updateMenu->Save();
-         return redirect('admin/menus')->with('message', 'StoredSuccessfully');
+         return redirect('dashboard/menus')->with('message', 'StoredSuccessfully');
     }
     public function deleteMenu($id)
     {

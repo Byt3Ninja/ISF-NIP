@@ -164,7 +164,7 @@ public function update_aboutus(Request $request){
 			$allabout->ar_set2 = $request->input('ar_set2');
 			$allabout->url = $request->input('url');
 			$allabout->Save();
-            return redirect('admin/setaboutus')->with('message', 'StoredSuccessfully');
+            return redirect('dashboard/setaboutus')->with('message', 'StoredSuccessfully');
     }
 public function get_contactus(Request $request){
             $this->preProcessingCheck('edit_settings');
@@ -183,7 +183,7 @@ public function update_contactus(Request $request){
 			$allcontact->set2 = $request->input('set2');
 			$allcontact->ar_set2 = $request->input('ar_set2');
 			$allcontact->Save();
-            return redirect('admin/setcontactus')->with('message', 'StoredSuccessfully');
+            return redirect('dashboard/setcontactus')->with('message', 'StoredSuccessfully');
     }
     //// Contact US Messages
     public function mymsg(){
@@ -231,7 +231,7 @@ public function update_contactus(Request $request){
             $read->user_id = Auth::user()->id;
             $read->Save();
             $read->delete();
-            return redirect('admin/mymsg')->with('message', 'DeletedSuccessfully');
+            return redirect('dashboard/mymsg')->with('message', 'DeletedSuccessfully');
     }
 			public function makeread($id){
             $this->preProcessingCheck('view_messages');

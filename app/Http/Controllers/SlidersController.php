@@ -35,7 +35,7 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
 			$newslider->slideorder = $request->input('slideorder');
             $newslider->user_added = Auth::user()->id;
             $newslider->Save();
-            return redirect('admin/slides')->with('message', 'StoredSuccessfully');
+            return redirect('dashboard/slides')->with('message', 'StoredSuccessfully');
 			}else{
 			return redirect()->back()->with('message2', 'FailedStore');
 						};
@@ -75,7 +75,7 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
 			$updateslider->slideorder = $request->input('slideorder');
             $updateslider->user_added = Auth::user()->id;
             $updateslider->Save();
-         return redirect('admin/slides')->with('message', 'StoredSuccessfully');
+         return redirect('dashboard/slides')->with('message', 'StoredSuccessfully');
     }
     public function deleteslide($id)
     {
