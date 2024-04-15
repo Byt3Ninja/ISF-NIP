@@ -138,17 +138,17 @@
                                                     <td> {{ $company->idea }}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>{{__('admin.Problem')}}:</td>
+                                                    <td>{{__('admin.Problem Solution')}}:</td>
                                                     <td> {{ $company->problem }} </td>
                                                 </tr>
                                                 <tr>
                                                     <td>{{__('admin.solution')}}:</td>
                                                     <td> {{ $company->solution }}</td>
                                                 </tr>
-                                                <tr>
-                                                    <td>{{__('admin.Team number')}}:</td>
-                                                    <td> {{ $company->team_num }}</td>
-                                                </tr>
+{{--                                                <tr>--}}
+{{--                                                    <td>{{__('admin.Team number')}}:</td>--}}
+{{--                                                    <td> {{ $company->team_num }}</td>--}}
+{{--                                                </tr>--}}
                                                 <tr>
                                                     <td>{{__('admin.Stage')}}:</td>
                                                     <td> {{ $company->stage }}</td>

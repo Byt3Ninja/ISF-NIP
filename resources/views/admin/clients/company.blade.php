@@ -80,7 +80,7 @@
                                                 </div>
                                             </div>
                                             @php
-                                                if($client->company) {$stateID = $client->company->state_id;} else {$stateID=0;}
+                                                if($client->company) {$stateID = optional($client->company)->state_id;} else {$stateID=0;}
                                             @endphp
                                             <div class="col-md-4 col-12">
                                                 <div class="form-group">
@@ -422,7 +422,7 @@ $(document).ready(function() {
 });
 function getStates(country_id){
     var $state = $('#state_id');
-    var currentState = '{{ $client->company->state_id }}';
+    var currentState = '{{ $client->company?optional($client->company)->state_id:0 }}';
     var selected = '';
     $.ajax({
         url: "{{ route('get_states_by_country') }}",
