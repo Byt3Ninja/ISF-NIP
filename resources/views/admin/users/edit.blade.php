@@ -151,23 +151,36 @@
                                                             autocomplete="title_en">
                                                 </fieldset>
                                                 <fieldset class="form-group">
+                                                    <label for="country_id">{{ __('admin.Country')}}</label>
+
+                                                    <select class="form-control" required
+                                                            id="country_id" name='country_id'>
+                                                        <option value="">{{ __('admin.Country')}}</option>
+                                                        @foreach($countries as $country)
+                                                            <option value="{{$country->id}}" {{($country->id==$client->country_id)? 'selected':''}}>{{$country->{'name_'.$l} }}</option>
+                                                        @endforeach
+                                                    </select>
+
+                                                </fieldset>
+                                                <fieldset class="form-group">
                                                     <label for="state_id">{{ __('admin.State')}}</label>
-                                                    <select class="form-control"
+                                                    <select class="form-control" required
                                                             id="state_id" name='state_id'>
                                                         <option value="">{{ __('admin.State')}}</option>
-                                                        @foreach(\App\State::get() as $state)
-                                                            <option value="{{$state->id}}" {{($state->id==$user->state_id)? 'selected':''}}>{{$state->{'name_'.$l} }}</option>
-                                                        @endforeach
+                                                        @php $name = 'name_'.$l; @endphp
+                                                        @if($client->state_id)
+                                                            <option value="{{$client->state_id}}" selected>{{$client->state->{'name_'.$l} }}</option>
+                                                        @endif
                                                     </select>
                                                 </fieldset>
                                                 <fieldset class="form-group">
                                                     <label for="city_id">{{ __('admin.City')}}</label>
-                                                    <select class="form-control"
+                                                    <select class="form-control" required
                                                             id="city_id" name='city_id'>
                                                         <option value="">{{ __('admin.City')}}</option>
                                                         @php $name = 'name_'.$l; @endphp
-                                                        @if($user->city_id)
-                                                            <option value="{{$user->city_id}}" selected>{{$user->city->{'name_'.$l} }}</option>
+                                                        @if($client->city_id)
+                                                            <option value="{{$client->city_id}}" selected>{{$client->city->{'name_'.$l} }}</option>
                                                         @endif
                                                     </select>
                                                 </fieldset>
@@ -370,29 +383,63 @@
 @section('pagescripts')
     <script>
         $(document).ready(function() {
-            $('#state_id').change(function() {
-                var $city = $('#city_id');
-                var currentCity = '{{ ($user->company)? $user->company->city_id:0 }}';
-                var selected = '';
-                $.ajax({
-                    url: "{{ route('cities.index') }}",
-                    data: {
-                        state_id: $(this).val()
-                    },
-                    success: function(data) {
-                        $city.html('<option value="" >{{ __('admin.City')}}</option>');
-                        $.each(data, function(id, value) {
-                            if(currentCity == id){
-                                selected = 'selected';
-                            }else{
-                                selected = '';
-                            }
-                            $city.append('<option value="'+id+' '+selected+'">'+value+'</option>');
-                        });
-                        $('#city').show(150);
-                    }
-                });
+            getStates($('#country_id').val());
+            $('#country_id').change(function () {
+                getStates($(this).val());
+            });
+            $('#state_id').change(function () {
+                getCities($(this).val());
             });
         });
+
+        function getStates(country_id){
+            var $state = $('#state_id');
+            var currentState = '{{ $client->state_id }}';
+            var selected = '';
+            $.ajax({
+                url: "{{ route('get_states_by_country') }}",
+                data: {
+                    country_id: country_id
+                },
+                success: function (data) {
+                    $state.html('<option value="" >{{ __('admin.State')}}</option>');
+                    $.each(data, function (id, value) {
+                        // selected = '';
+                        if (currentState === id) {
+                            selected = 'selected';
+                            getCities(id)
+                        } else {
+                            selected = '';
+                        }
+                        $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
+                        $('#city_id').html('<option value="" >{{ __('admin.City')}}</option>');
+                    });
+                    $('#state').show(150);
+                }
+            });
+        }
+        function getCities(state_id){
+            var $city = $('#city_id');
+            var currentCity = '{{ $client->city_id }}';
+            var selected = '';
+            $.ajax({
+                url: "{{ route('cities.index') }}",
+                data: {
+                    state_id: state_id
+                },
+                success: function(data) {
+                    $city.html('<option value="" >{{ __('admin.City')}}</option>');
+                    $.each(data, function(id, value) {
+                        if(currentCity == id){
+                            selected = 'selected';
+                        }else{
+                            selected = '';
+                        }
+                        $city.append('<option value="'+id+'" '+selected+' >'+value+'</option>');
+                    });
+                    $('#city').show(150);
+                }
+            });
+        }
     </script>
 @stop

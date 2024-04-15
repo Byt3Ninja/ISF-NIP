@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Country;
 use Illuminate\Http\Request;
 use \Spatie\Permission\Models\Role as Role;
 use App\Http\Requests\StoreUserRequest;
@@ -132,7 +133,8 @@ class UserController extends Controller
 
             $this->preProcessingCheck('edit_user');
             $roles = Role::all();
-            return view('admin/users/edit', compact('user', 'roles'));
+            $countries = Country::all();
+            return view('admin/users/edit', compact('user', 'roles','countries'));
 
         }catch (Exception $e){
 
