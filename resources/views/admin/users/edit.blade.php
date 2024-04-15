@@ -157,7 +157,7 @@
                                                             id="country_id" name='country_id'>
                                                         <option value="">{{ __('admin.Country')}}</option>
                                                         @foreach($countries as $country)
-                                                            <option value="{{$country->id}}" {{($country->id==$client->country_id)? 'selected':''}}>{{$country->{'name_'.$l} }}</option>
+                                                            <option value="{{$country->id}}" {{($country->id==$user->country_id)? 'selected':''}}>{{$country->{'name_'.$l} }}</option>
                                                         @endforeach
                                                     </select>
 
@@ -168,8 +168,8 @@
                                                             id="state_id" name='state_id'>
                                                         <option value="">{{ __('admin.State')}}</option>
                                                         @php $name = 'name_'.$l; @endphp
-                                                        @if($client->state_id)
-                                                            <option value="{{$client->state_id}}" selected>{{$client->state->{'name_'.$l} }}</option>
+                                                        @if($user->state_id)
+                                                            <option value="{{$user->state_id}}" selected>{{$user->state->{'name_'.$l} }}</option>
                                                         @endif
                                                     </select>
                                                 </fieldset>
@@ -179,8 +179,8 @@
                                                             id="city_id" name='city_id'>
                                                         <option value="">{{ __('admin.City')}}</option>
                                                         @php $name = 'name_'.$l; @endphp
-                                                        @if($client->city_id)
-                                                            <option value="{{$client->city_id}}" selected>{{$client->city->{'name_'.$l} }}</option>
+                                                        @if($user->city_id)
+                                                            <option value="{{$user->city_id}}" selected>{{$user->city->{'name_'.$l} }}</option>
                                                         @endif
                                                     </select>
                                                 </fieldset>
@@ -394,7 +394,7 @@
 
         function getStates(country_id){
             var $state = $('#state_id');
-            var currentState = '{{ $client->state_id }}';
+            var currentState = '{{ $user->state_id }}';
             var selected = '';
             $.ajax({
                 url: "{{ route('get_states_by_country') }}",
@@ -420,7 +420,7 @@
         }
         function getCities(state_id){
             var $city = $('#city_id');
-            var currentCity = '{{ $client->city_id }}';
+            var currentCity = '{{ $user->city_id }}';
             var selected = '';
             $.ajax({
                 url: "{{ route('cities.index') }}",
