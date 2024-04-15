@@ -99,7 +99,7 @@
 								@endif
 							</td>
                                                         <td><a href="/dashboard/editpage/{{$page->id}}"><i class="bx bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('admin/deletepage/'.$page->id ?? null)}}"><i class="bx bx-trash"> </i></a>
+                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('dashboard/deletepage/'.$page->id ?? null)}}"><i class="bx bx-trash"> </i></a>
                                                   |         @if($page->published) <a target="_blank" href="/page/{{$page->url}}"><i class="bx bx-show-alt"> </i></a>
                                                             @else <i class="bx bx-hide"> </i>@endif
                                                         </td>

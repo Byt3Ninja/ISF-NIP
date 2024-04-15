@@ -56,7 +56,7 @@
 					 @endif
                     <div class="row match-height">
                         <div class="col-12">
-                            <form class="form" id="basicForm" action= "{{URL::to('admin/update_settings')}}" method="POST" enctype="multipart/form-data">
+                            <form class="form" id="basicForm" action= "{{URL::to('dashboard/update_settings')}}" method="POST" enctype="multipart/form-data">
                                 {!! csrf_field() !!}
                             <div class="card">
                                 <div class="card-header">

@@ -195,7 +195,7 @@
      aria-labelledby="myModalLabel33" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form class="form" action= "{{URL::to('admin/cycles/modify')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
+            <form class="form" action= "{{URL::to('dashboard/cycles/modify')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
                 {!! csrf_field() !!}
             <div class="modal-header">
                 <h4 class="modal-title" id="myModalLabel33">{{__('cycles.Cycle data')}}
@@ -263,7 +263,7 @@
      aria-labelledby="myModalLabel33" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form class="form" action= "{{URL::to('admin/cycles/modify')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
+            <form class="form" action= "{{URL::to('dashboard/cycles/modify')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
                 {!! csrf_field() !!}
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel33">{{__('cycles.New step data')}} - <span id="formtitle">{{__('cycles.Custom Form')}}</span></h4>
@@ -333,7 +333,7 @@
      aria-labelledby="myModalLabel33" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form class="form" action= "{{URL::to('admin/cycles/modify')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
+            <form class="form" action= "{{URL::to('dashboard/cycles/modify')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
                 {!! csrf_field() !!}
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel33">{{__('cycles.Modify current step')}}</h4>

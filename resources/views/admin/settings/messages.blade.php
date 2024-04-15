@@ -126,7 +126,7 @@
                                                             <i class="bx bx-x"></i>
                                                         </button>
                                                     </div>
-                                                    <form action="{{URL::to('admin/msgreply')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
+                                                    <form action="{{URL::to('dashboard/msgreply')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
                                                     <div class="modal-body">
                                                         <p class="warning" id="replyby"></p>
 														<p><b>{{__('messages.Phone')}}: </b> <span id="Phone"></span></p>

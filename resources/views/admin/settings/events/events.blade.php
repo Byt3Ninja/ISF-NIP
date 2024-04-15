@@ -86,7 +86,7 @@
                                                         <td>
 												<a href="/reports/events/{{$event->id}}"><i class="bx bx-download"> </i></a> |
 												<a href="/dashboard/editevent/{{$event->id}}"><i class="bx bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('Are you sure, delete event & all its registered users?');" href="{{URL::to('admin/deleteevent/'.$event->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
+                                   <a onclick="return confirm('Are you sure, delete event & all its registered users?');" href="{{URL::to('dashboard/deleteevent/'.$event->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
 												@endforeach
 

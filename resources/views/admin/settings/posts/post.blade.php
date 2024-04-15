@@ -97,7 +97,7 @@
 								@endif
 							</td>
                                                         <td><a href="/dashboard/editpost/{{$post->id}}"><i class="bx bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('admin/deletepost/'.$post->id ?? null)}}"><i class="bx bx-trash"> </i></a>
+                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('dashboard/deletepost/'.$post->id ?? null)}}"><i class="bx bx-trash"> </i></a>
                                                             |   @if($post->published)<a target="_blank" href="/blog/{{$post->id}}"><i class="bx bx-show-alt"> </i></a>
                                                             @else <i class="bx bx-hide"> </i>
                                                             @endif

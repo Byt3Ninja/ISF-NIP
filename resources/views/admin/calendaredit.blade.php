@@ -100,7 +100,7 @@
                                             <div class="col-12 d-flex justify-content-end">
                                                 <button type="submit"
                                                     class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
-                                                <a onclick="return confirm('{{__('admin.Sure del cal')}}');" href="{{URL::to('admin/calendar/'.$cal->id.'/delete')}}" >
+                                                <a onclick="return confirm('{{__('admin.Sure del cal')}}');" href="{{URL::to('dashboard/calendar/'.$cal->id.'/delete')}}" >
                                                     <button type="button" class="btn btn-danger mr-1 mb-1">{{__('admin.Delete')}}</button> </a>
                                             </div>
                                         </div>

@@ -99,7 +99,7 @@
 								@endif
 							</td>
                                                         <td><a href="/dashboard/edit_slide/{{$slide->id}}"><i class="bx bx-edit-alt"> </i></a> |
-                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('admin/delete_slide/'.$slide->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
+                                   <a onclick="return confirm('{{__('settings.SureDelete')}}');" href="{{URL::to('dashboard/delete_slide/'.$slide->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
                                                     </tr>
 												@endforeach
 

@@ -75,7 +75,7 @@
                 {{session()->get('message') == 'Done'?__('Thank your for your subscription.'):__('Something went wrong. Please try again later!')}}
                  <p>
                 @endif
-                <form class="subscribe-form" id="sendmail" name="sendmail" action= "{{URL::to('admin/message')}}" method="POST" enctype="multipart/form-data">
+                <form class="subscribe-form" id="sendmail" name="sendmail" action= "{{URL::to('dashboard/message')}}" method="POST" enctype="multipart/form-data">
            					     {!! csrf_field() !!}
                     <input name ="email" type="email" placeholder="{{__('Email')}}" required><span class="fa fa-envelope"></span>
                     <button type="submit" class="thm-btn">{{__('Subscribe us')}}</button>

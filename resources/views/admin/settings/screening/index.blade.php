@@ -229,7 +229,7 @@
      aria-labelledby="myModalLabel33" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form class="form" action= "{{URL::to('admin/cycles/modify')}}" method="POST" enctype="multipart/form-data">
+            <form class="form" action= "{{URL::to('dashboard/cycles/modify')}}" method="POST" enctype="multipart/form-data">
                 {!! csrf_field() !!}
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel33">{{__('cycles.Modify current screening')}}</h4>
@@ -288,7 +288,7 @@
      aria-labelledby="myModalLabel33" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form class="form" action= "{{URL::to('admin/screening/add')}}" method="POST" enctype="multipart/form-data">
+            <form class="form" action= "{{URL::to('dashboard/screening/add')}}" method="POST" enctype="multipart/form-data">
                 {!! csrf_field() !!}
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel33">{{__('cycles.Assign companies to panel')}} <span id="cpanel">0</span> </h4>
