@@ -118,8 +118,8 @@
                                             <tbody>
                                             @foreach ($users as $user)
                                             <tr>
-                                                <td><a href="{{route('users.edit', ['id' => $user->id])}}">{{$user->id}}</a></td>
-                                                <td style="font-size: small;"><a href="{{route('users.edit', ['id' => $user->id])}}"> {{$user->{'first_name_'.$l} }} {{$user->{'last_name_'.$l} }}</a></td>
+                                                <td><a href="{{route('users.edit', ['user' => $user->id])}}">{{$user->id}}</a></td>
+                                                <td style="font-size: small;"><a href="{{route('users.edit', ['user' => $user->id])}}"> {{$user->{'first_name_'.$l} }} {{$user->{'last_name_'.$l} }}</a></td>
                                                 <td style="font-size: small;">{{$user->email}}</td>
                                                 <td style="font-size: small;">{{$user->phone}}</td>
                                                 <td style="font-size: small;">{{__('admin.'.$user->gender)}}</td>
@@ -128,7 +128,7 @@
                                                 <td style="font-size: small;">{{$user->created_at}}</td>
                                                 <td style="padding: 0px;font-size: small;">
                                                     @can('delete_user')
-                                                         <button id='deleteAction' data-id='{{$user->id}}' data-url="{{route('users.destroy', ['id' => $user->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="bx bx-trash"> </i></button>
+                                                         <button id='deleteAction' data-id='{{$user->id}}' data-url="{{route('users.destroy', ['user' => $user->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="bx bx-trash"> </i></button>
                                                     @endcan
                                                 </td>
                                             </tr>

@@ -68,8 +68,8 @@
                                                             @endforeach
                                                         </td>
                                                         <td>
-                                                            <a href="{{route('roles.edit', ['id' => $role->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
-                                                            <button id='deleteAction' data-id='{{$role->id}}' data-url="{{route('roles.destroy', ['id' => $role->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                            <a href="{{route('roles.edit', ['role' => $role->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                            <button id='deleteAction' data-id='{{$role->id}}' data-url="{{route('roles.destroy', ['role' => $role->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
                                                         </td>
 
                                                     </tr>

@@ -53,7 +53,7 @@
                                     </div>
                                     @endif
                                         <br>
-                                    <form method="post" action="{{route('documentation.update', ['id' => $documentation->id])}}" enctype="multipart/form-data">
+                                    <form method="post" action="{{route('documentation.update', ['documentation' => $documentation->id])}}" enctype="multipart/form-data">
                                         {!! csrf_field() !!}
                                         @method('patch')
                                         <div class="form-body">

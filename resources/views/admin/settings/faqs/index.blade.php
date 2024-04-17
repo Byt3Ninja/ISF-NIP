@@ -71,8 +71,8 @@
                                                         <td>{{$faq->published?"Yes":"No"}}</td>
                                                         @can('edit_faqs')
                                                         <td>
-                                                                <a href="{{route('faqs.edit', ['id' => $faq->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
-                                                                <button id='deleteAction' data-id='{{$faq->id}}' data-url="{{route('faqs.destroy', ['id' => $faq->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                                <a href="{{route('faqs.edit', ['faq' => $faq->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                                <button id='deleteAction' data-id='{{$faq->id}}' data-url="{{route('faqs.destroy', ['faq' => $faq->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
                                                         </td>
                                                         @endcan
                                                     </tr>

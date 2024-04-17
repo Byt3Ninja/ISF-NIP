@@ -77,7 +77,7 @@
                                             <tbody>
                                             @foreach ($booking_reviews as $booking_review)
                                             <tr>
-                                                <td style="font-size: small;"><a href="{{route('rooms.edit', ['id' => $booking_review->room->id])}}"> {{$booking_review->room->{'name_'.$l} }}</a></td>
+                                                <td style="font-size: small;"><a href="{{route('rooms.edit', ['room' => $booking_review->room->id])}}"> {{$booking_review->room->{'name_'.$l} }}</a></td>
                                                 <td style="font-size: small;">{{$booking_review->client->{'first_name_'.$l}.' '.$booking_review->client->{'last_name_'.$l} }}</td>
                                                 <td style="font-size: small;">{{$booking_review->fromDate}}</td>
                                                 <td style="font-size: small;">{{$booking_review->toDate}}</td>

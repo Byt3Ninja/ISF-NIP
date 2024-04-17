@@ -72,11 +72,11 @@
                                                         <td>{{$type->created_at}}</td>
                                                         <td>
                                                             @can('edit_type')
-                                                                <a href="{{route('types.edit', ['id' => $type->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                                <a href="{{route('types.edit', ['type' => $type->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
                                                             @endcan
 
                                                             @can('delete_type')
-                                                                <button id='deleteAction' data-id='{{$type->id}}' data-url="{{route('types.destroy', ['id' => $type->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                                <button id='deleteAction' data-id='{{$type->id}}' data-url="{{route('types.destroy', ['type' => $type->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
                                                             @endcan
                                                         </td>
                                                     </tr>

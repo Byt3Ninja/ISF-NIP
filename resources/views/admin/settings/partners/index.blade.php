@@ -69,11 +69,11 @@
                                                         <td>{{$partner->created_at}}</td>
                                                         <td>
                                                             @can('edit_partner')
-                                                                <a href="{{route('partners.edit', ['id' => $partner->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                                <a href="{{route('partners.edit', ['partner' => $partner->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
                                                             @endcan
 
                                                             @can('delete_partner')
-                                                                <button id='deleteAction' data-id='{{$partner->id}}' data-url="{{route('partners.destroy', ['id' => $partner->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                                <button id='deleteAction' data-id='{{$partner->id}}' data-url="{{route('partners.destroy', ['partner' => $partner->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
                                                             @endcan
                                                         </td>
                                                     </tr>

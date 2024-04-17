@@ -75,11 +75,11 @@
                                                         <td>{{$service->created_at}}</td>
                                                         <td>
                                                             @can('edit_service')
-                                                                <a href="{{route('services.edit', ['id' => $service->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                                <a href="{{route('services.edit', ['service' => $service->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
                                                             @endcan
 
                                                             @can('delete_service')
-                                                                <button id='deleteAction' data-id='{{$service->id}}' data-url="{{route('services.destroy', ['id' => $service->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                                <button id='deleteAction' data-id='{{$service->id}}' data-url="{{route('services.destroy', ['service' => $service->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
                                                             @endcan
                                                         </td>
                                                     </tr>

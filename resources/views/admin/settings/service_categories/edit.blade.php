@@ -38,7 +38,7 @@
                                             </div>
                                         </div>
                                     @endif
-                                    <form method="post" action="{{route('serviceCategories.update', ['id' => $serviceCategory->id])}}">
+                                    <form method="post" action="{{route('serviceCategories.update', ['serviceCategory' => $serviceCategory->id])}}">
                                         {!! csrf_field() !!}
                                         @method('patch')
                                         <div class="row">

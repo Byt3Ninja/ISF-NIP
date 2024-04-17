@@ -60,12 +60,12 @@
 											<tbody>
 											@foreach( $organizations as $organization )
 											<tr>
-												<td><a href="{{route('organizations.edit', ['id' => $organization->id])}}">{{$organization->id}}</a></td>
-												<td style="font-size: small;"><a href="{{route('organizations.edit', ['id' => $organization->id])}}"> {{ $organization->{'name_'.$l} }}</a></td>
+												<td><a href="{{route('organizations.edit', ['organization' => $organization->id])}}">{{$organization->id}}</a></td>
+												<td style="font-size: small;"><a href="{{route('organizations.edit', ['organization' => $organization->id])}}"> {{ $organization->{'name_'.$l} }}</a></td>
 
 												<td>
 													<div class="media align-items-center">
-														<a class="media-left mr-50" href="{{route('organizations.edit', ['id' => $organization->id])}}">
+														<a class="media-left mr-50" href="{{route('organizations.edit', ['organization' => $organization->id])}}">
 															<img src="/191014/{{$organization->img_url??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="" height="40" >
 														</a>
 													</div>
@@ -74,7 +74,7 @@
 												<td style="font-size: small;">{{$organization->user->phone}}</td>
 												<td style="padding: 0px;font-size: small;">
 													@can('delete_user')
-														<button id='deleteAction' data-id='{{$organization->id}}' data-url="{{route('organizations.destroy', ['id' => $organization->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="bx bx-trash"> </i></button>
+														<button id='deleteAction' data-id='{{$organization->id}}' data-url="{{route('organizations.destroy', ['organization' => $organization->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="bx bx-trash"> </i></button>
 													@endcan
 												</td>
 											</tr>

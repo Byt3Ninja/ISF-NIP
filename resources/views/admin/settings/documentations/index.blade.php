@@ -70,9 +70,9 @@
                                                             <a title="View" target="_blank" href="/dashboard/documentation/{{$doc->id}}" class="btn btn-icon rounded-circle btn-light-primary">
                                                                 <i class="bx bx-show"></i></a>
                                                             @can('manage_documentation')
-                                                            <a title="Edit" href="{{route('documentation.edit', ['id' => $doc->id])}}" class="btn btn-icon rounded-circle btn-light-success">
+                                                            <a title="Edit" href="{{route('documentation.edit', ['documentation' => $doc->id])}}" class="btn btn-icon rounded-circle btn-light-success">
                                                                 <i class="bx bx-edit"></i></a>
-                                                            <button  id='deleteAction' data-id='{{$doc->id}}' data-url="{{route('documentation.destroy', ['id' => $doc->id])}}" class="btn btn-icon rounded-circle btn-light-danger">
+                                                            <button  id='deleteAction' data-id='{{$doc->id}}' data-url="{{route('documentation.destroy', ['documentation' => $doc->id])}}" class="btn btn-icon rounded-circle btn-light-danger">
                                                                 <i class="bx bx-trash"></i></button>
                                                             @endcan
                                                         </td>

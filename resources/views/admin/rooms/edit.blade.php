@@ -53,7 +53,7 @@
                                             </div>
                                         @endif
 
-                                        <form method="post" action="{{route('rooms.update', ['id' => $room->id])}}" enctype="multipart/form-data">
+                                        <form method="post" action="{{route('rooms.update', ['room' => $room->id])}}" enctype="multipart/form-data">
                                             {!! csrf_field() !!}
                                             {{ method_field('PATCH') }}
                                             <div class="col-md-12">

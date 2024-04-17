@@ -56,7 +56,7 @@
 										</div>
 									</div>
 									@endif
-									<form method="post" action="{{ route('organizations.update', ['id' => $organization->id]) }}" enctype="multipart/form-data">
+									<form method="post" action="{{ route('organizations.update', ['organization' => $organization->id]) }}" enctype="multipart/form-data">
 										{!! csrf_field() !!}
                                         <input name="_method" type="hidden" value="PATCH" />
 										<div class="row">

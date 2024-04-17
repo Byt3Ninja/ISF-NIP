@@ -67,11 +67,11 @@
                                                         <td>{{$press->created_at}}</td>
                                                         <td>
                                                             @can('edit_press')
-                                                                <a href="{{route('press.edit', ['id' => $press->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                                <a href="{{route('press.edit', ['press' => $press->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
                                                             @endcan
 
                                                             @can('delete_press')
-                                                                <button id='deleteAction' data-id='{{$press->id}}' data-url="{{route('press.destroy', ['id' => $press->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                                <button id='deleteAction' data-id='{{$press->id}}' data-url="{{route('press.destroy', ['press' => $press->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
                                                             @endcan
                                                         </td>
                                                     </tr>

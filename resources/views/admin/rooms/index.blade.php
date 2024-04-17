@@ -87,8 +87,8 @@
                                             <?php $cont =1;?>
                                             @foreach ($rooms as $room)
                                             <tr>
-                                                <td><a href="{{route('rooms.edit', ['id' => $room->id])}}">{{$room->id}}</a></td>
-                                                <td style="font-size: small;"><a href="{{route('rooms.edit', ['id' => $room->id])}}"> {{$room->{'name_'.$l} }}</a></td>
+                                                <td><a href="{{route('rooms.edit', ['room' => $room->id])}}">{{$room->id}}</a></td>
+                                                <td style="font-size: small;"><a href="{{route('rooms.edit', ['room' => $room->id])}}"> {{$room->{'name_'.$l} }}</a></td>
                                                 <td style="font-size: small;">{{$room->type_trans}}</td>
                                                 <td style="font-size: small;">{{$room->price}}</td>
                                                 <td style="font-size: small;">{{$room->discount}}</td>
@@ -102,7 +102,7 @@
                                                 <?php $cont++;?>
                                                 <td style="padding: 0px;font-size: small;">
                                                     @can('delete_user')
-                                                         <button id='deleteAction' data-id='{{$room->id}}' data-url="{{route('rooms.destroy', ['id' => $room->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="bx bx-trash"> </i></button>
+                                                         <button id='deleteAction' data-id='{{$room->id}}' data-url="{{route('rooms.destroy', ['room' => $room->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="bx bx-trash"> </i></button>
                                                     @endcan
                                                 </td>
                                             </tr>

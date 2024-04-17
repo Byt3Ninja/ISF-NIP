@@ -52,7 +52,7 @@
                                         </div>
                                     </div>
                                     @endif
-                                    <form method="post" action="{{route('services.update', ['id' => $service->id])}}"
+                                    <form method="post" action="{{route('services.update', ['service' => $service->id])}}"
                                         enctype="multipart/form-data">
                                         {!! csrf_field() !!}
                                         @method('patch')
