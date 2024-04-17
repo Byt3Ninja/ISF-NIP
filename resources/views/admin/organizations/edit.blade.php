@@ -1,6 +1,5 @@
 @php
     $user = $organization->user;
-@php
 @endphp
 @extends('layouts.admin')
 @section('title', __('admin.Organizations') )
