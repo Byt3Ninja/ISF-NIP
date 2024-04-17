@@ -7,6 +7,7 @@
 /docker_volumes
 /docker_volumes/nginx
 /docker_volumes/db
+composer.lock
 sail
 Dockerfile
 docker-compose.yml
