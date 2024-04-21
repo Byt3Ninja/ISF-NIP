@@ -1,8 +1,8 @@
         <div class="navbar-header" style="margin-bottom: 50px">
             <ul class="nav navbar-nav flex-row">
                 <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
-                        @if(!is_null(auth()->user()->organization_id))
-                            <img  src="/191014/{{auth()->user()->organization->img_url}}" alt="avatar" height="40" width="80">
+                        @if(!is_null(auth()->user()->organization))
+                            <img  src="/191014/{{ optional(auth()->user()->organization)->img_url}}" alt="avatar" height="40" width="80">
                         @else
                         <img  src="/images/logo/arweqah.png" alt="avatar" height="50" width="80">
                         @endif

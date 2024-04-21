@@ -448,7 +448,7 @@ function getStates(country_id){
 }
 function getCities(state_id){
     var $city = $('#city_id');
-    var currentCity = '{{ $client->company->city_id }}';
+    var currentCity = '{{ $client->company? optional($client->company)->city_id:0 }}';
     var selected = '';
     $.ajax({
         url: "{{ route('cities.index') }}",
