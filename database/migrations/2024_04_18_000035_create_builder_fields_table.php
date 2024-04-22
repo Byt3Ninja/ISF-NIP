@@ -21,6 +21,7 @@ return new class extends Migration
 
             $table->longText('options')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

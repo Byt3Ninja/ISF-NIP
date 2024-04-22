@@ -22,8 +22,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('title_ar', 250)->nullable();
             $table->string('title_en', 250)->nullable();
-//            $table->integer('HaveCompany')->nullable()->default(1);
-//            $table->integer('company_id')->nullable()->default(0);
             $table->foreignId('country_id')->nullable()->constrained()->onDelete('SET NULL');
             $table->foreignId('state_id')->nullable()->constrained()->onDelete('SET NULL');
             $table->foreignId('city_id')->nullable()->constrained()->onDelete('SET NULL');
@@ -41,8 +39,8 @@ return new class extends Migration
             $table->rememberToken();
             $table->string('img_url')->nullable();
             $table->integer('PageId')->nullable();
-//            $table->integer('organization_id')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

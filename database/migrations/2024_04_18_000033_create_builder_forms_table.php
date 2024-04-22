@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('form_name')->nullable();
             $table->foreignId('organization_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

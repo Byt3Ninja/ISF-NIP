@@ -41,6 +41,7 @@ return new class extends Migration
             $table->foreign('cycle_id')->references('id')->on('cycles')->onDelete('cascade');
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

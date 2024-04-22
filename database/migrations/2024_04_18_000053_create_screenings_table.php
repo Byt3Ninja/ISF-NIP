@@ -14,14 +14,21 @@ return new class extends Migration
     public function up()
     {
         Schema::create('screenings', function (Blueprint $table) {
-            $table->integer('step_id');
-            $table->integer('user_id');
-            $table->integer('panel')->default(1);
-            $table->string('users', 500)->nullable();
-            $table->timestamp('created_at')->nullable()->useCurrent();
-            $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable();
 
-            $table->primary(['step_id', 'user_id', 'panel']);
+            $table->unsignedBigInteger('step_id');
+            $table->foreign('step_id')->references('id')->on('steps')->onDelete('cascade');
+
+
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->integer('panel')->default(1);
+
+            $table->string('users', 500)->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->primary(['panel']);
         });
     }
 

@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('question', 500);
             $table->text('answer')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
         });
     }

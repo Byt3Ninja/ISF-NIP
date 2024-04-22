@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_id');
             $table->foreign('parent_id')->references('id')->on('sectors')->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

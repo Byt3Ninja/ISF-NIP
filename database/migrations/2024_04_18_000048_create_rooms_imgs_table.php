@@ -20,8 +20,12 @@ return new class extends Migration
             $table->foreign('room_id')->references('id')->on('rooms')->onDelete('cascade');
 
             $table->string('img_url');
-            $table->integer('user_added');
+
+            $table->unsignedBigInteger('user_added')->nullable();
+            $table->foreign('user_added')->references('id')->on('users')->onDelete('set null');
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

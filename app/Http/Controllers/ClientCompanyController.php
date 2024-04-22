@@ -51,10 +51,10 @@ class ClientCompanyController extends Controller
      */
     public function editOrCreate(){
         try{
-            $client = User::with('company')
+            $client = User::where('HaveCompany',1)->with('company')
                          //   ->with('company.services:id')
-                            ->with('company.city')
-                            ->find(Auth::id());
+                ->with('company.city')
+                ->find(Auth::id());
             $countries = Country::all();
             $states = State::all();
             $cities = City::all();

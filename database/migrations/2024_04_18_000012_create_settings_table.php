@@ -32,6 +32,7 @@ return new class extends Migration
             $table->foreign('user_added')->references('id')->on('users')->onDelete('SET NULL');
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

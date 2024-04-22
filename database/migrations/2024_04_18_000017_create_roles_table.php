@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('guard_name', 250)->default('web');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

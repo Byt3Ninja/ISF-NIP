@@ -31,6 +31,7 @@ return new class extends Migration
 
             $table->integer('done')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

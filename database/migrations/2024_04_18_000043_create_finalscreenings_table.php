@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('join_url', 1024)->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
 
         });
     }

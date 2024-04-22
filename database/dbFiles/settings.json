@@ -1,0 +1,235 @@
+
+  [
+      {
+        "type": "1",
+        "title": "The Virtual Incubator",
+        "ar_title": "حاضنة الأعمال الإفتراضية",
+        "dsc": null,
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": "set_order = 1 to enable registration\nset url = UA-14400000?-? to add google analytics code\n",
+        "ar_set2": null,
+        "url": null,
+        "img_url": null,
+        "set_order": "1"
+      },
+      {
+        "type": "2",
+        "title": "Facebook",
+        "ar_title": "فيسبوك",
+        "dsc": null,
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "https:\/\/www.facebook.com\/pagelink",
+        "img_url": "facebook",
+        "set_order": "1"
+
+      },
+      {
+
+        "type": "2",
+        "title": "Twitter",
+        "ar_title": "تويتر",
+        "dsc": null,
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "https:\/\/www.twitter.com\/pagelink",
+        "img_url": "twitter",
+        "set_order": "2"
+
+      },
+      {
+
+        "type": "2",
+        "title": "Youtube",
+        "ar_title": "يوتيوب",
+        "dsc": null,
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "https:\/\/www.youtube.com\/pagelink",
+        "img_url": "youtube",
+        "set_order": "5"
+
+      },
+      {
+
+        "type": "2",
+        "title": "Instagram",
+        "ar_title": "انستجرام",
+        "dsc": null,
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "https:\/\/www.instagram.com\/pagelink",
+        "img_url": "instagram",
+        "set_order": "4"
+
+      },
+      {
+
+        "type": "2",
+        "title": "Linkedin",
+        "ar_title": "لينكيدإن",
+        "dsc": null,
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "https:\/\/www.linkedin.com\/pagelink",
+        "img_url": "linkedin",
+        "set_order": "3"
+
+      },
+      {
+
+        "type": "3",
+        "title": "Looking for a fund",
+        "ar_title": "تبحث عن تمويل لمشروعك",
+        "dsc": "Join now to get all support",
+        "ar_dsc": "خطوات بسيطة لتلقي الدعم اللازم",
+        "set1": "Join us now",
+        "ar_set1": "إنضم معنا الآن",
+        "set2": "icon-graphic",
+        "ar_set2": null,
+        "url": "\/register",
+        "img_url": "3.jpg",
+        "set_order": "1"
+
+      },
+      {
+
+        "type": "6",
+        "title": "Supported startups",
+        "ar_title": "شركة ناشئة تم دعمها",
+        "dsc": "3200+",
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "",
+        "img_url": "office",
+        "set_order": "1"
+
+      },
+      {
+
+        "type": "3",
+        "title": "Ask for Information",
+        "ar_title": "ترغب في الحصول على دعم فني",
+        "dsc": "Get the required technical support now",
+        "ar_dsc": "احصل على الدعم الفني اللازم الان",
+        "set1": "Submit your application",
+        "ar_set1": "سجل بياناتك الآن",
+        "set2": "icon-layers",
+        "ar_set2": null,
+        "url": "\/register",
+        "img_url": "2.jpg",
+        "set_order": "1"
+
+      },
+      {
+
+        "type": "3",
+        "title": "Join our parteners",
+        "ar_title": "إنضم لقائمة الرعاة",
+        "dsc": "We appreciate your joining our partners, Contact us now.",
+        "ar_dsc": "يسعدنا انضمامكم كراعي، اتصل بنا الآن.",
+        "set1": "Register now",
+        "ar_set1": "سجل بياناتك",
+        "set2": "icon-computer",
+        "ar_set2": null,
+        "url": "\/contact",
+        "img_url": "1.jpg",
+        "set_order": "1"
+      },
+      {
+
+        "type": "4",
+        "title": "About The Virtual Incubator",
+        "ar_title": "عن حاضنة الأعمال الإفتراضية",
+        "dsc": "More About The Virtual Incubator, More About The Virtual Incubator, More About The Virtual Incubator",
+        "ar_dsc": "معلومات أكثر عن حاضنة الأعمال الإفتراضية، معلومات أكثر عن حاضنة الأعمال الإفتراضية، معلومات أكثر عن حاضنة الأعمال الإفتراضية",
+        "set1": "The Virtual Incubator Mission",
+        "ar_set1": "رسالة حاضنة الأعمال الإفتراضية",
+        "set2": "The Virtual Incubator Vission",
+        "ar_set2": "رؤية حاضنة الأعمال الإفتراضية",
+        "url": "on",
+        "img_url": "",
+        "set_order": "1"
+      },
+      {
+
+        "type": "6",
+        "title": "Fund provided",
+        "ar_title": "تمويل تم تقديمه",
+        "dsc": "300 M$",
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "",
+        "img_url": "cup",
+        "set_order": "1"
+      },
+      {
+
+        "type": "6",
+        "title": "Mentors",
+        "ar_title": "مدرب محترف",
+        "dsc": "38",
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "",
+        "img_url": "professor",
+        "set_order": "1"
+      },
+      {
+
+        "type": "5",
+        "title": "info@masterencode.com",
+        "ar_title": "+20237495616",
+        "dsc": "8 Elsad El3aly st.<br>\r\nEldoki, Cairo<br>\r\nEgypt.",
+        "ar_dsc": "8 ش السد العالي،<br>\r\nالدقي، القاهرة<br>\r\nمصر",
+        "set1": "+20237495616",
+        "ar_set1": "https:\/\/www.google.com\/maps\/embed?pb=!1m18!1m12!1m3!1d3453.84580648717!2d31.21963271992172!3d30.04128122576464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1458412a48ef4ea3%3A0x5b287b005f7efbcd!2z2YHZitmG2KjZig!5e0!3m2!1sar!2seg!4v1632487999964!5m2!1sar!2seg",
+        "set2": "Sun - Thu: 09.00am to 5.00pm",
+        "ar_set2": "الأحد - الخميس: 9ص إلى 5م",
+        "url": "",
+        "img_url": "",
+        "set_order": "1"
+      },
+      {
+
+        "type": "6",
+        "title": "Entrepreneurs trained",
+        "ar_title": "رائد أعمال تم تدريبه",
+        "dsc": "5425+",
+        "ar_dsc": null,
+        "set1": null,
+        "ar_set1": null,
+        "set2": null,
+        "ar_set2": null,
+        "url": "",
+        "img_url": "man",
+        "set_order": "1"
+      }
+    ]
+

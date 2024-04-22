@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('field_id')->constrained()->onDelete('cascade');
             $table->longText('options')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

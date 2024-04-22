@@ -1,7 +1,7 @@
 <?php
 
 /* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
-//use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\File;
 //use Stichoza\GoogleTranslate\GoogleTranslate;
 //
 //Route::get('test',function (){
@@ -28,6 +28,13 @@
 //        }
 //    }
 //});
+
+Route::get('test',function (){
+        ini_set('memory_limit', '-1');
+    $json = File::get(base_path('database/dbFiles/settings.json'));
+    $data = json_decode($json);
+
+});
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');

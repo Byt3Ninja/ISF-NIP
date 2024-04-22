@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('name_en');
             $table->string('iso3')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

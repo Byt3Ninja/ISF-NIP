@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('specialization_en', 250)->nullable();
             $table->string('linkedin', 250)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
