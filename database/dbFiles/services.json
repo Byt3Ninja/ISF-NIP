@@ -1,0 +1,72 @@
+[
+  {
+
+    "service_category_id": "1",
+    "name_en": "Investment Readiness",
+    "name_ar": "جاهزية الشركات للاستثمار",
+    "price": "0.00",
+    "description_en": "<p>Investment readiness services prepare startups to attract potential investors by ensuring they have the necessary documentation, financial stability, and strategic planning in place. This includes refining business plans, conducting financial analysis, and developing compelling pitches to secure funding.<\/p>",
+    "description_ar": "<p>خدمات جاهزية الاستثمار تهدف إلى تجهيز الشركات الناشئة لجذب المستثمرين المحتملين عن طريق ضمان توافر الوثائق اللازمة والاستقرار المالي والتخطيط الاستراتيجي. يتضمن ذلك تنقيح خطط العمل وإجراء التحليل المالي وتطوير عروض مقنعة للحصول على التمويل.<\/p>",
+    "img_url": "services\/BF5IFAG8lwdI2oMRBTbqWl3Qkb1EDogitYwzfwUl.jpg"
+  },
+  {
+
+    "service_category_id": "2",
+    "name_en": "Digital Marketing",
+    "name_ar": "تسويق إلكترونى",
+    "price": "0.00",
+    "description_en": "<p>Digital Marketing<\/p>",
+    "description_ar": "<p>تسويق إلكترونى<\/p>",
+    "img_url": "services\/He0cKC6884LeBNubRIKESmzUUNQoXuaF6jmEDaRA.png"
+  },
+  {
+
+    "service_category_id": "3",
+    "name_en": "Branding",
+    "name_ar": "تصميم الهوية البصرية",
+    "price": "5000.00",
+    "description_en": "<p>Branding services assist startups in establishing a strong and recognizable brand identity that resonates with their target audience. This includes creating logos, defining brand messaging, developing marketing materials, and crafting a consistent brand image across all platforms.<\/p>",
+    "description_ar": "<p>إعادة هيكلة<\/p>\r\n\r\n<p>تساعد خدمات التمييز في إنشاء هوية علامة تجارية قوية ومعروفة تتفاعل مع الجمهور المستهدف للشركات الناشئة. يشمل ذلك إنشاء الشعارات وتحديد رسالة العلامة التجارية وتطوير المواد التسويقية وصياغة صورة علامة تجارية متسقة عبر جميع المنصات.<\/p>",
+    "img_url": "services\/kF5YxBC60u2bJR4aODgRrmonFkk96KWEzPlEPMWy.png"
+  },
+  {
+
+    "service_category_id": "2",
+    "name_en": "Legal services",
+    "name_ar": "خدمات القانونية للشركات الناشئة",
+    "price": "0.00",
+    "description_en": "<p>Legal services provide startups with legal advice and assistance to ensure compliance with regulations and protect their interests. This includes assistance with incorporation, contract drafting, intellectual property protection, and resolving legal disputes.<\/p>",
+    "description_ar": "<p>توفر خدمات القانونية للشركات الناشئة النصائح القانونية والمساعدة لضمان الامتثال للتشريعات وحماية مصالحها. يتضمن ذلك المساعدة في التأسيس، وصياغة العقود، وحماية الملكية الفكرية، وحل النزاعات القانونية.<\/p>",
+    "img_url": "services\/Om9NeZ4rscXfY3DP5Bd3rpnPf33UWonkhuswXFMO.png"
+  },
+  {
+
+    "service_category_id": "2",
+    "name_en": "Tech and development",
+    "name_ar": "البرمجيات",
+    "price": "5000.00",
+    "description_en": "<p>Tech and development services help startups leverage technology to build and enhance their products or services. This includes software development, website and app creation, IT infrastructure setup, and technology consulting to optimize business processes.<\/p>",
+    "description_ar": "<p>تساعد خدمات التكنولوجيا والتطوير الشركات الناشئة في استغلال التكنولوجيا لبناء وتعزيز منتجاتها أو خدماتها. يتضمن ذلك تطوير البرمجيات وإنشاء مواقع الويب والتطبيقات، وإعداد البنية التحتية لتكنولوجيا المعلومات، واستشارات التكنولوجيا لتحسين العمليات الأعمالية.<\/p>\r\n\r\n<p>&nbsp;<\/p>\r\n\r\n<p>&nbsp;<\/p>\r\n\r\n<p>&nbsp;<\/p>\r\n\r\n<p>&nbsp;<\/p>\r\n\r\n<p>&nbsp;<\/p>",
+    "img_url": "services\/vyHMkmTMWCRpQ9vdxeTcgCXIBwrEXbGebbS4LGjC.jpg"
+  },
+  {
+
+    "service_category_id": "3",
+    "name_en": "Meeting Room",
+    "name_ar": "قاعة الاجتماعات small",
+    "price": "0.00",
+    "description_en": "<p>Book Meeting Room<\/p>",
+    "description_ar": "<p>حجز قاعة الاجتماعات<\/p>",
+    "img_url": "services\/kcv6YqoMoSiTO2utvgk6joqWzXaqu6mHmOqsLA17.png"
+  },
+  {
+    "service_category_id": "4",
+    "name_en": "Training Room",
+    "name_ar": "مسرح تدريبي",
+    "price": "0.00",
+    "description_en": "<p>Training Room<\/p>",
+    "description_ar": "<p>مسرح تدريبي<\/p>",
+    "img_url": "services\/9IXcyVpjtFjbmeYOYLf70tcqL8og8cxBwAiHq9fk.webp"
+  }
+]
+

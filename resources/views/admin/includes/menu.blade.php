@@ -351,8 +351,11 @@
                     @endif
                 @endcan
                 @endif
-                <li class="active nav-item">
-                    =========================
-                </li>
+                @if(Auth::user()->hasanyRole('admin'))
+                    <li class="active nav-item">
+                        =========================
+                    </li>
+                @endif
+
             </ul>
         </div>

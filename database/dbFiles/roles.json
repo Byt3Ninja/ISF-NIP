@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Admin",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "Editor",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "Coordinator",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "Page Manager",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manager",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "Mentor",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "Judger",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "Registered",
+    "guard_name": "web"
+  },
+  {
+    "name": "Pages Editor",
+    "guard_name": "web"
+  },
+  {
+    "name": "organizationManager",
+    "guard_name": "web"
+  }
+]
+

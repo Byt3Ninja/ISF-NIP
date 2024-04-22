@@ -120,39 +120,14 @@
                                                         </select>
                                                 </div>
                                             </div>
-                                            @php
-                                                $sectors = [];
-                                                $_sectors = App\Sector::get();
-                                                foreach( $_sectors->where("parent_id", 0) as $sector )
-                                                {
-                                                    if( !array_key_exists( $sector->id, $sectors ) )
-                                                    {
-                                                        $sectors[$sector->id] = ["id" => $sector->id, "name" => $sector->$name, "sectors" => []];
-                                                    }
-                                                }
-                                                foreach( $_sectors->where("parent_id", "!=", 0) as $sector )
-                                                {
-                                                    if( !array_key_exists( $sector->parent_id, $sectors ) ) { continue; }
-                                                    else
-                                                    {
-                                                        $sectors[$sector->parent_id]["sectors"][] = ["id" => $sector->id, "val" => $sector->name_en, "name" => $sector->$name];
-                                                    }
-                                                }
-                                            @endphp
                                             <div class="col-md-12 col-12">
                                                 <div class="form-group">
                                                     <label for="sector">{{ __('admin.Sector')}} *</label>
                                                     <select id="selectsector" class="form-control" required onchange="ssector(this.options[this.selectedIndex].value)" name='sector'>
-                                                        {{--  <option value="{{($client->company)? $client->company->sector:''}}">{{($client->company)? __($client->company->sector): __('admin.Select Sector') }}</option>
-                                                        <option value="Industrial">{{ __('Industrial')}}</option>
-                                                        <option value="Agriculture">{{ __('Agriculture')}}</option>
-                                                        <option value="Commercial">{{ __('Commercial')}}</option>
-                                                        <option value="Technology">{{ __('Technology')}}</option>
-                                                        <option value="Other">{{ __('Other')}}</option>  --}}
                                                         @foreach( $sectors as $sector_group )
-                                                        <optgroup label="{{ $sector_group['name'] }}">
-                                                            @foreach( $sector_group["sectors"] as $sector )
-                                                            <option value="{{ $sector['val'] }}">{{ $sector['name'] }}</option>
+                                                        <optgroup label="{{ $sector_group->name }}">
+                                                            @foreach( $sector_group->children as $sector )
+                                                            <option value="{{ $sector->name_en }}">{{ $sector->name }}</option>
                                                             @endforeach
                                                         </optgroup>
                                                         @endforeach

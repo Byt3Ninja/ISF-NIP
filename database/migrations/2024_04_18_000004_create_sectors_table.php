@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name_en', 500)->nullable();
             $table->string('name_ar', 500)->nullable();
-            $table->unsignedBigInteger('parent_id');
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->foreign('parent_id')->references('id')->on('sectors')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();

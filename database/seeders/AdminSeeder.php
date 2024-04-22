@@ -1,10 +1,10 @@
 <?php
 
-namespace database\seeds;
+namespace Database\Seeders;
 
 use App\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seed;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
@@ -21,6 +21,7 @@ class AdminSeeder extends Seeder
             'last_name_ar'=>'أدمن',
             'email'=>'admin@growthlabs.com',
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'email_verified_at'=>now()
         ]);
     }
 }

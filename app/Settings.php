@@ -7,5 +7,7 @@ use App\Traits\Auditable;
 
 class Settings extends Model
 {
-    use Auditable;
+//    use Auditable;
+    protected $guarded = ['id', 'created_at', 'updated_at', 'deleted_at'];
+
 }

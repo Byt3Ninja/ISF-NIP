@@ -8,5 +8,5 @@ class Field extends Model
 {
     public $timestamps = false;
 
-    protected $guarded = [];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
 }

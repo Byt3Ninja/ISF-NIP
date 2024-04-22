@@ -1,0 +1,282 @@
+[
+  {
+
+    "name": "add_service_category",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_service_category",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "delete_service_category",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_service_category",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "add_service",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_service",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "delete_service",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_service",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "add_type",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_type",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "delete_type",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_type",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "add_slide",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_slide",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "delete_slide",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_slide",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_settings",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_messages",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "delete_messages",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_partner",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "add_partner",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_partner",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "delete_partner",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_press",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "add_press",
+    "guard_name": "web"
+  },
+  {
+    "name": "edit_press",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "delete_press",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "add_user",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_user",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "delete_user",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_user",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_report",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_products_cat",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_pages",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_posts",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_menus",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_events",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_page",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_permissions",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_permissions",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_log",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_faqs",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_faqs",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_calendar",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_calendar",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_log",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_forms",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_forms",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_cycles",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "edit_cycles",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_allfiles",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_myfiles",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_roles",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_roles",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_documentation",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "manage_documentation",
+    "guard_name": "web"
+  }
+]
+

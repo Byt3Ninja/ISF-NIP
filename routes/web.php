@@ -1,40 +1,7 @@
 <?php
 
 /* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
-use Illuminate\Support\Facades\File;
-//use Stichoza\GoogleTranslate\GoogleTranslate;
-//
-//Route::get('test',function (){
-//    ini_set('memory_limit', '-1');
-//    $json = File::get(base_path('countries+states+cities.json'));
-//    $data = json_decode($json);
-//    $s=array_filter($data,function ($q){
-////        dd($q->iso2=='EGY');
-//        return $q->iso3=='BHR' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-//    });
-////    dd($s);
-//    $country =  \App\Models\Country::create(['name_ar'=>$s['16']->native,'name_en'=>$s['16']->name,'iso3'=>$s['16']->iso3]);
-//    foreach($s['16']->states as $key){
-//        $state = $country->states()->create([
-//            'name_ar'=>GoogleTranslate::trans($key->name, 'ar', 'en'),
-//            'name_en'=>$key->name
-//        ]);
-//        foreach ($key->cities as $value){
-//            $state->cities()->create([
-//                'country_id'=>$country->id,
-//                'name_ar'=>GoogleTranslate::trans($value->name, 'ar', 'en'),
-//                'name_en'=>$value->name
-//            ]);
-//        }
-//    }
-//});
 
-Route::get('test',function (){
-        ini_set('memory_limit', '-1');
-    $json = File::get(base_path('database/dbFiles/settings.json'));
-    $data = json_decode($json);
-
-});
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');

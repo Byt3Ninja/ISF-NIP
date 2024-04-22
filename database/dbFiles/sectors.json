@@ -1,0 +1,250 @@
+[
+  {
+
+    "name_en": "Technology",
+    "name_ar": "تكنولوجيا",
+    "parent_id": null
+
+  },
+  {
+
+    "name_en": "Software Development",
+    "name_ar": "تطوير البرمجيات",
+    "parent_id": "1"
+  },
+  {
+
+    "name_en": "Artificial Intelligence",
+    "name_ar": "الذكاء الاصطناعي",
+    "parent_id": "1"
+  },
+  {
+
+    "name_en": "Cybersecurity",
+    "name_ar": "الأمن السيبراني",
+    "parent_id": "1"
+  },
+  {
+
+    "name_en": "Internet of Things (IoT)",
+    "name_ar": "إنترنت الأشياء",
+    "parent_id": "1"
+  },
+  {
+
+    "name_en": "Healthcare",
+    "name_ar": "الرعاية الصحية",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "Biotechnology",
+    "name_ar": "التكنولوجيا الحيوية",
+    "parent_id": "6"
+  },
+  {
+
+    "name_en": "Medical Devices",
+    "name_ar": "الأجهزة الطبية",
+    "parent_id": "6"
+  },
+  {
+
+    "name_en": "Digital Health",
+    "name_ar": "الصحة الرقمية",
+    "parent_id": "6"
+  },
+  {
+
+    "name_en": "Finance",
+    "name_ar": "المالية",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "Fintech",
+    "name_ar": "التكنولوجيا المالية",
+    "parent_id": "10"
+  },
+  {
+
+    "name_en": "Cryptocurrency",
+    "name_ar": "العملة المشفرة",
+    "parent_id": "10"
+  },
+  {
+
+    "name_en": "Banking Tech",
+    "name_ar": "تكنولوجيا البنوك",
+    "parent_id": "10"
+  },
+  {
+
+    "name_en": "Energy",
+    "name_ar": "الطاقة",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "Renewable Energy",
+    "name_ar": "الطاقة المتجددة",
+    "parent_id": "14"
+  },
+  {
+
+    "name_en": "Clean Tech",
+    "name_ar": "التكنولوجيا النظيفة",
+    "parent_id": "14"
+  },
+  {
+
+    "name_en": "Oil & Gas Tech",
+    "name_ar": "تكنولوجيا النفط والغاز",
+    "parent_id": "14"
+  },
+  {
+
+    "name_en": "Agriculture",
+    "name_ar": "الزراعة",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "AgriTech",
+    "name_ar": "التكنولوجيا الزراعية",
+    "parent_id": "18"
+  },
+  {
+
+    "name_en": "Sustainable Farming",
+    "name_ar": "الزراعة المستدامة",
+    "parent_id": "18"
+  },
+  {
+
+    "name_en": "Food Technology",
+    "name_ar": "تكنولوجيا الأغذية",
+    "parent_id": "18"
+  },
+  {
+
+    "name_en": "Education",
+    "name_ar": "التعليم",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "EdTech",
+    "name_ar": "التكنولوجيا التعليمية",
+    "parent_id": "22"
+  },
+  {
+
+    "name_en": "E-Learning",
+    "name_ar": "التعلم الإلكتروني",
+    "parent_id": "22"
+  },
+  {
+
+    "name_en": "Skill Development",
+    "name_ar": "تطوير المهارات",
+    "parent_id": "22"
+  },
+  {
+
+    "name_en": "Retail and E-commerce",
+    "name_ar": "التجزئة والتجارة الإلكترونية",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "Consumer Goods",
+    "name_ar": "السلع الاستهلاكية",
+    "parent_id": "26"
+  },
+  {
+
+    "name_en": "Online Marketplaces",
+    "name_ar": "الأسواق الإلكترونية",
+    "parent_id": "26"
+  },
+  {
+
+    "name_en": "Supply Chain Tech",
+    "name_ar": "تكنولوجيا سلسلة التوريد",
+    "parent_id": "26"
+  },
+  {
+
+    "name_en": "Transportation and Logistics",
+    "name_ar": "النقل والخدمات اللوجستية",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "Mobility Solutions",
+    "name_ar": "حلول التنقل",
+    "parent_id": "30"
+  },
+  {
+
+    "name_en": "Shipping and Delivery",
+    "name_ar": "الشحن والتوصيل",
+    "parent_id": "30"
+  },
+  {
+
+    "name_en": "Aviation Technology",
+    "name_ar": "تكنولوجيا الطيران",
+    "parent_id": "30"
+  },
+  {
+
+    "name_en": "Media and Entertainment",
+    "name_ar": "الإعلام والترفيه",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "Digital Media",
+    "name_ar": "الإعلام الرقمي",
+    "parent_id": "34"
+  },
+  {
+
+    "name_en": "Gaming and VR",
+    "name_ar": "الألعاب والواقع الافتراضي",
+    "parent_id": "34"
+  },
+  {
+
+    "name_en": "Content Creation",
+    "name_ar": "إنشاء المحتوى",
+    "parent_id": "34"
+  },
+  {
+
+    "name_en": "Environmental and Sustainability",
+    "name_ar": "البيئة والاستدامة",
+    "parent_id": null
+  },
+  {
+
+    "name_en": "Green Tech",
+    "name_ar": "التكنولوجيا الخضراء",
+    "parent_id": "38"
+  },
+  {
+
+    "name_en": "Waste Management",
+    "name_ar": "إدارة النفايات",
+    "parent_id": "38"
+  },
+  {
+
+    "name_en": "Sustainable Development",
+    "name_ar": "التنمية المستدامة",
+    "parent_id": "38"
+  }
+]
+

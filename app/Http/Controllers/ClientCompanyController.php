@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Country;
 use App\Events\WebMessage;
+use App\Sector;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUpdateClientCompanyRequest;
 use Illuminate\Support\Facades\Validator;
@@ -58,7 +59,10 @@ class ClientCompanyController extends Controller
             $countries = Country::all();
             $states = State::all();
             $cities = City::all();
-            return view('admin/clients/company', compact('client', 'states', 'cities','countries'));
+            $sectors = Sector::whereNull('parent_id')->get();
+            return view('admin/clients/company', compact(
+                'client', 'states', 'cities','countries','sectors'
+            ));
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);

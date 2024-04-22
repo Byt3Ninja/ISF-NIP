@@ -1,0 +1,18 @@
+[
+  {
+    "field_type": "input"
+  },
+  {
+    "field_type": "textarea"
+  },
+  {
+    "field_type": "select"
+  },
+  {
+    "field_type": "radio"
+  },
+  {
+    "field_type": "file"
+  }
+]
+
