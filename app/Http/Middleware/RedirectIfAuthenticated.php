@@ -21,6 +21,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+//                if (auth()->user()->hasRole('organizationManager') && ! auth()->user()->organization){
+//                    auth()->logout();
+//                    session(['error'=>'برجاء مراجعة الادارة']);
+//                    return redirect(route('login'));
+//                }
                 return redirect(route('admin'));
             }
         }

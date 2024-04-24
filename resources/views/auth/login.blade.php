@@ -49,6 +49,17 @@
             <section id="auth-login" class="row flexbox-container">
                 <div class="col-xl-8 col-11">
                     <div class="card bg-authentication mb-0">
+                        @if(session('error'))
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        <li>{{ session('error') }} </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         <div class="row m-0">
                             <!-- left section-login -->
                             <div class="col-md-6 col-12 px-0">

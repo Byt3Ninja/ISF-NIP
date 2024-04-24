@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\BuilderField;
+use App\Company;
 use App\FinalData;
 use App\Finalscreening;
 use App\Formdata;
@@ -56,13 +57,16 @@ class CyclesController extends Controller
             $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
             })->orderBy('id','DESC')->get();
-            $id = $cycles->pluck('id')[0];
+            if (!empty($cycles->toArray())){
+                $id = $cycles->pluck('id')[0];
+            }
         } else {
             $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
             return $q->where('organization_id',$organization_id);
         })->get();
         }
-        return view('admin.settings.cycles.users',compact('cycles','id'));
+        $companies = Company::where('cycle',$id)->get();
+        return view('admin.settings.cycles.users',compact('cycles','id','companies'));
     }
 
     public function modify(Request $request)
@@ -253,7 +257,7 @@ class CyclesController extends Controller
         }
     }
 
-    function view ($c,$s=0,Request $request)
+    function view ($c,Request $request)
     {
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);}
@@ -261,7 +265,11 @@ class CyclesController extends Controller
         // Check enrolled in Cycle
         if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);}
         //Check private
-        $private = Cycle::findOrFail($c);if ($private->private!=Input::get('id')) {abort(404);}
+        $private = Cycle::findOrFail($c);
+        if ($private->private!=null) {
+            return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
+//            abort(404);
+        }
         // Check STEPS
         if (!Auth::user()->company->cycle || Auth::user()->company->cycle == $c) {
                 $step = Step::where('cycle_id',$c)->orderBy('arr')->first();
@@ -279,7 +287,7 @@ class CyclesController extends Controller
             if (Auth::user()->company->step==$id) {
                 $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id',Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
             }
-                return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$c)->with('answers',$answers);;
+                return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$c)->with('answers',$answers);
         }
     }
 

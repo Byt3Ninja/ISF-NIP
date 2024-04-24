@@ -56,6 +56,9 @@ class ScreeningController extends Controller
 
     public function update(Request $request)
     {
+        if (!$request->judges){
+            return Redirect::back()->with('message2', 'برجاء اختيار المحكممين');
+        }
         if ($request->step) {
             $type = Step::where('id', $request->step)->pluck('data')->first();
             $list = $request->judges;

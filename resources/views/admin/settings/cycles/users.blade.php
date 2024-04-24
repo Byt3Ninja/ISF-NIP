@@ -108,9 +108,9 @@
                             </tr>
                             </thead>
                             <tbody>
-                            @php
-                                $companies = \App\Company::where('cycle',$id)->get();
-                            @endphp
+{{--                            @php--}}
+{{--                                $companies = \App\Company::where('cycle',$id)->get();--}}
+{{--                            @endphp--}}
                             @foreach($companies as $company)
                                 <tr>
                                     <td>
@@ -334,7 +334,7 @@
                         "step" : step,
                     },
                     success: function (response) {
-                        console.log(response);
+                        // console.log(response);
                         location.href = '/dashboard/cycles/{{$id}}/registered';
                     },
                     error: function (error) {

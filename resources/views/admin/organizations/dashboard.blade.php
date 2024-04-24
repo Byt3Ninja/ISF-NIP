@@ -14,7 +14,7 @@
         $messages = App\Messenger::where('receiver',auth()->id())->whereNull('read');
         $messages = $messages->count();
 
-        $mentrequests = App\MentorshipRequest::where('organization_id',$organization_id)->count();
+        $mentrequests = /*App\MentorshipRequest::where('organization_id',$organization_id)->count()*/0;
 
         $startups= \App\Company::whereHas('cycledata',function ($q) use ($organization_id){
             $q->where('organization_id',$organization_id);

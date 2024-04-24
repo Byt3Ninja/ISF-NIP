@@ -19,7 +19,7 @@
         "laravel/ui": "^4.4",
         "laravelcollective/html": "^6.2",
         "macsidigital/laravel-zoom": ">=3",
-        "phpoffice/phpspreadsheet": "^1.10",
+        "phpoffice/phpspreadsheet": "^2.0",
         "pusher/pusher-php-server": "^5.0",
         "sentry/sentry-laravel": "^4.4",
         "spatie/laravel-permission": ">=4",
