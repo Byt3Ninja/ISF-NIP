@@ -40,27 +40,27 @@
             var channel = pusher.subscribe('Web-Message');
             // Bind a function to a Event (the full Laravel class)
             channel.bind('App\\Events\\WebMessage', function(data) {
-                var existingNotifications = notifications.html();
+                var existingNotifications = notificationzs.html();
                 if (data.type === 'mymsg') {
                     var mylink = 'admin/mymsg';
                     var mymessage = '{{__('admin.New Contact us message from')}}' + ' ' + data.username;
                 } else if (data.type === 'NewUser') {
-                    var mylink = 'admin/users';
+                    var mylink = 'dashboard/users';
                     var mymessage =  data.username + ' ' + '{{__('admin.Register new account')}}';
                 } else if (data.type === 'NewComp') {
-                    var mylink = 'admin/companies';
+                    var mylink = 'dashboard/companies';
                     var mymessage =  data.username + ' ' + '{{__('admin.Create a new Company')}}';
                 } else if (data.type === 'UpdateComp') {
-                    var mylink = 'admin/companies';
+                    var mylink = 'dashboard/companies';
                     var mymessage =  data.username + ' ' + '{{__('admin.Update Company profile')}}';
                 } else if (data.type === 'NewMsg') {
-                    var mylink = 'admin/messages';
+                    var mylink = 'dashboard/messages';
                     var mymessage =  '{{__('admin.New Message from')}}' + ' ' + data.username  ;
                 } else if (data.type === 'NewServ') {
-                    var mylink = 'admin/requests/all';
+                    var mylink = 'dashboard/requests/all';
                     var mymessage =  '{{__('admin.New Service request from')}}' + ' ' + data.username  ;
                 } else if (data.type === 'NewMent') {
-                    var mylink = 'admin/mentorship/sessions';
+                    var mylink = 'dashboard/mentorship/sessions';
                     var mymessage =  '{{__('admin.New mentorship request from')}}' + ' ' + data.username  ;
                 }
                 var newNotificationHtml = `

@@ -102,12 +102,12 @@
                         </tr>
                         </thead>
                         <tbody>
-@foreach($contents as $content)
+                    @foreach($contents as $content)
                             <tr>
                                 <td>{{$content->arr}}</td>
                                 <td>{{$content->title}}</td>
                                 <td>{{$content->created_at}}</td>
-                                <td>{{$content->user->{'first_name_'.$l} }} {{$content->user->{'last_name_'.$l} }}</td>
+                                <td>{{ optional($content->user)->{'first_name_'.$l} }} {{ optional($content->user)->{'last_name_'.$l} }}</td>
                                 <td>
                                     <a title="Edit" href="/dashboard/training/editcontent/{{$content->id}}" class="btn btn-icon rounded-circle btn-light-success">
                                         <i class="bx bx-edit"></i></a>
@@ -117,7 +117,7 @@
                                         <i class="bx bx-show"></i></a>
                                 </td>
                             </tr>
-@endforeach
+                @endforeach
 
                         </tbody>
                     </table>
