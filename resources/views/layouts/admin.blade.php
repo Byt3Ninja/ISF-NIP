@@ -42,7 +42,7 @@
             channel.bind('App\\Events\\WebMessage', function(data) {
                 var existingNotifications = notificationzs.html();
                 if (data.type === 'mymsg') {
-                    var mylink = 'admin/mymsg';
+                    var mylink = 'dashboard/mymsg';
                     var mymessage = '{{__('admin.New Contact us message from')}}' + ' ' + data.username;
                 } else if (data.type === 'NewUser') {
                     var mylink = 'dashboard/users';
