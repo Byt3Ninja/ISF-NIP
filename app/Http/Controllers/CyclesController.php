@@ -308,7 +308,7 @@ class CyclesController extends Controller
         if (Auth::user()->company->step==$id) {
             $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id',Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
         }
-        return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$step->cycle_id)->with('answers',$answers);;
+        return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$step->cycle_id)->with('answers',$answers);
     }
 
     public function saveForm(Request $request)

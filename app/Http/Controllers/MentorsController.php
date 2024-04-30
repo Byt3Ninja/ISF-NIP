@@ -111,7 +111,7 @@ class MentorsController extends Controller
                     $rfullname_usr = $rname_usr->first_name_en ." ". $rname_usr->last_name_en;
                     $MSG = new TemplateEmail;
                     $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname.",","Kindly note you have a new mentorship session with '".$rfullname_usr."', Session will start:".$request->date.
-                        ", Check your account to join the session ","/admin"];
+                        ", Check your account to join the session ","/dashboard"];
                     $user->notify($MSG);
             /// Notify User
                     $user = new User();
@@ -119,7 +119,7 @@ class MentorsController extends Controller
                     $user->id = $rname_usr->id;
                     $MSG = new TemplateEmail;
                     $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname_usr.",","Kindly note you have a new mentorship session with '".$rfullname."', Session will start:".$request->date.
-                        ", Check your account to join the session ","/admin"];
+                        ", Check your account to join the session ","/dashboard"];
                     $user->notify($MSG);
             /// End of mail send
             return back()->with(['message' => 'Session successfully added']);
@@ -183,7 +183,7 @@ class MentorsController extends Controller
           $rfullname_usr = $rname_usr->first_name_en ." ". $rname_usr->last_name_en;
           $MSG = new TemplateEmail;
           $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname.",","Kindly note you have a new mentorship session with '".$rfullname_usr."', Session will start:".$request->date.
-              ", Check your account to join the session ","/admin"];
+              ", Check your account to join the session ","/dashboard"];
           $user->notify($MSG);
           /// Notify User
           $user = new User();
@@ -191,7 +191,7 @@ class MentorsController extends Controller
           $user->id = $rname_usr->id;
           $MSG = new TemplateEmail;
           $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname_usr.",","Kindly note you have a new mentorship session with '".$rfullname."', Session will start:".$request->date.
-              ", Check your account to join the session ","/admin"];
+              ", Check your account to join the session ","/dashboard"];
           $user->notify($MSG);
           /// End of mail send
       return back()->with(['message' => 'ٍaved successfully']);
@@ -226,7 +226,7 @@ class MentorsController extends Controller
                     $rfullname_usr = $rname_usr->first_name_en ." ". $rname_usr->last_name_en;
                     $MSG = new TemplateEmail;
                     $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname.",","Kindly note you have a new mentorship session with '".$rfullname_usr."', Session will start:".$request->date.
-                        ", Check your account to join the session ","/admin"];
+                        ", Check your account to join the session ","/dashboard"];
                     $user->notify($MSG);
                     /// Notify User
                     $user = new User();
@@ -234,7 +234,7 @@ class MentorsController extends Controller
                     $user->id = $rname_usr->id;
                     $MSG = new TemplateEmail;
                     $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname_usr.",","Kindly note you have a new mentorship session with '".$rfullname."', Session will start:".$request->date.
-                        ", Check your account to join the session ","/admin"];
+                        ", Check your account to join the session ","/dashboard"];
                     $user->notify($MSG);
                     /// End of mail send
                     return response()->json('success');

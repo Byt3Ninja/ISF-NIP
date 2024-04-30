@@ -228,7 +228,7 @@ class ServiceController extends Controller
                     $user->id = $crequest->user_id;
                     $rfullname = $crequest->user->first_name_en ." ". $crequest->user->last_name_en;
                     $MSG = new TemplateEmail;
-                    $MSG->Message=["Service request - VI portal","Dear ".$rfullname.",", "Kindly note that your service request (".$crequest->service->name_en . ") has been ".$stat.", Check your account for more details.","/admin/requests/mine"];
+                    $MSG->Message=["Service request - VI portal","Dear ".$rfullname.",", "Kindly note that your service request (".$crequest->service->name_en . ") has been ".$stat.", Check your account for more details.","/dashboard/requests/mine"];
                     $user->notify($MSG);
             /// End of mail send
         return response()->json(['state'=>'success']);

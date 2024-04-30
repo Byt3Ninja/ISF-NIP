@@ -94,7 +94,7 @@ class ScreeningController extends Controller
                 $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
                 $MSG = new TemplateEmail;
                 $MSG->Message=["New judging - VI portal","Dear ".$rfullname.",","Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from ".$cstep->from->format('d-m-Y').
-                    " to ". $cstep->to->format('d-m-Y') .", Check your account for more details.","/admin"];
+                    " to ". $cstep->to->format('d-m-Y') .", Check your account for more details.","/dashboard"];
                 $user->notify($MSG); }}
                 /// End of mail send
             }
@@ -209,7 +209,7 @@ class ScreeningController extends Controller
             $user->id = $rname->id;
             $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
             $MSG = new TemplateEmail;
-            $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/admin"];
+            $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
             $user->notify($MSG);
             /// End of mail send
             if ($update) {

@@ -59,7 +59,7 @@ class MessengerController extends Controller
             $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
             $sfullname = $sname->first_name_en ." ". $sname->last_name_en;
             $MSG = new TemplateEmail;
-            $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/admin/inbox"];
+            $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/dashboard/inbox"];
             $user->notify($MSG);
             /// End of send
 
@@ -130,7 +130,7 @@ class MessengerController extends Controller
                 $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
                 $sfullname = $cuser->first_name_en ." ". $cuser->last_name_en;
                 $MSG = new TemplateEmail;
-                $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/admin/inbox"];
+                $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/dashboard/inbox"];
                 $user->notify($MSG);
                 /// End of send
             }
@@ -151,7 +151,7 @@ class MessengerController extends Controller
                 $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
                 $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
                 $MSG = new TemplateEmail;
-                $MSG->Message = ["New message received - VI portal", "Dear " . $rfullname . ",", "You have a new message from " . $sfullname . ', Needs your review.', "/admin/inbox"];
+                $MSG->Message = ["New message received - VI portal", "Dear " . $rfullname . ",", "You have a new message from " . $sfullname . ', Needs your review.', "/dashboard/inbox"];
                 $user->notify($MSG);
                 /// End of send
             }

@@ -406,5 +406,6 @@ return [
     'Forms'=>'النماذج',
     'Latest 5 Cycles'=>'أخر 5 برامج مضافة حديثا',
     'Latest 5 Mentorship Requests'=>'أخر 5 طلبات الارشاد ( لم يتم الموافقة عليهم )',
-    'Problem Solution'=>'حل المشكلة'
+    'Problem Solution'=>'حل المشكلة',
+    'add organizations first'=>'برجاء اضافة مؤسسات اولا'
 ];

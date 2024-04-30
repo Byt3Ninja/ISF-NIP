@@ -203,7 +203,7 @@ public function update_contactus(Request $request){
             $user->id = 1;
             $rfullname = $request->rname;
             $MSG = new TemplateEmail;
-            $MSG->Message = [$request->subject.'- VI portal', "Dear " . $rfullname . ",", $request->message, "/admin"];
+            $MSG->Message = [$request->subject.'- VI portal', "Dear " . $rfullname . ",", $request->message, "/dashboard"];
             $user->notify($MSG);
             Messages::find($request->mid)->update([
                 'reSubject' => $request->subject,
