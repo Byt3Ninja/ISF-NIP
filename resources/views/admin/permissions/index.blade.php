@@ -63,7 +63,7 @@
                                                         </td>
                                                         <td>
                                                             <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
-                                                            <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+{{--                                                            <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>--}}
                                                         </td>
 
                                                     </tr>

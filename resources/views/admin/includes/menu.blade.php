@@ -252,9 +252,9 @@
                                     > {{__('admin.Companies')}}</span></a>
                             </li>
                             @can('view_permissions')
-                                <li class="{{Request::is('dashboard/permissions*')?'active':''}}"><a href="{{route('permissions.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
-                                        > {{__('admin.Permissions')}}</span></a>
-                                </li>
+{{--                                <li class="{{Request::is('dashboard/permissions*')?'active':''}}"><a href="{{route('permissions.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"--}}
+{{--                                        > {{__('admin.Permissions')}}</span></a>--}}
+{{--                                </li>--}}
                                 <li class="{{Request::is('dashboard/roles*')?'active':''}}"><a href="{{route('roles.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
                                         > {{__('admin.Roles')}}</span></a>
                                 </li>
