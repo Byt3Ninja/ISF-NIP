@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('approved', 3)->nullable();
             $table->string('admin_comment')->nullable();
 
-            $table->unsignedBigInteger('admin_id');
+            $table->unsignedBigInteger('admin_id')->nullable();
             $table->foreign('admin_id')->references('id')->on('users')->onDelete('cascade');
 
             $table->string('fileurl', 250)->nullable();

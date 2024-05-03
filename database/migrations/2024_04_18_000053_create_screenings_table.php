@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('screenings', function (Blueprint $table) {
 
+            $table->id();
             $table->unsignedBigInteger('step_id');
             $table->foreign('step_id')->references('id')->on('steps')->onDelete('cascade');
 
@@ -28,7 +29,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->primary(['panel']);
         });
     }
 
