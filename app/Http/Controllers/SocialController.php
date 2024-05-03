@@ -56,15 +56,14 @@
     public function handleGoogleCallback(){
 
         try {
-
             $guser = Socialite::driver('google')->user();
             $finduser = User::where('google_id', $guser->id)->first();
 			if (!$finduser) {
-          $finduser = User::where('email', $guser->email)->first();
-          if ($finduser){
-          return redirect()->to('/login')->withErrors(['social'=>'error']);
-          }
-        			}
+                $finduser = User::where('email', $guser->email)->first();
+                if ($finduser){
+                  return redirect()->to('/login')->withErrors(['social'=>'error']);
+                }
+            }
             if($finduser){
               	auth()->login($finduser);
                 return redirect('/dashboard');
@@ -81,7 +80,7 @@
 				$newUser->assignRole('Registered');
                 event(new WebMessage('NewUser', $guser->name, 1));
               	auth()->login($newUser);
-                return redirect()->back();
+                return redirect('/dashboard');
             }
 
         } catch (Exception $e) {
