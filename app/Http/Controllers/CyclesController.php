@@ -357,6 +357,7 @@ class CyclesController extends Controller
             $cid = Auth::user()->company->id;
 
             Formdata::where('field_id',$fid)->where('company_id',$cid)->delete();
+            dd(Auth::user()->company);
             Formdata::updateOrInsert([
                 'field_id' => $fid,
                 'company_id' => $cid,
