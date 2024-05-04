@@ -356,6 +356,9 @@ class CyclesController extends Controller
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
 
+            // update cycle & step
+            Auth::user()->company->update(['cycle'=>$request->cycle,'step'=>$request->id]);
+
             Formdata::where('field_id',$fid)->where('company_id',$cid)->delete();
             Formdata::updateOrInsert([
                 'field_id' => $fid,
@@ -369,9 +372,8 @@ class CyclesController extends Controller
                 'comments' => '{}'
             ]);
         }
-        // update cycle & step
-        Auth::user()->company->update(['cycle'=>$request->cycle,'step'=>$request->id]);
 
-        return Redirect::back()->with(['msg' => 'CycleStoredSuccessfully','class'=>'success']);
+
+        return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully','class'=>'success']);
     }
 }
