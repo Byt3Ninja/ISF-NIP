@@ -30,7 +30,7 @@ return new class extends Migration
             $table->foreign('form_id')->references('id')->on('steps')->onDelete('cascade');
 
 
-            $table->unsignedBigInteger('step_id');
+            $table->unsignedBigInteger('step_id')->nullable();
             $table->foreign('step_id')->references('id')->on('steps')->onDelete('cascade');
 
             $table->string('question', 250);
