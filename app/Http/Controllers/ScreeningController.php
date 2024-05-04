@@ -181,7 +181,7 @@ class ScreeningController extends Controller
                 });
             })->where('stype', 2)->where('id', $id)->first();
         }
-        $judges = User::join('screenings', 'user_id', 'id')->where('step_id', $id)->get();
+        $judges = User::join('screenings', 'user_id', 'users.id')->where('step_id', $id)->get();
         $form = null;
         if ($cstep) {
             $form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->first();

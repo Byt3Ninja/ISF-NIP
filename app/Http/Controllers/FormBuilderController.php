@@ -18,7 +18,8 @@ class FormBuilderController extends Controller
     public function showBuilder($id=1) {
         $this->preProcessingCheck('edit_forms');
         $organization_id=auth()->user()->organization_id;
-        if (is_null($organization_id) || Organization::count() == 0){
+
+        if (is_null($organization_id) && Organization::count() == 0){
             return redirect(route('organizations.index'))->with('message2','add organizations first');
         }
         $title = BuilderForm::where('id',$id)->when(!is_null($organization_id),function ($q) use($organization_id){
