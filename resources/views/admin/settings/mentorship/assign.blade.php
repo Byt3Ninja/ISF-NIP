@@ -136,8 +136,8 @@
                                                             <img src="{{$mentor->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                         </a>
                                                         <div class="media-body">
-                                                            <h5 class="media-heading mb-0">{{$mentor->{'first_name_'.$l} }} {{$mentor->{'last_name_'.$l} }}</h5><br>
-                                                            <span class="font-small-2">{{$mentor->{'title_'.$l} }}</span>
+                                                            <h5 class="media-heading">{{$mentor->{'first_name_'.$l} }} {{$mentor->{'last_name_'.$l} }}</h5><br>
+                                                            <span class="font-small-1">{{$mentor->{'title_'.$l} }}</span>
                                                         </div>
                                                     </div>
                                                     </label>

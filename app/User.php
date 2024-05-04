@@ -53,7 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
     // ==========> Attributes <=====================
-    public function getImageurlAttribute()
+    public function getImageUrlAttribute()
     {
         $image = $this->img_url;
         if (!$image) {

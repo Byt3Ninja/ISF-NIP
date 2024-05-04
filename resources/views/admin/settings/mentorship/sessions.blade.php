@@ -103,7 +103,7 @@
                                 <td>
                                     <div class="media align-items-center">
                                         <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
-                                            <img src="/191014/{{$session->user->company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                            <img src="{{$session->user->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                         </a>
                                         <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                             <div class="media align-items-center">
@@ -115,7 +115,7 @@
                                 <td>
                                     <div class="media align-items-center">
                                         <a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
-                                            <img src="/191014/{{$session->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                            <img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                         </a>
                                         <a href="/dashboard/users/{{$session->user_id}}/edit">
                                             <div class="media-body">
@@ -129,7 +129,7 @@
                                     <div style="cursor: pointer;" class="chip mr-1" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
                                         <div class="chip-body">
                                             <div class="avatar">
-                                                <img class="img-fluid" src="/191014/{{$session->mentor->img_url??'users/avatar.jpg'}}" alt="Mentor photo" height="20" width="20">
+                                                <img class="img-fluid" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
                                             </div>
                                     <span class="chip-text">
 {{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}

@@ -14,6 +14,17 @@ class Company extends Model
         'est_date','idea','problem','solution','team_num', 'stage','raised_fund','investors','founder','employees','facebook', 'twitter',
         'linkedin', 'youtube', 'google_map', 'logo','cycle','step','approved','approved_by'];
 
+    // ===========> Attributes <==============
+    public function getLogoUrlAttribute()
+    {
+        $image = $this->logo;
+        if (!$image) {
+            return '/app-assets/images/logo_placeholder.png';
+        }
+        return "/191014/".$image;
+    }
+
+    // ==========> Relations <==============
     public function user()
     {
         return $this->hasOne(User::class);
