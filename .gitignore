@@ -7,6 +7,7 @@
 /docker_volumes
 /docker_volumes/nginx
 /docker_volumes/db
+/app/Exceptions/Handler.php
 sail
 Dockerfile
 docker-compose.yml
