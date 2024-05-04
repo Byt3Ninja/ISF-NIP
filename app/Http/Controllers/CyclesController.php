@@ -372,6 +372,6 @@ class CyclesController extends Controller
         // update cycle & step
         Auth::user()->company->update(['cycle'=>$request->cycle,'step'=>$request->id]);
 
-        return Redirect::back()->with(['msg' => 'StoredSuccessfully','class'=>'success']);
+        return Redirect::back()->with(['msg' => 'CycleStoredSuccessfully','class'=>'success']);
     }
 }
