@@ -91,7 +91,7 @@ isset(Auth::user()->company()->first()->id)?$companyid=Auth::user()->company()->
                         <li class="dropdown dropdown-user nav-item"><a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
                                 <div class="user-nav d-sm-flex d-none"><span style="font-weight: 500;" class="user-name">{{Auth::user()->first_name_ar?Auth::user()->{'first_name_'.$l}.' '.Auth::user()->{'last_name_'.$l}:Auth::user()->first_name_en.' '.Auth::user()->last_name_en}}</span>
                                 <span class="user-status text-muted">{{ Auth::user()->{'title_'.$l} }}</span></div><span>
-                                 <img class="round" src="/191014/{{Auth::user()->img_url?Auth::user()->img_url:'/users/avatar.jpg'}}" alt="avatar" height="40" width="40">
+                                 <img class="round" src="{{auth()->user()->image_url}}" alt="avatar" height="40" width="40">
                                 </span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right pb-0">

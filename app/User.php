@@ -52,6 +52,18 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    // ==========> Attributes <=====================
+    public function getImageurlAttribute()
+    {
+        $image = $this->img_url;
+        if (!$image) {
+            return "/images/placeholder.jpg";
+        }
+        return "/191014/".$image;
+    }
+
+
+    // ===============> Relations <===================
     public function company()
     {
         return $this->belongsTo(Company::class);
