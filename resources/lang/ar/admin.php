@@ -407,5 +407,6 @@ return [
     'Latest 5 Cycles'=>'أخر 5 برامج مضافة حديثا',
     'Latest 5 Mentorship Requests'=>'أخر 5 طلبات الارشاد ( لم يتم الموافقة عليهم )',
     'Problem Solution'=>'حل المشكلة',
-    'add organizations first'=>'برجاء اضافة مؤسسات اولا'
+    'add organizations first'=>'برجاء اضافة مؤسسات اولا',
+    'CycleStoredSuccessfully'=>'شكرا علي انضمامك للبرنامج، سيتم تقييم الطلب والرد عليك لاحقا من فريق ادارة البرنامج',
 ];
