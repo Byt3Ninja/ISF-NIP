@@ -43,7 +43,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "php-http/discovery": true
-        }
+        },
+        "disable-tls": false
     },
     "extra": {
         "laravel": {
