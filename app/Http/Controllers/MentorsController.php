@@ -259,11 +259,13 @@ class MentorsController extends Controller
                     $my = Schedule::where('user_id', Auth::id())->where('id', $request->id)->first();
                     return response()->json($my);
                 } else {
+
                     Schedule::create($request->all() + ['user_id' => Auth::id()]);
                     return back()->with(['msg' => 'Saved', 'class' => 'success']);
                 }
             } catch (Exception $e) {
-                return response()->json(['state' => 'failed'], 500);
+                dd($e);
+                return response()->json(['state' => 'failed','e'=>$e], 500);
             }
     }
     public function mine() {

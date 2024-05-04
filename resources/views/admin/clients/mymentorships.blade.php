@@ -73,10 +73,10 @@
                                                                 @endif
                                                             @elseif($session->approved=='No')
                                                             <td class="text-danger py-1">
-                                                                NO
+                                                                {{ __('No') }}
                                                                 @else
                                                             <td class="text-warning py-1">
-                                                                Wait
+                                                                {!!  '<span class="warning">'.__('Waiting').'</span>'  !!}
                                                             @endif
                                                             </td>
 
