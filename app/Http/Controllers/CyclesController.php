@@ -313,12 +313,14 @@ class CyclesController extends Controller
 
     public function saveForm(Request $request)
     {
+
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'id' => 'required|integer|exists:steps,id',
             'field_ids' => 'required|string',
         ]);
         abort_if($validator->fails(), 422, "Data error");
+
         // generating validation rules based on dynamic field config data
         $field_map_ids = explode(",", $request->input('field_ids'));
         $field_required_rules = collect($field_map_ids)->mapWithKeys(function($id){
@@ -334,6 +336,7 @@ class CyclesController extends Controller
                 return ['field_'. $id => 'nullable'];
             }
         });
+
         $dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
             'required' => "field can't be left blank",
             'email' => 'field must be a valid email address'
@@ -343,17 +346,32 @@ class CyclesController extends Controller
                 ->withErrors($dynamic_validator)
                 ->withInput();
         }
+//dd("ss");
         // gather the form data as field_name => [ label, data ]
         foreach($field_map_ids as $fid){
+
             $field_options = Formfield::findOrFail($fid)->options;
             $field_name = 'field_'. $fid;
+
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
+
             Formdata::where('field_id',$fid)->where('company_id',$cid)->delete();
-            Formdata::updateOrInsert(['field_id'=>$fid,'company_id'=>$cid,'user_id'=>$uid,'form_id'=>$id,'step_id'=>Auth::user()->company->step, 'question'=>$field_options->label,'answer'=>$request->input($field_name),'screening'=>'{}','comments'=>'{}']);
+            Formdata::updateOrInsert([
+                'field_id' => $fid,
+                'company_id' => $cid,
+                'user_id' => $uid,
+                'form_id' => $id,
+                'step_id' => Auth::user()->company->step,
+                'question' => $field_options->label,
+                'answer' => $request->{$field_name},
+                'screening' => '{}',
+                'comments' => '{}'
+            ]);
         }
         // update cycle & step
         Auth::user()->company->update(['cycle'=>$request->cycle,'step'=>$request->id]);
+
         return Redirect::back()->with(['msg' => 'StoredSuccessfully','class'=>'success']);
     }
 }
