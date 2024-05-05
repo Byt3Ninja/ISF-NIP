@@ -17,8 +17,8 @@ class IndexController extends Controller
     public function __construct()
     {
         $this->t = App\Settings::where('type', '1')->first(['ar_title', 'title']);
-        $this->SocialIcons = App\settings::where('type', 2)->whereNotNull('url')->orderBy('set_order')->get();
-        $this->contact = App\Settings::findorfail('11');
+//        $this->SocialIcons = App\settings::where('type', 2)->whereNotNull('url')->orderBy('set_order')->get();
+//        $this->contact = App\Settings::findorfail('11');
 
     }
 
@@ -34,28 +34,31 @@ class IndexController extends Controller
 
     public function home()
     {
+        if (auth()->check()){
+            return redirect(route('dashboard'));
+        }
         return view('auth.login')->with('t', $this->t);
-        $CR = Route::getFacadeRoot()->current()->uri();
-        if ($CR == "about") {
-            $about = App\Settings::findorfail('10');
-            return view('pages.about')->with('t', $this->t)->with('about', $about)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
-        }
-        elseif ($CR == "contact") {
-            return view('pages.contact')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons);
-        }
-        elseif ($CR == "events") {
-            return view('pages.events')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR);
-        }
-        elseif ($CR == "faqs") {
-            $faqs = App\Faq::whereNotNull('Published')->get();
-            return view('pages.faqs')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR)->with('faqs',$faqs);
-        }
-        elseif ($CR == "/") {
-            $CR = 'pages.home';
-        } else {
-            $CR = 'pages.' . $CR;
-        }
-        return view($CR)->with('t', $this->t)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
+//        $CR = Route::getFacadeRoot()->current()->uri();
+//        if ($CR == "about") {
+//            $about = App\Settings::findorfail('10');
+//            return view('pages.about')->with('t', $this->t)->with('about', $about)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
+//        }
+//        elseif ($CR == "contact") {
+//            return view('pages.contact')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons);
+//        }
+//        elseif ($CR == "events") {
+//            return view('pages.events')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR);
+//        }
+//        elseif ($CR == "faqs") {
+//            $faqs = App\Faq::whereNotNull('Published')->get();
+//            return view('pages.faqs')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR)->with('faqs',$faqs);
+//        }
+//        elseif ($CR == "/") {
+//            $CR = 'pages.home';
+//        } else {
+//            $CR = 'pages.' . $CR;
+//        }
+//        return view($CR)->with('t', $this->t)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
     }
 
     public function post($id)
