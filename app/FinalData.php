@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class FinalData extends Model
 {
     protected $table = "final_data";
-    protected $fillable = ['organization_id', 'field_id','judge_id','company_id','step_id','question','answer'];
+    protected $fillable = [ 'field_id','judge_id','company_id','step_id','question','answer'];
 
     public function judge()
     {

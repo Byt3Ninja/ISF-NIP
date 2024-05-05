@@ -14,7 +14,7 @@ class BuilderField extends Model
      * Get the field's option.
      *
      * @param  string  $value
-     * @return string
+     * @return array
      */
     public function getOptionsAttribute($value)
     {
