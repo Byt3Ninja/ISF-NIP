@@ -9,7 +9,6 @@ class Faq extends Model
 {
     use Auditable;
     protected $fillable = [
-        'organization_id', 
         'title_ar',
         'title_en',
         'answer_ar',
