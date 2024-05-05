@@ -82,7 +82,7 @@
 												<td>
 													<div class="media align-items-center">
 														<a class="media-left mr-50" href="{{route('organizations.edit', ['organization' => $organization->id])}}">
-															<img src="/191014/{{$organization->img_url??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="" height="40" >
+															<img src="{{$organization->image_url}}" alt="avatar" class="" height="40" >
 														</a>
 													</div>
 												</td>
