@@ -181,7 +181,7 @@
 												<div class="card">
 													<div class="card-content">
 														<div class="card-body">
-															<img style="width: 100%;" class="img-responsive pad" src="/191014/{{$organization->img_url ??'../images/placeholder.jpg' }}">
+															<img style="width: 100%;" class="img-responsive pad" src="{{$organization->image_url }}">
 														</div>
 													</div>
 												</div>
