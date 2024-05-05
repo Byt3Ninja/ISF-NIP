@@ -104,11 +104,11 @@
                     <div class="chip mr-1">
                         <div class="chip-body">
                             <div class="avatar">
-                                <img class="img-fluid" src="/191014/{{$mentor->user->img_url??'users/avatar.jpg'}}" alt="click to view" height="20" width="20">
+                                <img class="img-fluid" src="{{$mentor->user->image_url}}" alt="click to view" height="20" width="20">
                             </div>
                             <span class="chip-text">
                                 <label for="mentor{{$mentor->id}}">
-{{$mentor->user->id}}-{{$thementor = $mentor->user->{'first_name_'.$l} .' '. $mentor->user->{'last_name_'.$l} }}
+                                    {{$mentor->user->id}}-{{$thementor = $mentor->user->{'first_name_'.$l} .' '. $mentor->user->{'last_name_'.$l} }}
                                 </label>
                             <input type="radio" value="{{$mentor->user_id}}" id="mentor{{$mentor->user_id}}" name="mentor" onclick="mentor({{$mentor->user_id}},'{{$thementor}}','{{$mentor->mrating()}}')" >
                             </span>
@@ -149,7 +149,7 @@
                                 <td>
                                     <div class="media align-items-center">
                                         <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
-                                            <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                            <img src="{{$company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                         </a>
                                         <a href="/dashboard/companyProfile/{{$company->id}}">
                                             <div class="media align-items-center">

@@ -24,14 +24,23 @@ class Organization extends Model
 		'created_at',
 		'updated_at',
 	];
-
-	/**
-	 * @return BelongsTo
-	 **/
+    // ===========> Attributes <==============
     public function getNameAttribute($key){
 
         return $this->attributes['name_'.app()->getLocale()];
     }
+    public function getImageUrlAttribute()
+    {
+        $image = $this->img_url;
+        if (!$image) {
+            return '/app-assets/images/logo_placeholder.png';
+        }
+        return "/191014/".$image;
+    }
+    // =============> Relations <=================
+	/**
+	 * @return BelongsTo
+	 **/
 
     public function user()
 	{
