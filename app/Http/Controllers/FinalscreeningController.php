@@ -81,7 +81,7 @@ class FinalscreeningController extends Controller
             'field_ids' => implode(",", $field_map_ids)
         ];
         $answers = Formfield::join('final_data', 'form_fields.id', 'final_data.field_id')->where('judge_id',$myid)->
-        where('company_id',$cid)->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+        where('company_id',$cid)->orderBy('form_fields.id', 'ASC')->select('answer')->pluck('answer')->toArray();
         $company = Company::findOrFail($cid);
         return view('admin.settings.final.form', $data)->with('step',$step)->with('company', $company)->with('answers',$answers);
     }
