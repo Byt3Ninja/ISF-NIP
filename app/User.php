@@ -41,7 +41,7 @@ class User extends Authenticatable implements MustVerifyEmail
 	}
     public function sendEmailVerificationNotification()
     {
-    $this->notify(new Notifications\VerifyEmailQueued);
+    $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
 	}
 	/// By Ibrahim Elsayed
     /**

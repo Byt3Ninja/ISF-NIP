@@ -2,23 +2,26 @@
 
 /* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
 
+Route::get('test',function (){
+    return view('emails.emailVerify');
+});
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');
-Route::get('home','IndexController@home');
-Route::get('about','IndexController@home');
-Route::get('faqs','IndexController@home');
-Route::get('contact','IndexController@home');
-Route::get('events','IndexController@home');
-Route::get('csr-events','IndexController@home');
-Route::get('blog','IndexController@home');
-Route::get('blog/{id}','IndexController@post');
-Route::post('message','IndexController@message');
-Route::post('sendmsg','IndexController@sendmsg');
-Route::get('page/{id}','IndexController@page');
-Route::get('search','IndexController@search');
-Route::get('event/{id}','IndexController@event');
-Route::post('eventregister','IndexController@eventregister');
+//Route::get('home','IndexController@home');
+//Route::get('about','IndexController@home');
+//Route::get('faqs','IndexController@home');
+//Route::get('contact','IndexController@home');
+//Route::get('events','IndexController@home');
+//Route::get('csr-events','IndexController@home');
+//Route::get('blog','IndexController@home');
+//Route::get('blog/{id}','IndexController@post');
+//Route::post('message','IndexController@message');
+//Route::post('sendmsg','IndexController@sendmsg');
+//Route::get('page/{id}','IndexController@page');
+//Route::get('search','IndexController@search');
+//Route::get('event/{id}','IndexController@event');
+//Route::post('eventregister','IndexController@eventregister');
 
 Auth::routes(['verify' => true]);
 Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],function(){
