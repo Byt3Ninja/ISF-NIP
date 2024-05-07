@@ -17,7 +17,7 @@ class VerifyEmailQueued extends VerifyEmail implements ShouldQueue
     public function __construct($name)
     {
         $this->name = $name;
-        $this->url = $this->createUrlCallback;
+        $this->url = static::$createUrlCallback;
     }
     public function build()
     {

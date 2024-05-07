@@ -231,7 +231,7 @@
 
             function deleteme(id,type) {
                 let url = '/dashboard/training/delcontent/'+id;
-                if (type===1) {url = '/dashboard/training/delete/'+id;}
+                if (type===1) {url = '/dashboard/training/delete/'+id}
                 let token = '{{ csrf_token() }}';
                 Swal.fire({
                     title: "{{__('admin.SureDelete')}}",
