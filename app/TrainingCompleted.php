@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class TrainingCompleted extends Model
 {
     protected $table = 'training_completed';
-    protected $fillable = ['organization_id', 'course_id'];
+    protected $fillable = ['course_id'];
 
 }
