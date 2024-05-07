@@ -180,6 +180,7 @@
                                                                         <v:textbox inset="0px,0px,0px,0px">
                                                                             <center style="color:#ffffff; font-family:Tahoma, sans-serif; font-size:16px">
                                                                     <![endif]-->
+                                                                    {{ $url }}
                                                                     <a href="{{ $url }}">
                                                                     <div style="text-decoration:none;display:inline-block;color:#ffffff;background-color:#1aa19c;border-radius:60px;width:auto;border-top:0px solid transparent;font-weight:undefined;border-right:0px solid transparent;border-bottom:0px solid transparent;border-left:0px solid transparent;padding-top:15px;padding-bottom:15px;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:16px;text-align:center;mso-border-alt:none;word-break:keep-all;"><span style="padding-left:30px;padding-right:30px;font-size:16px;display:inline-block;letter-spacing:normal;"><span style="margin: 0; word-break: break-word; line-height: 32px;"><strong>Activate Your Account</strong></span></span></div><!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
                                                                     </a>

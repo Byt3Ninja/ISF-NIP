@@ -28,6 +28,7 @@ class VerifyEmailQueued extends VerifyEmail implements ShouldQueue
 //    }
     protected function buildMailMessage($url)
     {
+        dd($url);
         return (new MailMessage)
             ->subject(Lang::get('Verify Email Address'))
             ->markdown('emails.emailVerify',$this->data);
