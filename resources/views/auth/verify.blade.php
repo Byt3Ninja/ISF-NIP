@@ -43,7 +43,7 @@
                                         @csrf
                                         <p>
                                             {{ __('If you did not receive the email') }},
-                                            <button type="submit" class="btn-link">{{ __('click here to request another') }}</button>.
+                                            <button type="submit" class="btn btn-link">{{ __('click here to request another') }}.</button>
                                         </p>
                                     </form>
 
