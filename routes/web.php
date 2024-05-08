@@ -2,9 +2,9 @@
 
 /* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
 
-Route::get('test',function (){
-    return view('emails.emailVerify');
-});
+//Route::get('test',function (){
+//    return view('emails.emailVerify');
+//});
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');
