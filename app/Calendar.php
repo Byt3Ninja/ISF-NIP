@@ -8,11 +8,26 @@ use App\Traits\Auditable;
 class Calendar extends Model
 {
     use Auditable;
-    public function user() {
-        return $this->belongsTo(User::class);
-    }
+
     protected $fillable = ['organization_id', 'title', 'start', 'end','body','user_id','color','allDay','isPrivate', ];
     protected $casts = [
         'allDay' => 'boolean','isPrivate'=> 'boolean',
     ];
+
+    // ========> Attributes <==========
+    public function getStartAttribute()
+    {
+
+        return $this->start->format('Y-m-d h:i a');
+    }
+    public function getEndAttribute()
+    {
+
+        return $this->end->format('Y-m-d h:i a');
+    }
+
+    // ==============> Relations <==============
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }
