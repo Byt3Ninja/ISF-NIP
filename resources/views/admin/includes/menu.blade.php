@@ -211,7 +211,7 @@
                     <li class="sidebar-group-active open nav-item">
                     </li>
 
-                @if(!Auth::user()->hasanyRole("organizationManager"))
+                @if(!Auth::user()->hasanyRole("organizationManager|Mentor|Judger") )
                     <li class="{{Request::is('*services*','','dashboard/requests/all','dashboard/room*')?'sidebar-group-active open':''}} nav-item">
                         <a href="#"><i class="menu-livicon" data-icon="loader-10"></i><span class="menu-title"
                             > {{__('admin.Services')}}</span></a>
