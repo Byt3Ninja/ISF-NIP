@@ -275,7 +275,7 @@
 									@elseif( $ctype == 5 )
 										@php( $myfinal = \App\Finalscreening::where('company_id', Auth::user()->company->id )->where('step_id', Auth::user()->company->step )->first())
 										@if( $myfinal->join_url )
-											<hr><h6>{{__('dashboard.Your final session will start')}}: ({{$myfinal->datetime}}) <a href="{{$myfinal->join_url}}">{{__('dashboard.Join here')}}</a>.</h6>
+											<hr><h2>{{__('dashboard.Your final session will start')}}: ({{$myfinal->datetime}}) <a href="{{$myfinal->join_url}}">{{__('dashboard.Join here')}}</a>.</h2>
 										@else
 											<hr><h6>{{__('dashboard.Your final session will start soon')}}.</h6>
 										@endif
@@ -407,11 +407,11 @@
 									<h4 class="card-title align-items-center">
 										<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.Mentors") }} :
 										@if( $nextsession )
-											<small class="text-danger">
+											<h2 class="text-danger">
 												{{__('dashboard.Your next mentorship session with')}} 
 												<a href="{{$nextsession->join_url}}" target="_blank">{{$nextsession->mentor->{'first_name_'.$l} }} {{$nextsession->mentor->{'last_name_'.$l} }}</a> 
 												{{__('dashboard.will start')}} {{$nextsession->zoom_date}}  <a href="{{$nextsession->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>.
-											</small>
+											</h2>
 										@endif
 									</h4>
 									<div class="heading-elements">
