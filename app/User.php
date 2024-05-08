@@ -13,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-//    use Auditable;
+    use Auditable;
     use Notifiable;
     use HasRoles;
     use SoftDeletes;
@@ -90,7 +90,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UsersBio::class);
     }
     public function mrating(){
-        return (MentorshipRequest::where('mentor_id',$this->id)->avg('rating'));
+        return $this->hasMany(MentorshipRequest::class,'mentor_id')->avg('rating');
+//        return (MentorshipRequest::where('mentor_id',$this->id)->avg('rating'));
     }
     public function organization(){
         return $this->hasOne(Organization::class,'user_id');
