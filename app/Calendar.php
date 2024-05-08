@@ -12,18 +12,19 @@ class Calendar extends Model
     protected $fillable = ['organization_id', 'title', 'start', 'end','body','user_id','color','allDay','isPrivate', ];
     protected $casts = [
         'allDay' => 'boolean','isPrivate'=> 'boolean',
+        'start'=>'datetime' , 'end'=>'datetime'
     ];
 
     // ========> Attributes <==========
     public function getStartAttribute()
     {
 
-        return $this->start->format('Y-m-d h:i a');
+        return date('Y-m-d h:i a',strtotime($this->attributes['start']));
     }
     public function getEndAttribute()
     {
 
-        return $this->end->format('Y-m-d h:i a');
+        return date('Y-m-d h:i a',strtotime($this->attributes['end']));
     }
 
     // ==============> Relations <==============
