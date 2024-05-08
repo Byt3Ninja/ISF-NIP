@@ -38,9 +38,15 @@
 
                                 </h5>
                                     <br>
-                                    <p>
-                                        {{ __('If you did not receive the email') }}, <a href="{{ route('verification.resend') }}">{{ __('click here to request another') }}</a>.
-                                    </p>
+
+                                    <form action=" {!! route('verification.resend') !!}" method="POST">
+                                        @csrf
+                                        <p>
+                                            {{ __('If you did not receive the email') }},
+                                            <button type="submit" class="btn btn-link">{{ __('click here to request another') }}.</button>
+                                        </p>
+                                    </form>
+
 
                             </div>
                         </div>
