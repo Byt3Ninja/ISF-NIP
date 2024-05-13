@@ -90,38 +90,49 @@ class MentorsController extends Controller
     public function add(Request $request)
     {
         $this->preProcessingCheck('edit_cycles');
+
         if ($request->userid) {
-           	$topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
-          	$data = ['topic'=>$topic, "start_time"=>$request->date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
-          	$zoom = $this->create($data);
-          	if (!$zoom['success']) {return back()->with(['message2' => "Error, can't create zoom meeting."]);}
-            MentorshipRequest::insert([
-                'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
-                'admin_id' => Auth::id(), 'start_url' => $zoom['data']['start_url'], 'join_url' => $zoom['data']['join_url'],
-                'zoom_date' => $request->date, 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
-            ]);
-            /// notify user via Mail
-            /// Notify Mentor
-                    $rname = User::findOrFail($request->mentorid);
-                    $rname_usr = User::findOrFail($request->userid);
-                    $user = new User();
-                    $user->email = $rname->email;
-                    $user->id = $rname->id;
-                    $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
-                    $rfullname_usr = $rname_usr->first_name_en ." ". $rname_usr->last_name_en;
-                    $MSG = new TemplateEmail;
-                    $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname.",","Kindly note you have a new mentorship session with '".$rfullname_usr."', Session will start:".$request->date.
-                        ", Check your account to join the session ","/dashboard"];
-                    $user->notify($MSG);
-            /// Notify User
-                    $user = new User();
-                    $user->email = $rname_usr->email;
-                    $user->id = $rname_usr->id;
-                    $MSG = new TemplateEmail;
-                    $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname_usr.",","Kindly note you have a new mentorship session with '".$rfullname."', Session will start:".$request->date.
-                        ", Check your account to join the session ","/dashboard"];
-                    $user->notify($MSG);
-            /// End of mail send
+            $dates = explode(',',$request->date);
+            foreach ($dates as $key){
+                $date = str_replace("@"," " ,$key);
+                $topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
+                $data = ['topic'=>$topic, "start_time"=>$date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
+                $zoom = $this->create($data);
+                if (!$zoom['success']) {return back()->with(['message2' => "Error, can't create zoom meeting."]);}
+                MentorshipRequest::insert([
+                    'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
+                    'admin_id' => Auth::id(), 'start_url' => $zoom['data']['start_url'], 'join_url' => $zoom['data']['join_url'],
+                    'zoom_date' => date('Y-m-d H:i',strtotime($date)), 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
+                ]);
+                /// notify user via Mail
+
+                $mentor = User::findOrFail($request->mentorid);
+                $mentor_name = $mentor->first_name_en ." ". $mentor->last_name_en;
+
+                $startup_owner = User::findOrFail($request->userid);
+                $startup_owner_name = $startup_owner->first_name_en ." ". $startup_owner->last_name_en;
+
+                /// Notify Mentor
+                $user = new User();
+                $user->email = $mentor->email;
+                $user->id = $mentor->id;
+
+                $MSG = new TemplateEmail;
+                $MSG->Message=["New Mentorship session - VI portal","Dear ".$mentor_name.",","Kindly note you have a new mentorship session with '".$startup_owner_name."', Session will start:".$date.
+                    ", Check your account to join the session ","/dashboard"];
+                $user->notify($MSG);
+
+                /// Notify Startup Owner
+                $user = new User();
+                $user->email = $startup_owner->email;
+                $user->id = $startup_owner->id;
+                $MSG = new TemplateEmail;
+                $MSG->Message=["New Mentorship session - VI portal","Dear ".$startup_owner_name.",","Kindly note you have a new mentorship session with '".$mentor_name."', Session will start:".$date.
+                    ", Check your account to join the session ","/dashboard"];
+                $user->notify($MSG);
+                /// End of mail send
+
+            }
             return back()->with(['message' => 'Session successfully added']);
         } else{
             return back()->with(['message2' => "Error, can't add session"]);
