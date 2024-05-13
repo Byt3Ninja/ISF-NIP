@@ -154,7 +154,7 @@
                                         </a>
                                         <a href="/dashboard/companyProfile/{{$company->id}}">
                                             <div class="media align-items-center">
-                                                {{$company->{'name_'.$l} }}
+                                                {{$company->name }}
                                             </div>
                                         </a>
                                     </div>

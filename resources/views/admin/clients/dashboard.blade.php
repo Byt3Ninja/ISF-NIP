@@ -200,17 +200,22 @@
 						<div class="col-md-12">
 							<div class="card">
 								<div class="card-header border-bottom">
-									<h4 class="card-title d-flex align-items-center"> <i class='bx bx-briefcase font-medium-4 mr-1'></i>{{__('dashboard.My progress')}}</h4>
-									<div class="heading-elements">
-										<ul class="list-inline mb-0">
-											<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
-										</ul>
+
+										<h4 class="card-title d-flex align-items-center mb-1">
+											<i class='bx bx-briefcase font-medium-4 mr-1'></i>{{__('dashboard.My progress')}} : {{Auth::user()->company->cycledata->title }}
+										</h4>
+
+									<span >{{ __('dashboard.start from').": " .Auth::user()->company->cycledata->start_format. " ".__('dashboard.to').": " .Auth::user()->company->cycledata->end_format  }}</span>
+
+									<div class="media align-items-center mt-2">
+										<div class="media-left mr-50">
+											<img src="{{Auth::user()->company->cycledata->organization->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+										</div>
+											<div class="media align-items-center">
+												{{Auth::user()->company->cycledata->organization->name }}
+											</div>
 									</div>
-									<div class="heading-elements">
-										<ul class="list-inline mb-0">
-											<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
-										</ul>
-									</div>
+
 								</div>
 								<div class="card-body">
 									<div class="row">
@@ -224,24 +229,44 @@
 										@endphp
 										@foreach( \App\Step::where('cycle_id', Auth::user()->company->cycle)->orderBy('arr')->get() as $step )
 											@php
-												if( $cs == $step->id ) { $stat="Started"; $ctype=$step->stype; }
+												if ($step->from && now()->format('Y-m-d')<= $step->to){
+														$stat="Started";
+													    $ctype=$step->stype;
+												}
+//                                                 Auth::user()->company->stepdata->arr >= $step->arr?:$s=0;
+                                                if (Auth::user()->company->stepdata->arr > $step->arr){
+                                                    $stat="Completed";
+                                                    $s=1;
+                                                }elseif (Auth::user()->company->stepdata->arr == $step->arr){
+                                                   $stat="Started";
+                                                    $s=1;
+                                                }else{
+                                                    $s=0;
+                                                }
+
 												$trtype = $flink = null;
-												if( Auth::user()->company->approved ) { $flink='my/'.Auth::user()->company->step; } else { $flink='view/'.Auth::user()->company->cycle; }
-												$links = ['','<a href="/dashboard/cycles/'.$flink.'">', '','','<a href="/dashboard/training/my">',''];
+												if( Auth::user()->company->approved ) {
+                                                    $flink='my/'.$step->id;
+                                                } else {
+                                                    $flink='view/'.Auth::user()->company->cycle;
+                                                }
+												$links = ['','<a href="/dashboard/cycles/'.$flink.'">', '','<a href="/dashboard/mentorship/mine">','<a href="/dashboard/training/my">',''];
 											@endphp
+											{!! $links[$step->stype] ? $links[$step->stype] : '' !!}
 											<div class="col text-center" style="opacity:{{$s==0?"0.4":"1"}};">
-												{!! $links[$step->stype]&&$stat=='Started' ? $links[$step->stype] : '' !!}
 												<i class="livicon-evo" data-options="name: {{$svgs[$step->stype-1]}}.svg; size: 60px; style: {{$s==0?'solid;animated: false':'original'}};"></i>
-													<hr style="color: {{$s?'#99a2ac':'#39da8a'}}">
-													<div class="text-{{$s==0?'muted':'primary'}} line-ellipsis">
-														<span class="badge badge-{{$s==0?'secondary':'success'}} badge-pill">{{__('dashboard.STEP ready')}} {{$step->arr}}</span>
-														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('d-m') }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m')}}
+													<hr style="color: {{now()->format('Y-m-d')>= $step->from && now()->format('Y-m-d')<= $step->to?'#39da8a':'#99a2ac'}}">
+													<div class="text-{{$stat!="Started"||$s==0?'muted':'primary'}} line-ellipsis">
+														<span class="badge badge-{{$stat!="Started"||$s==0?'secondary':'success'}} badge-pill">{{__('dashboard.STEP ready')}} {{$step->arr}}</span>
+														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('m-d') }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m')}}
 														<br>{{$step->title}}
 													</div>
-													<div class="text-{{$s==0?'muted':'success'}} line-ellipsis"> {{ __('dashboard.'.$stat) }} </div>
+													<div class="text-{{$stat!="Started"||$s==0?'muted':'success'}} line-ellipsis"> {{ __('dashboard.'.$stat) }} </div>
+
 											</div>
+											{!! $links[$step->stype] ? "</a>" : '' !!}
 											@if( !$loop->last )
-												<i class="step-icon bx @if($stat=="Completed") bx-check-circle @elseif($stat=="Started") bx-loader-circle @else bx-circle @endif" style="padding: 62px 0;font-size: 30px;color:{{$s==0?'#99a2ac':'#39da8a'}};"></i>
+												<i class="step-icon bx @if($stat=="Completed") bx-check-circle @elseif($stat=="Started" && $s==1) bx-loader-circle @else bx-circle @endif" style="padding: 62px 0;font-size: 30px;color:{{$stat!="Started"||$s==0?'#99a2ac':'#39da8a'}};"></i>
 											@endif
 											@php if($cs==$step->id){$s=0;$stat="Not started";} @endphp
 											@if($stat=="Refused")
@@ -257,7 +282,7 @@
 												</div>
 												@break
 											@endif
-											@php if($cs==0){$stat="Refused";} @endphp
+											@php if(is_null($cs)){$stat="Refused";} @endphp
 										@endforeach
 									</div>
 									@if( $ctype == 0 )
