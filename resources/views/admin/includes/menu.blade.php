@@ -255,9 +255,9 @@
 {{--                                <li class="{{Request::is('dashboard/permissions*')?'active':''}}"><a href="{{route('permissions.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"--}}
 {{--                                        > {{__('admin.Permissions')}}</span></a>--}}
 {{--                                </li>--}}
-                                <li class="{{Request::is('dashboard/roles*')?'active':''}}"><a href="{{route('roles.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
-                                        > {{__('admin.Roles')}}</span></a>
-                                </li>
+{{--                                <li class="{{Request::is('dashboard/roles*')?'active':''}}"><a href="{{route('roles.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"--}}
+{{--                                        > {{__('admin.Roles')}}</span></a>--}}
+{{--                                </li>--}}
                             @endcan
                         </ul>
                     </li>
@@ -268,18 +268,17 @@
                             <span class="menu-title" >{{__('admin.Documentations')}}</span></a>
                     </li>
                 @endcan
-                @can ('view_log')
-                    <li class="{{Request::is('*audit-logs*')?'active':''}} nav-item"><a href="/dashboard/audit-logs"><i class="menu-livicon"
-                                                                                                                    data-icon="lab"></i><span class="menu-title"
-                            >{{__('admin.Log viewer')}}</span></a>
-                    </li>
-                @endcan
-                @can ('view_report')
-                <li class="{{Request::is('reports*')?'active':''}} nav-item"><a href="/reports"><i class="menu-livicon"
-                                                                                                              data-icon="notebook"></i><span class="menu-title"
-                                                                                                                                         >{{__('admin.Reports')}}</span></a>
-                </li>
-                @endcan
+{{--                @can ('view_log')--}}
+{{--                    <li class="{{Request::is('*audit-logs*')?'active':''}} nav-item"><a href="/dashboard/audit-logs"><i class="menu-livicon"--}}
+{{--                                                                                                                    data-icon="lab"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.Log viewer')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can ('view_report')--}}
+{{--                <li class="{{Request::is('reports*')?'active':''}} nav-item"><a href="/reports"><i class="menu-livicon" data-icon="notebook"></i>--}}
+{{--                        <span class="menu-title">{{__('admin.Reports')}}</span></a>--}}
+{{--                </li>--}}
+{{--                @endcan--}}
                 @can('edit_settings')
                     <li class=" navigation-header"><span>{{__('admin.Frontend settings')}}</span>
                     </li>

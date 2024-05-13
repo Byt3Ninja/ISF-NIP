@@ -295,7 +295,7 @@ class CyclesController extends Controller
     {
         $step = Step::where('stype',1)->where('id',$id)->first();
         if (!$step) {return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);}
-        if ($step->to<now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
+//        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         $id = $step->id;
         $field_map_ids = Formfield::where('step_id',$id )->select('id')->pluck('id')->toArray();
         $answers = [];
@@ -305,9 +305,9 @@ class CyclesController extends Controller
             'form_id' => $step->id,
             'field_ids' => implode(",", $field_map_ids)
         ];
-        if (Auth::user()->company->step==$id) {
+//        if (Auth::user()->company->step==$id) {
             $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id',Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
-        }
+//        }
         return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$step->cycle_id)->with('answers',$answers);
     }
 
