@@ -225,15 +225,14 @@
 											$cs = Auth::user()->company->step;
 											$s = 1;
 											$stat = "Completed";
-											$ctype = 0;
+											$ctype = Auth::user()->company->stepdata->stype;
+
 										@endphp
 										@foreach( \App\Step::where('cycle_id', Auth::user()->company->cycle)->orderBy('arr')->get() as $step )
 											@php
 												if ($step->from && now()->format('Y-m-d')<= $step->to){
 														$stat="Started";
-													    $ctype=$step->stype;
 												}
-//                                                 Auth::user()->company->stepdata->arr >= $step->arr?:$s=0;
                                                 if (Auth::user()->company->stepdata->arr > $step->arr){
                                                     $stat="Completed";
                                                     $s=1;
