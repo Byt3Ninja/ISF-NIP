@@ -130,7 +130,7 @@
                                         <tr>
                                             <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 560px;"><img alt="I'm an image" height="auto" src="{{ url('email-assets') }}/images/arweqah_sa_cover.jpeg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div>
+                                                    <div style="max-width: 560px;"><img alt="I'm an image" height="auto" src="images/arweqah_sa_cover.jpeg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -162,9 +162,9 @@
                                         <tr>
                                             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-                                                    <p style="margin: 0;">Dear {{ $owner_name_en }},</p>
+                                                    <p style="margin: 0;">Dear {{$owner_name_en}},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">We are pleased to inform you that your startup <h3>{{ $company_name_en }}</h3>, has successfully transitioned from <h3>{{ $last_step }}</h3> step to the <h3>{{ $new_step }}</h3>.This advancement reflects your hard work and commitment to growth.</p>
+                                                    <p style="margin: 0;">We are pleased to inform you that your startup <h3>{{ $company_name_en }}</h3>, has successfully transitioned from the <h3>{{ $last_step }}</h3> to the <h3>{{ $new_step }}</h3>.This advancement reflects your hard work and commitment to growth.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Please log in to your dashboard on our virtual incubator platform to view detailed feedback and the next steps recommended for your continued success. Should you have any questions or require further assistance, feel free to reach out to us.</p>
                                                     <p style="margin: 0;"> </p>
@@ -182,7 +182,7 @@
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
                                                     <p style="margin: 0;">عزيزي {{ $owner_name_ar }},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، <h3>{{ $company_name_ar }}</h3>، قد انتقل بنجاح من مرحلة <h3>{{ $last_step }}</h3> الي مرحلة <h3>{{ $new_step }}</h3> . يعكس هذا التقدم الجهد الكبير والالتزام بالنمو الذي تظهرونه.</p>
+                                                    <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، <h3>{{ $company_name_ar }}</h3>، قد انتقل بنجاح من <h3>{{ $last_step }}</h3> إلى <h3> {{ $new_step }}</h3>. يعكس هذا التقدم الجهد الكبير والالتزام بالنمو الذي تظهرونه.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">الرجاء تسجيل الدخول إلى لوحة التحكم الخاصة بك على منصتنا للحاضنات الافتراضية لمشاهدة التعليقات التفصيلية والخطوات التالية الموصى بها لاستمرار نجاحكم. إذا كان لديك أي أسئلة أو تحتاج إلى مزيد من المساعدة، لا تتردد في الاتصال بنا.</p>
                                                     <p style="margin: 0;"> </p>
@@ -255,7 +255,7 @@
                                         <tr>
                                             <td class="pad" style="width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="{{ url('email-assets') }}/images/footer.png" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="640"/></div>
+                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="images/footer.png" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="640"/></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -277,7 +277,7 @@
                                         <tr>
                                             <td class="pad" style="padding-bottom:30px;padding-left:40px;padding-right:40px;padding-top:20px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:12px;line-height:120%;text-align:left;mso-line-height-alt:14.399999999999999px;">
-                                                    <p style="margin: 0; word-break: break-word;"><span style="color: #95979c;">Growthlabs Copyright © {{ date('Y') }}</span></p>
+                                                    <p style="margin: 0; word-break: break-word;"><span style="color: #95979c;">Growthlabs Copyright © {{date('Y')}}</span></p>
                                                 </div>
                                             </td>
                                         </tr>
