@@ -164,7 +164,7 @@
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
                                                     <p style="margin: 0;">Dear {{ $owner_name_en }},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">We are pleased to inform you that your startup {{ $company_name_en }}, has successfully transitioned from {{ $last_step }} step to the {{ $new_step }}.This advancement reflects your hard work and commitment to growth.</p>
+                                                    <p style="margin: 0;">We are pleased to inform you that your startup <h3>{{ $company_name_en }}</h3>, has successfully transitioned from <h3>{{ $last_step }}</h3> step to the <h3>{{ $new_step }}</h3>.This advancement reflects your hard work and commitment to growth.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Please log in to your dashboard on our virtual incubator platform to view detailed feedback and the next steps recommended for your continued success. Should you have any questions or require further assistance, feel free to reach out to us.</p>
                                                     <p style="margin: 0;"> </p>
@@ -182,8 +182,7 @@
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
                                                     <p style="margin: 0;">عزيزي {{ $owner_name_ar }},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، {{ $company_name_ar }}، قد انتقل بنجاح من مرحلة
-                                                        {{ $last_step }} إلى مرحلة {{ $new_step }}. يعكس هذا التقدم الجهد الكبير والالتزام بالنمو الذي تظهرونه.</p>
+                                                    <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، <h3>{{ $company_name_ar }}</h3>، قد انتقل بنجاح من مرحلة <h3>{{ $last_step }}</h3> الي مرحلة <h3>{{ $new_step }}</h3> . يعكس هذا التقدم الجهد الكبير والالتزام بالنمو الذي تظهرونه.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">الرجاء تسجيل الدخول إلى لوحة التحكم الخاصة بك على منصتنا للحاضنات الافتراضية لمشاهدة التعليقات التفصيلية والخطوات التالية الموصى بها لاستمرار نجاحكم. إذا كان لديك أي أسئلة أو تحتاج إلى مزيد من المساعدة، لا تتردد في الاتصال بنا.</p>
                                                     <p style="margin: 0;"> </p>
