@@ -38,7 +38,7 @@ class ChangeCycle extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Your Startup Progress Update - Stage Transition Notification')
-            ->markdown('email.emailCycle', $this->data);
+            ->markdown('emails.emailCycle', $this->data);
     }
 
     /**
