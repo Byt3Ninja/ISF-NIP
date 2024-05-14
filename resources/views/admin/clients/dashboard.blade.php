@@ -221,26 +221,32 @@
 									<div class="row">
 										@php
 											$svgs = ['notebook','search','idea','comments','trophy'];
-											$colors = ['#39da8a','#99a2ac'];
+											$colors = ['#39da8a','#99a2ac','#fdac41'];
 											$cs = Auth::user()->company->step;
 											$s = 1;
 											$stat = "Completed";
 											$ctype = Auth::user()->company->stepdata->stype;
+                                            $color= $colors[0];
 
 										@endphp
 										@foreach( \App\Step::where('cycle_id', Auth::user()->company->cycle)->orderBy('arr')->get() as $step )
 											@php
 												if ($step->from && now()->format('Y-m-d')<= $step->to){
 														$stat="Started";
+                                                        $color= $colors[0];
 												}
                                                 if (Auth::user()->company->stepdata->arr > $step->arr){
                                                     $stat="Completed";
                                                     $s=1;
+                                                    $color= $colors[2];
                                                 }elseif (Auth::user()->company->stepdata->arr == $step->arr){
                                                    $stat="Started";
                                                     $s=1;
+                                                    $color= $colors[0];
+
                                                 }else{
                                                     $s=0;
+                                                    $color= $colors[1];
                                                 }
 
 												$trtype = $flink = null;
@@ -254,7 +260,7 @@
 											{!! $links[$step->stype] ? $links[$step->stype] : '' !!}
 											<div class="col text-center" style="opacity:{{$s==0?"0.4":"1"}};">
 												<i class="livicon-evo" data-options="name: {{$svgs[$step->stype-1]}}.svg; size: 60px; style: {{$s==0?'solid;animated: false':'original'}};"></i>
-													<hr style="color: {{now()->format('Y-m-d')>= $step->from && now()->format('Y-m-d')<= $step->to?'#39da8a':'#99a2ac'}}">
+													<hr style="color: {{$color}}">
 													<div class="text-{{$stat!="Started"||$s==0?'muted':'primary'}} line-ellipsis">
 														<span class="badge badge-{{$stat!="Started"||$s==0?'secondary':'success'}} badge-pill">{{__('dashboard.STEP ready')}} {{$step->arr}}</span>
 														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('m-d') }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m')}}
@@ -265,7 +271,7 @@
 											</div>
 											{!! $links[$step->stype] ? "</a>" : '' !!}
 											@if( !$loop->last )
-												<i class="step-icon bx @if($stat=="Completed") bx-check-circle @elseif($stat=="Started" && $s==1) bx-loader-circle @else bx-circle @endif" style="padding: 62px 0;font-size: 30px;color:{{$stat!="Started"||$s==0?'#99a2ac':'#39da8a'}};"></i>
+												<i class="step-icon bx @if($stat=="Completed") bx-check-circle @elseif($stat=="Started" && $s==1) bx-loader-circle @else bx-circle @endif" style="padding: 62px 0;font-size: 30px;color:{{$color}};"></i>
 											@endif
 											@php if($cs==$step->id){$s=0;$stat="Not started";} @endphp
 											@if($stat=="Refused")
