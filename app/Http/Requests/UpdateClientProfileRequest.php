@@ -31,7 +31,7 @@ class UpdateClientProfileRequest extends FormRequest
             'first_name_en' => ['required', 'string', 'max:255'],
             'last_name_en' => ['required', 'string', 'max:255'],
             'phone' => ['required'],
-            'email' => 'email|required|unique:users,email,' .$id . '',
+            'email' => 'email|required|unique:users,email,'.$id ,
             'HaveCompany'=>['nullable','max:1'],
         ];
     }
