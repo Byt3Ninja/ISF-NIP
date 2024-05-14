@@ -130,7 +130,7 @@
                                         <tr>
                                             <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 560px;"><img alt="I'm an image" height="auto" src="images/arweqah_sa_cover.jpeg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div>
+                                                    <div style="max-width: 560px;"><img alt="GrowthLab" height="auto" src="{{ url('email-assets') }}/images/arweqah_sa_cover.jpeg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -255,7 +255,7 @@
                                         <tr>
                                             <td class="pad" style="width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
-                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="images/footer.png" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="640"/></div>
+                                                    <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="{{ url('email-assets') }}/images/footer.png" style="display: block; height: auto; border: 0; width: 100%;" title="GrowthLab" width="640"/></div>
                                                 </div>
                                             </td>
                                         </tr>
