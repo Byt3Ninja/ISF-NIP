@@ -206,19 +206,21 @@ class ScreeningController extends Controller
                 $data['new_step']=$cstep->title;
             }
             $update = $company->update(['step'=>$request->step, 'approved'=>$approved, 'approved_by'=>$by]);
-
+            if ($request->step!=0) {
             /// notify Company Owner via Mail
             $company_owner = $company->user;
-            $data['owner_name_en'] = $company_owner->first_name_en ." ". $company_owner->last_name_en;
-            $data['owner_name_ar'] = $company_owner->first_name_ar ." ". $company_owner->last_name_ar;
+            $data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;
+            $data['owner_name_ar'] = $company_owner->first_name_ar . " " . $company_owner->last_name_ar;
             $data['company_name_ar'] = $company_owner->company->name_ar;
             $data['company_name_en'] = $company_owner->company->name_en;
-            $data['organization_name_ar'] = $company_owner->company->name;
-            $data['organization_name_en'] = $company_owner->company->name;
+            $data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
+            $data['organization_name_en'] = $cstep->cycle->organization->name_en;
+
             $mail = new ChangeCycle($data);
 //            $MSG = new TemplateEmail;
 //            $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
             $company_owner->notify($mail);
+             }
             /// End of mail send
             if ($update) {
             return response()->json(['state' => 'success'], 200);
