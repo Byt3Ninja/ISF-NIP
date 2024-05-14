@@ -471,7 +471,7 @@
 															<td>
 																<div class="media align-items-center">
 																	<a class="media-left mr-50">
-																		<img src="/191014/{{$mentor->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+																		<img src="/191014/{{$mentor->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 																	</a>
 																	<div class="media-body">
 																		<h6 class="media-heading mb-0">{{$mentor->user->{'first_name_'.$l} }} {{$mentor->user->{'last_name_'.$l} }}</h6>
