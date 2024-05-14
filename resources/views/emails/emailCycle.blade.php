@@ -162,16 +162,16 @@
                                         <tr>
                                             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-                                                    <p style="margin: 0;">Dear {{ $name }},</p>
+                                                    <p style="margin: 0;">Dear {{ $owner_name_en }},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">We are pleased to inform you that your startup {{ $company_name }}, has successfully transitioned from {{ $last_step }} step to the {{ $new_step }}.This advancement reflects your hard work and commitment to growth.</p>
+                                                    <p style="margin: 0;">We are pleased to inform you that your startup {{ $company_name_en }}, has successfully transitioned from {{ $last_step }} step to the {{ $new_step }}.This advancement reflects your hard work and commitment to growth.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Please log in to your dashboard on our virtual incubator platform to view detailed feedback and the next steps recommended for your continued success. Should you have any questions or require further assistance, feel free to reach out to us.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Congratulations on reaching this significant milestone! We look forward to seeing your continued progress and success.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Best regards,</p>
-                                                    <p style="margin: 0;">{{ $organization_name }}</p>
+                                                    <p style="margin: 0;">{{ $organization_name_en }}</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -180,16 +180,16 @@
                                         <tr>
                                             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
-                                                    <p style="margin: 0;">عزيزي {{ $name }},</p>
+                                                    <p style="margin: 0;">عزيزي {{ $owner_name_ar }},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، {{ $company_name }}، قد انتقل بنجاح من مرحلة
+                                                    <p style="margin: 0;">يسرنا إعلامك بأن مشروعك الناشئ، {{ $company_name_ar }}، قد انتقل بنجاح من مرحلة
                                                         {{ $last_step }} إلى مرحلة {{ $new_step }}. يعكس هذا التقدم الجهد الكبير والالتزام بالنمو الذي تظهرونه.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">الرجاء تسجيل الدخول إلى لوحة التحكم الخاصة بك على منصتنا للحاضنات الافتراضية لمشاهدة التعليقات التفصيلية والخطوات التالية الموصى بها لاستمرار نجاحكم. إذا كان لديك أي أسئلة أو تحتاج إلى مزيد من المساعدة، لا تتردد في الاتصال بنا.</p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">تهانينا على بلوغ هذه الخطوة الهامة! نحن نتطلع إلى رؤية المزيد من تقدمكم ونجاحكم.</p>
                                                     <p style="margin: 0;">أطيب التحيات،</p>
-                                                    <p style="margin: 0;">{{ $organization_name }}</p>
+                                                    <p style="margin: 0;">{{ $organization_name_ar }}</p>
                                                 </div>
                                             </td>
                                         </tr>
