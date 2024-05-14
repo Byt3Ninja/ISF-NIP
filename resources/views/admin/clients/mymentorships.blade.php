@@ -44,7 +44,7 @@
                                                         <th>{{__('admin.Mentor')}}</th>
                                                         <th>{{__('admin.Date')}}</th>
                                                         <th>{{__('admin.Notes')}}</th>
-                                                        <th>{{__('admin.state')}}</th>
+                                                        <th>{{__('dashboard.Meeting Link')}}</th>
                                                         <th>{{__('admin.Rate')}}</th>
                                                     </tr>
                                                     </thead>
