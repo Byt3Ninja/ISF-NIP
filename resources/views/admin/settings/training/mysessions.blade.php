@@ -35,8 +35,8 @@
                 <div class="d-flex align-items-center">
                     <i class="bx bx-like"></i>
                     <span>
-                                                    {{ __('admin.'.session()->get('message')) }}
-                                                </span>
+                        {{ __('admin.'.session()->get('message')) }}
+                    </span>
                 </div>
             </div>
         @endif
@@ -62,7 +62,7 @@
                         </tr>
                         </thead>
                         <tbody>
-@foreach($sessions as $key=>$session)
+                        @foreach($sessions as $key=>$session)
                             <tr>
                                 <td>{{$key+1}}</td>
                                 <td>{{__('cycles.'.$session->type)}}</td>

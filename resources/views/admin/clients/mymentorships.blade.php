@@ -55,7 +55,7 @@
                                                             <td>
                                                                 <div class="media align-items-center">
                                                                     <a class="media-left mr-50">
-                                                                        <img src="/191014/{{$session->mentor->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                        <img src="{{$session->mentor->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                     </a>
                                                                     <div class="media-body">
                                                                         <h6 class="media-heading mb-0">{{$session->mentor->{'first_name_'.$l} }} {{$session->mentor->{'last_name_'.$l} }}</h6>
@@ -69,7 +69,7 @@
                                                                 @if($session->join_url)
                                                                     <a href="{{$session->join_url}}" target="_blank">
                                                                         <button title="Join meeting" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-                                                                            <i class="bx bx-user"></i></button></a>
+                                                                            <i class="bx bx-desktop"></i></button></a>
                                                                 @endif
                                                             @elseif($session->approved=='No')
                                                             <td class="text-danger py-1">
