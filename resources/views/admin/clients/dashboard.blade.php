@@ -299,7 +299,7 @@
 									@elseif( $ctype == 3 )
 										<hr><h6>{{__('dashboard.Below Mentors list to get any support, click request icon to check Mentor Schedule & request a meeting')}}.</h6>
 									@elseif( $ctype == 4 )
-										@php( $mytraining = \App\Step::findOrFail( Auth::user()->company->step ) )
+										@php( $mytraining =Auth::user()->company->stepdata  )
 										<hr><h6>{{__('dashboard.Your training step started')}}, <a href="/dashboard/training/my">{{__('dashboard.Click here')}}</a> {{__('dashboard.to view your training list')}}.</h6>
 										<p>{{$mytraining->description}}</p>
 									@elseif( $ctype == 5 )
@@ -323,15 +323,6 @@
 								<div class="card-header border-bottom">
 									<h4 class="card-title d-flex align-items-center">
 										<i class='bx bx-card font-medium-4 mr-1'></i>{{__('dashboard.IncubationList')}}</h4>
-									<div class="heading-elements">
-										<ul class="list-inline mb-0">
-											<li>
-												<a data-action="close">
-													<i class="bx bx-x"></i>
-												</a>
-											</li>
-										</ul>
-									</div>
 								</div>
 								<div class="card-body">
 									@php( $workingcycles = App\Cycle::whereNull('private')->whereRaw('? between start and end', [now()->format('Y-m-d')])->get() )
@@ -377,11 +368,7 @@
 									<i class='bx bxs-megaphone font-medium-4 mr-1'></i>{{__('dashboard.My Latest training')}} :: 
 									<a href="/dashboard/training/my">{{__('dashboard.Show all')}}</a>
 								</h4>
-								<div class="heading-elements">
-									<ul class="list-inline mb-0">
-										<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
-									</ul>
-								</div>
+
 							</div>
 							<div class="card-body">
 								<div class="card-text">
@@ -409,7 +396,7 @@
 															@if ($session->type=='sessions')
 																{{__('cycles.Duration')}}:  {{$session->duration}} {{__('cycles.Minutes')}} :
 																<a href="{{$session->join_url}}" target="_blank">
-																	<button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx bx-user"></i></button>
+																	<button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx bx-desktop"></i></button>
 																</a>
 															@elseif ($session->type=='offline')
 																<b>{{__('cycles.trainer name')}}:</b> {{$session->trainer_name}}<br><b>{{__('cycles.training location')}}:</b> {{$session->location}} <br>
@@ -444,11 +431,7 @@
 											</h2>
 										@endif
 									</h4>
-									<div class="heading-elements">
-										<ul class="list-inline mb-0">
-											<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
-										</ul>
-									</div>
+
 								</div>
 								<div class="card-body">
 									<div class="card ">

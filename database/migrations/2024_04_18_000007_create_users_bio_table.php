@@ -18,8 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-            $table->string('bio_ar')->nullable();
-            $table->string('bio_en')->nullable();
+            $table->mediumText('bio_ar')->nullable();
+            $table->mediumText('bio_en')->nullable();
             $table->string('specialization_ar', 250)->nullable();
             $table->string('specialization_en', 250)->nullable();
             $table->string('linkedin', 250)->nullable();
