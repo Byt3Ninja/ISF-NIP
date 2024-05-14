@@ -304,7 +304,7 @@
 										<p>{{$mytraining->description}}</p>
 									@elseif( $ctype == 5 )
 										@php( $myfinal = \App\Finalscreening::where('company_id', Auth::user()->company->id )->where('step_id', Auth::user()->company->step )->first())
-										@if( $myfinal->join_url )
+										@if( !is_null($myfinal)&&$myfinal->join_url )
 											<hr><h2>{{__('dashboard.Your final session will start')}}: ({{$myfinal->datetime}}) <a href="{{$myfinal->join_url}}">{{__('dashboard.Join here')}}</a>.</h2>
 										@else
 											<hr><h6>{{__('dashboard.Your final session will start soon')}}.</h6>
