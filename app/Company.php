@@ -24,6 +24,11 @@ class Company extends Model
         return "/191014/".$image;
     }
 
+    public function getNameAttribute()
+    {
+        return $this->{"name_".app()->getLocale()};
+    }
+
     // ==========> Relations <==============
     public function user()
     {

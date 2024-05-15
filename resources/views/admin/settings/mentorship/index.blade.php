@@ -1,7 +1,8 @@
 @extends('layouts.admin')
 @section('style')
     <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+{{--    <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">--}}
+   <link rel="stylesheet" href="/Datepicker/dist/css/datepicker.material.css">
     <style>
         #mentorstable tr td {
             padding:0.15rem 2rem;
@@ -153,7 +154,7 @@
                                         </a>
                                         <a href="/dashboard/companyProfile/{{$company->id}}">
                                             <div class="media align-items-center">
-                                                {{$company->{'name_'.$l} }}
+                                                {{$company->name }}
                                             </div>
                                         </a>
                                     </div>
@@ -175,7 +176,7 @@
                                     @if($company->user->mentorship)
                                      @foreach($company->user->mentorship as $session)
                                       @if ($session->approved=='Yes')
-                                                M#{{$session->mentor_id}} ({{$session->zoom_date->format('d-M-Y')}}) <br>
+                                                M#{{$session->mentor_id}} ({{$session->zoom_date}}) <br>
                                       @endif
                                      @endforeach
                                         @endif
@@ -222,7 +223,9 @@
                     <input type="hidden" name="cycle_id" id="addCycleID">
                     <div class="form-group" id="showdates">
                         <label>{{__('cycles.Date/Time')}}:</label>
-                        <input class='date width-200 form-control' type="text" id="date" name="date" value="" required>
+                        <input type="hidden" class="date form-control" name="date" id="constrained" data-inline="true" data-multiple="true" data-open-on="today" data-time="true" >
+
+{{--                        <input class='date width-200 form-control' type="text" id="date" name="date" value="" required>--}}
                     </div>
                     <div class="form-group">
                         <label>{{__('cycles.Meeting period')}}:</label>
@@ -255,8 +258,10 @@
 @section('pagescripts')
     <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
     <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-    <script src="/js/jquery.datetimepicker.full.min.js"></script>
-        <script type="text/javascript">
+{{--    <script src="/js/jquery.datetimepicker.full.min.js"></script>--}}
+    <script src="/Datepicker/dist/datepicker.js"></script>
+
+    <script type="text/javascript">
             $(document).ready(function() {
                 $('#userstable').DataTable({
                     "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
@@ -278,7 +283,19 @@
             });
         </script>
         <script>
-            $('.date').datetimepicker({timepicker:true,format:'Y-m-d H:i'});
+            // $('.date').datetimepicker({
+            //     timepicker:true,
+            //     multiple: true,
+            //     format:'Y-m-d H:i'
+            // });
+            var constrained = new Datepicker('.date', {
+                min: (function(){
+                    var date = new Date();
+                    date.setDate(date.getDate());
+                    return date;
+                })(),
+            });
+
             function add(id,organization_id,cycle_id) {
                 let mentor = $('input[name="mentor"]:checked').val();
                 if (mentor) {

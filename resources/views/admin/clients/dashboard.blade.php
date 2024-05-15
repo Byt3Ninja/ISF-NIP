@@ -200,48 +200,78 @@
 						<div class="col-md-12">
 							<div class="card">
 								<div class="card-header border-bottom">
-									<h4 class="card-title d-flex align-items-center"> <i class='bx bx-briefcase font-medium-4 mr-1'></i>{{__('dashboard.My progress')}}</h4>
-									<div class="heading-elements">
-										<ul class="list-inline mb-0">
-											<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
-										</ul>
+
+										<h4 class="card-title d-flex align-items-center mb-1">
+											<i class='bx bx-briefcase font-medium-4 mr-1'></i>{{__('dashboard.My progress')}} : {{Auth::user()->company->cycledata->title }}
+										</h4>
+
+									<span >{{ __('dashboard.start from').": " .Auth::user()->company->cycledata->start_format. " ".__('dashboard.to').": " .Auth::user()->company->cycledata->end_format  }}</span>
+
+									<div class="media align-items-center mt-2">
+										<div class="media-left mr-50">
+											<img src="{{Auth::user()->company->cycledata->organization->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+										</div>
+											<div class="media align-items-center">
+												{{Auth::user()->company->cycledata->organization->name }}
+											</div>
 									</div>
-									<div class="heading-elements">
-										<ul class="list-inline mb-0">
-											<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
-										</ul>
-									</div>
+
 								</div>
 								<div class="card-body">
 									<div class="row">
 										@php
 											$svgs = ['notebook','search','idea','comments','trophy'];
-											$colors = ['#39da8a','#99a2ac'];
+											$colors = ['#39da8a','#99a2ac','#fdac41'];
 											$cs = Auth::user()->company->step;
 											$s = 1;
 											$stat = "Completed";
-											$ctype = 0;
+											$ctype = Auth::user()->company->stepdata->stype;
+                                            $color= $colors[0];
+
 										@endphp
 										@foreach( \App\Step::where('cycle_id', Auth::user()->company->cycle)->orderBy('arr')->get() as $step )
 											@php
-												if( $cs == $step->id ) { $stat="Started"; $ctype=$step->stype; }
+												if ($step->from && now()->format('Y-m-d')<= $step->to){
+														$stat="Started";
+                                                        $color= $colors[0];
+												}
+                                                if (Auth::user()->company->stepdata->arr > $step->arr){
+                                                    $stat="Completed";
+                                                    $s=1;
+                                                    $color= $colors[2];
+                                                }elseif (Auth::user()->company->stepdata->arr == $step->arr){
+                                                   $stat="Started";
+                                                    $s=1;
+                                                    $color= $colors[0];
+
+                                                }else{
+                                                    $s=0;
+                                                    $color= $colors[1];
+                                                }
+
 												$trtype = $flink = null;
-												if( Auth::user()->company->approved ) { $flink='my/'.Auth::user()->company->step; } else { $flink='view/'.Auth::user()->company->cycle; }
-												$links = ['','<a href="/dashboard/cycles/'.$flink.'">', '','','<a href="/dashboard/training/my">',''];
+												if( Auth::user()->company->approved ) {
+                                                    $flink='my/'.$step->id;
+                                                } else {
+                                                    $flink='view/'.Auth::user()->company->cycle;
+                                                }
+												$links = ['','<a href="/dashboard/cycles/'.$flink.'">', '','<a href="/dashboard/mentorship/mine">','<a href="/dashboard/training/my">',''];
 											@endphp
+											{!! $links[$step->stype] ? $links[$step->stype] : '' !!}
 											<div class="col text-center" style="opacity:{{$s==0?"0.4":"1"}};">
-												{!! $links[$step->stype]&&$stat=='Started' ? $links[$step->stype] : '' !!}
 												<i class="livicon-evo" data-options="name: {{$svgs[$step->stype-1]}}.svg; size: 60px; style: {{$s==0?'solid;animated: false':'original'}};"></i>
-													<hr style="color: {{$s?'#99a2ac':'#39da8a'}}">
-													<div class="text-{{$s==0?'muted':'primary'}} line-ellipsis">
-														<span class="badge badge-{{$s==0?'secondary':'success'}} badge-pill">{{__('dashboard.STEP ready')}} {{$step->arr}}</span>
-														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('d-m') }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m')}}
+													<hr style="color: {{$color}}">
+													<div class="text-{{$stat!="Started"||$s==0?'muted':'primary'}} line-ellipsis">
+														<span class="badge badge-{{$stat!="Started"||$s==0?'secondary':'success'}} badge-pill">{{__('dashboard.STEP ready')}} {{$step->arr}}</span>
+														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('m-d') }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m')}}
 														<br>{{$step->title}}
 													</div>
-													<div class="text-{{$s==0?'muted':'success'}} line-ellipsis"> {{ __('dashboard.'.$stat) }} </div>
+													<div class="text-{{$stat!="Started"||$s==0?'muted':'success'}} line-ellipsis"> {{ __('dashboard.'.$stat) }} </div>
+
 											</div>
+											{!! $links[$step->stype] ? "</a>" : '' !!}
 											@if( !$loop->last )
-												<i class="step-icon bx @if($stat=="Completed") bx-check-circle @elseif($stat=="Started") bx-loader-circle @else bx-circle @endif" style="padding: 62px 0;font-size: 30px;color:{{$s==0?'#99a2ac':'#39da8a'}};"></i>
+												<i class="step-icon bx @if($stat=="Completed") bx-check-circle @elseif($stat=="Started" && $s==1) bx-loader-circle @else bx-circle @endif" style="padding: 62px 0;font-size: 30px;color:{{$color}};"></i>
 											@endif
 											@php if($cs==$step->id){$s=0;$stat="Not started";} @endphp
 											@if($stat=="Refused")
@@ -257,7 +287,7 @@
 												</div>
 												@break
 											@endif
-											@php if($cs==0){$stat="Refused";} @endphp
+											@php if(is_null($cs)){$stat="Refused";} @endphp
 										@endforeach
 									</div>
 									@if( $ctype == 0 )
@@ -269,12 +299,12 @@
 									@elseif( $ctype == 3 )
 										<hr><h6>{{__('dashboard.Below Mentors list to get any support, click request icon to check Mentor Schedule & request a meeting')}}.</h6>
 									@elseif( $ctype == 4 )
-										@php( $mytraining = \App\Step::findOrFail( Auth::user()->company->step ) )
+										@php( $mytraining =Auth::user()->company->stepdata  )
 										<hr><h6>{{__('dashboard.Your training step started')}}, <a href="/dashboard/training/my">{{__('dashboard.Click here')}}</a> {{__('dashboard.to view your training list')}}.</h6>
 										<p>{{$mytraining->description}}</p>
 									@elseif( $ctype == 5 )
 										@php( $myfinal = \App\Finalscreening::where('company_id', Auth::user()->company->id )->where('step_id', Auth::user()->company->step )->first())
-										@if( $myfinal->join_url )
+										@if( !is_null($myfinal)&&$myfinal->join_url )
 											<hr><h2>{{__('dashboard.Your final session will start')}}: ({{$myfinal->datetime}}) <a href="{{$myfinal->join_url}}">{{__('dashboard.Join here')}}</a>.</h2>
 										@else
 											<hr><h6>{{__('dashboard.Your final session will start soon')}}.</h6>
@@ -293,15 +323,6 @@
 								<div class="card-header border-bottom">
 									<h4 class="card-title d-flex align-items-center">
 										<i class='bx bx-card font-medium-4 mr-1'></i>{{__('dashboard.IncubationList')}}</h4>
-									<div class="heading-elements">
-										<ul class="list-inline mb-0">
-											<li>
-												<a data-action="close">
-													<i class="bx bx-x"></i>
-												</a>
-											</li>
-										</ul>
-									</div>
 								</div>
 								<div class="card-body">
 									@php( $workingcycles = App\Cycle::whereNull('private')->whereRaw('? between start and end', [now()->format('Y-m-d')])->get() )
@@ -347,11 +368,7 @@
 									<i class='bx bxs-megaphone font-medium-4 mr-1'></i>{{__('dashboard.My Latest training')}} :: 
 									<a href="/dashboard/training/my">{{__('dashboard.Show all')}}</a>
 								</h4>
-								<div class="heading-elements">
-									<ul class="list-inline mb-0">
-										<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
-									</ul>
-								</div>
+
 							</div>
 							<div class="card-body">
 								<div class="card-text">
@@ -379,7 +396,7 @@
 															@if ($session->type=='sessions')
 																{{__('cycles.Duration')}}:  {{$session->duration}} {{__('cycles.Minutes')}} :
 																<a href="{{$session->join_url}}" target="_blank">
-																	<button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx bx-user"></i></button>
+																	<button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx bx-desktop"></i></button>
 																</a>
 															@elseif ($session->type=='offline')
 																<b>{{__('cycles.trainer name')}}:</b> {{$session->trainer_name}}<br><b>{{__('cycles.training location')}}:</b> {{$session->location}} <br>
@@ -414,11 +431,7 @@
 											</h2>
 										@endif
 									</h4>
-									<div class="heading-elements">
-										<ul class="list-inline mb-0">
-											<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
-										</ul>
-									</div>
+
 								</div>
 								<div class="card-body">
 									<div class="card ">
@@ -441,7 +454,7 @@
 															<td>
 																<div class="media align-items-center">
 																	<a class="media-left mr-50">
-																		<img src="/191014/{{$mentor->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+																		<img src="{{$mentor->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 																	</a>
 																	<div class="media-body">
 																		<h6 class="media-heading mb-0">{{$mentor->user->{'first_name_'.$l} }} {{$mentor->user->{'last_name_'.$l} }}</h6>

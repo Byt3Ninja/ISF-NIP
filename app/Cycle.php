@@ -11,6 +11,21 @@ class Cycle extends Model
     protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d',];
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
+    // =============> Attributes <======================
+
+    public function getNameAttribute()
+    {
+        return $this->{"name_".app()->getLocale()};
+    }
+    public function getStartFormatAttribute()
+    {
+        return date('Y-m-d',strtotime($this->attributes['start']));
+    }
+    public function getEndFormatAttribute()
+    {
+        return date('Y-m-d',strtotime($this->attributes['end']));
+    }
+    // =============> Relations <========================
     public function organization(){
         return $this->belongsTo(Organization::class,'organization_id');
     }

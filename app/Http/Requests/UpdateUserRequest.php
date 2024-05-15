@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
                 'first_name_en' => ['required', 'string', 'max:255'],
                 'last_name_en' => ['required', 'string', 'max:255'],
                 'phone' => ['required'],
-                'email' => 'email|required|unique:users,email,' .$id . '',
+                'email' => 'email|required|unique:users,email,'.$id ,
                 'role' => 'required',
                 'img_url' => 'required|image|mimes:jpeg,bmp,png,jpg,gif',
             ];
@@ -40,7 +40,7 @@ class UpdateUserRequest extends FormRequest
                 'first_name_en' => ['required', 'string', 'max:255'],
                 'last_name_en' => ['required', 'string', 'max:255'],
                 'phone' => ['required'],
-                'email' => 'email|required|unique:users,email,' .$id . '',
+                'email' => 'email|required|unique:users,email,'.$id,
                 'role' => 'required',
             ];
         }
