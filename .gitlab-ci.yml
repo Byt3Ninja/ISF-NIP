@@ -4,7 +4,7 @@ stages:
 
 
 
-build:
+beta:
   stage: beta
   image: alpine
   before_script:
@@ -22,7 +22,7 @@ build:
     - development
 
 
-cloud:
+production:
   stage: production
   image: alpine
   allow_failure: true
