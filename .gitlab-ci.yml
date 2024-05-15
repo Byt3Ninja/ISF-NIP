@@ -13,10 +13,10 @@ build:
     - echo "$beta_ssh_key" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - ssh-keyscan -p 22 $BETA_IPADDRESS >> ~/.ssh/known_hosts
+    - ssh-keyscan -p 22 18.135.16.249 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p 22 root@45.63.42.192 'cd /home/app;sh deploy.sh'
+    - ssh -p 22 root@18.135.16.249 'cd /home/app;sh deploy.sh'
 
   only:
     - development
