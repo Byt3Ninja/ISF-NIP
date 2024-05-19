@@ -15,7 +15,7 @@ beta:
     - ssh-add <(echo "$beta_ssh_key")
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - ssh-keyscan -p22 18.135.16.249 >> ~/.ssh/known_hosts
+    - ssh-keyscan -p22 15.237.250.67 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
     - ssh-add <(echo "$beta_ssh_key")
@@ -23,7 +23,7 @@ beta:
     - chmod 700 ~/.ssh
     - ssh-keyscan -p22 18.135.16.249 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - ssh -vvv -p22 -o StrictHostKeyChecking=no root@18.135.16.249 "cd /home/app && sh deploy.sh"
+    - ssh -vvv -p22 -o StrictHostKeyChecking=no ubuntu@18.135.16.249 "cd /home/app && sudo sh deploy.sh"
 
   only:
     - development
