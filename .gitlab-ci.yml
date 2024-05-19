@@ -10,8 +10,8 @@ beta:
   before_script:
     - 'command -v ssh-agent >/dev/null || ( apk add --update openssh-client )'
     - eval $(ssh-agent -s)
-    - echo "$beta_ssh_key" | tr -d '\r' | ssh-add -
-    - ssh-add <(echo "$beta_ssh_key")
+    - echo "$beta_public_key" | tr -d '\r' | ssh-add -
+    - ssh-add <(echo "$beta_public_key")
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -p22 18.135.16.249 >> ~/.ssh/known_hosts
