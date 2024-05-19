@@ -11,7 +11,7 @@ beta:
  #   - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - 'command -v ssh-agent >/dev/null || ( apk add --update openssh-client )'
     - eval $(ssh-agent -s)
-    - echo "$beta_private_key" | tr -d '\r' | ssh-add -
+    - echo "${beta_private_key}" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -p22 18.135.16.249 >> ~/.ssh/known_hosts
