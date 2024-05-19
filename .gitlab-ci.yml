@@ -18,7 +18,7 @@ beta:
     - ssh-keyscan -p22 18.135.16.249 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p22 -o StrictHostKeyChecking=no root@18.135.16.249 "cd /home/app && sh deploy.sh"
+    - ssh -vvv -p22 -o StrictHostKeyChecking=no root@18.135.16.249 "cd /home/app && sh deploy.sh"
 
   only:
     - development
