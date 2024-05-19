@@ -8,8 +8,8 @@ beta:
   stage: beta
   image: ubuntu:latest
   before_script:
- #   - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh-client )'
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+#    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh-client )'
     - eval $(ssh-agent -s)
     - echo "${beta_private_key}" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
