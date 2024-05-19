@@ -8,12 +8,14 @@ beta:
   stage: beta
   image: alpine
   before_script:
-    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh-client )'
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$beta_ssh_key")
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan -p22 18.135.16.249 >> ~/.ssh/known_hosts
+    - echo "$beta_ssh_key" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -t rsa 18.135.16.249 > ~/.ssh/known_hosts
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - chmod 644 ~/.ssh/known_hosts
   script:
     - ssh -p22 root@18.135.16.249 "cd /home/app && sh deploy.sh"
