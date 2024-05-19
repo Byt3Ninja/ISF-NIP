@@ -6,7 +6,7 @@ stages:
 
 beta:
   stage: beta
-  image: alpine
+  image: ubuntu:latest
   before_script:
  #   - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - 'command -v ssh-agent >/dev/null || ( apk add --update openssh-client )'
