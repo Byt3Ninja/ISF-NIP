@@ -18,12 +18,7 @@ beta:
     - ssh-keyscan -p22 15.237.250.67 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh-add <(echo "$arweqah_ssh_key")
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan -p22 15.237.250.67 >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-    - ssh -vvv -p22 -o StrictHostKeyChecking=no ubuntu@15.237.250.67 "cd /home/app && sudo sh deploy.sh"
+    - ssh -p22 -o StrictHostKeyChecking=no ubuntu@15.237.250.67 "cd /home/app && sudo sh deploy.sh"
 
   only:
     - development
