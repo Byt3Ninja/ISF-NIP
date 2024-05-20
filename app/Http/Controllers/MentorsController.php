@@ -133,7 +133,7 @@ class MentorsController extends Controller
                 /// End of mail send
 
             }
-            return back()->with(['message' => 'Session successfully added']);
+            return back()->with(['message' => 'Session added successfully']);
         } else{
             return back()->with(['message2' => "Error, can't add session"]);
         }

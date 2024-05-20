@@ -5,6 +5,9 @@
 //Route::get('test',function (){
 //    return view('emails.emailVerify');
 //});
+// routes/web.php
+Route::get('create-meeting', 'MeetingController@createMeeting');
+
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');
@@ -264,5 +267,8 @@ Route::get('/auth/redirect/{provider}', 'SocialController@redirect');
 Route::get('/callback/{provider}', 'SocialController@callback');
 Route::get('/auth/google', 'SocialController@redirectToGoogle');
 Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
+
+Route::get('/auth/microsoft/redirect',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
+Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('auth.microsoft.callback');
 
 if( request()->secure() ) { URL::forceScheme("https"); }

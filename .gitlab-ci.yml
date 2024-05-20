@@ -1,22 +1,25 @@
 stages:
   - beta
+  - demo
   - production
 
 
 
 beta:
   stage: beta
-  image: alpine
+  image: ubuntu:latest
+  allow_failure: true
   before_script:
-    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh-client )'
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
-    - echo "$beta_ssh_key" | tr -d '\r' | ssh-add -
+    - ssh-add <(echo "$beta_ssh_key")
     - mkdir -p ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - chmod 700 ~/.ssh
-    - ssh-keyscan -p 22 18.135.16.249 >> ~/.ssh/known_hosts
+    - ssh-keyscan -p22 18.135.16.249 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p 22 root@18.135.16.249 'cd /home/app;sh deploy.sh'
+    - ssh -p22 -o StrictHostKeyChecking=no ubuntu@18.135.16.249 "cd /home/app/incubator && sudo git pull && sudo docker-compose build && sudo docker-compose up -d && sudo docker-compose exec -T app bash -c 'composer install'"
 
   only:
     - development
@@ -24,18 +27,18 @@ beta:
 
 production:
   stage: production
-  image: alpine
+  image: ubuntu:latest
   allow_failure: true
   before_script:
-    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh-client )'
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY_CLOUD" | tr -d '\r' | ssh-add -
+    - ssh-add <(echo "$arweqah_ssh_key")
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - ssh-keyscan -p 22 15.237.250.67 >> ~/.ssh/known_hosts
+    - ssh-keyscan -p22 15.237.250.67 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p 22 ubuntu@15.237.250.67 'cd /home/app/;sudo sh deploy.sh'
+    - ssh -p22 -o StrictHostKeyChecking=no ubuntu@15.237.250.67 "cd /home/app/incubator && sudo git pull && sudo docker-compose build && sudo docker-compose up -d && sudo docker-compose exec -T app bash -c 'composer install'"
 
   only:
     - production
