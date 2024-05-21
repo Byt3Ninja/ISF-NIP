@@ -77,10 +77,10 @@
                                                    class="btn btn-social btn-google btn-block font-small-3 mr-md-1 mb-md-0 mb-1">
                                                     <i class="bx bxl-google font-medium-3"></i><span
                                                         class="pl-50 d-block text-center">{{__('Google')}}</span></a>
-                                                <a href="{{ url('/auth/redirect/facebook') }}"
-                                                   class="btn btn-social btn-block mt-0 btn-facebook font-small-3">
-                                                    <i class="bx bxl-facebook-square font-medium-3"></i><span
-                                                        class="pl-50 d-block text-center">{{__('Facebook')}}</span></a>
+{{--                                                <a href="{{ url('/auth/redirect/facebook') }}"--}}
+{{--                                                   class="btn btn-social btn-block mt-0 btn-facebook font-small-3">--}}
+{{--                                                    <i class="bx bxl-facebook-square font-medium-3"></i><span--}}
+{{--                                                        class="pl-50 d-block text-center">{{__('Facebook')}}</span></a>--}}
                                             </div>
                                                              @if ($errors->has('social'))
                                                         <span class="help-block warning"><br>
