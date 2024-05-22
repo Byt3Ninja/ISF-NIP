@@ -409,4 +409,7 @@ return [
     'Problem Solution'=>'حل المشكلة',
     'add organizations first'=>'برجاء اضافة مؤسسات اولا',
     'CycleStoredSuccessfully'=>'شكرا علي انضمامك للبرنامج، سيتم تقييم الطلب والرد عليك لاحقا من فريق ادارة البرنامج',
-];
+
+    'Training sessions Duration'=>'عدد ساعات جلسات التدريب ( ساعات )',
+    'Mentorship requests Duration'=>'عدد ساعات جلسات الارشاد ( ساعات )'
+    ];

@@ -61,7 +61,14 @@ class User extends Authenticatable implements MustVerifyEmail
         }
         return "/191014/".$image;
     }
-
+    public function getNameAttribute()
+    {
+        return $this->{"first_name_".app()->getLocale()} .' '.$this->{"last_name_".app()->getLocale()};
+    }
+    public function getTitleAttribute()
+    {
+        return $this->{"title_".app()->getLocale()};
+    }
 
     // ===============> Relations <===================
     public function company()
