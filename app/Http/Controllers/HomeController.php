@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\BuilderForm;
+use App\Cycle;
 use App\Documentation;
 use App\Events\WebMessage;
+use App\MentorshipRequest;
+use App\Messenger;
 use App\ServicesRequests;
+use App\TrainingSession;
 use Illuminate\Http\Request;
 
 use App\Company;
@@ -33,20 +38,70 @@ class HomeController extends Controller
     public function index()
     {
         $user = auth()->user();
-        if ($user->hasanyRole('Admin|Editor|Manager'))
+        if ($user->hasanyRole('Admin|Editor|Manager')){
+
             return view('admin.dashboard');
-        elseif ($user->hasRole('Registered|Page Manager|Pages Editor')) {
+
+        }elseif ($user->hasRole('Registered|Page Manager|Pages Editor')) {
+
             return view('admin.clients.dashboard');
+
         } elseif ($user->hasRole('organizationManager')) {
-            return view('admin.organizations.dashboard');
+
+            return $this->organizationDashboard();
+
         } elseif ($user->hasRole('Mentor')) {
+
             return view('admin.clients.mentor');
+
         } elseif ($user->hasRole('Judger')) {
+
             return view('admin.clients.judge');
+
         } elseif ($user->hasRole('Disabled')) {
+
             return view('admin.clients.disabled');
+
         } else
             abort(401);
+    }
+    protected function organizationDashboard(){
+
+        $organization_id = Auth::user()->organization_id;
+        //Counts
+        $data['messages'] = Messenger::where('receiver',auth()->id())->whereNull('read');
+        $data['messages'] = $data['messages'] ->count();
+
+        $data['mentrequests'] = MentorshipRequest::where('organization_id',$organization_id)->count();
+        $data['mentrequests_period'] = MentorshipRequest::where('organization_id',$organization_id)->sum('period')/60;
+
+        $data['startups']= Company::whereHas('cycledata',function ($q) use ($organization_id){
+            $q->where('organization_id',$organization_id);
+        })->count();
+
+        $data['cycles'] = Cycle::where('organization_id',$organization_id);
+        $data['cycles_count'] = $data['cycles']->count();
+        $data['latest_cycles']= $data['cycles']->latest()->limit(10)->get();
+
+        $data['forms'] = BuilderForm::where('organization_id',$organization_id);
+        $data['forms_count'] = $data['forms']->count();
+
+        $data['sessions'] = TrainingSession::whereHas('step',function ($q)use ($organization_id){
+            $q->where('stype',4)->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->count();
+
+        $data['sessions_period'] =TrainingSession::whereHas('step',function ($q)use ($organization_id){
+            $q->where('stype',4)->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->sum('duration')/60;
+
+        $data['mentorshipRequests'] = MentorshipRequest::where('organization_id',$organization_id)
+            ->whereNull('approved')->latest()->limit(5)->get();
+
+        return view('admin.organizations.dashboard',$data);
     }
 
     private function getInterstedinServices($user)

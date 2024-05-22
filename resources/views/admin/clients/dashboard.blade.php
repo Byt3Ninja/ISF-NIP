@@ -331,6 +331,14 @@
 											<div class="card border-light">
 												<div class="card-header">
 													<h4 class="primary"><i class="bx bxs-bell"></i>  {{$cycle->title}}</h4>
+													<div class="media align-items-center mt-2">
+														<div class="media-left mr-50">
+															<img src="{{$cycle->organization->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+														</div>
+														<div class="media align-items-center">
+															{{$cycle->organization->name }}
+														</div>
+													</div>
 												</div>
 												<div class="card-body bg-rgba-light">
 													<p class="card-text">
