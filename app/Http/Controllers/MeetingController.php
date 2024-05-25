@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\GoogleMeetService;
 use App\Services\MicrosoftGraphService;
 use App\Traits\ZoomMeetingTrait;
 use Illuminate\Http\Request;
@@ -53,20 +54,18 @@ class MeetingController extends Controller
 //
 //        return $this->sendSuccess('Meeting deleted successfully.');
 //    }
-    protected $graphService;
+    protected $googleMeet;
 
-    public function __construct(MicrosoftGraphService $graphService)
+    public function __construct(GoogleMeetService $googleMeet)
     {
-        $this->graphService = $graphService;
+        $this->googleMeet = $googleMeet;
     }
 
     public function createMeeting()
     {
-        $subject = 'Team Meeting';
-        $startDateTime ='2024-05-18T14:30:34.2444915-07:00';
-        $endDateTime = '2024-05-18T14:40:34.2444915-07:00';
+
 //        try {
-            $meetingResponse = $this->graphService->createTeamsMeeting( $subject, $startDateTime, $endDateTime);
+            $meetingResponse = $this->googleMeet->creatMeeting();
 
             print_r($meetingResponse);
 //        } catch (\Exception $e) {
