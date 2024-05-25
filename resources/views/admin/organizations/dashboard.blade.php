@@ -8,35 +8,6 @@
 @stop
 @section('content')
     <!-- BEGIN: Content-->
-    @php
-
-        //Counts
-        $messages = App\Messenger::where('receiver',auth()->id())->whereNull('read');
-        $messages = $messages->count();
-
-        $mentrequests = /*App\MentorshipRequest::where('organization_id',$organization_id)->count()*/0;
-
-        $startups= \App\Company::whereHas('cycledata',function ($q) use ($organization_id){
-            $q->where('organization_id',$organization_id);
-        })->count();
-
-        $cycles = App\Cycle::where('organization_id',$organization_id);
-        $cycles_count = $cycles->count();
-        $latest_cycles= $cycles->latest()->limit(10)->get();
-
-        $forms = App\BuilderForm::where('organization_id',$organization_id);
-        $forms_count = $forms->count();
-
-        $sessions = App\TrainingSession::whereHas('step',function ($q)use ($organization_id){
-            $q->where('stype',4)->whereHas('cycle',function ($query) use ($organization_id){
-                $query->where('organization_id',$organization_id);
-            });
-        })->count();
-
-        $mentorshipRequests = App\MentorshipRequest::where('organization_id',$organization_id)
-        ->whereNull('approved')->latest()->limit(5)->get();
-
-    @endphp
     <div class="app-content content">
         <div class="content-overlay"></div>
         <div class="content-wrapper">
@@ -64,14 +35,30 @@
                         </div>
                     </div>
                 @endif
+
                 <div class="col-12">
                     <div class="row">
                         <div class="col-sm-3 col-12 dashboard-users-success">
                             <div class="card text-center">
                                 <div class="card-content">
+                                    <a href="/dashboard/cycles">
+                                        <div class="card-body py-1">
+                                            <div class="badge-circle badge-circle-lg badge-circle-warning mx-auto mb-50">
+                                                <i class="bx bx-bookmark-plus font-medium-5"></i>
+                                            </div>
+                                            <div class="text-muted line-ellipsis">{{__('admin.Cycles')}}</div>
+                                            <h3 class="mb-0">{{$cycles_count}}</h3>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-12 dashboard-users-success">
+                            <div class="card text-center">
+                                <div class="card-content">
                                     <a href="/dashboard/companies">
                                         <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
+                                            <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
                                                 <i class="bx bx-briefcase-alt font-medium-5"></i>
                                             </div>
                                             <div class="text-muted line-ellipsis">{{__('admin.Subscribe Startups')}}</div>
@@ -81,31 +68,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-3 col-12 dashboard-users-danger">
+                        <div class="col-sm-3 col-12 dashboard-users-success">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/dashboard/training/sessions">
+                                    <a href="/dashboard/show-builder">
                                         <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-warning mx-auto mb-50">
-                                                <i class="bx bxs-timer font-medium-5"></i>
+                                            <div class="badge-circle badge-circle-lg badge-circle-danger mx-auto mb-50">
+                                                <i class="bx bxs-building font-medium-5"></i>
                                             </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Training sessions')}}</div>
-                                            <h3 class="mb-0">{{$sessions}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-3 col-12 dashboard-users-danger">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/mentorship/sessions?show=all">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
-                                                <i class="bx bxs-help-circle font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Mentorship requests')}}</div>
-                                            <h3 class="mb-0">{{$mentrequests}}</h3>
+                                            <div class="text-muted line-ellipsis">{{__('admin.Forms')}}</div>
+                                            <h3 class="mb-0">{{$forms_count}}</h3>
                                         </div>
                                     </a>
                                 </div>
@@ -116,7 +88,7 @@
                                 <div class="card-content">
                                     <a href="/dashboard/inbox">
                                         <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
+                                            <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
                                                 <i class="bx bxs-conversation font-medium-5"></i>
                                             </div>
                                             <div class="text-muted line-ellipsis">{{__('admin.New messages')}}</div>
@@ -127,38 +99,107 @@
                             </div>
                         </div>
 
-                        <div class="col-sm-6 col-12 dashboard-users-success">
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-sm-6 col-12 dashboard-users-danger">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/dashboard/cycles">
+                                    <a href="/dashboard/mentorship/sessions?show=all">
                                         <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-info mx-auto mb-50">
-                                                <i class="bx bx-bookmark-plus font-medium-5"></i>
+                                            <div class="badge-circle badge-circle-lg badge-circle-light-info mx-auto mb-50">
+                                                <i class="bx bxs-book font-medium-5"></i>
                                             </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Cycles')}}</div>
-                                            <h3 class="mb-0">{{$cycles_count}}</h3>
+                                            <div class="text-muted line-ellipsis">{{__('admin.Mentorship requests')}}</div>
+                                            <h3 class="mb-0">{{$mentrequests}}</h3>
                                         </div>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-12 dashboard-users-success">
+                        <div class="col-sm-6 col-12 dashboard-users-danger">
                             <div class="card text-center">
                                 <div class="card-content">
-                                    <a href="/dashboard/show-builder">
+                                    <a href="/dashboard/mentorship/sessions?show=all">
                                         <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light mx-auto mb-50">
-                                                <i class="bx bxs-building font-medium-5"></i>
+                                            <div class="badge-circle badge-circle-lg badge-circle-light-secondary mx-auto mb-50">
+                                                <i class="bx bxs-calendar-event font-medium-5"></i>
                                             </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Forms')}}</div>
-                                            <h3 class="mb-0">{{$forms_count}}</h3>
+                                            <div class="text-muted line-ellipsis">{{__('admin.Mentorship requests Duration')}}</div>
+                                            <h3 class="mb-0">{{$mentrequests_period}} </h3>
                                         </div>
                                     </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title align-items-center">
+                                        <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.mentorship statistic") }}
+                                        :
+                                    </h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card ">
+                                        <div>
+                                            <canvas id="mentorshipChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-12 dashboard-users-danger">
+                            <div class="card text-center">
+                                <div class="card-content">
+                                    <a href="/dashboard/training/sessions">
+                                        <div class="card-body py-1">
+                                            <div class="badge-circle badge-circle-lg badge-circle-light-warning mx-auto mb-50">
+                                                <i class="bx bxs-book-bookmark font-medium-5"></i>
+                                            </div>
+                                            <div class="text-muted line-ellipsis">{{__('admin.Training sessions')}}</div>
+                                            <h3 class="mb-0">{{$sessions}}</h3>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-12 dashboard-users-danger">
+                            <div class="card text-center">
+                                <div class="card-content">
+                                    <a href="/dashboard/training/sessions">
+                                        <div class="card-body py-1">
+                                            <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
+                                                <i class="bx bxs-timer font-medium-5"></i>
+                                            </div>
+                                            <div class="text-muted line-ellipsis">{{__('admin.Training sessions Duration')}}</div>
+                                            <h3 class="mb-0">{{$sessions_period}}</h3>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title align-items-center">
+                                        <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Sessions statistic") }}
+                                        :
+                                    </h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card ">
+                                        <div>
+                                            <canvas id="sessionChart"></canvas>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
+                </div>
+                <div class="col-12">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="card">
@@ -184,8 +225,8 @@
                                                 @foreach($latest_cycles as $cycle)
                                                     <tr>
                                                         <td class="text-center"> {{ $cycle->title }} </td>
-                                                        <td class="text-center"> {{ $cycle->start->format('d-m-Y') }} </td>
-                                                        <td class="text-center"> {{ $cycle->end->format('d-m-Y') }} </td>
+                                                        <td class="text-center"> {{ $cycle->start_format }} </td>
+                                                        <td class="text-center"> {{ $cycle->end_format }} </td>
                                                         <td class="text-center">
                                                             <button class="btn btn-light-info"
                                                                     onclick="window.location.href='/dashboard/cycles/{{$cycle->id}}/registered'">
@@ -206,7 +247,8 @@
                             <div class="card">
                                 <div class="card-header border-bottom">
                                     <h4 class="card-title align-items-center">
-                                        <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Latest 5 Mentorship Requests") }} :
+                                        <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Latest 5 Mentorship Requests") }}
+                                        :
                                     </h4>
                                 </div>
                                 <div class="card-body">
@@ -227,37 +269,46 @@
                                                     <tr>
                                                         <td>
                                                             <div class="media align-items-center">
-                                                                <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
-                                                                    <img src="/191014/{{$session->user->company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                <a class="media-left mr-50"
+                                                                   href="/dashboard/companyProfile/{{$session->user->company->id}}">
+                                                                    <img src="{{$session->user->company->logo_url}}"
+                                                                         alt="avatar" class="rounded-circle" height="40"
+                                                                         width="40">
                                                                 </a>
                                                                 <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                                     <div class="media align-items-center">
-                                                                        {{$session->user->company->{'name_'.$l} }}
+                                                                        {{$session->user->company->name }}
                                                                     </div>
                                                                 </a>
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="media align-items-center">
-                                                                <a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
-                                                                    <img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                <a class="media-left mr-50"
+                                                                   href="/dashboard/users/{{$session->user->company->user->id}}/edit">
+                                                                    <img src="{{$session->user->image_url}}"
+                                                                         alt="avatar" class="rounded-circle" height="40"
+                                                                         width="40">
                                                                 </a>
                                                                 <a href="/dashboard/users/{{$session->user_id}}/edit">
                                                                     <div class="media-body">
-                                                                        <h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
-                                                                        <span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
+                                                                        <h6 class="media-heading mb-0">{{$session->user->name }}</h6>
+                                                                        <span class="font-small-2">{{$session->user->title }}</span>
                                                                     </div>
                                                                 </a>
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <div style="cursor: pointer;" class="chip mr-1" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
+                                                            <div style="cursor: pointer;" class="chip mr-1"
+                                                                 onclick="mentor({{$session->mentor_id}},'{{$session->mentor->name }}','{{$session->mentor->mrating()}}')">
                                                                 <div class="chip-body">
                                                                     <div class="avatar">
-                                                                        <img class="img-fluid" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
+                                                                        <img class="img-fluid"
+                                                                             src="{{$session->mentor->image_url}}"
+                                                                             alt="Mentor photo" height="20" width="20">
                                                                     </div>
                                                                     <span class="chip-text">
-{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}
+                                                                    {{$session->mentor->name }}
                                     </span>
                                                                 </div>
                                                             </div>
@@ -269,10 +320,16 @@
 
 
                                                         <td>
-                                                            <button title="Approve" onclick="approve({{$session->id}},'Yes')" type="button" class="btn btn-icon rounded-circle btn-light-success">
-                                                                    <i class="bx bx-check-square"></i></button>
-                                                            <button title="Dispprove" onclick="approve({{$session->id}}, 'No')" type="button" class="btn btn-icon rounded-circle btn-light-danger">
-                                                                    <i class="bx bxs-x-square"></i></button>
+                                                            <button title="Approve"
+                                                                    onclick="approve({{$session->id}},'Yes')"
+                                                                    type="button"
+                                                                    class="btn btn-icon rounded-circle btn-light-success">
+                                                                <i class="bx bx-check-square"></i></button>
+                                                            <button title="Dispprove"
+                                                                    onclick="approve({{$session->id}}, 'No')"
+                                                                    type="button"
+                                                                    class="btn btn-icon rounded-circle btn-light-danger">
+                                                                <i class="bx bxs-x-square"></i></button>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -286,6 +343,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -296,23 +354,84 @@
     <script src="/app-assets/vendors/js/charts/chart.min.js"></script>
     <script src="/app-assets/vendors/js/charts/apexcharts.min.js"></script>
     <script src="/app-assets/vendors/js/extensions/swiper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @stop
 @section('pagescripts')
-        <script>
-            function approve(id,stat){
-                // prompt('Please Wait ! Sending Request ........')
-                $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
-                $.ajax({
-                    type: "POST", url: "/dashboard/mentors/modify",
-                    data: {"id": id,"stat": stat,'rtype':6,},
-                    success: function (response) {
-                        location.reload();
+    <script>
+        function approve(id, stat) {
+            // prompt('Please Wait ! Sending Request ........')
+            $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+            $.ajax({
+                type: "POST", url: "/dashboard/mentors/modify",
+                data: {"id": id, "stat": stat, 'rtype': 6,},
+                success: function (response) {
+                    location.reload();
+                },
+                error: function (error) {
+                    console.log(error);
+                    alert("Error Occurred, Try again!");
+                }
+            });
+        }
+    </script>
+    <script>
+
+        new Chart(document.getElementById('sessionChart'), {
+            type: 'bar',
+            data: {
+                labels:{!! json_encode($sessions_labels) !!},
+                datasets: [{
+                    label: '({{ __('admin.hours') }})',
+                    data: {!! json_encode($sessions_durations) !!},
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                backgroundColor : '#f5ee9b',
+                indexAxis: 'y',
+                elements: {
+                    bar: {
+                        borderWidth: 2,
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
                     },
-                    error: function (error) {
-                        console.log(error);
-                        alert("Error Occurred, Try again!");
-                    }});
+
+                },
+
             }
-        </script>
+        });
+
+        new Chart(document.getElementById('mentorshipChart'), {
+            type: 'bar',
+            data: {
+                labels:{!! json_encode($mentorship_labels) !!},
+                datasets: [{
+                    label: '({{ __('admin.hours') }})',
+                    data: {!! json_encode($mentorship_durations) !!},
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                backgroundColor : '#f59b9b',
+                indexAxis: 'y',
+                elements: {
+                    bar: {
+                        borderWidth: 2,
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+
+                }
+            },
+        });
+    </script>
 
 @stop

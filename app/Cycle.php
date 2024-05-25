@@ -29,4 +29,7 @@ class Cycle extends Model
     public function organization(){
         return $this->belongsTo(Organization::class,'organization_id');
     }
+    public function companies(){
+        return $this->hasMany(Company::class,'cycle');
+    }
 }

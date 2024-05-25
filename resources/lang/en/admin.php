@@ -409,6 +409,13 @@ return [
     'Latest 5 Mentorship Requests'=>'Latest 5 Mentorship Requests',
     'Problem Solution'=>'Problem Solution',
     'add organizations first'=>'Please Create Organization Firstly',
-    'CycleStoredSuccessfully'=>'Thank you for joining the program. Your request will be evaluated, and our program management team will respond to you later.'
-
+    'CycleStoredSuccessfully'=>'Thank you for joining the program. Your request will be evaluated, and our program management team will respond to you later.',
+    'Training sessions Duration'=>'Training sessions Durations (Hours)',
+    'Mentorship requests Duration'=>'Mentorship sessions Durations (Hours)',
+    'hours'=>'Hosrs',
+    'Sessions statistic'=>'Training sessions statistic',
+    'mentorship statistic'=>'Mentorship sessions statistic',
+    'Cycle Startups Statistics'=>'Startups on Cycle Statistic',
+    'mentorship request between'=>'Mentorship Session Between : ',
+    'mentorship session'=>'Mentorship Session'
 ];

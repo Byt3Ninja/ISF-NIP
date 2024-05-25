@@ -409,4 +409,13 @@ return [
     'Problem Solution'=>'حل المشكلة',
     'add organizations first'=>'برجاء اضافة مؤسسات اولا',
     'CycleStoredSuccessfully'=>'شكرا علي انضمامك للبرنامج، سيتم تقييم الطلب والرد عليك لاحقا من فريق ادارة البرنامج',
-];
+
+    'Training sessions Duration'=>'عدد ساعات جلسات التدريب',
+    'Mentorship requests Duration'=>'عدد ساعات جلسات الارشاد',
+    'hours'=>'ساعات',
+    'Sessions statistic'=>'احصائية أوقات جلسات التدريب',
+    'mentorship statistic'=>'احصائية أوقات جلسات الارشاد',
+    'Cycle Startups Statistics'=>'احصائية عدد الشركات في البرامج',
+    'mentorship request between'=>'جلسة ارشاد بين : ',
+    'mentorship session'=>'جلسة ارشاد'
+    ];

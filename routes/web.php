@@ -5,6 +5,28 @@
 //Route::get('test',function (){
 //    return view('emails.emailVerify');
 //});
+// routes/web.php
+//Route::get('create-meeting', 'MeetingController@createMeeting');
+//Route::get('test',function (){
+//    function prime_or_not($no1)
+//    {
+//        //Insert your code here
+//        $sum = 0;
+//        if ($no1 < 2) {
+//            return 0;
+//        }
+//        for ($i = 2; $i <= sqrt($no1); $i++) {
+//            if ($no1 % $i == 0) {
+//                return -1;
+//            }
+//        }
+//        for ($i = 1; $i <= $no1; $i++) {
+//            $sum += $i;
+//        }
+//        return $sum;
+//    }
+//    return view('admin.reports.company');
+//});
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');
@@ -34,8 +56,9 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('documentation/view/{id?}','HomeController@help');
     Route::resource('documentation', 'DocumentationController');
     // Calendar
-	Route::get('calendar','SettingsController@calendar')->name('calendar');
-    Route::post('calendarAjax','SettingsController@ajax')->name('calendarAjax');
+	Route::get('calendar','CalenderController@index')->name('calendar');
+    Route::post('calendarViewCall','CalenderController@ViewCall')->name('calendarAjax');
+
     Route::get('calendar/{id}/edit','SettingsController@editcal');
     Route::post('calendar/{id}/update','SettingsController@updatecal');
     Route::get('calendar/{id}/delete','SettingsController@delcal');
@@ -264,5 +287,8 @@ Route::get('/auth/redirect/{provider}', 'SocialController@redirect');
 Route::get('/callback/{provider}', 'SocialController@callback');
 Route::get('/auth/google', 'SocialController@redirectToGoogle');
 Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
+
+Route::get('/auth/microsoft/redirect',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
+Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('auth.microsoft.callback');
 
 if( request()->secure() ) { URL::forceScheme("https"); }

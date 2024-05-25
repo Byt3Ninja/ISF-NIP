@@ -25,9 +25,9 @@ return new class extends Migration
             $table->string('address_en');
             $table->string('address_ar');
             $table->date('est_date')->nullable();
-            $table->string('idea')->nullable();
-            $table->string('problem')->nullable();
-            $table->string('solution')->nullable();
+            $table->mediumText('idea')->nullable();
+            $table->mediumText('problem')->nullable();
+            $table->mediumText('solution')->nullable();
             $table->integer('team_num')->nullable();
             $table->string('stage')->nullable();
             $table->string('raised_fund')->nullable();
