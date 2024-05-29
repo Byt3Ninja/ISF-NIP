@@ -91,16 +91,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Calendar::class);
     }
     public function mentorship() {
-        return $this->hasMany(MentorshipRequest::class);
+        return $this->hasMany(MentorshipRequest::class,'user_id');
     }
     public function bio() {
         return $this->hasOne(UsersBio::class);
     }
+    public function mentorSessions() {
+        return $this->hasMany(MentorshipRequest::class,'mentor_id');
+    }
     public function mrating(){
         return $this->hasMany(MentorshipRequest::class,'mentor_id')->avg('rating');
-//        return (MentorshipRequest::where('mentor_id',$this->id)->avg('rating'));
     }
     public function organization(){
         return $this->hasOne(Organization::class,'user_id');
+    }
+    public function mentorCycles(){
+        return $this->belongsToMany(Cycle::class, 'cycles_mentors', 'user_id', 'cycle_id');
     }
 }

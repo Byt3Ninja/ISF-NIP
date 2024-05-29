@@ -2,7 +2,7 @@
             <ul class="nav navbar-nav flex-row">
                 <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
                         @if(!is_null(auth()->user()->organization))
-                            <img  src="/191014/{{ optional(auth()->user()->organization)->img_url}}" alt="avatar" height="40" width="80">
+                            <img  src="{{ auth()->user()->organization->image_url}}" alt="avatar" height="40" width="80">
                         @else
                         <img  src="/images/logo/arweqah.png" alt="avatar" height="50" width="80">
                         @endif
@@ -14,7 +14,7 @@
 
                 <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
 
-                        <h2 class="brand-text mb-0" style="padding-right:0!important;">{{ is_null(auth()->user()->organization_id)?config('app.name') : auth()->user()->organization->{'name_'.$l} }}</h2>
+                        <h2 class="brand-text mb-0" style="padding-right:0!important;">{{ is_null(auth()->user()->organization_id)?config('app.name') : auth()->user()->organization->name }}</h2>
                     </a>
                 </li>
 
@@ -274,87 +274,86 @@
 {{--                            >{{__('admin.Log viewer')}}</span></a>--}}
 {{--                    </li>--}}
 {{--                @endcan--}}
-{{--                @can ('view_report')--}}
-{{--                <li class="{{Request::is('reports*')?'active':''}} nav-item"><a href="/reports"><i class="menu-livicon" data-icon="notebook"></i>--}}
-{{--                        <span class="menu-title">{{__('admin.Reports')}}</span></a>--}}
-{{--                </li>--}}
+                @can ('view_report')
+                <li class="{{Request::is('reports*')?'active':''}} nav-item"><a href="{{ route('reports.index') }}"><i class="menu-livicon" data-icon="notebook"></i>
+                        <span class="menu-title">{{__('admin.Reports')}}</span></a>
+                </li>
+                @endcan
+                    <li class=" navigation-header"><span></span>
+                    </li>
+
+{{--                @can('edit_settings')--}}
+{{--                    <li class=" navigation-header"><span>{{__('admin.Frontend settings')}}</span>--}}
+{{--                    </li>--}}
+{{--                    <li class="{{Request::is('dashboard/settings')?'active':''}} nav-item"><a href="/dashboard/settings"><i class="menu-livicon"--}}
+{{--                                                                                                                    data-icon="wrench"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.Homesettings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                    <li class="{{Request::is('dashboard/setaboutus')?'active':''}} nav-item"><a href="/dashboard/setaboutus"><i--}}
+{{--                                    class="menu-livicon" data-icon="globe"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.About Settings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                    <li class="{{Request::is('dashboard/setcontactus')?'active':''}} nav-item"><a href="/dashboard/setcontactus"><i--}}
+{{--                                    class="menu-livicon" data-icon="paper-plane"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.Contact Settings')}}</span></a>--}}
+{{--                    </li>--}}
 {{--                @endcan--}}
-                @can('edit_settings')
-                    <li class=" navigation-header"><span>{{__('admin.Frontend settings')}}</span>
-                    </li>
-                    <li class="{{Request::is('dashboard/settings')?'active':''}} nav-item"><a href="/dashboard/settings"><i class="menu-livicon"
-                                                                                                                    data-icon="wrench"></i><span class="menu-title"
-                            >{{__('admin.Homesettings')}}</span></a>
-                    </li>
-                    <li class="{{Request::is('dashboard/setaboutus')?'active':''}} nav-item"><a href="/dashboard/setaboutus"><i
-                                    class="menu-livicon" data-icon="globe"></i><span class="menu-title"
-                            >{{__('admin.About Settings')}}</span></a>
-                    </li>
-                    <li class="{{Request::is('dashboard/setcontactus')?'active':''}} nav-item"><a href="/dashboard/setcontactus"><i
-                                    class="menu-livicon" data-icon="paper-plane"></i><span class="menu-title"
-                            >{{__('admin.Contact Settings')}}</span></a>
-                    </li>
-                @endcan
-                @can ('manage_menus')
-                    <li class="{{Request::is('*menu*')?'active':''}} nav-item"><a href="/dashboard/menus"><i class="menu-livicon"
-                                                                                                         data-icon="morph-menu-arrow-bottom"></i><span class="menu-title"
-                            >{{__('admin.Menusettings')}}</span></a>
-                    </li>
-                @endcan
-                @can ('view_slide')
-                    <li class="{{Request::is('*slide*')?'active':''}} nav-item"><a href="/dashboard/slides"><i class="menu-livicon"
-                                                                                                           data-icon="settings"></i><span class="menu-title"
-                            >{{__('admin.Slidersettings')}}</span></a>
-                    </li>
-                @endcan
-                @can ('manage_pages')
-                    <li class="{{Request::is('*page*')?'active':''}} nav-item"><a href="/dashboard/pages"><i class="menu-livicon"
-                                                                                                         data-icon="briefcase"></i><span class="menu-title"
-                            >{{__('admin.Pagesettings')}}</span></a>
-                    </li>
-                @endcan
-                @can ('manage_posts')
-                    <li class="{{Request::is('*post*')?'active':''}} nav-item"><a href="/dashboard/posts"><i class="menu-livicon"
-                                                                                                         data-icon="box-add"></i><span class="menu-title"
-                            >{{__('admin.Postsettings')}}</span></a>
-                    </li>
-                @endcan
-                @can ('view_faqs')
-                    <li class="{{Request::is('*faqs*')?'active':''}} nav-item"><a href="/dashboard/faqs"><i class="menu-livicon"
-                                                                                                        data-icon="comments"></i><span class="menu-title"
-                            >{{__('admin.Faqs settings')}}</span></a>
-                    </li>
-                @endcan
-                @can ('view_partner')
-                    <li class="{{Request::is('*partners*')?'active':''}} nav-item"><a href="/dashboard/partners"><i class="menu-livicon"
-                                                                                                                data-icon="share"></i><span class="menu-title"
-                            >{{__('admin.partners settings')}}</span></a>
-                    </li>
-                @endcan
-                @can ('view_press')
-                    <li class="{{Request::is('*press*')?'active':''}} nav-item"><a href="/dashboard/press"><i class="menu-livicon"
-                                                                                                          data-icon="paper-clip"></i><span class="menu-title"
-                            >{{__('admin.press settings')}}</span></a>
-                    </li>
-                @endcan
-                @can('manage_events')
-                    <li class="{{Request::is('*event*')?'active':''}} nav-item"><a href="/dashboard/allevents"><i class="menu-livicon"
-                                                                                                              data-icon="calendar"></i><span class="menu-title">{{__('admin.manageevents')}}</span></a>
-                    </li>
-                @endcan
-                @can('manage_page')
-                    @if (Auth::user()->PageId)
-                        <li class="{{Request::is('editmypage')?'active':''}} nav-item"><a href="/dashboard/editmypage"><i class="menu-livicon"
-                                                                                                                      data-icon="briefcase"></i><span class="menu-title">{{__('admin.editmypage')}}</span></a>
-                        </li>
-                    @endif
-                @endcan
+{{--                @can ('manage_menus')--}}
+{{--                    <li class="{{Request::is('*menu*')?'active':''}} nav-item"><a href="/dashboard/menus"><i class="menu-livicon"--}}
+{{--                                                                                                         data-icon="morph-menu-arrow-bottom"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.Menusettings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can ('view_slide')--}}
+{{--                    <li class="{{Request::is('*slide*')?'active':''}} nav-item"><a href="/dashboard/slides"><i class="menu-livicon"--}}
+{{--                                                                                                           data-icon="settings"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.Slidersettings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can ('manage_pages')--}}
+{{--                    <li class="{{Request::is('*page*')?'active':''}} nav-item"><a href="/dashboard/pages"><i class="menu-livicon"--}}
+{{--                                                                                                         data-icon="briefcase"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.Pagesettings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can ('manage_posts')--}}
+{{--                    <li class="{{Request::is('*post*')?'active':''}} nav-item"><a href="/dashboard/posts"><i class="menu-livicon"--}}
+{{--                                                                                                         data-icon="box-add"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.Postsettings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can ('view_faqs')--}}
+{{--                    <li class="{{Request::is('*faqs*')?'active':''}} nav-item"><a href="/dashboard/faqs"><i class="menu-livicon"--}}
+{{--                                                                                                        data-icon="comments"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.Faqs settings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can ('view_partner')--}}
+{{--                    <li class="{{Request::is('*partners*')?'active':''}} nav-item"><a href="/dashboard/partners"><i class="menu-livicon"--}}
+{{--                                                                                                                data-icon="share"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.partners settings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can ('view_press')--}}
+{{--                    <li class="{{Request::is('*press*')?'active':''}} nav-item"><a href="/dashboard/press"><i class="menu-livicon"--}}
+{{--                                                                                                          data-icon="paper-clip"></i><span class="menu-title"--}}
+{{--                            >{{__('admin.press settings')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can('manage_events')--}}
+{{--                    <li class="{{Request::is('*event*')?'active':''}} nav-item"><a href="/dashboard/allevents"><i class="menu-livicon"--}}
+{{--                                                                                                              data-icon="calendar"></i><span class="menu-title">{{__('admin.manageevents')}}</span></a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
+{{--                @can('manage_page')--}}
+{{--                    @if (Auth::user()->PageId)--}}
+{{--                        <li class="{{Request::is('editmypage')?'active':''}} nav-item"><a href="/dashboard/editmypage"><i class="menu-livicon"--}}
+{{--                                                                                                                      data-icon="briefcase"></i><span class="menu-title">{{__('admin.editmypage')}}</span></a>--}}
+{{--                        </li>--}}
+{{--                    @endif--}}
+{{--                @endcan--}}
                 @endif
-                @if(Auth::user()->hasanyRole('admin'))
-                    <li class="active nav-item">
-                        =========================
-                    </li>
-                @endif
+
 
             </ul>
         </div>

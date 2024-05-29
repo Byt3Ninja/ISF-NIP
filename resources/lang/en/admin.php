@@ -417,5 +417,16 @@ return [
     'mentorship statistic'=>'Mentorship sessions statistic',
     'Cycle Startups Statistics'=>'Startups on Cycle Statistic',
     'mentorship request between'=>'Mentorship Session Between : ',
-    'mentorship session'=>'Mentorship Session'
+    'mentorship session'=>'Mentorship Session',
+    'Select Report Kind'=>'Select Report Kind',
+    'ViewReport'=>'View Report',
+    'Mentors In Cycle'=>'Mentors In Cycles',
+    'Mentors In Cycle Statistic'=>'Mentors In Cycle Statistic',
+    'Company Attendance Rate'=>'Company Attendance Rate',
+    'Mentorship requests number'=>'Mentorship Requests Count',
+    'Mentorship done Request'=>'Mentorship Done Requests Count',
+    'Mentorship pending Request'=>'Mentorship pending Requests Count',
+    'Zoom Training Sessions Count'=>'Training sessions ( Zoom ) count',
+    'Online Training Sessions Count'=>'Training sessions ( Online ) count',
+    'Offline Training Sessions Count'=>'Training sessions ( Offline ) count',
 ];

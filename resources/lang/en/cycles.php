@@ -229,5 +229,6 @@ return [
     'No training sessions added yet' => 'No training sessions added yet',
     'Are you sure, Delete current step and all its contents?'=>'Are you sure, Delete current step and all its contents?',
     'cant undo' => 'All forms, training, steps, users data, steps will be deleted, and can not undo?',
+    'Add Judges first'=>'Add Judges First'
 ];
 

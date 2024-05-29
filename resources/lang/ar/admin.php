@@ -417,5 +417,16 @@ return [
     'mentorship statistic'=>'احصائية أوقات جلسات الارشاد',
     'Cycle Startups Statistics'=>'احصائية عدد الشركات في البرامج',
     'mentorship request between'=>'جلسة ارشاد بين : ',
-    'mentorship session'=>'جلسة ارشاد'
+    'mentorship session'=>'جلسة ارشاد',
+    'Select Report Kind'=>'حدد نوع التقرير',
+    'ViewReport'=>'عرض التقرير',
+    'Mentors In Cycle'=>'المرشدين في البرامج',
+    'Mentors In Cycle Statistic'=>'احصائية المرشدين في البرامج',
+    'Company Attendance Rate'=>'نسبة حضور الشركات',
+    'Mentorship requests number'=>'عدد جلسات الارشاد',
+    'Mentorship pending Request'=>'عدد الجلسات القادمة',
+    'Mentorship done Request'=>'عدد الجلسات المنتهية',
+    'Zoom Training Sessions Count'=>'عدد جلسات التدريب ( زووم )',
+    'Online Training Sessions Count'=>'عدد جلسات التدريب ( تعليمي )',
+    'Offline Training Sessions Count'=>'عدد جلسات التدريب ( تقليدي )',
     ];

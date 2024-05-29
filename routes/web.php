@@ -27,6 +27,7 @@
 //    }
 //    return view('admin.reports.company');
 //});
+
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');
@@ -271,16 +272,24 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('final/results/{id?}','FinalscreeningController@results');
     Route::get('final/{sid}/{cid}','FinalscreeningController@view');
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
+
+    // ===============> Reports <============
+    Route::group(['prefix' => 'reports'],function (){
+        Route::get('/','ReportController@index')->name('reports.index');
+        // ======> Ajax Route
+        Route::get('view/{type?}','ReportController@View')->name('reports.view.ajax');
+    });
+    //================> End Reports <============
 });
 
 ///// Reports routes
-Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
-Route::post('users','ExcelController@ExUsers');
-Route::post('companies','ExcelController@ExCompanies');
-route::get('/','ExcelController@index');
-route::get('events/{id}','ExcelController@events');
-route::get('audit-log','ExcelController@auditlog');
-});
+//Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
+//Route::post('users','ExcelController@ExUsers');
+//Route::post('companies','ExcelController@ExCompanies');
+//route::get('/','ExcelController@index');
+//route::get('events/{id}','ExcelController@events');
+//route::get('audit-log','ExcelController@auditlog');
+//});
 
 //// Facbook & Google Login
 Route::get('/auth/redirect/{provider}', 'SocialController@redirect');

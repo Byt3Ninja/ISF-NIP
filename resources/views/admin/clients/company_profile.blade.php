@@ -20,7 +20,7 @@
                     <div class="col-12 col-sm-10">
                         <div class="media mb-2">
                             <a class="mr-1 shadow" data-toggle="modal" data-target="#MessageModal" href="javascript:void(0);">
-                                <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="Logo" height="100">
+                                <img src="{{$company->logo_url}}" alt="Logo" height="100">
                             </a>
                             <div class="media-body pt-25">
                                 <h4 class="media-heading"><span class="users-view-name">{{ $company->{'name_'.$l} }}</span></h4>

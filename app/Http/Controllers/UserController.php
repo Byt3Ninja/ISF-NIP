@@ -131,7 +131,7 @@ class UserController extends Controller
     {
         try{
 
-            $this->preProcessingCheck('edit_user');
+//            $this->preProcessingCheck('edit_user');
             $roles = Role::all();
             $countries = Country::all();
             return view('admin/users/edit', compact('user', 'roles','countries'));
