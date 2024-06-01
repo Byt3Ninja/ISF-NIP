@@ -93,9 +93,18 @@
                                                             <li class="d-inline-block mr-2 mb-1">
                                                                 <fieldset>
                                                                     <div class="radio">
-                                                                        <input type="radio" name="type" value="cycles"
+                                                                        <input type="radio" name="type" value="judge"
                                                                                id="rad2" class="type">
-                                                                        <label for="rad2">{{__('admin.Cycles')}}</label>
+                                                                        <label for="rad2">{{__('admin.judge Sessions')}}</label>
+                                                                    </div>
+                                                                </fieldset>
+                                                            </li>
+                                                            <li class="d-inline-block mr-2 mb-1">
+                                                                <fieldset>
+                                                                    <div class="radio">
+                                                                        <input type="radio" name="type" value="cycles"
+                                                                               id="rad3" class="type">
+                                                                        <label for="rad3">{{__('admin.Cycles')}}</label>
                                                                     </div>
                                                                 </fieldset>
                                                             </li>
@@ -104,8 +113,8 @@
                                                                     <div class="radio">
                                                                         <input type="radio" name="type"
                                                                                value="companies"
-                                                                               id="rad3" class="type">
-                                                                        <label for="rad3">{{__('admin.Companies')}}</label>
+                                                                               id="rad4" class="type">
+                                                                        <label for="rad4">{{__('admin.Companies')}}</label>
                                                                     </div>
                                                                 </fieldset>
                                                             </li>

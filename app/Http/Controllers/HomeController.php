@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\BuilderForm;
+use App\Calendar;
 use App\Cycle;
 use App\Documentation;
 use App\Events\WebMessage;
+use App\Finalscreening;
 use App\MentorshipRequest;
 use App\Messages;
 use App\Messenger;
 use App\Organization;
+use App\Screening;
 use App\ServicesRequests;
+use App\Step;
 use App\TrainingSession;
 use Illuminate\Http\Request;
 
@@ -59,7 +63,7 @@ class HomeController extends Controller
 
         } elseif ($user->hasRole('Judger')) {
 
-            return view('admin.clients.judge');
+            return $this->judgerDashboard();
 
         } elseif ($user->hasRole('Disabled')) {
 
@@ -120,8 +124,6 @@ class HomeController extends Controller
 
         return view('admin.dashboard',$data);
     }
-
-    // ============> End Functions <=======================
     protected function organizationDashboard(){
 
         $organization_id = Auth::user()->organization_id;
@@ -166,6 +168,30 @@ class HomeController extends Controller
 
         return view('admin.organizations.dashboard',$data);
     }
+
+    protected function judgerDashboard(){
+        $myid=auth()->id();
+       // ===> counts <=====
+        $data['services_count'] = Service::count();
+        $data['service_requests_count'] = auth()->user()->myServiceRequests()->count();
+        $data['messenger_count'] = Messenger::where('receiver',$myid)->whereNull('read')->count();
+
+        // ======> tables <=====
+        $data['services_latest'] = Service::orderBy('created_at','DESC')->take(5)->get();
+        $data['events_latest'] = Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) {
+            $q->orWhere('user_id',Auth::id())
+                ->orWhereNull('isPrivate');
+        })->orderBy('start')->take(5)->get();
+        // ======> process <=========
+        $data['mysteps'] = auth()->user()->screeningRequests()->get();
+        $today = date("Y-m-d");
+        $data['csteps'] = Step::whereRaw( '"'.$today. '" BETWEEN `from` AND `to`')->whereIn('id',$data['mysteps']->pluck('step_id'))->get();
+        $data['fcompanies'] = Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
+        return view('admin.clients.judge',$data);
+    }
+
+    // ============> End Functions <=======================
+
 
     private function getInterstedinServices($user)
     {

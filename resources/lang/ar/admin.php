@@ -429,4 +429,11 @@ return [
     'Zoom Training Sessions Count'=>'عدد جلسات التدريب ( زووم )',
     'Online Training Sessions Count'=>'عدد جلسات التدريب ( تعليمي )',
     'Offline Training Sessions Count'=>'عدد جلسات التدريب ( تقليدي )',
+    'startup not complete the form'=>'الشركة لم تكمل النموذج بعد',
+    'Mentorship done requests Duration'=>'عدد ساعات الجلسات المنتهية',
+    'judge Sessions'=>'جلسات التحكيم و المراجعة',
+    'Final done screening'=>'عدد جلسات التقيم النهائي المنتهية',
+    'Final pending screening'=>'عدد جلسات التقيم النهائي المنتظرة',
+    'screening pending sessions'=>'عدد جلسات التقيم المبدائي المنتظرة',
+    'screening done sessions'=>'عدد جلسات التقيم المبدائي المنتهية',
     ];

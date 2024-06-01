@@ -429,4 +429,11 @@ return [
     'Zoom Training Sessions Count'=>'Training sessions ( Zoom ) count',
     'Online Training Sessions Count'=>'Training sessions ( Online ) count',
     'Offline Training Sessions Count'=>'Training sessions ( Offline ) count',
+    'startup not complete the form'=>'Startup Not Complete the Form',
+    'Mentorship done requests Duration'=>'Mentorship Done Requests Duration',
+    'judge Sessions'=>'Judge and Review Sessions',
+    'Final done screening'=>'Final Screening Done',
+    'Final pending screening'=>'Final Screening Pending',
+    'screening pending sessions'=>'Screening Pending Number',
+    'screening done sessions'=>'Screening Done Number',
 ];

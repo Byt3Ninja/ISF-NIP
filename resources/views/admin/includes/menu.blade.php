@@ -4,7 +4,7 @@
                         @if(!is_null(auth()->user()->organization))
                             <img  src="{{ auth()->user()->organization->image_url}}" alt="avatar" height="40" width="80">
                         @else
-                        <img  src="/images/logo/arweqah.png" alt="avatar" height="50" width="80">
+                        <img  src="/images/logo/growthlab.png" alt="avatar" height="50" width="80">
                         @endif
                     </a>
                 </li> <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i

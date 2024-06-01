@@ -74,9 +74,9 @@ class ScreeningController extends Controller
                         foreach ($panel as $user) {
                             $users = json_decode($request->{'panel'.$cpanel});
                             if ($users=="") {
-                                Screening::insert(['step_id' => $request->step,'user_id' => $user, 'panel' => $cpanel ]);
+                                Screening::create(['step_id' => $request->step,'user_id' => $user, 'panel' => $cpanel ]);
                             } else {
-                                Screening::insert(['step_id' => $request->step,'user_id' => $user, 'panel' => $cpanel,'users'=> json_encode($users) ]);
+                                Screening::create(['step_id' => $request->step,'user_id' => $user, 'panel' => $cpanel,'users'=> json_encode($users) ]);
                             }
                         }
                     }
@@ -96,7 +96,8 @@ class ScreeningController extends Controller
                 $MSG = new TemplateEmail;
                 $MSG->Message=["New judging - VI portal","Dear ".$rfullname.",","Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from ".$cstep->from->format('d-m-Y').
                     " to ". $cstep->to->format('d-m-Y') .", Check your account for more details.","/dashboard"];
-                $user->notify($MSG); }}
+                $user->notify($MSG); }
+                }
                 /// End of mail send
             }
             return Redirect::back()->with('message', 'Saved');
@@ -107,8 +108,12 @@ class ScreeningController extends Controller
 
     public function view($fid, $cid)
     {
+
         // Insure answers belong to Judger first
         $answers = Formdata::where('form_id', $fid)->where('company_id', $cid)->orderBy('field_id', 'ASC')->get();
+        if (count($answers)==0){
+            return redirect()->back()->with('message2','startup not complete the form');
+        }
         $company = Company::where('id', $answers->pluck(['company_id'])->first())->first();
         return view('admin.settings.screening.form', compact('answers', 'company'));
     }

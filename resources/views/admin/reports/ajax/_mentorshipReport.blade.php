@@ -157,6 +157,8 @@
                                     <th class="text-center">{{__('cycles.Rate')}}</th>
                                     <th class="text-center">{{__('admin.Mentorship requests number')}}</th>
                                     <th class="text-center">{{__('admin.Mentorship requests Duration')}}</th>
+                                    <th class="text-center">{{__('admin.Mentorship done Request')}}</th>
+                                    <th class="text-center">{{__('admin.Mentorship done requests Duration')}}</th>
                                     <th class="text-center">{{__('admin.Company Attendance Rate')}}</th>
                                 </tr>
                                 </thead>
@@ -180,10 +182,16 @@
                                             <small>{!! str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$mentor->mrating()) !!}</small>
                                         </td>
                                         <td class="text-center">
-                                            {{$mentor->mentorSessions()->whereNotNull('start_url')->count()}}
+                                            {{$mentor->mentorSessions()->where('approved','Yes')->count()}}
                                         </td>
                                         <td class="text-center">
-                                            {{$mentor->mentorSessions()->whereNotNull('start_url')->sum('period')/60}}
+                                            {{$mentor->mentorSessions()->where('approved','Yes')->sum('period')/60}}
+                                        </td>
+                                        <td class="text-center">
+                                            {{$mentor->mentorSessions()->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->count()}}
+                                        </td>
+                                        <td class="text-center">
+                                            {{$mentor->mentorSessions()->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->sum('period')/60}}
                                         </td>
                                         <td class="text-center">
                                             {{ (integer)($mentor->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->sum('done')/$mentor->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->count()*100) }} %

@@ -270,7 +270,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('final/save','FinalscreeningController@save');
     Route::post('final/addzoom','FinalscreeningController@addzoom');
     Route::get('final/results/{id?}','FinalscreeningController@results');
-    Route::get('final/{sid}/{cid}','FinalscreeningController@view');
+    Route::get('final/{step_id}/{company_id}','FinalscreeningController@view');
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
 
     // ===============> Reports <============

@@ -13,4 +13,7 @@ class FinalData extends Model
     {
         return $this->belongsTo(User::class,'judge_id','id');
     }
+    public function step(){
+        return $this->belongsTo(Step::class,'step_id');
+    }
 }
