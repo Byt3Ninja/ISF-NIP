@@ -1,18 +1,21 @@
 @extends('layouts.admin')
-@section('bodyclass') calendar-application @stop
+@section('bodyclass')
+    calendar-application
+@stop
 @section('content')
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css' />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css'/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
     @if ($l=='ar')
-<style>
-    .fc-left {
-        direction: rtl;
-    }
-    .toast-top-right {
-        right:auto;
-        left:12px;
-    }
-</style>
+        <style>
+            .fc-left {
+                direction: rtl;
+            }
+
+            .toast-top-right {
+                right: auto;
+                left: 12px;
+            }
+        </style>
     @endif
     <!-- BEGIN: Content-->
     <div class="app-content content">
@@ -36,28 +39,18 @@
          aria-labelledby="myModalLabel33" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="title"></h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <i class="bx bx-x"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                         <h6 id="body"></h6>
-                        <br>
-                        <h7 id="start"></h7>
-                        <h7 id="end"></h7>
-                    </div>
-                    <div class="modal-footer">
-                        <a id="edit" href="#" class="btn btn-light-primary" style="display: none;" >
-                            <i class="bx bx-x d-block d-sm-none"></i>
-                            <span class="d-none d-sm-block">{{__('admin.Edit')}}</span>
-                        </a>
-                        <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
-                            <i class="bx bx-x d-block d-sm-none"></i>
-                            <span class="d-none d-sm-block">{{__('admin.Close')}}</span>
-                        </button>
-                    </div>
+                <div class="modal-header">
+                    <h4 class="modal-title" id="title"></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="bx bx-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="body"></div>
+                    <br>
+                    <h7 id="start"></h7>
+                    <h7 id="end"></h7>
+                </div>
             </div>
         </div>
     </div>
@@ -66,9 +59,9 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    @if ($l=='ar')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/locale/ar.js"></script>
-    @endif
+{{--    @if ($l=='ar')--}}
+{{--        <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/locale/ar.js"></script>--}}
+{{--    @endif--}}
     <script>
         $(document).ready(function () {
             var SITEURL = "{{ url('/') }}";
@@ -78,221 +71,60 @@
                 }
             });
             var calendar = $('#calendar').fullCalendar({
-                customButtons: {
-                    AddNew: {
-                        text: '{{$l=='ar'?'إضافة جديد!':'Add New!'}}',
-                        click: function() {
-                            /// add
-                            var title = prompt('{{$l=='ar'?'ادخل عنوان لحدث اليوم':'Today, event title'}}:');
-                            if (title) {
-                                var start = new Date().toISOString().split("T")[0];
-                                var end = start;
-                                var allDay= 1;
-                                $.ajax({
-                                    url: SITEURL + "/dashboard/calendarAjax",
-                                    data: {
-                                        title: title,
-                                        start: start,
-                                        end: end,
-                                        allDay: allDay,
-                                        type: 'add'
-                                    },
-                                    type: "POST",
-                                    success: function (data) {
-                                        displayMessage("{{__('admin.Event Created Successfully')}}");
-                                        calendar.fullCalendar('renderEvent',
-                                            {
-                                                id: data.id,
-                                                title: title,
-                                                start: start,
-                                                end: end,
-                                                editable: true,
-                                                allDay: allDay
-                                            },true);
-                                        calendar.fullCalendar('unselect');
-                                    }
-                                });
-                            }
-                            //// end
-                        }
-                    },
-                    AllEvents: {
-                        text: '{{$l=='ar'?'الأحداث':'Events!'}}',
-                        click: function() {
-                           window.open('/dashboard/allevents','_Self')
-                        }
-                    }
-                },
                 header: {
-                    left: 'prev,next today AddNew',
+                    left: 'prev,next today',
                     center: 'title',
-                    right: 'month,agendaWeek,agendaDay @can('manage_events') AllEvents @endcan '
+                    right: 'month,agendaWeek,agendaDay '
                 },
+
                 events: SITEURL + "/dashboard/calendar",
-                eventTextColor:'#fff',
+                eventTextColor: '#0c0c0c',
                 displayEventTime: true,
                 editable: false,
                 eventRender: function (event, element, view) {
+
                     if (event.isallDay === true) {
                         event.allDay = true;
                     } else {
                         event.allDay = false;
                     }
                 },
-                selectable: true,
-                selectHelper: true,
-                select: function (start, end, allDay) {
-                    var title = prompt('{{$l=='ar'?'عنوان الحدث':'Event Title'}}:');
-                    if (title) {
-                        if ($.fullCalendar.formatDate(start, "HH:mm")===$.fullCalendar.formatDate(end, "HH:mm")) {
-                            var start = $.fullCalendar.formatDate(start, "Y-MM-DD");
-                            var end = $.fullCalendar.formatDate(end, "Y-MM-DD");
-                            var allDay= 1;
-                        }
-                        else {
-                            var start = $.fullCalendar.formatDate(start, "Y-MM-DD HH:mm");
-                            var end = $.fullCalendar.formatDate(end, "Y-MM-DD HH:mm");
-                            var allDay= null;
-                        }
-                        @if ($l=='ar')
-                            start = start.replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
-                        end = end.replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
-                        @endif
-                        $.ajax({
-                            url: SITEURL + "/dashboard/calendarAjax",
-                            data: {
-                                title: title,
-                                start: start,
-                                end: end,
-                                allDay: allDay,
-                                type: 'add'
-                            },
-                            type: "POST",
-                            success: function (data) {
-                                displayMessage("{{__('admin.Event Created Successfully')}}");
-                                calendar.fullCalendar('renderEvent',
-                                    {
-                                        id: data.id,
-                                        calendarId:1,
-                                        title: title,
-                                        start: start,
-                                        end: end,
-                                        editable: true,
-                                        allDay: allDay
-                                    },true);
-                                calendar.fullCalendar('unselect');
-                            }
-                        });
-                    }
-                },
-                eventDrop: function (event, delta) {
-                    var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm");
-                    if (event.end) {
-                        var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm");
-                    } else {var end=start;}
-                    var allDay = null;
-                    if (event.allDay===true) {
-                        var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
-                        if (event.end) {
-                        var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD");
-                        } else {var end=start;}
-                        var allDay = 1;}
-                        @if ($l=='ar')
-                     start = start.replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
-                     end = end.replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
-                        @endif
-
-                    $.ajax({
-                        url: SITEURL + '/dashboard/calendarAjax',
-                        data: {
-                            title: event.title,
-                            start: start,
-                            end: end,
-                            id: event.id,
-                            allDay: allDay,
-                            type: 'update'
-                        },
-                        type: "POST",
-                        success: function (response) {
-                            displayMessage("{{__('admin.Event Updated Successfully')}}");
-                        }
-                    });
-                },
-                eventResize: function (event, delta) {
-                    var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm");
-                    if (event.end) {
-                        var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm");
-                    } else {var end=start;}
-                    var allDay = null;
-                    if (event.allDay===true) {
-                        var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
-                        if (event.end) {
-                            var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD");
-                        } else {var end=start;}
-                        var allDay = 1;}
-                    @if ($l=='ar')
-                        start = start.replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
-                        end = end.replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
-                    @endif
-
-                    $.ajax({
-                        url: SITEURL + '/dashboard/calendarAjax',
-                        data: {
-                            title: event.title,
-                            start: start,
-                            end: end,
-                            id: event.id,
-                            allDay: allDay,
-                            type: 'update'
-                        },
-                        type: "POST",
-                        success: function (response) {
-                            displayMessage("{{__('admin.Event Updated Successfully')}}");
-                        }
-                    });
-                },
+                // selectable: true,
+                // selectHelper: true,
                 eventClick: function (event) {
-                    if (event.calendarId==='e') {
-                        window.open('/event/'+event.id, "_blank");
-                        return false;
-                    }
-                    else if (event.calendarId==='c') {
-                        window.open('/dashboard/cycles/'+event.id, "_self");
-                        return false;
-                    }
-                    else if (event.calendarId==='p') {
-                        openmodal(event.calendarId,event.id);
-                        return false;
-                    } else {
-                        openmodal(event.calendarId,event.id);
-                        return false;
+                    switch (event.calendarId) {
+                        case 'M':
+                            openmodal(event,'{{ trans('admin.mentorship request between')  }}');
+                            break;
                     }
                 }
+
             });
         });
-        function displayMessage(message) {
-            toastr.success(message, '{{__('admin.Calendar')}}');
-        }
-        function openmodal(modal,id) {
-            $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
-            $.ajax({
-                type: "POST", url: "/dashboard/calendar/view",data: {"type" : modal,"id" : id},
-                success: function (response) {
-                    $('#title').html(response.title);
-                    $('#body').html(response.body);
-                    $('#start').html("<b>{{__('admin.Start')}}: </b> "+ response.start );
-                    $('#end').html("<b>{{__('admin.End')}}: </b> "+ response.end);
-                    if ( response.user_id === {{Auth::id()}} ) {
-                        $('#edit').show();
-                        $('#edit').attr('href','/dashboard/calendar/'+id+'/edit')
+
+        function openmodal(event,title) {
+
+                $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('calendarAjax') }}",
+                    data: {
+                        "type" : event.calendarId,
+                        "id" : event.id
+                    },
+                    success: function (response) {
+                        $('#title').html(title);
+                        $('#body').html(response.body);
+                        $('#start').html("<b>{{__('admin.Start')}}: </b> "+ response.start );
+                        $('#end').html("<b>{{__('admin.End')}}: </b> "+ response.end);
+                        $('#viewevent').modal('show');
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        alert("Error Occurred, Try again!");
                     }
-                    $('#viewevent').modal('show');
-                },
-                error: function (error) {
-                    console.log(error);
-                    alert("Error Occurred, Try again!");
-                }
-            });
+                });
+
         }
     </script>
 @stop

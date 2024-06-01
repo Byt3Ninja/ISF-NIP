@@ -113,7 +113,7 @@
             <h4 class="card-title secondary">{{$cstep->title}} <small class="text-muted"> {{__('cycles.from')}} {{$cstep->from->format('d-m')}} {{__('cycles.to')}} {{$cstep->to->format('d-m-Y')}}</small>
                 {{__('cycles.for')}} :
                         <a   href="/dashboard/companyProfile/{{$c->id}}">
-                        <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                        <img src="{{$company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                              {{ $c->{'name_'.$l} }}</a>
             </h4>
             <p>{{$cstep->description}}</p>

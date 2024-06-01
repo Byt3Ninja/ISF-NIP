@@ -146,6 +146,7 @@ class TrainingController extends Controller
             }
             if(!$contents) {return back()->with(['class'=>'danger','message'=>'Error, content not exist.']);}
                 /// save progress
+//                dd(['training_id'=>$ccontent->id,'user_id'=>Auth::id()],['course_id'=>$id]);
                 TrainingCompleted::updateOrInsert(['training_id'=>$ccontent->id,'user_id'=>Auth::id()],['course_id'=>$id]);
                 return view('admin/clients/training', compact('contents','ccontent'));
             } else {

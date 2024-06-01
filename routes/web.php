@@ -7,26 +7,27 @@
 //});
 // routes/web.php
 //Route::get('create-meeting', 'MeetingController@createMeeting');
-Route::get('test',function (){
-    function prime_or_not($no1)
-    {
-        //Insert your code here
-        $sum = 0;
-        if ($no1 < 2) {
-            return 0;
-        }
-        for ($i = 2; $i <= sqrt($no1); $i++) {
-            if ($no1 % $i == 0) {
-                return -1;
-            }
-        }
-        for ($i = 1; $i <= $no1; $i++) {
-            $sum += $i;
-        }
-        return $sum;
-    }
-    return view('admin.reports.company');
-});
+//Route::get('test',function (){
+//    function prime_or_not($no1)
+//    {
+//        //Insert your code here
+//        $sum = 0;
+//        if ($no1 < 2) {
+//            return 0;
+//        }
+//        for ($i = 2; $i <= sqrt($no1); $i++) {
+//            if ($no1 % $i == 0) {
+//                return -1;
+//            }
+//        }
+//        for ($i = 1; $i <= $no1; $i++) {
+//            $sum += $i;
+//        }
+//        return $sum;
+//    }
+//    return view('admin.reports.company');
+//});
+
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');
@@ -56,8 +57,9 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('documentation/view/{id?}','HomeController@help');
     Route::resource('documentation', 'DocumentationController');
     // Calendar
-	Route::get('calendar','SettingsController@calendar')->name('calendar');
-    Route::post('calendarAjax','SettingsController@ajax')->name('calendarAjax');
+	Route::get('calendar','CalenderController@index')->name('calendar');
+    Route::post('calendarViewCall','CalenderController@ViewCall')->name('calendarAjax');
+
     Route::get('calendar/{id}/edit','SettingsController@editcal');
     Route::post('calendar/{id}/update','SettingsController@updatecal');
     Route::get('calendar/{id}/delete','SettingsController@delcal');
@@ -268,18 +270,26 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('final/save','FinalscreeningController@save');
     Route::post('final/addzoom','FinalscreeningController@addzoom');
     Route::get('final/results/{id?}','FinalscreeningController@results');
-    Route::get('final/{sid}/{cid}','FinalscreeningController@view');
+    Route::get('final/{step_id}/{company_id}','FinalscreeningController@view');
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
+
+    // ===============> Reports <============
+    Route::group(['prefix' => 'reports'],function (){
+        Route::get('/','ReportController@index')->name('reports.index');
+        // ======> Ajax Route
+        Route::get('view/{type?}','ReportController@View')->name('reports.view.ajax');
+    });
+    //================> End Reports <============
 });
 
 ///// Reports routes
-Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
-Route::post('users','ExcelController@ExUsers');
-Route::post('companies','ExcelController@ExCompanies');
-route::get('/','ExcelController@index');
-route::get('events/{id}','ExcelController@events');
-route::get('audit-log','ExcelController@auditlog');
-});
+//Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
+//Route::post('users','ExcelController@ExUsers');
+//Route::post('companies','ExcelController@ExCompanies');
+//route::get('/','ExcelController@index');
+//route::get('events/{id}','ExcelController@events');
+//route::get('audit-log','ExcelController@auditlog');
+//});
 
 //// Facbook & Google Login
 Route::get('/auth/redirect/{provider}', 'SocialController@redirect');

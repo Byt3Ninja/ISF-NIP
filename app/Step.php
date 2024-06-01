@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Step extends Model
 {
-    use Auditable;
+//    use Auditable;
 
     public function cycle()
     {

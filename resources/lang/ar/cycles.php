@@ -227,5 +227,6 @@ return [
     'No training sessions added yet' => 'لا يوجد تدريبات حاليا',
     'Are you sure, Delete current step and all its contents?'=>'هل بالتأكيد تريد حذف المرحلة الحالية وكافة محتوياتها؟',
     'cant undo' => 'سوف يتم حذف كافة النماذج والبيانات والمراجعات والتدريبات، ولا يمكنك التراجع عن هذا الإجراء عند التأكيد؟',
-];
+    'Add Judges first'=>'حدد محكممين اولا'
+    ];
 

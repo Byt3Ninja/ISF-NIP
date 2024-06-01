@@ -112,4 +112,8 @@ class Company extends Model
     {
         return (Finalscreening::where('company_id',$this->id)->where('step_id',$s)->first());
     }
+
+    public function finalData(){
+        return $this->hasMany(FinalData::class,'company_id');
+    }
 }

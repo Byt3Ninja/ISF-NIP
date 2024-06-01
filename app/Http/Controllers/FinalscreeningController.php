@@ -125,7 +125,7 @@ class FinalscreeningController extends Controller
             $field_options = Formfield::findOrFail($fid)->options;
             $field_name = 'field_'. $fid;
             FinalData::where('field_id',$fid)->where('judge_id',$uid)->where('company_id',$cid)->delete();
-            FinalData::updateOrInsert(['field_id'=>$fid, 'judge_id'=>$uid, 'company_id'=>$cid, 'step_id'=>$id, 'question'=>$field_options->label,'answer'=>$request->input($field_name)]);
+            FinalData::updateOrCreate(['field_id'=>$fid, 'judge_id'=>$uid, 'company_id'=>$cid, 'step_id'=>$id, 'question'=>$field_options->label,'answer'=>$request->input($field_name)]);
         }
         return Redirect::back()->with(['msg' => 'StoredSuccessfully','class'=>'success']);
     }

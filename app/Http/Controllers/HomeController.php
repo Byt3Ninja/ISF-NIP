@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\BuilderForm;
+use App\Calendar;
 use App\Cycle;
 use App\Documentation;
 use App\Events\WebMessage;
+use App\Finalscreening;
 use App\MentorshipRequest;
+use App\Messages;
 use App\Messenger;
+use App\Organization;
+use App\Screening;
 use App\ServicesRequests;
+use App\Step;
 use App\TrainingSession;
 use Illuminate\Http\Request;
 
@@ -17,6 +23,7 @@ use App\Service;
 use App\User;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use DB;
 
 class HomeController extends Controller
 {
@@ -40,7 +47,7 @@ class HomeController extends Controller
         $user = auth()->user();
         if ($user->hasanyRole('Admin|Editor|Manager')){
 
-            return view('admin.dashboard');
+            return $this->AdminDashboard();
 
         }elseif ($user->hasRole('Registered|Page Manager|Pages Editor')) {
 
@@ -56,7 +63,7 @@ class HomeController extends Controller
 
         } elseif ($user->hasRole('Judger')) {
 
-            return view('admin.clients.judge');
+            return $this->judgerDashboard();
 
         } elseif ($user->hasRole('Disabled')) {
 
@@ -65,48 +72,129 @@ class HomeController extends Controller
         } else
             abort(401);
     }
+
+    // ============> Functions of dashboards
+    protected function adminDashboard(){
+        $startups=   Company::count();
+        $messages = Messenger::where('receiver',Auth::user()->id)->whereNull('read')->count();
+        $servrequests = ServicesRequests::whereNull('approved')->count();
+        $mentrequests = new MentorshipRequest();
+        $managers = User::join('model_has_roles','id','=','model_id')->whereIn('role_id',[5,1])->count();
+        $cmessages = Messages::where('read','<>',1)->count();
+        $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->count();
+        $judgers = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->count();
+
+        $cycles= new Cycle();
+        $sessions = TrainingSession::whereHas('step',function ($q){
+            $q->where('stype',4);
+        });
+        $organizations =new Organization();
+
+        //=================> Counts Section<==============
+
+        $data['messages_count'] = $messages;
+        $data['servrequests_count'] = $servrequests;
+
+        $data['managers_count'] = $managers;
+        $data['cmessages_count'] = $cmessages;
+        $data['startups_count']=   $startups;
+        $data['mentors_count'] = $mentors;
+        $data['mentrequests_count'] = $mentrequests->count();
+        $data['mentrequests_period'] = $mentrequests->sum('period')/60;
+        $data['judgers_count'] = $judgers;
+        $data['cycles_count'] = $cycles->count();
+
+        $data['sessions_count'] = $sessions->count();
+        $data['sessions_period'] =$sessions->sum('duration')/60;
+        $data['organizations_count'] = $organizations->count();
+
+        //=============> Charts Section <=====================
+        $usersgov = User::join('states','state_id','=','states.id')->select('name_en as state_en','name_ar as state_ar', DB::raw('count(*) as total'));
+        $usersgender = User::select('gender', DB::raw('count(*) as total'));
+
+        $data['usersgov'] = $usersgov->groupBy('name_en','name_ar');
+        $data['usersgender'] = $usersgender->groupBy('gender');
+
+        $data['cycles_labels']=[];
+        $data['cycles_startups_count']=[];
+        foreach ($cycles->get() as $key){
+            $data['cycles_labels'][] = $key->title;
+            $data['cycles_startups_count'][] = (int)$key->companies()->count();
+        }
+
+        return view('admin.dashboard',$data);
+    }
     protected function organizationDashboard(){
 
         $organization_id = Auth::user()->organization_id;
-        //Counts
-        $data['messages'] = Messenger::where('receiver',auth()->id())->whereNull('read');
-        $data['messages'] = $data['messages'] ->count();
-
-        $data['mentrequests'] = MentorshipRequest::where('organization_id',$organization_id)->count();
-        $data['mentrequests_period'] = MentorshipRequest::where('organization_id',$organization_id)->sum('period')/60;
-
-        $data['startups']= Company::whereHas('cycledata',function ($q) use ($organization_id){
+        $mentorshipRequests = MentorshipRequest::where('organization_id',$organization_id);
+        $forms = BuilderForm::where('organization_id',$organization_id);
+        $sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id){
+            $q->where('stype',4)->whereHas('cycle',function ($query) use ($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        });
+        $messages = Messenger::where('receiver',auth()->id())->whereNull('read');
+        $startups = Company::whereHas('cycledata',function ($q) use ($organization_id){
             $q->where('organization_id',$organization_id);
-        })->count();
+        });
+        $cycles= Cycle::where('organization_id',$organization_id);
 
-        $data['cycles'] = Cycle::where('organization_id',$organization_id);
-        $data['cycles_count'] = $data['cycles']->count();
-        $data['latest_cycles']= $data['cycles']->latest()->limit(10)->get();
+        // ============> Counts Section <==================
+        $data['startups']= $startups->count();
+        $data['sessions'] = $sessions->count();
+        $data['sessions_period'] =$sessions->sum('duration')/60;
 
-        $data['forms'] = BuilderForm::where('organization_id',$organization_id);
-        $data['forms_count'] = $data['forms']->count();
+        $data['cycles_count'] = $cycles->count();
+        $data['forms_count'] = $forms->count();
 
-        $data['sessions'] = TrainingSession::whereHas('step',function ($q)use ($organization_id){
-            $q->where('stype',4)->whereHas('cycle',function ($query) use ($organization_id){
-                $query->where('organization_id',$organization_id);
-            });
-        })->count();
-
-        $data['sessions_period'] =TrainingSession::whereHas('step',function ($q)use ($organization_id){
-            $q->where('stype',4)->whereHas('cycle',function ($query) use ($organization_id){
-                $query->where('organization_id',$organization_id);
-            });
-        })->sum('duration')/60;
-
-        $data['mentorshipRequests'] = MentorshipRequest::where('organization_id',$organization_id)
-            ->whereNull('approved')->latest()->limit(5)->get();
+        $data['mentrequests'] = $mentorshipRequests->count();
+        $data['mentrequests_period'] = $mentorshipRequests->sum('period')/60;
+        $data['messages'] = $messages->count();
+        // ============> Chart Statistics Section <==================
+        $data['sessions_labels']=[];
+        $data['sessions_durations']=[];
+        foreach ($sessions->get() as $key){
+            $data['sessions_labels'][] = $key->title . ' '.$key->start_format ;
+            $data['sessions_durations'][] = (int)$key->duration/60;
+        }
+        foreach ($mentorshipRequests->get() as $key){
+            $data['mentorship_labels'][] = $key->mentor->name . ' '.$key->zoom_date ;
+            $data['mentorship_durations'][] = (int)$key->period/60;
+        }
+        //=============> listing Section <===================
+        $data['mentorshipRequests'] = $mentorshipRequests->whereNull('approved')->latest()->limit(5)->get();
+        $data['latest_cycles']= $cycles->latest()->limit(10)->get();
 
         return view('admin.organizations.dashboard',$data);
     }
 
+    protected function judgerDashboard(){
+        $myid=auth()->id();
+       // ===> counts <=====
+        $data['services_count'] = Service::count();
+        $data['service_requests_count'] = auth()->user()->myServiceRequests()->count();
+        $data['messenger_count'] = Messenger::where('receiver',$myid)->whereNull('read')->count();
+
+        // ======> tables <=====
+        $data['services_latest'] = Service::orderBy('created_at','DESC')->take(5)->get();
+        $data['events_latest'] = Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) {
+            $q->orWhere('user_id',Auth::id())
+                ->orWhereNull('isPrivate');
+        })->orderBy('start')->take(5)->get();
+        // ======> process <=========
+        $data['mysteps'] = auth()->user()->screeningRequests()->get();
+        $today = date("Y-m-d");
+        $data['csteps'] = Step::whereRaw( '"'.$today. '" BETWEEN `from` AND `to`')->whereIn('id',$data['mysteps']->pluck('step_id'))->get();
+        $data['fcompanies'] = Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
+        return view('admin.clients.judge',$data);
+    }
+
+    // ============> End Functions <=======================
+
+
     private function getInterstedinServices($user)
     {
-
         return null;
     }
 
