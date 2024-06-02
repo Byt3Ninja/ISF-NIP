@@ -338,6 +338,7 @@
             {{--                            >{{__('admin.Log viewer')}}</span></a>--}}
             {{--                    </li>--}}
             {{--                @endcan--}}
+        @endif
             @can ('view_report')
                 <li class="{{Request::is('reports*')?'active':''}} nav-item"><a href="{{ route('reports.index') }}"><i
                                 class="menu-livicon" data-icon="notebook"></i>
@@ -417,7 +418,7 @@
             {{--                        </li>--}}
             {{--                    @endif--}}
             {{--                @endcan--}}
-        @endif
+
 
 
     </ul>
