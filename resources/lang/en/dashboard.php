@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'First screening'=>'First screening',
-    'Final screening'=>'Final screening',
+    'First screening'=>'Filtration',
+    'Final screening'=>'Evaluation',
     'Services' => 'Services',
     'newmessages' => 'New Messages',
     'Latest services' => 'Latest services',
@@ -117,5 +117,7 @@ return [
     'to view your training list' => 'to view your training list',
     'My Latest training' => 'My Latest training courses & sessions',
     'Show all' => 'Show all',
+    'Final pending screening'=>'Pending Evaluation Session',
+    'screening pending sessions'=>'Pending Filtration Session',
 
 ];

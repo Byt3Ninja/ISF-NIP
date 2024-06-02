@@ -75,6 +75,77 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h4 class="card-title align-items-center">
+                        <i class='bx bx-card font-medium-4 mr-1'></i> {{__('dashboard.Final pending screening')}}
+                        :
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="card ">
+                        <div class="table-responsive">
+                            <table class="table mb-0" id="userstable">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th class="text-center">{{__('cycles.Company')}}</th>
+                                    <th class="text-center">{{__('admin.Organization')}}</th>
+                                    <th class="text-center">{{__('cycles.Cycle')}}</th>
+                                    <th class="text-center">{{__('cycles.Step Title')}}</th>
+                                    <th class="text-center">{{__('admin.Judgers')}}</th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach( $final_screening_companies as $company)
+                                    <tr>
+                                        <td class="text-center">
+                                            <div class="media align-items-center">
+                                                <div class="media-left mr-50">
+                                                    <img src="{{$company->logo_url}}"
+                                                         alt="avatar" class="rounded-circle" height="40"
+                                                         width="40">
+                                                </div>
+                                                <div class="media align-items-center">
+                                                    {{$company->name }}
+                                                </div>
+
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $company->cycledata->organization->name }}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $company->cycledata->title }}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $company->stepdata->title }}
+                                        </td>
+                                        <td class="text-center">
+                                            @foreach(\App\User::whereIn('id', $company->finals($company->stepdata->id) )->get() as $judge)
+                                                <div class="chip mr-1">
+                                                    <div class="chip-body">
+                                                        <div class="avatar">
+                                                            <img class="img-fluid" src="{{$judge->image_url}}" alt="click to view" height="20" width="20">
+                                                        </div>
+                                                        <span class="chip-text">{{$judge->name }}</span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </td>
+
+                                    </tr>
+                                @endforeach
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="col-sm-6 col-12 dashboard-users-danger">
             <div class="card text-center">
                 <div class="card-content">
@@ -105,79 +176,82 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h4 class="card-title align-items-center">
+                        <i class='bx bx-card font-medium-4 mr-1'></i> {{__('dashboard.screening pending sessions')}}
+                        :
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="card ">
+                        <div class="table-responsive">
+                            <table class="table mb-0" id="userstable">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th class="text-center">{{__('cycles.Company')}}</th>
+                                    <th class="text-center">{{__('admin.Organization')}}</th>
+                                    <th class="text-center">{{__('cycles.Cycle')}}</th>
+                                    <th class="text-center">{{__('cycles.Step Title')}}</th>
+                                    <th class="text-center">{{__('admin.Judgers')}}</th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach( $screening_companies as $company)
+                                    <tr>
+                                        <td class="text-center">
+                                            <div class="media align-items-center">
+                                                <div class="media-left mr-50">
+                                                    <img src="{{$company->logo_url}}"
+                                                         alt="avatar" class="rounded-circle" height="40"
+                                                         width="40">
+                                                </div>
+                                                <div class="media align-items-center">
+                                                    {{$company->name }}
+                                                </div>
+
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $company->cycledata->organization->name }}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $company->cycledata->title }}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $company->stepdata->title }}
+                                        </td>
+                                        <td class="text-center">
+                                            @foreach($company->stepdata->stepFiltrationJudges()->get() as $judge)
+                                                <div class="chip mr-1" data-toggle="tooltip" data-placement="bottom"
+                                                     title=""
+                                                     data-original-title="{{$judge->phone}} {{$judge->email}}">
+                                                    <div class="chip-body">
+                                                        <div class="avatar">
+                                                            <img class="img-fluid"
+                                                                 src="{{$judge->image_url}}"
+                                                                 alt="click to view" height="20" width="20">
+                                                        </div>
+                                                        <span class="chip-text">{{ $judge->name }}</span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </td>
+
+                                    </tr>
+                                @endforeach
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
 
     </div>
 </div>
-{{--<div class="col-12">--}}
-{{--    <div class="row">--}}
-{{--        <div class="col-md-12">--}}
-{{--            <div class="card">--}}
-{{--                <div class="card-header border-bottom">--}}
-{{--                    <h4 class="card-title align-items-center">--}}
-{{--                        <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Mentors In Cycle Statistic") }}--}}
-{{--                        :--}}
-{{--                    </h4>--}}
-{{--                </div>--}}
-{{--                <div class="card-body">--}}
-{{--                    <div class="card ">--}}
-{{--                        <div class="table-responsive">--}}
-{{--                            <table class="table mb-0" id="userstable">--}}
-{{--                                <thead class="thead-dark">--}}
-{{--                                <tr>--}}
-{{--                                    <th class="text-center">{{__('cycles.Mentor')}}</th>--}}
-{{--                                    <th class="text-center">{{__('cycles.Rate')}}</th>--}}
-{{--                                    <th class="text-center">{{__('admin.Mentorship requests number')}}</th>--}}
-{{--                                    <th class="text-center">{{__('admin.Mentorship requests Duration')}}</th>--}}
-{{--                                    <th class="text-center">{{__('admin.Mentorship done Request')}}</th>--}}
-{{--                                    <th class="text-center">{{__('admin.Mentorship done requests Duration')}}</th>--}}
-{{--                                    <th class="text-center">{{__('admin.Company Attendance Rate')}}</th>--}}
-{{--                                </tr>--}}
-{{--                                </thead>--}}
-{{--                                <tbody>--}}
-{{--                                @foreach($cycle_mentors as $mentor)--}}
-{{--                                    <tr>--}}
-{{--                                        <td class="text-center">--}}
-{{--                                            <div class="media align-items-center">--}}
-{{--                                                <div class="media-left mr-50">--}}
-{{--                                                    <img src="{{$mentor->image_url}}"--}}
-{{--                                                         alt="avatar" class="rounded-circle" height="40"--}}
-{{--                                                         width="40">--}}
-{{--                                                </div>--}}
-{{--                                                <div class="media align-items-center">--}}
-{{--                                                    {{$mentor->name }}--}}
-{{--                                                </div>--}}
-
-{{--                                            </div>--}}
-{{--                                        </td>--}}
-{{--                                        <td class="text-center">--}}
-{{--                                            <small>{!! str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$mentor->mrating()) !!}</small>--}}
-{{--                                        </td>--}}
-{{--                                        <td class="text-center">--}}
-{{--                                            {{$mentor->mentorSessions()->where('approved','Yes')->count()}}--}}
-{{--                                        </td>--}}
-{{--                                        <td class="text-center">--}}
-{{--                                            {{$mentor->mentorSessions()->where('approved','Yes')->sum('period')/60}}--}}
-{{--                                        </td>--}}
-{{--                                        <td class="text-center">--}}
-{{--                                            {{$mentor->mentorSessions()->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->count()}}--}}
-{{--                                        </td>--}}
-{{--                                        <td class="text-center">--}}
-{{--                                            {{$mentor->mentorSessions()->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->sum('period')/60}}--}}
-{{--                                        </td>--}}
-{{--                                        <td class="text-center">--}}
-{{--                                            {{ (integer)($mentor->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->sum('done')/$mentor->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->count()*100) }} %--}}
-{{--                                        </td>--}}
-{{--                                    </tr>--}}
-{{--                                @endforeach--}}
-
-{{--                                </tbody>--}}
-{{--                            </table>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-{{--</div>--}}

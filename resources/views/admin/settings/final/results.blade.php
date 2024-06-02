@@ -127,9 +127,9 @@
                         <tr>
                             <th>#</th>
                             <th>Question</th>
-@foreach($cj as $judge)
-                            <th>{{ $judge->judge->{'first_name_'.$l} }} {{$judge->judge->{'last_name_'.$l} }}</th>
-@endforeach
+                    @foreach($cj as $judge)
+                                <th>{{ $judge->judge->name }} </th>
+                    @endforeach
                         </tr>
                         </thead>
                         <tbody>

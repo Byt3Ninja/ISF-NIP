@@ -160,11 +160,11 @@
                                                                 <label for="checkbox{{$company->id}}">
                                                             <div class="media align-items-center">
                                                                 <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
-                                                                    <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                    <img src="{{$company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                 </a>
                                                                 <a href="/dashboard/companyProfile/{{$company->id}}">
                                                                     <div class="media align-items-center">
-                                                                        {{$company->{'name_'.$l} }}
+                                                                        {{$company->name }}
                                                                     </div>
                                                                 </a>
                                                             </div>
@@ -178,8 +178,8 @@
                                                                 </a>
                                                                 <a href="/dashboard/users/{{$company->user->id}}/edit">
                                                                     <div class="media-body">
-                                                                        <h6 class="media-heading mb-0">{{$company->user->{'first_name_'.$l} }} {{$company->user->{'last_name_'.$l} }}</h6>
-                                                                        <span class="font-small-2">{{$company->user->{'title_'.$l} }}</span>
+                                                                        <h6 class="media-heading mb-0">{{$company->user->name }} </h6>
+                                                                        <span class="font-small-2">{{$company->user->title }}</span>
                                                                     </div>
                                                                 </a>
                                                             </div>
@@ -189,9 +189,9 @@
                                                             <div class="chip mr-1">
                                                                 <div class="chip-body">
                                                                     <div class="avatar">
-                                                                        <img class="img-fluid" src="/191014/{{$judge->img_url??'users/avatar.jpg'}}" alt="click to view" height="20" width="20">
+                                                                        <img class="img-fluid" src="{{$judge->image_url}}" alt="click to view" height="20" width="20">
                                                                     </div>
-                                                                    <span class="chip-text">{{$judge->{'first_name_'.$l} .' '. $judge->{'last_name_'.$l} }}</span>
+                                                                    <span class="chip-text">{{$judge->name }}</span>
                                                                 </div>
                                                             </div>
                                                             @endforeach

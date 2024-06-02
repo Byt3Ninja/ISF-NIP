@@ -138,10 +138,33 @@ class ReportController extends Controller
             })->where('stype', 5);
         })->whereHas('finalData')->get();
 
+        $screening_pending_sessions =  Company::whereHas('stepdata',function ($q)use ($organization_id){
+            $q->when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('stype', 2)->whereHas('formData',function ($q){
+                $q->where('screening','{}');
+            });
+        })->get();
+        $screening_done_sessions =  Company::whereHas('stepdata',function ($q)use ($organization_id){
+            $q->when(!is_null($organization_id),function ($q) use($organization_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            })->where('stype', 2)->whereHas('formData',function ($q){
+                $q->where('screening','<>','{}');
+            });
+        })->get();
+
         $data['screening_sessions_count'] = count($screenings);
+        $data['screening_pending_sessions_count'] = count($screening_pending_sessions);
+        $data['screening_done_sessions_count'] = count($screening_done_sessions);
         $data['final_screening_count']=count($final_screenings);
         $data['final_pending_screening_count']=count($final_pending_screenings);
         $data['final_done_screening_count']=count($final_done_screenings);
+        $data['screening_companies']= $screening_pending_sessions;
+        $data['final_screening_companies']= $final_pending_screenings;
         return $data;
     }
 }
