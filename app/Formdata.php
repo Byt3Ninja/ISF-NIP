@@ -14,4 +14,6 @@ class Formdata extends Model
         'screening' => 'array',
         'comments' => 'array',
     ];
+
+
 }

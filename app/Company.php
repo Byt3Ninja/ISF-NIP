@@ -116,4 +116,7 @@ class Company extends Model
     public function finalData(){
         return $this->hasMany(FinalData::class,'company_id');
     }
+    public function formData(){
+        return $this->hasMany(Formdata::class,'company_id');
+    }
 }

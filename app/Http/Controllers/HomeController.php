@@ -154,6 +154,8 @@ class HomeController extends Controller
         // ============> Chart Statistics Section <==================
         $data['sessions_labels']=[];
         $data['sessions_durations']=[];
+        $data['mentorship_labels']= [];
+        $data['mentorship_durations']=[];
         foreach ($sessions->get() as $key){
             $data['sessions_labels'][] = $key->title . ' '.$key->start_format ;
             $data['sessions_durations'][] = (int)$key->duration/60;
