@@ -338,12 +338,12 @@
             {{--                            >{{__('admin.Log viewer')}}</span></a>--}}
             {{--                    </li>--}}
             {{--                @endcan--}}
-            @if(Auth::user()->hasanyRole("organizationManager|Admin|Editor|Manager") )
+            @can ('view_report')
                 <li class="{{Request::is('reports*')?'active':''}} nav-item"><a href="{{ route('reports.index') }}"><i
                                 class="menu-livicon" data-icon="notebook"></i>
                         <span class="menu-title">{{__('admin.Reports')}}</span></a>
                 </li>
-            @endif
+            @endcan
             <li class=" navigation-header"><span></span>
             </li>
 
