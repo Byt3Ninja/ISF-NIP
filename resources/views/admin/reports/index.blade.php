@@ -123,20 +123,40 @@
                                                 </div>
                                             </div>
                                         </div>
-{{--                                        <div class="col-md-12 col-12">--}}
-{{--                                            <div class="form-group">--}}
-{{--                                                <div class="card-content">--}}
-{{--                                                    <div class="card-body">--}}
-{{--                                                        <h6>{{__('admin.SelState')}}</h6>--}}
-{{--                                                        <p>{{__('admin.SelMultiState')}}</p>--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <select name="state[]" class=" form-control select2">--}}
-{{--                                                             </select>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
+                                        <div class="col-md-12 col-12 " id="cyclesSelectSection" style="display: none;">
+                                            <div class="form-group">
+                                                <div class="card-content">
+                                                    <div class="card-body">
+                                                        <h6 id="selectTitle">{{__('admin.SelectCycle')}}</h6>
+                                                        <p id="selectSubtitle">{{__('admin.SelectOrSearchCycle')}}.</p>
+                                                        <div class="form-group">
+                                                            <select class="form-control select2" id="cyclesSelectOptions">
+                                                                @foreach($cycles as $cycle)
+                                                                    <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
+                                                                @endforeach
+                                                             </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                            <div class="col-md-12 col-12 " id="companiesSelectSection" style="display: none;">
+                                            <div class="form-group">
+                                                <div class="card-content">
+                                                    <div class="card-body">
+                                                        <h6>{{__('admin.SelectCompany')}}</h6>
+                                                        <p >{{__('admin.SelectOrSearchCompany')}}.</p>
+                                                        <div class="form-group">
+                                                            <select class="form-control select2" id="companiesSelectOptions">
+                                                                @foreach($companies as $company)
+                                                                    <option value="{{ $company->id }}">{{ $company->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="row">
@@ -163,18 +183,50 @@
     <script src="/app-assets/vendors/js/charts/apexcharts.min.js"></script>
     <script>
         $(document).ready(function (){
+            $('#companiesSelectSection').hide();
+            $('#cyclesSelectSection').hide();
+            $('.type').change(function (){
+                if($(this).val() ==='cycles') {
+                    $('#cyclesSelectSection').show();
+                    $('#companiesSelectSection').hide();
+                }else if($(this).val()==='companies') {
+                    $('#cyclesSelectSection').hide();
+                    $('#companiesSelectSection').show();
+                }else{
+                    $('#companiesSelectSection').hide();
+                    $('#cyclesSelectSection').hide();
+                }
+            });
             $('#showReport').click(function (){
-
-                $.ajax({
-                    url: "{{ route('reports.view.ajax') }}/"+$('.type:checked').val(),
-                    success: function(data) {
-                        if (data['value'] === 1) {
-                            $('#reportContent').html(data['view']);
-                        }
+                var value = $('.type:checked').val();
+                if(value ==='cycles'|| value==='companies'){
+                    var selectValue = $('#'+value+'SelectOptions').val();
+                    if(selectValue === ''|| selectValue=== undefined){
+                        alert('برجاء اختيار القيمة اولا');
+                    }else {
+                        getAjaxReport(value,selectValue);
                     }
-                });
+
+                }else {
+
+                    getAjaxReport(value)
+                }
             });
         });
+        function getAjaxReport(value,id=0){
+            $.ajax({
+                url: "{{ route('reports.view.ajax') }}/"+value,
+               data:{
+                 id:id
+               },
+                success: function(data) {
+                    if (data['value'] === 1) {
+                        $('#reportContent').html(data['view']);
+                    }
+                }
+            });
+        }
+
     </script>
 
 @stop

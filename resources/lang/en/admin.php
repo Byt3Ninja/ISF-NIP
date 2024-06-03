@@ -437,4 +437,9 @@ return [
     'Final pending screening'=>'Evaluation Pending',
     'screening pending sessions'=>'Filtration Pending Number',
     'screening done sessions'=>'Filtration Done Number',
+    'SelectCompany'=>'Select The Company',
+    'SelectOrSearchCompany'=>'You can search by company name',
+    'SelectCycle'=>'Select The Cycle',
+    'SelectOrSearchCycle'=>'You can search by cycle name',
+    'Subscribe Startups in Cycle'=>'Subscribe Startups in Cycle'
 ];

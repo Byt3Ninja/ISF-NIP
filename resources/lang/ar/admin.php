@@ -437,4 +437,9 @@ return [
     'Final pending screening'=>'عدد جلسات التقيم  المنتظرة',
     'screening pending sessions'=>'عدد جلسات المراجعة و الفحص المنتظرة',
     'screening done sessions'=>'عدد جلسات المراجعة و الفحص المنتهية',
+    'SelectCompany'=>'اختار الشركة',
+    'SelectOrSearchCompany'=>'يمكن البحث باسم الشركة',
+    'SelectCycle'=>'اختار البرنامج',
+    'SelectOrSearchCycle'=>'يمكن البحث باسم البرنامج',
+    'Subscribe Startups in Cycle'=>'عدد الشركات المشاركة بالبرنامج'
     ];

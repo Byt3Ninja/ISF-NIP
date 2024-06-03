@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Cycle;
 use App\FinalData;
 use App\Finalscreening;
 use App\MentorshipRequest;
@@ -14,9 +15,18 @@ use Illuminate\Http\Request;
 class ReportController extends Controller
 {
     public function index(){
-        return view('admin.reports.index');
+        $organization_id = auth()->user()->organization_id;
+        $cycles = Cycle::when(!is_null($organization_id),function ($q)use($organization_id){
+            $q->where('organization_id',$organization_id);
+        })->get();
+        $companies = Company::whereHas('cycledata',function ($q)use ($organization_id){
+            $q->when(!is_null($organization_id),function ($query)use($organization_id){
+                $query->where('organization_id',$organization_id);
+            });
+        })->get();
+        return view('admin.reports.index',compact('companies','cycles'));
     }
-    public function View($type){
+    public function View($type,Request $request){
         $organization_id = auth()->user()->organization_id;
         switch ($type){
             case 'mentorship':
@@ -30,6 +40,12 @@ class ReportController extends Controller
             case 'judge':
                 $data = $this->judgeReport($organization_id);
                 $view = '_judgeSessionReport';
+                break;
+            case 'cycles':
+                $data = $this->cyclesReport($organization_id,$request->id);
+                $view = '_cyclesReport';
+                break;
+            case '':
                 break;
 
         }
@@ -165,6 +181,55 @@ class ReportController extends Controller
         $data['final_done_screening_count']=count($final_done_screenings);
         $data['screening_companies']= $screening_pending_sessions;
         $data['final_screening_companies']= $final_pending_screenings;
+        return $data;
+    }
+
+    protected function cyclesReport($organization_id,$cycle_id){
+        $cycle = Cycle::find($cycle_id);
+        $data['mentors_count'] = User::whereHas('mentorSessions',function ($q)use ($organization_id,$cycle_id){
+            $q->where('cycle_id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
+                $q->where('organization_id',$organization_id);
+            });
+        })->count();
+        $mentorRequests =  MentorshipRequest::when(!is_null($organization_id),function ($q)use ($organization_id){
+            $q->where('organization_id',$organization_id);
+        })->where('cycle_id',$cycle_id);
+
+        $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id){
+            $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
+                $query->whereHas('cycle',function ($query) use ($organization_id){
+                    $query->where('organization_id',$organization_id);
+                });
+            });
+        });
+        $startups = Company::whereHas('cycledata',function ($q) use ($organization_id,$cycle_id){
+            $q->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
+                return $this->where('organization_id',$organization_id);
+            });
+        });
+        $screenings =Company::whereHas('stepdata',function ($q)use ($organization_id,$cycle_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id,$cycle_id){
+                    $query->where('cycle_id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
+                        $q->where('organization_id',$organization_id);
+                    });
+            })->where('stype', 2);
+        })->count();
+        $final_screenings= Company::whereHas('stepdata',function ($q)use ($organization_id,$cycle_id){
+                return $q->whereHas('cycle',function ($query) use ($organization_id,$cycle_id){
+                    $query->where('cycle_id',$cycle_id)->when(!is_null($organization_id),function ($q) use($organization_id){
+                        $q->where('organization_id',$organization_id);
+                    });
+            })->where('stype', 5);
+        })->count();
+        $data['training_sessions_count'] = $training_sessions->count();
+        $data['training_sessions_period'] = $training_sessions->sum('duration')/60;
+        $data['mentorRequests_count']  = $mentorRequests->count();
+        $data['mentorships_period']= $mentorRequests->sum('period')/60;
+        $data['cycle']=$cycle;
+        $data['startups']=$startups->count();
+        $data['screening_sessions_count']=$screenings;
+        $data['final_screening_count']=$final_screenings;
+
         return $data;
     }
 }
