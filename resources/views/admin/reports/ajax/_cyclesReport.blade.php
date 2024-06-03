@@ -26,7 +26,7 @@
         <div class="col-sm-12 col-12 dashboard-users-success">
             <div class="card text-center">
                 <div class="card-content">
-                    <a href="/dashboard/companies">
+                    <a href="dashboard/cycles/{{ $cycle->id }}/registered">
                         <div class="card-body py-1">
                             <div class="badge-circle badge-circle-lg badge-circle-info mx-auto mb-50">
                                 <i class="bx bx-briefcase-alt font-medium-5"></i>
@@ -38,12 +38,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-4 col-12 dashboard-users-danger">
+        <div class="col-sm-3 col-12 dashboard-users-danger">
             <div class="card text-center">
                 <div class="card-content">
                     <a href="/dashboard/users#search=Mentor">
                         <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
+                            <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
                                 <i class="bx bxs-graduation font-medium-5"></i>
                             </div>
                             <div class="text-muted line-ellipsis">{{__('admin.Mentors')}}</div>
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <div class="col-sm-4 col-12 dashboard-users-danger">
+        <div class="col-sm-3 col-12 dashboard-users-danger">
             <div class="card text-center">
                 <div class="card-content">
                     <a href="/dashboard/mentorship/sessions?show=all">
@@ -69,7 +69,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-4 col-12 dashboard-users-danger">
+        <div class="col-sm-3 col-12 dashboard-users-danger">
             <div class="card text-center">
                 <div class="card-content">
                     <a href="/dashboard/mentorship/sessions?show=all">
@@ -79,6 +79,21 @@
                             </div>
                             <div class="text-muted line-ellipsis">{{__('admin.Mentorship requests Duration')}}</div>
                             <h3 class="mb-0">{{$mentorships_period}} </h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 col-12 dashboard-users-danger">
+            <div class="card text-center">
+                <div class="card-content">
+                    <a href="/dashboard/mentorship/sessions?show=all">
+                        <div class="card-body py-1">
+                            <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
+                                <i class="bx bxs-book-open font-medium-5"></i>
+                            </div>
+                            <div class="text-muted line-ellipsis">{{__('admin.Company Attendance Rate')}}</div>
+                            <h3 class="mb-0">{{(integer)$mentorship_attendance_rate}} % </h3>
                         </div>
                     </a>
                 </div>

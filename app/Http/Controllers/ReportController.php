@@ -225,6 +225,7 @@ class ReportController extends Controller
         $data['training_sessions_period'] = $training_sessions->sum('duration')/60;
         $data['mentorRequests_count']  = $mentorRequests->count();
         $data['mentorships_period']= $mentorRequests->sum('period')/60;
+        $data['mentorship_attendance_rate']= ($mentorRequests->sum('done')/$mentorRequests->count())*100;
         $data['cycle']=$cycle;
         $data['startups']=$startups->count();
         $data['screening_sessions_count']=$screenings;
