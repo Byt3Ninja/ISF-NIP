@@ -195,28 +195,28 @@ class ReportController extends Controller
             $q->where('organization_id',$organization_id);
         })->where('cycle_id',$cycle_id);
 
-        $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id){
-            $q->where('stype',4)->when(!is_null($organization_id),function ($query) use ($organization_id){
-                $query->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
-                });
+        $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id,$cycle_id){
+            $q->where('stype',4)->whereHas('cycle',function ($query) use ($organization_id,$cycle_id){
+                    $query->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($query) use ($organization_id){
+                        $query->where('organization_id',$organization_id);
+                    });
             });
         });
         $startups = Company::whereHas('cycledata',function ($q) use ($organization_id,$cycle_id){
             $q->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
-                return $this->where('organization_id',$organization_id);
+                 $q->where('organization_id',$organization_id);
             });
         });
         $screenings =Company::whereHas('stepdata',function ($q)use ($organization_id,$cycle_id){
                 return $q->whereHas('cycle',function ($query) use ($organization_id,$cycle_id){
-                    $query->where('cycle_id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
+                    $query->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($q)use ($organization_id){
                         $q->where('organization_id',$organization_id);
                     });
             })->where('stype', 2);
         })->count();
         $final_screenings= Company::whereHas('stepdata',function ($q)use ($organization_id,$cycle_id){
                 return $q->whereHas('cycle',function ($query) use ($organization_id,$cycle_id){
-                    $query->where('cycle_id',$cycle_id)->when(!is_null($organization_id),function ($q) use($organization_id){
+                    $query->where('cycles.id',$cycle_id)->when(!is_null($organization_id),function ($q) use($organization_id){
                         $q->where('organization_id',$organization_id);
                     });
             })->where('stype', 5);
