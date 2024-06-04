@@ -24,82 +24,9 @@ class CalenderController extends Controller
             $user = auth()->user();
             $organization_id = $user->organization_id;
             if ($user->hasanyRole('Admin|Editor|Manager|organizationManager')) {
-                $mentorshipRequests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    return $q->where('organization_id', $organization_id);
-                })->get();
-                foreach ($mentorshipRequests as $key) {
-                    $data[] = [
-                        'id' => $key->id,
-                        'title' => __('admin.mentorship session'),
-                        'start' => $key->ZoomDateOrg,
-                        'end' => $key->EndZoomDateOrg,
-                        'calendarId' => 'M',
-                        'color' => '#ff5b5c',
-                        'allDay' => false,
-                        'textColor' => '#ffffff'
-                    ];
-                }
-                $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    return $q->where('organization_id', $organization_id);
-                })->get();
-                foreach ($cycles as $key) {
-                    $data[] = [
-                        'id' => $key->id,
-                        'title' => $key->title,
-                        'start' => $key->start,
-                        'end' => $key->end,
-                        'calendarId' => 'C',
-                        'color' => '#009faa',
-                        'allDay' => true,
-                        'textColor' => '#ffffff'
-                    ];
-                }
-                $sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id) {
-                    $q->where('stype', 4)->when(!is_null($organization_id), function ($q) use ($organization_id) {
-                        return $q->whereHas('cycle', function ($query) use ($organization_id) {
-                            $query->where('organization_id', $organization_id);
-                        });
-                    });
-                })->get();
-                foreach ($sessions as $key) {
-                    $data[] = [
-                        'id' => $key->id,
-                        'title' => $key->title,
-                        'start' => $key->start_org,
-                        'end' => $key->end_org,
-                        'calendarId' => 'T',
-                        'color' => '#fdac41',
-                        'allDay' => false,
-                        'textColor' => '#ffffff'
-                    ];
-                }
+               $data = $this->AdminCelander($organization_id);
             }elseif ($user->hasanyRole('Mentor')){
-                $mentorshipRequests = auth()->user()->mentorSessions()->get();
-                foreach ($mentorshipRequests as $key) {
-                    $data[] = [
-                        'id' => $key->id,
-                        'title' => __('admin.mentorship session'),
-                        'start' => $key->ZoomDateOrg,
-                        'end' => $key->EndZoomDateOrg,
-                        'calendarId' => 'M',
-                        'color' => '#ff5b5c',
-                        'allDay' => false,
-                        'textColor' => '#ffffff'
-                    ];
-                }
-                $cycles = auth()->user()->mentorCycles()->get();
-                foreach ($cycles as $key) {
-                    $data[] = [
-                        'id' => $key->id,
-                        'title' => $key->title,
-                        'start' => $key->start,
-                        'end' => $key->end,
-                        'calendarId' => 'C',
-                        'color' => '#009faa',
-                        'allDay' => true,
-                        'textColor' => '#ffffff'
-                    ];
-                }
+              $data = $this->MentorCelander();
             }
 
             return response()->json($data);
@@ -141,5 +68,88 @@ class CalenderController extends Controller
         }
 
 
+    }
+
+    protected function AdminCelander($organization_id){
+        $mentorshipRequests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->where('organization_id', $organization_id);
+        })->get();
+        foreach ($mentorshipRequests as $key) {
+            $data[] = [
+                'id' => $key->id,
+                'title' => __('admin.mentorship session'),
+                'start' => $key->ZoomDateOrg,
+                'end' => $key->EndZoomDateOrg,
+                'calendarId' => 'M',
+                'color' => '#ff5b5c',
+                'allDay' => false,
+                'textColor' => '#ffffff'
+            ];
+        }
+        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->where('organization_id', $organization_id);
+        })->get();
+        foreach ($cycles as $key) {
+            $data[] = [
+                'id' => $key->id,
+                'title' => $key->title,
+                'start' => $key->start,
+                'end' => $key->end,
+                'calendarId' => 'C',
+                'color' => '#009faa',
+                'allDay' => true,
+                'textColor' => '#ffffff'
+            ];
+        }
+        $sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id) {
+            $q->where('stype', 4)->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
+                });
+            });
+        })->get();
+        foreach ($sessions as $key) {
+            $data[] = [
+                'id' => $key->id,
+                'title' => $key->title,
+                'start' => $key->start_org,
+                'end' => $key->end_org,
+                'calendarId' => 'T',
+                'color' => '#fdac41',
+                'allDay' => false,
+                'textColor' => '#ffffff'
+            ];
+        }
+        return $data;
+    }
+
+    protected function MentorCelander(){
+        $mentorshipRequests = auth()->user()->mentorSessions()->get();
+        foreach ($mentorshipRequests as $key) {
+            $data[] = [
+                'id' => $key->id,
+                'title' => __('admin.mentorship session'),
+                'start' => $key->ZoomDateOrg,
+                'end' => $key->EndZoomDateOrg,
+                'calendarId' => 'M',
+                'color' => '#ff5b5c',
+                'allDay' => false,
+                'textColor' => '#ffffff'
+            ];
+        }
+        $cycles = auth()->user()->mentorCycles()->get();
+        foreach ($cycles as $key) {
+            $data[] = [
+                'id' => $key->id,
+                'title' => $key->title,
+                'start' => $key->start,
+                'end' => $key->end,
+                'calendarId' => 'C',
+                'color' => '#009faa',
+                'allDay' => true,
+                'textColor' => '#ffffff'
+            ];
+        }
+        return $data;
     }
 }
