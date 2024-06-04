@@ -31,6 +31,9 @@ class Step extends Model
     public function stepFiltrationJudges(){
         return $this->belongsToMany(User::class,Screening::class,'step_id','user_id');
     }
+    public function companies(){
+        return $this->hasMany(Company::class,'step');
+    }
     
 
 }

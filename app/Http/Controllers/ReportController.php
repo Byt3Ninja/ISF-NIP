@@ -45,7 +45,9 @@ class ReportController extends Controller
                 $data = $this->cyclesReport($organization_id,$request->id);
                 $view = '_cyclesReport';
                 break;
-            case '':
+            case 'companies':
+                $data = $this->companiesReport($organization_id,$request->id);
+                $view = '_companyReport';
                 break;
 
         }
@@ -231,6 +233,30 @@ class ReportController extends Controller
         $data['screening_sessions_count']=$screenings;
         $data['final_screening_count']=$final_screenings;
 
+        return $data;
+    }
+
+    protected function companiesReport($organization_id,$company_id){
+        $data['company']= Company::find($company_id);
+        $mentorRequests =  MentorshipRequest::where('user_id',$company_id);
+        $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id,$company_id){
+            $q->where('stype',4)->whereHas('companies',function ($q)use ($company_id){
+             $q->where('companies.id',$company_id);
+            });
+        });
+
+        $data['training_sessions_count'] = $training_sessions->count();
+        $data['training_sessions_period'] = $training_sessions->sum('duration')/60;
+        $data['mentorRequests_count']  = $mentorRequests->count();
+        $data['mentorships_period']= $mentorRequests->sum('period')/60;
+        if ($mentorRequests->count()){
+
+            $data['mentorship_attendance_rate']= ($mentorRequests->sum('done')/$mentorRequests->count())*100;
+        }else{
+            $data['mentorship_attendance_rate']= 0;
+        }
+        $data['mentorship_sessions']=$mentorRequests->get();
+        $data['training_sessions']=$training_sessions->get();
         return $data;
     }
 }
