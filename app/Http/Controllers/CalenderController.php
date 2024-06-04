@@ -73,6 +73,33 @@ class CalenderController extends Controller
                         'textColor' => '#ffffff'
                     ];
                 }
+            }elseif ($user->hasanyRole('Mentor')){
+                $mentorshipRequests = auth()->user()->mentorSessions()->get();
+                foreach ($mentorshipRequests as $key) {
+                    $data[] = [
+                        'id' => $key->id,
+                        'title' => __('admin.mentorship session'),
+                        'start' => $key->ZoomDateOrg,
+                        'end' => $key->EndZoomDateOrg,
+                        'calendarId' => 'M',
+                        'color' => '#ff5b5c',
+                        'allDay' => false,
+                        'textColor' => '#ffffff'
+                    ];
+                }
+                $cycles = auth()->user()->mentorCycles()->get();
+                foreach ($cycles as $key) {
+                    $data[] = [
+                        'id' => $key->id,
+                        'title' => $key->title,
+                        'start' => $key->start,
+                        'end' => $key->end,
+                        'calendarId' => 'C',
+                        'color' => '#009faa',
+                        'allDay' => true,
+                        'textColor' => '#ffffff'
+                    ];
+                }
             }
 
             return response()->json($data);
