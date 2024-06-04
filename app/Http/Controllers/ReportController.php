@@ -238,7 +238,7 @@ class ReportController extends Controller
 
     protected function companiesReport($organization_id,$company_id){
         $data['company']= Company::find($company_id);
-        $mentorRequests =  MentorshipRequest::where('user_id',$company_id);
+        $mentorRequests =  MentorshipRequest::where('user_id',$data['company']->user->id);
         $training_sessions = TrainingSession::whereHas('step',function ($q)use ($organization_id,$company_id){
             $q->where('stype',4)->whereHas('companies',function ($q)use ($company_id){
              $q->where('companies.id',$company_id);

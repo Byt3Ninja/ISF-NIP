@@ -125,7 +125,7 @@
                                     <th>{{__('cycles.Rate/Comment')}}</th>
                                     <th>{{__('cycles.Date/Time')}}</th>
                                     <th>{{__('cycles.Approved')}}</th>
-                                    <th>{{__('cycles.Done')}}</th>
+                                    <th>{{__('cycles.Attendance')}}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
