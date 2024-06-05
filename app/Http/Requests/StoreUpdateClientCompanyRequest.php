@@ -28,7 +28,7 @@ class StoreUpdateClientCompanyRequest extends FormRequest
 
         $companyId = Auth::user()->company_id;
         //make sure that, the ID is number
-        !is_numeric ($companyId)? abort('401'): '';
+//        !is_numeric ($companyId)? abort('401'): '';
         return [
             'state_id' => ['required', 'numeric'],
             'city_id' => ['required', 'numeric'],
