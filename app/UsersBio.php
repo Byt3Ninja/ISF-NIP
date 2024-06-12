@@ -13,7 +13,7 @@ class UsersBio extends Model
     public function getMentorshipApproachesAttribute()
     {
 
-        return $this->mentorship_approach=="null"?[]:json_decode($this->mentorship_approach);
+        return $this->mentorship_approach=="null"|| is_null($this->mentorship_approach)?[]:json_decode($this->mentorship_approach);
     }
 
 }
