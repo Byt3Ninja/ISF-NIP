@@ -28,6 +28,7 @@
 //    return view('admin.reports.company');
 //});
 
+
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');

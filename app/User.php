@@ -113,6 +113,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function mentorCycles(){
         return $this->belongsToMany(Cycle::class, 'cycles_mentors', 'user_id', 'cycle_id');
     }
+    public function mentorExpertises(){
+        return $this->belongsToMany(Expertise::class, 'mentor_expertise', 'mentor_id', 'expertise_id');
+    }
 
     // ===============>  Organization Manager Relations < =========================
     public function organization(){

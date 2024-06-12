@@ -273,7 +273,7 @@ return [
 	'Contact us' => 'رسائل اتصل بنا',
 	'Mentorship requests' => 'طلبات الإرشاد',
 	'Services Requests' => 'طلبات الخدمات',
-	'addbio' => 'أضف مختصر لسيرتك الذاتية/ تخصصك/ لينكيدإن',
+	'addbio' => 'أضف مختصر لسيرتك الذاتية/ خبراتك/ لينكيدإن',
 	'arbio' => 'مختصر السيرة باللغة العربية',
 	'writebioar' => 'أكتب مختصر لسيرتك الذاتية باللغة العربية',
 	'enbio' => 'مختصر السيرة باللغة الإنجليزية',
@@ -441,5 +441,15 @@ return [
     'SelectOrSearchCompany'=>'يمكن البحث باسم الشركة',
     'SelectCycle'=>'اختار البرنامج',
     'SelectOrSearchCycle'=>'يمكن البحث باسم البرنامج',
-    'Subscribe Startups in Cycle'=>'عدد الشركات المشاركة بالبرنامج'
+    'Subscribe Startups in Cycle'=>'عدد الشركات المشاركة بالبرنامج',
+    'SelectExpertises'=>'حدد مناطق التخصص',
+    'SelectMultiExpertises'=>'يمكن اختيار اكثر من تخصص',
+    'Entrepreneurial Experience'=>'هل لديك تجربة في ريادة الاعمال ؟',
+    'Entrepreneurial Experience Brief'=>'مختصر تجربة ريادة الاعمال',
+    'Profile Privacy'=>'خصوصية الملف الشخصي',
+    'phone calls'=>'مكالمات هاتفية',
+    'video calls'=>'مكالمات فيديو',
+    'in-person meetings'=>'مقابلات شخصية',
+    'mentorship approach'=>'طرق الارشاد',
+    'Entrepreneurial Experience desc'=>'اضف تجربتك من المشاريع و التحديات و الدروس'
     ];

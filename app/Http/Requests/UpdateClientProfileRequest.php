@@ -25,14 +25,14 @@ class UpdateClientProfileRequest extends FormRequest
     public function rules()
     {
        $id = Auth::user()->id;
-        //make sure that, the ID is number
-       !is_numeric ($id)? abort('401'): '';
+
         return [
             'first_name_en' => ['required', 'string', 'max:255'],
             'last_name_en' => ['required', 'string', 'max:255'],
             'phone' => ['required'],
             'email' => 'email|required|unique:users,email,'.$id ,
             'HaveCompany'=>['nullable','max:1'],
+
         ];
     }
 }

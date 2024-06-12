@@ -274,7 +274,7 @@ return [
 	'Contact us' => 'Contact us',
 	'Mentorship requests' => 'Mentorship requests',
 	'Services Requests' => 'Services Requests',
-	'addbio' => 'Adding your short BIO/Spec/linkedin',
+	'addbio' => 'Adding your short BIO/Expertise/Linkedin',
 	'arbio' => 'Bio in Arabic',
 	'writebioar' => 'Write a short bio in Arabic',
 	'enbio' => 'Bio in English',
@@ -441,5 +441,15 @@ return [
     'SelectOrSearchCompany'=>'You can search by company name',
     'SelectCycle'=>'Select The Cycle',
     'SelectOrSearchCycle'=>'You can search by cycle name',
-    'Subscribe Startups in Cycle'=>'Subscribe Startups in Cycle'
+    'Subscribe Startups in Cycle'=>'Subscribe Startups in Cycle',
+    'SelectExpertises'=>'Select your expertises',
+    'SelectMultiExpertises'=>'you can select more than one expertise',
+    'Entrepreneurial Experience'=>'Do you have Entrepreneurial Experience ?',
+    'Entrepreneurial Experience Brief'=>'Entrepreneurial Experience Brief',
+    'Profile Privacy'=>'Profile Privacy',
+    'phone calls'=>'Phone Calls',
+    'video calls'=>'Video Calls',
+    'in-person meetings'=>'In-Person Meetings',
+    'mentorship approach'=>'Mentorship Approach',
+    'Entrepreneurial Experience desc'=>'Add your experience from ventures, challenges, and lessons'
 ];
