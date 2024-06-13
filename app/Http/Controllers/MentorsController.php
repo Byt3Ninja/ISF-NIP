@@ -52,6 +52,7 @@ class MentorsController extends Controller
         $cycles= Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
             return $q->where('organization_id',$organization_id);
         })->get();
+
         return view('admin.settings.mentorship.assign', compact( 'mentors','id','clist','cycles'));
     }
     public function assign($id ,Request $request){
@@ -89,7 +90,7 @@ class MentorsController extends Controller
     }
     public function add(Request $request)
     {
-        $this->preProcessingCheck('edit_cycles');
+//        $this->preProcessingCheck('edit_cycles');
 
         if ($request->userid) {
             $dates = explode(',',$request->date);

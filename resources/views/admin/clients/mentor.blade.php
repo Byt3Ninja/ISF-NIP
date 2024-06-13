@@ -23,10 +23,16 @@
           $myid = Auth::id();
           $mysteps = App\Screening::where('user_id',Auth::id())->get();
           $today = date("Y-m-d");
-          $csteps = App\Step::whereRaw( '"'.$today. '" BETWEEN `from` AND `to`')->whereIn('id',$mysteps->pluck('step_id'))->get();
-          $fcompanies = App\Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
-  $mysessions = \App\MentorshipRequest::where('mentor_id',Auth::id())->where('zoom_date','>=',date("Y-m-d 00:00:00"))->where('approved','Yes')->get();
+   $mysessions = auth()->user()->mentorSessions()->where('zoom_date','>=',date("Y-m-d 00:00:00"))->where('approved','Yes')->get();
   $mycycles = \App\CyclesMentors::where('user_id',$myid)->get();
+   if(auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->count()){
+        $attends_rate = (integer)(auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->sum('done')/auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->count()*100). '%';
+       }else{
+            $attends_rate = '0%';
+       }
+
+
+
 @endphp
 <!-- BEGIN: Content-->
 <div class="app-content content">
@@ -108,6 +114,33 @@
                                     </div>
                                     <div class="text-muted line-ellipsis">{{__('dashboard.Cycles')}}</div>
                                     <h3 class="mb-0">{{count($mycycles)}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-light-info mx-auto mb-50">
+                                        <i class="bx bx-server font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('admin.Company Attendance Rate')}}</div>
+                                    <h3 class="mb-0">{{$attends_rate}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
+                                        <i class="bx bx-star font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('cycles.Rate')}}</div>
+                                    <small>{!! str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',auth()->user()->mrating()) !!}</small>
                                 </div>
                             </div>
                         </div>
@@ -309,18 +342,18 @@
                                                     </a>
                                                     <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                         <div class="media align-items-center">
-                                                            {{$session->user->company->{'name_'.$l} }}
+                                                            {{$session->user->company->name }}
                                                         </div>
                                                     </a>
                                                 </td>
                                                 <td>
                                                     <div class="media align-items-center">
                                                         <a class="media-left mr-50">
-                                                            <img src="/191014/{{$session->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                            <img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                         </a>
                                                             <div class="media-body">
-                                                                <h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
-                                                                <span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
+                                                                <h6 class="media-heading mb-0">{{$session->user->name  }}</h6>
+                                                                <span class="font-small-2">{{$session->user->title }}</span>
                                                             </div>
                                                     </div>
                                                 </td>

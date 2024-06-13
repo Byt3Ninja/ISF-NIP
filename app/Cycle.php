@@ -32,4 +32,7 @@ class Cycle extends Model
     public function companies(){
         return $this->hasMany(Company::class,'cycle');
     }
+    public function mentors(){
+        return $this->belongsToMany(User::class, 'cycles_mentors', 'cycle_id', 'user_id');
+    }
 }

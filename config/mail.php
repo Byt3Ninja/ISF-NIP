@@ -72,6 +72,7 @@ return [
     */
 
     'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+    'verify_peer' => false,
 
     /*
     |--------------------------------------------------------------------------

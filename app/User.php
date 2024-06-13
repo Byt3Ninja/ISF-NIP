@@ -13,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use Auditable;
+//    use Auditable;
     use Notifiable;
     use HasRoles;
     use SoftDeletes;
@@ -34,7 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password', 'remember_token',
     ];
-    //// New
+
 	public function sendPasswordResetNotification($token)
 	{
     	$this->notify(new ResetPasswordNotification($token));
@@ -43,7 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
     $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
 	}
-	/// By Ibrahim Elsayed
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -71,10 +71,8 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     // ===============> Relations <===================
-    public function company()
-    {
-        return $this->belongsTo(Company::class);
-    }
+
+    // ===============> General Relations <==============
     public function country()
     {
         return $this->belongsTo(Country::class,'country_id');
@@ -90,17 +88,43 @@ class User extends Authenticatable implements MustVerifyEmail
     public function calendar() {
         return $this->hasMany(Calendar::class);
     }
-    public function mentorship() {
-        return $this->hasMany(MentorshipRequest::class);
+    public function myServiceRequests(){
+        return $this->hasMany(ServicesRequests::class,'user_id');
     }
+    // ============> company (startup) Relations <====================
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+    public function mentorship() {
+        return $this->hasMany(MentorshipRequest::class,'user_id');
+    }
+
+    // =================> mentor Relations <=============================
     public function bio() {
         return $this->hasOne(UsersBio::class);
     }
+    public function mentorSessions() {
+        return $this->hasMany(MentorshipRequest::class,'mentor_id');
+    }
     public function mrating(){
         return $this->hasMany(MentorshipRequest::class,'mentor_id')->avg('rating');
-//        return (MentorshipRequest::where('mentor_id',$this->id)->avg('rating'));
     }
+    public function mentorCycles(){
+        return $this->belongsToMany(Cycle::class, 'cycles_mentors', 'user_id', 'cycle_id');
+    }
+    public function mentorExpertises(){
+        return $this->belongsToMany(Expertise::class, 'mentor_expertise', 'mentor_id', 'expertise_id');
+    }
+
+    // ===============>  Organization Manager Relations < =========================
     public function organization(){
         return $this->hasOne(Organization::class,'user_id');
     }
+
+    // ============> Judger Relations <======================
+    public function screeningRequests(){
+        return $this->hasMany(Screening::class,'user_id');
+    }
+
 }

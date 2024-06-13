@@ -23,10 +23,10 @@
                                         </dt>
                                         <dd class="col-sm-9">
                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
-                                                <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                <img src="{{$company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                 <div class="media-body">
-                                                    <h6 class="media-heading mb-0">{{$company->{'name_'.$l} }} </h6>
-                                                    <span class="font-small-2">{{$company->{'title_'.$l} }}</span>
+                                                    <h6 class="media-heading mb-0">{{$company->name }} </h6>
+                                                    <span class="font-small-2">{{$company->title }}</span>
                                                 </div>
                                             </a>
                                         </dd>
@@ -37,11 +37,11 @@
                                         </dt>
                                         <dd class="col-sm-9">
                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
-                                                <img src="/191014/{{$company->user->img_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                <img src="{{$company->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 
                                                 <div class="media-body">
-                                                    <h6 class="media-heading mb-0">{{$company->user->{'first_name_'.$l} }} {{$company->user->{'last_name_'.$l} }}</h6>
-                                                    <span class="font-small-2">{{$company->user->{'title_'.$l} }}</span>
+                                                    <h6 class="media-heading mb-0">{{$company->user->name }} </h6>
+                                                    <span class="font-small-2">{{$company->user->title}}</span>
                                                 </div></a>
                                         </dd>
                                     </dl>

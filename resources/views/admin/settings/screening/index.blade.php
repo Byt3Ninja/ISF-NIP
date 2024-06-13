@@ -142,14 +142,17 @@
                             <input type="hidden" name="fid" value="{{$form->id??''}}">
                             <div class="form-group">
                                @if($cstep->data == 'grouptogroup')
+
                                @foreach(json_decode($cstep->list)??[] as $key=>$clist)
                                    <div class="form-row">
                                        <p style="margin:5px;">{{__('cycles.panel list')." ".$key }}</p>
                                        <div class="row col-md-12">
                                        <div class="col-md-11">
+
+
                                            <select name="judges[{{$key}}][]" class="select2 form-control panel{{$key}}" multiple="multiple">
                                                @foreach($judges as $judge)
-                                                   <option value="{{$judge->id}}" {{in_array($judge->id,$clist??[])?'selected':''}}>{{$judge->{'first_name_'.$l} }}  {{$judge->{'last_name_'.$l} }} ({{$judge->email}})</option>
+                                                   <option value="{{$judge->id}}" {{in_array($judge->id,$clist??[])?'selected':''}}>{{$judge->name }} ({{$judge->email}})</option>
                                                @endforeach
                                            </select>
                                        </div>

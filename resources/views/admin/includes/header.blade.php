@@ -20,10 +20,10 @@ isset(Auth::user()->company()->first()->id)?$companyid=Auth::user()->company()->
                     </div>
                     <ul class="nav navbar-nav float-right">
                         <li class="nav-item d-lg-block"><a class="nav-link nav-link-search"
-                        @if(Request::is('admin/documentation/view*'))
+                        @if(Request::is('admin/documentation/*'))
                         href="/dashboard" ><i class="ficon bx bx-arrow-back">
                         @else
-                        href="/dashboard/documentation/view" ><i class="ficon bx bx-help-circle">
+                        href="/dashboard/documentation" ><i class="ficon bx bx-help-circle">
                         @endif
                                 </i></a></li>
                         <li class="nav-item d-lg-block"><a class="nav-link nav-link-search" href="/dashboard/dark?l={{session('layout')??'dark'}}" ><i class="ficon bx {{session('icon')??'bx-moon'}}"></i></a></li>
@@ -89,8 +89,8 @@ isset(Auth::user()->company()->first()->id)?$companyid=Auth::user()->company()->
                             </ul>
                         </li>
                         <li class="dropdown dropdown-user nav-item"><a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
-                                <div class="user-nav d-sm-flex d-none"><span style="font-weight: 500;" class="user-name">{{Auth::user()->first_name_ar?Auth::user()->{'first_name_'.$l}.' '.Auth::user()->{'last_name_'.$l}:Auth::user()->first_name_en.' '.Auth::user()->last_name_en}}</span>
-                                <span class="user-status text-muted">{{ Auth::user()->{'title_'.$l} }}</span></div><span>
+                                <div class="user-nav d-sm-flex d-none"><span style="font-weight: 500;" class="user-name">{{Auth::user()->name}}</span>
+                                <span class="user-status text-muted">{{ Auth::user()->title }}</span></div><span>
                                  <img class="round" src="{{auth()->user()->image_url}}" alt="avatar" height="40" width="40">
                                 </span>
                             </a>

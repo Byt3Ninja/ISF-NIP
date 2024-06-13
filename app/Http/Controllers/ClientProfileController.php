@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Country;
+use App\Expertise;
 use App\Http\Requests\UpdateClientProfileRequest;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
 use App\UsersBio;
@@ -35,7 +36,8 @@ class ClientProfileController extends Controller
         try{
             $client = Auth::user();
             $countries = Country::all();
-            return view('admin/clients/profile', compact('client','countries'));
+            $expertises = Expertise::where('parent_id',null)->get();
+            return view('admin/clients/profile', compact('client','countries','expertises'));
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -53,10 +55,24 @@ class ClientProfileController extends Controller
     {
         try{
             $user = Auth::user();
-            //add bio
-            if ($request->bio_ar || $request->bio_en){
-                UsersBio::updateOrInsert(['user_id'=>$user->id],['bio_ar'=>$request->bio_ar, 'bio_en'=>$request->bio_en,'specialization_ar'=>$request->specialization_ar,'specialization_en'=>$request->specialization_en,'linkedIn'=>$request->linkedin]);
+
+            // Mentor Bio section
+            if ($request->mentor_section){
+                $data =[
+                    'bio_ar'=>$request->bio_ar,
+                    'bio_en'=>$request->bio_en,
+                    'linkedIn'=>$request->linkedin,
+                    'entrepreneurial_experience'=>$request->entrepreneurial_experience,
+                    'profile_privacy'=>$request->profile_privacy,
+                    'mentorship_approach'=>json_encode($request->mentorship_approach),
+                ];
+                if ($request->entrepreneurial_experience){
+                    $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief;
+                }
+                $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
+                $user->mentorExpertises()->sync($request->expertises);
             }
+
             if ($request->hasFile('img_url')) {
                 //store the image
                 $img_url = $request->file('img_url');

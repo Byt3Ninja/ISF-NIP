@@ -23,7 +23,7 @@ return new class extends Migration
 
 
             $table->unsignedBigInteger('course_id');
-            $table->foreign('course_id')->references('id')->on('training_sessions')->onDelete('cascade');
+            $table->foreign('course_id')->references('id')->on('trainings')->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();

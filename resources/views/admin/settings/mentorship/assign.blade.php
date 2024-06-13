@@ -25,7 +25,7 @@
                     </div>
                 </div>
             </div>
-<div class="content-body">
+        <div class="content-body">
                 <section id="multiple-column-form">
 				    @if(session()->has('message'))
 				    <div class="alert alert-success alert-dismissible mb-2" role="alert">
@@ -136,8 +136,8 @@
                                                             <img src="{{$mentor->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                         </a>
                                                         <div class="media-body">
-                                                            <h5 class="media-heading">{{$mentor->{'first_name_'.$l} }} {{$mentor->{'last_name_'.$l} }}</h5><br>
-                                                            <span class="font-small-1">{{$mentor->{'title_'.$l} }}</span>
+                                                            <h5 class="media-heading">{{$mentor->name }} </h5><br>
+                                                            <span class="font-small-1">{{$mentor->title }}</span>
                                                         </div>
                                                     </div>
                                                     </label>
@@ -203,7 +203,7 @@
         <script type="text/javascript">
             $(document).ready(function() {
                 $('.table').DataTable({
-                    "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
+                    "responsive": true, "searching": true, "lengthChange": false, "paging": false, "bInfo": false,
                     "columnDefs": [
                         {"orderable": false, "targets":  [3]},
                     ],

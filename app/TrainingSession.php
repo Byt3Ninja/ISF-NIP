@@ -31,6 +31,10 @@ class TrainingSession extends Model
         return date("Y-m-d H:i", strtotime('+'.$this->attributes['duration'].' minutes', strtotime($this->attributes['datetime'])));
     }
     public function step() {
-        return $this->belongsTo(Step::class);
+        return $this->belongsTo(Step::class,'step_id');
+    }
+
+    public function course(){
+        return $this->belongsTo(Training::class,'location');
     }
 }
