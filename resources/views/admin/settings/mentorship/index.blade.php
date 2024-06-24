@@ -320,7 +320,6 @@
                 date.setDate(date.getDate());
                 return date;
             })(),
-            separator:" "
         });
 
         function add(id, organization_id, cycle_id) {
