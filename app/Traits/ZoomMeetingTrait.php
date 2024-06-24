@@ -92,7 +92,7 @@ trait ZoomMeetingTrait
                 'settings'   => [
                     'host_video'        => ($data['host_video'] == "1") ? true : false,
                     'participant_video' => ($data['participant_video'] == "1") ? true : false,
-                    'waiting_room'      => true,
+                    'waiting_room'      => false,
                 ],
             ]),
         ];
@@ -122,7 +122,7 @@ trait ZoomMeetingTrait
                 'settings'   => [
                     'host_video'        => ($data['host_video'] == "1") ? true : false,
                     'participant_video' => ($data['participant_video'] == "1") ? true : false,
-                    'waiting_room'      => true,
+                    'waiting_room'      => false,
                 ],
             ]),
         ];
