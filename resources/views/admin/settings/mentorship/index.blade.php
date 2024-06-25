@@ -1,11 +1,13 @@
 @extends('layouts.admin')
 @section('style')
+
     <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
     {{--    <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">--}}
 {{--    <link rel="stylesheet" href="/Datepicker/dist/css/datepicker.material.css">--}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
-
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
+{{--    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">--}}
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         #mentorstable tr td {
             padding: 0.15rem 2rem;
@@ -248,8 +250,20 @@
                         <div class="form-group" id="showdates">
                             <label>{{__('cycles.Date/Time')}}:</label>
                             <p id="selectSubtitle">{{__('admin.SelectDateTime')}}.</p>
-                            <input type="hidden" class="date form-control" name="date" id="constrained"
-                                   data-inline="true" data-multiple="true" data-open-on="today" data-time="true">
+                            <div class="flatpickr input-group">
+                                <a class="input-button" title="toggle" style="margin-left: 3px;margin-top: 3px;" data-toggle>
+                                    <i class="fa fa-calendar fa-2x primary    "></i>
+                                </a>
+
+                                <input type="text" name="date" placeholder="{{ __('admin.selectDate') }}" class="form-control mr-1"  data-input> <!-- input is mandatory -->
+
+
+                                <a class="input-button" title="clear" style="margin-top: 3px" data-clear>
+                                    <i class="fa fa-trash-o fa-2x danger" ></i>
+                                </a>
+                            </div>
+{{--                            <input type="hidden" class="date form-control" name="date" id="constrained"--}}
+{{--                                   data-inline="true" data-multiple="true" data-open-on="today" data-time="true">--}}
 
                             {{--                        <input class='date width-200 form-control' type="text" id="date" name="date" value="" required>--}}
                         </div>
@@ -330,13 +344,14 @@
         //         return date;
         //     })(),
         // });
-        $(".date").flatpickr({
+        $(".flatpickr").flatpickr({
             inline: false,
             enableTime: true,
             dateFormat: "d-m-Y h:i a",
             minDate: "today",
             mode: "multiple",
             locale: "ar",
+            wrap: true
         });
 
         function add(id, organization_id, cycle_id) {
