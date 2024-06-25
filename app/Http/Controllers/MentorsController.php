@@ -64,7 +64,7 @@ class MentorsController extends Controller
                 CyclesMentors::insert(['cycle_id'=>$request->id,'user_id'=>$user]);
             }}
         }
-        return back();
+        return back()->with(['message' => 'Request successfully added','class'=>'success']);
     }
     public function addwait(Request $request)
     {
@@ -95,12 +95,7 @@ class MentorsController extends Controller
         if ($request->userid) {
             $dates = explode(',',$request->date);
             foreach ($dates as $key){
-                $date = str_replace("@"," " ,$key);
-                $checkTime = explode(' ',$date);
-                if ($checkTime[1]=='00:00'){
-                    $checkTime[1]="24:00";
-                }
-                $date = implode(" ",$checkTime);
+                $date = ltrim($key);
                 $topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
                 $data = ['topic'=>$topic, "start_time"=>$date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
                 $zoom = $this->create($data);

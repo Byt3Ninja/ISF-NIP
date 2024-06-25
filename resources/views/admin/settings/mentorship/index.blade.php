@@ -1,8 +1,13 @@
 @extends('layouts.admin')
 @section('style')
+
     <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
     {{--    <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">--}}
-    <link rel="stylesheet" href="/Datepicker/dist/css/datepicker.material.css">
+{{--    <link rel="stylesheet" href="/Datepicker/dist/css/datepicker.material.css">--}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
+{{--    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">--}}
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         #mentorstable tr td {
             padding: 0.15rem 2rem;
@@ -244,8 +249,21 @@
                         <input type="hidden" name="cycle_id" id="addCycleID">
                         <div class="form-group" id="showdates">
                             <label>{{__('cycles.Date/Time')}}:</label>
-                            <input type="hidden" class="date form-control" name="date" id="constrained"
-                                   data-inline="true" data-multiple="true" data-open-on="today" data-time="true">
+                            <p id="selectSubtitle">{{__('admin.SelectDateTime')}}.</p>
+                            <div class="flatpickr input-group">
+                                <a class="input-button" title="toggle" style="margin-left: 3px;margin-top: 3px;" data-toggle>
+                                    <i class="fa fa-calendar fa-2x primary    "></i>
+                                </a>
+
+                                <input type="text" name="date" placeholder="{{ __('admin.selectDate') }}" class="form-control mr-1"  data-input> <!-- input is mandatory -->
+
+
+                                <a class="input-button" title="clear" style="margin-top: 3px" data-clear>
+                                    <i class="fa fa-trash-o fa-2x danger" ></i>
+                                </a>
+                            </div>
+{{--                            <input type="hidden" class="date form-control" name="date" id="constrained"--}}
+{{--                                   data-inline="true" data-multiple="true" data-open-on="today" data-time="true">--}}
 
                             {{--                        <input class='date width-200 form-control' type="text" id="date" name="date" value="" required>--}}
                         </div>
@@ -281,7 +299,12 @@
     <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
     <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
     {{--    <script src="/js/jquery.datetimepicker.full.min.js"></script>--}}
-    <script src="/Datepicker/dist/datepicker.js"></script>
+{{--    <script src="/Datepicker/dist/datepicker.js"></script>--}}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @if($l=='ar')
+        <script src="https://npmcdn.com/flatpickr/dist/l10n/ar.js"></script>
+    @endif
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -314,12 +337,21 @@
         //     multiple: true,
         //     format:'Y-m-d H:i'
         // });
-        var constrained = new Datepicker('.date', {
-            min: (function () {
-                var date = new Date();
-                date.setDate(date.getDate());
-                return date;
-            })(),
+        // var constrained = new Datepicker('.date', {
+        //     min: (function () {
+        //         var date = new Date();
+        //         date.setDate(date.getDate());
+        //         return date;
+        //     })(),
+        // });
+        $(".flatpickr").flatpickr({
+            inline: false,
+            enableTime: true,
+            dateFormat: "d-m-Y h:i a",
+            minDate: "today",
+            mode: "multiple",
+            locale: "ar",
+            wrap: true
         });
 
         function add(id, organization_id, cycle_id) {
