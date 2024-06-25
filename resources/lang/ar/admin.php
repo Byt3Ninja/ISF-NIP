@@ -451,5 +451,6 @@ return [
     'video calls'=>'مكالمات فيديو',
     'in-person meetings'=>'مقابلات شخصية',
     'mentorship approach'=>'طرق الارشاد',
-    'Entrepreneurial Experience desc'=>'اضف تجربتك من المشاريع و التحديات و الدروس'
+    'Entrepreneurial Experience desc'=>'اضف تجربتك من المشاريع و التحديات و الدروس',
+    'SelectDateTime'=>'يمكن اختيار اكثر من تاريخ بتوقيت مختلف. و برجاء اختيار التوقيت للتاريخ المحدد قبل اختيار تاريخ اخر'
     ];

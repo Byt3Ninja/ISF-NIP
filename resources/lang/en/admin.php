@@ -451,5 +451,6 @@ return [
     'video calls'=>'Video Calls',
     'in-person meetings'=>'In-Person Meetings',
     'mentorship approach'=>'Mentorship Approach',
-    'Entrepreneurial Experience desc'=>'Add your experience from ventures, challenges, and lessons'
+    'Entrepreneurial Experience desc'=>'Add your experience from ventures, challenges, and lessons',
+    'SelectDateTime'=>'You can select more than one date with a different time. Please choose the time for the specified date before choosing another date.'
 ];

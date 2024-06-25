@@ -2,7 +2,10 @@
 @section('style')
     <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
     {{--    <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">--}}
-    <link rel="stylesheet" href="/Datepicker/dist/css/datepicker.material.css">
+{{--    <link rel="stylesheet" href="/Datepicker/dist/css/datepicker.material.css">--}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+
     <style>
         #mentorstable tr td {
             padding: 0.15rem 2rem;
@@ -244,6 +247,7 @@
                         <input type="hidden" name="cycle_id" id="addCycleID">
                         <div class="form-group" id="showdates">
                             <label>{{__('cycles.Date/Time')}}:</label>
+                            <p id="selectSubtitle">{{__('admin.SelectDateTime')}}.</p>
                             <input type="hidden" class="date form-control" name="date" id="constrained"
                                    data-inline="true" data-multiple="true" data-open-on="today" data-time="true">
 
@@ -281,7 +285,12 @@
     <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
     <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
     {{--    <script src="/js/jquery.datetimepicker.full.min.js"></script>--}}
-    <script src="/Datepicker/dist/datepicker.js"></script>
+{{--    <script src="/Datepicker/dist/datepicker.js"></script>--}}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @if($l=='ar')
+        <script src="https://npmcdn.com/flatpickr/dist/l10n/ar.js"></script>
+    @endif
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -314,12 +323,20 @@
         //     multiple: true,
         //     format:'Y-m-d H:i'
         // });
-        var constrained = new Datepicker('.date', {
-            min: (function () {
-                var date = new Date();
-                date.setDate(date.getDate());
-                return date;
-            })(),
+        // var constrained = new Datepicker('.date', {
+        //     min: (function () {
+        //         var date = new Date();
+        //         date.setDate(date.getDate());
+        //         return date;
+        //     })(),
+        // });
+        $(".date").flatpickr({
+            inline: false,
+            enableTime: true,
+            dateFormat: "d-m-Y h:i a",
+            minDate: "today",
+            mode: "multiple",
+            locale: "ar",
         });
 
         function add(id, organization_id, cycle_id) {
