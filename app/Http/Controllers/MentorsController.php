@@ -64,7 +64,7 @@ class MentorsController extends Controller
                 CyclesMentors::insert(['cycle_id'=>$request->id,'user_id'=>$user]);
             }}
         }
-        return back();
+        return back()->with(['message' => 'Request successfully added','class'=>'success']);
     }
     public function addwait(Request $request)
     {
