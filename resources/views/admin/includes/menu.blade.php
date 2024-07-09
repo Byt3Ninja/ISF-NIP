@@ -99,6 +99,14 @@
                     <span class="menu-title">{{__('admin.Services')}}</span></a>
             </li>
         @endif
+        @role('Mentor')
+        <li class="{{Request::is('dashboard/mentor/mentorshipSessions*')?'active':''}} nav-item">
+            <a href="{{ route('mentorshipSessions.index') }}">
+                <i class="menu-livicon" data-icon="briefcase"></i>
+                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>
+            </a>
+        </li>
+        @endrole
         @role('Registered')
         <li class="{{Request::is('dashboard/requests/mine','/dashboard/mentorship/mine')?'sidebar-group-active open':''}} nav-item ">
             <a href="#"><i class="menu-livicon" data-icon="two-pointers"></i>

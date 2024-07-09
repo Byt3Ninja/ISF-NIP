@@ -2,11 +2,9 @@
 
 /* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
 
-//Route::get('test',function (){
-//    return view('emails.emailVerify');
-//});
+
 // routes/web.php
-//Route::get('create-meeting', 'MeetingController@createMeeting');
+Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test',function (){
 //    function prime_or_not($no1)
 //    {
@@ -205,7 +203,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('cycles/save','CyclesController@saveForm');
     Route::get('cycles/my/{id}','CyclesController@my');
 
-    //Sceening
+    //Screening
     Route::get('screening','ScreeningController@index');
     Route::post('screening/update','ScreeningController@update');
     Route::post('screening/save','ScreeningController@save');
@@ -273,6 +271,15 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('final/results/{id?}','FinalscreeningController@results');
     Route::get('final/{step_id}/{company_id}','FinalscreeningController@view');
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
+
+    // ===============> Mentor Dashboard Routes <===============
+    Route::group(['prefix' => 'mentor'],function (){
+        Route::get('mentorshipSessions','Mentor\MentorshipController@index')->name('mentorshipSessions.index');
+        Route::get('meetingRedirect/{mentorship_request_id}','Mentor\MentorshipController@meetingRedirect')->name('meetingRedirect');
+        Route::resource('mentorshipTasks','Mentor\MentorshipTaskController');
+
+    });
+
 
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'],function (){

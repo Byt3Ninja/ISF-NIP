@@ -31,4 +31,9 @@ class MentorshipRequest extends Model
     public function mentor(){
         return $this->belongsTo(User::class, 'mentor_id','id');
     }
+    public function mentorshipTasks()
+    {
+        return $this->hasMany(MentorshipTask::class, 'mentorship_request_id', 'id');
+
+    }
 }

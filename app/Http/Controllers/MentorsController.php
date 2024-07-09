@@ -192,8 +192,8 @@ class MentorsController extends Controller
           $user = new User();
           $user->email = $rname->email;
           $user->id = $rname->id;
-          $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
-          $rfullname_usr = $rname_usr->first_name_en ." ". $rname_usr->last_name_en;
+          $rfullname = $rname->name;
+          $rfullname_usr = $rname_usr->name;
           $MSG = new TemplateEmail;
           $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname.",","Kindly note you have a new mentorship session with '".$rfullname_usr."', Session will start:".$request->date.
               ", Check your account to join the session ","/dashboard"];
@@ -235,8 +235,8 @@ class MentorsController extends Controller
                     $user = new User();
                     $user->email = $rname->email;
                     $user->id = $rname->id;
-                    $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
-                    $rfullname_usr = $rname_usr->first_name_en ." ". $rname_usr->last_name_en;
+                    $rfullname = $rname->name;
+                    $rfullname_usr = $rname_usr->name;
                     $MSG = new TemplateEmail;
                     $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname.",","Kindly note you have a new mentorship session with '".$rfullname_usr."', Session will start:".$request->date.
                         ", Check your account to join the session ","/dashboard"];
