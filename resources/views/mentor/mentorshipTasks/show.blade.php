@@ -39,11 +39,11 @@
                                                 </tr>
                                                 <tr>
                                                     <td>{{__('mentor.mentorshipTasks.description')}}:</td>
-                                                    <td class="text-center">{!! $task->description !!}</td>
+                                                    <td >{!! $task->description !!}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>{{__('mentor.mentorshipTasks.reply')}}:</td>
-                                                    <td class="text-center">{!! $task->reply??'----------------------------' !!}</td>
+                                                    <td >{!! $task->reply??'----------------------------' !!}</td>
                                                 </tr>
                                                 </tbody>
                                             </table>

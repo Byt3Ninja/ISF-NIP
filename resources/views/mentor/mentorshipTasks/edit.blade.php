@@ -72,7 +72,6 @@
                                             <input type="hidden" name="_method" value="PUT">
                                             <div class="form-body">
                                                 <div class="row">
-                                                    <input type="hidden" name="parent_id" value="{{ $task->id }}">
                                                     <div class="col-md-12 col-12">
                                                         <label for="title">{{__('mentor.mentorshipTasks.title')}}</label>
                                                         <div class="form-label-group">

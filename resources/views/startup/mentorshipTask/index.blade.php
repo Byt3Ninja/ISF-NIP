@@ -94,8 +94,8 @@
                                                         {{ $task->status =='pending'?__('No'):__('Yes') }}
                                                     </td>
                                                     <td class="text-center">
-                                                        <a href="{{ route('mentorshipTasks.edit',['mentorshipTask'=>$task->id]) }}" title="Edit" class="btn btn-icon rounded-circle btn-light-primary">
-                                                            <i class="bx bxs-edit-alt"></i></a>
+                                                        <a href="{{ route('startup.mentorshipTasks.show',['mentorshipTask'=>$task->id]) }}" title="Show" class="btn btn-icon rounded-circle btn-success">
+                                                            <i class="bx bxs-comment-add"></i></a>
                                                     </td>
                                                 </tr>
                                             @endforeach
