@@ -14,6 +14,11 @@ class MentorshipTaskController extends Controller
         $mentorshipTasks = $mentorship->mentorshipTasks;
         return view('startup.mentorshipTask.index',compact('mentorshipTasks','mentorship'));
     }
+    public function home(){
+        $mentorshipTasks = MentorshipTask::where('company_id',auth()->user()->company->id)->get();
+        return view('startup.mentorshipTask.home',compact('mentorshipTasks'));
+    }
+
     public function show($id){
         $task= MentorshipTask::findOrFail($id);
         return view('startup.mentorshipTask.show',compact('task'));

@@ -132,6 +132,12 @@
                 <i class="menu-livicon" data-icon="help"></i>
                 <span class="menu-title">{{__('admin.My courses')}}</span></a>
         </li>
+        <li class="{{Request::is('dashboard/startup/mentorshipTasks*')?'active':''}} nav-item">
+            <a href="{{ route('startup.mentorshipTasks.home') }}">
+                <i class="menu-livicon" data-icon="briefcase"></i>
+                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>
+            </a>
+        </li>
         @endrole
         <li class="{{Request::is('dashboard/myFiles')?'active':''}} nav-item"><a href="/dashboard/myFiles">
                 <i class="menu-livicon" data-icon="save"></i>

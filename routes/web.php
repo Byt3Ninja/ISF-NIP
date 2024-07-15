@@ -283,6 +283,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     // =====================> Startup Routes <===========
 
     Route::group(['prefix' => 'startup'],function (){
+        Route::get('mentorshipTasks','Startup\MentorshipTaskController@home')->name('startup.mentorshipTasks.home');
         Route::get('mentorshipTasks/{mentorship_id}','Startup\MentorshipTaskController@index')->name('startup.mentorshipTasks.index');
         Route::get('mentorshipTasks/show/{mentorshipTask}','Startup\MentorshipTaskController@show')->name('startup.mentorshipTasks.show');
         Route::post('mentorshipTasks/complete/{mentorshipTask}','Startup\MentorshipTaskController@complete')->name('startup.mentorshipTasks.complete');
@@ -312,7 +313,7 @@ Route::get('/callback/{provider}', 'SocialController@callback');
 Route::get('/auth/google', 'SocialController@redirectToGoogle');
 Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
 
-Route::get('/auth/microsoft/redirect',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
+Route::get('/auth/microsoft/redirect/{mentorship_id}',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
 Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('auth.microsoft.callback');
 
 if( request()->secure() ) { URL::forceScheme("https"); }
