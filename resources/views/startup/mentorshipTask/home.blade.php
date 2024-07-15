@@ -78,6 +78,7 @@
                                         <table class="table mb-0" id="userstable">
                                             <thead class="thead-dark">
                                             <tr>
+                                                <th class="text-center">{{__('mentor.mentorshipTasks.mentorship request')}}</th>
                                                 <th class="text-center">{{__('mentor.mentorshipTasks.title')}}</th>
                                                 <th class="text-center">{{__('cycles.Done')}}</th>
                                                 <th class="text-center">{{__('cycles.Actions')}}</th>
@@ -87,6 +88,9 @@
 
                                             @foreach($mentorshipTasks as $task)
                                                 <tr>
+                                                    <td class="text-center">
+                                                        {{ $task->mentorshipRequest->zoom_date }}
+                                                    </td>
                                                     <td class="text-center">
                                                         {{ $task->title??"-----" }}
                                                     </td>
