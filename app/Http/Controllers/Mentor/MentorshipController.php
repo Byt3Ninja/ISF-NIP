@@ -19,6 +19,7 @@ class MentorshipController extends Controller
        if ($mentorship_request->mentorshipTasks()->first()){
            $response['message']='Initial task has already been created before';
            $response['join_url']=$mentorship_request->join_url;
+           $response['mentorship_id']=$mentorship_request->id;
            return response()->json($response,200);
        }
 
@@ -29,6 +30,7 @@ class MentorshipController extends Controller
        ]);
         $response['message']='Initial task has been created successfully';
         $response['join_url']=$mentorship_request->join_url;
+        $response['mentorship_id']=$mentorship_request->id;
         return response()->json($response,200);
 
     }
