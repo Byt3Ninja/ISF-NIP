@@ -110,6 +110,7 @@ class MicrosoftController extends Controller
             ->setReturnType(Model\User::class)
             ->execute();
 
+
         return $user[0]->getId(); // Get the user ID
 
     }
