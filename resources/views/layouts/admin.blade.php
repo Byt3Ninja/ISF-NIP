@@ -26,21 +26,29 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="//js.pusher.com/3.1/pusher.min.js"></script>
     <script type="text/javascript">
+        $(document).ready(function (){
+
+
             var notificationsWrapper   = $('.dropdown-menu-media');
             var countWrapper = $('.dropdown-notification');
             var notificationsCountElem = notificationsWrapper.find('li[data-count]');
             var notificationsCount     = parseInt(notificationsCountElem.data('count'));
             var notifications          = notificationsWrapper.find('li.scrollable-container');
+            var audio = new Audio('{{ asset('/notification-sound.mp3') }}');
+
             // Enable pusher logging - don't include this in production
-            Pusher.logToConsole = false;
-            var pusher = new Pusher('bb165b6f72f8fd56314e', {
-                cluster: 'eu'
+            Pusher.logToConsole = true  ;
+            var pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
+                // cluster: 'eu'
+                encrypted: true
             });
             // Subscribe to the channel we specified in our Laravel Event
             var channel = pusher.subscribe('Web-Message');
             // Bind a function to a Event (the full Laravel class)
             channel.bind('App\\Events\\WebMessage', function(data) {
-                var existingNotifications = notificationzs.html();
+                var existingNotifications = notifications.html();
+                // play sound
+                audio.play();
                 if (data.type === 'mymsg') {
                     var mylink = 'dashboard/mymsg';
                     var mymessage = '{{__('admin.New Contact us message from')}}' + ' ' + data.username;
@@ -85,6 +93,8 @@
                 notificationsWrapper.show();
                 notificationsWrapper.css('display', '');
             });
+        });
+
     </script>
     <!-- End of Pusher -->
     @endhasanyrole

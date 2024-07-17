@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -32,6 +33,10 @@ class WebMessage implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return ['Web-Message'];
+        return new Channel('Web-Message');
+    }
+    public function broadcastWith()
+    {
+        return ['type'=>$this->type,'username'=>$this->username];
     }
 }

@@ -5,6 +5,10 @@
 
 // routes/web.php
 Route::get('create-meeting', 'MicrosoftController@createMeeting');
+Route::get('test', function () {
+    event(new App\Events\WebMessage('NewMent','sss'));
+    return "Event has been sent!";
+});
 //Route::get('test',function (){
 //    function prime_or_not($no1)
 //    {

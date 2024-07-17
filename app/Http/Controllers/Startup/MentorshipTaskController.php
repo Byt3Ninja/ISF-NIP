@@ -28,7 +28,7 @@ class MentorshipTaskController extends Controller
         try{
 
             $task= MentorshipTask::findOrFail($id);
-            $result=$task->update(['status'=>'completed','done_date'=>now()->format('Y-m-d'),'reply'=>$request->reply]);
+            $result=$task->update(['status'=>'completed',/*'done_date'=>now()->format('Y-m-d'),'reply'=>$request->reply*/]);
 
             if($result)
                 return redirect(route('startup.mentorshipTasks.index',['mentorship_id'=>$task->mentorship_request_id]))->with( ['message' => 'StoredSuccessfully'] );
