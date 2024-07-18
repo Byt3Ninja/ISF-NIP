@@ -344,6 +344,9 @@
                                                  @if (now()->format('Y-m-d') == date('Y-m-d',strtotime($session->zoom_date)))
                                                         <button title="Start Meeting" type="button" data-value="{{ $session->id }}" class="btn btn-icon rounded-circle btn-light-success start_meeting">
                                                            <i class="bx bx-user"></i></button>
+                                                  @else
+                                                      <button title="Start Meeting" type="button" disabled class="btn btn-icon rounded-circle btn-light-warning">
+                                                          <i class="bx bx-user"></i></button>
                                                  @endif
                                                 </td>
                                             </tr>
