@@ -16,18 +16,18 @@ class MentorshipController extends Controller
     public function meetingRedirect($mentorship_request_id)
     {
        $mentorship_request = MentorshipRequest::findOrFail($mentorship_request_id);
-       if ($mentorship_request->mentorshipTasks()->first()){
-           $response['message']='Initial task has already been created before';
-           $response['join_url']=$mentorship_request->join_url;
-           $response['mentorship_id']=$mentorship_request->id;
-           return response()->json($response,200);
-       }
-
-       $mentorship_request->mentorshipTasks()->create([
-           'mentor_id'=>$mentorship_request->mentor_id,
-           'company_id'=>$mentorship_request->user->company->id,
-           'user_id'=>$mentorship_request->user_id,
-       ]);
+//       if ($mentorship_request->mentorshipTasks()->first()){
+//           $response['message']='Initial task has already been created before';
+//           $response['join_url']=$mentorship_request->join_url;
+//           $response['mentorship_id']=$mentorship_request->id;
+//           return response()->json($response,200);
+//       }
+//
+//       $mentorship_request->mentorshipTasks()->create([
+//           'mentor_id'=>$mentorship_request->mentor_id,
+//           'company_id'=>$mentorship_request->user->company->id,
+//           'user_id'=>$mentorship_request->user_id,
+//       ]);
         $response['message']='Initial task has been created successfully';
         $response['join_url']=$mentorship_request->join_url;
         $response['mentorship_id']=$mentorship_request->id;

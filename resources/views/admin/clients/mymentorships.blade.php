@@ -46,7 +46,7 @@
                                                         <th>{{__('admin.Notes')}}</th>
                                                         <th>{{__('admin.Rate')}}</th>
                                                         <th>{{__('dashboard.Meeting Link')}}</th>
-                                                        <th>{{__('mentor.mentorshipTasks.all')}}</th>
+{{--                                                        <th>{{__('mentor.mentorshipTasks.all')}}</th>--}}
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -89,10 +89,10 @@
                                                                     {!!  '<span class="warning">'.__('Waiting').'</span>'  !!}
                                                                     @endif
                                                                 </td>
-                                                                <td class="text-center">
-                                                                    <a href="{{ route('startup.mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle btn-info">
-                                                                        <i class="bx bxs-tag"></i> {{ __('mentor.mentorshipTasks.tasks') }}</a>
-                                                                </td>
+{{--                                                                <td class="text-center">--}}
+{{--                                                                    <a href="{{ route('startup.mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle btn-info">--}}
+{{--                                                                        <i class="bx bxs-tag"></i> {{ __('mentor.mentorshipTasks.tasks') }}</a>--}}
+{{--                                                                </td>--}}
                                                          </tr>
                                                      @endforeach
                                                      </tbody>
