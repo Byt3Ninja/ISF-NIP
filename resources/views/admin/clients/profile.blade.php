@@ -359,7 +359,7 @@
                                                                                name="entrepreneurial_experience"
                                                                                value="1"
                                                                                class="entrepreneurial_experience"
-                                                                               id="e1" {{$client->bio->entrepreneurial_experience?'checked=""':''}}>
+                                                                               id="e1" {{optional($client->bio)->entrepreneurial_experience?'checked=""':''}}>
                                                                         <label for="e1">{{__('Yes')}}</label>
                                                                     </div>
                                                                 </fieldset>
@@ -371,7 +371,7 @@
                                                                                name="entrepreneurial_experience"
                                                                                value="0"
                                                                                class="entrepreneurial_experience"
-                                                                               id="e2" {{$client->bio->entrepreneurial_experience?'':'checked=""'}}>
+                                                                               id="e2" {{optional($client->bio)->entrepreneurial_experience?'':'checked=""'}}>
                                                                         <label for="e2">{{__('No')}}</label>
                                                                     </div>
                                                                 </fieldset>

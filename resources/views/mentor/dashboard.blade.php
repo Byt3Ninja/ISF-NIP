@@ -8,10 +8,6 @@
 @section('subTitle', __('admin.My Dashboard'))
 @section('content')
 
-@if(!Auth::user()->bio)
-{!!redirect('/dashboard/myProfile#bio')!!}
-@endif
-
 <!-- BEGIN: Content-->
 <div class="app-content content">
     <div class="content-overlay"></div>
@@ -346,7 +342,7 @@
                                                            <i class="bx bx-user"></i></button>
                                                   @else
                                                       <button title="Start Meeting" type="button" disabled class="btn btn-icon rounded-circle btn-light-warning">
-                                                          <i class="bx bx-user"></i></button>
+                                                          <i class="bx bx-alarm"></i></button>The link will be active on the day of the meeting
                                                  @endif
                                                 </td>
                                             </tr>
