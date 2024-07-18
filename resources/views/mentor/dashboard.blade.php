@@ -346,7 +346,7 @@
                                                            <i class="bx bx-user"></i></button>
                                                   @else
                                                       <button title="Start Meeting" type="button" disabled class="btn btn-icon rounded-circle btn-light-warning">
-                                                          <i class="bx bx-user"></i></button>
+                                                          <i class="bx bx-alarm"></i></button>Meeting will start at time
                                                  @endif
                                                 </td>
                                             </tr>

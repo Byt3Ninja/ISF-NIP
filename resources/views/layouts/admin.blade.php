@@ -37,7 +37,7 @@
             var audio = new Audio('{{ asset('/notification-sound.mp3') }}');
 
             // Enable pusher logging - don't include this in production
-            Pusher.logToConsole = false  ;
+            Pusher.logToConsole = false;
             var pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
                 // cluster: 'eu'
                 encrypted: true
