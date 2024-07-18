@@ -1,14 +1,27 @@
 <div class="col-md-12">
+    <a href="/dashboard/companyProfile/{{ $company->id }}">
     <!-- users view card details start -->
     <div class="card">
         <div class="card-header border-bottom">
 
             <h4 class="card-title d-flex align-items-center mb-1">
-                <i class='bx bx-briefcase font-medium-4 mr-1'></i> {{$company->name }}
+                <img src="{{$company->cycledata->organization->image_url}}" alt="avatar" class="rounded-circle"
+                    height="40" width="40">
+             {{$company->name }}
             </h4>
-
-            <span>{{$company->cycledata->title }} ( {{ __('dashboard.start from').": " .$company->cycledata->start_format. " ".__('dashboard.to').": " .$company->cycledata->end_format  }} )</span>
-
+            <div style="cursor: pointer;" class="chip mr-1">
+                                                <div class="chip-body">
+                                                    <div class="avatar">
+                                                        <img class="img-fluid" src="{{$company->user->image_url}}"
+                                                             alt="Mentor photo" height="20" width="20">
+                                                    </div>
+                                                    <span class="chip-text">
+                                {{$company->user->name}}
+                                    </span>
+                    </div>
+            </div>
+            
+            <span class=" d-flex align-items-center mt-1">{{$company->cycledata->title }} ( {{ __('dashboard.start from').": " .$company->cycledata->start_format. " ".__('dashboard.to').": " .$company->cycledata->end_format  }} ) - {{$company->stepdata->title }}</span>
             <div class="media align-items-center mt-2">
                 <div class="media-left mr-50">
                     <img src="{{$company->cycledata->organization->image_url}}" alt="avatar" class="rounded-circle"
@@ -20,6 +33,7 @@
             </div>
         </div>
     </div>
+    </a>
     <!-- users view card details ends -->
 </div>
 <div class="col-12">

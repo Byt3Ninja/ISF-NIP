@@ -2,11 +2,13 @@
 
 /* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
 
-//Route::get('test',function (){
-//    return view('emails.emailVerify');
-//});
+
 // routes/web.php
-//Route::get('create-meeting', 'MeetingController@createMeeting');
+Route::get('create-meeting', 'MicrosoftController@createMeeting');
+Route::get('test', function () {
+    event(new App\Events\WebMessage('NewMent','sss'));
+    return "Event has been sent!";
+});
 //Route::get('test',function (){
 //    function prime_or_not($no1)
 //    {
@@ -205,7 +207,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('cycles/save','CyclesController@saveForm');
     Route::get('cycles/my/{id}','CyclesController@my');
 
-    //Sceening
+    //Screening
     Route::get('screening','ScreeningController@index');
     Route::post('screening/update','ScreeningController@update');
     Route::post('screening/save','ScreeningController@save');
@@ -274,6 +276,23 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('final/{step_id}/{company_id}','FinalscreeningController@view');
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
 
+    // ===============> Mentor Dashboard Routes <===============
+    Route::group(['prefix' => 'mentor'],function (){
+        Route::get('mentorshipSessions','Mentor\MentorshipController@index')->name('mentorshipSessions.index');
+        Route::get('meetingRedirect/{mentorship_request_id}','Mentor\MentorshipController@meetingRedirect')->name('meetingRedirect');
+        Route::resource('mentorshipTasks','Mentor\MentorshipTaskController');
+
+    });
+
+    // =====================> Startup Routes <===========
+
+    Route::group(['prefix' => 'startup'],function (){
+        Route::get('mentorshipTasks','Startup\MentorshipTaskController@home')->name('startup.mentorshipTasks.home');
+        Route::get('mentorshipTasks/{mentorship_id}','Startup\MentorshipTaskController@index')->name('startup.mentorshipTasks.index');
+        Route::get('mentorshipTasks/show/{mentorshipTask}','Startup\MentorshipTaskController@show')->name('startup.mentorshipTasks.show');
+        Route::post('mentorshipTasks/complete/{mentorshipTask}','Startup\MentorshipTaskController@complete')->name('startup.mentorshipTasks.complete');
+    });
+
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'],function (){
         Route::get('/','ReportController@index')->name('reports.index');
@@ -298,7 +317,7 @@ Route::get('/callback/{provider}', 'SocialController@callback');
 Route::get('/auth/google', 'SocialController@redirectToGoogle');
 Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
 
-Route::get('/auth/microsoft/redirect',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
+Route::get('/auth/microsoft/redirect/{mentorship_id}',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
 Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('auth.microsoft.callback');
 
 if( request()->secure() ) { URL::forceScheme("https"); }

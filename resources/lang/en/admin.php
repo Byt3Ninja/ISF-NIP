@@ -454,4 +454,5 @@ return [
     'Entrepreneurial Experience desc'=>'Add your experience from ventures, challenges, and lessons',
     'SelectDateTime'=>'You can select more than one date with a different time. Please choose the time for the specified date before choosing another date.',
     'selectDate'=>'Select times and dates',
+    'deleted_msg_confirm' => 'Are You Sure To Delete  ',
 ];

@@ -12,6 +12,7 @@ use App\MentorshipRequest;
 use App\Messages;
 use App\Messenger;
 use App\Organization;
+use App\Schedule;
 use App\Screening;
 use App\ServicesRequests;
 use App\Step;
@@ -59,7 +60,10 @@ class HomeController extends Controller
 
         } elseif ($user->hasRole('Mentor')) {
 
-            return view('admin.clients.mentor');
+            if(!Auth::user()->bio){
+                return redirect('/dashboard/myProfile#bio');
+            }
+            return $this->mentorDashboard(); 
 
         } elseif ($user->hasRole('Judger')) {
 
@@ -190,6 +194,25 @@ class HomeController extends Controller
         $data['csteps'] = Step::whereRaw( '"'.$today. '" BETWEEN `from` AND `to`')->whereIn('id',$data['mysteps']->pluck('step_id'))->get();
         $data['fcompanies'] = Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
         return view('admin.clients.judge',$data);
+    }
+    protected function mentorDashboard(){
+        $data['services_latest'] = Service::orderBy('created_at','DESC')->take(5)->get();
+        $data['event_latest'] = Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) {
+            $q->orWhere('user_id',Auth::id())
+            ->orWhereNull('isPrivate');
+        })->orderBy('start')->take(5)->get();
+        $data['services_count'] = Service::count();
+        $data['service_requests_count'] = ServicesRequests::where('user_id',Auth::id())->count();
+        $data['nm_count'] = Messenger::where('receiver',Auth::id())->whereNull('read')->count();   
+        $data['mysessions'] = auth()->user()->mentorSessions()->where('zoom_date','>=',date("Y-m-d 00:00:00"))->where('approved','Yes')->get();
+        $data['mycycles'] = auth()->user()->mentorCycles;
+        $data['myschedules'] = Schedule::where('user_id',Auth::id())->get();
+     if(auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->count()){
+          $data['attends_rate'] = (integer)(auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->sum('done')/auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->count()*100). '%';
+         }else{
+              $data['attends_rate'] = '0%';
+            }
+        return view('mentor.dashboard',$data);
     }
 
     // ============> End Functions <=======================

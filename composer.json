@@ -19,7 +19,7 @@
         "laravel/ui": "^4.4",
         "laravelcollective/html": "^6.2",
         "macsidigital/laravel-zoom": ">=3",
-        "microsoft/microsoft-graph": "^2.0.0",
+        "microsoft/microsoft-graph": "^1.28",
         "phpoffice/phpspreadsheet": "^2.0",
         "pusher/pusher-php-server": "^5.0",
         "sentry/sentry-laravel": "^4.4",
