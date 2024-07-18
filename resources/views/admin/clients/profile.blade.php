@@ -404,7 +404,7 @@
                                                                                name="profile_privacy"
                                                                                value="1"
                                                                                class="profile_privacy"
-                                                                               id="p1" {{$client->bio->profile_privacy?'checked=""':''}}>
+                                                                               id="p1" {{optional($client->bio)->profile_privacy?'checked=""':''}}>
                                                                         <label for="p1">{{__('Yes')}}</label>
                                                                     </div>
                                                                 </fieldset>
