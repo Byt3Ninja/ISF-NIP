@@ -4,11 +4,11 @@
 
 
 // routes/web.php
-Route::get('create-meeting', 'MicrosoftController@createMeeting');
-Route::get('test', function () {
-    event(new App\Events\WebMessage('NewMent','sss'));
-    return "Event has been sent!";
-});
+//Route::get('create-meeting', 'MicrosoftController@createMeeting');
+//Route::get('test', function () {
+//    event(new App\Events\WebMessage('NewMent','sss'));
+//    return "Event has been sent!";
+//});
 //Route::get('test',function (){
 //    function prime_or_not($no1)
 //    {
@@ -281,6 +281,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
         Route::get('mentorshipSessions','Mentor\MentorshipController@index')->name('mentorshipSessions.index');
         Route::get('meetingRedirect/{mentorship_request_id}','Mentor\MentorshipController@meetingRedirect')->name('meetingRedirect');
         Route::resource('mentorshipTasks','Mentor\MentorshipTaskController');
+        Route::post('mentorshipTasks/send/comment','Mentor\MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
 
     });
 
@@ -291,6 +292,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
         Route::get('mentorshipTasks/{mentorship_id}','Startup\MentorshipTaskController@index')->name('startup.mentorshipTasks.index');
         Route::get('mentorshipTasks/show/{mentorshipTask}','Startup\MentorshipTaskController@show')->name('startup.mentorshipTasks.show');
         Route::post('mentorshipTasks/complete/{mentorshipTask}','Startup\MentorshipTaskController@complete')->name('startup.mentorshipTasks.complete');
+        Route::post('mentorshipTasks/send/comment','Startup\MentorshipTaskController@sendComment')->name('startup.mentorshipTasks.sendComment');
+
     });
 
     // ===============> Reports <============

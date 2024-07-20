@@ -14,7 +14,11 @@ return [
         'show'=>'Show task data',
         'status'=>'Status',
         'reply'=>'Reply to task',
-        'tasks'=>'Tasks'
+        'tasks'=>'Tasks',
+        'Task created before'=>'Initial task has already been created before',
+        'Task created successfully'=>'Initial task has been created successfully',
+        'comments'=>'Comments',
+        'no comments'=>'No Comments Yet',
     ],
     'mentorshipRequests'=>[
         'all'=>'Mentorship Sessions',

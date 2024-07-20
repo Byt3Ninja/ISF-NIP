@@ -8,6 +8,7 @@
 @section('subTitle', __('admin.My Dashboard'))
 @section('content')
 
+
 <!-- BEGIN: Content-->
 <div class="app-content content">
     <div class="content-overlay"></div>
@@ -342,7 +343,7 @@
                                                            <i class="bx bx-user"></i></button>
                                                   @else
                                                       <button title="Start Meeting" type="button" disabled class="btn btn-icon rounded-circle btn-light-warning">
-                                                          <i class="bx bx-alarm"></i></button>The link will be active on the day of the meeting
+                                                          <i class="bx bx-alarm"></i></button>Meeting will start at time
                                                  @endif
                                                 </td>
                                             </tr>
@@ -526,9 +527,9 @@
         $.ajax({
             type: "GET", url: "/dashboard/mentor/meetingRedirect/"+$(this).data('value'),
             success: function (response) {
-                // alert(response['message']);
+                alert(response['message']);
                 window.open(response['join_url'], '_blank');
-                {{--window.location.href ='{{ route('mentorshipTasks.index') }}'+'?mentorship_id='+response['mentorship_id'];--}}
+                window.location.href ='{{ route('mentorshipTasks.index') }}'+'?mentorship_id='+response['mentorship_id'];
             },
             error: function (error) {
                 console.log(error);

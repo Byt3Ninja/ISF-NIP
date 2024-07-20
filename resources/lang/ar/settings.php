@@ -79,5 +79,6 @@ return [
 	'Private' => 'رابط خاص',
 	'view' => 'عرض',
 	'View training content' => 'عرض محتوى التدريب',
-    'Complete'=>'اكتمال'
+    'Complete'=>'اكتمال',
+    'Send'=>'ارسال'
 ];
