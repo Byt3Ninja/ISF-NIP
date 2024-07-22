@@ -9,6 +9,7 @@ use App\Documentation;
 use App\Events\WebMessage;
 use App\Finalscreening;
 use App\MentorshipRequest;
+use App\MentorshipTask;
 use App\Messages;
 use App\Messenger;
 use App\Organization;
@@ -209,9 +210,15 @@ class HomeController extends Controller
         $data['myschedules'] = Schedule::where('user_id',Auth::id())->get();
      if(auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->count()){
           $data['attends_rate'] = (integer)(auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->sum('done')/auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date','<=',now()->format('Y-m-d'))->count()*100). '%';
-         }else{
+     }else{
               $data['attends_rate'] = '0%';
-            }
+     }
+     $data['sessionWithoutTasks'] = auth()->user()->mentorSessions()->whereHas('mentorshipTasks',function ($q){
+         return $q->whereNull('title');
+     })->count();
+     $data['completedTasks'] = MentorshipTask::whereIn('mentorship_request_id',auth()->user()->mentorSessions()->pluck('id'))->where('status','completed')->whereNotNull('title')->count();
+     $data['nonCompletedTasks'] = MentorshipTask::whereIn('mentorship_request_id',auth()->user()->mentorSessions()->pluck('id'))->where('status','pending')->whereNotNull('title')->count();
+
         return view('mentor.dashboard',$data);
     }
 

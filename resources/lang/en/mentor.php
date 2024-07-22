@@ -19,8 +19,11 @@ return [
         'Task created successfully'=>'Initial task has been created successfully',
         'comments'=>'Comments',
         'no comments'=>'No Comments Yet',
+        'completedTasks'=>'Completed Tasks',
+        'nonCompletedTasks'=>'Non Completed Tasks',
     ],
     'mentorshipRequests'=>[
         'all'=>'Mentorship Sessions',
+        'withoutTasks'=>'Sessions Without Tasks',
     ]
 ];

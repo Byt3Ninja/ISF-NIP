@@ -455,4 +455,9 @@ return [
     'SelectDateTime'=>'You can select more than one date with a different time. Please choose the time for the specified date before choosing another date.',
     'selectDate'=>'Select times and dates',
     'deleted_msg_confirm' => 'Are You Sure To Delete  ',
+    'company Information'=>'Company Information',
+    'elevator Pitch'=>'Elevator Pitch',
+    'Funding Data'=>'Funding Data',
+    'social & contact'=>'Social & Contact',
+    'Business Type'=>'Business Type',
 ];

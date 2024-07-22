@@ -120,6 +120,45 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-sm-4 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-warning mx-auto mb-50">
+                                        <i class="bx bx-select-multiple font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('mentor.mentorshipRequests.withoutTasks')}}</div>
+                                    <h3 class="mb-0">{{$sessionWithoutTasks}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-success mx-auto mb-50">
+                                        <i class="bx bx-task font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('mentor.mentorshipTasks.completedTasks')}}</div>
+                                    <h3 class="mb-0">{{$completedTasks}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-info mx-auto mb-50">
+                                        <i class="bx bx-archive font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('mentor.mentorshipTasks.nonCompletedTasks')}}</div>
+                                    <h3 class="mb-0">{{$nonCompletedTasks}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
               <div class="row">
                     <div class="col-sm-6 col-12">

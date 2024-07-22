@@ -455,5 +455,9 @@ return [
     'SelectDateTime'=>'يمكن اختيار اكثر من تاريخ بتوقيت مختلف. و برجاء اختيار التوقيت للتاريخ المحدد قبل اختيار تاريخ اخر',
     'selectDate'=>'حدد الاوقات و التواريخ',
     'deleted_msg_confirm' => 'هل انت متأكد من الحذف  ',
-
+    'company Information'=>'معلومات الشركة',
+    'elevator Pitch'=>'Elevator Pitch',
+    'Funding Data'=>'بيانات التمويل',
+    'social & contact'=>'التواصل الاجتماعي',
+    'Business Type'=>'نوع المشروع'
     ];

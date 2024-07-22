@@ -12,7 +12,7 @@ class Company extends Model
     use Auditable;
     protected $fillable = ['organization_id', 'country_id','state_id', 'city_id', 'name_en', 'name_ar', 'address_en', 'sector', 'address_ar', 'phone', 'fax', 'email', 'website',
         'est_date','idea','problem','solution','team_num', 'stage','raised_fund','investors','founder','employees','facebook', 'twitter',
-        'linkedin', 'youtube', 'google_map', 'logo','cycle','step','approved','approved_by'];
+        'linkedin', 'youtube', 'google_map', 'logo','cycle','step','approved','approved_by','business_type','institutions'];
 
     // ===========> Attributes <==============
     public function getLogoUrlAttribute()
@@ -27,6 +27,10 @@ class Company extends Model
     public function getNameAttribute()
     {
         return $this->{"name_".app()->getLocale()};
+    }
+    public function getInstitutionsAttribute()
+    {
+        return json_decode($this->attributes['institutions']);
     }
 
     // ==========> Relations <==============

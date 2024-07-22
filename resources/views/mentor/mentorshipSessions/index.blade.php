@@ -83,6 +83,8 @@
                                                 <th class="text-center">{{__('cycles.User/Title')}}</th>
                                                 <th class="text-center">{{__('cycles.Rate/Comment')}}</th>
                                                 <th class="text-center">{{__('cycles.Date/Time')}}</th>
+                                                <th class="text-center">{{__('mentor.mentorshipTasks.completedTasks')}}</th>
+                                                <th class="text-center">{{__('mentor.mentorshipTasks.nonCompletedTasks')}}</th>
                                                 <th class="text-center">{{__('mentor.mentorshipTasks.all')}}</th>
                                             </tr>
                                             </thead>
@@ -126,8 +128,10 @@
                                                         <br>({{$session->period}}M)
                                                     </td>
 
+                                                    <td class="text-center"> {{ $session->mentorshipTasks()->where('status','completed')->whereNotNull('title')->count() }}</td>
+                                                    <td class="text-center"> {{ $session->mentorshipTasks()->where('status','pending')->whereNotNull('title')->count() }}</td>
                                                   <td class="text-center">
-                                                      <a href="{{ route('mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle btn-info">
+                                                      <a href="{{ route('mentorshipTasks.index',['mentorship_id'=>$session->id]) }}" title="{{ __('mentor.mentorshipTasks.tasks') }}" class="btn btn-icon rounded-circle {{ $session->mentorshipTasks()->whereNull('title')->count()?'btn-warning':'btn-info'  }}">
                                                           <i class="bx bxs-tag"></i> {{ __('mentor.mentorshipTasks.tasks') }}</a>
                                                   </td>
                                                 </tr>
