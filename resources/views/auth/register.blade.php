@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta name="description" content="VI V0.1">
     <meta name="keywords" content="VI V0.1">
-    <meta name="author" content="ibrahim.suez@gmail.com">
+    <meta name="author" content="info@growthlabs.app">
     <title>Registration Page - VI portal</title>
     <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
     <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
