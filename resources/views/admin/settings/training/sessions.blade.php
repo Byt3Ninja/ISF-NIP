@@ -219,6 +219,10 @@
                         <label>{{__('cycles.trainer name')}}</label>
                         <input name="trainer_name" type="text" placeholder="{{__('cycles.trainer name')}}" class="form-control" >
                     </div>
+                    <div class="form-group" id="trainer_email" style="display: none;">
+                        <label>{{__('cycles.trainer email')}}</label>
+                        <input name="trainer_email" type="text" placeholder="{{__('cycles.trainer email')}}" class="form-control" >
+                    </div>
                     <div class="form-group" id="location" style="display: none;">
                         <label>{{__('cycles.training location')}}</label>
                         <input name="location" type="text" placeholder="{{__('cycles.training location')}}" class="form-control" >
@@ -289,6 +293,10 @@
                     <div class="form-group" id="strainer" style="display: none;">
                         <label>{{__('cycles.trainer name')}}</label>
                         <input id="etrainer" name="trainer_name" type="text" placeholder="{{__('cycles.trainer name')}}" class="form-control" >
+                    </div>
+                    <div class="form-group" id="strainer_email" style="display: none;">
+                        <label>{{__('cycles.trainer email')}}</label>
+                        <input id="etrainer_email" name="trainer_email" type="text" placeholder="{{__('cycles.trainer email')}}" class="form-control" >
                     </div>
                     <div class="form-group" id="slocation" style="display: none;">
                         <label>{{__('cycles.training location')}}</label>
@@ -385,17 +393,21 @@
                                 $('#senddatetime').show();
                                 $('#ssessions').hide();
                                 $('#strainer').show();
+                                $('#strainer_email').show();
                                 $('#slocation').show();
                                 $('#eenddate').val(response.enddatetime);
                                 $('#elocation').val(response.location);
                                 $('#etrainer').val(response.trainer_name);
+                                $('#etrainer_email').val(response.trainer_email);
                             } else if (type === 'sessions') {
                                 $('#sonline').hide();
                                 $('#senddatetime').hide();
                                 $('#ssessions').show();
                                 $('#strainer').show();
+                                $('#strainer_email').show();
                                 $('#slocation').hide();
                                 $('#etrainer').val(response.trainer_name);
+                                $('#etrainer_email').val(response.trainer_email);
                                 $('#eduration').val(response.duration);
                                 $('#elocation').val('');
                             } else {
@@ -403,6 +415,7 @@
                                 $('#senddatetime').hide();
                                 $('#ssessions').hide();
                                 $('#strainer').hide();
+                                $('#strainer_email').hide();
                                 $('#slocation').hide();
                                 $('#eonline').val(response.location);
                                 $('#etrainer').val('');
