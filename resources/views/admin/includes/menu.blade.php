@@ -3,8 +3,11 @@
         <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
                 @if(!is_null(auth()->user()->organization))
                     <img src="{{ auth()->user()->organization->image_url}}" alt="avatar" height="40" width="80">
+                @elseif(auth()->user()->hasRole('Registered|Page Manager|Pages Editor')&&auth()->user()->company&&auth()->user()->company->cycledata)
+                    <img src="{{ auth()->user()->company->cycledata->organization->image_url}}" alt="avatar" height="40" width="80">
+
                 @else
-                    <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
+                    <img src="/images/logo/arweqah.png" alt="avatar" height="50" width="150">
                 @endif
             </a>
         </li>
