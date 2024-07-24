@@ -368,11 +368,11 @@
 
                 function tchange(training) {
                 if (training==='offline') {
-                    $('#online').hide();$('#enddatetime').show();$('#sessions').hide();$('#trainer').show();$('#location').show();
+                    $('#online').hide();$('#enddatetime').show();$('#sessions').hide();$('#trainer').show();$('#trainer_email').show();$('#location').show();
                 } else if (training==='sessions') {
-                    $('#online').hide();$('#enddatetime').hide();$('#sessions').show();$('#trainer').show();$('#location').hide();
+                    $('#online').hide();$('#enddatetime').hide();$('#sessions').show();$('#trainer').show();$('#trainer_email').show();$('#location').hide();
                 } else {
-                    $('#online').show();$('#enddatetime').hide();$('#sessions').hide();$('#trainer').hide();$('#location').hide();
+                    $('#online').show();$('#enddatetime').hide();$('#sessions').hide();$('#trainer').hide();$('#trainer_email').hide();$('#location').hide();
                 }
                     }
 
