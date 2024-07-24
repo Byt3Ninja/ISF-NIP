@@ -287,12 +287,13 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 
     // =====================> Startup Routes <===========
 
-    Route::group(['prefix' => 'startup'],function (){
-        Route::get('mentorshipTasks','Startup\MentorshipTaskController@home')->name('startup.mentorshipTasks.home');
-        Route::get('mentorshipTasks/{mentorship_id}','Startup\MentorshipTaskController@index')->name('startup.mentorshipTasks.index');
-        Route::get('mentorshipTasks/show/{mentorshipTask}','Startup\MentorshipTaskController@show')->name('startup.mentorshipTasks.show');
-        Route::post('mentorshipTasks/complete/{mentorshipTask}','Startup\MentorshipTaskController@complete')->name('startup.mentorshipTasks.complete');
-        Route::post('mentorshipTasks/send/comment','Startup\MentorshipTaskController@sendComment')->name('startup.mentorshipTasks.sendComment');
+    Route::group(['prefix' => 'startup','as'=>'startup.'],function (){
+        Route::get('mentorshipTasks','Startup\MentorshipTaskController@home')->name('mentorshipTasks.home');
+        Route::get('mentorshipTasks/{mentorship_id}','Startup\MentorshipTaskController@index')->name('mentorshipTasks.index');
+        Route::get('mentorshipTasks/show/{mentorshipTask}','Startup\MentorshipTaskController@show')->name('mentorshipTasks.show');
+        Route::post('mentorshipTasks/complete/{mentorshipTask}','Startup\MentorshipTaskController@complete')->name('mentorshipTasks.complete');
+        Route::post('mentorshipTasks/send/comment','Startup\MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+        Route::resource('fundingRounds','Startup\FundingRoundController')->except(['index','show']);
 
     });
 

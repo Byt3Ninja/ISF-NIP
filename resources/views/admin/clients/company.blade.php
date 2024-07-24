@@ -5,6 +5,7 @@
 @section('style')
     <link rel="stylesheet" href="/tabs/dist/jquery.tabs.css">
     <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/forms/select/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 
 @stop
 @section('title', __('admin.My company') )
@@ -69,7 +70,8 @@
                                                     <div class="jq-tab-menu">
                                                         <div class="jq-tab-title active" data-tab="1"><i class="bx bx-info-circle"></i> {{ __('admin.company Information') }}</div>
                                                         <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div>
-                                                        <div class="jq-tab-title" data-tab="3"><i class="bx bxs-contact"></i> {{ __('admin.social & contact') }}</div>
+                                                        <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div>
+                                                        <div class="jq-tab-title" data-tab="4"><i class="bx bxs-contact"></i> {{ __('admin.social & contact') }}</div>
                                                     </div>
                                                     <div class="jq-tab-content-wrapper">
                                                         <div class="jq-tab-content active" data-tab="1">
@@ -328,6 +330,166 @@
                                                             Iure. Delectus magnam eius, facere ratione est dicta, placeat labore possimus, praesentium ex quos similique
                                                             veritatis illum velit minima dolor beatae.</div>
                                                         <div class="jq-tab-content" data-tab="3">
+                                                            <div class="row">
+                                                                <div class="col-12">
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <div class="card">
+                                                                                <div class="card-header">
+                                                                                    <h4 class="card-title">{{__('admin.Funding Overview')}}</h4>
+                                                                                </div>
+                                                                                <div class="card-content">
+                                                                                    <div class="card-body">
+                                                                                        <form method="post" action="{{route('update_my_company')}}"
+                                                                                              enctype="multipart/form-data">
+                                                                                            {!! csrf_field() !!}
+                                                                                            <div class="row">
+                                                                                                <div class="col-md-6">
+                                                                                                    <fieldset class="form-group">
+                                                                                                        <label class="text-bold-600"
+                                                                                                               for="development_stage">{{ __('admin.development_stage') }} *</label>
+                                                                                                        <select class="form-control" required
+                                                                                                                id="development_stage" name='development_stage'>
+                                                                                                            <option value="Idea Exploration" {{ ( !empty( $client->company ) && $client->company->development_stage == 'Idea Exploration' ) ? 'selected' : ''}}>Idea Exploration</option>
+                                                                                                            <option value="Idea Development" {{ ( !empty( $client->company ) && $client->company->development_stage == 'Idea Development' ) ? 'selected' : ''}}>Idea Development</option>
+                                                                                                            <option value="Prototype testing" {{ ( !empty( $client->company ) && $client->company->development_stage == 'Prototype testing' ) ? 'selected' : ''}}>Prototype testing</option>
+                                                                                                            <option value="Launch" {{ ( !empty( $client->company ) && $client->company->development_stage == 'Launch' ) ? 'selected' : ''}}>Launch</option>
+                                                                                                            <option value="SEED" {{ ( !empty( $client->company ) && $client->company->development_stage == 'SEED' ) ? 'selected' : ''}}>SEED</option>
+                                                                                                            <option value="Growth" {{ ( !empty( $client->company ) && $client->company->development_stage == 'Growth' ) ? 'selected' : ''}}>Growth</option>
+                                                                                                            <option value="Maturity" {{ ( !empty( $client->company ) && $client->company->development_stage == 'Maturity' ) ? 'selected' : ''}}>Maturity</option>
+                                                                                                            <option value="Acquired" {{ ( !empty( $client->company ) && $client->company->development_stage == 'Acquired' ) ? 'selected' : ''}}>Acquired</option>
+                                                                                                        </select>
+                                                                                                    </fieldset>
+                                                                                                </div>
+                                                                                                <div class="col-md-6">
+                                                                                                    <fieldset class="form-group">
+                                                                                                        <label class="text-bold-600"
+                                                                                                               for="revenue_generating">{{ __('admin.revenue_generating') }} *</label>
+                                                                                                        <select class="form-control" required
+                                                                                                                id="revenue_generating" name='revenue_generating'>
+                                                                                                            <option value="No" {{ ( !empty( $client->company ) && $client->company->revenue_generating == 'No' ) ? 'selected' : ''}}>No</option>
+                                                                                                            <option value="Yes" {{ ( !empty( $client->company ) && $client->company->revenue_generating == 'Yes' ) ? 'selected' : ''}}>Yes</option>
+                                                                                                        </select>
+                                                                                                    </fieldset>
+                                                                                                </div>
+                                                                                                <div class="col-md-6">
+                                                                                                    <fieldset class="form-group">
+                                                                                                        <label class="text-bold-600"
+                                                                                                               for="currently_fundraising">{{ __('admin.currently_fundraising') }} *</label>
+                                                                                                        <select class="form-control" required
+                                                                                                                id="currently_fundraising" name='currently_fundraising'>
+                                                                                                            <option value="No" {{ ( !empty( $client->company ) && $client->company->currently_fundraising == 'No' ) ? 'selected' : ''}}>No</option>
+                                                                                                            <option value="Yes" {{ ( !empty( $client->company ) && $client->company->currently_fundraising == 'Yes' ) ? 'selected' : ''}}>Yes</option>
+                                                                                                        </select>
+                                                                                                    </fieldset>
+                                                                                                </div>
+                                                                                                <div class="col-md-6">
+                                                                                                    <fieldset class="form-group">
+                                                                                                        <label class="text-bold-600"
+                                                                                                               for="desired_funding_amount">{{ __('admin.desired_funding_amount') }} *</label>
+                                                                                                        <select class="form-control" required
+                                                                                                                id="desired_funding_amount" name='desired_funding_amount'>
+                                                                                                            <option value="No Funding" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == 'No Funding' ) ? 'selected' : ''}}>No Funding</option>
+                                                                                                            <option value="0-25k" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '0-25k' ) ? 'selected' : ''}}>0-25k</option>
+                                                                                                            <option value="26K-50k" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '26K-50k' ) ? 'selected' : ''}}>26K-50k</option>
+                                                                                                            <option value="51K-100k" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '51K-100k' ) ? 'selected' : ''}}>51K-100k</option>
+                                                                                                            <option value="101K-250k" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '101K-250k' ) ? 'selected' : ''}}>101K-250k</option>
+                                                                                                            <option value="251K-500k" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '251K-500k' ) ? 'selected' : ''}}>251K-500k</option>
+                                                                                                            <option value="501K-1m" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '501K-1m' ) ? 'selected' : ''}}>501K-1m</option>
+                                                                                                            <option value="1m-2.5m" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '1m-2.5m' ) ? 'selected' : ''}}>1m-2.5m</option>
+                                                                                                            <option value="5m-10m" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '5m-10m' ) ? 'selected' : ''}}>5m-10m</option>
+                                                                                                            <option value="10m-25m" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '10m-25m' ) ? 'selected' : ''}}>10m-25m</option>
+                                                                                                            <option value="25m+" {{ ( !empty( $client->company ) && $client->company->desired_funding_amount == '25m+' ) ? 'selected' : ''}}>25m+</option>
+                                                                                                        </select>
+                                                                                                    </fieldset>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="row">
+                                                                                                <div class="col-12 d-flex justify-content-end">
+                                                                                                    <button type="submit"
+                                                                                                            class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </form>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <section class="row">
+                                                                        <div class="col-xl-12 col-md-12 col-sm-12">
+                                                                            <div class="card">
+                                                                                <div class="card-header border-bottom">
+                                                                                    <h4 class="card-title align-items-center">
+                                                                                        <i class='bx bx-card font-medium-4 mr-1'></i>{{__('admin.Funding Data')}}:
+                                                                                        <a href="#" class="btn btn-icon  btn-success float-right roundBtn" data-value="create" data-url="{{ route('startup.fundingRounds.store') }}">
+                                                                                            <i class="bx bx-plus"></i> {{ __('admin.Add new funding round') }}</a>
+                                                                                    </h4>
+                                                                                </div>
+                                                                                <div class="card-body">
+                                                                                    <div class="card-text">
+                                                                                        <div class="table-responsive">
+                                                                                            <table class="table mb-0" id="userstable">
+                                                                                                <thead class="thead-dark">
+                                                                                                <tr>
+                                                                                                    <th class="text-center">{{__('admin.Funding Stage')}}</th>
+                                                                                                    <th class="text-center">{{__('admin.Amount')}}</th>
+                                                                                                    <th class="text-center">{{__('admin.Post Money Valuation')}}</th>
+                                                                                                    <th class="text-center">{{__('admin.Date Raised')}}</th>
+                                                                                                    <th class="text-center">{{__('admin.Investment Vehicle')}}</th>
+                                                                                                    <th class="text-center">{{__('admin.Amount Raised')}}</th>
+                                                                                                    <th class="text-center">{{__('cycles.Actions')}}</th>
+                                                                                                </tr>
+                                                                                                </thead>
+                                                                                                <tbody>
+                                                                                                @foreach($funding_rounds as $round)
+                                                                                                    <tr id="row_{{ $round->id }}">
+                                                                                                        <td class="text-center">
+                                                                                                            {{ $round->funding_stage }}
+                                                                                                        </td>
+                                                                                                        <td class="text-center">
+                                                                                                            {{ $round->amount }}
+                                                                                                        </td>
+                                                                                                        <td class="text-center">
+                                                                                                            {{ $round->post_money_valuation }}
+                                                                                                        </td>
+                                                                                                        <td class="text-center">
+                                                                                                            {{ $round->date_raised }}
+                                                                                                        </td>
+                                                                                                        <td class="text-center">
+                                                                                                            {{ $round->investment_vehicle }}
+                                                                                                        </td>
+                                                                                                        <td class="text-center">
+                                                                                                            {{ $round->amount_raised }}
+                                                                                                        </td>
+
+                                                                                                        <td class="text-center">
+                                                                                                            <a href="#" title="Edit" class="btn btn-icon rounded-circle btn-light-primary roundBtn" data-value="edit" data-url="{{ route('startup.fundingRounds.update',['fundingRound'=>$round->id]) }}">
+                                                                                                                <i class="bx bxs-edit-alt"></i></a>
+                                                                                                            <a onclick="sweet_delete( '{{ route('startup.fundingRounds.destroy',['fundingRound' => $round->id ])  }} ' , '{{ trans('admin.deleted_msg_confirm') }}' ,{{ $round->id }} )" title="Delete" class="btn btn-icon rounded-circle btn-light-danger">
+                                                                                                                <i class="bx bxs-x-square"></i></a>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                @endforeach
+
+                                                                                                </tbody>
+                                                                                            </table>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+
+
+                                                                    </section>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="jq-tab-content" data-tab="4">
                                                             <form method="post" action="{{route('update_my_company')}}" enctype="multipart/form-data">
                                                                 {!! csrf_field() !!}
                                                                 <div class="row">
@@ -405,8 +567,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
-
                                 </div>
                             </div>
                         </div>
@@ -420,13 +580,122 @@
     </div>
 </div>
 <!-- END: Content-->
+
+<div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <form method="post" id="fundingForm" action="{{ route('startup.fundingRounds.store') }}" enctype="multipart/form-data" autocomplete="off">
+                <div class="modal-header">
+                    <h4 class="modal-title">{{__('admin.Add new funding round')}}
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="bx bx-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @csrf
+                    <input type="hidden" name="_method" value="PUT" id="fundingMethod">
+                    <div class="row">
+                        <div class="form-group col-6">
+                            <label>{{__('admin.Funding Stage')}} * :</label>
+                            <select class="form-control" required id="funding_stage" name='funding_stage'>
+                                <option value="Undisclosed" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Undisclosed' ) ? 'selected' : ''}}>Undisclosed</option>
+                                <option value="Friends and Family" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Friends and Family' ) ? 'selected' : ''}}>Friends and Family</option>
+                                <option value="SEED" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'SEED' ) ? 'selected' : ''}}>SEED</option>
+                                <option value="Pre-Series A" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Pre-Series A' ) ? 'selected' : ''}}>Pre-Series A</option>
+                                <option value="Series A" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Series A' ) ? 'selected' : ''}}>Series A</option>
+                                <option value="Series B" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Series B' ) ? 'selected' : ''}}>Series B</option>
+                                <option value="Angel Investment" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Angel Investment' ) ? 'selected' : ''}}>Angel Investment</option>
+                                <option value="Pre-SEED" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Pre-SEED' ) ? 'selected' : ''}}>Pre-SEED</option>
+                                <option value="Series C" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Series C' ) ? 'selected' : ''}}>Series C</option>
+                                <option value="Series D" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Series D' ) ? 'selected' : ''}}>Series D</option>
+                                <option value="Bridge" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Bridge' ) ? 'selected' : ''}}>Bridge</option>
+                                <option value="Convertible Note" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Convertible Note' ) ? 'selected' : ''}}>Convertible Note</option>
+                                <option value="Merger and Acquisition (M&A)" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Merger and Acquisition (M&A)' ) ? 'selected' : ''}}>Merger and Acquisition (M&A)</option>
+                                <option value="Series E" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Series E' ) ? 'selected' : ''}}>Series E</option>
+                                <option value="Series F" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Series F' ) ? 'selected' : ''}}>Series F</option>
+                                <option value="Crowdfunding" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Crowdfunding' ) ? 'selected' : ''}}>Crowdfunding</option>
+                                <option value="Private Equity" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Private Equity' ) ? 'selected' : ''}}>Private Equity</option>
+                                <option value="Pre-Series B" {{ ( !empty( $client->company ) && $client->company->funding_stage == 'Pre-Series B' ) ? 'selected' : ''}}>Pre-Series B</option>
+
+                            </select>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>{{__('admin.Amount')}} * :</label>
+                            <input value="{{($client->company)? $client->company->amount:old('amount')}}"
+                                   name="amount" type="number" class="form-control"
+                                   id="amount"
+                                   placeholder="{{ __('admin.Amount') }} *" required
+                                   autocomplete="amount" />
+                        </div>
+                        <div class="form-group col-6">
+                            <label>{{__('admin.Post Money Valuation')}} * :</label>
+                            <input value="{{($client->company)? $client->company->post_money_valuation:old('post_money_valuation')}}"
+                                   name="post_money_valuation" type="number" class="form-control"
+                                   id="post_money_valuation"
+                                   placeholder="{{ __('admin.Post Money Valuation') }} *" required
+                                   autocomplete="post_money_valuation" />
+                        </div>
+                        <div class="form-group col-6">
+                            <label>{{__('admin.Date Raised')}} * :</label>
+                            <div class="input-group">
+                                <input type="date" name="date_raised" placeholder="{{ __('admin.selectDate') }}" class="form-control" >
+                            </div>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>{{__('admin.Investment Vehicle')}} * :</label>
+                            <div class="input-group">
+                                <select class="form-control" required id="investment_vehicle" name='investment_vehicle'>
+                                    <option value="Equity" {{ ( !empty( $client->company ) && $client->company->investment_vehicle == 'Equity' ) ? 'selected' : ''}}>Equity</option>
+                                    <option value="Venture Debt" {{ ( !empty( $client->company ) && $client->company->investment_vehicle == 'Venture Debt' ) ? 'selected' : ''}}>Venture Debt</option>
+                                    <option value="Conventional Debt" {{ ( !empty( $client->company ) && $client->company->investment_vehicle == 'Conventional Debt' ) ? 'selected' : ''}}>Conventional Debt</option>
+                                    <option value="Grant" {{ ( !empty( $client->company ) && $client->company->investment_vehicle == 'Grant' ) ? 'selected' : ''}}>Grant</option>
+                                    <option value="Non-equity Assistance" {{ ( !empty( $client->company ) && $client->company->investment_vehicle == 'Non-equity Assistance' ) ? 'selected' : ''}}>Non-equity Assistance</option>
+                                    <option value="Line of Credit" {{ ( !empty( $client->company ) && $client->company->investment_vehicle == 'Line of Credit' ) ? 'selected' : ''}}>Line of Credit</option>
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>{{__('admin.Amount Raised')}} * :</label>
+                            <input value="{{($client->company)? $client->company->post_money_valuation:old('amount_raised')}}"
+                                   name="amount_raised" type="number" class="form-control"
+                                   id="amount_raised"
+                                   placeholder="{{ __('admin.Amount Raised') }} *" required
+                                   autocomplete="amount_raised" />
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary ml-1">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">{{__('cycles.Submit')}}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @stop
 @section('pagescripts')
 <script src="/js/jquery.datetimepicker.full.min.js"></script>
 <script src="/tabs/dist/jquery.tabs.min.js"></script>
 <script src="/app-assets/vendors/js/forms/select/select2.full.min.js"></script>
 <script>
+
     $(document).ready(function() {
+        $('.roundBtn').click(function (){
+            if ($(this).data('value')==='create'){
+                $('#fundingMethod').setAttribute('name','');
+            }else{
+                $('#fundingMethod').setAttribute('name','_method');
+            }
+            $('#fundingForm').setAttribute('action',$(this).data('url'));
+            $('#SendRequest').modal('show');
+        });
         $('#institutions').select2({
             tags: true,
             placeholder: 'Type and press enter to add',

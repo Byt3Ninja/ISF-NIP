@@ -460,4 +460,18 @@ return [
     'Funding Data'=>'Funding Data',
     'social & contact'=>'Social & Contact',
     'Business Type'=>'Business Type',
+    'Funding Overview'=>'Funding Overview',
+    'development_stage'=>'Development Stage',
+    'Select Development Stage'=>'Select Development Stage',
+    'revenue_generating'=>'Revenue Generating',
+    'currently_fundraising'=>'Currently Fundraising',
+    'desired_funding_amount'=>'Desired Funding Amount',
+    'Funding Stage'=>'Funding Stage',
+    'Amount'=>'Amount',
+    'Post Money Valuation'=>'Post Money Valuation',
+    'Date Raised'=>'Date Raised',
+    'Investment Vehicle'=>'Investment Vehicle',
+    'Amount Raised'=>'Amount Raised',
+    'Add new funding round'=>'Add New Funding Round',
+
 ];
