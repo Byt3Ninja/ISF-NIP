@@ -223,13 +223,17 @@ class TrainingController extends Controller
             TrainingSession::insert(['type'=>$type,'step_id'=>$step,'title'=>$title,'dsc'=>$dsc,'zoom_id'=>$zoomid,'datetime'=>$datetime,
                 'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
             // ======> notify Trainer <=================
+
             $user = new User();
             $user->email = $request->trainer_email;
             $user->id = 1;
+            $user->make();
+            dd($user);
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
             $user->notify($MSG);
+
             // ==========> End Notify <================
             return back()->with(['message'=>'Session added successfully','class' => 'success']);
         } elseif ($type=='online') {
