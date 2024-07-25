@@ -217,7 +217,7 @@ return [
     'details' => 'التفاصيل',
     'online' =>'محتوى تعليمي',
     'offline' =>'تدريب تقليدي',
-    'sessions' =>'تدريب زووم',
+    'sessions' =>'تدريب عن بعد',
     'trainer name'=>'اسم المدرب',
     'trainer email'=>'البريد الالكتروني للمدرب',
     'training location'=>'مكان التدريب',

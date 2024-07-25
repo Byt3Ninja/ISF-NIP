@@ -228,7 +228,6 @@ class TrainingController extends Controller
             $user->email = $request->trainer_email;
             $user->id = 1;
             $user->make();
-            dd($user);
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
@@ -247,6 +246,7 @@ class TrainingController extends Controller
             $user = new User();
             $user->email = $request->trainer_email;
             $user->id = 1;
+            $user->make();
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
