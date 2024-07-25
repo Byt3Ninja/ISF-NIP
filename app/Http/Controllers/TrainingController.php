@@ -232,8 +232,7 @@ class TrainingController extends Controller
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
-            $s=\Notification::send($user, $MSG);
-            dd($s);
+            \Notification::send($user, $MSG);
 //            $user->notify($MSG);
 
 
