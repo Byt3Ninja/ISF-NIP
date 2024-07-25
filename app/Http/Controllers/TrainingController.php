@@ -224,15 +224,13 @@ class TrainingController extends Controller
             TrainingSession::insert(['type'=>$type,'step_id'=>$step,'title'=>$title,'dsc'=>$dsc,'zoom_id'=>$zoomid,'datetime'=>$datetime,
                 'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
             // ======> notify Trainer <=================
-
-
             $MSG = new TemplateEmail;
-            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
-                ", Check your account to join the session ","/dashboard"];
+            $MSG->ActionText="Start Session";
+            $MSG->ActionUrl=$start;
+            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new online training session, with Title : ".$topic.", Session will start:".$datetime
+                ,"/dashboard"];
             \Notification::route('mail', $request->trainer_email)
                 ->notify($MSG);
-
-
             // ==========> End Notify <================
             return back()->with(['message'=>'Session added successfully','class' => 'success']);
         } elseif ($type=='online') {
@@ -245,8 +243,8 @@ class TrainingController extends Controller
             // ======> notify Trainer <=================
 
             $MSG = new TemplateEmail;
-            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
-                ", Check your account to join the session ","/dashboard"];
+            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new offline training session with title : ".$title.", Session will start:".$datetime.
+                ", At this location: ".$request->location,"/dashboard"];
             \Notification::route('mail', $request->trainer_email)
                 ->notify($MSG);
             // ==========> End Notify <================
@@ -277,8 +275,10 @@ class TrainingController extends Controller
                 'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
             // ======> notify Trainer <=================
             $MSG = new TemplateEmail;
-            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
-                ", Check your account to join the session ","/dashboard"];
+            $MSG->ActionText="Start Session";
+            $MSG->ActionUrl=$start;
+            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new online training session, with Title : ".$topic.", Session will start:".$datetime
+               ,"/dashboard"];
             \Notification::route('mail', $request->trainer_email)
                 ->notify($MSG);
 
@@ -292,10 +292,9 @@ class TrainingController extends Controller
             TrainingSession::where('id',$id)->update(['type'=>$type,'title'=>$title,'dsc'=>$dsc,'datetime'=>$datetime,'user_id'=>Auth::id(),'location'=>$request->location,
                 'enddatetime'=>$request->enddatetime, 'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
             // ======> notify Trainer <=================
-
             $MSG = new TemplateEmail;
-            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
-                ", Check your account to join the session ","/dashboard"];
+            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new offline training session with title : ".$title.", Session will start:".$datetime.
+                ", At this location: ".$request->location,"/dashboard"];
             \Notification::route('mail', $request->trainer_email)
                 ->notify($MSG);
             // ==========> End Notify <================
