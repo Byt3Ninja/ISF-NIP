@@ -118,7 +118,7 @@
                                     @endif
 
                                 </td>
-                                <td> <button title="Delete" onclick="editme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-primary">
+                                <td> <button title="Edit" onclick="editme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-primary">
                                         <i class="bx bx-edit"></i></button>&nbsp;
                                     <button title="Delete" onclick="deleteme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-danger">
                                         <i class="bx bx-trash"></i></button>

@@ -236,6 +236,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('mentorship/addwait','MentorsController@addwait');
     Route::get('mentorship/mine','MentorsController@mine');
     Route::post('mentorship/rate','MentorsController@rate');
+    Route::post('mentorship/delsession/{id}' ,'MentorsController@delsession');
+
     //Training
     Route::get('training/all/{id?}','TrainingController@all')->name('training.all');
     Route::get('training/edit/{id}','TrainingController@edit');
