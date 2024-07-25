@@ -225,15 +225,12 @@ class TrainingController extends Controller
                 'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
             // ======> notify Trainer <=================
 
-            $user = new User();
-            $user->email = $request->trainer_email;
-            $user->name=$request->trainer_name;
-            $user->make();
+
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
-            \Notification::send($user, $MSG);
-//            $user->notify($MSG);
+            \Notification::route('mail', $request->trainer_email)
+                ->notify($MSG);
 
 
             // ==========> End Notify <================
@@ -246,14 +243,12 @@ class TrainingController extends Controller
             TrainingSession::insert(['type'=>$type,'step_id'=>$step,'title'=>$title,'dsc'=>$dsc,'datetime'=>$datetime,'user_id'=>Auth::id(),'location'=>$request->location,
                 'enddatetime'=>$request->enddatetime, 'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
             // ======> notify Trainer <=================
-            $user = new User();
-            $user->email = $request->trainer_email;
-            $user->id = 1;
-            $user->make();
+
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
-            $user->notify($MSG);
+            \Notification::route('mail', $request->trainer_email)
+                ->notify($MSG);
             // ==========> End Notify <================
             return back()->with(['message'=>'Saved','class' => 'success']);
         } else {
@@ -281,10 +276,6 @@ class TrainingController extends Controller
             TrainingSession::where('id',$id)->update(['type'=>$type,'title'=>$title,'dsc'=>$dsc,'zoom_id'=>$zoomid,'datetime'=>$datetime,
                 'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
             // ======> notify Trainer <=================
-            $user = new User();
-            $user->email = $request->trainer_email;
-            $user->name=$request->trainer_name;
-            $user->make();
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
@@ -301,13 +292,12 @@ class TrainingController extends Controller
             TrainingSession::where('id',$id)->update(['type'=>$type,'title'=>$title,'dsc'=>$dsc,'datetime'=>$datetime,'user_id'=>Auth::id(),'location'=>$request->location,
                 'enddatetime'=>$request->enddatetime, 'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
             // ======> notify Trainer <=================
-            $user = new User();
-            $user->email = $request->trainer_email;
-            $user->id = 1;
+
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
-            $user->notify($MSG);
+            \Notification::route('mail', $request->trainer_email)
+                ->notify($MSG);
             // ==========> End Notify <================
             return back()->with(['message'=>'Saved','class' => 'success']);
         } else {
