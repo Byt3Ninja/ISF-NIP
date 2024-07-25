@@ -7,11 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Finalscreening extends Model
 {
-    use Auditable;
-    protected $fillable = ['organization_id', 'company_id','step_id','judges','datetime','duration','zoom_id','start_url','join_url'];
-    protected $casts = ['judges' => 'array',];
+//    use Auditable;
+    protected $fillable = [ 'company_id','step_id','judges','datetime','duration','zoom_id','start_url','join_url'];
+    protected $casts = ['judges' => 'array'];
     public function company()
     {
         return $this->hasOne(Company::class,'id','company_id');
+    }
+    public function step(){
+        return $this->belongsTo(Step::class,'step_id');
+    }
+
+    public function evaluationJudgers(){
+
+        return User::whereIn('id',$this->attributes['judges'])->get();
     }
 }

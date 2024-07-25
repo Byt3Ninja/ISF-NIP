@@ -78,4 +78,6 @@ return [
     'Private' => 'Private Link',
     'view' => 'view',
     'View training content' => 'View training content',
+    'Complete'=>'Complete',
+    'Send'=>'Send'
 ];

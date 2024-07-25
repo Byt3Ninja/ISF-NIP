@@ -1,19 +1,19 @@
 @extends('layouts.admin')
 @section('vendorstyle')
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/charts/apexcharts.css">
-<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/charts/apexcharts.css">
+    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/swiper.min.css">
 @stop
 @section('style')
-<link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/dashboard-analytics.css">
+    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/dashboard-analytics.css">
 @stop
 @section('content')
     @php
-    $tusers = App\User::count();
-    $notactive = App\User::join('model_has_roles','id','=','model_id')->where('role_id',5)->count();
-    $individual = App\User::whereNull('HaveCompany')->count();
+        $tusers = App\User::count();
+        $notactive = App\User::join('model_has_roles','id','=','model_id')->where('role_id',5)->count();
+        $individual = App\User::whereNull('HaveCompany')->count();
 
     @endphp
-    <!-- BEGIN: Content-->
+            <!-- BEGIN: Content-->
     <div class="app-content content">
         <div class="content-overlay"></div>
         <div class="content-wrapper">
@@ -82,37 +82,37 @@
                                                     </div>
 
                                                 </div>
-                                            <div class="card-content">
-                                                <div class="card-body">
-                                                    <p>{{__('admin.ReportLang')}}</p>
-                                                    <ul class="list-unstyled mb-0">
-                                                        <li class="d-inline-block mr-2 mb-1">
-                                                            <fieldset>
-                                                                <div class="radio">
-                                                                    <input type="radio" name="lang" value="ar" id="radio1" checked="">
-                                                                    <label for="radio1">{{__('admin.Arabic')}}</label>
-                                                                </div>
-                                                            </fieldset>
-                                                        </li>
-                                                        <li class="d-inline-block mr-2 mb-1">
-                                                            <fieldset>
-                                                                <div class="radio">
-                                                                    <input type="radio" name="lang" value="en" id="radio2">
-                                                                    <label for="radio2">{{__('admin.English')}}</label>
-                                                                </div>
-                                                            </fieldset>
-                                                        </li>
-                                                    </ul>
-                                                    <button type="submit" class="btn btn-primary">{{__('admin.Download')}}</button>
+                                                <div class="card-content">
+                                                    <div class="card-body">
+                                                        <p>{{__('admin.ReportLang')}}</p>
+                                                        <ul class="list-unstyled mb-0">
+                                                            <li class="d-inline-block mr-2 mb-1">
+                                                                <fieldset>
+                                                                    <div class="radio">
+                                                                        <input type="radio" name="lang" value="ar" id="radio1" checked="">
+                                                                        <label for="radio1">{{__('admin.Arabic')}}</label>
+                                                                    </div>
+                                                                </fieldset>
+                                                            </li>
+                                                            <li class="d-inline-block mr-2 mb-1">
+                                                                <fieldset>
+                                                                    <div class="radio">
+                                                                        <input type="radio" name="lang" value="en" id="radio2">
+                                                                        <label for="radio2">{{__('admin.English')}}</label>
+                                                                    </div>
+                                                                </fieldset>
+                                                            </li>
+                                                        </ul>
+                                                        <button type="submit" class="btn btn-primary">{{__('admin.Download')}}</button>
+
+                                                    </div>
 
                                                 </div>
-
-                                            </div>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
-                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -213,12 +213,11 @@
                             </div>
                         </div>
                     </div>
-            </div>
             </section>
             <!-- Multiple Select2 end -->
 
-            </div>
         </div>
+    </div>
     </div>
     <!-- END: Content-->
 @stop
@@ -324,7 +323,7 @@
             analyticsBarChartOptions
         );
 
-    //    analyticsBarChart.render();
+        //    analyticsBarChart.render();
 
         // Radial-Success-chart
         // --------------------------------
@@ -549,3 +548,4 @@
         radialDangerChart.render();
     </script>
 @stop
+

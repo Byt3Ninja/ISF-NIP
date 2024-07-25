@@ -6,24 +6,25 @@ use App\Company;
 use App\Cycle;
 use App\CyclesMentors;
 use App\Events\WebMessage;
+use App\Factories\OnlineMeetingFactory;
 use App\MentorshipRequest;
 use App\Schedule;
 use App\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Traits\ZoomMeetingTrait;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TemplateEmail;
 
 class MentorsController extends Controller
 {
-     use ZoomMeetingTrait;
 
-    const MEETING_TYPE_INSTANT = 1;
-    const MEETING_TYPE_SCHEDULE = 2;
-    const MEETING_TYPE_RECURRING = 3;
-    const MEETING_TYPE_FIXED_RECURRING_FIXED = 8;
+
+    protected $meetingService;
+    public function __construct()
+    {
+        $this->meetingService =  OnlineMeetingFactory::create();
+    }
   
     public function index($id = 0)
     {
@@ -52,6 +53,7 @@ class MentorsController extends Controller
         $cycles= Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
             return $q->where('organization_id',$organization_id);
         })->get();
+
         return view('admin.settings.mentorship.assign', compact( 'mentors','id','clist','cycles'));
     }
     public function assign($id ,Request $request){
@@ -63,7 +65,7 @@ class MentorsController extends Controller
                 CyclesMentors::insert(['cycle_id'=>$request->id,'user_id'=>$user]);
             }}
         }
-        return back();
+        return back()->with(['message' => 'Request successfully added','class'=>'success']);
     }
     public function addwait(Request $request)
     {
@@ -89,28 +91,31 @@ class MentorsController extends Controller
     }
     public function add(Request $request)
     {
-        $this->preProcessingCheck('edit_cycles');
+//        $this->preProcessingCheck('edit_cycles');
 
         if ($request->userid) {
             $dates = explode(',',$request->date);
             foreach ($dates as $key){
-                $date = str_replace("@"," " ,$key);
+                $date = ltrim($key);
+
                 $topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
                 $data = ['topic'=>$topic, "start_time"=>$date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
-                $zoom = $this->create($data);
-                if (!$zoom['success']) {return back()->with(['message2' => "Error, can't create zoom meeting."]);}
+                $onlineMeeting = $this->meetingService->createMeeting($data);
+                if (!$onlineMeeting['success']) {return back()->with(['message2' => "Error, can't create online meeting."]);}
+
+                $dateFormat = new \DateTime($date);
                 MentorshipRequest::insert([
                     'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
-                    'admin_id' => Auth::id(), 'start_url' => $zoom['data']['start_url'], 'join_url' => $zoom['data']['join_url'],
-                    'zoom_date' => date('Y-m-d H:i',strtotime($date)), 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
+                    'admin_id' => Auth::id(), 'start_url' => $onlineMeeting['data']['start_url'], 'join_url' => $onlineMeeting['data']['join_url'],
+                    'zoom_date' => $dateFormat->format('Y-m-d H:i'), 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
                 ]);
                 /// notify user via Mail
 
                 $mentor = User::findOrFail($request->mentorid);
-                $mentor_name = $mentor->first_name_en ." ". $mentor->last_name_en;
+                $mentor_name = $mentor->name;
 
                 $startup_owner = User::findOrFail($request->userid);
-                $startup_owner_name = $startup_owner->first_name_en ." ". $startup_owner->last_name_en;
+                $startup_owner_name = $startup_owner->name;
 
                 /// Notify Mentor
                 $user = new User();
@@ -177,10 +182,10 @@ class MentorsController extends Controller
         $approved ='Yes';
         $topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
         $data = ['topic'=>$topic, "start_time"=>$request->date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
-        $zoom = $this->create($data);
-      if (!$zoom['success']) {return back()->with(['message2' => "Error, can't create zoom meeting."]);}
-       	$start = $zoom['data']['start_url'];
-        $join = $zoom['data']['join_url'];   
+        $onlineMeeting = $this->meetingService->createMeeting($data);
+        if (!$onlineMeeting['success']) {return back()->with(['message2' => "Error, can't create Online meeting."]);}
+        $start = $onlineMeeting['data']['start_url'];
+        $join = $onlineMeeting['data']['join_url'];
       }
       MentorshipRequest::where('id',$request->id)->update(['period'=> $request->period, 'zoom_date'=>$request->date, 'admin_comment' => $request->notes, 'approved'=>$approved, 'start_url' => $start, 'join_url' => $join ]);
           /// Notify Mentor
@@ -190,8 +195,8 @@ class MentorsController extends Controller
           $user = new User();
           $user->email = $rname->email;
           $user->id = $rname->id;
-          $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
-          $rfullname_usr = $rname_usr->first_name_en ." ". $rname_usr->last_name_en;
+          $rfullname = $rname->name;
+          $rfullname_usr = $rname_usr->name;
           $MSG = new TemplateEmail;
           $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname.",","Kindly note you have a new mentorship session with '".$rfullname_usr."', Session will start:".$request->date.
               ", Check your account to join the session ","/dashboard"];
@@ -205,7 +210,7 @@ class MentorsController extends Controller
               ", Check your account to join the session ","/dashboard"];
           $user->notify($MSG);
           /// End of mail send
-      return back()->with(['message' => 'ٍaved successfully']);
+      return back()->with(['message' => 'ٍsaved successfully']);
       } else {return back()->with(['message2' => 'Error saving data']);}
     }
 
@@ -217,14 +222,16 @@ class MentorsController extends Controller
                 if ($type == 6) {
                   	$start = $join = null;
                   	   if($request->stat=='Yes'){
-                  	$mrequest = MentorshipRequest::findOrFail($request->id);
-                  	$topic = "Online mentorship meeting (M" . $mrequest->mentor_id . '- U'.$mrequest->user_id . ')';
-          			$data = ['topic'=>$topic, "start_time"=>$mrequest->zoom_date, 'duration'=>$mrequest->period, 'host_video'=>1, 'participant_video'=>1];
-          			$zoom = $this->create($data);
-                       if (!$zoom['success']) {return response()->json('failed, zoom api error');}
-                    $start = $zoom['data']['start_url'];
-                    $join = $zoom['data']['join_url'];  
-                    }
+                             $mrequest = MentorshipRequest::findOrFail($request->id);
+                             $topic = "Online mentorship meeting (M" . $mrequest->mentor_id . '- U'.$mrequest->user_id . ')';
+                             $data = ['topic'=>$topic, "start_time"=>$mrequest->zoom_date, 'duration'=>$mrequest->period, 'host_video'=>1, 'participant_video'=>1];
+
+                             $onlineMeeting = $this->meetingService->createMeeting($data);
+
+                             if (!$onlineMeeting['success']) {return response()->json('failed, Online meeting api error');}
+                             $start = $onlineMeeting['data']['start_url'];
+                             $join = $onlineMeeting['data']['join_url'];
+                         }
                     MentorshipRequest::where('id',$request->id)->update(['approved'=>$request->stat, 'start_url' => $start, 'join_url' => $join ]);
                     /// Notify Mentor
                     $session = MentorshipRequest::findOrFail($request->id);
@@ -233,8 +240,8 @@ class MentorsController extends Controller
                     $user = new User();
                     $user->email = $rname->email;
                     $user->id = $rname->id;
-                    $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
-                    $rfullname_usr = $rname_usr->first_name_en ." ". $rname_usr->last_name_en;
+                    $rfullname = $rname->name;
+                    $rfullname_usr = $rname_usr->name;
                     $MSG = new TemplateEmail;
                     $MSG->Message=["New Mentorship session - VI portal","Dear ".$rfullname.",","Kindly note you have a new mentorship session with '".$rfullname_usr."', Session will start:".$request->date.
                         ", Check your account to join the session ","/dashboard"];

@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'First screening'=>'التقييمات المبدأية',
-    'Final screening'=>'التقييمات النهائية',
+    'First screening'=>'المراجعة و الفحص',
+    'Final screening'=>'التقييمات',
     'Services' => 'الخدمات',
     'newmessages' => 'الرسائل الجديدة',
     'Latest services' => 'آخر الخدمات',
@@ -117,4 +117,6 @@ return [
     'to view your training list' => 'للإطلاع على قائمة تدريباتك',
     'My Latest training' => 'آخر التدريبات القادمة',
     'Show all' => 'عرض الكل',
+    'Final pending screening'=>'جلسات التقييمات المنتظرة',
+    'screening pending sessions'=>'جلسات المراجعة و الفحص المنتظرة'
 ];

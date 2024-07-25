@@ -1,0 +1,213 @@
+[
+  {
+    "id": "1",
+    "title": "Product Development",
+    "parent_id": null
+  },
+  {
+    "id": "2",
+    "title": "MVP development",
+    "parent_id": "1"
+  },
+  {
+    "id": "3",
+    "title": "Prototyping",
+    "parent_id": "1"
+  },
+  {
+    "id": "4",
+    "title": "Product iteration",
+    "parent_id": "1"
+  },
+  {
+    "id": "5",
+    "title": "UX\/UI design",
+    "parent_id": "1"
+  },
+  {
+    "id": "6",
+    "title": "Customer feedback",
+    "parent_id": "1"
+  },
+  {
+    "id": "7",
+    "title": "Market research",
+    "parent_id": "1"
+  },
+  {
+    "id": "8",
+    "title": "Market Fit",
+    "parent_id": null
+  },
+  {
+    "id": "9",
+    "title": "Market research",
+    "parent_id": "8"
+  },
+  {
+    "id": "10",
+    "title": "Customer segmentation",
+    "parent_id": "8"
+  },
+  {
+    "id": "11",
+    "title": "Demand validation",
+    "parent_id": "8"
+  },
+  {
+    "id": "12",
+    "title": "Competitive analysis",
+    "parent_id": "8"
+  },
+  {
+    "id": "13",
+    "title": "Sales strategy",
+    "parent_id": "8"
+  },
+  {
+    "id": "14",
+    "title": "Marketing tactics",
+    "parent_id": "8"
+  },
+  {
+    "id": "15",
+    "title": "Business Model",
+    "parent_id": null
+  },
+  {
+    "id": "16",
+    "title": "Revenue model",
+    "parent_id": "15"
+  },
+  {
+    "id": "17",
+    "title": "Pricing strategy",
+    "parent_id": "15"
+  },
+  {
+    "id": "18",
+    "title": "Financial planning",
+    "parent_id": "15"
+  },
+  {
+    "id": "19",
+    "title": "Cost structure",
+    "parent_id": "15"
+  },
+  {
+    "id": "20",
+    "title": "Budgeting",
+    "parent_id": "15"
+  },
+  {
+    "id": "21",
+    "title": "Financial forecasting",
+    "parent_id": "15"
+  },
+  {
+    "id": "22",
+    "title": "Team and Leadership",
+    "parent_id": null
+  },
+  {
+    "id": "23",
+    "title": "Team building",
+    "parent_id": "22"
+  },
+  {
+    "id": "24",
+    "title": "Leadership development",
+    "parent_id": "22"
+  },
+  {
+    "id": "25",
+    "title": "Organizational structure",
+    "parent_id": "22"
+  },
+  {
+    "id": "26",
+    "title": "HR policies",
+    "parent_id": "22"
+  },
+  {
+    "id": "27",
+    "title": "Recruitment",
+    "parent_id": "22"
+  },
+  {
+    "id": "28",
+    "title": "Talent management",
+    "parent_id": "22"
+  },
+  {
+    "id": "29",
+    "title": "Financial Health",
+    "parent_id": null
+  },
+  {
+    "id": "30",
+    "title": "Financial management",
+    "parent_id": "29"
+  },
+  {
+    "id": "31",
+    "title": "Budgeting",
+    "parent_id": "29"
+  },
+  {
+    "id": "32",
+    "title": "Financial analytics",
+    "parent_id": "29"
+  },
+  {
+    "id": "33",
+    "title": "KPI tracking",
+    "parent_id": "29"
+  },
+  {
+    "id": "34",
+    "title": "Fundraising strategy",
+    "parent_id": "29"
+  },
+  {
+    "id": "35",
+    "title": "Investor relations",
+    "parent_id": "29"
+  },
+  {
+    "id": "36",
+    "title": "Operations",
+    "parent_id": null
+  },
+  {
+    "id": "37",
+    "title": "Process optimization",
+    "parent_id": "36"
+  },
+  {
+    "id": "38",
+    "title": "Lean operations",
+    "parent_id": "36"
+  },
+  {
+    "id": "39",
+    "title": "Supply chain management",
+    "parent_id": "36"
+  },
+  {
+    "id": "40",
+    "title": "Logistics",
+    "parent_id": "36"
+  },
+  {
+    "id": "41",
+    "title": "Technology integration",
+    "parent_id": "36"
+  },
+  {
+    "id": "42",
+    "title": "Automation",
+    "parent_id": "36"
+  }
+]
+

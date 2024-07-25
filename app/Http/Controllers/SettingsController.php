@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 use App\Calendar;
 use App\Cycle;
+use App\MentorshipRequest;
 use App\Notifications\TemplateEmail;
 Use App\Settings;
 Use App\Messages;
@@ -252,29 +253,43 @@ public function update_contactus(Request $request){
 public function calendar(Request $request){
     if($request->ajax()) {
         /// my data
-        $data = Calendar::where('user_id',Auth::user()->id)->where(function($query) use($request) {
-            $query->orwhereDate('start', '>=', $request->start)
-                ->orwhereDate('end', '<=', $request->end);
-        })->get(['id', 'title', 'start', 'end', 'color', 'calendarId','allDay', DB::raw('"true" AS editable')]);
-   /*     $cycles = Cycle::orwhereDate('start', '>=', $request->start)
-            ->orwhereDate('end', '<=', $request->end)
-            ->get(['id', 'title', 'start', 'end',DB::raw('1 AS allDay, "#000" AS color, "c" AS calendarId')]); */
-        $events = Event::where('published',1)->where(function($query) use($request){
-            $query->orwhereDate('timerdate', '>=', $request->start)
-                ->orwhereDate('timerdate',   '<=', $request->end);
-        })->get(['id', 'title_en AS title', 'timerdate AS start',DB::raw('"#607d8b" AS color, "e" AS calendarId')]);
-        if (Auth::user()->can('edit_calendar')) {
-            $public = Calendar::whereNull('isPrivate')->where(function($query) use($request) {
-                $query->orwhereDate('start', '>=', $request->start)
-                    ->orwhereDate('end', '<=', $request->end);
-            })->get(['id', 'title', 'start', 'end', 'color', 'calendarId','allDay', DB::raw('"true" AS editable')]);
-        } else {
-            $public = Calendar::whereNull('isPrivate')->where(function($query) use($request) {
-                $query->orwhereDate('start', '>=', $request->start)
-                    ->orwhereDate('end', '<=', $request->end);
-            })->get(['id', 'title', 'start', 'end', 'color', 'calendarId','allDay',DB::raw('"p" AS calendarId')]);
+//        $data = Calendar::where('user_id',Auth::user()->id)->where(function($query) use($request) {
+//            $query->orwhereDate('start', '>=', $request->start)
+//                ->orwhereDate('end', '<=', $request->end);
+//        })->get(['id', 'title', 'start', 'end', 'color', 'calendarId','allDay', DB::raw('"true" AS editable')]);
+//   /*     $cycles = Cycle::orwhereDate('start', '>=', $request->start)
+//            ->orwhereDate('end', '<=', $request->end)
+//            ->get(['id', 'title', 'start', 'end',DB::raw('1 AS allDay, "#000" AS color, "c" AS calendarId')]); */
+//        $events = Event::where('published',1)->where(function($query) use($request){
+//            $query->orwhereDate('timerdate', '>=', $request->start)
+//                ->orwhereDate('timerdate',   '<=', $request->end);
+//        })->get(['id', 'title_en AS title', 'timerdate AS start',DB::raw('"#607d8b" AS color, "e" AS calendarId')]);
+//        if (Auth::user()->can('edit_calendar')) {
+//            $public = Calendar::whereNull('isPrivate')->where(function($query) use($request) {
+//                $query->orwhereDate('start', '>=', $request->start)
+//                    ->orwhereDate('end', '<=', $request->end);
+//            })->get(['id', 'title', 'start', 'end', 'color', 'calendarId','allDay', DB::raw('"true" AS editable')]);
+//        } else {
+//            $public = Calendar::whereNull('isPrivate')->where(function($query) use($request) {
+//                $query->orwhereDate('start', '>=', $request->start)
+//                    ->orwhereDate('end', '<=', $request->end);
+//            })->get(['id', 'title', 'start', 'end', 'color', 'calendarId','allDay',DB::raw('"p" AS calendarId')]);
+//        }
+//        $data = $data->merge($public)->merge($events);
+
+        $mentorshipRequests = MentorshipRequest::get();
+        foreach ($mentorshipRequests as $key){
+            $data[]=[
+                'id'=>$key->id,
+                'title'=>$key->mentor->name,
+                'start'=>$key->zoom_date,
+                'end'=> $key->end_zoom_date,
+                'calendarId'=>'M',
+                'color'=>'#607d8b',
+                'allDay'=>false
+            ];
         }
-        $data = $data->merge($public)->merge($events);
+
         return response()->json($data);
                         }
     return view('admin.calendar');

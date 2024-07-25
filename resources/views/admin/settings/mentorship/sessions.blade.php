@@ -132,15 +132,15 @@
                                                 <img class="img-fluid" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
                                             </div>
                                     <span class="chip-text">
-{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}
+                                {{$session->mentor->name}}
                                     </span>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <small>{!!  $session->rate_comment?
-str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->rating).
-'<br>'.$session->rate_comment:$session->comment  !!}</small>
+                                         str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->rating).
+                                    '<br>'.$session->rate_comment:$session->comment  !!}</small>
                                 </td>
                                 <td>
                                     {{$session->zoom_date}}

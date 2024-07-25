@@ -8,26 +8,7 @@
 @section('subTitle', __('admin.My Dashboard'))
 @section('content')
 
-@if(!Auth::user()->bio)
-{!!redirect('/dashboard/myProfile#bio')!!}
-@endif
-@php
-    $s_latest = \App\Service::orderBy('created_at','DESC')->take(5)->get();
-      $e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) {
-          $q->orWhere('user_id',Auth::id())
-          ->orWhereNull('isPrivate');
-      })->orderBy('start')->take(5)->get();
-      $s_count = \App\Service::count();
-      $s_r_count = \App\ServicesRequests::where('user_id',Auth::id())->count();
-      $nm_count = \App\Messenger::where('receiver',Auth::id())->whereNull('read')->count();
-          $myid = Auth::id();
-          $mysteps = App\Screening::where('user_id',Auth::id())->get();
-          $today = date("Y-m-d");
-          $csteps = App\Step::whereRaw( '"'.$today. '" BETWEEN `from` AND `to`')->whereIn('id',$mysteps->pluck('step_id'))->get();
-          $fcompanies = App\Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
-  $mysessions = \App\MentorshipRequest::where('mentor_id',Auth::id())->where('zoom_date','>=',date("Y-m-d 00:00:00"))->where('approved','Yes')->get();
-  $mycycles = \App\CyclesMentors::where('user_id',$myid)->get();
-@endphp
+
 <!-- BEGIN: Content-->
 <div class="app-content content">
     <div class="content-overlay"></div>
@@ -65,7 +46,7 @@
                                             <i class="bx bx bx-briefcase-alt font-medium-5"></i>
                                         </div>
                                         <div class="text-muted line-ellipsis">{{__('dashboard.Services')}}</div>
-                                        <h3 class="mb-0">{{$s_count}}</h3>
+                                        <h3 class="mb-0">{{$services_count}}</h3>
                                     </div>
                                 </a>
                             </div>
@@ -112,6 +93,72 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-sm-6 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-light-info mx-auto mb-50">
+                                        <i class="bx bx-server font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('admin.Company Attendance Rate')}}</div>
+                                    <h3 class="mb-0">{{$attends_rate}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
+                                        <i class="bx bx-star font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('cycles.Rate')}}</div>
+                                    <small>{!! str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',auth()->user()->mrating()) !!}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-warning mx-auto mb-50">
+                                        <i class="bx bx-select-multiple font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('mentor.mentorshipRequests.withoutTasks')}}</div>
+                                    <h3 class="mb-0">{{$sessionWithoutTasks}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-success mx-auto mb-50">
+                                        <i class="bx bx-task font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('mentor.mentorshipTasks.completedTasks')}}</div>
+                                    <h3 class="mb-0">{{$completedTasks}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 col-12">
+                        <div class="card text-center">
+                            <div class="card-content">
+                                <div class="card-body py-1">
+                                    <div class="badge-circle badge-circle-lg badge-circle-info mx-auto mb-50">
+                                        <i class="bx bx-archive font-medium-5"></i>
+                                    </div>
+                                    <div class="text-muted line-ellipsis">{{__('mentor.mentorshipTasks.nonCompletedTasks')}}</div>
+                                    <h3 class="mb-0">{{$nonCompletedTasks}}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
               <div class="row">
                     <div class="col-sm-6 col-12">
@@ -129,8 +176,8 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                @if (count($s_latest)>0)
-                                    @foreach($s_latest as $serv)
+                                @if (count($services_latest)>0)
+                                    @foreach($services_latest as $serv)
                                         <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
                                             <div class="widget-todo-title-area d-flex align-items-center">
                                                 <a href="/dashboard/directory?find={{$serv->{'name_'.$l} }}">
@@ -175,8 +222,8 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                @if (count($e_latest)>0)
-                                    @foreach($e_latest as $event)
+                                @if (count($event_latest)>0)
+                                    @foreach($event_latest as $event)
                                         <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
                                             <div class="widget-todo-title-area d-flex align-items-center">
                                                 <a href="/dashboard/calendar">
@@ -218,7 +265,6 @@
                                         <i class="bx bx-plus"></i></button></h4>
                             </div>
                             <div class="card-body">
-                                @php ($myschedules = \App\Schedule::where('user_id',Auth::id())->get())
                                 @if(count($myschedules))
                                 <div class="card border-light">
                                     <div class="table-responsive">
@@ -262,7 +308,7 @@
                                                         <i class="bx bx-trash"></i></button>
                                                 </td>
                                             </tr>
-@endforeach
+                                          @endforeach
                                             </tbody>
                                         </table>
                                     </div>
@@ -270,7 +316,7 @@
                             </div>
                                 @else
                                 {{ __('dashboard.kindly add your schedule')}}  <a href="#" onclick="modify(0,0,0)">"{{ __('dashboard.here')}}"</a>.
-@endif
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -302,25 +348,25 @@
                                             <tbody>
                                     @foreach($mysessions as $key=>$session)
                                             <tr>
-                                                <td>{{$key+1}}</td>
+                                                <td>{{ $loop->iteration }}</td>
                                                 <td>
                                                     <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
-                                                        <img src="/191014/{{$session->user->company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                        <img src="{{$session->user->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                     </a>
                                                     <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                         <div class="media align-items-center">
-                                                            {{$session->user->company->{'name_'.$l} }}
+                                                            {{$session->user->company->name }}
                                                         </div>
                                                     </a>
                                                 </td>
                                                 <td>
                                                     <div class="media align-items-center">
                                                         <a class="media-left mr-50">
-                                                            <img src="/191014/{{$session->user->img_url??'../images/placeholder.jpg'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                            <img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                         </a>
                                                             <div class="media-body">
-                                                                <h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
-                                                                <span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
+                                                                <h6 class="media-heading mb-0">{{$session->user->name  }}</h6>
+                                                                <span class="font-small-2">{{$session->user->title }}</span>
                                                             </div>
                                                     </div>
                                                 </td>
@@ -331,12 +377,16 @@
                                                    {{$session->admin_comment??'-'}}
                                                 </td>
                                               <td>
-                                                 <a href="{{$session->join_url}}" target="_blank">
-                                  	<button title="Start Meeting" type="button" class="btn btn-icon rounded-circle btn-light-success">
-                                        <i class="bx bx-user"></i></button></a>
+                                                 @if (now()->format('Y-m-d') == date('Y-m-d',strtotime($session->zoom_date)))
+                                                        <button title="Start Meeting" type="button" data-value="{{ $session->id }}" class="btn btn-icon rounded-circle btn-success start_meeting">
+                                                           <i class="bx bx-user"></i></button>
+                                                  @else
+                                                      <button title="Start Meeting" type="button" disabled class="btn btn-icon rounded-circle btn-light-warning">
+                                                          <i class="bx bx-alarm"></i></button>Meeting will start at time
+                                                 @endif
                                                 </td>
                                             </tr>
-                        @endforeach
+                                    @endforeach
                                             </tbody>
                                         </table>
                                     </div>
@@ -418,6 +468,7 @@
         </div>
     </div>
 </div>
+
 @stop
 @section('pagescripts')
 <script src="/js/jquery.datetimepicker.full.min.js"></script>
@@ -510,5 +561,20 @@
                 break;
         }
     }
+
+    $('.start_meeting').click(function () {
+        $.ajax({
+            type: "GET", url: "/dashboard/mentor/meetingRedirect/"+$(this).data('value'),
+            success: function (response) {
+                alert(response['message']);
+                window.open(response['join_url'], '_blank');
+                window.location.href ='{{ route('mentorshipTasks.index') }}'+'?mentorship_id='+response['mentorship_id'];
+            },
+            error: function (error) {
+                console.log(error);
+                alert("Error Occurred, Try again!");
+            }
+        });
+    });
 </script>
 @stop

@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    use Auditable;
+//    use Auditable;
     protected $fillable = ['organization_id', 'country_id','state_id', 'city_id', 'name_en', 'name_ar', 'address_en', 'sector', 'address_ar', 'phone', 'fax', 'email', 'website',
         'est_date','idea','problem','solution','team_num', 'stage','raised_fund','investors','founder','employees','facebook', 'twitter',
-        'linkedin', 'youtube', 'google_map', 'logo','cycle','step','approved','approved_by'];
+        'linkedin', 'youtube', 'google_map', 'logo','cycle','step','approved','approved_by','business_type','institutions',
+        'development_stage','revenue_generating','currently_fundraising', 'desired_funding_amount'
+    ];
 
     // ===========> Attributes <==============
     public function getLogoUrlAttribute()
@@ -27,6 +29,10 @@ class Company extends Model
     public function getNameAttribute()
     {
         return $this->{"name_".app()->getLocale()};
+    }
+    public function getInstitutionsAttribute()
+    {
+        return json_decode($this->attributes['institutions']);
     }
 
     // ==========> Relations <==============
@@ -111,5 +117,16 @@ class Company extends Model
     public function fsession($s)
     {
         return (Finalscreening::where('company_id',$this->id)->where('step_id',$s)->first());
+    }
+
+    public function finalData(){
+        return $this->hasMany(FinalData::class,'company_id');
+    }
+    public function formData(){
+        return $this->hasMany(Formdata::class,'company_id');
+    }
+
+    public function fundingRounds(){
+        return $this->hasMany(FundingRound::class,'company_id');
     }
 }

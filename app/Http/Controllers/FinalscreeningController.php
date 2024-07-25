@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Factories\OnlineMeetingFactory;
 use App\FinalData;
 use App\Finalscreening;
 use App\Formfield;
+use App\Notifications\TemplateEmail;
 use App\Step;
-use App\Traits\ZoomMeetingTrait;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -20,12 +21,11 @@ use Illuminate\Support\Facades\Validator;
 
 class FinalscreeningController extends Controller
 {
-     use ZoomMeetingTrait;
-
-    const MEETING_TYPE_INSTANT = 1;
-    const MEETING_TYPE_SCHEDULE = 2;
-    const MEETING_TYPE_RECURRING = 3;
-    const MEETING_TYPE_FIXED_RECURRING_FIXED = 8;
+    protected $meetingService;
+    public function __construct()
+    {
+        $this->meetingService =  OnlineMeetingFactory::create();
+    }
 
     public function index($id = 0)
     {
@@ -125,7 +125,7 @@ class FinalscreeningController extends Controller
             $field_options = Formfield::findOrFail($fid)->options;
             $field_name = 'field_'. $fid;
             FinalData::where('field_id',$fid)->where('judge_id',$uid)->where('company_id',$cid)->delete();
-            FinalData::updateOrInsert(['field_id'=>$fid, 'judge_id'=>$uid, 'company_id'=>$cid, 'step_id'=>$id, 'question'=>$field_options->label,'answer'=>$request->input($field_name)]);
+            FinalData::updateOrCreate(['field_id'=>$fid, 'judge_id'=>$uid, 'company_id'=>$cid, 'step_id'=>$id, 'question'=>$field_options->label,'answer'=>$request->input($field_name)]);
         }
         return Redirect::back()->with(['msg' => 'StoredSuccessfully','class'=>'success']);
     }
@@ -135,13 +135,51 @@ class FinalscreeningController extends Controller
         if ($request->period) {
             $topic = "Final Screening (C" . $request->company . ')';
             $data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
-            $zoom = $this->create($data);
-            if (!$zoom['success']) {
+            $onlineMeeting = $this->meetingService->createMeeting($data);
+            if (!$onlineMeeting['success']) {
                 return back()->with(['message2' => "API Error, can't create zoom meeting."]);
             }
-            /// Notify users
-            Finalscreening::where('step_id', $request->step)->where('company_id', $request->company)->update(['datetime' => $request->date, 'duration' => $request->duration,
-                'zoom_id' => $zoom['data']['id'], 'start_url' =>  $zoom['data']['start_url'], 'join_url' =>  $zoom['data']['join_url']]);
+
+            $finalScreening = Finalscreening::where('step_id', $request->step)->where('company_id', $request->company)->update(['datetime' => $request->date, 'duration' => $request->duration,
+                'zoom_id' => $onlineMeeting['data']['id'], 'start_url' =>  $onlineMeeting['data']['start_url'], 'join_url' =>  $onlineMeeting['data']['join_url']]);
+
+            $startup_owner = $finalScreening->company->user;
+            $startup_owner_name = $startup_owner->name;
+
+            $judges_names = '';
+            foreach ($finalScreening->evaluationJudgers as $judge) {
+
+                $judge_name = $judge->name;
+                $user = new User();
+                $user->email = $judge->email;
+                $user->id = $judge->id;
+
+                $MSG = new TemplateEmail;
+                $MSG->Message=["New Final Screen session - VI portal","Dear ".$judge_name.",","Kindly note you have a New Final Screen session with '".$startup_owner_name."', Session will start:".$request->date.
+                    ", Check your account to join the session ","/dashboard"];
+
+                $user->notify($MSG);
+                $judges_names .= $judge->name .', ';
+
+            }
+
+
+            /// Notify Mentor
+
+
+            /// Notify Startup Owner
+            $startup_owner = User::findOrFail($request->userid);
+            $startup_owner_name = $startup_owner->name;
+
+            $user = new User();
+            $user->email = $startup_owner->email;
+            $user->id = $startup_owner->id;
+            $MSG = new TemplateEmail;
+            $MSG->Message=["New Final Screen session - VI portal","Dear ".$startup_owner_name.",","Kindly note you have a New Final Screen session with '".$judges_names."', Session will start:".$request->date.
+                ", Check your account to join the session ","/dashboard"];
+            $user->notify($MSG);
+            /// End of mail send
+
             return Redirect::back()->with('message', 'Meeting added successfully.');
         } else {return Redirect::back()->with('message2', 'Error');}
     }

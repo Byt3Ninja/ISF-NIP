@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Factories\OnlineMeetingFactory;
 use App\Step;
 use App\Training;
 use App\TrainingCompleted;
@@ -17,12 +18,17 @@ use App\Traits\ZoomMeetingTrait;
 
 class TrainingController extends Controller
 {
-     use ZoomMeetingTrait;
-
-    const MEETING_TYPE_INSTANT = 1;
-    const MEETING_TYPE_SCHEDULE = 2;
-    const MEETING_TYPE_RECURRING = 3;
-    const MEETING_TYPE_FIXED_RECURRING_FIXED = 8;
+//     use ZoomMeetingTrait;
+//
+//    const MEETING_TYPE_INSTANT = 1;
+//    const MEETING_TYPE_SCHEDULE = 2;
+//    const MEETING_TYPE_RECURRING = 3;
+//    const MEETING_TYPE_FIXED_RECURRING_FIXED = 8;
+    protected $meetingService;
+    public function __construct()
+    {
+        $this->meetingService =  OnlineMeetingFactory::create();
+    }
 
 
     public function all($id=0) {
@@ -146,6 +152,7 @@ class TrainingController extends Controller
             }
             if(!$contents) {return back()->with(['class'=>'danger','message'=>'Error, content not exist.']);}
                 /// save progress
+//                dd(['training_id'=>$ccontent->id,'user_id'=>Auth::id()],['course_id'=>$id]);
                 TrainingCompleted::updateOrInsert(['training_id'=>$ccontent->id,'user_id'=>Auth::id()],['course_id'=>$id]);
                 return view('admin/clients/training', compact('contents','ccontent'));
             } else {
@@ -206,11 +213,12 @@ class TrainingController extends Controller
           // Add Zoom
             $topic = "Training (" . $title . ')';
             $data = ['topic'=>$topic, "start_time"=>$datetime, 'duration'=>$request->duration, 'host_video'=>1, 'participant_video'=>1];
-            $zoom = $this->create($data);
-            if (!$zoom['success']) {return back()->with(['message'=>'Can\'t create zoom meeting, API error','class' => 'danger']);}
-            $zoomid =  $zoom['data']['id'];
-            $start = $zoom['data']['start_url'];
-            $join = $zoom['data']['join_url'];
+            $onlineMeeting = $this->meetingService->createMeeting($data);
+
+            if (!$onlineMeeting['success']) {return back()->with(['message'=>'Can\'t create zoom meeting, API error','class' => 'danger']);}
+            $zoomid =  $onlineMeeting['data']['id'];
+            $start = $onlineMeeting['data']['start_url'];
+            $join = $onlineMeeting['data']['join_url'];
             TrainingSession::insert(['type'=>$type,'step_id'=>$step,'title'=>$title,'dsc'=>$dsc,'zoom_id'=>$zoomid,'datetime'=>$datetime,
                 'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name]);
             return back()->with(['message'=>'Session added successfully','class' => 'success']);
@@ -238,11 +246,12 @@ class TrainingController extends Controller
             // Add Zoom
             $topic = "Training (" . $title . ')';
             $data = ['topic'=>$topic, "start_time"=>$datetime, 'duration'=>$request->duration, 'host_video'=>1, 'participant_video'=>1];
-            $zoom = $this->create($data);
-            if (!$zoom['success']) {return back()->with(['message'=>'Can\'t create zoom meeting, API error','class' => 'danger']);}
-            $zoomid =  $zoom['data']['id'];
-            $start = $zoom['data']['start_url'];
-            $join = $zoom['data']['join_url'];
+            $onlineMeeting = $this->meetingService->createMeeting($data);
+
+            if (!$onlineMeeting['success']) {return back()->with(['message'=>'Can\'t create zoom meeting, API error','class' => 'danger']);}
+            $zoomid =  $onlineMeeting['data']['id'];
+            $start = $onlineMeeting['data']['start_url'];
+            $join = $onlineMeeting['data']['join_url'];
             TrainingSession::where('id',$id)->update(['type'=>$type,'title'=>$title,'dsc'=>$dsc,'zoom_id'=>$zoomid,'datetime'=>$datetime,
                 'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name]);
             return back()->with(['message'=>'Session added successfully','class' => 'success']);
@@ -269,14 +278,14 @@ class TrainingController extends Controller
     }
     public function delsession($id, Request $request){
         $this->preProcessingCheck('edit_cycles');
-        $zoomid = TrainingSession::findOrFail($id)->zoom_id;
+//        $zoomid = TrainingSession::findOrFail($id)->zoom_id;
         if($request) {
-            if ($zoomid) {
-                $zoom = $this->delete($zoomid);
-                if (!$zoom['success']) {
-                    return response()->json(['state' => 'failed'], 500);
-                }
-            }
+//            if ($zoomid) {
+//                $zoom = $this->delete($zoomid);
+//                if (!$zoom['success']) {
+//                    return response()->json(['state' => 'failed'], 500);
+//                }
+//            }
             TrainingSession::findOrFail($id)->delete();
             return response()->json(['state' => 'success'], 200);
         } else {
