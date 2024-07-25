@@ -13,6 +13,7 @@ use App\User;
 use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Storage;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Traits\ZoomMeetingTrait;
@@ -226,12 +227,15 @@ class TrainingController extends Controller
 
             $user = new User();
             $user->email = $request->trainer_email;
-            $user->id = 1;
+            $user->name=$request->trainer_name;
             $user->make();
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
-            $user->notify($MSG);
+            $s=\Notification::send($user, $MSG);
+            dd($s);
+//            $user->notify($MSG);
+
 
             // ==========> End Notify <================
             return back()->with(['message'=>'Session added successfully','class' => 'success']);
@@ -280,11 +284,14 @@ class TrainingController extends Controller
             // ======> notify Trainer <=================
             $user = new User();
             $user->email = $request->trainer_email;
-            $user->id = 1;
+            $user->name=$request->trainer_name;
+            $user->make();
             $MSG = new TemplateEmail;
             $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new Training session, Session will start:".$datetime.
                 ", Check your account to join the session ","/dashboard"];
-            $user->notify($MSG);
+            \Notification::route('mail', $request->trainer_email)
+                ->notify($MSG);
+
             // ==========> End Notify <================
             return back()->with(['message'=>'Session added successfully','class' => 'success']);
         } elseif ($type=='online') {
