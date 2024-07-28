@@ -102,14 +102,14 @@
                     <span class="menu-title">{{__('admin.Services')}}</span></a>
             </li>
         @endif
-        @role('Mentor')
-        <li class="{{Request::is('dashboard/mentor/mentorshipSessions*')?'active':''}} nav-item">
-            <a href="{{ route('mentorshipSessions.index') }}">
-                <i class="menu-livicon" data-icon="briefcase"></i>
-                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>
-            </a>
-        </li>
-        @endrole
+{{--        @role('Mentor')--}}
+{{--        <li class="{{Request::is('dashboard/mentor/mentorshipSessions*')?'active':''}} nav-item">--}}
+{{--            <a href="{{ route('mentorshipSessions.index') }}">--}}
+{{--                <i class="menu-livicon" data-icon="briefcase"></i>--}}
+{{--                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>--}}
+{{--            </a>--}}
+{{--        </li>--}}
+{{--        @endrole--}}
         @role('Registered')
         <li class="{{Request::is('dashboard/requests/mine','/dashboard/mentorship/mine')?'sidebar-group-active open':''}} nav-item ">
             <a href="#"><i class="menu-livicon" data-icon="two-pointers"></i>
@@ -135,12 +135,12 @@
                 <i class="menu-livicon" data-icon="help"></i>
                 <span class="menu-title">{{__('admin.My courses')}}</span></a>
         </li>
-        <li class="{{Request::is('dashboard/startup/mentorshipTasks*')?'active':''}} nav-item">
-            <a href="{{ route('startup.mentorshipTasks.home') }}">
-                <i class="menu-livicon" data-icon="briefcase"></i>
-                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>
-            </a>
-        </li>
+{{--        <li class="{{Request::is('dashboard/startup/mentorshipTasks*')?'active':''}} nav-item">--}}
+{{--            <a href="{{ route('startup.mentorshipTasks.home') }}">--}}
+{{--                <i class="menu-livicon" data-icon="briefcase"></i>--}}
+{{--                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>--}}
+{{--            </a>--}}
+{{--        </li>--}}
         @endrole
         <li class="{{Request::is('dashboard/myFiles')?'active':''}} nav-item"><a href="/dashboard/myFiles">
                 <i class="menu-livicon" data-icon="save"></i>
