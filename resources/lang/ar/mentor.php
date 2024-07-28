@@ -14,10 +14,18 @@ return [
         'show'=>'عرض بيانات المهمة',
         'status'=>'حالة المهمة',
         'reply'=>'رد الشركة',
-        'tasks'=>'المهام'
+        'tasks'=>'المهام',
+        'Task created before'=>'تم بالفعل إنشاء المهمة الأولية من قبل',
+        'Task created successfully'=>"تم إنشاء المهمة الأولية بنجاح",
+        'comments'=>'التعليقات',
+        'no comments'=>'لا توجد تعليقات حتي الان',
+        'completedTasks'=>'عدد المهام المنتهية',
+        'nonCompletedTasks'=>'عدد المهام الغير منتهية'
+
     ],
     'mentorshipRequests'=>[
-        'all'=>'عرض جلسات الارشارد'
+        'all'=>'عرض جلسات الارشارد',
+        'withoutTasks'=>'عدد الجلسات بدون مهام'
     ]
 
 ];

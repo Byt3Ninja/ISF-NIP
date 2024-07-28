@@ -26,5 +26,9 @@ class MentorshipTask extends Model
         return $this->belongsTo(User::class,'mentor_id');
     }
 
+    public function comments(){
+        return $this->hasMany(MentorshipTaskComment::class,'mentorship_task_id');
+    }
+
     
 }

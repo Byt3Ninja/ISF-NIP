@@ -7,6 +7,8 @@ use App\Http\Requests\Mentor\MentorshipTask\TaskRequest;
 use App\MentorshipRequest;
 use App\MentorshipTask;
 use Illuminate\Http\Request;
+use Exception;
+use Log;
 
 class MentorshipTaskController extends Controller
 {
@@ -111,5 +113,24 @@ class MentorshipTaskController extends Controller
         $task->delete();
         return back()->with('class', 'alert alert-success')->with('message', trans('dash.deleted_successfully'));
 
+    }
+
+    public function sendComment(Request $request){
+        try{
+
+            $task= MentorshipTask::findOrFail($request->mentorship_task_id);
+            $result = $task->comments()->create(['user_id'=>auth()->id(),'comment'=>$request->comment]);
+
+            if($result)
+                return redirect()->back()->with( ['message' => 'StoredSuccessfully'] );
+            else
+                return back()->withInput()->with( ['message2' => 'FailedStore'] );
+
+        }catch (Exception $e){
+            //log what happend
+            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+            abort(500);
+
+        }
     }
 }

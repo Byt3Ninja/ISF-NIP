@@ -1,4 +1,7 @@
 @extends('layouts.admin')
+@section('style')
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+@endsection
 @section('content')
     <style>
         .users-view {
@@ -42,8 +45,54 @@
                                                     <td >{!! $task->description !!}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>{{__('mentor.mentorshipTasks.reply')}}:</td>
-                                                    <td >{!! $task->reply??'----------------------------' !!}</td>
+                                                    <td>{{__('mentor.mentorshipTasks.comments')}}:</td>
+                                                    @forelse($task->comments as $comment)
+                                                        <tr>
+                                                            <td></td>
+                                                            <td>
+                                                                <div class="card">
+                                                                    <div class="card-header border-bottom">
+                                                                    <div class="media align-items-center mt-2 mb-1">
+                                                                        <div class="media-left mr-50">
+                                                                            <img src="{{$comment->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                        </div>
+                                                                        <div class="media align-items-center">
+                                                                            {{$comment->user->name }}
+                                                                        </div>
+
+                                                                    </div>
+                                                                        <small>
+                                                                            {{ $comment->created_at->diffForHumans() }}
+                                                                        </small>
+                                                                    <p>
+                                                                        {!! $comment->comment !!}
+                                                                    </p>
+
+                                                                </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <td>
+                                                            <div class="alert alert-warning text-center">
+                                                                @lang('mentor.mentorshipTasks.no comments')
+                                                            </div>
+                                                        </td>
+                                                    @endforelse
+                                                <tr>
+                                                    <td></td>
+                                                    <td>
+                                                        <form class="form-horizontal form-bordered" id="basicForm" action= "{{ route('mentorshipTasks.sendComment') }}" method="POST" enctype="multipart/form-data">
+                                                            {!! csrf_field() !!}
+                                                            <input type="hidden" name="mentorship_task_id" value="{{ $task->id }}">
+                                                            <div class="form-label-group">
+                                                                <textarea class="form-control" id="summernote" name="comment" required></textarea>
+                                                            </div>
+                                                            <div class="col-12 d-flex justify-content-end">
+                                                                <button type="submit" class="btn btn-success mr-1 mb-1">{{__('settings.Send')}}</button>
+                                                            </div>
+                                                        </form>
+                                                    </td>
                                                 </tr>
                                                 </tbody>
                                             </table>
@@ -61,4 +110,12 @@
     </div>
     <!-- END: Content-->
  @stop
+@section('pagescripts')
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#summernote').summernote();
+        });
+    </script>
+@endsection
 

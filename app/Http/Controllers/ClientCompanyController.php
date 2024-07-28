@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Country;
 use App\Events\WebMessage;
+use App\FundingRound;
 use App\Sector;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUpdateClientCompanyRequest;
@@ -53,15 +54,15 @@ class ClientCompanyController extends Controller
     public function editOrCreate(){
         try{
             $client = User::where('HaveCompany',1)->with('company')
-                         //   ->with('company.services:id')
                 ->with('company.city')
                 ->find(Auth::id());
             $countries = Country::all();
             $states = State::all();
             $cities = City::all();
             $sectors = Sector::whereNull('parent_id')->get();
+            $funding_rounds=auth()->user()->company->fundingRounds;
             return view('admin/clients/company', compact(
-                'client', 'states', 'cities','countries','sectors'
+                'client', 'states', 'cities','countries','sectors','funding_rounds'
             ));
         }catch (Exception $e){
             //log what happend
@@ -81,6 +82,8 @@ class ClientCompanyController extends Controller
         try{
             $user = Auth::user();
             $companyId = $user->company_id;
+            $data = $request->all();
+            $data['institutions'] = json_encode($request->institutions);
             if ($request->hasFile('img_url')) {
                 $img_url = $request->file('img_url');
                 //get the path of the stores image
@@ -89,10 +92,10 @@ class ClientCompanyController extends Controller
                 Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function($con) {$con->aspectRatio();})->save();
                 $result = Company::updateOrCreate(
                     ['id' => $companyId],
-                    $request->all() + ['logo' => $img_url]
+                    $data + ['logo' => $img_url]
                 );
             } else {
-                $result = Company::updateOrCreate(['id' => $companyId], $request->all());
+                $result = Company::updateOrCreate(['id' => $companyId], $data);
             }
 
                 $msgtype = 'UpdateComp';
@@ -101,7 +104,7 @@ class ClientCompanyController extends Controller
                 $msgtype = 'NewComp';
             }
             if($result) {
-                event(new WebMessage($msgtype, $user->first_name_en,'1'));
+                event(new WebMessage($msgtype, $user->first_name_en));
                 return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
             }
             else {
@@ -110,7 +113,6 @@ class ClientCompanyController extends Controller
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            dd($e);
             abort(500);
         }
     }
