@@ -277,6 +277,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('final/results/{id?}','FinalscreeningController@results');
     Route::get('final/{step_id}/{company_id}','FinalscreeningController@view');
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
+    Route::post('final/delsession/{id}' ,'FinalscreeningController@delsession');
+
 
     // ===============> Mentor Dashboard Routes <===============
     Route::group(['prefix' => 'mentor'],function (){
