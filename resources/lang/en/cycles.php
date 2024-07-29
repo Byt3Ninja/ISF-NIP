@@ -221,6 +221,7 @@ return [
     'offline' =>'Traditional Training',
     'sessions' =>'Online Sessions',
     'trainer name'=>'Trainer name',
+    'trainer email'=>'Trainer Email',
     'training location'=>'Training location',
     'select online'=>'Select online course',
     'Display course contents' => 'View course contents',

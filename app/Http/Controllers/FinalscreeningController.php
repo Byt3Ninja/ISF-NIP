@@ -143,7 +143,7 @@ class FinalscreeningController extends Controller
             $finalScreening = Finalscreening::where('step_id', $request->step)->where('company_id', $request->company)->update(['datetime' => $request->date, 'duration' => $request->duration,
                 'zoom_id' => $onlineMeeting['data']['id'], 'start_url' =>  $onlineMeeting['data']['start_url'], 'join_url' =>  $onlineMeeting['data']['join_url']]);
 
-            $startup_owner = $finalScreening->company->user;
+            $startup_owner = Company::findOrFail($request->company)->user;
             $startup_owner_name = $startup_owner->name;
 
             $judges_names = '';
@@ -162,9 +162,6 @@ class FinalscreeningController extends Controller
                 $judges_names .= $judge->name .', ';
 
             }
-
-
-            /// Notify Mentor
 
 
             /// Notify Startup Owner
@@ -206,5 +203,21 @@ class FinalscreeningController extends Controller
             $cj = FinalData::where('company_id',$c->id)->where('step_id', $id)->distinct('judge_id')->get(['judge_id']);
         }
         return view('admin.settings.final.results', compact('cstep', 'steps', 'id','companies','c', 'cj'));
+    }
+    public function delsession($id, Request $request){
+        $this->preProcessingCheck('edit_cycles');
+//        $zoomid = TrainingSession::findOrFail($id)->zoom_id;
+        if($request) {
+//            if ($zoomid) {
+//                $zoom = $this->delete($zoomid);
+//                if (!$zoom['success']) {
+//                    return response()->json(['state' => 'failed'], 500);
+//                }
+//            }
+            Finalscreening::findOrFail($id)->delete();
+            return response()->json(['state' => 'success'], 200);
+        } else {
+            return response()->json(['state' => 'failed'], 500);
+        }
     }
 }

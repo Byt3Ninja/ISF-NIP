@@ -3,8 +3,11 @@
         <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
                 @if(!is_null(auth()->user()->organization))
                     <img src="{{ auth()->user()->organization->image_url}}" alt="avatar" height="40" width="80">
+                @elseif(auth()->user()->hasRole('Registered|Page Manager|Pages Editor')&&auth()->user()->company&&auth()->user()->company->cycledata)
+                    <img src="{{ auth()->user()->company->cycledata->organization->image_url}}" alt="avatar" height="40" width="80">
+
                 @else
-                    <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
+                    <img src="/images/logo/arweqah.png" alt="avatar" height="50" width="150">
                 @endif
             </a>
         </li>
@@ -99,14 +102,14 @@
                     <span class="menu-title">{{__('admin.Services')}}</span></a>
             </li>
         @endif
-        @role('Mentor')
-        <li class="{{Request::is('dashboard/mentor/mentorshipSessions*')?'active':''}} nav-item">
-            <a href="{{ route('mentorshipSessions.index') }}">
-                <i class="menu-livicon" data-icon="briefcase"></i>
-                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>
-            </a>
-        </li>
-        @endrole
+{{--        @role('Mentor')--}}
+{{--        <li class="{{Request::is('dashboard/mentor/mentorshipSessions*')?'active':''}} nav-item">--}}
+{{--            <a href="{{ route('mentorshipSessions.index') }}">--}}
+{{--                <i class="menu-livicon" data-icon="briefcase"></i>--}}
+{{--                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>--}}
+{{--            </a>--}}
+{{--        </li>--}}
+{{--        @endrole--}}
         @role('Registered')
         <li class="{{Request::is('dashboard/requests/mine','/dashboard/mentorship/mine')?'sidebar-group-active open':''}} nav-item ">
             <a href="#"><i class="menu-livicon" data-icon="two-pointers"></i>
@@ -132,12 +135,12 @@
                 <i class="menu-livicon" data-icon="help"></i>
                 <span class="menu-title">{{__('admin.My courses')}}</span></a>
         </li>
-        <li class="{{Request::is('dashboard/startup/mentorshipTasks*')?'active':''}} nav-item">
-            <a href="{{ route('startup.mentorshipTasks.home') }}">
-                <i class="menu-livicon" data-icon="briefcase"></i>
-                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>
-            </a>
-        </li>
+{{--        <li class="{{Request::is('dashboard/startup/mentorshipTasks*')?'active':''}} nav-item">--}}
+{{--            <a href="{{ route('startup.mentorshipTasks.home') }}">--}}
+{{--                <i class="menu-livicon" data-icon="briefcase"></i>--}}
+{{--                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>--}}
+{{--            </a>--}}
+{{--        </li>--}}
         @endrole
         <li class="{{Request::is('dashboard/myFiles')?'active':''}} nav-item"><a href="/dashboard/myFiles">
                 <i class="menu-livicon" data-icon="save"></i>

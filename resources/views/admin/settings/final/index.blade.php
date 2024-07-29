@@ -197,9 +197,14 @@
                                                             @endforeach
                                                         </td>
                                                         <td>
+
                                                             @if(!$company->fsession($cstep->id))
                                                                 {{__('cycles.Add Judges first')}}
                                                              @elseif($company->fsession($cstep->id)->join_url)
+                                                                <button title="Edit" onclick="edit({{$company->fsession($cstep->id)->id}})" type="button" class="btn btn-icon rounded-circle btn-info">
+                                                                    <i class="bx bxs-edit-alt"></i></button>
+                                                                <button title="Delete" onclick="deleteme({{$company->fsession($cstep->id)->id}})" type="button" class="btn btn-icon rounded-circle btn-danger">
+                                                                    <i class="bx bx-trash"></i></button>
                                                                  <a href="{{$company->fsession($cstep->id)->start_url}}" target="_blank">
                                                                     <button title="Start Meeting" type="button" class="btn btn-icon rounded-circle btn-light-success">
                                                                         <i class="bx bx-slider-alt"></i></button></a>
@@ -207,7 +212,12 @@
                                                                     <button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary">
                                                                         <i class="bx bx-user"></i></button></a>
                                                             @else
-                                                                    <button title="Add meeting" onclick="addzoom({{$company->id}})" type="button" class="btn btn-icon rounded-circle btn-light-secondary">
+{{--                                                                <button title="Edit" onclick="edit({{$company->fsession($cstep->id)->id}})" type="button" class="btn btn-icon rounded-circle btn-info">--}}
+{{--                                                                    <i class="bx bxs-edit-alt"></i></button>--}}
+
+                                                                <button title="Delete" onclick="deleteme({{$company->fsession($cstep->id)->id}})" type="button" class="btn btn-icon rounded-circle btn-danger">
+                                                                    <i class="bx bx-trash"></i></button>
+                                                                    <button title="Add meeting" onclick="addzoom({{$company->id}})" type="button" class="btn btn-icon rounded-circle btn-success">
                                                                         <i class="bx bx-plus"></i></button>
                                                             @endif
                                                         </td>
@@ -326,6 +336,50 @@
         </div>
     </div>
 </div>
+<div class="modal fade text-left" id="ModifyRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <form method="post" action="/dashboard/final/editZoom" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h4 class="modal-title">{{__('cycles.Modify Final Screen')}} </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="bx bx-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @csrf
+                    <p class="text-danger">{{__('cycles.Before submit review')}}.</p>
+                    <input type="hidden" name="step" value="{{$cstep->id}}" id="sid">
+                    <input type="hidden" name="company" value="0" id="cid">
+                    <div class="form-group" id="showdates">
+                        <label>{{__('cycles.Date/Time')}}:</label>
+                        <input class='date width-200 form-control' type="text" id="sdate" name="date" value="" required>
+                    </div>
+                    <div class="form-group">
+                        <label>{{__('cycles.Meeting period')}}:</label>
+                        <select name="period" class="select form-control" id="period">
+                            <option value="30">30 {{__('cycles.Minutes')}}</option>
+                            <option value="60">1 {{__('cycles.Hour')}}</option>
+                            <option value="120">2 {{__('cycles.Hours')}}</option>
+                            <option value="180">3 {{__('cycles.Hours')}}</option>
+                            <option value="240">4 {{__('cycles.Hours')}}</option>
+                            <option value="300">5 {{__('cycles.Hours')}}</option>
+                        </select>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary ml-1" >
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">{{__('cycles.Submit')}}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endif
 @stop
 @section('pagescripts')
@@ -333,6 +387,24 @@
     <script>
         $('.date').datetimepicker({timepicker:false,format:'Y-m-d'});
         $('#date').datetimepicker({timepicker:true,format:'Y-m-d H:i'});
+        function edit(id) {
+            $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+            $.ajax({
+                type: "POST", url: "/dashboard/finalScreening/session",
+                data: {"id": id,},
+                success: function (response) {
+                    $('#sid').val(id);
+
+                    $('#sdate').val(response.zoom_date);
+                    $('#period').val(response.period);
+
+                    $('#ModifyRequest').modal('show');
+                },
+                error: function (error) {
+                    console.log(error);
+                    alert("Error Occurred, Try again!");
+                }});
+        }
         function DoChange(set) {
             switch (set) {
                 case 1:
@@ -361,8 +433,37 @@
             $("input[type=checkbox]").prop('checked', $(this).prop('checked'));
         });
         function addzoom(company) {
-            $('#cid').val(company);
+            $('#cid').val(company); 
             $('#addzoom').modal('show');
+        }
+        function deleteme(id) {
+            let url = '/dashboard/final/delsession/' + id;
+            let token = '{{ csrf_token() }}';
+            Swal.fire({
+                title: "{{__('admin.SureDelete')}}",
+                text: "{{__('admin.Recover')}}",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-danger",
+                confirmButtonText: "{{__('admin.DYes')}}",
+                cancelButtonText: "{{__('admin.No')}}!",
+            })
+                .then((result) => {
+                    if (result.value) {
+                        $.post(url, {'_method': 'POST', '_token': token},
+                            function (response) {
+                                Swal.fire(
+                                    '{{__('admin.Deleted')}}!',
+                                    '{{__('admin.Session Deleted')}}.',
+                                    'success');
+                                window.location.href = '/dashboard/final';
+                            }).fail(function (error) {
+                            console.log(error);
+                        });
+                    } else {
+                        console.log('Canceled')
+                    }
+                });
         }
     </script>
 @stop

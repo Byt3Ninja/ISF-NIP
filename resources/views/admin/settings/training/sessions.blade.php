@@ -118,7 +118,7 @@
                                     @endif
 
                                 </td>
-                                <td> <button title="Delete" onclick="editme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-primary">
+                                <td> <button title="Edit" onclick="editme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-primary">
                                         <i class="bx bx-edit"></i></button>&nbsp;
                                     <button title="Delete" onclick="deleteme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-danger">
                                         <i class="bx bx-trash"></i></button>
@@ -219,6 +219,10 @@
                         <label>{{__('cycles.trainer name')}}</label>
                         <input name="trainer_name" type="text" placeholder="{{__('cycles.trainer name')}}" class="form-control" >
                     </div>
+                    <div class="form-group" id="trainer_email" style="display: none;">
+                        <label>{{__('cycles.trainer email')}}</label>
+                        <input name="trainer_email" type="text" placeholder="{{__('cycles.trainer email')}}" class="form-control" >
+                    </div>
                     <div class="form-group" id="location" style="display: none;">
                         <label>{{__('cycles.training location')}}</label>
                         <input name="location" type="text" placeholder="{{__('cycles.training location')}}" class="form-control" >
@@ -290,6 +294,10 @@
                         <label>{{__('cycles.trainer name')}}</label>
                         <input id="etrainer" name="trainer_name" type="text" placeholder="{{__('cycles.trainer name')}}" class="form-control" >
                     </div>
+                    <div class="form-group" id="strainer_email" style="display: none;">
+                        <label>{{__('cycles.trainer email')}}</label>
+                        <input id="etrainer_email" name="trainer_email" type="text" placeholder="{{__('cycles.trainer email')}}" class="form-control" >
+                    </div>
                     <div class="form-group" id="slocation" style="display: none;">
                         <label>{{__('cycles.training location')}}</label>
                         <input id="elocation" name="location" type="text" placeholder="{{__('cycles.training location')}}" class="form-control" >
@@ -360,11 +368,11 @@
 
                 function tchange(training) {
                 if (training==='offline') {
-                    $('#online').hide();$('#enddatetime').show();$('#sessions').hide();$('#trainer').show();$('#location').show();
+                    $('#online').hide();$('#enddatetime').show();$('#sessions').hide();$('#trainer').show();$('#trainer_email').show();$('#location').show();
                 } else if (training==='sessions') {
-                    $('#online').hide();$('#enddatetime').hide();$('#sessions').show();$('#trainer').show();$('#location').hide();
+                    $('#online').hide();$('#enddatetime').hide();$('#sessions').show();$('#trainer').show();$('#trainer_email').show();$('#location').hide();
                 } else {
-                    $('#online').show();$('#enddatetime').hide();$('#sessions').hide();$('#trainer').hide();$('#location').hide();
+                    $('#online').show();$('#enddatetime').hide();$('#sessions').hide();$('#trainer').hide();$('#trainer_email').hide();$('#location').hide();
                 }
                     }
 
@@ -385,17 +393,21 @@
                                 $('#senddatetime').show();
                                 $('#ssessions').hide();
                                 $('#strainer').show();
+                                $('#strainer_email').show();
                                 $('#slocation').show();
                                 $('#eenddate').val(response.enddatetime);
                                 $('#elocation').val(response.location);
                                 $('#etrainer').val(response.trainer_name);
+                                $('#etrainer_email').val(response.trainer_email);
                             } else if (type === 'sessions') {
                                 $('#sonline').hide();
                                 $('#senddatetime').hide();
                                 $('#ssessions').show();
                                 $('#strainer').show();
+                                $('#strainer_email').show();
                                 $('#slocation').hide();
                                 $('#etrainer').val(response.trainer_name);
+                                $('#etrainer_email').val(response.trainer_email);
                                 $('#eduration').val(response.duration);
                                 $('#elocation').val('');
                             } else {
@@ -403,6 +415,7 @@
                                 $('#senddatetime').hide();
                                 $('#ssessions').hide();
                                 $('#strainer').hide();
+                                $('#strainer_email').hide();
                                 $('#slocation').hide();
                                 $('#eonline').val(response.location);
                                 $('#etrainer').val('');

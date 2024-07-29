@@ -155,13 +155,15 @@
                                     {{$session->done?__('Yes'):__('No')}}
                                 </td>
                                 <td>
+                                    <button title="Edit" onclick="edit({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-info">
+                                        <i class="bx bxs-edit-alt"></i></button>
+                                    <button title="Delete" onclick="deleteme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-danger">
+                                        <i class="bx bx-trash"></i></button>
                                   @if(!$session->approved)
                                     <button title="Approve" onclick="approve({{$session->id}},'Yes')" type="button" class="btn btn-icon rounded-circle btn-light-success">
                                         <i class="bx bx-check-square"></i></button>
                                     <button title="Dispprove" onclick="approve({{$session->id}}, 'No')" type="button" class="btn btn-icon rounded-circle btn-light-danger">
                                         <i class="bx bxs-x-square"></i></button>
-                                    <button title="Edit" onclick="edit({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-                                        <i class="bx bxs-edit-alt"></i></button>
                                         @endif
                                   @if($session->join_url)
                                   <a href="{{$session->start_url}}" target="_blank">
@@ -367,6 +369,35 @@
                         console.log(error);
                         alert("Error Occurred, Try again!");
                     }});
+            }
+            function deleteme(id) {
+                let url = '/dashboard/mentorship/delsession/' + id;
+                let token = '{{ csrf_token() }}';
+                Swal.fire({
+                    title: "{{__('admin.SureDelete')}}",
+                    text: "{{__('admin.Recover')}}",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "{{__('admin.DYes')}}",
+                    cancelButtonText: "{{__('admin.No')}}!",
+                })
+                    .then((result) => {
+                        if (result.value) {
+                            $.post(url, {'_method': 'POST', '_token': token},
+                                function (response) {
+                                    Swal.fire(
+                                        '{{__('admin.Deleted')}}!',
+                                        '{{__('admin.Session Deleted')}}.',
+                                        'success');
+                                    window.location.href = '/dashboard/mentorship/sessions?show=all';
+                                }).fail(function (error) {
+                                console.log(error);
+                            });
+                        } else {
+                            console.log('Canceled')
+                        }
+                    });
             }
     </script>
 @stop

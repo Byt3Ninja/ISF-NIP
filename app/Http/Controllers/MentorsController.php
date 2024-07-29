@@ -282,7 +282,6 @@ class MentorsController extends Controller
                     return back()->with(['msg' => 'Saved', 'class' => 'success']);
                 }
             } catch (Exception $e) {
-                dd($e);
                 return response()->json(['state' => 'failed','e'=>$e], 500);
             }
     }
@@ -297,6 +296,22 @@ class MentorsController extends Controller
             return back();
         }else {
             return back();
+        }
+    }
+    public function delsession($id, Request $request){
+        $this->preProcessingCheck('edit_cycles');
+//        $zoomid = TrainingSession::findOrFail($id)->zoom_id;
+        if($request) {
+//            if ($zoomid) {
+//                $zoom = $this->delete($zoomid);
+//                if (!$zoom['success']) {
+//                    return response()->json(['state' => 'failed'], 500);
+//                }
+//            }
+            MentorshipRequest::findOrFail($id)->delete();
+            return response()->json(['state' => 'success'], 200);
+        } else {
+            return response()->json(['state' => 'failed'], 500);
         }
     }
 }

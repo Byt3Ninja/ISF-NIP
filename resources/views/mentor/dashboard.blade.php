@@ -566,9 +566,9 @@
         $.ajax({
             type: "GET", url: "/dashboard/mentor/meetingRedirect/"+$(this).data('value'),
             success: function (response) {
-                alert(response['message']);
+                // alert(response['message']);
                 window.open(response['join_url'], '_blank');
-                window.location.href ='{{ route('mentorshipTasks.index') }}'+'?mentorship_id='+response['mentorship_id'];
+{{--                window.location.href ='{{ route('mentorshipTasks.index') }}'+'?mentorship_id='+response['mentorship_id'];--}}
             },
             error: function (error) {
                 console.log(error);

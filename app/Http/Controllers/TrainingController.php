@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Factories\OnlineMeetingFactory;
+use App\Notifications\TemplateEmail;
 use App\Step;
 use App\Training;
 use App\TrainingCompleted;
@@ -12,6 +13,7 @@ use App\User;
 use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Storage;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Traits\ZoomMeetingTrait;
@@ -220,7 +222,16 @@ class TrainingController extends Controller
             $start = $onlineMeeting['data']['start_url'];
             $join = $onlineMeeting['data']['join_url'];
             TrainingSession::insert(['type'=>$type,'step_id'=>$step,'title'=>$title,'dsc'=>$dsc,'zoom_id'=>$zoomid,'datetime'=>$datetime,
-                'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name]);
+                'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
+            // ======> notify Trainer <=================
+            $MSG = new TemplateEmail;
+            $MSG->ActionText="Start Session";
+            $MSG->ActionUrl=$start;
+            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new online training session, with Title : ".$topic.", Session will start:".$datetime
+                ,"/dashboard"];
+            \Notification::route('mail', $request->trainer_email)
+                ->notify($MSG);
+            // ==========> End Notify <================
             return back()->with(['message'=>'Session added successfully','class' => 'success']);
         } elseif ($type=='online') {
             if(!$request->online) {return back()->with(['message2','Can\'t add training you must add new training course first']);}
@@ -228,7 +239,15 @@ class TrainingController extends Controller
             return back()->with(['message'=>'Saved','class' => 'success']);
         } elseif ($type=='offline') {
             TrainingSession::insert(['type'=>$type,'step_id'=>$step,'title'=>$title,'dsc'=>$dsc,'datetime'=>$datetime,'user_id'=>Auth::id(),'location'=>$request->location,
-                'enddatetime'=>$request->enddatetime, 'trainer_name'=>$request->trainer_name]);
+                'enddatetime'=>$request->enddatetime, 'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
+            // ======> notify Trainer <=================
+
+            $MSG = new TemplateEmail;
+            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new offline training session with title : ".$title.", Session will start:".$datetime.
+                ", At this location: ".$request->location,"/dashboard"];
+            \Notification::route('mail', $request->trainer_email)
+                ->notify($MSG);
+            // ==========> End Notify <================
             return back()->with(['message'=>'Saved','class' => 'success']);
         } else {
             return back()->with(['message'=>'Can\'t add session','class' => 'danger']);
@@ -253,7 +272,17 @@ class TrainingController extends Controller
             $start = $onlineMeeting['data']['start_url'];
             $join = $onlineMeeting['data']['join_url'];
             TrainingSession::where('id',$id)->update(['type'=>$type,'title'=>$title,'dsc'=>$dsc,'zoom_id'=>$zoomid,'datetime'=>$datetime,
-                'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name]);
+                'duration'=>$request->duration,'user_id'=>Auth::id(),'start_url'=>$start,'join_url'=>$join,'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
+            // ======> notify Trainer <=================
+            $MSG = new TemplateEmail;
+            $MSG->ActionText="Start Session";
+            $MSG->ActionUrl=$start;
+            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new online training session, with Title : ".$topic.", Session will start:".$datetime
+               ,"/dashboard"];
+            \Notification::route('mail', $request->trainer_email)
+                ->notify($MSG);
+
+            // ==========> End Notify <================
             return back()->with(['message'=>'Session added successfully','class' => 'success']);
         } elseif ($type=='online') {
             if(!$request->online) {return back()->with(['message2','Can\'t add training you must add new training course first']);}
@@ -261,7 +290,14 @@ class TrainingController extends Controller
             return back()->with(['message'=>'Saved','class' => 'success']);
         } elseif ($type=='offline') {
             TrainingSession::where('id',$id)->update(['type'=>$type,'title'=>$title,'dsc'=>$dsc,'datetime'=>$datetime,'user_id'=>Auth::id(),'location'=>$request->location,
-                'enddatetime'=>$request->enddatetime, 'trainer_name'=>$request->trainer_name]);
+                'enddatetime'=>$request->enddatetime, 'trainer_name'=>$request->trainer_name,'trainer_email'=>$request->trainer_email]);
+            // ======> notify Trainer <=================
+            $MSG = new TemplateEmail;
+            $MSG->Message=["New Training session - VI portal","Dear ".$request->trainer_name.",","Kindly note you have a new offline training session with title : ".$title.", Session will start:".$datetime.
+                ", At this location: ".$request->location,"/dashboard"];
+            \Notification::route('mail', $request->trainer_email)
+                ->notify($MSG);
+            // ==========> End Notify <================
             return back()->with(['message'=>'Saved','class' => 'success']);
         } else {
             return back()->with(['message'=>'Can\'t edit session','class' => 'danger']);
