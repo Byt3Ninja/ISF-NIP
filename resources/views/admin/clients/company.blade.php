@@ -69,9 +69,10 @@
                                                 <div class="jq-tab-wrapper" id="verticalTab">
                                                     <div class="jq-tab-menu">
                                                         <div class="jq-tab-title active" data-tab="1"><i class="bx bx-info-circle"></i> {{ __('admin.company Information') }}</div>
-{{--                                                        <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div>--}}
-{{--                                                        <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div>--}}
-                                                        <div class="jq-tab-title" data-tab="4"><i class="bx bxs-contact"></i> {{ __('admin.social & contact') }}</div>
+                                                        <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div>
+                                                        <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div>
+                                                        <div class="jq-tab-title" data-tab="4"><i class="bx bxs-slideshow"></i> {{ __('admin.about') }}</div>
+                                                        <div class="jq-tab-title" data-tab="5"><i class="bx bxs-contact"></i> {{ __('admin.social & contact') }}</div>
                                                     </div>
                                                     <div class="jq-tab-content-wrapper">
                                                         <div class="jq-tab-content active" data-tab="1">
@@ -80,7 +81,7 @@
                                                                 <div class="row">
                                                                     <div class="col-md-12 col-12">
                                                                         @if (isset($client->company->logo))
-                                                                            <img src="/191014/{{$client->company->logo}}" alt="Company logo" height="80px">
+                                                                            <img src="{{$client->company->logo_url}}" alt="Company logo" height="80px">
                                                                         @endif
                                                                         <div class="form-group mt-75">
                                                                             <label for="basicInput">{{ __('admin.Logo')}}</label>
@@ -210,21 +211,14 @@
 
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-6 col-12">
+                                                                    <div class="col-md-12 col-12">
                                                                         <div class="form-label-group mt-75">
                                                                             <label for="est_date">{{ __('admin.est_date') }}</label>
                                                                             <input type="text" class="form-control" id="est_date"
                                                                                    value="{{($client->company)? $client->company->est_date:old('est_date')}}" name="est_date" >
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-6 col-12">
-                                                                        <div class="form-label-group mt-75">
-                                                                            <label for="team_num">{{ __('admin.team_num') }}</label>
-                                                                            <input type="number" class="form-control" id="team_num"
-                                                                                   placeholder="{{ __('admin.team_num') }}" value="{{($client->company)? $client->company->team_num:old('team_num')}}" name="team_num"
-                                                                                   autocomplete="new-team_num">
-                                                                        </div>
-                                                                    </div>
+
                                                                     <div class="col-md-6 col-12">
                                                                         <div class="form-label-group mt-75">
                                                                             <label for="stage">{{ __('admin.stage') }}*</label>
@@ -283,16 +277,24 @@
                                                                                    autocomplete="new-founder">
                                                                         </div>
                                                                     </div>
+{{--                                                                    <div class="col-md-12 col-12">--}}
+{{--                                                                        <div class="form-group">--}}
+{{--                                                                            <label for="idea">{{ __('admin.idea')}}</label>--}}
+{{--                                                                            <textarea class="form-control" id="idea" name='idea' placeholder="{{__('admin.idea')}}">{{($client->company)? $client->company->idea:old('idea')}}</textarea>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    </div>--}}
+{{--                                                                    <div class="col-md-12 col-12">--}}
+{{--                                                                        <div class="form-group">--}}
+{{--                                                                            <label for="problem">{{ __('admin.Problem Solution')}}</label>--}}
+{{--                                                                            <textarea class="form-control" id="problem" name='problem' placeholder="{{ __('admin.Problem Solution')}}">{{($client->company)? $client->company->problem:old('problem')}}</textarea>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    </div>--}}
                                                                     <div class="col-md-12 col-12">
-                                                                        <div class="form-group">
-                                                                            <label for="idea">{{ __('admin.idea')}}</label>
-                                                                            <textarea class="form-control" id="idea" name='idea' placeholder="{{__('admin.idea')}}">{{($client->company)? $client->company->idea:old('idea')}}</textarea>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-12 col-12">
-                                                                        <div class="form-group">
-                                                                            <label for="problem">{{ __('admin.Problem Solution')}}</label>
-                                                                            <textarea class="form-control" id="problem" name='problem' placeholder="{{ __('admin.Problem Solution')}}">{{($client->company)? $client->company->problem:old('problem')}}</textarea>
+                                                                        <div class="form-label-group mt-75">
+                                                                            <label for="team_num">{{ __('admin.team_num') }}</label>
+                                                                            <input type="number" class="form-control" id="team_num"
+                                                                                   placeholder="{{ __('admin.team_num') }}" value="{{($client->company)? $client->company->team_num:old('team_num')}}" name="team_num"
+                                                                                   autocomplete="new-team_num">
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-12 col-12">
@@ -326,54 +328,147 @@
 
                                                         </div>
                                                         <div class="jq-tab-content" data-tab="2">
-                                                            <div class="jq-tab-wrapper" id="horizontalTab">
-                                                                <div class="jq-tab-menu">
-                                                                    <div class="jq-tab-title active" data-tab="H1">Business Model</div>
-                                                                    <div class="jq-tab-title" data-tab="H2">Business Plan</div>
-                                                                    <div class="jq-tab-title" data-tab="H3">Pitch Deck</div>
-                                                                    <div class="jq-tab-title" data-tab="H4">Financial Plan</div>
-                                                                </div>
-                                                                <div class="jq-tab-content-wrapper">
-                                                                    <div class="jq-tab-content active" data-tab="H1">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum, animi aperiam! Odio harum error enim aliquam
-                                                                        voluptates, quibusdam fuga maxime doloremque blanditiis et! Laborum neque esse ab voluptates, perferendis
-                                                                        nam. Sint alias provident reiciendis ut facilis obcaecati, aliquid excepturi architecto quibusdam aperiam
-                                                                        numquam! Reprehenderit vitae ducimus, magni labore maiores architecto aliquid inventore facere aut eveniet
-                                                                        officia recusandae voluptatum maxime provident. Animi veritatis pariatur nemo ratione tempore suscipit porro
-                                                                        laborum quasi quaerat, eum repudiandae quis, quas natus, ducimus explicabo necessitatibus voluptas? Repellat
-                                                                        praesentium reiciendis voluptatem eligendi blanditiis, ducimus saepe nesciunt dolor? Officiis ipsum dolor
-                                                                        perspiciatis dolores libero, cum, repellendus ipsam ab sequi aliquam eius cupiditate voluptas magnam adipisci
-                                                                        sapiente optio. Debitis amet quae tempora, corporis porro autem. Beatae nisi officia magnam! Ex modi expedita
-                                                                        non facilis quam dolor magnam odit? Autem distinctio aut quibusdam incidunt ipsum rerum nostrum expedita
-                                                                        pariatur eveniet iusto minus, magni deserunt, ex accusantium amet hic odio. Alias. Sunt esse dolore architecto
-                                                                        eaque cum repellat placeat nemo ratione beatae illo reiciendis ex magnam minima delectus sit laboriosam dicta
-                                                                        repellendus ut cupiditate quaerat eos deleniti, hic at? Ullam, placeat! Nihil maiores omnis est dicta ratione
-                                                                        quod eligendi optio quos, itaque accusantium, commodi ducimus quisquam ullam soluta vel provident quidem
-                                                                        vitae temporibus earum corrupti necessitatibus eius inventore? Ipsam, quaerat reprehenderit. Modi voluptatem
-                                                                        libero, nihil necessitatibus non dicta molestias atque distinctio odit fuga aliquam totam? Vero minima accusamus
-                                                                        voluptatum asperiores repellendus libero quas. Dolorum quibusdam quia sit numquam sint voluptatibus dolor.
-                                                                        Aliquam adipisci possimus minima quae dolorem suscipit minus praesentium labore culpa assumenda rerum a,
-                                                                        necessitatibus qui porro atque illum molestias officiis omnis at nihil? Aut cupiditate unde optio vitae necessitatibus.
-                                                                        Quo veniam fugit, suscipit magni aliquid delectus, consequuntur dolore et deserunt pariatur, sunt ab ipsum?
-                                                                        Explicabo qui nesciunt consequuntur eum? Veritatis provident corrupti quod voluptate ducimus repellendus
-                                                                        quasi, magni harum!</div>
-                                                                    <div class="jq-tab-content" data-tab="H2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione, magnam mollitia consequuntur modi sit nostrum
-                                                                        molestiae sunt nihil, quisquam eligendi expedita quae, id natus provident labore odio! Necessitatibus, odit.
-                                                                        Iure. Delectus magnam eius, facere ratione est dicta, placeat labore possimus, praesentium ex quos similique
-                                                                        veritatis illum velit minima dolor beatae. Necessitatibus, porro explicabo consectetur perferendis dignissimos
-                                                                        velit consequuntur. Debitis, eos! Distinctio maxime facilis recusandae dicta explicabo, omnis mollitia sequi
-                                                                        debitis qui corrupti illo numquam autem quod eius molestias natus earum voluptates nobis iusto. Est temporibus
-                                                                        expedita quasi magnam eius magni. Accusamus at blanditiis explicabo velit vero, voluptates vel ut a repudiandae,
-                                                                        expedita ducimus repellendus sit eos ad eaque ipsam modi porro impedit aspernatur, numquam doloremque et
-                                                                        officiis id? Iusto, nemo. Quos autem quidem obcaecati vitae facere, iure nam magnam odio sed quo, itaque
-                                                                        sit cupiditate? Possimus, culpa cum quidem magni ullam veniam adipisci maxime! Sequi harum animi voluptas
-                                                                        eligendi reprehenderit!</div>
-                                                                    <div class="jq-tab-content" data-tab="H3">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Sit cumque aperiam amet officiis atque accusamus repudiandae
-                                                                        perspiciatis aliquid voluptatum itaque, sint, pariatur architecto mollitia laborum fuga culpa dignissimos
-                                                                        quo debitis.
-                                                                    </div>
-                                                                    <div class="jq-tab-content" data-tab="H4">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Sit cumque aperiam amet officiis atque accusamus repudiandae
-                                                                        perspiciatis aliquid voluptatum itaque, sint, pariatur architecto mollitia laborum fuga culpa dignissimos
-                                                                        quo debitis.
+                                                            <div class="col-12">
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="card">
+                                                                            <div class="card-header">
+                                                                                <h4 class="card-title">{{__('admin.elevator Pitch')}}</h4>
+                                                                            </div>
+                                                                            <div class="card-content">
+                                                                                <div class="card-body">
+                                                                                    <form method="post" action="{{route('update_my_company')}}"
+                                                                                          enctype="multipart/form-data">
+                                                                                        {!! csrf_field() !!}
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-6 col-12">
+
+                                                                                                <div class="form-group mt-75">
+                                                                                                    <label for="basicInput">{{ __('Business Model')}}</label>
+                                                                                                    <div class="input-group">
+                                                                                                        <div class="input-group-prepend">
+                                                                                                            <span class="input-group-text" id="inputGroupFileAddonP01">{{ __('admin.Upload')}}</span>
+                                                                                                        </div>
+                                                                                                        <div class="custom-file">
+                                                                                                            <input type="file" class="custom-file-input" id="business_model"
+                                                                                                                   name="business_model" accept=".pdf,.xlsx,.docx" style="direction: ltr;"
+                                                                                                                   aria-describedby="inputGroupFileAddonP00">
+                                                                                                            <label class="custom-file-label"
+                                                                                                                   for="inputGroupFileP00">{{ __('admin.Select file')}}</label>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    @if (isset($client->company->business_model))
+                                                                                                        <a href="{{ $client->company->business_model_url }}" target="_blank" class="btn btn-warning mt-1">
+                                                                                                            <i class="bx bx-search-alt"></i>  {{ __('Preview') }}
+                                                                                                        </a>
+                                                                                                    @endif
+                                                                                                </div>
+                                                                                                <div class="form-group">
+                                                                                                        <label for="business_model_description">{{ __('Business Model Description') }}</label>
+                                                                                                        <textarea class="form-control " id="business_model_description" name='business_model_description'
+                                                                                                                  placeholder="{{__('Business Model Description')}}"
+                                                                                                        >{{($client->company)? $client->company->business_model_description:old('business_model_description')}}</textarea>
+                                                                                                    </div>
+                                                                                            </div>
+
+                                                                                            <div class="col-md-6 col-12">
+
+                                                                                                <div class="form-group mt-75">
+                                                                                                    <label for="basicInput">{{ __('Business Plan')}}</label>
+                                                                                                    <div class="input-group">
+                                                                                                        <div class="input-group-prepend">
+                                                                                                            <span class="input-group-text" id="inputGroupFileAddonP02">{{ __('admin.Upload')}}</span>
+                                                                                                        </div>
+                                                                                                        <div class="custom-file">
+                                                                                                            <input type="file" class="custom-file-input" id="business_plan"
+                                                                                                                   name="business_plan" accept=".pdf,.xlsx,.docx" style="direction: ltr;"
+                                                                                                                   aria-describedby="inputGroupFileAddonP01">
+                                                                                                            <label class="custom-file-label"
+                                                                                                                   for="inputGroupFileP01">{{ __('admin.Select file')}}</label>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    @if (isset($client->company->business_plan))
+                                                                                                        <a href="{{ $client->company->business_plan_url }}" target="_blank" class="btn btn-warning mt-1">
+                                                                                                            <i class="bx bx-search-alt"></i>  {{ __('Preview') }}
+                                                                                                        </a>
+                                                                                                    @endif
+                                                                                                </div>
+                                                                                                    <div class="form-group">
+                                                                                                        <label for="business_plan_description">{{ __('Business Plan Description') }}</label>
+                                                                                                        <textarea class="form-control " id="business_plan_description" name='business_plan_description'
+                                                                                                                  placeholder="{{__('Business Plan Description')}}"
+                                                                                                        >{{($client->company)? $client->company->business_plan_description:old('business_plan_description')}}</textarea>
+                                                                                                    </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-6 col-12">
+
+                                                                                                <div class="form-group mt-75">
+                                                                                                    <label for="basicInput">{{ __('Pitch Deck')}}</label>
+                                                                                                    <div class="input-group">
+                                                                                                        <div class="input-group-prepend">
+                                                                                                            <span class="input-group-text" id="inputGroupFileAddonP03">{{ __('admin.Upload')}}</span>
+                                                                                                        </div>
+                                                                                                        <div class="custom-file">
+                                                                                                            <input type="file" class="custom-file-input" id="pitch_deck"
+                                                                                                                   name="pitch_deck" accept=".pdf,.xlsx,.docx" style="direction: ltr;"
+                                                                                                                   aria-describedby="inputGroupFileAddonP02">
+                                                                                                            <label class="custom-file-label"
+                                                                                                                   for="inputGroupFileP02">{{ __('admin.Select file')}}</label>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    @if (isset($client->company->pitch_deck))
+                                                                                                        <a href="{{ $client->company->pitch_deck_url }}" target="_blank" class="btn btn-warning mt-1">
+                                                                                                            <i class="bx bx-search-alt"></i>  {{ __('Preview') }}
+                                                                                                        </a>
+                                                                                                    @endif
+                                                                                                </div>
+                                                                                                    <div class="form-group">
+                                                                                                        <label for="pitch_deck_description">{{ __('Pitch Deck Description') }}</label>
+                                                                                                        <textarea class="form-control " id="pitch_deck_description" name='pitch_deck_description'
+                                                                                                                  placeholder="{{__('Pitch Deck Description')}}"
+                                                                                                        >{{($client->company)? $client->company->pitch_deck_description:old('pitch_deck_description')}}</textarea>
+                                                                                                    </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-6 col-12">
+                                                                                                <div class="form-group mt-75">
+                                                                                                    <label for="basicInput">{{ __('Financial Plan')}}</label>
+                                                                                                    <div class="input-group">
+                                                                                                        <div class="input-group-prepend">
+                                                                                                            <span class="input-group-text" id="inputGroupFileAddonP04">{{ __('admin.Upload')}}</span>
+                                                                                                        </div>
+                                                                                                        <div class="custom-file">
+                                                                                                            <input type="file" class="custom-file-input" id="financial_plan"
+                                                                                                                   name="financial_plan" accept=".pdf,.xlsx,.docx" style="direction: ltr;"
+                                                                                                                   aria-describedby="inputGroupFileAddonP03">
+                                                                                                            <label class="custom-file-label"
+                                                                                                                   for="inputGroupFileP03">{{ __('admin.Select file')}}</label>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    @if (isset($client->company->financial_plan))
+                                                                                                        <a href="{{ $client->company->financial_plan_url }}" target="_blank" class="btn btn-warning mt-1">
+                                                                                                            <i class="bx bx-search-alt"></i>  {{ __('Preview') }}
+                                                                                                        </a>
+                                                                                                    @endif
+                                                                                                </div>
+                                                                                                    <div class="form-group">
+                                                                                                        <label for="financial_plan_description">{{ __('Financial Plan Description') }}</label>
+                                                                                                        <textarea class="form-control " id="financial_plan_description" name='financial_plan_description'
+                                                                                                                  placeholder="{{__('Financial Plan Description')}}"
+                                                                                                        >{{($client->company)? $client->company->financial_plan_description:old('financial_plan_description')}}</textarea>
+                                                                                                    </div>
+                                                                                            </div>
+
+                                                                                        </div>
+                                                                                        <div class="row">
+                                                                                            <div class="col-12 d-flex justify-content-end">
+                                                                                                <button type="submit"
+                                                                                                        class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </form>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -515,7 +610,7 @@
                                                                                                         </td>
 
                                                                                                         <td class="text-center">
-                                                                                                            <a href="#" title="Edit" class="btn btn-icon rounded-circle btn-light-primary roundBtn" data-value="edit" data-url="{{ route('startup.fundingRounds.update',['fundingRound'=>$round->id]) }}">
+                                                                                                            <a href="#" title="Edit" class="btn btn-icon rounded-circle btn-light-primary roundBtn" data-value="edit" data-url="{{ route('startup.fundingRounds.update',['fundingRound'=>$round->id]) }}" data-id="{{ $round->id }}">
                                                                                                                 <i class="bx bxs-edit-alt"></i></a>
                                                                                                             <a onclick="sweet_delete( '{{ route('startup.fundingRounds.destroy',['fundingRound' => $round->id ])  }} ' , '{{ trans('admin.deleted_msg_confirm') }}' ,{{ $round->id }} )" title="Delete" class="btn btn-icon rounded-circle btn-light-danger">
                                                                                                                 <i class="bx bxs-x-square"></i></a>
@@ -542,8 +637,55 @@
                                                             <form method="post" action="{{route('update_my_company')}}" enctype="multipart/form-data">
                                                                 {!! csrf_field() !!}
                                                                 <div class="row">
+                                                                    <div class="col-md-12 col-12 ">
+                                                                        <div class="form-group">
+                                                                            <label for="about_problem">What problem are you solving, or what value are you creating?</label>
+                                                                                <textarea  class="form-control height-100" id="about_problem" name='about_problem'
+                                                                            >{{($client->company)? $client->company->about_problem:old('about_problem')}}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-12 col-12 ">
+                                                                        <div class="form-group">
+                                                                            <label for="about_market_opportunity">What's your market opportunity and how will you acquire customers?</label>
+                                                                            <textarea  class="form-control height-100" id="about_market_opportunity" name='about_market_opportunity'
+                                                                            >{{($client->company)? $client->company->about_market_opportunity:old('about_market_opportunity')}}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-12 col-12 ">
+                                                                        <div class="form-group">
+                                                                            <label for="about_competitors">Who are your competitors and what makes you different?</label>
+                                                                            <textarea  class="form-control height-100" id="about_competitors" name='about_competitors'
+                                                                            >{{($client->company)? $client->company->about_competitors:old('about_competitors')}}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-12 col-12 ">
+                                                                        <div class="form-group">
+                                                                            <label for="about_monetize">How will you monetize?</label>
+                                                                            <textarea  class="form-control height-100" id="about_monetize" name='about_monetize'
+                                                                            >{{($client->company)? $client->company->about_monetize:old('about_monetize')}}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-12 col-12 ">
+                                                                        <div class="form-group">
+                                                                            <label for="about_challenges">What are your top three challenges?</label>
+                                                                            <textarea  class="form-control height-100" id="about_challenges" name='about_challenges'
+                                                                            >{{($client->company)? $client->company->about_challenges:old('about_challenges')}}</textarea>
+                                                                        </div>
+                                                                    </div>
 
-
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-12 d-flex justify-content-end">
+                                                                        <button type="submit"
+                                                                                class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                        <div class="jq-tab-content" data-tab="5">
+                                                            <form method="post" action="{{route('update_my_company')}}" enctype="multipart/form-data">
+                                                                {!! csrf_field() !!}
+                                                                <div class="row">
                                                                     <div class="col-md-6 col-12 ">
                                                                         <div class="form-label-group">
                                                                             <label for="facebook">{{ __('admin.Website') }}</label>
@@ -634,7 +776,7 @@
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
-            <form method="post" id="fundingForm" action="{{ route('startup.fundingRounds.store') }}" enctype="multipart/form-data" autocomplete="off">
+            <form method="post" class="fundingForm" action="{{ route('startup.fundingRounds.store') }}" enctype="multipart/form-data" autocomplete="off">
                 <div class="modal-header">
                     <h4 class="modal-title">{{__('admin.Add new funding round')}}
                     </h4>
@@ -644,7 +786,7 @@
                 </div>
                 <div class="modal-body">
                     @csrf
-                    <input type="hidden" name="_method" value="PUT" id="fundingMethod">
+                    <input type="hidden" name="_method" value="PUT" class="fundingMethod">
                     <div class="row">
                         <div class="form-group col-6">
                             <label>{{__('admin.Funding Stage')}} * :</label>
@@ -689,7 +831,7 @@
                         <div class="form-group col-6">
                             <label>{{__('admin.Date Raised')}} * :</label>
                             <div class="input-group">
-                                <input type="date" name="date_raised" placeholder="{{ __('admin.selectDate') }}" class="form-control" >
+                                <input type="date" name="date_raised" id="date_raised" placeholder="{{ __('admin.selectDate') }}" class="form-control" >
                             </div>
                         </div>
                         <div class="form-group col-6">
@@ -738,13 +880,26 @@
     $(document).ready(function() {
         $('.roundBtn').click(function (){
             if ($(this).data('value')==='create'){
-                $('#fundingMethod').setAttribute('name','');
+                $('.fundingMethod').attr('name','');
             }else{
-                $('#fundingMethod').setAttribute('name','_method');
+                $('.fundingMethod').attr('name','_method');
+                $.ajax({
+                    url: "/dashboard/startup/fundingRounds/"+$(this).data('id'),
+                    success: function (data) {
+                        $('#funding_stage').val(data['funding_stage']);
+                        $('#amount').val(data['amount']);
+                        $('#post_money_valuation').val(data['post_money_valuation']);
+                        $('#date_raised').val(data['date_raised']);
+                        $('#investment_vehicle').val(data['investment_vehicle']);
+                        $('#amount_raised').val(data['amount_raised']);
+
+                    }
+                });
             }
-            $('#fundingForm').setAttribute('action',$(this).data('url'));
+            $('.fundingForm').attr('action',$(this).data('url'));
             $('#SendRequest').modal('show');
         });
+
         $('#institutions').select2({
             tags: true,
             placeholder: 'Type and press enter to add',

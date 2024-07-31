@@ -297,7 +297,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
         Route::get('mentorshipTasks/show/{mentorshipTask}','Startup\MentorshipTaskController@show')->name('mentorshipTasks.show');
         Route::post('mentorshipTasks/complete/{mentorshipTask}','Startup\MentorshipTaskController@complete')->name('mentorshipTasks.complete');
         Route::post('mentorshipTasks/send/comment','Startup\MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
-        Route::resource('fundingRounds','Startup\FundingRoundController')->except(['index','show']);
+        Route::resource('fundingRounds','Startup\FundingRoundController')->except(['index']);
+
 
     });
 
