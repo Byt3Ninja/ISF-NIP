@@ -473,5 +473,7 @@ return [
     'Investment Vehicle'=>'Investment Vehicle',
     'Amount Raised'=>'Amount Raised',
     'Add new funding round'=>'Add New Funding Round',
+    'Select file'=>'Select File',
+    'about'=>'About Section'
 
 ];

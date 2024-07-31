@@ -473,4 +473,6 @@ return [
     'Investment Vehicle'=>'Investment Vehicle',
     'Amount Raised'=>'Amount Raised',
     'Add new funding round'=>'Add New Funding Round',
+    'Select file'=>'ارفاق الملف',
+    'about'=>'عن الشركة',
     ];

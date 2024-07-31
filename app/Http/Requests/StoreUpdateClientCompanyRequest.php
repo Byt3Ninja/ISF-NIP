@@ -30,14 +30,14 @@ class StoreUpdateClientCompanyRequest extends FormRequest
         //make sure that, the ID is number
 //        !is_numeric ($companyId)? abort('401'): '';
         return [
-            'state_id' => ['required', 'numeric'],
-            'city_id' => ['required', 'numeric'],
-            'name_en' => ['required', 'string'],
-            'name_ar' => ['required', 'string'],
-            'address_en' => ['required', 'string'],
-            'address_ar' => ['required', 'string'],
-            'phone' => ['required'],
-            'email' => 'email|required|unique:companies,email,'.$companyId,
+            'state_id' => ['sometimes', 'numeric'],
+            'city_id' => ['sometimes', 'numeric'],
+            'name_en' => ['sometimes', 'string'],
+            'name_ar' => ['sometimes', 'string'],
+            'address_en' => ['sometimes', 'string'],
+            'address_ar' => ['sometimes', 'string'],
+            'phone' => ['sometimes'],
+            'email' => 'email|sometimes|unique:companies,email,'.$companyId,
         ];
     }
 }

@@ -45,8 +45,8 @@ class FundingRoundController extends Controller
      */
     public function show(string $id)
     {
-        abort(404);
-
+        $round = FundingRound::findOrFail($id);
+        return response()->json($round);
     }
 
     /**
@@ -54,15 +54,22 @@ class FundingRoundController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        abort(404);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(FundingStoreRequest $request, string $id)
     {
-        //
+        $round = auth()->user()->company->fundingRounds()->findOrFail($id);
+        $round->update($request->validated());
+        if($round) {
+            return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+        }
+        else {
+            return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+        }
     }
 
     /**
@@ -70,6 +77,15 @@ class FundingRoundController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+
+//            if ($zoomid) {
+//                $zoom = $this->delete($zoomid);
+//                if (!$zoom['success']) {
+//                    return response()->json(['state' => 'failed'], 500);
+//                }
+//            }
+            FundingRound::findOrFail($id)->delete();
+            return response()->json(['state' => 'success'], 200);
+
     }
 }
