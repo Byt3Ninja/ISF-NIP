@@ -1,42 +1,77 @@
 @php($gtag = \App\Settings::findorfail(1)->first('url'))
+
+<!-- Goggle Tag Manger -->
 @if ($gtag)
-    <script async src="https://www.googletagmanager.com/gtag/js?id={!!$gtag->url!!}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '{!!$gtag->url!!}');
-    </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id={!!$gtag->url!!}"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{!!$gtag->url!!}');
+  </script>
 @endif
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-    <meta name="author" content="GrowthLab">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{config('app.name')}}-V2</title>
-    <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
-    <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
-{{--    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,500,600%7CIBM+Plex+Sans:300,400,500,600,700" rel="stylesheet">--}}
-	<link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
-    <!-- BEGIN: Vendor CSS-->
-    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/vendors{{$l=='ar'?'-rtl':''}}.min.css">
-	@yield('vendorstyle')
-    <!-- END: Vendor CSS-->
-    <!-- BEGIN: Theme CSS-->
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/bootstrap-extended.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/colors.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/components.css?v=0000001">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/themes/dark-layout.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/themes/semi-dark-layout.css">
-    @if ($l=='ar') <link rel="stylesheet" type="text/css" href="/app-assets/css-rtl/custom-rtl.css"> @endif
-    <!-- END: Theme CSS-->
-    <!-- BEGIN: Page CSS-->
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/core/menu/menu-types/vertical-menu.css">
-	@yield('style')
-	<!-- END: Page CSS-->
-    <!-- BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="/assets/css/style{{$l=='ar'?'-rtl':''}}.css">
-    <!-- END: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/sweetalert2.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+<!-- End Goggle Tag Manger -->
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+<meta name="author" content="GrowthLab">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>{{config('app.name')}}-V2</title>
+<link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
+
+<!-- Favicon -->
+<link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
+
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600" rel="stylesheet">
+<!-- End Fonts -->
+
+<!-- Icons -->
+<link rel="stylesheet" href="/vuexy/assets/vendor/fonts/fontawesome.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/fonts/tabler-icons.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/fonts/flag-icons.css" />
+<!-- End Icons -->
+
+<!-- Core CSS -->
+<link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
+<link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
+<!-- End Core CSS -->
+
+
+<!-- BEGIN: Vendor CSS-->
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/vendors/css/vendors.min.css">
+@yield('vendorstyle')
+<!-- END: Vendor CSS-->
+
+<!-- BEGIN: Theme CSS-->
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/bootstrap-extended.css">
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/colors.css">
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/components.css">
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/themes/dark-layout.css">
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/themes/bordered-layout.css">
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/themes/semi-dark-layout.css">
+<!-- END: Theme CSS-->
+
+<!-- BEGIN: Page CSS-->
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/core/menu/menu-types/vertical-menu.css">
+<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/pages/page-profile.css">
+@yield('style')
+<!-- END: Page CSS-->
+
+<!-- BEGIN: Custom CSS-->
+<link rel="stylesheet" type="text/css" href="/vuexy/assets/css/style.css">
+<!-- END: Custom CSS-->
+
+<!-- Helpers -->
+<script src="/vuexy/assets/vendor/js/helpers.js"></script>
+<!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+
+<!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+<script src="/vuexy/assets/vendor/js/template-customizer.js"></script>
+
+<!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+<script src="/vuexy/assets/js/config.js"></script>

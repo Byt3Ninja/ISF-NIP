@@ -7,25 +7,29 @@
 <!-- BEGIN: Body-->
 <body class="vertical-layout vertical-menu-modern {{session('layout')??'semi-dark'}}-layout 2-columns @yield('bodyclass') navbar-sticky footer-static" data-open="click" data-menu="vertical-menu-modern" data-col="2-columns" data-layout="semi-dark-layout">
 		@include('admin.includes.header')
+   
     <!-- BEGIN: Main Menu-->
-    <div class="main-menu menu-fixed menu-{{session('layout')=='light'?'light':'dark'}} menu-accordion menu-shadow" data-scroll-to-active="true">
+    <!-- <div class="main-menu menu-fixed menu-{{session('layout')=='light'?'light':'dark'}} menu-accordion menu-shadow" data-scroll-to-active="true">
 		@include('admin.includes.menu')
-    </div>
+    </div> -->
     <!-- END: Main Menu-->
-	<!-- Start Content -->
-		@yield('content')
-	<!-- End Content -->
+
+    <!-- Start Content -->
+      @yield('content')
+    <!-- End Content -->
+
   	<!-- BEGIN: Footer-->
     <footer class="footer footer-static footer-light">
-		@include('admin.includes.footer')
+	  	@include('admin.includes.footer')
     </footer>
     <!-- END: Footer-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
         @hasanyrole('Admin|Manager')
         <!-- Pusher scripts -->
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="//js.pusher.com/3.1/pusher.min.js"></script>
-    <script type="text/javascript">
+    <!-- <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
+    <!-- <script src="//js.pusher.com/3.1/pusher.min.js"></script> -->
+    <!-- <script type="text/javascript">
         $(document).ready(function (){
 
 
@@ -95,10 +99,10 @@
             });
         });
 
-    </script>
+    </script> -->
     <!-- End of Pusher -->
     @endhasanyrole
-        <script>
+        <!-- <script>
             function sweet_delete(url, message, user_id) {
                 $("#row_" + user_id).css('background-color', '#000000').css('color', 'white');
                 swal({
@@ -134,27 +138,30 @@
                     }
                 });
             }
-        </script>
+        </script> -->
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
     <script src="/app-assets/js/scripts/forms/select/form-select2.js"></script>
     <script src="/app-assets/js/scripts/extensions/sweet-alerts.js"></script>
-    <script src="/app-assets/vendors/js/extensions/sweetalert2.all.min.js"></script>
+    <script src="/app-assets/vendors/js/extensions/sweetalert2.all.min.js"></script> -->
+
     <!-- BEGIN: Vendor JS-->
-    <script src="/app-assets/vendors/js/vendors.min.js"></script>
-    <script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.tools.js"></script>
-    <script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.defaults.js"></script>
-    <script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.min.js"></script>
-    <!-- BEGIN Vendor JS-->
-	@yield('scripts')
+    <!-- <script src="/app-assets/vendors/js/vendors.min.js"></script> -->
+    <!-- <script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.tools.js"></script> -->
+    <!-- <script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.defaults.js"></script>
+    <script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.min.js"></script> -->
+	  @yield('scripts')
+    <!-- End Vendor JS-->
+
     <!-- BEGIN: Theme JS-->
-    <script src="/app-assets/js/scripts/configs/vertical-menu-dark.js"></script>
+    <!-- <script src="/app-assets/js/scripts/configs/vertical-menu-dark.js"></script>
     <script src="/app-assets/js/core/app-menu.js"></script>
-	<script src="/app-assets/js/core/app.js"></script>
+    <script src="/app-assets/js/core/app.js"></script>
     <script src="/app-assets/js/scripts/components.js"></script>
-	<script src="/app-assets/js/scripts/footer.js"></script>
+    <script src="/app-assets/js/scripts/footer.js"></script> -->
     <!-- END: Theme JS-->
-	@yield('pagescripts')
+     
+    @yield('pagescripts')
 </body>
 <!-- END: Body-->
 </html>
