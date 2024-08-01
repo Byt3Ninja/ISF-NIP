@@ -40,30 +40,21 @@
 <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
 <!-- End Core CSS -->
 
-
-<!-- BEGIN: Vendor CSS-->
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/vendors/css/vendors.min.css">
-@yield('vendorstyle')
+<!-- Vendors CSS -->
+ <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
+ <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+ <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+ <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+ <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+ <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
+ @yield('vendorstyle')
 <!-- END: Vendor CSS-->
 
-<!-- BEGIN: Theme CSS-->
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/bootstrap.css">
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/bootstrap-extended.css">
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/colors.css">
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/components.css">
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/themes/dark-layout.css">
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/themes/bordered-layout.css">
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/themes/semi-dark-layout.css">
-<!-- END: Theme CSS-->
-
 <!-- BEGIN: Page CSS-->
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/core/menu/menu-types/vertical-menu.css">
-<link rel="stylesheet" type="text/css" href="/vuexy/app-assets/css/pages/page-profile.css">
 @yield('style')
 <!-- END: Page CSS-->
 
 <!-- BEGIN: Custom CSS-->
-<link rel="stylesheet" type="text/css" href="/vuexy/assets/css/style.css">
 <!-- END: Custom CSS-->
 
 <!-- Helpers -->
@@ -71,7 +62,7 @@
 <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
 
 <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
-<script src="/vuexy/assets/vendor/js/template-customizer.js"></script>
+{{-- <script src="/vuexy/assets/vendor/js/template-customizer.js"></script> --}}
 
 <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
 <script src="/vuexy/assets/js/config.js"></script>
