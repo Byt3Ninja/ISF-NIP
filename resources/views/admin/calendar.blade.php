@@ -7,9 +7,7 @@
   <!-- Calendar Vendor css -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/fullcalendar/fullcalendar.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <!-- Calendar Vendor css -->
 @stop
 

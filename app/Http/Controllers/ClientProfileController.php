@@ -37,13 +37,18 @@ class ClientProfileController extends Controller
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id',null)->get();
-            return view('admin/clients/profile', compact('client','countries','expertises'));
+            return view('admin/clients/editProfile', compact('client','countries','expertises'));
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
     }
+
+    public function show(){
+      return view('admin/clients/profile');
+    }
+
     /**
      * Update the specified resource in storage.
      *

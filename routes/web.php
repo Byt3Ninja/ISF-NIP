@@ -132,6 +132,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::resource('press', 'PressController');
 	//Client's Profile
 	Route::get('/myProfile', 'ClientProfileController@edit')->name('my_profile');
+	Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
 	Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
 	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
 	//Client's company
