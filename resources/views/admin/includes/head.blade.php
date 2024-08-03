@@ -2,12 +2,15 @@
 
 <!-- Goggle Tag Manger -->
 @if ($gtag)
-  <script async src="https://www.googletagmanager.com/gtag/js?id={!!$gtag->url!!}"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id={!! $gtag->url !!}"></script>
   <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '{!!$gtag->url!!}');
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', '{!! $gtag->url !!}');
   </script>
 @endif
 <!-- End Goggle Tag Manger -->
@@ -17,7 +20,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
 <meta name="author" content="GrowthLab">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>{{config('app.name')}}-V2</title>
+<title>{{ config('app.name') }}-V2</title>
 <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
 
 <!-- Favicon -->
@@ -25,7 +28,11 @@
 
 
 <!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+  rel="stylesheet" />
 <!-- End Fonts -->
 
 <!-- Icons -->
@@ -41,13 +48,13 @@
 <!-- End Core CSS -->
 
 <!-- Vendors CSS -->
- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
- @yield('vendorstyle')
+@yield('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
 <!-- END: Vendor CSS-->
 
 <!-- BEGIN: Page CSS-->
