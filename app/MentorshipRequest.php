@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MentorshipRequest extends Model
 {
     protected $table = 'mentorship_requests';
-    protected $fillable = ['organization_id', 'mentor_id', 'user_id', 'comment', 'approved','admin_comment','admin_id','join_url','start_url','rate_comment','done'];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $casts = ['zoom_date'  => 'date:Y-m-d H:i'];
     public function getZoomDateAttribute()
     {

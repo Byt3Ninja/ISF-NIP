@@ -77,7 +77,7 @@ class MentorsController extends Controller
                 $fileName = $request->file('file_url');
                 $fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
             }
-            MentorshipRequest::insert([
+            MentorshipRequest::create([
                 'mentor_id' => $request->mentorid, 'user_id' => Auth::id(), 'comment' => $request->notes,
                 'zoom_date' => $request->date, 'period' => $request->period, 'fileurl' => $fileName,
                 'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id
@@ -104,7 +104,7 @@ class MentorsController extends Controller
                 if (!$onlineMeeting['success']) {return back()->with(['message2' => "Error, can't create online meeting."]);}
 
                 $dateFormat = new \DateTime($date);
-                MentorshipRequest::insert([
+                MentorshipRequest::create([
                     'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
                     'admin_id' => Auth::id(), 'start_url' => $onlineMeeting['data']['start_url'], 'join_url' => $onlineMeeting['data']['join_url'],
                     'zoom_date' => $dateFormat->format('Y-m-d H:i'), 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
@@ -187,7 +187,7 @@ class MentorsController extends Controller
         $start = $onlineMeeting['data']['start_url'];
         $join = $onlineMeeting['data']['join_url'];
       }
-      MentorshipRequest::where('id',$request->id)->update(['period'=> $request->period, 'zoom_date'=>$request->date, 'admin_comment' => $request->notes, 'approved'=>$approved, 'start_url' => $start, 'join_url' => $join ]);
+      MentorshipRequest::find($request->id)->update(['period'=> $request->period, 'zoom_date'=>$request->date, 'admin_comment' => $request->notes, 'approved'=>$approved, 'start_url' => $start, 'join_url' => $join ]);
           /// Notify Mentor
           $session = MentorshipRequest::findOrFail($request->id);
           $rname = User::findOrFail($session->mentor_id);
@@ -232,7 +232,7 @@ class MentorsController extends Controller
                              $start = $onlineMeeting['data']['start_url'];
                              $join = $onlineMeeting['data']['join_url'];
                          }
-                    MentorshipRequest::where('id',$request->id)->update(['approved'=>$request->stat, 'start_url' => $start, 'join_url' => $join ]);
+                    MentorshipRequest::find($request->id)->update(['approved'=>$request->stat, 'start_url' => $start, 'join_url' => $join ]);
                     /// Notify Mentor
                     $session = MentorshipRequest::findOrFail($request->id);
                     $rname = User::findOrFail($session->mentor_id);
