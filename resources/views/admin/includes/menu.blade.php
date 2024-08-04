@@ -1,433 +1,1145 @@
-<div class="navbar-header" style="margin-bottom: 50px">
-    <ul class="nav navbar-nav flex-row">
-        <li class="nav-item mr-auto"><a class="navbar-brand" href="/dashboard">
-                @if(!is_null(auth()->user()->organization))
-                    <img src="{{ auth()->user()->organization->image_url}}" alt="avatar" height="40" width="80">
-                @else
-                    <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
-                @endif
-            </a>
-        </li>
-        <li class="nav-item nav-toggle">
-            <a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i
-                        class="bx bx-x d-block d-xl-none font-medium-4 primary"></i><i
-                        class="toggle-icon bx bx-disc font-medium-4 d-none d-xl-block primary"
-                        data-ticon="bx-disc"></i>
-            </a>
-        </li>
+<!-- Menu -->
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+  <div class="app-brand demo pt-4">
+    <a href="index.html" class="app-brand-link">
+      <span class="app-brand-logo demo">
+        <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
+            fill="#7367F0" />
+          <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd"
+            d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z" fill="#161616" />
+          <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd"
+            d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z" fill="#161616" />
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
+            fill="#7367F0" />
+        </svg>
+      </span>
+      <span class="app-brand-text demo menu-text fw-bold">Vuexy</span>
+    </a>
 
-        <li class="nav-item mr-auto">
-            <a class="navbar-brand" href="/dashboard">
-                <h2 class="brand-text mb-0"
-                    style="padding-right:0!important;">{{ is_null(auth()->user()->organization_id)?config('app.name') : auth()->user()->organization->name }}</h2>
-            </a>
+    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+      <i class="ti menu-toggle-icon d-none d-xl-block align-middle"></i>
+      <i class="ti ti-x d-block d-xl-none ti-md align-middle"></i>
+    </a>
+  </div>
+
+  <div class="menu-inner-shadow"></div>
+
+  <ul class="menu-inner py-1">
+    <!-- Dashboards -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-smart-home"></i>
+        <div data-i18n="Dashboards">Dashboards</div>
+        <div class="badge bg-danger rounded-pill ms-auto">5</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="index.html" class="menu-link">
+            <div data-i18n="Analytics">Analytics</div>
+          </a>
         </li>
-
-
-    </ul>
-</div>
-<div class="shadow-bottom"></div>
-<div class="main-menu-content">
-    <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation"
-        data-icon-style="lines">
-        <li class="{{Request::is('dashboard','dashboard/final/*/*','dashboard/companyProfile/*','dashboard/cycles/view/*','dashboard/cycles/my/*','dashboard/screening/*/*')?'active':''}} nav-item">
-            <a href="/dashboard"><i class="menu-livicon"
-                                    data-icon="desktop"></i><span class="menu-title"
-                >{{__('admin.Dashboard')}}</span></a>
+        <li class="menu-item">
+          <a href="dashboards-crm.html" class="menu-link">
+            <div data-i18n="CRM">CRM</div>
+          </a>
         </li>
-        <li class="{{Request::is('*myProfile')?'active':''}} nav-item">
-            <a href="{{route('my_profile')}}">
-                <i class="menu-livicon" data-icon="user"></i>
-                <span class="menu-title">{{__('admin.Profile')}}</span>
-            </a>
+        <li class="menu-item">
+          <a href="app-ecommerce-dashboard.html" class="menu-link">
+            <div data-i18n="eCommerce">eCommerce</div>
+          </a>
         </li>
+        <li class="menu-item">
+          <a href="app-logistics-dashboard.html" class="menu-link">
+            <div data-i18n="Logistics">Logistics</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-academy-dashboard.html" class="menu-link">
+            <div data-i18n="Academy">Academy</div>
+          </a>
+        </li>
+      </ul>
+    </li>
 
+    <!-- Layouts -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-layout-sidebar"></i>
+        <div data-i18n="Layouts">Layouts</div>
+      </a>
 
-        @if(auth()->user()->HaveCompany==1)
-            <li class="{{Request::is('*myCompany')?'active':''}} nav-item">
-                <a href="{{route('my_company')}}">
-                    <i class="menu-livicon" data-icon="building"></i>
-                    <span class="menu-title">{{__('admin.My company')}}</span>
-                </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="layouts-collapsed-menu.html" class="menu-link">
+            <div data-i18n="Collapsed menu">Collapsed menu</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="layouts-content-navbar.html" class="menu-link">
+            <div data-i18n="Content navbar">Content navbar</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="layouts-content-navbar-with-sidebar.html" class="menu-link">
+            <div data-i18n="Content nav + Sidebar">Content nav + Sidebar</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="../horizontal-menu-template" class="menu-link" target="_blank">
+            <div data-i18n="Horizontal">Horizontal</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="layouts-without-menu.html" class="menu-link">
+            <div data-i18n="Without menu">Without menu</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="layouts-without-navbar.html" class="menu-link">
+            <div data-i18n="Without navbar">Without navbar</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="layouts-fluid.html" class="menu-link">
+            <div data-i18n="Fluid">Fluid</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="layouts-container.html" class="menu-link">
+            <div data-i18n="Container">Container</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="layouts-blank.html" class="menu-link">
+            <div data-i18n="Blank">Blank</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Front Pages -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-files"></i>
+        <div data-i18n="Front Pages">Front Pages</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="../front-pages/landing-page.html" class="menu-link" target="_blank">
+            <div data-i18n="Landing">Landing</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="../front-pages/pricing-page.html" class="menu-link" target="_blank">
+            <div data-i18n="Pricing">Pricing</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="../front-pages/payment-page.html" class="menu-link" target="_blank">
+            <div data-i18n="Payment">Payment</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="../front-pages/checkout-page.html" class="menu-link" target="_blank">
+            <div data-i18n="Checkout">Checkout</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="../front-pages/help-center-landing.html" class="menu-link" target="_blank">
+            <div data-i18n="Help Center">Help Center</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Apps & Pages -->
+    <li class="menu-header small">
+      <span class="menu-header-text" data-i18n="Apps & Pages">Apps &amp; Pages</span>
+    </li>
+    <li class="menu-item">
+      <a href="app-email.html" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-mail"></i>
+        <div data-i18n="Email">Email</div>
+      </a>
+    </li>
+    <li class="menu-item">
+      <a href="app-chat.html" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-messages"></i>
+        <div data-i18n="Chat">Chat</div>
+      </a>
+    </li>
+    <li class="menu-item">
+      <a href="app-calendar.html" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-calendar"></i>
+        <div data-i18n="Calendar">Calendar</div>
+      </a>
+    </li>
+    <li class="menu-item">
+      <a href="app-kanban.html" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
+        <div data-i18n="Kanban">Kanban</div>
+      </a>
+    </li>
+    <!-- e-commerce-app menu start -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-shopping-cart"></i>
+        <div data-i18n="eCommerce">eCommerce</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="app-ecommerce-dashboard.html" class="menu-link">
+            <div data-i18n="Dashboard">Dashboard</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Products">Products</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="app-ecommerce-product-list.html" class="menu-link">
+                <div data-i18n="Product List">Product List</div>
+              </a>
             </li>
-        @endif
-        <li class="{{Request::is('*calendar*')?'active':''}} nav-item">
-            <a href="{{route('calendar')}}">
-                <i class="menu-livicon" data-icon="calendar"></i>
-                <span class="menu-title">{{__('admin.Calendar')}}</span>
-            </a>
+            <li class="menu-item">
+              <a href="app-ecommerce-product-add.html" class="menu-link">
+                <div data-i18n="Add Product">Add Product</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-category-list.html" class="menu-link">
+                <div data-i18n="Category List">Category List</div>
+              </a>
+            </li>
+          </ul>
         </li>
-        <?php
-        $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
-//        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
-        $unread = $cmessages->count();
-        $l == 'ar' ? $arrow = 'left' : $arrow = 'right';
-        ?>
-        <li class="{{Request::is('dashboard/inbox','dashboard/outbox','dashboard/mymsg','dashboard/sendmessage')?'sidebar-group-active open':''}} nav-item ">
-            <a href="#"><i class="menu-livicon" data-icon="comments"></i>
-                <span class="menu-title">{{__('admin.My messages')}}</span>
-            </a>
-            <ul class="menu-content">
-                <li class="{{Request::is('dashboard/sendmessage')?'active':''}}"><a href="/dashboard/sendmessage"><i
-                                class="bx bx-message"></i>
-                        <span class="menu-item">{{__('admin.New Message')}}</span>
-                    </a>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Order">Order</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="app-ecommerce-order-list.html" class="menu-link">
+                <div data-i18n="Order List">Order List</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-order-details.html" class="menu-link">
+                <div data-i18n="Order Details">Order Details</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Customer">Customer</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="app-ecommerce-customer-all.html" class="menu-link">
+                <div data-i18n="All Customers">All Customers</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <div data-i18n="Customer Details">Customer Details</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item">
+                  <a href="app-ecommerce-customer-details-overview.html" class="menu-link">
+                    <div data-i18n="Overview">Overview</div>
+                  </a>
                 </li>
-                <li class="{{Request::is('dashboard/inbox')?'active':''}}"><a href="/dashboard/inbox"><i
-                                class="bx bxs-inbox"></i>
-                        <span class="menu-item">{{__('admin.myinbox')}}</span>
-                        @if($unread>0)
-                            <span class="badge badge-pill badge-round badge-dark-info float-right mr-50 ml-auto">{{$unread}}</span>
-                        @endif
-                    </a>
+                <li class="menu-item">
+                  <a href="app-ecommerce-customer-details-security.html" class="menu-link">
+                    <div data-i18n="Security">Security</div>
+                  </a>
                 </li>
-                <li class="{{Request::is('dashboard/outbox')?'active':''}}"><a href="/dashboard/outbox"><i
-                                class="bx bx-mail-send"></i>
-                        <span class="menu-item">{{__('admin.myoutbox')}}</span></a>
+                <li class="menu-item">
+                  <a href="app-ecommerce-customer-details-billing.html" class="menu-link">
+                    <div data-i18n="Address & Billing">Address & Billing</div>
+                  </a>
                 </li>
-                @can('view_messages')
-                    <li class="{{Request::is('dashboard/mymsg')?'active':''}}"><a href="/dashboard/mymsg"><i
-                                    class="bx bx-support"></i><span class="menu-item"
-                            >{{__('admin.contactus')}}</span></a>
-                    </li>
-                @endcan
-            </ul>
+                <li class="menu-item">
+                  <a href="app-ecommerce-customer-details-notifications.html" class="menu-link">
+                    <div data-i18n="Notifications">Notifications</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </li>
-        @if( !Auth::user()->hasanyRole("Mentor|Judger") )
-            <li class="{{Request::is('dashboard/directory')?'active':''}} nav-item"><a href="/dashboard/directory">
-                    <i class="menu-livicon" data-icon="search"></i>
-                    <span class="menu-title">{{__('admin.Services')}}</span></a>
-            </li>
-        @endif
-        @role('Mentor')
-        <li class="{{Request::is('dashboard/mentor/mentorshipSessions*')?'active':''}} nav-item">
-            <a href="{{ route('mentorshipSessions.index') }}">
-                <i class="menu-livicon" data-icon="briefcase"></i>
-                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>
-            </a>
+        <li class="menu-item">
+          <a href="app-ecommerce-manage-reviews.html" class="menu-link">
+            <div data-i18n="Manage Reviews">Manage Reviews</div>
+          </a>
         </li>
-        @endrole
-        @role('Registered')
-        <li class="{{Request::is('dashboard/requests/mine','/dashboard/mentorship/mine')?'sidebar-group-active open':''}} nav-item ">
-            <a href="#"><i class="menu-livicon" data-icon="two-pointers"></i>
-                <span class="menu-title">{{__('admin.My Requests')}}</span>
-            </a>
-            <ul class="menu-content">
-
-                <li class="{{Request::is('dashboard/requests/mine')?'active':''}}"><a href="/dashboard/requests/mine"><i
-                                class="bx bx-{{$arrow}}-arrow-alt"></i>
-                        <span class="menu-item">{{__('admin.Services')}}</span>
-                    </a>
-                </li>
-
-                <li class="{{Request::is('dashboard/mentorship/mine')?'active':''}}"><a
-                            href="/dashboard/mentorship/mine"><i class="bx bx-{{$arrow}}-arrow-alt"></i>
-                        <span class="menu-item">{{__('admin.Mentorship')}}</span>
-                    </a>
-                </li>
-            </ul>
+        <li class="menu-item">
+          <a href="app-ecommerce-referral.html" class="menu-link">
+            <div data-i18n="Referrals">Referrals</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Settings">Settings</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-detail.html" class="menu-link">
+                <div data-i18n="Store Details">Store Details</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-payments.html" class="menu-link">
+                <div data-i18n="Payments">Payments</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-checkout.html" class="menu-link">
+                <div data-i18n="Checkout">Checkout</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-shipping.html" class="menu-link">
+                <div data-i18n="Shipping & Delivery">Shipping & Delivery</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-locations.html" class="menu-link">
+                <div data-i18n="Locations">Locations</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-ecommerce-settings-notifications.html" class="menu-link">
+                <div data-i18n="Notifications">Notifications</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <!-- e-commerce-app menu end -->
+    <!-- Academy menu start -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-book"></i>
+        <div data-i18n="Academy">Academy</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="app-academy-dashboard.html" class="menu-link">
+            <div data-i18n="Dashboard">Dashboard</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-academy-course.html" class="menu-link">
+            <div data-i18n="My Course">My Course</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-academy-course-details.html" class="menu-link">
+            <div data-i18n="Course Details">Course Details</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <!-- Academy menu end -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-truck"></i>
+        <div data-i18n="Logistics">Logistics</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="app-logistics-dashboard.html" class="menu-link">
+            <div data-i18n="Dashboard">Dashboard</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-logistics-fleet.html" class="menu-link">
+            <div data-i18n="Fleet">Fleet</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+        <div data-i18n="Invoice">Invoice</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="app-invoice-list.html" class="menu-link">
+            <div data-i18n="List">List</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-invoice-preview.html" class="menu-link">
+            <div data-i18n="Preview">Preview</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-invoice-edit.html" class="menu-link">
+            <div data-i18n="Edit">Edit</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="app-invoice-add.html" class="menu-link">
+            <div data-i18n="Add">Add</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-users"></i>
+        <div data-i18n="Users">Users</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="app-user-list.html" class="menu-link">
+            <div data-i18n="List">List</div>
+          </a>
         </li>
 
-        <li class="{{Request::is('dashboard/training/my*')?'active':''}} nav-item"><a href="/dashboard/training/my">
-                <i class="menu-livicon" data-icon="help"></i>
-                <span class="menu-title">{{__('admin.My courses')}}</span></a>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="View">View</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="app-user-view-account.html" class="menu-link">
+                <div data-i18n="Account">Account</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-user-view-security.html" class="menu-link">
+                <div data-i18n="Security">Security</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-user-view-billing.html" class="menu-link">
+                <div data-i18n="Billing & Plans">Billing & Plans</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-user-view-notifications.html" class="menu-link">
+                <div data-i18n="Notifications">Notifications</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="app-user-view-connections.html" class="menu-link">
+                <div data-i18n="Connections">Connections</div>
+              </a>
+            </li>
+          </ul>
         </li>
-        <li class="{{Request::is('dashboard/startup/mentorshipTasks*')?'active':''}} nav-item">
-            <a href="{{ route('startup.mentorshipTasks.home') }}">
-                <i class="menu-livicon" data-icon="briefcase"></i>
-                <span class="menu-title">{{__('mentor.mentorshipTasks.index')}}</span>
-            </a>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-settings"></i>
+        <div data-i18n="Roles & Permissions">Roles & Permissions</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="app-access-roles.html" class="menu-link">
+            <div data-i18n="Roles">Roles</div>
+          </a>
         </li>
-        @endrole
-        <li class="{{Request::is('dashboard/myFiles')?'active':''}} nav-item"><a href="/dashboard/myFiles">
-                <i class="menu-livicon" data-icon="save"></i>
-                <span class="menu-title">{{__('admin.filemanager')}}</span></a>
+        <li class="menu-item">
+          <a href="app-access-permission.html" class="menu-link">
+            <div data-i18n="Permission">Permission</div>
+          </a>
         </li>
-        @canany (['view_user','view_log','view_forms','view_report'])
-            <li class=" navigation-header"><span>{{__('admin.Portal Settings')}}</span>
+      </ul>
+    </li>
+    <li class="menu-item active open">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-file"></i>
+        <div data-i18n="Pages">Pages</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item active open">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="User Profile">User Profile</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item active">
+              <a href="pages-profile-user.html" class="menu-link">
+                <div data-i18n="Profile">Profile</div>
+              </a>
             </li>
-        @endcanany
-        @if( auth()->user()->hasRole('Admin') )
-            <li class="{{Request::is('*organizations')?'active':''}} nav-item">
-                <a href="{{route('organizations.index')}}">
-                    <i class="menu-livicon" data-icon="building"></i>
-                    <span class="menu-title">{{__('admin.Manage Organizations')}}</span>
-                </a>
+            <li class="menu-item">
+              <a href="pages-profile-teams.html" class="menu-link">
+                <div data-i18n="Teams">Teams</div>
+              </a>
             </li>
-        @endif
-        @can ('edit_forms')
-            <li class="{{Request::is('dashboard/show-builder*','dashboard/show-form*')?'active':''}} nav-item"><a
-                        href="/dashboard/show-builder">
-                    <i class="menu-livicon" data-icon="thumbnails-big"></i>
-                    <span class="menu-title">{{__('admin.Forms builder')}}</span></a>
+            <li class="menu-item">
+              <a href="pages-profile-projects.html" class="menu-link">
+                <div data-i18n="Projects">Projects</div>
+              </a>
             </li>
-        @endcan
-        @can ('edit_cycles')
-            <li class="{{Request::is('dashboard/cycles*')?'sidebar-group-active open':''}} nav-item">
-                <a href="#"><i class="menu-livicon" data-icon="retweet"></i><span class="menu-title"
-                    > {{__('admin.Cycles')}}</span></a>
-                <ul class="menu-content">
-                    <li class="{{Request::is('/dashboard/cycles*')?'active':''}}"><a href="/dashboard/cycles"><i
-                                    class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
-                            > {{__('cycles.steps')}}</span></a>
-                    </li>
-                    <li class="{{Request::is('dashboard/cycles/*/registered')?'active':''}}"><a
-                                href="/dashboard/cycles/0/registered"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"
-                            > {{__('admin.Startups')}}</span></a>
-                    </li>
-                </ul>
+            <li class="menu-item">
+              <a href="pages-profile-connections.html" class="menu-link">
+                <div data-i18n="Connections">Connections</div>
+              </a>
             </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Account Settings">Account Settings</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="pages-account-settings-account.html" class="menu-link">
+                <div data-i18n="Account">Account</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="pages-account-settings-security.html" class="menu-link">
+                <div data-i18n="Security">Security</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="pages-account-settings-billing.html" class="menu-link">
+                <div data-i18n="Billing & Plans">Billing & Plans</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="pages-account-settings-notifications.html" class="menu-link">
+                <div data-i18n="Notifications">Notifications</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="pages-account-settings-connections.html" class="menu-link">
+                <div data-i18n="Connections">Connections</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="pages-faq.html" class="menu-link">
+            <div data-i18n="FAQ">FAQ</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="pages-pricing.html" class="menu-link">
+            <div data-i18n="Pricing">Pricing</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Misc">Misc</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="pages-misc-error.html" class="menu-link" target="_blank">
+                <div data-i18n="Error">Error</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="pages-misc-under-maintenance.html" class="menu-link" target="_blank">
+                <div data-i18n="Under Maintenance">Under Maintenance</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="pages-misc-comingsoon.html" class="menu-link" target="_blank">
+                <div data-i18n="Coming Soon">Coming Soon</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="pages-misc-not-authorized.html" class="menu-link" target="_blank">
+                <div data-i18n="Not Authorized">Not Authorized</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-lock"></i>
+        <div data-i18n="Authentications">Authentications</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Login">Login</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="auth-login-basic.html" class="menu-link" target="_blank">
+                <div data-i18n="Basic">Basic</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="auth-login-cover.html" class="menu-link" target="_blank">
+                <div data-i18n="Cover">Cover</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Register">Register</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="auth-register-basic.html" class="menu-link" target="_blank">
+                <div data-i18n="Basic">Basic</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="auth-register-cover.html" class="menu-link" target="_blank">
+                <div data-i18n="Cover">Cover</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="auth-register-multisteps.html" class="menu-link" target="_blank">
+                <div data-i18n="Multi-steps">Multi-steps</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Verify Email">Verify Email</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="auth-verify-email-basic.html" class="menu-link" target="_blank">
+                <div data-i18n="Basic">Basic</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="auth-verify-email-cover.html" class="menu-link" target="_blank">
+                <div data-i18n="Cover">Cover</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Reset Password">Reset Password</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="auth-reset-password-basic.html" class="menu-link" target="_blank">
+                <div data-i18n="Basic">Basic</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="auth-reset-password-cover.html" class="menu-link" target="_blank">
+                <div data-i18n="Cover">Cover</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Forgot Password">Forgot Password</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="auth-forgot-password-basic.html" class="menu-link" target="_blank">
+                <div data-i18n="Basic">Basic</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="auth-forgot-password-cover.html" class="menu-link" target="_blank">
+                <div data-i18n="Cover">Cover</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Two Steps">Two Steps</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="auth-two-steps-basic.html" class="menu-link" target="_blank">
+                <div data-i18n="Basic">Basic</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="auth-two-steps-cover.html" class="menu-link" target="_blank">
+                <div data-i18n="Cover">Cover</div>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-forms"></i>
+        <div data-i18n="Wizard Examples">Wizard Examples</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="wizard-ex-checkout.html" class="menu-link">
+            <div data-i18n="Checkout">Checkout</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="wizard-ex-property-listing.html" class="menu-link">
+            <div data-i18n="Property Listing">Property Listing</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="wizard-ex-create-deal.html" class="menu-link">
+            <div data-i18n="Create Deal">Create Deal</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="modal-examples.html" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-square"></i>
+        <div data-i18n="Modal Examples">Modal Examples</div>
+      </a>
+    </li>
 
-            <li class="{{Request::is('dashboard/screening*')?'sidebar-group-active open':''}} nav-item">
-                <a href="#"><i class="menu-livicon" data-icon="hourglass"></i><span class="menu-title"
-                    > {{__('admin.Screening')}}</span></a>
-                <ul class="menu-content">
-                    <li class="{{Request::is('dashboard/screening','dashboard/*/screening')?'active':''}}"><a
-                                href="/dashboard/screening"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"
-                            > {{__('admin.Manage')}}</span></a>
-                    </li>
-                    <li class="{{Request::is('dashboard/screening/results*')?'active':''}}"><a
-                                href="/dashboard/screening/results"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"
-                            > {{__('admin.Results')}}</span></a>
-                    </li>
-                </ul>
-            </li>
-            <li class="{{Request::is('dashboard/mentorship/assign*','dashboard/mentorship/view*','dashboard/mentorship/sessions*')?'sidebar-group-active open':''}} nav-item">
-                <a href="#"><i class="menu-livicon" data-icon="idea"></i><span
-                            class="menu-title"> {{__('admin.Mentorship')}}</span></a>
-                <ul class="menu-content">
-                    <li class="{{Request::is('dashboard/mentorship/assign*')?'active':''}}"><a
-                                href="/dashboard/mentorship/assign"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"> {{__('admin.Cycles Mentors')}}</span></a>
-                    </li>
-                    <li class="{{Request::is('dashboard/mentorship/view*')?'active':''}}"><a
-                                href="/dashboard/mentorship/view"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"> {{__('admin.Manage')}}</span></a>
-                    </li>
+    <!-- Components -->
+    <li class="menu-header small">
+      <span class="menu-header-text" data-i18n="Components">Components</span>
+    </li>
+    <!-- Cards -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-id"></i>
+        <div data-i18n="Cards">Cards</div>
+        <div class="badge bg-primary rounded-pill ms-auto">5</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="cards-basic.html" class="menu-link">
+            <div data-i18n="Basic">Basic</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="cards-advance.html" class="menu-link">
+            <div data-i18n="Advance">Advance</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="cards-statistics.html" class="menu-link">
+            <div data-i18n="Statistics">Statistics</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="cards-analytics.html" class="menu-link">
+            <div data-i18n="Analytics">Analytics</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="cards-actions.html" class="menu-link">
+            <div data-i18n="Actions">Actions</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <!-- User interface -->
+    <li class="menu-item">
+      <a href="javascript:void(0)" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-color-swatch"></i>
+        <div data-i18n="User interface">User interface</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="ui-accordion.html" class="menu-link">
+            <div data-i18n="Accordion">Accordion</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-alerts.html" class="menu-link">
+            <div data-i18n="Alerts">Alerts</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-badges.html" class="menu-link">
+            <div data-i18n="Badges">Badges</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-buttons.html" class="menu-link">
+            <div data-i18n="Buttons">Buttons</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-carousel.html" class="menu-link">
+            <div data-i18n="Carousel">Carousel</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-collapse.html" class="menu-link">
+            <div data-i18n="Collapse">Collapse</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-dropdowns.html" class="menu-link">
+            <div data-i18n="Dropdowns">Dropdowns</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-footer.html" class="menu-link">
+            <div data-i18n="Footer">Footer</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-list-groups.html" class="menu-link">
+            <div data-i18n="List Groups">List groups</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-modals.html" class="menu-link">
+            <div data-i18n="Modals">Modals</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-navbar.html" class="menu-link">
+            <div data-i18n="Navbar">Navbar</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-offcanvas.html" class="menu-link">
+            <div data-i18n="Offcanvas">Offcanvas</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-pagination-breadcrumbs.html" class="menu-link">
+            <div data-i18n="Pagination & Breadcrumbs">Pagination &amp; Breadcrumbs</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-progress.html" class="menu-link">
+            <div data-i18n="Progress">Progress</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-spinners.html" class="menu-link">
+            <div data-i18n="Spinners">Spinners</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-tabs-pills.html" class="menu-link">
+            <div data-i18n="Tabs & Pills">Tabs &amp; Pills</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-toasts.html" class="menu-link">
+            <div data-i18n="Toasts">Toasts</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-tooltips-popovers.html" class="menu-link">
+            <div data-i18n="Tooltips & Popovers">Tooltips &amp; Popovers</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="ui-typography.html" class="menu-link">
+            <div data-i18n="Typography">Typography</div>
+          </a>
+        </li>
+      </ul>
+    </li>
 
-                    <li class="{{Request::is('dashboard/mentorship/sessions*')?'sidebar-group-active open':''}} nav-item">
-                        <a href="#"><i class="bx bx-slider"></i><span class="menu-title"
-                            > {{__('admin.Sessions')}}</span></a>
-                        <ul class="menu-content">
-                            <li class="{{Request::is('/dashboard/mentorship/sessions?show=all')?'active':''}}"><a
-                                        href="/dashboard/mentorship/sessions?show=all"><i
-                                            class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                            class="menu-item"> {{__('cycles.All requests')}}</span></a>
-                            <li class="{{Request::is('/dashboard/mentorship/sessions')?'active':''}}"><a
-                                        href="/dashboard/mentorship/sessions"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                            class="menu-item"> {{__('cycles.New requests only')}}</span></a>
-                            <li class="{{Request::is('/dashboard/mentorship/sessions?show=approved')?'active':''}}"><a
-                                        href="/dashboard/mentorship/sessions?show=approved"><i
-                                            class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                            class="menu-item"> {{__('cycles.approved requests')}}</span></a>
-                            <li class="{{Request::is('/dashboard/mentorship/sessions?show=disapproved')?'active':''}}">
-                                <a href="/dashboard/mentorship/sessions?show=disapproved"><i
-                                            class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                            class="menu-item"> {{__('cycles.disapproved requests')}}</span></a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+    <!-- Extended components -->
+    <li class="menu-item">
+      <a href="javascript:void(0)" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-components"></i>
+        <div data-i18n="Extended UI">Extended UI</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="extended-ui-avatar.html" class="menu-link">
+            <div data-i18n="Avatar">Avatar</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-blockui.html" class="menu-link">
+            <div data-i18n="BlockUI">BlockUI</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-drag-and-drop.html" class="menu-link">
+            <div data-i18n="Drag & Drop">Drag &amp; Drop</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-media-player.html" class="menu-link">
+            <div data-i18n="Media Player">Media Player</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-perfect-scrollbar.html" class="menu-link">
+            <div data-i18n="Perfect Scrollbar">Perfect Scrollbar</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-star-ratings.html" class="menu-link">
+            <div data-i18n="Star Ratings">Star Ratings</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-sweetalert2.html" class="menu-link">
+            <div data-i18n="SweetAlert2">SweetAlert2</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-text-divider.html" class="menu-link">
+            <div data-i18n="Text Divider">Text Divider</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <div data-i18n="Timeline">Timeline</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item">
+              <a href="extended-ui-timeline-basic.html" class="menu-link">
+                <div data-i18n="Basic">Basic</div>
+              </a>
             </li>
-            <li class="{{Request::is('*training*')?'sidebar-group-active open':''}} nav-item">
-                <a href="#"><i class="menu-livicon" data-icon="info-alt"></i><span
-                            class="menu-title"> {{__('admin.Training')}}</span></a>
-                <ul class="menu-content">
-                    <li class="{{Request::is('dashboard/training/sessions*')?'active':''}}"><a
-                                href="/dashboard/training/sessions"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"> {{__('admin.Training sessions')}}</span></a>
-                    </li>
-                    <li class="{{Request::is('dashboard/training/all*','dashboard/training/addcontent*','dashboard/training/editcontent*','dashboard/training/viewcontent*')?'active':''}}">
-                        <a href="/dashboard/training/all"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"> {{__('admin.Training courses')}}</span></a>
-                    </li>
-                    <li class="{{Request::is('dashboard/training/results*')?'active':''}}"><a
-                                href="/dashboard/training/results"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"> {{__('admin.Results')}}</span></a>
-                    </li>
-                </ul>
+            <li class="menu-item">
+              <a href="extended-ui-timeline-fullscreen.html" class="menu-link">
+                <div data-i18n="Fullscreen">Fullscreen</div>
+              </a>
             </li>
-            <li class="{{Request::is('dashboard/final/*')?'sidebar-group-active open':''}} nav-item">
-                <a href="#"><i class="menu-livicon" data-icon="trophy"></i><span class="menu-title"
-                    > {{__('admin.Final Screening')}}</span></a>
-                <ul class="menu-content">
-                    <li class="{{Request::is('dashboard/final','dashboard/*/final')?'active':''}}"><a
-                                href="/dashboard/final"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"
-                            > {{__('admin.Manage')}}</span></a>
-                    </li>
-                    <li class="{{Request::is('dashboard/final/results*')?'active':''}}"><a
-                                href="/dashboard/final/results"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"
-                            > {{__('admin.Results')}}</span></a>
-                    </li>
-                </ul>
-            </li>
-            <li class="sidebar-group-active open nav-item">
-            </li>
+          </ul>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-tour.html" class="menu-link">
+            <div data-i18n="Tour">Tour</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-treeview.html" class="menu-link">
+            <div data-i18n="Treeview">Treeview</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="extended-ui-misc.html" class="menu-link">
+            <div data-i18n="Miscellaneous">Miscellaneous</div>
+          </a>
+        </li>
+      </ul>
+    </li>
 
-            @if(!Auth::user()->hasanyRole("organizationManager|Mentor|Judger") )
-                <li class="{{Request::is('*services*','','dashboard/requests/all','dashboard/room*')?'sidebar-group-active open':''}} nav-item">
-                    <a href="#"><i class="menu-livicon" data-icon="loader-10"></i><span class="menu-title"
-                        > {{__('admin.Services')}}</span></a>
-                    <ul class="menu-content">
-                        <li class="{{Request::is('dashboard/requests/all','dashboard/requests/old')?'active':''}}"><a
-                                    href="{{route('requests')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i>
-                                <span class="menu-item"> {{__('admin.Requests')}}</span></a>
-                        </li>
-                        <li class="{{Request::is('dashboard/services/create')?'active':''}}"><a
-                                    href="{{route('services.create')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                        class="menu-item"
-                                > {{__('admin.Add Service')}}</span></a>
-                        </li>
-                        <li class="{{Request::is('dashboard/services','dashboard/services/*/edit')?'active':''}}"><a
-                                    href="{{route('services.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                        class="menu-item"
-                                > {{__('admin.All Services')}}</span></a>
-                        </li>
-                        <!--
-                            <li class="{{Request::is('dashboard/room*','')?'active':''}}"><a href="{{route('rooms.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
-                                    > {{__('admin.Rooms Management')}}</span></a>
-                            </li> -->
-                        <li class="{{Request::is('dashboard/serviceCategories*')?'active':''}}"><a
-                                    href="{{route('serviceCategories.index')}}"><i
-                                        class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
-                                > {{__('admin.Services Categories')}}</span></a>
-                        </li>
-                    </ul>
-                </li>
-            @endif
-        @endcan
-        @if(!Auth::user()->hasanyRole("organizationManager"))
-            @can('view_user')
-                <li class="{{Request::is('*users*')?'sidebar-group-active open':''}} nav-item">
-                    <a href="#"><i class="menu-livicon" data-icon="users"></i><span class="menu-title"
-                        > {{__('admin.Users')}}</span></a>
-                    <ul class="menu-content">
-                        <li class="{{Request::is('dashboard/users/create')?'active':''}}"><a
-                                    href="{{route('users.create')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                        class="menu-item"
-                                > {{__('admin.Add New')}}</span></a>
-                        </li>
-                        <li class="{{Request::is('dashboard/users','dashboard/users/*/edit')?'active':''}}"><a
-                                    href="{{route('users.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                        class="menu-item"
-                                > {{__('admin.List All')}}</span></a>
-                        </li>
-                        <li class="{{Request::is('dashboard/companies')?'active':''}}"><a
-                                    href="{{route('users.companies')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                        class="menu-item"
-                                > {{__('admin.Companies')}}</span></a>
-                        </li>
-                        @can('view_permissions')
-                            {{--                                <li class="{{Request::is('dashboard/permissions*')?'active':''}}"><a href="{{route('permissions.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"--}}
-                            {{--                                        > {{__('admin.Permissions')}}</span></a>--}}
-                            {{--                                </li>--}}
-                            {{--                                <li class="{{Request::is('dashboard/roles*')?'active':''}}"><a href="{{route('roles.index')}}"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"--}}
-                            {{--                                        > {{__('admin.Roles')}}</span></a>--}}
-                            {{--                                </li>--}}
-                        @endcan
-                    </ul>
-                </li>
-            @endcan
-            @can('view_documentation')
-                <li class="{{Request::is('dashboard/documentation*')?'active':''}} nav-item"><a
-                            href="/dashboard/documentation">
-                        <i class="menu-livicon" data-icon="morph-folder"></i>
-                        <span class="menu-title">{{__('admin.Documentations')}}</span></a>
-                </li>
-            @endcan
-            {{--                @can ('view_log')--}}
-            {{--                    <li class="{{Request::is('*audit-logs*')?'active':''}} nav-item"><a href="/dashboard/audit-logs"><i class="menu-livicon"--}}
-            {{--                                                                                                                    data-icon="lab"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.Log viewer')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-        @endif
-            @can ('view_report')
-                <li class="{{Request::is('reports*')?'active':''}} nav-item"><a href="{{ route('reports.index') }}"><i
-                                class="menu-livicon" data-icon="notebook"></i>
-                        <span class="menu-title">{{__('admin.Reports')}}</span></a>
-                </li>
-            @endcan
-            <li class=" navigation-header"><span></span>
-            </li>
+    <!-- Icons -->
+    <li class="menu-item">
+      <a href="javascript:void(0)" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
+        <div data-i18n="Icons">Icons</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="icons-tabler.html" class="menu-link">
+            <div data-i18n="Tabler">Tabler</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="icons-font-awesome.html" class="menu-link">
+            <div data-i18n="Fontawesome">Fontawesome</div>
+          </a>
+        </li>
+      </ul>
+    </li>
 
-            {{--                @can('edit_settings')--}}
-            {{--                    <li class=" navigation-header"><span>{{__('admin.Frontend settings')}}</span>--}}
-            {{--                    </li>--}}
-            {{--                    <li class="{{Request::is('dashboard/settings')?'active':''}} nav-item"><a href="/dashboard/settings"><i class="menu-livicon"--}}
-            {{--                                                                                                                    data-icon="wrench"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.Homesettings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                    <li class="{{Request::is('dashboard/setaboutus')?'active':''}} nav-item"><a href="/dashboard/setaboutus"><i--}}
-            {{--                                    class="menu-livicon" data-icon="globe"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.About Settings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                    <li class="{{Request::is('dashboard/setcontactus')?'active':''}} nav-item"><a href="/dashboard/setcontactus"><i--}}
-            {{--                                    class="menu-livicon" data-icon="paper-plane"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.Contact Settings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can ('manage_menus')--}}
-            {{--                    <li class="{{Request::is('*menu*')?'active':''}} nav-item"><a href="/dashboard/menus"><i class="menu-livicon"--}}
-            {{--                                                                                                         data-icon="morph-menu-arrow-bottom"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.Menusettings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can ('view_slide')--}}
-            {{--                    <li class="{{Request::is('*slide*')?'active':''}} nav-item"><a href="/dashboard/slides"><i class="menu-livicon"--}}
-            {{--                                                                                                           data-icon="settings"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.Slidersettings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can ('manage_pages')--}}
-            {{--                    <li class="{{Request::is('*page*')?'active':''}} nav-item"><a href="/dashboard/pages"><i class="menu-livicon"--}}
-            {{--                                                                                                         data-icon="briefcase"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.Pagesettings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can ('manage_posts')--}}
-            {{--                    <li class="{{Request::is('*post*')?'active':''}} nav-item"><a href="/dashboard/posts"><i class="menu-livicon"--}}
-            {{--                                                                                                         data-icon="box-add"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.Postsettings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can ('view_faqs')--}}
-            {{--                    <li class="{{Request::is('*faqs*')?'active':''}} nav-item"><a href="/dashboard/faqs"><i class="menu-livicon"--}}
-            {{--                                                                                                        data-icon="comments"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.Faqs settings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can ('view_partner')--}}
-            {{--                    <li class="{{Request::is('*partners*')?'active':''}} nav-item"><a href="/dashboard/partners"><i class="menu-livicon"--}}
-            {{--                                                                                                                data-icon="share"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.partners settings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can ('view_press')--}}
-            {{--                    <li class="{{Request::is('*press*')?'active':''}} nav-item"><a href="/dashboard/press"><i class="menu-livicon"--}}
-            {{--                                                                                                          data-icon="paper-clip"></i><span class="menu-title"--}}
-            {{--                            >{{__('admin.press settings')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can('manage_events')--}}
-            {{--                    <li class="{{Request::is('*event*')?'active':''}} nav-item"><a href="/dashboard/allevents"><i class="menu-livicon"--}}
-            {{--                                                                                                              data-icon="calendar"></i><span class="menu-title">{{__('admin.manageevents')}}</span></a>--}}
-            {{--                    </li>--}}
-            {{--                @endcan--}}
-            {{--                @can('manage_page')--}}
-            {{--                    @if (Auth::user()->PageId)--}}
-            {{--                        <li class="{{Request::is('editmypage')?'active':''}} nav-item"><a href="/dashboard/editmypage"><i class="menu-livicon"--}}
-            {{--                                                                                                                      data-icon="briefcase"></i><span class="menu-title">{{__('admin.editmypage')}}</span></a>--}}
-            {{--                        </li>--}}
-            {{--                    @endif--}}
-            {{--                @endcan--}}
+    <!-- Forms & Tables -->
+    <li class="menu-header small">
+      <span class="menu-header-text" data-i18n="Forms & Tables">Forms &amp; Tables</span>
+    </li>
+    <!-- Forms -->
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-toggle-left"></i>
+        <div data-i18n="Form Elements">Form Elements</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="forms-basic-inputs.html" class="menu-link">
+            <div data-i18n="Basic Inputs">Basic Inputs</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-input-groups.html" class="menu-link">
+            <div data-i18n="Input groups">Input groups</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-custom-options.html" class="menu-link">
+            <div data-i18n="Custom Options">Custom Options</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-editors.html" class="menu-link">
+            <div data-i18n="Editors">Editors</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-file-upload.html" class="menu-link">
+            <div data-i18n="File Upload">File Upload</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-pickers.html" class="menu-link">
+            <div data-i18n="Pickers">Pickers</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-selects.html" class="menu-link">
+            <div data-i18n="Select & Tags">Select &amp; Tags</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-sliders.html" class="menu-link">
+            <div data-i18n="Sliders">Sliders</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-switches.html" class="menu-link">
+            <div data-i18n="Switches">Switches</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="forms-extras.html" class="menu-link">
+            <div data-i18n="Extras">Extras</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-layout-navbar"></i>
+        <div data-i18n="Form Layouts">Form Layouts</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="form-layouts-vertical.html" class="menu-link">
+            <div data-i18n="Vertical Form">Vertical Form</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="form-layouts-horizontal.html" class="menu-link">
+            <div data-i18n="Horizontal Form">Horizontal Form</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="form-layouts-sticky.html" class="menu-link">
+            <div data-i18n="Sticky Actions">Sticky Actions</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-text-wrap-disabled"></i>
+        <div data-i18n="Form Wizard">Form Wizard</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="form-wizard-numbered.html" class="menu-link">
+            <div data-i18n="Numbered">Numbered</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="form-wizard-icons.html" class="menu-link">
+            <div data-i18n="Icons">Icons</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="form-validation.html" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-checkbox"></i>
+        <div data-i18n="Form Validation">Form Validation</div>
+      </a>
+    </li>
+    <!-- Tables -->
+    <li class="menu-item">
+      <a href="tables-basic.html" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-table"></i>
+        <div data-i18n="Tables">Tables</div>
+      </a>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-layout-grid"></i>
+        <div data-i18n="Datatables">Datatables</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="tables-datatables-basic.html" class="menu-link">
+            <div data-i18n="Basic">Basic</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="tables-datatables-advanced.html" class="menu-link">
+            <div data-i18n="Advanced">Advanced</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="tables-datatables-extensions.html" class="menu-link">
+            <div data-i18n="Extensions">Extensions</div>
+          </a>
+        </li>
+      </ul>
+    </li>
 
+    <!-- Charts & Maps -->
+    <li class="menu-header small">
+      <span class="menu-header-text" data-i18n="Charts & Maps">Charts &amp; Maps</span>
+    </li>
+    <li class="menu-item">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-chart-pie"></i>
+        <div data-i18n="Charts">Charts</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item">
+          <a href="charts-apex.html" class="menu-link">
+            <div data-i18n="Apex Charts">Apex Charts</div>
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="charts-chartjs.html" class="menu-link">
+            <div data-i18n="ChartJS">ChartJS</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="menu-item">
+      <a href="maps-leaflet.html" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-map"></i>
+        <div data-i18n="Leaflet Maps">Leaflet Maps</div>
+      </a>
+    </li>
 
-
-    </ul>
-</div>
+    <!-- Misc -->
+    <li class="menu-header small">
+      <span class="menu-header-text" data-i18n="Misc">Misc</span>
+    </li>
+    <li class="menu-item">
+      <a href="https://pixinvent.ticksy.com/" target="_blank" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-lifebuoy"></i>
+        <div data-i18n="Support">Support</div>
+      </a>
+    </li>
+    <li class="menu-item">
+      <a href="https://demos.pixinvent.com/vuexy-html-admin-template/documentation/" target="_blank"
+        class="menu-link">
+        <i class="menu-icon tf-icons ti ti-file-description"></i>
+        <div data-i18n="Documentation">Documentation</div>
+      </a>
+    </li>
+  </ul>
+</aside>
+<!-- / Menu -->

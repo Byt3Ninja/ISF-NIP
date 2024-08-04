@@ -7,26 +7,27 @@
 </head>
 <!-- BEGIN: Body-->
 
-<body
-  class="vertical-layout vertical-menu-modern {{ session('layout') ?? 'semi-dark' }}-layout 2-columns @yield('bodyclass') navbar-sticky footer-static"
-  data-open="click" data-menu="vertical-menu-modern" data-col="2-columns" data-layout="semi-dark-layout">
-  @include('admin.includes.header')
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Sidebar Menu -->
+      @include('admin.includes.menu')
 
-  <!-- BEGIN: Main Menu-->
-  <!-- <div class="main-menu menu-fixed menu-{{ session('layout') == 'light' ? 'light' : 'dark' }} menu-accordion menu-shadow" data-scroll-to-active="true">
-  @include('admin.includes.menu')
-    </div> -->
-  <!-- END: Main Menu-->
+      <div class="layout-page">
+        <!-- Navbar -->
+        @include('admin.includes.header')
 
-  <!-- Start Content -->
-  @yield('content')
-  <!-- End Content -->
+        <!-- Content -->
+        @yield('content')
 
-  <!-- BEGIN: Footer-->
-  <footer class="footer footer-static footer-light">
-    @include('admin.includes.footer')
-  </footer>
-  <!-- END: Footer-->
+        <!-- Footer -->
+        <footer>
+          @include('admin.includes.footer')
+        </footer>
+      </div>
+    </div>
+  </div>
 
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
   @hasanyrole('Admin|Manager')

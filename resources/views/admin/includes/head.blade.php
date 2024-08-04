@@ -42,9 +42,12 @@
 <!-- End Icons -->
 
 <!-- Core CSS -->
-<link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/{{ $l == 'ar' ? 'css/rtl' : 'css' }}/core.css"
+  class="template-customizer-core-css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/{{ $l == 'ar' ? 'css/rtl' : 'css' }}/theme-default.css"
+  class="template-customizer-theme-css" />
 <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
+<link rel="stylesheet" href="/vuexy/assets/css/style{{ $l == 'ar' ? '-rtl' : '' }}.css" />
 <!-- End Core CSS -->
 
 <!-- Vendors CSS -->
