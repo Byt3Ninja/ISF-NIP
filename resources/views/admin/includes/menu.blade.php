@@ -1,22 +1,12 @@
 <!-- Menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo pt-4">
-    <a href="index.html" class="app-brand-link">
-      <span class="app-brand-logo demo">
-        <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd"
-            d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
-            fill="#7367F0" />
-          <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd"
-            d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z" fill="#161616" />
-          <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd"
-            d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z" fill="#161616" />
-          <path fill-rule="evenodd" clip-rule="evenodd"
-            d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
-            fill="#7367F0" />
-        </svg>
-      </span>
-      <span class="app-brand-text demo menu-text fw-bold">Vuexy</span>
+    <a href="/dashboard" class="app-brand-link">
+      @if (!is_null(auth()->user()->organization))
+        <img src="{{ auth()->user()->organization->image_url }}" alt="avatar" height="40" width="80">
+      @else
+        <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
+      @endif
     </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -28,41 +18,423 @@
   <div class="menu-inner-shadow"></div>
 
   <ul class="menu-inner py-1">
-    <!-- Dashboards -->
     <li class="menu-item">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
+      <a href="/dashboard" class="menu-link">
+        {{ is_null(auth()->user()->organization_id) ? config('app.name') : auth()->user()->organization->name }}
+      </a>
+    </li>
+    <!-- Dashboards -->
+    <li
+      class="{{ Request::is('dashboard', 'dashboard/final/*/*', 'dashboard/companyProfile/*', 'dashboard/cycles/view/*', 'dashboard/cycles/my/*', 'dashboard/screening/*/*') ? 'active' : '' }} menu-item">
+      <a href="/dashboard" class="menu-link">
         <i class="menu-icon tf-icons ti ti-smart-home"></i>
-        <div data-i18n="Dashboards">Dashboards</div>
-        <div class="badge bg-danger rounded-pill ms-auto">5</div>
+        <div>{{ __('admin.Dashboard') }}</div>
+      </a>
+    </li>
+
+    <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
+      <a href="{{ route('show_my_profile') }}" class="menu-link">
+        <i class="ti ti-user me-3 ti-md"></i>
+        <div>{{ __('admin.Profile') }}</div>
+      </a>
+    </li>
+
+    @if (auth()->user()->HaveCompany == 1)
+      <li class="{{ Request::is('*myCompany') ? 'active' : '' }} menu-item">
+        <a href="{{ route('my_company') }}" class="menu-link">
+          <i class="menu-livicon" data-icon="building"></i>
+          <span class="menu-title">{{ __('admin.My company') }}</span>
+        </a>
+      </li>
+    @endif
+
+    <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
+      <a href="{{ route('calendar') }}" class="menu-link">
+        <i class="menu-livicon" data-icon="calendar"></i>
+        <span class="menu-title">{{ __('admin.Calendar') }}</span>
+      </a>
+    </li>
+
+    <?php
+    $cmessages = App\Messenger::where('receiver', auth()->id())->whereNull('read');
+    //        if( !is_null( $organization_id ) ) { $cmessages = $cmessages->where('organization_id', $organization_id); }
+    $unread = $cmessages->count();
+    $l == 'ar' ? ($arrow = 'left') : ($arrow = 'right');
+    ?>
+
+    <li
+      class="{{ Request::is('dashboard/inbox', 'dashboard/outbox', 'dashboard/mymsg', 'dashboard/sendmessage') ? 'sidebar-group-active open' : '' }} menu-item">
+      <a class="menu-link menu-toggle"><i class="menu-livicon" data-icon="comments"></i>
+        <span class="menu-title">{{ __('admin.My messages') }}</span>
       </a>
       <ul class="menu-sub">
-        <li class="menu-item">
-          <a href="index.html" class="menu-link">
-            <div data-i18n="Analytics">Analytics</div>
+        <li class="{{ Request::is('dashboard/sendmessage') ? 'active' : '' }} menu-item"><a
+            href="/dashboard/sendmessage" class="menu-link">
+            <i class="bx bx-message"></i>
+            <span class="menu-item">{{ __('admin.New Message') }}</span>
           </a>
         </li>
-        <li class="menu-item">
-          <a href="dashboards-crm.html" class="menu-link">
-            <div data-i18n="CRM">CRM</div>
+        <li class="{{ Request::is('dashboard/inbox') ? 'active' : '' }} menu-item"><a href="/dashboard/inbox"
+            class="menu-link"><i class="bx bxs-inbox"></i>
+            <span class="menu-item">{{ __('admin.myinbox') }}</span>
+            @if ($unread > 0)
+              <span
+                class="badge badge-pill badge-round badge-dark-info float-right mr-50 ml-auto">{{ $unread }}</span>
+            @endif
           </a>
         </li>
-        <li class="menu-item">
-          <a href="app-ecommerce-dashboard.html" class="menu-link">
-            <div data-i18n="eCommerce">eCommerce</div>
+        <li class="{{ Request::is('dashboard/outbox') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/outbox" class="menu-link"><i class="bx bx-mail-send"></i>
+            <span class="menu-item">{{ __('admin.myoutbox') }}</span>
           </a>
         </li>
-        <li class="menu-item">
-          <a href="app-logistics-dashboard.html" class="menu-link">
-            <div data-i18n="Logistics">Logistics</div>
-          </a>
-        </li>
-        <li class="menu-item">
-          <a href="app-academy-dashboard.html" class="menu-link">
-            <div data-i18n="Academy">Academy</div>
-          </a>
-        </li>
+        @can('view_messages')
+          <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
+              <span class="menu-item">{{ __('admin.contactus') }}</span>
+            </a>
+          </li>
+        @endcan
       </ul>
     </li>
+    @if (!Auth::user()->hasanyRole('Mentor|Judger'))
+      <li class="{{ Request::is('dashboard/directory') ? 'active' : '' }} menu-item"><a href="/dashboard/directory"
+          class="menu-link">
+          <i class="menu-livicon" data-icon="search"></i>
+          <span class="menu-title">{{ __('admin.Services') }}</span>
+        </a>
+      </li>
+    @endif
+    @role('Mentor')
+      <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
+          <i class="menu-livicon" data-icon="briefcase"></i>
+          <span class="menu-title">{{ __('mentor.mentorshipTasks.index') }}</span>
+        </a>
+      </li>
+    @endrole
+    @role('Registered')
+      <li
+        class="{{ Request::is('dashboard/requests/mine', '/dashboard/mentorship/mine') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a href="#" class="menu-link"><i class="menu-livicon" data-icon="two-pointers"></i>
+          < class="menu-title">{{ __('admin.My Requests') }}</>
+        </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('dashboard/requests/mine') ? 'active' : '' }} menu-item"><a
+              href="/dashboard/requests/mine"><i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Services') }}</span>
+            </a>
+          </li>
+
+          <li class="{{ Request::is('dashboard/mentorship/mine') ? 'active' : '' }} menu-item"><a
+              href="/dashboard/mentorship/mine"><i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Mentorship') }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="{{ Request::is('dashboard/training/my*') ? 'active' : '' }} menu-item"><a href="/dashboard/training/my">
+          <i class="menu-livicon" data-icon="help"></i>
+          <span class="menu-title">{{ __('admin.My courses') }}</span></a>
+      </li>
+      <li class="{{ Request::is('dashboard/startup/mentorshipTasks*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('startup.mentorshipTasks.home') }}">
+          <i class="menu-livicon" data-icon="briefcase"></i>
+          <span class="menu-title">{{ __('mentor.mentorshipTasks.index') }}</span>
+        </a>
+      </li>
+    @endrole
+    <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
+      <a href="/dashboard/myFiles" class="menu-link">
+        <i class="menu-livicon" data-icon="save"></i>
+        <span class="menu-title">{{ __('admin.filemanager') }}</span>
+      </a>
+    </li>
+
+    @canany(['view_user', 'view_log', 'view_forms', 'view_report'])
+      <li class="menu-header small">
+        <span>{{ __('admin.Portal Settings') }}</span>
+      </li>
+    @endcanany
+
+    @if (auth()->user()->hasRole('Admin'))
+      <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
+        <a href="{{ route('organizations.index') }}" class="menu-link">
+          <i class="menu-livicon" data-icon="building"></i>
+          <span class="menu-title">{{ __('admin.Manage Organizations') }}</span>
+        </a>
+      </li>
+    @endif
+
+    @can('edit_forms')
+      <li class="{{ Request::is('dashboard/show-builder*', 'dashboard/show-form*') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/show-builder" class="menu-link">
+          <i class="menu-livicon" data-icon="thumbnails-big"></i>
+          <span class="menu-title">{{ __('admin.Forms builder') }}</span>
+        </a>
+      </li>
+    @endcan
+
+    @can('edit_cycles')
+      <li class="{{ Request::is('dashboard/cycles*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="menu-livicon" data-icon="retweet"></i>
+          <span class="menu-title">{{ __('admin.Cycles') }}</span>
+        </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/cycles" class="menu-link">
+              <span class="menu-item">{{ __('cycles.steps') }}</span>
+              <i class="bx bx-message"></i>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/cycles/*/registered') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/cycles/0/registered" class="menu-link">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Startups') }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="{{ Request::is('dashboard/screening*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="menu-livicon" data-icon="hourglass"></i>
+          <span class="menu-title">{{ __('admin.Screening') }}</span>
+        </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('dashboard/screening', 'dashboard/*/screening') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/screening">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-title">{{ __('admin.Manage') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/screening/results*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/screening/results">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-title"> {{ __('admin.Results') }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <!-- Mentorship Nav Item -->
+      <li
+        class="{{ Request::is('dashboard/mentorship/assign*', 'dashboard/mentorship/view*', 'dashboard/mentorship/sessions*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <span class="menu-title">{{ __('admin.Mentorship') }}</span>
+        </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('dashboard/mentorship/assign*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/mentorship/assign">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Cycles Mentors') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/mentorship/view*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/mentorship/view">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Manage') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/mentorship/sessions*') ? 'sidebar-group-active open' : '' }} menu-item">
+            <a class="menu-link menu-toggle">
+              <i class="bx bx-slider"></i>
+              <span class="menu-title">{{ __('admin.Sessions') }}</span>
+            </a>
+            <ul class="menu-sub">
+              <li class="{{ Request::is('/dashboard/mentorship/sessions?show=all') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="/dashboard/mentorship/sessions?show=all">
+                  <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                  <span class="menu-item">{{ __('cycles.All requests') }}</span>
+                </a>
+              </li>
+              <li class="{{ Request::is('/dashboard/mentorship/sessions') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="/dashboard/mentorship/sessions">
+                  <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                  <span class="menu-item">{{ __('cycles.New requests only') }}</span>
+                </a>
+              </li>
+              <li class="{{ Request::is('/dashboard/mentorship/sessions?show=approved') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="/dashboard/mentorship/sessions?show=approved">
+                  <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                  <span class="menu-item">{{ __('cycles.approved requests') }}</span>
+                </a>
+              </li>
+              <li
+                class="{{ Request::is('/dashboard/mentorship/sessions?show=disapproved') ? 'active' : '' }} menu-item">
+                <a class="menu-link" href="/dashboard/mentorship/sessions?show=disapproved">
+                  <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                  <span class="menu-item">{{ __('cycles.disapproved requests') }}</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <!-- End Mentorship Nav Item -->
+
+      <li class="{{ Request::is('*training*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle"><i class="menu-livicon" data-icon="info-alt"></i>
+          <span class="menu-title">{{ __('admin.Training') }}</span>
+        </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('dashboard/training/sessions*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/training/sessions">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Training sessions') }}</span>
+            </a>
+          </li>
+          <li
+            class="{{ Request::is('dashboard/training/all*', 'dashboard/training/addcontent*', 'dashboard/training/editcontent*', 'dashboard/training/viewcontent*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/training/all">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Training courses') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/training/results*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/training/results">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Results') }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="{{ Request::is('dashboard/final/*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="menu-livicon" data-icon="trophy"></i>
+          <span class="menu-title">{{ __('admin.Final Screening') }}</span>
+        </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('dashboard/final', 'dashboard/*/final') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/final">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Manage') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/final/results*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/final/results">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Results') }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      @if (!Auth::user()->hasanyRole('organizationManager|Mentor|Judger'))
+        <li
+          class="{{ Request::is('*services*', '', 'dashboard/requests/all', 'dashboard/room*') ? 'sidebar-group-active open' : '' }} menu-item">
+          <a class="menu-link menu-toggle">
+            <i class="menu-livicon" data-="loader-10"></i>
+            <span class="menu-title">{{ __('admin.Services') }}</span>
+          </a>
+          <ul class="menu-sub">
+            <li
+              class="{{ Request::is('dashboard/requests/all', 'dashboard/requests/old') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('requests') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.Requests') }}</span>
+              </a>
+            </li>
+            <li class="{{ Request::is('dashboard/services/create') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('services.create') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.Add Service') }}</span>
+              </a>
+            </li>
+            <li class="{{ Request::is('dashboard/services', 'dashboard/services/*/edit') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('services.index') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.All Services') }}</span>
+              </a>
+            </li>
+            <!--
+                      <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
+                        <a href="{{ route('rooms.index') }}">
+                          <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                          <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
+                        </a>
+                      </li>
+                    -->
+            <li class="{{ Request::is('dashboard/serviceCategories*') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('serviceCategories.index') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.Services Categories') }}</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+      @endif
+    @endcan
+    @if (!Auth::user()->hasanyRole('organizationManager'))
+      @can('view_user')
+        <li class="{{ Request::is('*users*') ? 'sidebar-group-active open' : '' }} menu-item">
+          <a class="menu-link menu-toggle">
+            <i class="menu-livicon" data-icon="users"></i>
+            <span class="menu-title">{{ __('admin.Users') }}</span>
+          </a>
+          <ul class="menu-sub">
+            <li class="{{ Request::is('dashboard/users/create') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('users.create') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.Add New') }}</span>
+              </a>
+            </li>
+            <li class="{{ Request::is('dashboard/users', 'dashboard/users/*/edit') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('users.index') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.List All') }}</span>
+              </a>
+            </li>
+            <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
+              <a class="menu-link" href="{{ route('users.companies') }}">
+                <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                <span class="menu-item">{{ __('admin.Companies') }}</span>
+              </a>
+            </li>
+            @can('view_permissions')
+              {{-- <li class="{{ Request::is('dashboard/permissions*') ? 'active' : '' }} menu-item">
+            <a href="{{ route('permissions.index') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Permissions') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/roles*') ? 'active' : '' }} menu-item">
+            <a href="{{ route('roles.index') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item">{{ __('admin.Roles') }}</span>
+            </a>
+          </li> --}}
+            @endcan
+          </ul>
+        </li>
+      @endcan
+      @can('view_documentation')
+        <li class="{{ Request::is('dashboard/documentation*') ? 'active' : '' }} menu-item">
+          <a class="menu-link" href="/dashboard/documentation">
+            <i class="menu-livicon" data-icon="morph-folder"></i>
+            <span class="menu-title">{{ __('admin.Documentations') }}</span>
+          </a>
+        </li>
+      @endcan
+      {{-- @can('view_log')
+    <li class="{{ Request::is('*audit-logs*') ? 'active' : '' }} menu-item">
+      <a href="/dashboard/audit-logs">
+        <i class="menu-livicon" data-icon="lab"></i>
+        <span class="menu-title">{{ __('admin.Log viewer') }}</span>
+      </a>
+    </li>
+  @endcan --}}
+    @endif
+
+    @can('view_report')
+      <li class="{{ Request::is('reports*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('reports.index') }}">
+          <i class="menu-livicon" data-icon="notebook"></i>
+          <span class="menu-title">{{ __('admin.Reports') }}</span></a>
+      </li>
+    @endcan
 
     <!-- Layouts -->
     <li class="menu-item">
