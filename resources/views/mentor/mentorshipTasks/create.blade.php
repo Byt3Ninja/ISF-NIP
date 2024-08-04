@@ -13,7 +13,7 @@
                                 <ol class="breadcrumb p-0 mb-0">
                                     <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{{ route('mentorshipTasks.index') }}"><i class="bx bx-briefcase"></i></a>
+                                    <li class="breadcrumb-item"><a href="{{ route('mentorshipTasks.index',['mentorship_id'=>$mentorship->id]) }}">{{ $mentorship->zoom_date }} - {{ $mentorship->user->company->name }}</a>
                                     </li>
                                     <li class="breadcrumb-item active">{{__('mentor.mentorshipTasks.create')}}
                                     </li>

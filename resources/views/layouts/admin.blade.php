@@ -106,8 +106,13 @@
                     icon: "warning",
                     buttons: true,
                     dangerMode: true,
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    focusConfirm: false,
+                    confirmButtonText: "{{ __('Confirm & Delete') }}",
+                    cancelButtonText: "{{ __('Cancel') }}",
                 }).then((willDelete) => {
-                    if (willDelete) {
+                    if (willDelete.value)  {
                         $.ajax({
                             url: url,
                             type: 'post', // Use POST method

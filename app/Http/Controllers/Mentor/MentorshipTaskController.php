@@ -46,7 +46,7 @@ class MentorshipTaskController extends Controller
                 ]);
 
             if($result)
-                return back()->with( ['message' => 'StoredSuccessfully'] );
+                return  redirect(route('mentorshipTasks.index',['mentorship_id'=>$request->mentorship_request_id]))->with( ['message' => 'StoredSuccessfully'] );
             else
                 return back()->withInput()->with( ['message2' => 'FailedStore'] );
 
@@ -65,7 +65,8 @@ class MentorshipTaskController extends Controller
     public function show(string $id)
     {
         $task = MentorshipTask::findOrFail($id);
-        return view('mentor.mentorshipTasks.show',compact('task'));
+        $mentorship=$task->mentorshipRequest;
+        return view('mentor.mentorshipTasks.show',compact('task','mentorship'));
     }
 
     /**
