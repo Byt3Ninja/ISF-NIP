@@ -473,6 +473,7 @@ return [
     'Investment Vehicle'=>'Investment Vehicle',
     'Amount Raised'=>'Amount Raised',
     'Add new funding round'=>'Add New Funding Round',
+    'institutions_question'=>'Have you been in any Institutions Associated with your Startup (e.g. Accelerator Programs, Investors etc.)',
     'Select file'=>'Select File',
     'about'=>'About Section',
     'Error, content not exist.'=>'Error, content not exist.',

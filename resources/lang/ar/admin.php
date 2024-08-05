@@ -473,6 +473,7 @@ return [
     'Investment Vehicle'=>'Investment Vehicle',
     'Amount Raised'=>'Amount Raised',
     'Add new funding round'=>'Add New Funding Round',
+    'institutions_question'=>'Have you been in any Institutions Associated with your Startup (e.g. Accelerator Programs, Investors etc.)',
     'Select file'=>'ارفاق الملف',
     'about'=>'عن الشركة',
     'Error, content not exist.'=>'خطا, لم يتم اضافة محتوي بعد.'
