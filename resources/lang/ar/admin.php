@@ -475,4 +475,5 @@ return [
     'Add new funding round'=>'Add New Funding Round',
     'Select file'=>'ارفاق الملف',
     'about'=>'عن الشركة',
+    'Error, content not exist.'=>'خطا, لم يتم اضافة محتوي بعد.'
     ];

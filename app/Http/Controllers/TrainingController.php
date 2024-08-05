@@ -150,10 +150,14 @@ class TrainingController extends Controller
             $c = $request->c ?? 0;
             if ($tr->stype == 4) {
             $contents = TrainingContent::where('training_id',$id)->orderBy('arr')->get(['id','title','training_id']);
-            if ($c==0){$ccontent = TrainingContent::where('training_id',$id)->orderBy('arr','ASC')->first(['id','content']);} else {
+
+            if ($c==0){
+                $ccontent = TrainingContent::where('training_id',$id)->orderBy('arr','ASC')->first(['id','content']);}
+            else {
                 $ccontent = TrainingContent::where('training_id',$id)->where('id',$c)->first(['id','title','content']);
             }
-            if(!$contents) {return back()->with(['class'=>'danger','message'=>'Error, content not exist.']);}
+         ;
+            if(count($contents)==0) {return back()->with(['class'=>'danger','message'=>'Error, content not exist.']);}
                 /// save progress
 //                dd(['training_id'=>$ccontent->id,'user_id'=>Auth::id()],['course_id'=>$id]);
                 TrainingCompleted::updateOrInsert(['training_id'=>$ccontent->id,'user_id'=>Auth::id()],['course_id'=>$id]);
