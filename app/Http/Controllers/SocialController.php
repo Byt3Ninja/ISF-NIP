@@ -60,9 +60,10 @@
             $finduser = User::where('google_id', $guser->id)->first();
 			if (!$finduser) {
                 $finduser = User::where('email', $guser->email)->first();
-                if ($finduser){
-                  return redirect()->to('/login')->withErrors(['social'=>'error']);
-                }
+//                if ($finduser){
+//                  return redirect()->to('/login')->withErrors(['social'=>'error']);
+//                }
+                $finduser->update(['google_id'=> $guser->id,'email_verified_at' => now()]);
             }
             if($finduser){
               	auth()->login($finduser);
