@@ -462,23 +462,23 @@
 															<td>
 																<div class="media align-items-center">
 																	<a class="media-left mr-50">
-																		<img src="{{$mentor->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+																		<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 																	</a>
 																	<div class="media-body">
-																		<h6 class="media-heading mb-0">{{$mentor->user->{'first_name_'.$l} }} {{$mentor->user->{'last_name_'.$l} }}</h6>
-																		<span class="font-small-2">{{$mentor->user->{'title_'.$l} }}</span>
+																		<h6 class="media-heading mb-0">{{optional($mentor->user)->{'first_name_'.$l} }} {{$mentor->user->{'last_name_'.$l} }}</h6>
+																		<span class="font-small-2">{{optional($mentor->user)->{'title_'.$l} }}</span>
 																	</div>
 																</div>
 															</td>
-															<td> {{$mentor->user->bio->{'bio_'.$l} ?? '-' }} </td>
-															<td> {{$mentor->user->bio->{'specialization_'.$l} ?? '-' }} </td>
+															<td> {{optional($mentor->user)->bio->{'bio_'.$l} ?? '-' }} </td>
+															<td> {{optional($mentor->user)->bio->{'specialization_'.$l} ?? '-' }} </td>
 															<td>
-																@if ($mentor->user->bio->linkedin ??0)
-																	<a title="Linkedin URL" target="_blank" href="{{$mentor->user->bio->linkedin}}" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx  bxl-linkedin"></i></a>
+																@if (optional($mentor->user)->bio->linkedin ??0)
+																	<a title="Linkedin URL" target="_blank" href="{{optional($mentor->user)->bio->linkedin}}" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx  bxl-linkedin"></i></a>
 																@endif
 															</td>
 															<td>
-																<button onclick="request({{$mentor->user_id}},'{{$mentor->user->{'first_name_'.$l} }} {{$mentor->user->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-light-primary">
+																<button onclick="request({{$mentor->user_id}},'{{optional($mentor->user)->{'first_name_'.$l} }} {{optional($mentor->user)->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-light-primary">
 																	<i class="bx bxs-conversation"></i>
 																</button>
 															</td>

@@ -145,7 +145,7 @@ class TrainingController extends Controller
         return response()->json(['location'=> '/dashboard/training/'.$fileName]); //env('APP_URL'). full URL
     }
     public function my($id,Request $request) {
-            $step = Auth::user()->company->step;
+            $step = optional(Auth::user()->company)->step;
             $tr = Step::findOrfail($step);
             $c = $request->c ?? 0;
             if ($tr->stype == 4) {
