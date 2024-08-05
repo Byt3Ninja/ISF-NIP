@@ -465,8 +465,8 @@
 																		<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 																	</a>
 																	<div class="media-body">
-																		<h6 class="media-heading mb-0">{{optional($mentor->user)->{'first_name_'.$l} }} {{$mentor->user->{'last_name_'.$l} }}</h6>
-																		<span class="font-small-2">{{optional($mentor->user)->{'title_'.$l} }}</span>
+																		<h6 class="media-heading mb-0">{{optional($mentor->user)->name }}</h6>
+																		<span class="font-small-2">{{optional($mentor->user)->title }}</span>
 																	</div>
 																</div>
 															</td>
