@@ -60,7 +60,7 @@ class ClientCompanyController extends Controller
             $states = State::all();
             $cities = City::all();
             $sectors = Sector::whereNull('parent_id')->get();
-            $funding_rounds=auth()->user()->company->fundingRounds;
+            $funding_rounds=auth()->user()->company?auth()->user()->company->fundingRounds:[];
             return view('admin/clients/company', compact(
                 'client', 'states', 'cities','countries','sectors','funding_rounds'
             ));

@@ -135,5 +135,8 @@
     "Other" : "أخرى",
     "Enter your company sector name" : "يرجى إدخال اسم القطاع الخاص بشركتك",
 	"More Details" : "تفاصيل إضافية",
-    "Unauthorized" : "غير مسموح"
+    "Unauthorized" : "غير مسموح",
+    "alert" : "تنبيه",
+    "Confirm & Delete":"تأكيد, إحذف",
+    "Cancel": "الغاء"
 }

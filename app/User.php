@@ -16,7 +16,7 @@ class User extends Authenticatable implements MustVerifyEmail
 //    use Auditable;
     use Notifiable;
     use HasRoles;
-    use SoftDeletes;
+//    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

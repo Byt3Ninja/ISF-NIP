@@ -15,6 +15,25 @@
     <div class="app-content content">
         <div class="content-overlay"></div>
         <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-12 mb-2 mt-1">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h5 class="content-header-title float-left pr-1 mb-0">{{__('mentor.mentorshipTasks.index')}}</h5>
+                            <div class="breadcrumb-wrapper col-12">
+                                <ol class="breadcrumb p-0 mb-0">
+                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{{ route('mentorshipTasks.index') }}">{{ $mentorship->zoom_date }} - {{ $mentorship->user->company->name }}</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">{{ $task->title }}
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="content-body">
                 <!-- users view start -->
                 <section class="users-view">
@@ -31,13 +50,40 @@
                                             <table class="table table-borderless table-hover">
                                                 <tbody>
                                                 <tr>
+                                                    <td class="width-200">{{__('cycles.Company')}}:</td>
+                                                    <td>
+
+                                                            <div class="card">
+                                                                <div class="card-header border-bottom">
+                                                                    <a href="/dashboard/companyProfile/{{ $task->company->id }}">
+                                                                     <div class="media align-items-center mt-2 mb-1">
+                                                                        <div class="media-left mr-50">
+                                                                            <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                        </div>
+                                                                        <div class="media align-items-center">
+                                                                            {{$task->user->name }}
+                                                                        </div>
+                                                                        <div class="media-left mr-50">
+                                                                            <img src="{{$task->company->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                        </div>
+                                                                        <div class="media align-items-center">
+                                                                            {{$task->company->name }}
+                                                                        </div>
+                                                                    </div>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
                                                     <td class="width-200">{{__('mentor.mentorshipTasks.title')}}:</td>
                                                     <td>{{ $task->title }}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>{{__('mentor.mentorshipTasks.status')}}:</td>
                                                     <td>
-                                                        {{ $task->status =='pending'?__('No'):__('Yes') }}
+                                                        {{ $task->status =='pending'?__('Uncompleted'):__('Completed') }}
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -53,12 +99,21 @@
                                                                 <div class="card">
                                                                     <div class="card-header border-bottom">
                                                                     <div class="media align-items-center mt-2 mb-1">
-                                                                        <div class="media-left mr-50">
-                                                                            <img src="{{$comment->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
-                                                                        </div>
-                                                                        <div class="media align-items-center">
-                                                                            {{$comment->user->name }}
-                                                                        </div>
+                                                                        @if(!$comment->user->hasRole('Mentor'))
+                                                                            <a href="/dashboard/companyProfile/{{ $comment->user->company->id }}">
+                                                                        @endif
+                                                                                <div class="media-left mr-50">
+                                                                                    <img src="{{$comment->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                                </div>
+                                                                                <div class="media align-items-center">
+                                                                                    {{$comment->user->name }}
+                                                                                    @if(!$comment->user->hasRole('Mentor'))
+                                                                                        - {{ $comment->user->company->name }}
+                                                                                    @endif
+                                                                                </div>
+                                                                        @if(!$comment->user->hasRole('Mentor'))
+                                                                            </a>
+                                                                        @endif
 
                                                                     </div>
                                                                         <small>

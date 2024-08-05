@@ -474,6 +474,7 @@ return [
     'Amount Raised'=>'Amount Raised',
     'Add new funding round'=>'Add New Funding Round',
     'Select file'=>'Select File',
-    'about'=>'About Section'
+    'about'=>'About Section',
+    'Error, content not exist.'=>'Error, content not exist.',
 
 ];
