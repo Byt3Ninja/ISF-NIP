@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="{{ $l }}">
-<html {{-- class="loading" lang="{{ $l }}" 
-  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" --}} lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
-  dir="ltr" data-theme="theme-default" data-assets-path="/vuexy/assets/" data-template="vertical-menu-template"
-  data-style="light">
+<html
+  lang="{{ $l }}" 
+  dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
+  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
+  data-theme="theme-default" 
+  data-assets-path="/vuexy/assets/" 
+  data-template="vertical-menu-template"
+  data-style="light"
+>
 
 <head>
   @include('admin.includes.head')
 </head>
-<!-- BEGIN: Body-->
 
+<!-- BEGIN: Body-->
 <body>
   <!-- Layout wrapper -->
   <div class="layout-wrapper layout-content-navbar">
@@ -31,6 +37,37 @@
       </div>
     </div>
   </div>
+
+  <!-- / Layout wrapper -->
+
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+
+  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
+  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/vuexy/assets/vendor/js/menu.js"></script>
+
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+  <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
+  @yield('scripts')
+  <!-- End Vendor JS-->
+
+  <!-- Main JS -->
+  <script src="/vuexy/assets/js/main.js"></script>
+
+  <!-- Main Page JS -->
+  <script src="/vuexy/assets/js/dashboards-analytics.js"></script>
+  <!-- End Main JS-->
 
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
   @hasanyrole('Admin|Manager')
@@ -148,36 +185,6 @@
     }
   </script>
 
-  <!-- / Layout wrapper -->
-
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-
-  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
-  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-  <script src="/vuexy/assets/vendor/js/menu.js"></script>
-
-  <!-- endbuild -->
-
-  <!-- Vendors JS -->
-  <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-  <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
-  <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
-  @yield('scripts')
-  <!-- End Vendor JS-->
-
-  <!-- Main JS -->
-  <script src="/vuexy/assets/js/main.js"></script>
-
-  <!-- Main Page JS -->
-  <script src="/vuexy/assets/js/dashboards-analytics.js"></script>
-  <!-- End Main JS-->
 
   <!-- BEGIN: Page JS-->
   @yield('pagescripts')
