@@ -85,7 +85,7 @@
       <!-- Style Switcher -->
       <li class="nav-item dropdown-style-switcher dropdown">
         <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow"
-          href="javascript:void(0);" data-bs-toggle="dropdown" style="color: #000; fill: #000;">
+          href="javascript:void(0);" data-bs-toggle="dropdown">
           <i class="ti ti-md"></i>
         </a>
         <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
