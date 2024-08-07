@@ -50,7 +50,6 @@
 <!-- End Core CSS -->
 
 <!-- Vendors CSS -->
-@yield('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
@@ -61,6 +60,7 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+@yield('vendorstyle')
 <!-- END: Vendor CSS-->
 
 <!-- BEGIN: Page CSS-->

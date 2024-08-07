@@ -1,16 +1,9 @@
 <!DOCTYPE html>
 <html lang="{{ $l }}">
-<html 
-  {{-- class="loading" lang="{{ $l }}" 
-  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" --}}
-  lang="en"
-  class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
-  dir="ltr"
-  data-theme="theme-default"
-  data-assets-path="/vuexy/assets/"
-  data-template="vertical-menu-template"
-  data-style="light"
->
+<html {{-- class="loading" lang="{{ $l }}" 
+  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" --}} lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
+  dir="ltr" data-theme="theme-default" data-assets-path="/vuexy/assets/" data-template="vertical-menu-template"
+  data-style="light">
 
 <head>
   @include('admin.includes.head')
@@ -40,12 +33,12 @@
   </div>
 
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
-  {{-- @hasanyrole('Admin|Manager') --}}
+  @hasanyrole('Admin|Manager')
     <!-- Pusher scripts -->
-    <!-- <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-      integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
-    <!-- <script src="//js.pusher.com/3.1/pusher.min.js"></script> -->
-    <!-- <script type="text/javascript">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+      integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="//js.pusher.com/3.1/pusher.min.js"></script>
+    <script type="text/javascript">
       $(document).ready(function() {
 
 
@@ -114,10 +107,10 @@
           notificationsWrapper.css('display', '');
         });
       });
-    </script> -->
+    </script>
     <!-- End of Pusher -->
-  {{-- @endhasanyrole --}}
-  <!-- <script>
+  @endhasanyrole
+  <script>
     function sweet_delete(url, message, user_id) {
       $("#row_" + user_id).css('background-color', '#000000').css('color', 'white');
       swal({
@@ -153,42 +146,42 @@
         }
       });
     }
-  </script> -->
+  </script>
 
   <!-- / Layout wrapper -->
 
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
 
-    <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
-    <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-    <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-    <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-    <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-    <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-    <script src="/vuexy/assets/vendor/js/menu.js"></script>
+  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
+  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/vuexy/assets/vendor/js/menu.js"></script>
 
-    <!-- endbuild -->
+  <!-- endbuild -->
 
-    <!-- Vendors JS -->
-    @yield('scripts')
-    <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-    <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
-    <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
-    <!-- End Vendor JS-->
+  <!-- Vendors JS -->
+  <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+  <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
+  @yield('scripts')
+  <!-- End Vendor JS-->
 
-    <!-- Main JS -->
-    <script src="/vuexy/assets/js/main.js"></script>
+  <!-- Main JS -->
+  <script src="/vuexy/assets/js/main.js"></script>
 
-    {{-- <!--Profile Page JS -->
-    <script src="/vuexy/assets/js/pages-profile.js"></script> --}}
+  <!-- Main Page JS -->
+  <script src="/vuexy/assets/js/dashboards-analytics.js"></script>
+  <!-- End Main JS-->
 
-    <!-- Main Page JS -->
-    <script src="/vuexy/assets/js/dashboards-analytics.js"></script>
-    
-    @yield('pagescripts')
+  <!-- BEGIN: Page JS-->
+  @yield('pagescripts')
+  <!-- END: Page JS-->
 
 </body>
 <!-- END: Body-->
