@@ -15,9 +15,11 @@
 @endif
 <!-- End Goggle Tag Manger -->
 
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+<meta name="viewport"
+  content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="author" content="GrowthLab">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{{ config('app.name') }}-V2</title>
@@ -42,12 +44,9 @@
 <!-- End Icons -->
 
 <!-- Core CSS -->
-<link rel="stylesheet" href="/vuexy/assets/vendor/{{ $l == 'ar' ? 'css/rtl' : 'css' }}/core.css"
-  class="template-customizer-core-css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/{{ $l == 'ar' ? 'css/rtl' : 'css' }}/theme-default.css"
-  class="template-customizer-theme-css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css"  />
+<link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
 <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
-<link rel="stylesheet" href="/vuexy/assets/css/style{{ $l == 'ar' ? '-rtl' : '' }}.css" />
 <!-- End Core CSS -->
 
 <!-- Vendors CSS -->
@@ -55,10 +54,12 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/apex-charts/apex-charts.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 <!-- END: Vendor CSS-->
 

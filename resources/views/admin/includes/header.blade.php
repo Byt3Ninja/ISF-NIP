@@ -27,26 +27,43 @@
           <i class="ti ti-language rounded-circle ti-md"></i>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li>
-            <a class="dropdown-item" href="javascript:void(0);" data-language="en" data-text-direction="ltr">
+          <li class="dropdown dropdown-language nav-item">
+            @if ($l == 'ar')
+              <a class="dropdown-item" href="/lang/en">
+                <i class="flag-icon flag-icon-us"></i>
+                <span class="selected-language">English</span>
+              </a>
+            @else
+              <a class="dropdown-item" href="/lang/ar">
+                <i class="flag-icon flag-icon-sa"></i>
+                <span class="selected-language">عربي</span>
+              </a>
+            @endif
+          </li>
+          {{-- <li>
+            <a class="dropdown-item" href="/lang/en" 
+            data-language="en" data-text-direction="ltr"
+            >
               <span>English</span>
             </a>
           </li>
           <li>
+            <a class="dropdown-item" href="/lang/ar" 
+            data-language="ar" data-text-direction="rtl"
+            >
+              <span>Arabic</span>
+            </a>
+          </li> --}}
+          {{-- <li>
             <a class="dropdown-item" href="javascript:void(0);" data-language="fr" data-text-direction="ltr">
               <span>French</span>
             </a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="javascript:void(0);" data-language="ar" data-text-direction="rtl">
-              <span>Arabic</span>
-            </a>
-          </li>
-          <li>
+          </li> --}}
+          {{-- <li>
             <a class="dropdown-item" href="javascript:void(0);" data-language="de" data-text-direction="ltr">
               <span>German</span>
             </a>
-          </li>
+          </li> --}}
         </ul>
       </li>
       <!--/ Language -->
