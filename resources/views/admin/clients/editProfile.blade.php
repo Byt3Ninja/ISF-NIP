@@ -215,36 +215,19 @@
   <!-- Content wrapper -->
 @stop
 
+
 @section('scripts')
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
-
-  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
-  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-  <script src="/vuexy/assets/vendor/js/menu.js"></script>
-
-  <!-- endbuild -->
-
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-    <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-    <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-    <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
-    <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-    <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 
-    <!-- Main JS -->
-    <script src="/vuexy/assets/js/main.js"></script>
-
-    <!-- Page JS -->
-    <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+  <!-- Page JS -->
+  <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 @stop
 
 @section('pagescripts')
@@ -389,22 +372,22 @@
               break;
           } @endif
 
-          $('.entrepreneurial_experience').change(function() {
-            var value = $(this).val();
-            switch (value) {
-              case '1':
-                $('#entrepreneurial_experience_brief').show();
-                break;
-              case '0':
-                $('#entrepreneurial_experience_brief').hide();
-                break;
-              default:
-                $('#entrepreneurial_experience_brief').hide();
-                break;
-            }
+            $('.entrepreneurial_experience').change(function() {
+              var value = $(this).val();
+              switch (value) {
+                case '1':
+                  $('#entrepreneurial_experience_brief').show();
+                  break;
+                case '0':
+                  $('#entrepreneurial_experience_brief').hide();
+                  break;
+                default:
+                  $('#entrepreneurial_experience_brief').hide();
+                  break;
+              }
+            });
           });
-        });
-      </script>
+        </script>
   @endrole
 
 @stop

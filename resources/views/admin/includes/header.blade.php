@@ -1,3 +1,17 @@
+@php
+  $msgs = 0;
+  if (Auth::user()->hasanyRole('Admin|Manager')) {
+      $msgs = App\Messages::where('read', 0)->count();
+  }
+  $messages = App\Messenger::where('receiver', Auth::user()->id)
+      ->whereNull('read')
+      ->count();
+  $all = $msgs + $messages;
+  isset(Auth::user()->company()->first()->id)
+      ? ($companyid = Auth::user()->company()->first()->id)
+      : ($companyid = null);
+@endphp
+
 <!-- Navbar -->
 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
   id="layout-navbar">
@@ -403,21 +417,22 @@
       <li class="nav-item navbar-dropdown dropdown-user dropdown">
         <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
           <div class="avatar avatar-online">
-            <img src="/vuexy/assets/img/avatars/1.png" alt class="rounded-circle" />
+            <img class="rounded-circle" src="{{ auth()->user()->image_url }}" alt />
+            {{-- <img src="/vuexy/assets/img/avatars/1.png" alt class="rounded-circle" /> --}}
           </div>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
           <li>
-            <a class="dropdown-item mt-0" href="pages-account-settings-account.html">
+            <a class="dropdown-item mt-0" href="/dashboard/show/myProfile">
               <div class="d-flex align-items-center">
                 <div class="flex-shrink-0 me-2">
                   <div class="avatar avatar-online">
-                    <img src="/vuexy/assets/img/avatars/1.png" alt class="rounded-circle" />
+                    <img src="{{ auth()->user()->image_url }}" alt class="rounded-circle" />
                   </div>
                 </div>
                 <div class="flex-grow-1">
-                  <h6 class="mb-0">John Doe</h6>
-                  <small class="text-muted">Admin</small>
+                  <h6 class="mb-0">{{ Auth::user()->name }}</h6>
+                  <small class="text-muted">{{ Auth::user()->title }}</small>
                 </div>
               </div>
             </a>
@@ -426,13 +441,25 @@
             <div class="dropdown-divider my-1 mx-n2"></div>
           </li>
           <li>
-            <a class="dropdown-item" href="pages-profile-user.html">
-              <i class="ti ti-user me-3 ti-md"></i><span class="align-middle">My Profile</span>
+            <a class="dropdown-item" href="/dashboard/show/myProfile">
+              <i class="ti ti-user me-3 ti-md"></i>
+              <span class="align-middle">{{ __('admin.Profile') }}</span>
             </a>
           </li>
+          @if ($companyid)
+            <li>
+              <a class="dropdown-item" href="/dashboard/myCompany">
+                <i class="ti ti-building me-3 ti-md"></i>
+                <span class="align-middle">{{ __('admin.Company') }}</span>
+              </a>
+            </li>
+          @endif
           <li>
-            <a class="dropdown-item" href="pages-account-settings-account.html">
-              <i class="ti ti-settings me-3 ti-md"></i><span class="align-middle">Settings</span>
+            <a class="dropdown-item" href="/dashboard/myProfile">
+              <i class="ti ti-settings me-3 ti-md"></i>
+              <span class="align-middle">
+                {{$l=='ar'?'الاعدادات':'Settings'}}
+              </span>
             </a>
           </li>
           <li>
@@ -459,10 +486,14 @@
           </li>
           <li>
             <div class="d-grid px-2 pt-2 pb-1">
-              <a class="btn btn-sm btn-danger d-flex" href="auth-login-cover.html" target="_blank">
-                <small class="align-middle">Logout</small>
+              <a class="btn btn-sm btn-danger d-flex" href="{{ route('logout') }}"
+                onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+                <small class="align-middle">{{ __('admin.Logout') }}</small>
                 <i class="ti ti-logout ms-2 ti-14px"></i>
               </a>
+              <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+              </form>
             </div>
           </li>
         </ul>
