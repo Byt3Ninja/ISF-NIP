@@ -305,7 +305,7 @@
                                                                     </div>
                                                                     <div class="col-md-12 col-12">
                                                                         <div class="form-group">
-                                                                            <label for="institutions">Have you been in any Institutions Associated with your Startup (e.g. Accelerator Programs, Investors etc.) *</label>
+                                                                            <label for="institutions">{{ __('admin.institutions_question') }}</label>
                                                                             <select id="institutions" name="institutions[]" multiple="multiple" class="form-control">
                                                                                 @if(($client->company && !is_null($client->company->institutions)))
                                                                                     @foreach($client->company->institutions as $key)
