@@ -35,4 +35,8 @@ class Cycle extends Model
     public function mentors(){
         return $this->belongsToMany(User::class, 'cycles_mentors', 'cycle_id', 'user_id');
     }
+    public function CalenderSync()
+    {
+        return $this->morphMany(CalenderSync::class, 'calenderable');
+    }
 }

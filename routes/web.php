@@ -59,9 +59,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     //Roles
     Route::get('documentation/view/{id?}','HomeController@help');
     Route::resource('documentation', 'DocumentationController');
-    // Calendar
-	Route::get('calendar','CalenderController@index')->name('calendar');
-    Route::post('calendarViewCall','CalenderController@ViewCall')->name('calendarAjax');
+
 
     Route::get('calendar/{id}/edit','SettingsController@editcal');
     Route::post('calendar/{id}/update','SettingsController@updatecal');
@@ -281,25 +279,34 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 
 
     // ===============> Mentor Dashboard Routes <===============
-    Route::group(['prefix' => 'mentor'],function (){
-        Route::get('mentorshipSessions','Mentor\MentorshipController@index')->name('mentorshipSessions.index');
-        Route::get('meetingRedirect/{mentorship_request_id}','Mentor\MentorshipController@meetingRedirect')->name('meetingRedirect');
-        Route::resource('mentorshipTasks','Mentor\MentorshipTaskController');
-        Route::post('mentorshipTasks/send/comment','Mentor\MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+    Route::group(['prefix' => 'mentor','namespace'=>'Mentor'],function (){
+        Route::get('mentorshipSessions','MentorshipController@index')->name('mentorshipSessions.index');
+        Route::get('meetingRedirect/{mentorship_request_id}','MentorshipController@meetingRedirect')->name('meetingRedirect');
+        Route::resource('mentorshipTasks','MentorshipTaskController');
+        Route::post('mentorshipTasks/send/comment','MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
 
     });
 
+
+
     // =====================> Startup Routes <===========
 
-    Route::group(['prefix' => 'startup','as'=>'startup.'],function (){
-        Route::get('mentorshipTasks','Startup\MentorshipTaskController@home')->name('mentorshipTasks.home');
-        Route::get('mentorshipTasks/{mentorship_id}','Startup\MentorshipTaskController@index')->name('mentorshipTasks.index');
-        Route::get('mentorshipTasks/show/{mentorshipTask}','Startup\MentorshipTaskController@show')->name('mentorshipTasks.show');
-        Route::post('mentorshipTasks/complete/{mentorshipTask}','Startup\MentorshipTaskController@complete')->name('mentorshipTasks.complete');
-        Route::post('mentorshipTasks/send/comment','Startup\MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
-        Route::resource('fundingRounds','Startup\FundingRoundController')->except(['index']);
+    Route::group(['prefix' => 'startup','as'=>'startup.','namespace'=>'Startup'],function (){
+        Route::get('mentorshipTasks','MentorshipTaskController@home')->name('mentorshipTasks.home');
+        Route::get('mentorshipTasks/{mentorship_id}','MentorshipTaskController@index')->name('mentorshipTasks.index');
+        Route::get('mentorshipTasks/show/{mentorshipTask}','MentorshipTaskController@show')->name('mentorshipTasks.show');
+        Route::post('mentorshipTasks/complete/{mentorshipTask}','MentorshipTaskController@complete')->name('mentorshipTasks.complete');
+        Route::post('mentorshipTasks/send/comment','MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+        Route::resource('fundingRounds','FundingRoundController')->except(['index']);
+    });
 
-
+    // =================> Calender Routes <==================
+    Route::group(['prefix' => 'calendar','namespace'=>'Calender'],function () {
+        Route::get('/','CalenderController@index')->name('calendar');
+        Route::post('calendarViewCall','CalenderController@ViewCall')->name('calendarAjax');
+        Route::get('login/google', 'GoogleCalendarController@redirectToGoogle')->name('calender.login.google');
+        Route::get('callback/google', 'GoogleCalendarController@handleGoogleCallback')->name('calender.callback.google');
+        Route::get('sync-events', 'GoogleCalendarController@syncEvents')->name('calender.syncEvents');
     });
 
     // ===============> Reports <============

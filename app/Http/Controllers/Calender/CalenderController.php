@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Calender;
 
-use App\Calendar;
 use App\Cycle;
 use App\Finalscreening;
+use App\Http\Controllers\Controller;
 use App\MentorshipRequest;
 use App\Screening;
 use App\Step;
 use App\TrainingSession;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class CalenderController extends Controller
 {

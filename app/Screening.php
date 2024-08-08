@@ -14,5 +14,9 @@ class Screening extends Model
     public function step(){
         return $this->belongsTo(Step::class,'step_id');
     }
+    public function CalenderSync()
+    {
+        return $this->morphMany(CalenderSync::class, 'calenderable');
+    }
 
 }
