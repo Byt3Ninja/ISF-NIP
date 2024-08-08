@@ -73,7 +73,7 @@ class GoogleCalendarController extends Controller
         })->get();
         foreach ($mentorshipRequests as $key) {
 
-            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
                 continue;
             }
             // Fetch your project events from the database
@@ -92,7 +92,7 @@ class GoogleCalendarController extends Controller
             return $q->where('organization_id', $organization_id);
         })->get();
         foreach ($cycles as $key) {
-            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
                 continue;
             }
             // Fetch your project events from the database
@@ -115,7 +115,7 @@ class GoogleCalendarController extends Controller
         })->get();
 //        foreach ($sessions as $key) {
 //
-//        if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+//        if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
 //                continue;
 //            }
 //            // Fetch your project events from the database
@@ -135,7 +135,7 @@ class GoogleCalendarController extends Controller
         $finalScreenings = Finalscreening::all();
 
         foreach ($csteps as $key) {
-            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
                 continue;
             }
             // Fetch your project events from the database
@@ -149,7 +149,7 @@ class GoogleCalendarController extends Controller
             $key->CalenderSync()->create(['provider'=>'google', 'event_id'=>$event->id,'user_id'=>auth()->id()]);
         }
 //        foreach ($finalScreenings as $key) {
-//            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+//            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
 //                continue;
 //            }
 //            // Fetch your project events from the database
@@ -169,7 +169,7 @@ class GoogleCalendarController extends Controller
     protected function MentorCalender($user){
         $mentorshipRequests = auth()->user()->mentorSessions()->get();
         foreach ($mentorshipRequests as $key) {
-            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
                 continue;
             }
             // Fetch your project events from the database
@@ -186,7 +186,7 @@ class GoogleCalendarController extends Controller
         }
         $cycles = auth()->user()->mentorCycles()->get();
         foreach ($cycles as $key) {
-            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
                 continue;
             }
             // Fetch your project events from the database
@@ -211,7 +211,7 @@ class GoogleCalendarController extends Controller
         $finalScreenings = Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
 
         foreach ($csteps as $key) {
-            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
                 continue;
             }
             // Fetch your project events from the database
@@ -225,7 +225,7 @@ class GoogleCalendarController extends Controller
             $key->CalenderSync()->create(['provider'=>'google', 'event_id'=>$event->id,'user_id'=>auth()->id()]);
         }
 //        foreach ($finalScreenings as $key) {
-//            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+//            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
 //                continue;
 //            }
 //            // Fetch your project events from the database
@@ -248,7 +248,7 @@ class GoogleCalendarController extends Controller
         }
         $cycle = auth()->user()->company->cycledata;
         if (!is_null($cycle)){
-            if (!$cycle->CalenderSync()->where('user_id',auth()->id())->first()){
+            if (!$cycle->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
 
                 $eventData = [
                     'title' => $cycle->title,
@@ -265,7 +265,7 @@ class GoogleCalendarController extends Controller
         }
         $mentorshipRequests = auth()->user()->mentorship;
         foreach ($mentorshipRequests as $key) {
-            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
                 continue;
             }
             // Fetch your project events from the database
@@ -282,7 +282,7 @@ class GoogleCalendarController extends Controller
         }
 //        $sessions = TrainingSession::where("step_id", auth()->user()->company->step)->get();
 //        foreach ($sessions as $key) {
-//        if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+//        if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
 //            continue;
 //        }
 //            // Fetch your project events from the database
@@ -299,7 +299,7 @@ class GoogleCalendarController extends Controller
         $finalScreenings = auth()->user()->company->finalScreening;
 
 //        foreach ($finalScreenings as $key) {
-//            if ($key->CalenderSync()->where('user_id',auth()->id())->first()){
+//            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()){
 //                continue;
 //            }
 //            // Fetch your project events from the database
@@ -315,7 +315,7 @@ class GoogleCalendarController extends Controller
         $csteps = auth()->user()->company->stepdata()->where('stype',2)->first();
 
         if (isset($csteps)){
-            if (!$csteps->CalenderSync()->where('user_id',auth()->id())->first()) {
+            if (!$csteps->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'google'])->first()) {
                 // Fetch your project events from the database
                 $eventData = [
                     'title' => __('admin.judge Sessions'),

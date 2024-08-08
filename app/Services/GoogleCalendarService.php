@@ -18,7 +18,7 @@ class GoogleCalendarService
         $this->client = new Google_Client();
         $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
         $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
-        $this->client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
+        $this->client->setRedirectUri(env('CALENDER_GOOGLE_REDIRECT_URI'));
         $this->client->addScope(Google_Service_Calendar::CALENDAR);
     }
 
@@ -35,6 +35,7 @@ class GoogleCalendarService
         UserOauthToken::updateOrCreate(
             ['user_id' => $userId],
             [
+                'provider' => 'google',
                 'access_token' => $token['access_token'],
                 'refresh_token' => $token['refresh_token']??'',
                 'expires_at' => now()->addSeconds($token['expires_in']),
@@ -45,7 +46,7 @@ class GoogleCalendarService
     public function getCalendarService($user)
     {
         // Fetch user's token
-        $oauthToken = $user->oauthToken;
+        $oauthToken = $user->oauthToken()->where('provider', 'google')->firstOrFail();
 
         if ($oauthToken) {
             $this->client->setAccessToken([

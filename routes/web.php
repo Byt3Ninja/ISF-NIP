@@ -304,9 +304,16 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::group(['prefix' => 'calendar','namespace'=>'Calender'],function () {
         Route::get('/','CalenderController@index')->name('calendar');
         Route::post('calendarViewCall','CalenderController@ViewCall')->name('calendarAjax');
+        // ===>  google sync <=====
         Route::get('login/google', 'GoogleCalendarController@redirectToGoogle')->name('calender.login.google');
         Route::get('callback/google', 'GoogleCalendarController@handleGoogleCallback')->name('calender.callback.google');
         Route::get('sync-events', 'GoogleCalendarController@syncEvents')->name('calender.syncEvents');
+
+        // ====> Microsoft sync <=====
+        Route::get('login/microsoft', 'MicrosoftCalendarController@redirectToMicrosoft')->name('calender.login.microsoft');
+        Route::get('callback/microsoft', 'MicrosoftCalendarController@handleMicrosoftCallback')->name('calender.callback.microsoft');
+        Route::get('microsoft-sync-events', 'MicrosoftCalendarController@syncEvents')->name('calender.MicrosoftsyncEvents');
+
     });
 
     // ===============> Reports <============

@@ -104,7 +104,7 @@
             });
             var calendar = $('#calendar').fullCalendar({
                 customButtons: {
-                    AddNew: {
+                    google: {
                         text: 'Sync With Google Calender',
                         click: function () {
                             /// add
@@ -112,11 +112,19 @@
                             //// end
                         }
                     },
+                    microsoft: {
+                        text: 'Sync With Microsoft Calender',
+                        click: function () {
+                            /// add
+                            window.open('{{ route('calender.login.microsoft') }}','_Self')
+                            //// end
+                        }
+                    },
 
                 },
 
                 header: {
-                    left: 'prev,next today AddNew',
+                    left: 'prev,next today google microsoft',
                     center: 'title',
                     right: 'month,agendaWeek,agendaDay '
                 },

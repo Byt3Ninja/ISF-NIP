@@ -1,0 +1,346 @@
+<?php
+
+
+namespace App\Http\Controllers\Calender;
+
+use App\Cycle;
+use App\Finalscreening;
+use App\Http\Controllers\Controller;
+use App\MentorshipRequest;
+use App\Screening;
+use App\Services\GoogleCalendarService;
+use App\Services\MicrosoftCalenderService;
+use App\Step;
+use App\TrainingSession;
+use Illuminate\Http\Request;
+
+
+
+class MicrosoftCalendarController extends Controller
+{
+    protected $microsoftService;
+
+    public function __construct(MicrosoftCalenderService $microsoftService)
+    {
+        $this->microsoftService = $microsoftService;
+    }
+    public function redirectToMicrosoft()
+    {
+        return $this->microsoftService->redirect();
+    }
+
+
+
+    public function handleMicrosoftCallback(Request $request)
+    {
+        // Validate the OAuth state
+        $state = $request->session()->pull('oauth2state');
+        if (empty($request->input('state')) || ($request->input('state') !== $state)) {
+            abort(403, 'Invalid state');
+        }
+        $code = $request->input('code');
+        $this->microsoftService->authenticate($code, auth()->id());
+        return redirect(route('calender.MicrosoftsyncEvents'));
+
+
+    }
+
+    public function syncEvents()
+    {
+
+
+        $user = auth()->user();
+        $organization_id = $user->organization_id;
+        if ($user->hasanyRole('Admin|Editor|Manager|organizationManager')) {
+
+            $data = $this->AdminCalender($user,$organization_id);
+
+        }elseif ($user->hasanyRole('Mentor')){
+
+            $data = $this->MentorCalender($user);
+
+        }elseif ($user->hasRole('Judger')){
+
+            $data = $this->JudgerCalender($user);
+        }elseif($user->hasRole('Registered|Page Manager|Pages Editor')){
+            $data=$this->StartupCalender($user);
+        }
+
+        if ($data){
+            return  redirect(route('calendar'))->with('msg','Events synced successfully!');
+        }else{
+            return  redirect(route('calendar'))->with('message2','Events synced Failed!');
+
+        }
+
+    }
+
+    protected function AdminCalender($user,$organization_id){
+        $mentorshipRequests = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->where('organization_id', $organization_id);
+        })->get();
+        foreach ($mentorshipRequests as $key) {
+
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+                continue;
+            }
+            // Fetch your project events from the database
+            $eventData = [
+                'title' => __('admin.mentorship session'),
+                'description' => 'Mentor: '.$key->mentor->name.' Startup: '.$key->user->name,
+                'location' => $key->join_url,
+                'start_date_time' => $key->ZoomDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+                'end_date_time' => $key->EndZoomDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+            ];
+
+            $event = $this->microsoftService->createEvent($user, $eventData);
+            
+            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+        }
+        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->where('organization_id', $organization_id);
+        })->get();
+        foreach ($cycles as $key) {
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+                continue;
+            }
+            // Fetch your project events from the database
+            $eventData = [
+                'title' => $key->title,
+                'description' => 'Cycle: '.$key->title,
+                'start_date_time' => $key->start, // Make sure it's in 'Y-m-d H:i:s' format
+                'end_date_time' => $key->end, // Make sure it's in 'Y-m-d H:i:s' format
+            ];
+
+            $event = $this->microsoftService->createEvent($user, $eventData);
+            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+        }
+        $sessions = TrainingSession::whereHas('step', function ($q) use ($organization_id) {
+            $q->where('stype', 4)->when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
+                });
+            });
+        })->get();
+//        foreach ($sessions as $key) {
+//
+//        if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+//                continue;
+//            }
+//            // Fetch your project events from the database
+//            $eventData = [
+//                'title' => $key->title,
+//                'description' => 'Training: '.$key->title,
+//                'start_date_time' => $key->start_org, // Make sure it's in 'Y-m-d H:i:s' format
+//                'end_date_time' => $key->end_org, // Make sure it's in 'Y-m-d H:i:s' format
+//            ];
+//
+//            $event = $this->microsoftService->createEvent($user, $eventData);
+//            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+//        }
+
+        $mysteps = Screening::all();
+        $csteps = Step::whereIn('id',$mysteps->pluck('step_id'))->get();
+        $finalScreenings = Finalscreening::all();
+
+        foreach ($csteps as $key) {
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+                continue;
+            }
+            // Fetch your project events from the database
+            $eventData = [
+                'title' => __('admin.judge Sessions'),
+                'start_date_time' => $key->from->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
+                'end_date_time' => $key->to->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
+            ];
+
+            $event = $this->microsoftService->createEvent($user, $eventData);
+            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+        }
+//        foreach ($finalScreenings as $key) {
+//            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+//                continue;
+//            }
+//            // Fetch your project events from the database
+//            $eventData = [
+//                'title' => __('admin.Final Screening'),
+//                'start_date_time' => $key->StartDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+//                'end_date_time' => $key->EndDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+//            ];
+//
+//            $event = $this->microsoftService->createEvent($user, $eventData);
+//            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+//        }
+
+        return true;
+    }
+
+    protected function MentorCalender($user){
+        $mentorshipRequests = auth()->user()->mentorSessions()->get();
+        foreach ($mentorshipRequests as $key) {
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+                continue;
+            }
+            // Fetch your project events from the database
+            $eventData = [
+                'title' => __('admin.mentorship session'),
+                'description' => 'Mentor: '.$key->mentor->name.' Startup: '.$key->user->name,
+                'location' => $key->join_url,
+                'start_date_time' => $key->ZoomDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+                'end_date_time' => $key->EndZoomDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+            ];
+
+            $event = $this->microsoftService->createEvent($user, $eventData);
+            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+        }
+        $cycles = auth()->user()->mentorCycles()->get();
+        foreach ($cycles as $key) {
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+                continue;
+            }
+            // Fetch your project events from the database
+            $eventData = [
+                'title' => $key->title,
+                'description' => 'Cycle: '.$key->title,
+                'start_date_time' => $key->start, // Make sure it's in 'Y-m-d H:i:s' format
+                'end_date_time' => $key->end, // Make sure it's in 'Y-m-d H:i:s' format
+            ];
+
+            $event = $this->microsoftService->createEvent($user, $eventData);
+            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+        }
+        return true;
+    }
+
+    protected function JudgerCalender($user)
+    {
+        $myid=auth()->id();
+        $mysteps = auth()->user()->screeningRequests()->get();
+        $csteps = Step::whereIn('id',$mysteps->pluck('step_id'))->get();
+        $finalScreenings = Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
+
+        foreach ($csteps as $key) {
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+                continue;
+            }
+            // Fetch your project events from the database
+            $eventData = [
+                'title' => __('admin.judge Sessions'),
+                'start_date_time' => $key->from->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
+                'end_date_time' => $key->to->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
+            ];
+
+            $event = $this->microsoftService->createEvent($user, $eventData);
+            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+        }
+//        foreach ($finalScreenings as $key) {
+//            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+//                continue;
+//            }
+//            // Fetch your project events from the database
+//            $eventData = [
+//                'title' => __('admin.Final Screening'),
+//                'start_date_time' => $key->StartDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+//                'end_date_time' => $key->EndDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+//            ];
+//
+//            $event = $this->microsoftService->createEvent($user, $eventData);
+//            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+//        }
+        return true;
+    }
+
+    protected function StartupCalender($user)
+    {
+        if (!auth()->user()->company){
+            return false;
+        }
+        $cycle = auth()->user()->company->cycledata;
+        if (!is_null($cycle)){
+            if (!$cycle->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+
+                $eventData = [
+                    'title' => $cycle->title,
+                    'description' => 'Cycle: '.$cycle->title,
+                    'start_date_time' => $cycle->start, // Make sure it's in 'Y-m-d H:i:s' format
+                    'end_date_time' => $cycle->end, // Make sure it's in 'Y-m-d H:i:s' format
+                ];
+
+                $event = $this->microsoftService->createEvent($user, $eventData);
+                $cycle->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+            }
+
+
+        }
+        $mentorshipRequests = auth()->user()->mentorship;
+        foreach ($mentorshipRequests as $key) {
+            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+                continue;
+            }
+            // Fetch your project events from the database
+            $eventData = [
+                'title' => __('admin.mentorship session'),
+                'description' => 'Mentor: '.$key->mentor->name.' Startup: '.$key->user->name,
+                'location' => $key->join_url,
+                'start_date_time' => $key->ZoomDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+                'end_date_time' => $key->EndZoomDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+            ];
+
+            $event = $this->microsoftService->createEvent($user, $eventData);
+            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+        }
+//        $sessions = TrainingSession::where("step_id", auth()->user()->company->step)->get();
+//        foreach ($sessions as $key) {
+//        if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+//            continue;
+//        }
+//            // Fetch your project events from the database
+//            $eventData = [
+//                'title' => $key->title,
+//                'description' => 'Training: '.$key->title,
+//                'start_date_time' => $key->start_org, // Make sure it's in 'Y-m-d H:i:s' format
+//                'end_date_time' => $key->end_org, // Make sure it's in 'Y-m-d H:i:s' format
+//            ];
+//
+//            $event = $this->microsoftService->createEvent($user, $eventData);
+//            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+//        }
+        $finalScreenings = auth()->user()->company->finalScreening;
+
+//        foreach ($finalScreenings as $key) {
+//            if ($key->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()){
+//                continue;
+//            }
+//            // Fetch your project events from the database
+//            $eventData = [
+//                'title' => __('admin.Final Screening'),
+//                'start_date_time' => $key->StartDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+//                'end_date_time' => $key->EndDateOrg, // Make sure it's in 'Y-m-d H:i:s' format
+//            ];
+//
+//            $event = $this->microsoftService->createEvent($user, $eventData);
+//            $key->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+//        }
+        $csteps = auth()->user()->company->stepdata()->where('stype',2)->first();
+
+        if (isset($csteps)){
+            if (!$csteps->CalenderSync()->where(['user_id'=>auth()->id(),'provider'=>'microsoft'])->first()) {
+                // Fetch your project events from the database
+                $eventData = [
+                    'title' => __('admin.judge Sessions'),
+                    'start_date_time' => $csteps->from->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
+                    'end_date_time' => $csteps->to->format('d-m-Y'), // Make sure it's in 'Y-m-d H:i:s' format
+                ];
+
+                $event = $this->microsoftService->createEvent($user, $eventData);
+                $csteps->CalenderSync()->create(['provider'=>'microsoft', 'event_id'=>$event->getId(),'user_id'=>auth()->id()]);
+            }
+
+        }
+        return true;
+    }
+
+
+
+}
+
