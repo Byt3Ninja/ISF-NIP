@@ -60,32 +60,17 @@ class MicrosoftCalendarController extends Controller
 
     public function syncEvents()
     {
-
-
         $user = auth()->user();
         $organization_id = $user->organization_id;
-        if ($user->hasanyRole('Admin|Editor|Manager|organizationManager')) {
-
-            $data = $this->AdminCalender($user,$organization_id);
-
-        }elseif ($user->hasanyRole('Mentor')){
-
-            $data = $this->MentorCalender($user);
-
-        }elseif ($user->hasRole('Judger')){
-
-            $data = $this->JudgerCalender($user);
-        }elseif($user->hasRole('Registered|Page Manager|Pages Editor')){
-            $data=$this->StartupCalender($user);
-        }
-
-        if ($data){
-            return  redirect(route('calendar'))->with('msg','Events synced successfully!');
-        }else{
-            return  redirect(route('calendar'))->with('message2','Events synced Failed!');
-
-        }
-
+        if( $user->hasanyRole('Admin|Editor|Manager|organizationManager') ) { $data = $this->AdminCalender( $user, $organization_id ); }
+        elseif( $user->hasanyRole('Mentor') ) { $data = $this->MentorCalender( $user ); }
+        elseif( $user->hasRole('Judger') ) { $data = $this->JudgerCalender( $user ) ; }
+        elseif( $user->hasRole('Registered|Page Manager|Pages Editor') ) { $data = $this->StartupCalender( $user ); }
+        
+        if( $data ) { Session::flash('success', trans('admin.events_sync_success')); } else { Session::flash('error', trans('admin.events_sync_failed')); }
+        /* if( $data ) { return redirect(route('calendar'))->with('msg','Events synced successfully!'); }
+        else { return redirect(route('calendar'))->with('message2','Events synced Failed!'); } */
+        return redirect( route('calendar') );
     }
 
     protected function AdminCalender($user,$organization_id){
