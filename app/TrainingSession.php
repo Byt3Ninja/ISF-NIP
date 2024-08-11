@@ -37,4 +37,8 @@ class TrainingSession extends Model
     public function course(){
         return $this->belongsTo(Training::class,'location');
     }
+    public function CalenderSync()
+    {
+        return $this->morphMany(CalenderSync::class, 'calenderable');
+    }
 }

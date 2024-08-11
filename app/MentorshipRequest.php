@@ -40,4 +40,8 @@ class MentorshipRequest extends Model
         return $this->hasMany(MentorshipTask::class, 'mentorship_request_id', 'id');
 
     }
+    public function CalenderSync()
+    {
+        return $this->morphMany(CalenderSync::class, 'calenderable');
+    }
 }

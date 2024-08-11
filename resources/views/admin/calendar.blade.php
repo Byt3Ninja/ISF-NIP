@@ -24,6 +24,47 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
+                @if( session()->has('success') )
+                    <div class="alert alert-success alert-dismissible mb-2" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+                        <div class="d-flex align-items-center">
+                            <i class="bx bx-like"></i>
+                            <span> {{ session()->get('success') }} </span>
+                        </div>
+                    </div>
+                @endif
+
+                @if( session()->has('error') )
+                    <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+                        <div class="d-flex align-items-center">
+                            <i class="bx bx-error"></i>
+                            <span> {{ session()->get('error') }} </span>
+                        </div>
+                    </div>
+                @endif
+
+                @if(session()->has('msg'))
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-success  mb-2" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+                                <div class="d-flex align-items-center">
+                                    <i class="bx bx-like"></i>
+                                    <span> {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @elseif(session()->has('message2'))
+                    <div class="alert alert-danger alert-dismissible mb-2" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+                        <div class="d-flex align-items-center">
+                            <i class="bx bx-error"></i>
+                            <span> {{ __('admin.'.session()->get('message2')) }} </span>
+                        </div>
+                    </div>
+                @endif
                 <div class="calendar-wrapper position-relative">
                     <div class="card">
                         <div class="card-body">
@@ -71,8 +112,28 @@
                 }
             });
             var calendar = $('#calendar').fullCalendar({
+                customButtons: {
+                    google: {
+                        text: 'Sync With Google Calender',
+                        click: function () {
+                            /// add
+                            window.open('{{ route('calender.login.google') }}','_Self')
+                            //// end
+                        }
+                    },
+                    microsoft: {
+                        text: 'Sync With Microsoft Calender',
+                        click: function () {
+                            /// add
+                            window.open('{{ route('calender.login.microsoft') }}','_Self')
+                            //// end
+                        }
+                    },
+
+                },
+
                 header: {
-                    left: 'prev,next today',
+                    left: 'prev,next today google microsoft',
                     center: 'title',
                     right: 'month,agendaWeek,agendaDay '
                 },
@@ -89,8 +150,8 @@
                         event.allDay = false;
                     }
                 },
-                // selectable: true,
-                // selectHelper: true,
+                selectable: true,
+                selectHelper: true,
                 eventClick: function (event) {
                     switch (event.calendarId) {
                         case 'M':

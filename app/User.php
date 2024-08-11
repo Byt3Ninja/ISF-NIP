@@ -73,6 +73,14 @@ class User extends Authenticatable implements MustVerifyEmail
     // ===============> Relations <===================
 
     // ===============> General Relations <==============
+    public function oauthToken()
+    {
+        return $this->hasOne(UserOauthToken::class);
+    }
+    public function CalenderSync()
+    {
+        return $this->hasMany(CalenderSync::class, 'user_id');
+    }
     public function country()
     {
         return $this->belongsTo(Country::class,'country_id');

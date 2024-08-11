@@ -42,4 +42,8 @@ class Finalscreening extends Model
 
         return User::whereIn('id',$this->attributes['judges'])->get();
     }
+    public function CalenderSync()
+    {
+        return $this->morphMany(CalenderSync::class, 'calenderable');
+    }
 }
