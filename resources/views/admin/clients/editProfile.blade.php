@@ -42,8 +42,8 @@
             <!-- Account -->
             <div class="card-body">
               <div class="d-flex align-items-start align-items-sm-center gap-6">
-                <img src="/vuexy/assets/img/avatars/1.png" alt="user-avatar" class="d-block w-px-100 h-px-100 rounded"
-                  id="uploadedAvatar" />
+                <img src="/191014/{{ $client->img_url ?? '../images/placeholder.jpg' }}" alt="user-avatar"
+                  class="d-block w-px-100 h-px-100 rounded" id="uploadedAvatar" />
                 <div class="button-wrapper">
                   <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
                     <span class="d-none d-sm-block">Upload new photo</span>
@@ -61,77 +61,123 @@
               </div>
             </div>
             <div class="card-body pt-4">
-              <form id="formAccountSettings" method="GET" onsubmit="return false">
+              <form method="post" action="{{ route('update_my_profile') }}" enctype="multipart/form-data">
                 <div class="row">
                   <div class="mb-4 col-md-6">
-                    <label for="firstName" class="form-label">First Name</label>
-                    <input class="form-control" type="text" id="firstName" name="firstName" value="John" autofocus />
+                    <label for="first_name_en" class="form-label">{{ __('admin.English UserName') }}</label>
+                    <input value="{{ $client->first_name_en }}" name="first_name_en" type="text" class="form-control"
+                      id="first_name_en" style="direction: ltr;" placeholder="{{ __('admin.First Name') }}" required
+                      autocomplete="first_name_en" autofocus />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="lastName" class="form-label">Last Name</label>
-                    <input class="form-control" type="text" name="lastName" id="lastName" value="Doe" />
+                    <label for="last_name_en" class="form-label">{{ __('admin.Last Name') }}</label>
+                    <input value="{{ $client->last_name_en }}" name="last_name_en" type="text" class="form-control"
+                      id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required
+                      autocomplete="last_name_en" />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="email" class="form-label">E-mail</label>
-                    <input class="form-control" type="text" id="email" name="email" value="john.doe@example.com"
-                      placeholder="john.doe@example.com" />
+                    <label for="first_name_ar" class="form-label">{{ __('admin.Arabic UserName') }}</label> <input
+                      value="{{ $client->first_name_ar }}" name="first_name_ar" type="text" class="form-control"
+                      id="first_name_ar" style="direction: rtl;" placeholder="{{ __('admin.First Name') }}" required
+                      autocomplete="first_name_ar" autofocus />
+                  </div>
+                  <div class="mb-4 col-md-6">
+                    <label for="last_name_ar" class="form-label">Arabic {{ __('admin.Last Name') }}</label>
+                    <input value="{{ $client->last_name_ar }}" name="last_name_ar" type="text" class="form-control"
+                      id="last_name_ar" style="direction: rtl;" placeholder="{{ __('admin.Last Name') }}" required
+                      autocomplete="last_name_ar" />
+                  </div>
+                  <div class="mb-4 col-md-6">
+                    <label for="email" class="form-label">{{ __('admin.E-mail') }}</label>
+                    <input value="{{ $client->email }}" name="email" type="email" class="form-control"
+                      id="email" style="direction: ltr;" placeholder="{{ __('admin.E-mail') }}" required
+                      autocomplete="email">
+                  </div>
+                  <div class="mb-4 col-md-6">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select name="gender" id="gender" class="select2 form-select">
+                      <option value="Male" {{ $client->gender == 'Male' ? 'selected' : '' }}>{{ __('Male') }}
+                      </option>
+                      <option value="Female" {{ $client->gender == 'Female' ? 'selected' : '' }}>{{ __('Female') }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="mb-4 col-md-6">
+                    <label for="title_ar" class="form-label">{{ __('admin.JobTitleAr') }}</label>
+                    <input value="{{ $client->title_ar }}" name="title_ar" type="title_ar" class="form-control"
+                      id="title_ar" style="direction: rtl;" placeholder="{{ __('admin.JobTitleAr') }}" required
+                      autocomplete="title_ar">
+                  </div>
+                  <div class="mb-4 col-md-6">
+                    <label for="title_en">{{ __('admin.JobTitleEn') }}</label>
+                    <input value="{{ $client->title_en }}" name="title_en" type="title_en" class="form-control"
+                      id="title_en" style="direction: ltr;" placeholder="{{ __('admin.JobTitleEn') }}" required
+                      autocomplete="title_en">
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="organization" class="form-label">Organization</label>
-                    <input type="text" class="form-control" id="organization" name="organization" value="Pixinvent" />
+                    <input type="text" class="form-control" id="organization" name="organization"
+                      value="Pixinvent" />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label class="form-label" for="phoneNumber">Phone Number</label>
-                    <div class="input-group input-group-merge">
-                      <span class="input-group-text">US (+1)</span>
-                      <input type="text" id="phoneNumber" name="phoneNumber" class="form-control"
-                        placeholder="202 555 0111" />
-                    </div>
+                    <label for="phone" class="form-label">{{ __('admin.Phone') }}</label>
+                    <input type="text" class="form-control" id="phone" style="direction: ltr;"
+                      placeholder="{{ __('admin.Phone') }}" value="{{ $client->phone }}" name="phone" required
+                      autocomplete="new-phone" />
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="address" class="form-label">Address</label>
                     <input type="text" class="form-control" id="address" name="address" placeholder="Address" />
                   </div>
-                  <div class="mb-4 col-md-6">
+                  {{-- <div class="mb-4 col-md-6">
                     <label for="state" class="form-label">State</label>
                     <input class="form-control" type="text" id="state" name="state"
                       placeholder="California" />
-                  </div>
+                  </div> --}}
                   <div class="mb-4 col-md-6">
                     <label for="zipCode" class="form-label">Zip Code</label>
                     <input type="text" class="form-control" id="zipCode" name="zipCode" placeholder="231465"
                       maxlength="6" />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label class="form-label" for="country">Country</label>
-                    <select id="country" class="select2 form-select">
-                      <option value="">Select</option>
-                      <option value="Australia">Australia</option>
-                      <option value="Bangladesh">Bangladesh</option>
-                      <option value="Belarus">Belarus</option>
-                      <option value="Brazil">Brazil</option>
-                      <option value="Canada">Canada</option>
-                      <option value="China">China</option>
-                      <option value="France">France</option>
-                      <option value="Germany">Germany</option>
-                      <option value="India">India</option>
-                      <option value="Indonesia">Indonesia</option>
-                      <option value="Israel">Israel</option>
-                      <option value="Italy">Italy</option>
-                      <option value="Japan">Japan</option>
-                      <option value="Korea">Korea, Republic of</option>
-                      <option value="Mexico">Mexico</option>
-                      <option value="Philippines">Philippines</option>
-                      <option value="Russia">Russian Federation</option>
-                      <option value="South Africa">South Africa</option>
-                      <option value="Thailand">Thailand</option>
-                      <option value="Turkey">Turkey</option>
-                      <option value="Ukraine">Ukraine</option>
-                      <option value="United Arab Emirates">United Arab Emirates</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="United States">United States</option>
+                    <label for="state_id" class="form-label">{{ __('admin.Country') }}</label>
+                    <select id="country_id" name='country_id' class="select2 form-select" required>
+                      <option value="">{{ __('admin.Country') }}</option>
+                      @foreach ($countries as $country)
+                        <option value="{{ $country->id }}"
+                          {{ $country->id == $client->country_id ? 'selected' : '' }}>
+                          {{ $country->{'name_' . $l} }}</option>
+                      @endforeach
                     </select>
                   </div>
+                  <div class="mb-4 col-md-6">
+                    <label for="state_id">{{ __('admin.State') }}</label>
+                    <select class="select2 form-select" required id="state_id" name='state_id'>
+                      <option value="">{{ __('admin.State') }}</option>
+                      @php $name = 'name_'.$l; @endphp
+                      @if ($client->state_id)
+                        <option value="{{ $client->state_id }}" selected>{{ $client->state->{'name_' . $l} }}</option>
+                      @endif
+                    </select>
+                  </div>
+                  <div class="mb-4 col-md-6">
+                    <label for="city_id" class="form-label">{{ __('admin.City') }}</label>
+                    <select class="select2 form-select" required id="city_id" name='city_id'>
+                      <option value="">{{ __('admin.City') }}</option>
+                      @php $name = 'name_'.$l; @endphp
+                      @if ($client->city_id)
+                        <option value="{{ $client->city_id }}" selected>{{ $client->city->{'name_' . $l} }}</option>
+                      @endif
+                    </select>
+                  </div>
+                  <div class="mb-4 col-md-6">
+                    <label for="HaveCompany" class="form-label">{{ __('auth.DoYouHaveCompany') }}</label>
+                    <select name="HaveCompany" id="HaveCompany" class="select2 form-select">
+                      <option value="1" {{ $client->HaveCompany ? 'selected' : '' }}>{{ __('Yes') }}</option>
+                      <option value="" {{ $client->HaveCompany ? '' : 'selected' }}>{{ __('No') }}</option>
+                    </select>
+                  </div>
+
                   <div class="mb-4 col-md-6">
                     <label for="language" class="form-label">Language</label>
                     <select id="language" class="select2 form-select">
@@ -176,6 +222,165 @@
                       <option value="bitcoin">Bitcoin</option>
                     </select>
                   </div>
+
+                  {{--                ================> Section Mentor Bio <==================== --}}
+                  @role('Mentor')
+                    <input type="hidden" name="mentor_section" value="1">
+                    <a id="bio">
+                      <section id="basic-input">
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="card">
+                              <div class="card-header">
+                                <h4 class="card-title">{{ __('admin.addbio') }}</h4>
+                              </div>
+                              <div class="card-content">
+                                <div class="card-body">
+
+                                  <div class="row">
+
+                                    <div class="col-md-12">
+                                      <div class="col-md-12 col-12">
+                                        <label for="linkedin" class="form-label">{{ __('admin.Linkedin') }}</label>
+                                        <div class="form-group">
+                                          <input value="{{ $client->bio ? $client->bio->linkedin : '' }}" name="linkedin"
+                                            type="text" class="form-control" id="linkedin" style="direction: ltr;"
+                                            placeholder="{{ __('admin.Linkedin') }} - https://linkedin.com/in/yourname"
+                                            autocomplete="linkedin">
+
+                                        </div>
+                                      </div>
+                                      <div class="col-md-12 col-12 mt-4">
+                                        <label class="form-label">{{ __('admin.arbio') }}: </label>
+                                        <div class="form-group">
+                                          <textarea class="form-control" id="bio_ar" name='bio_ar' rows="3" dir="rtl"
+                                            placeholder="{{ __('admin.writebioar') }}">{{ $client->bio->bio_ar ?? '' }}</textarea>
+                                        </div>
+                                      </div>
+                                      <div class="col-md-12 col-12 mt-4">
+                                        <label class="form-label">{{ __('admin.enbio') }}: </label>
+                                        <div class="form-group">
+                                          <textarea class="form-control" id="bio_en" name='bio_en' rows="3" dir="ltr"
+                                            placeholder="{{ __('admin.writebioen') }}">{{ $client->bio->bio_en ?? '' }}</textarea>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+
+                                  <div class="col-md-12 col-12 mt-4">
+                                    <div class="form-label-group">
+                                      <h6 for="selectExpertises">{{ __('admin.SelectExpertises') }}</h6>
+                                      <p>{{ __('admin.SelectMultiExpertises') }}.</p>
+                                      <div class="form-group">
+                                        <select name="expertises[]" class="select2 form-control" multiple="multiple"
+                                          id="selectExpertises">
+                                          @foreach ($expertises as $expertise_group)
+                                            <optgroup label="{{ $expertise_group->title }}">
+                                              @foreach ($expertise_group->children as $expertise)
+                                                <option value="{{ $expertise->id }}"
+                                                  @if (in_array($expertise->id, $client->mentorExpertises()->pluck('expertises.id')->toArray())) selected @endif>{{ $expertise->title }}
+                                                </option>
+                                              @endforeach
+                                            </optgroup>
+                                          @endforeach
+                                        </select>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div class="mt-4 col-md-6">
+                                    <label for="basicInput" class="form-label">
+                                      {{ __('admin.Entrepreneurial Experience') }}
+                                    </label>
+
+                                    <select name="entrepreneurial_experience" id="entrepreneurial_experience"
+                                      class="select2 form-select">
+                                      <option value="1"
+                                        {{ optional($client->bio)->entrepreneurial_experience ? 'selected' : '' }}>
+                                        {{ __('Yes') }}</option>
+                                      <option value="0"
+                                        {{ optional($client->bio)->entrepreneurial_experience ? '' : 'selected' }}>
+                                        {{ __('No') }}</option>
+                                    </select>
+                                  </div>
+                                  <br>
+
+                                  <div class="mt-4 col-md-6">
+                                    <label class="form-label">{{ __('admin.Entrepreneurial Experience desc') }}.</label>
+                                    <textarea class="form-control" id="basicTextarea" rows="8" name="entrepreneurial_experience_brief" required>{{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }} </textarea>
+                                    <label for="tcontent"
+                                      class="mt-2">{{ __('admin.Entrepreneurial Experience Brief') }}</label>
+
+                                  </div>
+
+                                  <div class="my-4 col-md-6">
+                                    <label for="profile_privacy" class="form-label">{{ __('admin.Profile Privacy') }}</label>
+                                    <select name="profile_privacy" id="profile_privacy" class="select2 form-select">
+                                        <option value="1" {{ optional($client->bio)->profile_privacy ? 'selected' : '' }}>{{ __('Yes') }}</option>
+                                        <option value="0" {{ optional($client->bio)->profile_privacy ? '' : 'selected' }}>{{ __('No') }}</option>
+                                    </select>
+                                </div>
+
+                                  <div class="col-md-12 col-12">
+                                    <label for="approach" class="form-label">{{ __('admin.mentorship approach') }}
+                                      :</label>
+                                    <div class="form-group" id="approach">
+                                      <div class="checkbox mr-5">
+                                        <input type='checkbox' id="checkbox1" class="checkbox-input"
+                                          name='mentorship_approach[]'
+                                          {{ $client->bio && in_array('E-mail', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
+                                          value="E-mail">
+                                        <label for="checkbox1" class="form-label">
+                                          {{ __('admin.E-mail') }}
+                                        </label>
+                                      </div>
+                                      <div class="checkbox mr-5">
+                                        <input type='checkbox' id="checkbox2" class="checkbox-input"
+                                          name='mentorship_approach[]'
+                                          {{ $client->bio && in_array('phone calls', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
+                                          value="phone calls">
+                                        <label for="checkbox2" class="form-label">
+                                          {{ __('admin.phone calls') }}
+                                        </label>
+                                      </div>
+                                      <div class="checkbox mr-5">
+                                        <input type='checkbox' id="checkbox3" class="checkbox-input"
+                                          name='mentorship_approach[]'
+                                          {{ $client->bio && in_array('video calls', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
+                                          value="video calls">
+                                        <label for="checkbox3" class="form-label">
+                                          {{ __('admin.video calls') }}
+                                        </label>
+                                      </div>
+                                      <div class="checkbox mr-5">
+                                        <input type='checkbox' id="checkbox4" class="checkbox-input"
+                                          name='mentorship_approach[]'
+                                          {{ $client->bio && in_array('in-person meetings', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
+                                          value="in-person meetings">
+                                        <label for="checkbox4" class="form-label">
+                                          {{ __('admin.in-person meetings') }}
+                                        </label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                  <div class="col-12 d-flex justify-content-end">
+                                    <button type="submit"
+                                      class="btn btn-primary mr-1 mb-1">{{ __('admin.Update') }}</button>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    </a>
+                  @endrole
+                  {{--                ================> Section Mentor Bio <==================== --}}
                 </div>
                 <div class="mt-2">
                   <button type="submit" class="btn btn-primary me-3">Save changes</button>
@@ -372,22 +577,22 @@
               break;
           } @endif
 
-            $('.entrepreneurial_experience').change(function() {
-              var value = $(this).val();
-              switch (value) {
-                case '1':
-                  $('#entrepreneurial_experience_brief').show();
-                  break;
-                case '0':
-                  $('#entrepreneurial_experience_brief').hide();
-                  break;
-                default:
-                  $('#entrepreneurial_experience_brief').hide();
-                  break;
-              }
-            });
-          });
-        </script>
+                                      $('.entrepreneurial_experience').change(function() {
+                                        var value = $(this).val();
+                                        switch (value) {
+                                          case '1':
+                                            $('#entrepreneurial_experience_brief').show();
+                                            break;
+                                          case '0':
+                                            $('#entrepreneurial_experience_brief').hide();
+                                            break;
+                                          default:
+                                            $('#entrepreneurial_experience_brief').hide();
+                                            break;
+                                        }
+                                      });
+                                    });
+                                  </script>
   @endrole
 
 @stop
