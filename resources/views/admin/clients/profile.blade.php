@@ -21,7 +21,7 @@
             </div>
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
               <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                <img src="/vuexy/assets/img/avatars/1.png" alt="user image"
+                <img src="{{$client->image_url}}" alt="user image"
                   class="d-block h-auto ms-0 ms-sm-6 rounded user-profile-img" />
               </div>
               <div class="flex-grow-1 mt-3 mt-lg-5">
@@ -32,10 +32,11 @@
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-palette ti-lg"></i><span class="fw-medium">UX Designer</span>
+                        <i class="ti ti-palette ti-lg"></i><span class="fw-medium">{{ $client->title_en }}</span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-map-pin ti-lg"></i><span class="fw-medium">Vatican City</span>
+                        <i class="ti ti-map-pin ti-lg"></i><span
+                          class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined April 2021</span>
@@ -97,7 +98,7 @@
                 </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-crown ti-lg"></i><span class="fw-medium mx-2">Role:</span>
-                  <span>Developer</span>
+                  <span>{{ $client->title_en }}</span>
                 </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-flag ti-lg"></i><span class="fw-medium mx-2">Country:</span> <span>USA</span>
@@ -111,7 +112,7 @@
               <ul class="list-unstyled my-3 py-1">
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-phone-call ti-lg"></i><span class="fw-medium mx-2">Contact:</span>
-                  <span>(123) 456-7890</span>
+                  <span>{{ $client->phone }}</span>
                 </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-messages ti-lg"></i><span class="fw-medium mx-2">Skype:</span>
@@ -119,7 +120,7 @@
                 </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-mail ti-lg"></i><span class="fw-medium mx-2">Email:</span>
-                  <span>john.doe@example.com</span>
+                  <span>{{ $client->email }}</span>
                 </li>
               </ul>
               <small class="card-text text-uppercase text-muted small">Teams</small>
