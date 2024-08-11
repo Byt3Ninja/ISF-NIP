@@ -7,6 +7,18 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @stop
 
+@section('style')
+  <style>
+    .content-section {
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+  </style>
+@stop
+
 @section('content')
   <!-- Content wrapper -->
   <div class="content-wrapper">
@@ -18,11 +30,12 @@
           <div class="nav-align-top">
             <ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" href="javascript:void(0);"><i class="ti-sm ti ti-users me-1_5"></i> Account</a>
+                <button id="accountButton" class="nav-link active"><i class="ti-sm ti ti-users me-1_5"></i>
+                  Account</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-security.html"><i class="ti-sm ti ti-lock me-1_5"></i>
-                  Security</a>
+                <button id="securityBtn" class="nav-link"><i class="ti-sm ti ti-lock me-1_5"></i>
+                  Security</button>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="pages-account-settings-billing.html"><i class="ti-sm ti ti-bookmark me-1_5"></i>
@@ -38,7 +51,7 @@
               </li>
             </ul>
           </div>
-          <div class="card mb-6">
+          <div id="accountSection" class="card mb-6">
             <!-- Account -->
             <div class="card-body">
               <div class="d-flex align-items-start align-items-sm-center gap-6">
@@ -315,12 +328,17 @@
                                   </div>
 
                                   <div class="my-4 col-md-6">
-                                    <label for="profile_privacy" class="form-label">{{ __('admin.Profile Privacy') }}</label>
+                                    <label for="profile_privacy"
+                                      class="form-label">{{ __('admin.Profile Privacy') }}</label>
                                     <select name="profile_privacy" id="profile_privacy" class="select2 form-select">
-                                        <option value="1" {{ optional($client->bio)->profile_privacy ? 'selected' : '' }}>{{ __('Yes') }}</option>
-                                        <option value="0" {{ optional($client->bio)->profile_privacy ? '' : 'selected' }}>{{ __('No') }}</option>
+                                      <option value="1"
+                                        {{ optional($client->bio)->profile_privacy ? 'selected' : '' }}>
+                                        {{ __('Yes') }}</option>
+                                      <option value="0"
+                                        {{ optional($client->bio)->profile_privacy ? '' : 'selected' }}>
+                                        {{ __('No') }}</option>
                                     </select>
-                                </div>
+                                  </div>
 
                                   <div class="col-md-12 col-12">
                                     <label for="approach" class="form-label">{{ __('admin.mentorship approach') }}
@@ -388,8 +406,65 @@
                 </div>
               </form>
             </div>
-            <!-- /Account -->
           </div>
+          <!-- /Account -->
+
+          <!-- Change Password -->
+          <div id="securitySection" class="card mb-6" style="display: none">
+            <h5 class="card-header">Change Password</h5>
+            <div class="card-body pt-1">
+              <form method="post" action="{{ route('update_my_profile_password') }}" enctype="multipart/form-data">
+                {!! csrf_field() !!}
+                 <div class="row">
+                  <div class="mb-6 col-md-6 form-password-toggle">
+                    <label class="form-label" for="currentPassword">Current Password</label>
+                    <div class="input-group input-group-merge">
+                      <input class="form-control" type="password" name="currentPassword" id="currentPassword"
+                        placeholder="Current password"
+                         />
+                      <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="mb-6 col-md-6 form-password-toggle">
+                    <label class="form-label"
+                    for="password">{{ __('admin.Password') }}
+                    </label>
+                    <div class="input-group input-group-merge">
+                      <input type="password" class="form-control" id="password"
+                      placeholder="{{ __('admin.Password') }}" name="password"
+                      required autocomplete="new-password">
+                      <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                    </div>
+                  </div>
+
+                  <div class="mb-6 col-md-6 form-password-toggle">
+                    <label class="form-label" for="password-confirm">{{ __('admin.Confirm') }}</label>
+                    <div class="input-group input-group-merge">
+                      <input type="password" class="form-control"
+                      id="password-confirm"
+                      placeholder="{{ __('admin.Password') }}"
+                      name="password_confirmation"
+                      required autocomplete="new-password">
+                      <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                    </div>
+                  </div>
+                </div>
+                <h6 class="text-body">Password Requirements:</h6>
+                <ul class="ps-4 mb-0">
+                  <li class="mb-4">Minimum 8 characters long - the more, the better</li>
+                  <li class="mb-4">At least one lowercase character</li>
+                  <li>At least one number, symbol, or whitespace character</li>
+                </ul>
+                <div class="mt-6">
+                  <button type="submit" class="btn btn-primary me-3">Save changes</button>
+                  <button type="reset" class="btn btn-label-secondary">Reset</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!--/ Change Password -->
           <div class="card">
             <h5 class="card-header">Delete Account</h5>
             <div class="card-body">
@@ -436,6 +511,28 @@
 @stop
 
 @section('pagescripts')
+  <script>
+    const accountButton = document.getElementById('accountButton');
+    const securityBtn = document.getElementById('securityBtn');
+    const accountSection = document.getElementById('accountSection');
+    const securitySection = document.getElementById('securitySection');
+    
+    securityBtn.addEventListener('click', () => {
+      console.log('clicked');
+      securitySection.style.display = 'block';
+      accountSection.style.display = 'none';
+      securityBtn.classList.add('active');
+      accountButton.classList.remove('active');
+    });
+
+    accountButton.addEventListener('click', () => {
+      accountSection.style.display = 'block';
+      securitySection.style.display = 'none';
+      accountButton.classList.add('active');
+      securityBtn.classList.remove('active');
+    });
+  </script>
+
   <script>
     $(document).ready(function() {
       getStates($('#country_id').val());
@@ -577,22 +674,22 @@
               break;
           } @endif
 
-                                      $('.entrepreneurial_experience').change(function() {
-                                        var value = $(this).val();
-                                        switch (value) {
-                                          case '1':
-                                            $('#entrepreneurial_experience_brief').show();
-                                            break;
-                                          case '0':
-                                            $('#entrepreneurial_experience_brief').hide();
-                                            break;
-                                          default:
-                                            $('#entrepreneurial_experience_brief').hide();
-                                            break;
-                                        }
-                                      });
-                                    });
-                                  </script>
+                                                    $('.entrepreneurial_experience').change(function() {
+                                                      var value = $(this).val();
+                                                      switch (value) {
+                                                        case '1':
+                                                          $('#entrepreneurial_experience_brief').show();
+                                                          break;
+                                                        case '0':
+                                                          $('#entrepreneurial_experience_brief').hide();
+                                                          break;
+                                                        default:
+                                                          $('#entrepreneurial_experience_brief').hide();
+                                                          break;
+                                                      }
+                                                    });
+                                                  });
+                                                </script>
   @endrole
 
 @stop
