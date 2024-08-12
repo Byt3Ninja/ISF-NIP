@@ -455,14 +455,14 @@
               <form method="post" action="{{ route('update_my_profile_password') }}" enctype="multipart/form-data">
                 {!! csrf_field() !!}
                 <div class="row">
-                  <div class="mb-6 col-md-6 form-password-toggle">
+                  {{-- <div class="mb-6 col-md-6 form-password-toggle">
                     <label class="form-label" for="currentPassword">Current Password</label>
                     <div class="input-group input-group-merge">
                       <input class="form-control" type="password" name="currentPassword" id="currentPassword"
                         placeholder="Current password" />
                       <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                     </div>
-                  </div>
+                  </div> --}}
                 </div>
                 <div class="row">
                   <div class="mb-6 col-md-6 form-password-toggle">
