@@ -13,8 +13,7 @@ use App\Services\MicrosoftCalenderService;
 use App\Step;
 use App\TrainingSession;
 use Illuminate\Http\Request;
-
-
+use Session;
 
 class MicrosoftCalendarController extends Controller
 {
@@ -29,50 +28,49 @@ class MicrosoftCalendarController extends Controller
         return $this->microsoftService->redirect();
     }
 
-
-
     public function handleMicrosoftCallback(Request $request)
     {
-        // Validate the OAuth state
-        $state = $request->session()->pull('oauth2state');
-        if (empty($request->input('state')) || ($request->input('state') !== $state)) {
-            abort(403, 'Invalid state');
+        if( $request->has('error') || !$request->has('code') )
+        {
+            $reason = $request->error;
+            if( $request->has('error_description') && !empty( $request->error_description ) ) { $reason = $request->error_description; }
+            Session::flash('error', trans('auth.auth_error', ['reason' => $reason]));
+            return redirect( route('calendar') );
         }
-        $code = $request->input('code');
-        $this->microsoftService->authenticate($code, auth()->id());
-        return redirect(route('calender.MicrosoftsyncEvents'));
+        else
+        {
+            try {
+                // Validate the OAuth state
+                $state = $request->session()->pull('oauth2state');
+                if (empty($request->input('state')) || ($request->input('state') !== $state)) {
+                    // abort(403, 'Invalid state');
+                    Session::flash('error', trans('auth.auth_error', ['reason' => 'Invalid state']));
+                    return redirect( route('calendar') );
+                }
+                $code = $request->input('code');
+                $this->microsoftService->authenticate($code, auth()->id());
+                return redirect(route('calender.MicrosoftsyncEvents'));
 
-
+            } catch (\Exception $e) {
+                Session::flash('error', trans('auth.auth_error', ['reason' => $e->getMessage()]));
+                return redirect( route('calendar') );
+            }
+        }
     }
 
     public function syncEvents()
     {
-
-
         $user = auth()->user();
         $organization_id = $user->organization_id;
-        if ($user->hasanyRole('Admin|Editor|Manager|organizationManager')) {
-
-            $data = $this->AdminCalender($user,$organization_id);
-
-        }elseif ($user->hasanyRole('Mentor')){
-
-            $data = $this->MentorCalender($user);
-
-        }elseif ($user->hasRole('Judger')){
-
-            $data = $this->JudgerCalender($user);
-        }elseif($user->hasRole('Registered|Page Manager|Pages Editor')){
-            $data=$this->StartupCalender($user);
-        }
-
-        if ($data){
-            return  redirect(route('calendar'))->with('msg','Events synced successfully!');
-        }else{
-            return  redirect(route('calendar'))->with('message2','Events synced Failed!');
-
-        }
-
+        if( $user->hasanyRole('Admin|Editor|Manager|organizationManager') ) { $data = $this->AdminCalender( $user, $organization_id ); }
+        elseif( $user->hasanyRole('Mentor') ) { $data = $this->MentorCalender( $user ); }
+        elseif( $user->hasRole('Judger') ) { $data = $this->JudgerCalender( $user ) ; }
+        elseif( $user->hasRole('Registered|Page Manager|Pages Editor') ) { $data = $this->StartupCalender( $user ); }
+        
+        if( $data ) { Session::flash('success', trans('admin.events_sync_success')); } else { Session::flash('error', trans('admin.events_sync_failed')); }
+        /* if( $data ) { return redirect(route('calendar'))->with('msg','Events synced successfully!'); }
+        else { return redirect(route('calendar'))->with('message2','Events synced Failed!'); } */
+        return redirect( route('calendar') );
     }
 
     protected function AdminCalender($user,$organization_id){

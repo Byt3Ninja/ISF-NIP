@@ -477,5 +477,6 @@ return [
     'Select file'=>'Select File',
     'about'=>'About Section',
     'Error, content not exist.'=>'Error, content not exist.',
-
+	'events_sync_success' => 'Events synchronization completed successfully!',
+	'events_sync_failed' => 'Events synchronization Failed'
 ];

@@ -476,5 +476,7 @@ return [
     'institutions_question'=>'Have you been in any Institutions Associated with your Startup (e.g. Accelerator Programs, Investors etc.)',
     'Select file'=>'ارفاق الملف',
     'about'=>'عن الشركة',
-    'Error, content not exist.'=>'خطا, لم يتم اضافة محتوي بعد.'
-    ];
+    'Error, content not exist.'=>'خطا, لم يتم اضافة محتوي بعد.',
+	'events_sync_success' => 'تم مزامنة الأحداث بنجاح!',
+	'events_sync_failed' => 'فشل مزامنة الأحداث!'
+];

@@ -13,7 +13,7 @@ use App\Step;
 use App\TrainingSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Session;
 
 class GoogleCalendarController extends Controller
 {
@@ -24,47 +24,46 @@ class GoogleCalendarController extends Controller
         $this->googleService = $googleService;
     }
 
-
-
     public function redirectToGoogle()
     {
-//        dd(route('calender.callback.google'));
+        // dd(route('calender.callback.google'));
         return redirect($this->googleService->getAuthUrl());
     }
 
     public function handleGoogleCallback(Request $request)
     {
-        $code = $request->get('code');
-        $this->googleService->authenticate($code, auth()->id());
-        return redirect(route('calender.syncEvents'));
+        if( $request->has('error') || !$request->has('code') )
+        {
+            Session::flash('error', trans('auth.auth_error', ['reason' => $request->error]));
+            return redirect( route('calendar') );
+        }
+        else
+        {
+            try {
+                $code = $request->get('code');
+                $this->googleService->authenticate($code, auth()->id());
+                return redirect(route('calender.syncEvents'));
+            } catch (\Exception $e) {
+                Session::flash('error', trans('auth.auth_error', ['reason' => $e->getMessage()]));
+                return redirect( route('calendar') );
+            }
+        }
     }
 
     public function syncEvents()
     {
         $user = auth()->user();
         $organization_id = $user->organization_id;
-        if ($user->hasanyRole('Admin|Editor|Manager|organizationManager')) {
 
-            $data = $this->AdminCalender($user,$organization_id);
+        if( $user->hasanyRole('Admin|Editor|Manager|organizationManager') ) { $data = $this->AdminCalender( $user, $organization_id ); }
+        elseif( $user->hasanyRole('Mentor') ) { $data = $this->MentorCalender( $user ); }
+        elseif( $user->hasRole('Judger') ) { $data = $this->JudgerCalender( $user ) ; }
+        elseif( $user->hasRole('Registered|Page Manager|Pages Editor') ) { $data = $this->StartupCalender( $user ); }
 
-        }elseif ($user->hasanyRole('Mentor')){
+        /* if( $data ) { return redirect(route('calendar'))->with('msg','Events synced successfully!'); }
+        else { return redirect(route('calendar'))->with('message2','Events synced Failed!'); } */
 
-            $data = $this->MentorCalender($user);
-
-        }elseif ($user->hasRole('Judger')){
-
-            $data = $this->JudgerCalender($user);
-        }elseif($user->hasRole('Registered|Page Manager|Pages Editor')){
-            $data=$this->StartupCalender($user);
-        }
-
-        if ($data){
-            return  redirect(route('calendar'))->with('msg','Events synced successfully!');
-        }else{
-            return  redirect(route('calendar'))->with('message2','Events synced Failed!');
-
-        }
-
+        return redirect( route('calendar') );
     }
 
     protected function AdminCalender($user,$organization_id){

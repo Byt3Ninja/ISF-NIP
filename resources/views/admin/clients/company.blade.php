@@ -69,9 +69,9 @@
                                                 <div class="jq-tab-wrapper" id="verticalTab">
                                                     <div class="jq-tab-menu">
                                                         <div class="jq-tab-title active" data-tab="1"><i class="bx bx-info-circle"></i> {{ __('admin.company Information') }}</div>
-                                                        <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div>
-                                                        <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div>
-                                                        <div class="jq-tab-title" data-tab="4"><i class="bx bxs-slideshow"></i> {{ __('admin.about') }}</div>
+{{--                                                        <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div>--}}
+{{--                                                        <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div>--}}
+{{--                                                        <div class="jq-tab-title" data-tab="4"><i class="bx bxs-slideshow"></i> {{ __('admin.about') }}</div>--}}
                                                         <div class="jq-tab-title" data-tab="5"><i class="bx bxs-contact"></i> {{ __('admin.social & contact') }}</div>
                                                     </div>
                                                     <div class="jq-tab-content-wrapper">

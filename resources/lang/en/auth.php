@@ -27,4 +27,5 @@ return [
   	'AccountType' =>'Account Type',
     'DoYouHaveCompany' =>'Do you have a company?',
     'Registration Disabled'=>'Registration Disabled Temporary',
+	'auth_error' => 'Unable to complete authentication because ":reason"'
 ];
