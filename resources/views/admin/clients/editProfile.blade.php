@@ -53,28 +53,67 @@
           </div>
           <div id="accountSection" class="card mb-6">
             <!-- Account -->
-            <div class="card-body">
-              <div class="d-flex align-items-start align-items-sm-center gap-6">
-                <img src="/191014/{{ $client->img_url ?? '../images/placeholder.jpg' }}" alt="user-avatar"
-                  class="d-block w-px-100 h-px-100 rounded" id="uploadedAvatar" />
-                <div class="button-wrapper">
-                  <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
-                    <span class="d-none d-sm-block">Upload new photo</span>
-                    <i class="ti ti-upload d-block d-sm-none"></i>
-                    <input type="file" id="upload" class="account-file-input" hidden
-                      accept="image/png, image/jpeg" />
-                  </label>
-                  <button type="button" class="btn btn-label-secondary account-image-reset mb-4">
-                    <i class="ti ti-refresh-dot d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Reset</span>
-                  </button>
-
-                  <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
-                </div>
+            <div class="card-content">
+              <div class="card-body">
+                @if (session()->has('msg'))
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="alert alert-{{ Session::get('class') }} alert-dismissible mb-2" role="alert">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="d-flex align-items-center">
+                            <i class="bx bx-error"></i>
+                            <span>
+                              {{ __('admin.' . session()->get('msg')) }}
+                              {{ Session::forget('msg') }}
+                            </span>
+                          </div>
+                          <button type="button" class="" data-dismiss="alert" aria-label="Close"
+                            style="background: transparent; border: none; outline: none; cursor: pointer;">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                @endif
+                <!-- Validation messages -->
+                @if (count($errors) > 0)
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="alert alert-danger">
+                        <ul>
+                          @foreach ($errors->all() as $error)
+                            <li>{{ $error }} </li>
+                          @endforeach
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                @endif
               </div>
             </div>
             <div class="card-body pt-4">
               <form method="post" action="{{ route('update_my_profile') }}" enctype="multipart/form-data">
+                {!! csrf_field() !!}
+                <div class="card-body">
+                  <div class="d-flex align-items-start align-items-sm-center gap-6">
+                    <img src="/191014/{{ $client->img_url ?? '../images/placeholder.jpg' }}" alt="user-avatar"
+                      class="d-block w-px-100 h-px-100 rounded" id="uploadedAvatar" />
+                    <div class="button-wrapper">
+                      <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
+                        <span class="d-none d-sm-block">Upload new photo</span>
+                        <i class="ti ti-upload d-block d-sm-none"></i>
+                        <input hidden type="file" name="img_url" class="account-file-input" id="upload" 
+                          accept="image/*" />
+                      </label>
+                      <button type="button" class="btn btn-label-secondary account-image-reset mb-4">
+                        <i class="ti ti-refresh-dot d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Reset</span>
+                      </button>
+                      <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
+                    </div>
+                  </div>
+                </div>
                 <div class="row">
                   <div class="mb-4 col-md-6">
                     <label for="first_name_en" class="form-label">{{ __('admin.English UserName') }}</label>
@@ -96,9 +135,9 @@
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="last_name_ar" class="form-label">Arabic {{ __('admin.Last Name') }}</label>
-                    <input value="{{ $client->last_name_ar }}" name="last_name_ar" type="text" class="form-control"
-                      id="last_name_ar" style="direction: rtl;" placeholder="{{ __('admin.Last Name') }}" required
-                      autocomplete="last_name_ar" />
+                    <input value="{{ $client->last_name_ar }}" name="last_name_ar" type="text"
+                      class="form-control" id="last_name_ar" style="direction: rtl;"
+                      placeholder="{{ __('admin.Last Name') }}" required autocomplete="last_name_ar" />
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="email" class="form-label">{{ __('admin.E-mail') }}</label>
@@ -415,26 +454,23 @@
             <div class="card-body pt-1">
               <form method="post" action="{{ route('update_my_profile_password') }}" enctype="multipart/form-data">
                 {!! csrf_field() !!}
-                 <div class="row">
+                <div class="row">
                   <div class="mb-6 col-md-6 form-password-toggle">
                     <label class="form-label" for="currentPassword">Current Password</label>
                     <div class="input-group input-group-merge">
                       <input class="form-control" type="password" name="currentPassword" id="currentPassword"
-                        placeholder="Current password"
-                         />
+                        placeholder="Current password" />
                       <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                     </div>
                   </div>
                 </div>
                 <div class="row">
                   <div class="mb-6 col-md-6 form-password-toggle">
-                    <label class="form-label"
-                    for="password">{{ __('admin.Password') }}
+                    <label class="form-label" for="password">{{ __('admin.Password') }}
                     </label>
                     <div class="input-group input-group-merge">
                       <input type="password" class="form-control" id="password"
-                      placeholder="{{ __('admin.Password') }}" name="password"
-                      required autocomplete="new-password">
+                        placeholder="{{ __('admin.Password') }}" name="password" required autocomplete="new-password">
                       <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                     </div>
                   </div>
@@ -442,11 +478,9 @@
                   <div class="mb-6 col-md-6 form-password-toggle">
                     <label class="form-label" for="password-confirm">{{ __('admin.Confirm') }}</label>
                     <div class="input-group input-group-merge">
-                      <input type="password" class="form-control"
-                      id="password-confirm"
-                      placeholder="{{ __('admin.Password') }}"
-                      name="password_confirmation"
-                      required autocomplete="new-password">
+                      <input type="password" class="form-control" id="password-confirm"
+                        placeholder="{{ __('admin.Password') }}" name="password_confirmation" required
+                        autocomplete="new-password">
                       <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                     </div>
                   </div>
@@ -674,22 +708,22 @@
               break;
           } @endif
 
-                                                    $('.entrepreneurial_experience').change(function() {
-                                                      var value = $(this).val();
-                                                      switch (value) {
-                                                        case '1':
-                                                          $('#entrepreneurial_experience_brief').show();
-                                                          break;
-                                                        case '0':
-                                                          $('#entrepreneurial_experience_brief').hide();
-                                                          break;
-                                                        default:
-                                                          $('#entrepreneurial_experience_brief').hide();
-                                                          break;
-                                                      }
-                                                    });
-                                                  });
-                                                </script>
+                                                          $('.entrepreneurial_experience').change(function() {
+                                                            var value = $(this).val();
+                                                            switch (value) {
+                                                              case '1':
+                                                                $('#entrepreneurial_experience_brief').show();
+                                                                break;
+                                                              case '0':
+                                                                $('#entrepreneurial_experience_brief').hide();
+                                                                break;
+                                                              default:
+                                                                $('#entrepreneurial_experience_brief').hide();
+                                                                break;
+                                                            }
+                                                          });
+                                                        });
+                                                      </script>
   @endrole
 
 @stop
