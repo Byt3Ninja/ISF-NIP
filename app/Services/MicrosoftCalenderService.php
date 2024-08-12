@@ -78,11 +78,11 @@ class MicrosoftCalenderService{
             'subject' => $eventData['title'],
             'start' => [
                 'dateTime' => $this->toZoomTimeFormat($eventData['start_date_time']),
-                'timeZone'=>'Asia/Riyadh'
+                'timeZone'=>'UTC'
             ],
             'end' => [
                 'dateTime' => $this->toZoomTimeFormat($eventData['end_date_time']),
-                'timeZone'=>'Asia/Riyadh'
+                'timeZone'=>'UTC'
             ],
             'location' => [
                 'displayName' => 'Online'
@@ -107,10 +107,12 @@ class MicrosoftCalenderService{
     {
         try {
             if (is_null($duration)){
-                $date = new \DateTime($dateTime);
+                $date = new \DateTime($dateTime,new \DateTimeZone('Asia/Riyadh'));
+                $interval = new \DateInterval('PT3H');
+                $date->sub($interval);
                 return $date->format('Y-m-d\TH:i:s.u\Z');
             }else{
-                $date = new \DateTime($dateTime);
+                $date = new \DateTime($dateTime,new \DateTimeZone('Asia/Riyadh'));
                 $interval = new \DateInterval('PT' . $duration . 'M');
                 $date->add($interval);
 

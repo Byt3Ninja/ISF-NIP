@@ -77,18 +77,21 @@ class GoogleCalendarService
         $service = $this->getCalendarService($user);
 
         $s = new \DateTime($eventData['start_date_time']);
+        $interval = new \DateInterval('PT3H');
+        $s->sub($interval);
         $e=new \DateTime($eventData['end_date_time']);
+        $e->sub($interval);
         $event = new Google_Service_Calendar_Event(array(
             'summary' => $eventData['title'],
             'location' => $eventData['location'] ?? '',
             'description' => $eventData['description'] ?? '',
             'start' =>[
                 'dateTime'=>$s->format(\DateTime::RFC3339),
-                'timeZone'=>'Asia/Riyadh'
+                'timeZone'=>'UTC'
                 ],
             'end' =>[
                 'dateTime'=>$e->format(\DateTime::RFC3339),
-                'timeZone'=>'Asia/Riyadh'
+                'timeZone'=>'UTC'
             ]
 
         ));
