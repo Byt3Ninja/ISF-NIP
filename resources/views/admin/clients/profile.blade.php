@@ -21,18 +21,24 @@
             </div>
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
               <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                <img src="{{$client->image_url}}" alt="user image"
-                  class="d-block h-auto ms-0 ms-sm-6 rounded user-profile-img" />
+                <img src="{{ $client->image_url }}" alt="user image" class="d-block ms-0 ms-sm-6 rounded user-profile-img"
+                  style="height: 130px" />
               </div>
               <div class="flex-grow-1 mt-3 mt-lg-5">
                 <div
                   class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
                   <div class="user-profile-info">
-                    <h4 class="mb-2 mt-lg-6">{{ $client->first_name_en . ' ' . $client->last_name_en }}</h4>
+                    <h4 class="mb-2 mt-lg-6">
+                      {{ 
+                        $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en
+                      }}
+                    </h4>
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-palette ti-lg"></i><span class="fw-medium">{{ $client->title_en }}</span>
+                        <i class="ti ti-palette ti-lg"></i><span class="fw-medium">
+                          {{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
+                        </span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-map-pin ti-lg"></i><span
@@ -61,7 +67,8 @@
             <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-2 gap-lg-0">
               <li class="nav-item">
                 <a class="nav-link active" href="javascript:void(0);"><i class="ti-sm ti ti-user-check me-1_5"></i>
-                  Profile</a>
+                  Profile
+                </a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="pages-profile-teams.html"><i class="ti-sm ti ti-users me-1_5"></i> Teams</a>
@@ -86,40 +93,73 @@
           <!-- About User -->
           <div class="card mb-6">
             <div class="card-body">
-              <small class="card-text text-uppercase text-muted small">About</small>
+              <small class="card-text text-uppercase text-muted small">
+                {{ $l == 'ar' ? 'المعلومات الشخصية' : 'About' }}
+              </small>
               <ul class="list-unstyled my-3 py-1">
                 <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">Full Name:</span>
-                  <span>{{ $client->first_name_en }}</span>
+                  <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</span>
+                  <span>{{ $l == 'ar' ? $client->first_name_ar : $client->first_name_en }}</span>
                 </li>
                 <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">Status:</span>
-                  <span>Active</span>
+                  <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'الحالة' : 'Status' }}:
+                  </span>
+                  <span>{{ $l == 'ar' ? 'نشط:' : 'Active' }}</span>
                 </li>
                 <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-crown ti-lg"></i><span class="fw-medium mx-2">Role:</span>
-                  <span>{{ $client->title_en }}</span>
+                  <i class="ti ti-crown ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:
+                  </span>
+                  <span>
+                    {{ $l == 'ar' ? $client->title_ar : $client->title_en }}
+                  </span>
                 </li>
                 <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-flag ti-lg"></i><span class="fw-medium mx-2">Country:</span> <span>USA</span>
+                  <i class="ti ti-flag ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
+                  </span>
+                  <span>
+                    {{ $client->country->{'name_' . $l} }}
+                  </span>
                 </li>
                 <li class="d-flex align-items-center mb-2">
-                  <i class="ti ti-language ti-lg"></i><span class="fw-medium mx-2">Languages:</span>
-                  <span>English</span>
+                  <i class="ti ti-language ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar'
+                        ? 'اللغات:'
+                        : '
+                                        Languages:' }}
+                  </span>
+                  <span>
+                    {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
+                  </span>
                 </li>
               </ul>
-              <small class="card-text text-uppercase text-muted small">Contacts</small>
+              <small class="card-text text-uppercase text-muted small">
+                {{ $l == 'ar' ? 'التواصل' : 'Contact' }}
+              </small>
               <ul class="list-unstyled my-3 py-1">
                 <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-phone-call ti-lg"></i><span class="fw-medium mx-2">Contact:</span>
+                  <i class="ti ti-phone-call ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'الهاتف:' : 'Phone:' }}
+                  </span>
                   <span>{{ $client->phone }}</span>
                 </li>
+                {{-- @role('Mentor')
+                  <li class="d-flex align-items-center mb-4">
+                    <i class="ti ti-messages ti-lg"></i><span class="fw-medium mx-2">
+                      {{ $l == 'ar' ? 'ليتكدان' : 'linkedin' }}:
+                    </span>
+                    <span>
+                      {{ $client->linkedin }}
+                    </span>
+                  </li>
+                @endrole --}}
+
                 <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-messages ti-lg"></i><span class="fw-medium mx-2">Skype:</span>
-                  <span>john.doe</span>
-                </li>
-                <li class="d-flex align-items-center mb-4">
-                  <i class="ti ti-mail ti-lg"></i><span class="fw-medium mx-2">Email:</span>
+                  <i class="ti ti-mail ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'البريد الإلكتروني:' : 'Email:' }}
+                  </span>
                   <span>{{ $client->email }}</span>
                 </li>
               </ul>
