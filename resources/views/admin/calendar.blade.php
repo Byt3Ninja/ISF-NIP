@@ -198,6 +198,11 @@
 
 <!-- Page JS -->
 @section('pagescripts')
-  <script src="/vuexy/assets/js/app-calendar-events.js"></script>
+  <script>
+    // This siteUrl used in app-calendar.js
+    var siteUrlFromBlade = "{{ url('/') }}";
+  </script>
   <script src="/vuexy/assets/js/app-calendar.js"></script>
+  {{-- <script src="/vuexy/assets/js/app-calendar-events.js"></script> --}}
+  {{-- <script src="/vuexy/assets/js/app-calendar-custom.js"></script> --}}
 @stop
