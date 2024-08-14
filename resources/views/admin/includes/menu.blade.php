@@ -117,32 +117,34 @@
     @role('Registered')
       <li
         class="{{ Request::is('dashboard/requests/mine', '/dashboard/mentorship/mine') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a href="#" class="menu-link"><i class="menu-livicon" data-icon="two-pointers"></i>
-          < class="menu-title">{{ __('admin.My Requests') }}</>
+        <a href="#" class="menu-link menu-toggle">
+          <i class="ti ti-file-text  ti-md me-2 me-lg-4 ti-lg"></i>
+          <div>{{ __('admin.My Requests') }}</div>
         </a>
         <ul class="menu-sub">
           <li class="{{ Request::is('dashboard/requests/mine') ? 'active' : '' }} menu-item"><a
-              href="/dashboard/requests/mine"><i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              href="/dashboard/requests/mine" class="menu-link"><i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Services') }}</span>
             </a>
           </li>
 
           <li class="{{ Request::is('dashboard/mentorship/mine') ? 'active' : '' }} menu-item"><a
-              href="/dashboard/mentorship/mine"><i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              href="/dashboard/mentorship/mine" class="menu-link"><i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Mentorship') }}</span>
             </a>
           </li>
         </ul>
       </li>
 
-      <li class="{{ Request::is('dashboard/training/my*') ? 'active' : '' }} menu-item"><a href="/dashboard/training/my">
+      <li class="{{ Request::is('dashboard/training/my*') ? 'active' : '' }} menu-item"><a href="/dashboard/training/my"
+          class="menu-link">
           <i class="menu-icon tf-icons ti ti-forms"></i>
           <div>{{ __('admin.My courses') }}</div>
         </a>
       </li>
       <li class="{{ Request::is('dashboard/startup/mentorshipTasks*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('startup.mentorshipTasks.home') }}">
-          <i class="menu-livicon" data-icon="briefcase"></i>
+        <a href="{{ route('startup.mentorshipTasks.home') }}" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-checklist"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
@@ -353,13 +355,13 @@
               </a>
             </li>
             <!--
-                          <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
-                            <a href="{{ route('rooms.index') }}">
-                              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                              <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
-                            </a>
-                          </li>
-                        -->
+                                  <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
+                                    <a href="{{ route('rooms.index') }}">
+                                      <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                                      <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
+                                    </a>
+                                  </li>
+                                -->
             <li class="{{ Request::is('dashboard/serviceCategories*') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('serviceCategories.index') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
