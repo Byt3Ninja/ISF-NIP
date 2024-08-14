@@ -99,7 +99,11 @@
               <ul class="list-unstyled my-3 py-1">
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</span>
-                  <span>{{ $l == 'ar' ? $client->first_name_ar : $client->first_name_en }}</span>
+                  <span>{{ 
+                  $l == 'ar' 
+                  ? $client->first_name_arز . ' ' . $client->last_name_ar 
+                  : $client->first_name_en . ' ' . $client->last_name_en
+                  }}</span>
                 </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">
