@@ -177,7 +177,7 @@
                 <span class="dropdown-shortcuts-icon rounded-circle mb-3">
                   <i class="ti ti-help ti-26px text-heading"></i>
                 </span>
-                <a href="pages-faq.html" class="stretched-link">FAQs</a>
+                <a href="/dashboard/documentation" class="stretched-link">FAQs</a>
                 <small>FAQs & Articles</small>
               </div>
               <div class="dropdown-shortcuts-item col">
@@ -480,7 +480,7 @@
             </a>
           </li>
           <li>
-            <a class="dropdown-item" href="pages-faq.html">
+            <a class="dropdown-item" href="/dashboard/documentation">
               <i class="ti ti-question-mark me-3 ti-md"></i><span class="align-middle">FAQ</span>
             </a>
           </li>
