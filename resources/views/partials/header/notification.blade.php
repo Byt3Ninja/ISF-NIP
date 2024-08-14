@@ -30,8 +30,10 @@
         @if ($all == 0)
           <li class="list-group-item list-group-item-action dropdown-notifications-item">
             <div class="dropdown-header px-1 py-75 d-flex justify-content-between"><span
-                class="notification-title"><span class="notif-count">{{ $all }}</span>
-                {{ __('admin.NewNotify') }}</span><span class="text-bold-400 cursor-pointer"><a
+                class="notification-title" style="text-transform:capitalize;">
+                <span class="notif-count">{{ $all }}</span>
+                {{ __('admin.NewNotify') }}
+              </span><span class="text-bold-400 cursor-pointer"><a
                   onclick="location.reload();">{{ __('admin.MarkRead') }}</a></span>
             </div>
           </li>
