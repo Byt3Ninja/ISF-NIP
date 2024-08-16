@@ -28,7 +28,6 @@
 <!-- Favicon -->
 <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
-
 <!-- Fonts -->
 @if ($l == 'ar')
   <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
@@ -57,7 +56,6 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/apex-charts/apex-charts.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
