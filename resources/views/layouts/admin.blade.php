@@ -31,7 +31,7 @@
         @yield('content')
 
         <!-- Footer -->
-        <footer style="margin-left: 30px">
+        <footer class="mx-6">
           @include('admin.includes.footer')
         </footer>
       </div>
