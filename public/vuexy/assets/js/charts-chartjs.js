@@ -42,30 +42,32 @@
 
   // Bar Chart
   // --------------------------------------------------------------------
-  const barChart = document.getElementById('barChart');
+  const barChart = document.getElementById('verticalBarChart');
   if (barChart) {
     const barChartVar = new Chart(barChart, {
       type: 'bar',
       data: {
-        labels: [
-          '7/12',
-          '8/12',
-          '9/12',
-          '10/12',
-          '11/12',
-          '12/12',
-          '13/12',
-          '14/12',
-          '15/12',
-          '16/12',
-          '17/12',
-          '18/12',
-          '19/12'
-        ],
+        labels: verticalBarLabels,
         datasets: [
           {
-            data: [275, 90, 190, 205, 125, 85, 55, 87, 127, 150, 230, 280, 190],
-            backgroundColor: cyanColor,
+            data: verticalBarData,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.8)',
+              'rgba(54, 162, 235, 0.8)',
+              'rgba(255, 206, 86, 0.8)',
+              'rgba(75, 192, 192, 0.8)',
+              'rgba(153, 102, 255, 0.8)',
+              'rgba(255, 159, 64, 0.8)',
+              'rgba(199, 199, 199, 0.8)',
+              'rgba(83, 102, 255, 0.8)',
+              'rgba(255, 99, 71, 0.8)',
+              'rgba(60, 179, 113, 0.8)',
+              'rgba(255, 140, 0, 0.8)',
+              'rgba(75, 0, 130, 0.8)',
+              'rgba(255, 20, 147, 0.8)',
+              'rgba(0, 191, 255, 0.8)',
+              'rgba(34, 139, 34, 0.8)'
+            ],
             borderColor: 'transparent',
             maxBarThickness: 15,
             borderRadius: {
@@ -106,15 +108,15 @@
             }
           },
           y: {
-            min: 0,
-            max: 400,
+            min: 2,
+            max: 12,
             grid: {
               color: borderColor,
               drawBorder: false,
               borderColor: borderColor
             },
             ticks: {
-              stepSize: 100,
+              stepSize: 2,
               color: labelColor
             }
           }
@@ -126,74 +128,74 @@
   // Horizontal Bar Chart
   // --------------------------------------------------------------------
 
-  const horizontalBarChart = document.getElementById('horizontalBarChart');
-  if (horizontalBarChart) {
-    const horizontalBarChartVar = new Chart(horizontalBarChart, {
-      type: 'bar',
-      data: {
-        labels: ['MON', 'TUE', 'WED ', 'THU', 'FRI', 'SAT', 'SUN'],
-        datasets: [
-          {
-            data: [710, 350, 470, 580, 230, 460, 120],
-            backgroundColor: blueDarkColor,
-            borderColor: 'transparent',
-            maxBarThickness: 15
-          }
-        ]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 500
-        },
-        elements: {
-          bar: {
-            borderRadius: {
-              topRight: 15,
-              bottomRight: 15
-            }
-          }
-        },
-        plugins: {
-          tooltip: {
-            rtl: isRtl,
-            backgroundColor: cardColor,
-            titleColor: headingColor,
-            bodyColor: legendColor,
-            borderWidth: 1,
-            borderColor: borderColor
-          },
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          x: {
-            min: 0,
-            grid: {
-              color: borderColor,
-              borderColor: borderColor
-            },
-            ticks: {
-              color: labelColor
-            }
-          },
-          y: {
-            grid: {
-              borderColor: borderColor,
-              display: false,
-              drawBorder: false
-            },
-            ticks: {
-              color: labelColor
-            }
-          }
-        }
-      }
-    });
-  }
+  // const horizontalBarChart = document.getElementById('horizontalBarChart');
+  // if (horizontalBarChart) {
+  //   const horizontalBarChartVar = new Chart(horizontalBarChart, {
+  //     type: 'bar',
+  //     data: {
+  //       labels: ['MON', 'TUE', 'WED ', 'THU', 'FRI', 'SAT', 'SUN'],
+  //       datasets: [
+  //         {
+  //           data: [710, 350, 470, 580, 230, 460, 120],
+  //           backgroundColor: blueDarkColor,
+  //           borderColor: 'transparent',
+  //           maxBarThickness: 15
+  //         }
+  //       ]
+  //     },
+  //     options: {
+  //       indexAxis: 'y',
+  //       responsive: true,
+  //       maintainAspectRatio: false,
+  //       animation: {
+  //         duration: 500
+  //       },
+  //       elements: {
+  //         bar: {
+  //           borderRadius: {
+  //             topRight: 15,
+  //             bottomRight: 15
+  //           }
+  //         }
+  //       },
+  //       plugins: {
+  //         tooltip: {
+  //           rtl: isRtl,
+  //           backgroundColor: cardColor,
+  //           titleColor: headingColor,
+  //           bodyColor: legendColor,
+  //           borderWidth: 1,
+  //           borderColor: borderColor
+  //         },
+  //         legend: {
+  //           display: false
+  //         }
+  //       },
+  //       scales: {
+  //         x: {
+  //           min: 0,
+  //           grid: {
+  //             color: borderColor,
+  //             borderColor: borderColor
+  //           },
+  //           ticks: {
+  //             color: labelColor
+  //           }
+  //         },
+  //         y: {
+  //           grid: {
+  //             borderColor: borderColor,
+  //             display: false,
+  //             drawBorder: false
+  //           },
+  //           ticks: {
+  //             color: labelColor
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
 
   // Line Chart
   // --------------------------------------------------------------------

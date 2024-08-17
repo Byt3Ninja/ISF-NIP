@@ -5,103 +5,103 @@
 @stop
 
 @section('style')
-  <link rel="stylesheet" href="../../assets/vendor/css/pages/app-logistics-dashboard.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
 @stop
 
 @section('content')
   @php
     $countCards = [
-        [
-            'color' => 'success',
-            'href' => '/dashboard/users#search=Manager',
-            'icon' => 'ti ti-user-share',
-            'text' => __('admin.Managers'),
-            'count' => $managers_count,
-        ],
-        [
-            'color' => 'warning',
-            'href' => '/dashboard/organizations',
-            'icon' => 'ti-businessplan',
-            'text' => __('admin.Organizations'),
-            'count' => $organizations_count,
-        ],
-        [
-            'color' => 'secondary',
-            'href' => '/dashboard/requests/all',
-            'icon' => 'ti-speakerphone',
-            'text' => __('admin.Services Requests'),
-            'count' => $servrequests_count,
-        ],
-        [
-            'color' => 'success',
-            'href' => '/dashboard/inbox',
-            'icon' => 'ti-message',
-            'text' => __('admin.New messages'),
-            'count' => $messages_count,
-        ],
-        [
-            'color' => 'danger',
-            'href' => '/dashboard/mymsg',
-            'icon' => 'ti-network',
-            'text' => __('admin.Contact us'),
-            'count' => $cmessages_count,
-        ],
-        [
-            'color' => 'danger',
-            'href' => '/dashboard/cycles',
-            'icon' => 'ti-circles',
-            'text' => __('admin.Cycles'),
-            'count' => $cycles_count,
-        ],
-        [
-            'color' => 'info',
-            'href' => '/dashboard/companies',
-            'icon' => 'ti-building',
-            'text' => __('admin.Startups'),
-            'count' => $startups_count,
-        ],
-        [
-            'color' => 'danger',
-            'href' => '/dashboard/users#search=Mentor',
-            'icon' => 'ti-school',
-            'text' => __('admin.Mentors'),
-            'count' => $mentors_count,
-        ],
-        [
-            'color' => 'secondary',
-            'href' => '/dashboard/mentorship/sessions',
-            'icon' => 'ti-brand-my-oppo',
-            'text' => __('admin.Mentorship requests'),
-            'count' => $mentrequests_count,
-        ],
-        [
-            'color' => 'success',
-            'href' => '/dashboard/mentorship/sessions',
-            'icon' => 'ti-calendar-event',
-            'text' => __('admin.Mentorship requests Duration'),
-            'count' => $mentrequests_period,
-        ],
-        [
-            'color' => 'primary',
-            'href' => '/dashboard/users#search=Judger',
-            'icon' => 'ti-certificate',
-            'text' => __('admin.Judgers'),
-            'count' => $judgers_count,
-        ],
-        [
-            'color' => 'warning',
-            'href' => '/dashboard/training/sessions',
-            'icon' => 'ti-camera-question',
-            'text' => __('admin.Training sessions'),
-            'count' => $sessions_count,
-        ],
-        [
-            'color' => 'info',
-            'href' => '/dashboard/training/sessions',
-            'icon' => 'ti-alarm',
-            'text' => __('admin.Training sessions Duration'),
-            'count' => $sessions_period,
-        ],
+      [
+        'color' => 'success',
+        'href' => '/dashboard/users#search=Manager',
+        'icon' => 'ti ti-user-share',
+        'text' => __('admin.Managers'),
+        'count' => $managers_count,
+      ],
+      [
+        'color' => 'warning',
+        'href' => '/dashboard/organizations',
+        'icon' => 'ti-businessplan',
+        'text' => __('admin.Organizations'),
+        'count' => $organizations_count,
+      ],
+      [
+        'color' => 'secondary',
+        'href' => '/dashboard/requests/all',
+        'icon' => 'ti-speakerphone',
+        'text' => __('admin.Services Requests'),
+        'count' => $servrequests_count,
+      ],
+      [
+        'color' => 'success',
+        'href' => '/dashboard/inbox',
+        'icon' => 'ti-message',
+        'text' => __('admin.New messages'),
+        'count' => $messages_count,
+      ],
+      [
+        'color' => 'danger',
+        'href' => '/dashboard/mymsg',
+        'icon' => 'ti-network',
+        'text' => __('admin.Contact us'),
+        'count' => $cmessages_count,
+      ],
+      [
+        'color' => 'danger',
+        'href' => '/dashboard/cycles',
+        'icon' => 'ti-circles',
+        'text' => __('admin.Cycles'),
+        'count' => $cycles_count,
+      ],
+      [
+        'color' => 'info',
+        'href' => '/dashboard/companies',
+        'icon' => 'ti-building',
+        'text' => __('admin.Startups'),
+        'count' => $startups_count,
+      ],
+      [
+        'color' => 'danger',
+        'href' => '/dashboard/users#search=Mentor',
+        'icon' => 'ti-school',
+        'text' => __('admin.Mentors'),
+        'count' => $mentors_count,
+      ],
+      [
+        'color' => 'secondary',
+        'href' => '/dashboard/mentorship/sessions',
+        'icon' => 'ti-brand-my-oppo',
+        'text' => __('admin.Mentorship requests'),
+        'count' => $mentrequests_count,
+      ],
+      [
+        'color' => 'success',
+        'href' => '/dashboard/mentorship/sessions',
+        'icon' => 'ti-calendar-event',
+        'text' => __('admin.Mentorship requests Duration'),
+        'count' => $mentrequests_period,
+      ],
+      [
+        'color' => 'primary',
+        'href' => '/dashboard/users#search=Judger',
+        'icon' => 'ti-certificate',
+        'text' => __('admin.Judgers'),
+        'count' => $judgers_count,
+      ],
+      [
+        'color' => 'warning',
+        'href' => '/dashboard/training/sessions',
+        'icon' => 'ti-camera-question',
+        'text' => __('admin.Training sessions'),
+        'count' => $sessions_count,
+      ],
+      [
+        'color' => 'info',
+        'href' => '/dashboard/training/sessions',
+        'icon' => 'ti-alarm',
+        'text' => __('admin.Training sessions Duration'),
+        'count' => $sessions_period,
+      ],
     ];
   @endphp
 
@@ -131,10 +131,9 @@
         @endif
       </div>
       <div class="row g-6">
-
         <!-- Count cards -->
         @foreach ($countCards as $card)
-          <div class="col-lg-3 col-sm-6">
+          <a href="{{ $card['href'] }}" class="col-lg-3 col-sm-6">
             <div class="card card-border-shadow-{{ $card['color'] }} h-100">
               <div class="card-body">
                 <div class="d-flex justify-content-center align-items-center mb-2">
@@ -148,173 +147,85 @@
                 <p class="mb-1 text-center">{{ $card['text'] }}</p>
               </div>
             </div>
-          </div>
+          </a>
         @endforeach
         <!-- / Count cards -->
       </div>
+
+      <!-- Horizontal Bar Chart -->
+      <div class="col-12 mt-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <i class="ti ti-device-laptop ti-28px"></i>
+              <h5 class="card-title mb-0 mx-2">{{ __('admin.Cycle Startups Statistics') }}</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="horizontalBarChart"></div>
+          </div>
+        </div>
+      </div>
+      <!-- /Horizontal Bar Chart -->
+
+      <div class="row g-3 align-items-center mt-6">
+        <!-- Pie Chart -->
+        <div class="col-md-6 col-12">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="menu-icon tf-icons ti ti-user ti-28px"></i>
+                <h5 class="card-title mb-0">{{ __('admin.totalusersmf') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="pieChart"></div>
+            </div>
+          </div>
+        </div>
+        <!-- /Pie Chart -->
+
+        <!-- Vertical Bar Charts -->
+        <div class="col-md-6 col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-id ti-28px"></i>
+                <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="verticalBarChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- /Vertical Bar Charts -->
+      </div>
     </div>
-  </div>
-@stop
+  @stop
 
-@section('scripts')
-  {{-- <script src="/app-assets/vendors/js/charts/chart.min.js"></script>
-    <script src="/app-assets/vendors/js/charts/apexcharts.min.js"></script>
-    <script src="/app-assets/vendors/js/extensions/swiper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> --}}
-  <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
-@stop
-@section('pagescripts')
-  <script>
-    < script src = "../../assets/js/app-logistics-dashboard.js" >
-      <
-      />
-    console.log('admin dashbaord')
-  </script>
-  <script>
-    $(window).on("load", function() {
-      var $primary = '#5A8DEE',
-        $success = '#39DA8A',
-        $danger = '#FF5B5C',
-        $warning = '#FDAC41',
-        $info = '#00CFDD',
-        $label_color = '#475F7B',
-        grid_line_color = '#dae1e7';
-      var themeColors = [$primary, $warning, $danger, $success, $info, $label_color, $primary, $warning, $danger,
-        $success, $info, $label_color,
-        $primary, $warning, $danger, $success, $info, $label_color, $primary, $warning, $danger, $success, $info,
-        $label_color
-      ];
+  @section('scripts')
+    <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+    <script src="/vuexy/assets/vendor/libs/chartjs/chartjs.js"></script>
+  @stop
 
-      // Bar Chart
-      // ------------------------------------------
-      //Get the context of the Chart canvas element we want to select
-      var barChartctx = $("#bar-chart");
-      // Chart Options
-      var barchartOptions = {
-        // Elements options apply to all of the options unless overridden in a dataset
-        // In this case, we are setting the border of each bar to be 2px wide
-        elements: {
-          rectangle: {
-            borderWidth: 2,
-            borderSkipped: 'left'
-          }
-        },
-        responsive: true,
-        maintainAspectRatio: false,
-        responsiveAnimationDuration: 500,
-        legend: {
-          display: false
-        },
-        scales: {
-          xAxes: [{
-            display: true,
-            gridLines: {
-              color: grid_line_color,
-            },
-            scaleLabel: {
-              display: true,
-            }
-          }],
-          yAxes: [{
-            display: true,
-            gridLines: {
-              color: grid_line_color,
-            },
-            scaleLabel: {
-              display: true,
-            },
-            ticks: {
-              stepSize: 10
-            },
-          }],
-        },
-        title: {
-          display: true,
-          text: '{{ __('admin.totalregisteredusers') }}'
-        },
-      };
-      // Chart Data
-      var barchartData = {
-        labels: {!! $usersgov->pluck('state_' . $l)->toJson() !!},
-        datasets: [{
-          label: "Total",
-          data: {!! $usersgov->pluck('total')->toJson() !!},
-          backgroundColor: themeColors,
-          borderColor: "transparent"
-        }]
-      };
-      var barChartconfig = {
-        type: 'bar',
-        // Chart Options
-        options: barchartOptions,
-        data: barchartData
-      };
-      // Create the chart
-      var barChart = new Chart(barChartctx, barChartconfig);
+  @section('pagescripts')
+    <script>
+      // Horizontal Bar Chart
+      const dataLabel = '{{ __('admin.Registered') }}';
+      const cyclesLabels = {!! json_encode($cycles_labels) !!};
+      const cyclesStartupsCount = {!! json_encode($cycles_startups_count) !!};
+
+      // Vertical Bar Chart 
+      const verticalBarLabels = {!! json_encode($usersgov->pluck('state_' . $l)) !!};
+      const verticalBarData = {!! json_encode($usersgov->pluck('total')) !!};
+
       // Pie Chart
-      // --------------------------------
-      //Get the context of the Chart canvas element we want to select
-      var pieChartctx = $("#simple-pie-chart");
-      // Chart Options
-      var piechartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        responsiveAnimationDuration: 500,
-        title: {
-          display: true,
-          text: '{{ __('admin.totalregisteredusers') }}'
-        }
-      };
-      // Chart Data
-      var piechartData = {
-        labels: ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'],
-        datasets: [{
-          label: "{{ __('admin.totalregistered') }}",
-          data: {!! $usersgender->pluck('total')->toJson() !!},
-          backgroundColor: themeColors,
-        }]
-      };
-      var pieChartconfig = {
-        type: 'pie',
-        // Chart Options
-        options: piechartOptions,
-        data: piechartData
-      };
-      // Create the chart
-      var pieSimpleChart = new Chart(pieChartctx, pieChartconfig);
+      const pieLabels = ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'];
+      const pieData = {!! json_encode($usersgender->pluck('total')) !!};
+    </script>
 
-    });
-  </script>
-
-  <script>
-    new Chart(document.getElementById('cycleStartups'), {
-      type: 'bar',
-      data: {
-        labels: {!! json_encode($cycles_labels) !!},
-        datasets: [{
-          label: '({{ __('admin.Registered') }})',
-          data: {!! json_encode($cycles_startups_count) !!},
-          borderWidth: 1
-        }]
-      },
-      options: {
-        backgroundColor: '#f59b9b',
-        indexAxis: 'y',
-        elements: {
-          bar: {
-            borderWidth: 2,
-          }
-        },
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'right',
-          },
-
-        },
-
-      }
-    });
-  </script>
-
-@stop
+    <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+    <script src="/vuexy/assets/js/charts-apex.js"></script>
+    <script src="/vuexy/assets/js/charts-chartjs.js"></script>
+  @stop

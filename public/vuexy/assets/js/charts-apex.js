@@ -476,6 +476,10 @@
 
   // Horizontal Bar Chart
   // --------------------------------------------------------------------
+  let labelsCycles = cyclesLabels;
+  let cyclesCount = cyclesStartupsCount;
+  let countLabel = dataLabel;
+
   const horizontalBarChartEl = document.querySelector('#horizontalBarChart'),
     horizontalBarChartConfig = {
       chart: {
@@ -511,11 +515,12 @@
       },
       series: [
         {
-          data: [700, 350, 480, 600, 210, 550, 150]
+          data: cyclesCount,
+          name: countLabel
         }
       ],
       xaxis: {
-        categories: ['MON, 11', 'THU, 14', 'FRI, 15', 'MON, 18', 'WED, 20', 'FRI, 21', 'MON, 23'],
+        categories: labelsCycles,
         axisBorder: {
           show: false
         },
@@ -1133,5 +1138,156 @@
   if (typeof donutChartEl !== undefined && donutChartEl !== null) {
     const donutChart = new ApexCharts(donutChartEl, donutChartConfig);
     donutChart.render();
+  }
+
+  // Pie Chart
+  // --------------------------------------------------------------------
+  let pieChartLabels = pieLabels;
+  let pieChartData = pieData;
+
+  const pieChartEl = document.querySelector('#pieChart'),
+    pieChartConfig = {
+      chart: {
+        height: 380,
+        type: 'pie'
+      },
+      labels: pieChartLabels,
+      series: pieChartData,
+      colors: [
+        '#c7c2f9', '#7367f0',
+        // chartColors.donut.series1,
+        // chartColors.donut.series4,
+        // chartColors.donut.series3,
+        // chartColors.donut.series2
+      ],
+      stroke: {
+        show: false,
+        curve: 'smooth'
+      },
+      // dataLabels: {
+      //   enabled: true,
+      //   formatter: function (val, opt) {
+      //     return parseInt(val, 10) + '%';
+      //   }
+      // },
+      legend: {
+        show: true,
+        position: 'bottom',
+        markers: { offsetX: -3 },
+        itemMargin: {
+          vertical: 3,
+          horizontal: 10
+        },
+        labels: {
+          colors: legendColor,
+          useSeriesColors: false
+        }
+      },
+      plotOptions: {
+        // pie: {
+        //   donut: {
+        //     labels: {
+        //       show: true,
+        //       name: {
+        //         fontSize: '2rem',
+        //         fontFamily: 'Public Sans'
+        //       },
+        //       value: {
+        //         fontSize: '1.2rem',
+        //         color: legendColor,
+        //         fontFamily: 'Public Sans',
+        //         formatter: function (val) {
+        //           return parseInt(val, 10) + '%';
+        //         }
+        //       },
+        //       total: {
+        //         show: true,
+        //         fontSize: '1.5rem',
+        //         color: headingColor,
+        //         label: 'Operational',
+        //         formatter: function (w) {
+        //           return '42%';
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
+      },
+      // responsive: [
+      //   {
+      //     breakpoint: 992,
+      //     options: {
+      //       chart: {
+      //         height: 380
+      //       },
+      //       legend: {
+      //         position: 'bottom',
+      //         labels: {
+      //           colors: legendColor,
+      //           useSeriesColors: false
+      //         }
+      //       }
+      //     }
+      //   },
+      //   {
+      //     breakpoint: 576,
+      //     options: {
+      //       chart: {
+      //         height: 320
+      //       },
+      //       plotOptions: {
+      //         pie: {
+      //           donut: {
+      //             labels: {
+      //               show: true,
+      //               name: {
+      //                 fontSize: '1.5rem'
+      //               },
+      //               value: {
+      //                 fontSize: '1rem'
+      //               },
+      //               total: {
+      //                 fontSize: '1.5rem'
+      //               }
+      //             }
+      //           }
+      //         }
+      //       },
+      //       legend: {
+      //         position: 'bottom',
+      //         labels: {
+      //           colors: legendColor,
+      //           useSeriesColors: false
+      //         }
+      //       }
+      //     }
+      //   },
+      //   {
+      //     breakpoint: 420,
+      //     options: {
+      //       chart: {
+      //         height: 280
+      //       },
+      //       legend: {
+      //         show: false
+      //       }
+      //     }
+      //   },
+      //   {
+      //     breakpoint: 360,
+      //     options: {
+      //       chart: {
+      //         height: 250
+      //       },
+      //       legend: {
+      //         show: false
+      //       }
+      //     }
+      //   }
+      // ]
+    };
+  if (typeof pieChartEl !== undefined && pieChartEl !== null) {
+    const pieChart = new ApexCharts(pieChartEl, pieChartConfig);
+    pieChart.render();
   }
 })();
