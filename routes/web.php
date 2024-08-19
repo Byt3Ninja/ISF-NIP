@@ -258,6 +258,14 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('training/session' ,'TrainingController@session');
     Route::post('training/editsession' ,'TrainingController@editsession');
     Route::post('trainings/getdsc/{id}' ,'TrainingController@getdsc');
+
+    // questions bank
+    Route::resource('question-categories', 'QuestionCategoriesController');
+    Route::resource('questions-bank', 'QuestionsBankController');
+    Route::resource('quizzes', 'quizzesController');
+    Route::get('quizzes/{quiz}/questions', 'quizzesController@get_questions')->name('quizzes.questions');
+    Route::post('quizzes/{quiz}/questions', 'quizzesController@save_questions')->name('quizzes.saveQuestions');
+
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
     Route::get('/roomImages/{id}','RoomsController@roomImages')->name('roomImages');

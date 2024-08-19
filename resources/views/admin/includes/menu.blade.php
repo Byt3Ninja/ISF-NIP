@@ -235,21 +235,55 @@
                     </li>
                 </ul>
             </li>
-            <li class="{{Request::is('*training*')?'sidebar-group-active open':''}} nav-item">
-                <a href="#"><i class="menu-livicon" data-icon="info-alt"></i><span
-                            class="menu-title"> {{__('admin.Training')}}</span></a>
+            <li class="{{Request::is('*question-categories*', '*questions-bank*')?'sidebar-group-active open':''}} nav-item">
+                <a href="#">
+                    <i class="menu-livicon" data-icon="question"></i>
+                    <span class="menu-title"> {{__('admin.Questions')}}</span>
+                </a>
                 <ul class="menu-content">
-                    <li class="{{Request::is('dashboard/training/sessions*')?'active':''}}"><a
-                                href="/dashboard/training/sessions"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"> {{__('admin.Training sessions')}}</span></a>
+                    <li class="{{Request::is('dashboard/question-categories*')?'active':''}}">
+                        <a href="/dashboard/question-categories">
+                            <i class="bx bx-{{$arrow}}-arrow-alt"></i>
+                            <span class="menu-item"> {{__('admin.Questions Categories')}}</span>
+                        </a>
+                    </li>
+                    <li class="{{Request::is('dashboard/questions-bank*')?'active':''}}">
+                        <a href="/dashboard/questions-bank">
+                            <i class="bx bx-{{$arrow}}-arrow-alt"></i>
+                            <span class="menu-item"> {{__('admin.Questions Bank')}}</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="{{Request::is('*training*', '*quizzes*')?'sidebar-group-active open':''}} nav-item">
+                <a href="#">
+                    <i class="menu-livicon" data-icon="info-alt"></i>
+                    <span class="menu-title"> {{__('admin.Training')}}</span>
+                </a>
+                <ul class="menu-content">
+                    <li class="{{Request::is('dashboard/training/sessions*')?'active':''}}">
+                        <a href="/dashboard/training/sessions">
+                            <i class="bx bx-{{$arrow}}-arrow-alt"></i>
+                            <span class="menu-item"> {{__('admin.Training sessions')}}</span>
+                        </a>
                     </li>
                     <li class="{{Request::is('dashboard/training/all*','dashboard/training/addcontent*','dashboard/training/editcontent*','dashboard/training/viewcontent*')?'active':''}}">
-                        <a href="/dashboard/training/all"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"> {{__('admin.Training courses')}}</span></a>
+                        <a href="/dashboard/training/all">
+                            <i class="bx bx-{{$arrow}}-arrow-alt"></i>
+                            <span class="menu-item"> {{__('admin.Training courses')}}</span>
+                        </a>
                     </li>
-                    <li class="{{Request::is('dashboard/training/results*')?'active':''}}"><a
-                                href="/dashboard/training/results"><i class="bx bx-{{$arrow}}-arrow-alt"></i><span
-                                    class="menu-item"> {{__('admin.Results')}}</span></a>
+                    <li class="{{Request::is('dashboard/training/results*')?'active':''}}">
+                        <a href="/dashboard/training/results">
+                            <i class="bx bx-{{$arrow}}-arrow-alt"></i>
+                            <span class="menu-item"> {{__('admin.Results')}}</span>
+                        </a>
+                    </li>
+                    <li class="{{Request::is('dashboard/quizzes*')?'active':''}}">
+                        <a href="/dashboard/quizzes">
+                            <i class="bx bx-{{$arrow}}-arrow-alt"></i>
+                            <span class="menu-item"> {{__('admin.quizzes')}}</span>
+                        </a>
                     </li>
                 </ul>
             </li>
