@@ -5,16 +5,14 @@
                 <h5 class="content-header-title float-left pr-1 mb-0">@yield('title')</h5>
                 <div class="breadcrumb-wrapper col-12">
                     <ol class="breadcrumb p-0 mb-0">
-                        <li class="breadcrumb-item"><a href="/dashboard">
-                                <i class="bx bx-home-alt"></i></a>
-                        </li>
+                        <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a></li>
                         @hasSection('index_url')
-                            <li class="breadcrumb-item"><a href="@yield('index_url')">
-                                    <i class="bx bx-briefcase"></i></a>
-                            </li>
+                            <li class="breadcrumb-item"><a href="@yield('index_url')"> <i class="bx bx-briefcase"></i></a> </li>
                         @endif
-                        <li class="breadcrumb-item active">@yield('subTitle')
-                        </li>
+                        @hasSection('sub_index_url')
+                            <li class="breadcrumb-item"><a href="@yield('sub_index_url')"> <i class="bx bx-file-blank"></i></a> </li>
+                        @endif
+                        <li class="breadcrumb-item active">@yield('subTitle')</li>
                     </ol>
                 </div>
             </div>

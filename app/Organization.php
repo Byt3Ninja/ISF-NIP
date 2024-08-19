@@ -46,4 +46,9 @@ class Organization extends Model
 		return $this->belongsTo(User::class, 'user_id', 'id');
 	}
 
+	public function questionsCategories()
+	{
+		return $this->hasMany(QuestionCategories::class, 'organization_id', 'id');
+	}
+
 }
