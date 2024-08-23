@@ -13,6 +13,7 @@ class ProgramController extends Controller
     public function index()
     {
         $cycles = Cycle::all();
+        
         return view('admin.programs.index', compact('cycles'));
     }
 

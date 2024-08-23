@@ -151,6 +151,7 @@ return [
     'Select training from list' => 'اختر مرحلة تدريب من القائمة',
     'Completed' => 'مكتمل',
     'Error' => 'خطأ',
+    'NA' => 'غير متاح',
     'nosubscripe' => 'عفواً انت غير مشترك فى اى برامج تدريبية',
     'No training courses into cycles' => 'لم يتم إضافة تدريبات للدورات',
     'Back to Manage cycles' => 'العودة لإدارة البرامج',
@@ -230,6 +231,14 @@ return [
     'Are you sure, Delete current step and all its contents?'=>'هل بالتأكيد تريد حذف المرحلة الحالية وكافة محتوياتها؟',
     'cant undo' => 'سوف يتم حذف كافة النماذج والبيانات والمراجعات والتدريبات، ولا يمكنك التراجع عن هذا الإجراء عند التأكيد؟',
     'Add Judges first'=>'حدد محكممين اولا',
-    'Attendance'=>'حضور السيشن'
+    'Attendance'=>'حضور السيشن',
+    'Name' => 'اسم البرنامج',
+    'Program Start Date' => 'تاريخ البداية ',
+    'Program End Date' => 'تاريخ النهاية ',
+    'Private Link' => 'الرابط الخاص',
+    'Number of joined Startup' => 'عدد المشتركين',
+    'Numbers of cycles' => 'عدد المراحل',
+    'Organization Name'=>'اسم الحاضنة',
+    'Organization logo'=>'شعار الحاضنة'
     ];
 
