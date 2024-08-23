@@ -11,97 +11,97 @@
 @section('content')
   @php
     $countCards = [
-      [
-        'color' => 'success',
-        'href' => '/dashboard/users#search=Manager',
-        'icon' => 'ti ti-user-share',
-        'text' => __('admin.Managers'),
-        'count' => $managers_count,
-      ],
-      [
-        'color' => 'warning',
-        'href' => '/dashboard/organizations',
-        'icon' => 'ti-businessplan',
-        'text' => __('admin.Organizations'),
-        'count' => $organizations_count,
-      ],
-      [
-        'color' => 'secondary',
-        'href' => '/dashboard/requests/all',
-        'icon' => 'ti-speakerphone',
-        'text' => __('admin.Services Requests'),
-        'count' => $servrequests_count,
-      ],
-      [
-        'color' => 'success',
-        'href' => '/dashboard/inbox',
-        'icon' => 'ti-message',
-        'text' => __('admin.New messages'),
-        'count' => $messages_count,
-      ],
-      [
-        'color' => 'danger',
-        'href' => '/dashboard/mymsg',
-        'icon' => 'ti-network',
-        'text' => __('admin.Contact us'),
-        'count' => $cmessages_count,
-      ],
-      [
-        'color' => 'danger',
-        'href' => '/dashboard/cycles',
-        'icon' => 'ti-circles',
-        'text' => __('admin.Cycles'),
-        'count' => $cycles_count,
-      ],
-      [
-        'color' => 'info',
-        'href' => '/dashboard/companies',
-        'icon' => 'ti-building',
-        'text' => __('admin.Startups'),
-        'count' => $startups_count,
-      ],
-      [
-        'color' => 'danger',
-        'href' => '/dashboard/users#search=Mentor',
-        'icon' => 'ti-school',
-        'text' => __('admin.Mentors'),
-        'count' => $mentors_count,
-      ],
-      [
-        'color' => 'secondary',
-        'href' => '/dashboard/mentorship/sessions',
-        'icon' => 'ti-brand-my-oppo',
-        'text' => __('admin.Mentorship requests'),
-        'count' => $mentrequests_count,
-      ],
-      [
-        'color' => 'success',
-        'href' => '/dashboard/mentorship/sessions',
-        'icon' => 'ti-calendar-event',
-        'text' => __('admin.Mentorship requests Duration'),
-        'count' => $mentrequests_period,
-      ],
-      [
-        'color' => 'primary',
-        'href' => '/dashboard/users#search=Judger',
-        'icon' => 'ti-certificate',
-        'text' => __('admin.Judgers'),
-        'count' => $judgers_count,
-      ],
-      [
-        'color' => 'warning',
-        'href' => '/dashboard/training/sessions',
-        'icon' => 'ti-camera-question',
-        'text' => __('admin.Training sessions'),
-        'count' => $sessions_count,
-      ],
-      [
-        'color' => 'info',
-        'href' => '/dashboard/training/sessions',
-        'icon' => 'ti-alarm',
-        'text' => __('admin.Training sessions Duration'),
-        'count' => $sessions_period,
-      ],
+        [
+            'color' => 'success',
+            'href' => '/dashboard/users#search=Manager',
+            'icon' => 'ti ti-user-share',
+            'text' => __('admin.Managers'),
+            'count' => $managers_count,
+        ],
+        [
+            'color' => 'warning',
+            'href' => '/dashboard/organizations',
+            'icon' => 'ti-businessplan',
+            'text' => __('admin.Organizations'),
+            'count' => $organizations_count,
+        ],
+        [
+            'color' => 'secondary',
+            'href' => '/dashboard/requests/all',
+            'icon' => 'ti-speakerphone',
+            'text' => __('admin.Services Requests'),
+            'count' => $servrequests_count,
+        ],
+        [
+            'color' => 'success',
+            'href' => '/dashboard/inbox',
+            'icon' => 'ti-message',
+            'text' => __('admin.New messages'),
+            'count' => $messages_count,
+        ],
+        [
+            'color' => 'danger',
+            'href' => '/dashboard/mymsg',
+            'icon' => 'ti-network',
+            'text' => __('admin.Contact us'),
+            'count' => $cmessages_count,
+        ],
+        [
+            'color' => 'danger',
+            'href' => '/dashboard/cycles',
+            'icon' => 'ti-circles',
+            'text' => __('admin.Cycles'),
+            'count' => $cycles_count,
+        ],
+        [
+            'color' => 'info',
+            'href' => '/dashboard/companies',
+            'icon' => 'ti-building',
+            'text' => __('admin.Startups'),
+            'count' => $startups_count,
+        ],
+        [
+            'color' => 'danger',
+            'href' => '/dashboard/users#search=Mentor',
+            'icon' => 'ti-school',
+            'text' => __('admin.Mentors'),
+            'count' => $mentors_count,
+        ],
+        [
+            'color' => 'secondary',
+            'href' => '/dashboard/mentorship/sessions',
+            'icon' => 'ti-brand-my-oppo',
+            'text' => __('admin.Mentorship requests'),
+            'count' => $mentrequests_count,
+        ],
+        [
+            'color' => 'success',
+            'href' => '/dashboard/mentorship/sessions',
+            'icon' => 'ti-calendar-event',
+            'text' => __('admin.Mentorship requests Duration'),
+            'count' => $mentrequests_period,
+        ],
+        [
+            'color' => 'primary',
+            'href' => '/dashboard/users#search=Judger',
+            'icon' => 'ti-certificate',
+            'text' => __('admin.Judgers'),
+            'count' => $judgers_count,
+        ],
+        [
+            'color' => 'warning',
+            'href' => '/dashboard/training/sessions',
+            'icon' => 'ti-camera-question',
+            'text' => __('admin.Training sessions'),
+            'count' => $sessions_count,
+        ],
+        [
+            'color' => 'info',
+            'href' => '/dashboard/training/sessions',
+            'icon' => 'ti-alarm',
+            'text' => __('admin.Training sessions Duration'),
+            'count' => $sessions_period,
+        ],
     ];
   @endphp
 
@@ -202,30 +202,31 @@
         <!-- /Vertical Bar Charts -->
       </div>
     </div>
-  @stop
+  </div>
+@stop
 
-  @section('scripts')
-    <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
-    <script src="/vuexy/assets/vendor/libs/chartjs/chartjs.js"></script>
-  @stop
+@section('scripts')
+  <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+  <script src="/vuexy/assets/vendor/libs/chartjs/chartjs.js"></script>
+@stop
 
-  @section('pagescripts')
-    <script>
-      // Horizontal Bar Chart
-      const dataLabel = '{{ __('admin.Registered') }}';
-      const cyclesLabels = {!! json_encode($cycles_labels) !!};
-      const cyclesStartupsCount = {!! json_encode($cycles_startups_count) !!};
+@section('pagescripts')
+  <script>
+    // Horizontal Bar Chart
+    const dataLabel = '{{ __('admin.Registered') }}';
+    const cyclesLabels = {!! json_encode($cycles_labels) !!};
+    const cyclesStartupsCount = {!! json_encode($cycles_startups_count) !!};
 
-      // Vertical Bar Chart 
-      const verticalBarLabels = {!! json_encode($usersgov->pluck('state_' . $l)) !!};
-      const verticalBarData = {!! json_encode($usersgov->pluck('total')) !!};
+    // Vertical Bar Chart 
+    const verticalBarLabels = {!! json_encode($usersgov->pluck('state_' . $l)) !!};
+    const verticalBarData = {!! json_encode($usersgov->pluck('total')) !!};
 
-      // Pie Chart
-      const pieLabels = ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'];
-      const pieData = {!! json_encode($usersgender->pluck('total')) !!};
-    </script>
+    // Pie Chart
+    const pieLabels = ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'];
+    const pieData = {!! json_encode($usersgender->pluck('total')) !!};
+  </script>
 
-    <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-    <script src="/vuexy/assets/js/charts-apex.js"></script>
-    <script src="/vuexy/assets/js/charts-chartjs.js"></script>
-  @stop
+  <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+  <script src="/vuexy/assets/js/charts-apex.js"></script>
+  <script src="/vuexy/assets/js/charts-chartjs.js"></script>
+@stop

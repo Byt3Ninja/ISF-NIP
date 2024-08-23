@@ -3,13 +3,8 @@
 @section('title', __('admin.Dashboard'))
 @section('subTitle', __('admin.My Dashboard'))
 
-@section('vendorstyle')
-@stop
-
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
-  {{-- <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"> --}}
 @stop
 
 @section('content')

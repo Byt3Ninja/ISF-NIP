@@ -109,7 +109,7 @@
                   <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">
                     {{ $l == 'ar' ? 'الحالة' : 'Status' }}:
                   </span>
-                  <span>{{ $l == 'ar' ? 'نشط:' : 'Active' }}</span>
+                  <span>{{ $l == 'ar' ? 'نشط' : 'Active' }}</span>
                 </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-crown ti-lg"></i><span class="fw-medium mx-2">
