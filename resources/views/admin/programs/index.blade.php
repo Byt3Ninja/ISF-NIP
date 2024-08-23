@@ -77,7 +77,7 @@
                                             <th>{{__('cycles.Numbers of cycles')}}</th>
                                             <th>{{__('cycles.Organization Name')}}</th>
                                             <th>{{__('cycles.Organization logo')}}</th>
-                                            <th></th>
+                                            
                                             <th>@can('edit_user'){{__('cycles.Edit')}}@endcan</th>
                                             <th>@can('delete_user'){{__('cycles.Delete')}}@endcan</th>
                                         </tr>
@@ -101,7 +101,8 @@
                                                 <a target="_blank" href="cycles/{{ $cycle->private }}">اضغط هنا</a>
                                                 @endif
                                             </td>
-                                            <td style="font-size: small;">{{ $totalcompany }}</td>
+                                            <td style="font-size: small;"><a target="_blank" href="/dashboard/cycles/{{$cycle->id}}/registered">
+                                                {{ $totalcompany }}</a></td>
                                             <td style="font-size: small;">{{$totalSteps}}</td>
                                                     @if(app()->getLocale() == 'ar')
                                                         <td style="font-size: small;">{{$cycle->organization->name_ar}}</td>
@@ -109,13 +110,7 @@
                                                         <td style="font-size: small;">{{$cycle->organization->name_en}}</td>
                                                     @endif
                                             <td><img src="{{$cycle->organization->image_url}}" alt="Logo" class="" height="40" ></td>
-                                            <td style="font-size: small;">
-
-                                        <div class="btn btn-secondary" onclick="window.location.href='/dashboard/cycles/{{$cycle->id}}/registered'">
-                                           <span class="align-middle ml-25"> <i class="bx bxs-user"></i> {{__('admin.Startups')}}</span>
-                                        </div>
-
-                                    </td> 
+                                            
 
 
                                     <td style="font-size: small;">
