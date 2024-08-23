@@ -65,7 +65,7 @@
                             <div class="card-body">
                                 <!-- datatable start -->
                                 <div class="table-responsive">
-                                    <table id="organizations-list-datatable" class="table">
+                                    <table id="users-list-datatable" class="table">
                                         <thead>
                                         <tr class="table-light">
                                             <th>#</th>
@@ -216,6 +216,12 @@
 
 @section('pagescripts')
     @php( $ccycle = \App\Cycle::find(0))
+    <script src="/app-assets/js/scripts/pages/page-users.js"></script>
+<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
+<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
+<script src="/app-assets/js/scripts/datatables/datatable.js"></script>
+<script src="/app-assets/js/scripts/modal/components-modal.js"></script>
+
     <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
     <script src="/js/jquery.datetimepicker.full.min.js"></script>
     <script>
