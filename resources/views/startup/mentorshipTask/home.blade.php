@@ -85,11 +85,11 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-@if(is_array($mentorshipTasks) && in_array("لا يوجد شركات", $mentorshipTasks))
+@if(is_array($mentorshipTasks) && in_array("NoCompany", $mentorshipTasks))
 
 <tr>
     <td class="text-center">
-        ليست هناك بيانات متاحة في الجدول
+        {{__('mentor.mentorshipTasks.noCompany')}}
     </td>
     <td class="text-center">
         

@@ -26,11 +26,11 @@ class MentorshipTaskController extends Controller
             
             // إذا كانت المهام فارغة، يمكنك أيضًا إرجاع الرسالة كعنصر في المصفوفة
             if ($mentorshipTasks->isEmpty()) {
-                $mentorshipTasks = ["لا يوجد شركات"];
+                $mentorshipTasks = ["NoCompany"];
             }
         } else {
             // إذا لم يكن هناك شركة مرتبطة بالمستخدم
-            $mentorshipTasks = ["لا يوجد شركات"];
+            $mentorshipTasks = ["NoCompany"];
         }
         return view('startup.mentorshipTask.home',compact('mentorshipTasks'));
         

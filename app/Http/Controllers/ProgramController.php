@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Cycle;
 use Illuminate\Http\Request;
 
 class ProgramController extends Controller
@@ -11,8 +12,8 @@ class ProgramController extends Controller
      */
     public function index()
     {
-
-        return view('admin.programs.index');
+        $cycles = Cycle::all();
+        return view('admin.programs.index', compact('cycles'));
     }
 
     /**
