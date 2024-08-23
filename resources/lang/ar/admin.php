@@ -247,6 +247,7 @@ return [
 	'Mentorship' => 'جلسات الإرشاد',
 	'Forms builder' => 'منشئ النماذج',
 	'Cycles' => 'البرامج',
+	'Cycles`s List'=> 'قائمة البرامج',
 	'Screening' => 'المراجعة والفحص',
 	'Results' => 'النتائج',
 	'Cycles Mentors' => 'إضافة المرشدين',

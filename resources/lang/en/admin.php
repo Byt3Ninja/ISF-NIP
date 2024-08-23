@@ -250,6 +250,7 @@ return [
 	'Mentorship' => 'Mentorship',
 	'Forms builder' => 'Forms builder',
 	'Cycles' => 'Cycles',
+	'Cycles`s List'=> 'Cycles`s List',
 	'Screening' => 'Screening',
 	'Results' => 'Results',
 	'Cycles Mentors' => 'Cycles Mentors',

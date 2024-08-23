@@ -129,7 +129,7 @@ class CyclesController extends Controller
                 'private'=>$private
             ]);
 
-            return redirect(route('index.cycle',$createdCycle->id))->with('message', 'Saved');
+            return redirect()->back()->with('message', 'Saved');
         }
         elseif( $type == 3 )
         {

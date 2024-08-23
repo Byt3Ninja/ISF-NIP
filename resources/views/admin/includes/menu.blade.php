@@ -152,10 +152,7 @@
                 <span class="menu-title">{{__('admin.filemanager')}}</span></a>
         </li>
         
-        <li class="{{Request::is('dashboard/programlist')?'active':''}} nav-item"><a href="/dashboard/programlist">
-            <i class="menu-livicon" data-icon="save"></i>
-            <span class="menu-title">{{__('admin.ProgramList')}}</span></a>
-    </li>
+        
 
         @canany (['view_user','view_log','view_forms','view_report'])
             <li class=" navigation-header"><span>{{__('admin.Portal Settings')}}</span>
@@ -181,6 +178,12 @@
                 <a href="#"><i class="menu-livicon" data-icon="retweet"></i><span class="menu-title"
                     > {{__('admin.Cycles')}}</span></a>
                 <ul class="menu-content">
+
+                    <li class="{{Request::is('dashboard/programlist')?'active':''}} nav-item"><a href="/dashboard/programlist">
+                        <i class="bx bx-{{$arrow}}-arrow-alt"></i>
+                        <span class="menu-title">{{__('admin.ProgramList')}}</span></a>
+                </li>
+
                     <li class="{{Request::is('/dashboard/cycles*')?'active':''}}"><a href="/dashboard/cycles"><i
                                     class="bx bx-{{$arrow}}-arrow-alt"></i><span class="menu-item"
                             > {{__('cycles.steps')}}</span></a>
