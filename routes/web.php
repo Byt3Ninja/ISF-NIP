@@ -206,6 +206,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('cycles/view/{c?}/{s?}','CyclesController@view');
     Route::post('cycles/save','CyclesController@saveForm');
     Route::get('cycles/my/{id}','CyclesController@my');
+    Route::post('change/cyc','CyclesController@changAll');
 
     //Screening
     Route::get('screening','ScreeningController@index');
@@ -278,6 +279,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('final/{step_id}/{company_id}','FinalscreeningController@view');
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
     Route::post('final/delsession/{id}' ,'FinalscreeningController@delsession');
+
+
+//Program List
+Route::resource('programlist', 'ProgramController');
 
 
     // ===============> Mentor Dashboard Routes <===============

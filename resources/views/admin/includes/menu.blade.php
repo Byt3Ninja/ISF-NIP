@@ -54,6 +54,7 @@
                 </a>
             </li>
         @endif
+        
         <li class="{{Request::is('*calendar*')?'active':''}} nav-item">
             <a href="{{route('calendar')}}">
                 <i class="menu-livicon" data-icon="calendar"></i>
@@ -102,6 +103,8 @@
                     <span class="menu-title">{{__('admin.Services')}}</span></a>
             </li>
         @endif
+
+        
         @role('Mentor')
         <li class="{{Request::is('dashboard/mentor/mentorshipSessions*')?'active':''}} nav-item">
             <a href="{{ route('mentorshipSessions.index') }}">
@@ -110,6 +113,7 @@
             </a>
         </li>
         @endrole
+        
         @role('Registered')
         <li class="{{Request::is('dashboard/requests/mine','/dashboard/mentorship/mine')?'sidebar-group-active open':''}} nav-item ">
             <a href="#"><i class="menu-livicon" data-icon="two-pointers"></i>
@@ -130,6 +134,7 @@
                 </li>
             </ul>
         </li>
+        
 
         <li class="{{Request::is('dashboard/training/my*')?'active':''}} nav-item"><a href="/dashboard/training/my">
                 <i class="menu-livicon" data-icon="help"></i>
@@ -146,6 +151,12 @@
                 <i class="menu-livicon" data-icon="save"></i>
                 <span class="menu-title">{{__('admin.filemanager')}}</span></a>
         </li>
+        
+        <li class="{{Request::is('dashboard/programlist')?'active':''}} nav-item"><a href="/dashboard/programlist">
+            <i class="menu-livicon" data-icon="save"></i>
+            <span class="menu-title">{{__('admin.ProgramList')}}</span></a>
+    </li>
+
         @canany (['view_user','view_log','view_forms','view_report'])
             <li class=" navigation-header"><span>{{__('admin.Portal Settings')}}</span>
             </li>

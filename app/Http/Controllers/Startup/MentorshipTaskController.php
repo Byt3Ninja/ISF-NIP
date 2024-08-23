@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Startup;
 
+use App\Company;
 use App\Http\Controllers\Controller;
 use App\MentorshipRequest;
 use App\MentorshipTask;
@@ -17,8 +18,22 @@ class MentorshipTaskController extends Controller
         return view('startup.mentorshipTask.index',compact('mentorshipTasks','mentorship'));
     }
     public function home(){
-        $mentorshipTasks = MentorshipTask::where('company_id',auth()->user()->company->id)->get();
+    
+        $user = auth()->user();
+        if ($user && $user->company) {
+            $companyId = $user->company->id;
+            $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
+            
+            // إذا كانت المهام فارغة، يمكنك أيضًا إرجاع الرسالة كعنصر في المصفوفة
+            if ($mentorshipTasks->isEmpty()) {
+                $mentorshipTasks = ["لا يوجد شركات"];
+            }
+        } else {
+            // إذا لم يكن هناك شركة مرتبطة بالمستخدم
+            $mentorshipTasks = ["لا يوجد شركات"];
+        }
         return view('startup.mentorshipTask.home',compact('mentorshipTasks'));
+        
     }
 
     public function show($id){

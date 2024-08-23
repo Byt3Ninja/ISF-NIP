@@ -813,3 +813,7 @@ jQuery(window).on('scroll', function () {
 		factCounter();
 	})(jQuery);
 });
+
+
+
+

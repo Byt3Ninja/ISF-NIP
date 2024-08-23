@@ -96,23 +96,41 @@
                 </div>
                 <hr style="margin:-10px 0 5px 0;">
                 <div class="card-body">
+                    
                     <div class="table-responsive">
+                        
                         <table class="table mb-0">
+                            <div class="media align-items-center col-md-3">
+                                <select class="form-control ChangeAllBox">
+                                    <option value="0" >{{__('cycles.Disapprove')}}</option>
+                                    @foreach($steps as $step)
+                                <option value="{{ $step->id }}">{{ $step->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <thead class="thead-dark">
                             <tr>
+                                <th><input type="checkbox" class="checkAll" ></th>
                                 <th>{{__('cycles.Company')}}</th>
                                 <th>{{__('cycles.User/Title')}}</th>
                                 <th>{{__('cycles.Mobile')}}</th>
                                 <th>{{__('cycles.E-Mail')}}</th>
                                 <th>{{__('cycles.Current Step')}}</th>
+                                
                             </tr>
                             </thead>
                             <tbody>
+
 {{--                            @php--}}
 {{--                                $companies = \App\Company::where('cycle',$id)->get();--}}
 {{--                            @endphp--}}
                             @foreach($companies as $company)
                                 <tr>
+                                    <td>
+                                        <div class="media align-items-center">
+                                            <input type="checkbox" class="chboxcyclesReg" do="{{$company->id}}" userid="{{$company->user->id}}" value="1" name="chboxcyclesReg[]" >
+                                        </div>
+                                    </td>
                                     <td>
                                         <div class="media align-items-center">
                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
@@ -267,6 +285,10 @@
     <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
     <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
     <script>
+
+ 
+
+
 
         function DoChange(set) {
             var cycle = $('#ccycle').find(":selected").val();

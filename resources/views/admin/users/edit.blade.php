@@ -34,7 +34,7 @@
                                                 <div class="d-flex align-items-center">
                                                     <i class="bx bx-error"></i>
                                                     <span>
-                                                        {{ __('admin.'.session()->get('msg')) }}
+                                                        {{ __(session()->get('msg')) }}
                                                         {{ Session::forget('msg') }}
                                                     </span>
                                                 </div>

@@ -22,9 +22,33 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class CyclesController extends Controller
 {
+
+    public function changAll(Request $request ){
+
+        
+
+        $this->validate($request, [
+            
+            'checkget' => 'required|integer',
+            'compid' => 'required|array',
+            'compid.*' => 'required|integer',
+            
+        ]);
+        $checkget = $request->input('checkget');
+        $compid = $request->input('compid');
+        foreach ($compid as $index => $id) {
+            $company = Company::where('id', $id)->first();
+            if ($company) {
+                $company->step = $checkget;
+                $company->save();
+            }
+        }
+        return response()->json(['state' => 'success'], 200);
+    }
     public function index($id=0)
     {
         $this->preProcessingCheck('edit_cycles');
@@ -66,7 +90,9 @@ class CyclesController extends Controller
         })->get();
         }
         $companies = Company::where('cycle',$id)->get();
-        return view('admin.settings.cycles.users',compact('cycles','id','companies'));
+        $uniqueCycleIds = $companies->pluck('cycle')->unique();
+        $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
+        return view('admin.settings.cycles.users',compact('cycles','id','companies','steps'));
     }
 
     public function modify(Request $request)
