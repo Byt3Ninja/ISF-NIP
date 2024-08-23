@@ -96,7 +96,7 @@
         <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
                 <div class="card-header border-bottom">
-                    <h4 class="card-title">{{ __('cycles.Error') }}</h4>
+                    <h4 class="card-title">{{ __('cycles.nosubscripe') }}</h4>
                 </div>
 
                 <div class="card-body">

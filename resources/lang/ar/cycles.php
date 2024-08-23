@@ -151,6 +151,7 @@ return [
     'Select training from list' => 'اختر مرحلة تدريب من القائمة',
     'Completed' => 'مكتمل',
     'Error' => 'خطأ',
+    'nosubscripe' => 'عفواً انت غير مشترك فى اى برامج تدريبية',
     'No training courses into cycles' => 'لم يتم إضافة تدريبات للدورات',
     'Back to Manage cycles' => 'العودة لإدارة البرامج',
     'all online training sessions' => 'كافة جلسات التدريب المباشر',
