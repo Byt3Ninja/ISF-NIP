@@ -196,7 +196,7 @@
         <!-- Latest Events -->
         <div class="col-sm-6 col-12">
           <div class="card">
-            <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
+            <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom">
               <div class="d-flex align-items-center py-2">
                 <i class="ti ti-calendar-event ti-24px"></i>
                 <h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest Events') }}</h5>
@@ -474,14 +474,14 @@
   </script>
 
   <script>
-    $('.date').datetimepicker({
-      timepicker: false,
-      format: 'Y-m-d'
-    });
-    $('.time').datetimepicker({
-      datepicker: false,
-      format: 'H:i'
-    });
+    // $('.date').datetimepicker({
+    //   timepicker: false,
+    //   format: 'Y-m-d'
+    // });
+    // $('.time').datetimepicker({
+    //   datepicker: false,
+    //   format: 'H:i'
+    // });
 
     function modify(type, id, stat) {
       $.ajaxSetup({

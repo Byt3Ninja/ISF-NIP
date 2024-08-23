@@ -213,9 +213,9 @@
 @section('pagescripts')
   <script>
     // Horizontal Bar Chart
-    const dataLabel = '{{ __('admin.Registered') }}';
-    const cyclesLabels = {!! json_encode($cycles_labels) !!};
-    const cyclesStartupsCount = {!! json_encode($cycles_startups_count) !!};
+    const seriesName = '{{ __('admin.Registered') }}';
+    const barChartCategories = {!! json_encode($cycles_labels) !!};
+    const seriesData = {!! json_encode($cycles_startups_count) !!};
 
     // Vertical Bar Chart 
     const verticalBarLabels = {!! json_encode($usersgov->pluck('state_' . $l)) !!};

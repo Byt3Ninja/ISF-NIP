@@ -48,11 +48,35 @@
         ],
         [
             'href' => '/dashboard/mentorship/sessions?show=all',
-            'icon' => 'ti ti-calendar-event',
+            'icon' => 'ti ti-clock-hour-5',
             'text' => __('admin.Mentorship requests Duration'),
             'count' => $mentrequests_period,
-            'color' => 'label-info',
+            'color' => 'info',
         ],
+        [
+            'href' => '/dashboard/training/sessions',
+            'icon' => 'ti ti-calendar',
+            'text' => __('admin.Training sessions'),
+            'count' => $sessions,
+            'color' => 'danger',
+        ],
+        [
+            'href' => '/dashboard/training/sessions',
+            'icon' => 'ti ti-clock-hour-5',
+            'text' => __('admin.Training sessions Duration'),
+            'count' => $sessions_period,
+            'color' => 'muted',
+        ],
+    ];
+
+    $cyclesHeadArr = [__('cycles.Title'), __('cycles.Valid from'), __('cycles.Valid to'), __('admin.Startups')];
+
+    $requestsHeadArr = [
+        __('cycles.Company'),
+        __('cycles.User/Title'),
+        __('cycles.Mentor'),
+        __('cycles.Date/Time'),
+        __('cycles.Actions'),
     ];
   @endphp
 
@@ -67,7 +91,7 @@
         </div>
       @endif
       <!-- / Alert -->
-      
+
       <div class="row g-6">
         <!-- Count cards -->
         @foreach ($countCards as $card)
@@ -90,55 +114,153 @@
         <!-- / Count cards -->
       </div>
 
-      <!-- Horizontal Bar Chart -->
+      <!-- Mentorship Sessions Chart -->
       <div class="col-12 mt-6">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
               <i class="ti ti-device-laptop ti-28px"></i>
-              {{-- <h5 class="card-title mb-0 mx-2">{{ __('admin.Cycle Startups Statistics') }}</h5> --}}
+              <h5 class="card-title mb-0 mx-2">{{ __('admin.mentorship statistic') }}</h5>
             </div>
           </div>
           <div class="card-body">
-            {{-- <div id="horizontalBarChart"></div> --}}
+            <div id="horizontalBarChart"></div>
           </div>
         </div>
       </div>
-      <!-- /Horizontal Bar Chart -->
+      <!-- / Mentorship Sessions Chart -->
 
-      <div class="row g-3 align-items-center mt-6">
-        <!-- Pie Chart -->
-        <div class="col-md-6 col-12">
-          <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <i class="menu-icon tf-icons ti ti-user ti-28px"></i>
-                {{-- <h5 class="card-title mb-0">{{ __('admin.totalusersmf') }}</h5> --}}
-              </div>
-            </div>
-            <div class="card-body">
-              {{-- <div id="pieChart"></div> --}}
+      <!-- Internship Sessions Chart -->
+      <div class="col-12 mt-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <i class="ti ti-device-laptop ti-28px"></i>
+              <h5 class="card-title mb-0 mx-2">{{ __('admin.Sessions statistic') }}</h5>
             </div>
           </div>
-        </div>
-        <!-- /Pie Chart -->
-
-        <!-- Vertical Bar Charts -->
-        <div class="col-md-6 col-12">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <i class="ti ti-id ti-28px"></i>
-                {{-- <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5> --}}
-              </div>
-            </div>
-            <div class="card-body">
-              {{-- <canvas id="verticalBarChart" class="chartjs" data-height="345"></canvas> --}}
-            </div>
+          <div class="card-body">
+            <div id="internshipChart"></div>
           </div>
         </div>
-        <!-- /Vertical Bar Charts -->
       </div>
+      <!-- / Internship Sessions Chart -->
+
+      <!-- Latest Cycles Table -->
+      <div class="card mt-6">
+        <h5 class="card-header" style="text-transform: capitalize">
+          <i class="ti ti-circles ti-24px"></i>
+          <span class="mx-2">{{ $l === 'ar' ? __('admin.Latest 5 Cycles') : 'Latest 5 cycles' }}</span>
+        </h5>
+        <div class="table-responsive text-nowrap">
+          <table class="table">
+            <thead>
+              <tr>
+                @foreach ($cyclesHeadArr as $header)
+                  <th class="text-center">{{ $header }}</th>
+                @endforeach
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($latest_cycles as $cycle)
+                <tr>
+                  <td class="text-center"> {{ $cycle->title }} </td>
+                  <td class="text-center"> {{ $cycle->start_format }} </td>
+                  <td class="text-center"> {{ $cycle->end_format }} </td>
+                  <td class="text-center">
+                    <button onclick="window.location.href='/dashboard/cycles/{{ $cycle->id }}/registered'"
+                      type="button" class="btn-sm btn-label-primary rounded">
+                      <i class="ti ti-user"></i>
+                    </button>
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!--/ Latest Cycles Table -->
+
+      <!-- Latest Mentorship Requests Table -->
+      <div class="card mt-6">
+        <h5 class="card-header" style="text-transform: capitalize">
+          <i class="ti ti-school ti-28px"></i>
+          <span class="mx-2">{{ __('admin.Latest 5 Mentorship Requests') }}</span>
+        </h5>
+        <div class="table-responsive text-nowrap">
+          <table class="table">
+            <thead>
+              <tr>
+                @foreach ($requestsHeadArr as $header)
+                  <th class="text-center">{{ $header }}</th>
+                @endforeach
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($mentorshipRequests as $session)
+                <tr>
+                  <td>
+                    <div class="media align-items-center">
+                      <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $session->user->company->id }}">
+                        <img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
+                          height="40" width="40">
+                      </a>
+                      <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
+                        <div class="media align-items-center">
+                          {{ $session->user->company->name }}
+                        </div>
+                      </a>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="media align-items-center">
+                      <a class="media-left mr-50" href="/dashboard/users/{{ $session->user->company->user->id }}/edit">
+                        <img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle" height="40"
+                          width="40">
+                      </a>
+                      <a href="/dashboard/users/{{ $session->user_id }}/edit">
+                        <div class="media-body">
+                          <h6 class="media-heading mb-0">{{ $session->user->name }}</h6>
+                          <span class="font-small-2">{{ $session->user->title }}</span>
+                        </div>
+                      </a>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="cursor: pointer;" class="chip mr-1"
+                      onclick="mentor({{ $session->mentor_id }},'{{ $session->mentor->name }}','{{ $session->mentor->mrating() }}')">
+                      <div class="chip-body">
+                        <div class="avatar">
+                          <img class="img-fluid" src="{{ $session->mentor->image_url }}" alt="Mentor photo"
+                            height="20" width="20">
+                        </div>
+                        <span class="chip-text">
+                          {{ $session->mentor->name }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    {{ $session->zoom_date }}
+                    <br>({{ $session->period }}M)
+                  </td>
+                  <td>
+                    <button title="Approve" onclick="approve({{ $session->id }},'Yes')" type="button"
+                      class="btn btn-icon rounded-circle btn-label-success">
+                      <i class="ti ti-check"></i>
+                    </button>
+                    <button title="Dispprove" onclick="approve({{ $session->id }}, 'No')" type="button"
+                      class="btn btn-icon rounded-circle btn-label-danger">
+                      <i class="ti ti-x"></i>
+                    </button>
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!--/ Latest Mentorship Requests Table -->
     </div>
   </div>
 @stop
@@ -149,9 +271,20 @@
 @stop
 
 @section('pagescripts')
+  <script>
+    // Mentorship chart data
+    const seriesName = '({{ __('admin.hours') }})';
+    const barChartCategories = {!! json_encode($mentorship_labels) !!};
+    const seriesData = {!! json_encode($mentorship_durations) !!};
+
+    // Internship chart data
+    const internshipSeriesName = '({{ __('admin.hours') }})';
+    const internshipBarChartCategories = {!! json_encode($sessions_labels) !!};
+    const internshipSeriesData = {!! json_encode($sessions_durations) !!};
+  </script>
+
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-  <script src="/vuexy/assets/js/charts-apex.js"></script>
-  <script src="/vuexy/assets/js/charts-chartjs.js"></script>
+  <script src="/vuexy/assets/js/orgDashboard.js"></script>
 
   <script>
     function approve(id, stat) {
@@ -179,63 +312,4 @@
       });
     }
   </script>
-  <script>
-    new Chart(document.getElementById('sessionChart'), {
-      type: 'bar',
-      data: {
-        labels: {!! json_encode($sessions_labels) !!},
-        datasets: [{
-          label: '({{ __('admin.hours') }})',
-          data: {!! json_encode($sessions_durations) !!},
-          borderWidth: 1
-        }]
-      },
-      options: {
-        backgroundColor: '#f5ee9b',
-        indexAxis: 'y',
-        elements: {
-          bar: {
-            borderWidth: 2,
-          }
-        },
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'right',
-          },
-
-        },
-
-      }
-    });
-
-    new Chart(document.getElementById('mentorshipChart'), {
-      type: 'bar',
-      data: {
-        labels: {!! json_encode($mentorship_labels) !!},
-        datasets: [{
-          label: '({{ __('admin.hours') }})',
-          data: {!! json_encode($mentorship_durations) !!},
-          borderWidth: 1
-        }]
-      },
-      options: {
-        backgroundColor: '#f59b9b',
-        indexAxis: 'y',
-        elements: {
-          bar: {
-            borderWidth: 2,
-          }
-        },
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'right',
-          },
-
-        }
-      },
-    });
-  </script>
-
 @stop

@@ -476,9 +476,9 @@
 
   // Horizontal Bar Chart
   // --------------------------------------------------------------------
-  let labelsCycles = cyclesLabels;
-  let cyclesCount = cyclesStartupsCount;
-  let countLabel = dataLabel;
+  // let barChartCategories = cyclesLabels ? cyclesLabels : mentorshipLabels;
+  // let seriesData = cyclesStartupsCount ? cyclesStartupsCount : mentorhhipDurations;
+  // let seriesName = dataLabel;
 
   const horizontalBarChartEl = document.querySelector('#horizontalBarChart'),
     horizontalBarChartConfig = {
@@ -515,12 +515,12 @@
       },
       series: [
         {
-          data: cyclesCount,
-          name: countLabel
+          data: seriesData,
+          name: seriesName
         }
       ],
       xaxis: {
-        categories: labelsCycles,
+        categories: barChartCategories,
         axisBorder: {
           show: false
         },
@@ -548,6 +548,7 @@
     horizontalBarChart.render();
   }
 
+  
   // Candlestick Chart
   // --------------------------------------------------------------------
   const candlestickEl = document.querySelector('#candleStickChart'),
@@ -1154,7 +1155,8 @@
       labels: pieChartLabels,
       series: pieChartData,
       colors: [
-        '#c7c2f9', '#7367f0',
+        '#c7c2f9',
+        '#7367f0'
         // chartColors.donut.series1,
         // chartColors.donut.series4,
         // chartColors.donut.series3,
@@ -1212,7 +1214,7 @@
         //     }
         //   }
         // }
-      },
+      }
       // responsive: [
       //   {
       //     breakpoint: 992,
