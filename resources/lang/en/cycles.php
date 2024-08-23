@@ -153,6 +153,7 @@ return [
     'Select training from list' => 'Select training from list',
     'Completed' => 'Completed',
     'Error' => 'Error',
+    'nosubscripe' => 'You are not subscribed to any training programs',
     'No training courses into cycles' => 'No training courses into cycles',
     'Back to Manage cycles' => 'Back to Manage cycles',
     'all online training sessions' => 'All online training sessions',

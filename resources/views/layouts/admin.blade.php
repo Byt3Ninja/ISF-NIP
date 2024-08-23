@@ -158,6 +158,7 @@
 	<script src="/app-assets/js/core/app.js"></script>
     <script src="/app-assets/js/scripts/components.js"></script>
 	<script src="/app-assets/js/scripts/footer.js"></script>
+    <script src="/app-assets/js/1.js"></script>
     <!-- END: Theme JS-->
 	@yield('pagescripts')
 </body>
