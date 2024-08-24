@@ -1,333 +1,197 @@
 <!DOCTYPE html>
-<html class="loading" lang="{{$l}}" data-textdirection="rtl" style="direction: {{$l=='ar'?'rtl':'ltr'}};">
-<!-- BEGIN: Head-->
+<html class="loading" lang="{{ $l }}" data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};">
+
 <head>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-    <meta name="description" content="VI V0.1">
-    <meta name="keywords" content="VI V0.1">
-    <meta name="author" content="info@growthlabs.app">
-    <title>Registration Page - VI portal</title>
-    <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
-    <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
-    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,500,600%7CIBM+Plex+Sans:300,400,500,600,700"
-          rel="stylesheet">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+  <meta name="description" content="VI Login">
+  <meta name="author" content="info@growthlabs.app">
+  <title>{{ __('Login Page') }} - {{ App\Settings::findorfail(1)->first('title')->title }} - v1</title>
+  <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
+  <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
+
+  <!-- Fonts -->
+  @if ($l == 'ar')
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
-    <!-- BEGIN: Vendor CSS-->
-    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/vendors{{$l=='ar'?'-rtl':''}}.min.css">
-    <!-- END: Vendor CSS-->
-    <!-- BEGIN: Theme CSS-->
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/bootstrap-extended.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/colors.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/components.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/themes/dark-layout.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/themes/semi-dark-layout.css">
-    <!-- END: Theme CSS-->
-    <!-- BEGIN: Page CSS-->
-    <link rel="stylesheet" type="text/css"
-          href="/app-assets/css{{$l=='ar'?'-rtl':''}}/core/menu/menu-types/vertical-menu.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/authentication.css">
-    <!-- END: Page CSS-->
-    <!-- BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="/assets/css/style{{$l=='ar'?'-rtl':''}}.css">
-    <!-- END: Custom CSS-->
+  @else
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+      rel="stylesheet" />
+  @endif
+  <!-- End Fonts -->
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/fontawesome.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/tabler-icons.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/flag-icons.css" />
+  <!-- End Icons -->
+
+  <!-- Core CSS -->
+
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
+
+  <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
+
+  <!-- Vendors CSS -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
+
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+  <!-- Vendor -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+
+  <!-- Page CSS -->
+  <!-- Page -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
+
+  <!-- Helpers -->
+  <script src="/vuexy/assets/vendor/js/helpers.js"></script>
+  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+
+  <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+  <script src="/vuexy/assets/vendor/js/template-customizer.js"></script>
+
+  <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+  <script src="/vuexy/assets/js/config.js"></script>
 </head>
 <!-- END: Head-->
 <!-- BEGIN: Body-->
-<body
-    class="vertical-layout vertical-menu-modern semi-dark-layout 1-column  navbar-sticky footer-static bg-full-screen-image  blank-page blank-page"
-    data-open="click" data-menu="vertical-menu-modern" data-col="1-column" data-layout="semi-dark-layout">
-<!-- BEGIN: Content-->
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
-        <div class="content-header row">
-        </div>
-        <div class="content-body">
-            <!-- login page start -->
-            <section id="auth-login" class="row flexbox-container">
-                <div class="col-xl-8 col-11">
-                    <div class="card bg-authentication mb-0">
-                        <div class="row m-0">
-                            <!-- left section-login -->
-                            @if (App\Settings::findOrFail(1)->set_order)
-                            <div class="col-md-6 col-12 px-0">
-                                <div
-                                    class="card disable-rounded-right mb-0 p-2 h-100 d-flex justify-content-center">
-                                    <div class="card-header pb-1">
-                                        <div class="card-title">
-                                            <h4 class="text-center mb-2">{{ __('auth.Create Free Account') }}</h4>
-                                        </div>
-                                    </div>
-                                    <div class="card-content">
-                                        <div class="card-body">
-                                            @if (count($errors) > 0)
-                                                <div class="alert alert-danger">
-                                                    <ul>
-                                                        @foreach ($errors->all() as $error)
-                                                            <li>{{ $error }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            @endif
-                                            <form method="POST" action="{{ route('register') }}">
-                                                @csrf
-                                                <div class="form-group">
-                                                    <label class="text-bold-600"
-                                                           for="first_name_en">{{ __('auth.English Name') }}</label>
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <input value="{{ old('first_name_en') }}" name="first_name_en" type="text"
-                                                                   class="form-control" id="first_name_en"
-                                                                   placeholder="{{ __('auth.First English Name') }}" required
-                                                                   autocomplete="first_name_en" autofocus />
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <input value="{{ old('last_name_en') }}" name="last_name_en" type="text"
-                                                                   class="form-control" id="last_name_en"
-                                                                   placeholder="{{ __('auth.Last English Name') }}" required
-                                                                   autocomplete="last_name_en" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <ul class="list-unstyled mb-0">
-                                                        <li class="d-inline-block mr-2 mb-1">
-                                                            <fieldset>
-                                                                <div class="radio">
-                                                                    <input type="radio" name="gender" value="Male" id="rad1" checked="">
-                                                                    <label for="rad1">{{__('Male')}}</label>
-                                                                </div>
-                                                            </fieldset>
-                                                        </li>
-                                                        <li class="d-inline-block mr-2 mb-1">
-                                                            <fieldset>
-                                                                <div class="radio">
-                                                                    <input type="radio" name="gender" value="Female" id="rad2">
-                                                                    <label for="rad2">{{__('Female')}}</label>
-                                                                </div>
-                                                            </fieldset>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="text-bold-600"
-                                                           for="exampleInputEmail1">{{ __('auth.E-Mail') }}</label>
-                                                    <input value="{{ old('email') }}" name="email" type="email"
-                                                           class="form-control" id="email"
-                                                           placeholder="{{ __('auth.E-Mail') }}" required
-                                                           autocomplete="email">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="text-bold-600"
-                                                           for="phone">{{ __('auth.Phone') }}</label>
-                                                    <input type="text" class="form-control" id="phone"
-                                                           placeholder="{{ __('auth.Phone') }}" value="{{ old('phone') }}" name="phone"
-                                                           required autocomplete="new-phone">
-                                                </div>
-                                                <!--
-                                                <div class="form-group">
-                                                    <label for="basicInput">{{ __('auth.AccountType')}}</label>
-                                                    <select class="form-control" required
-                                                            id="UserType" name='UserType'>
-                                                        <option value="">{{ __('auth.AccountType')}}</option>
-                                                        <option value="Service Provider" {{old('UserType')=="Service Provider"?'selected':''}}>{{ __('admin.Service Provider')}}</option>
-                                                        <option value="Service Seeker" {{old('UserType')=="Service Seeker"?'selected':''}}>{{ __('admin.Service Seeker')}}</option>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="basicInput">{{ __('auth.DoYouHaveCompany')}}</label>
-                                                    <ul class="list-unstyled mb-0">
-                                                        <li class="d-inline-block mr-2 mb-1">
-                                                            <fieldset>
-                                                                <div class="radio">
-                                                                    <input type="radio" name="HaveCompany" value="1" id="h1" {{old('HaveCompany')?'checked=""':''}}>
-                                                                    <label for="h1">{{__('Yes')}}</label>
-                                                                </div>
-                                                            </fieldset>
-                                                        </li>
-                                                        <li class="d-inline-block mr-2 mb-1">
-                                                            <fieldset>
-                                                                <div class="radio">
-                                                                    <input type="radio" name="HaveCompany" value="" id="h2" {{old('HaveCompany')?'':'checked=""'}}>
-                                                                    <label for="h2">{{__('No')}}</label>
-                                                                </div>
-                                                            </fieldset>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                                -->
-                                                <div class="form-group">
-                                                    <label class="text-bold-600"
-                                                           for="password">{{ __('auth.Password') }}</label>
-                                                    <input type="password" class="form-control" id="password"
-                                                           placeholder="{{ __('auth.Password') }}" name="password"
-                                                           required autocomplete="new-password">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="text-bold-600"
-                                                           for="password-confirm">{{ __('auth.Confirm') }}</label>
-                                                    <input type="password" class="form-control" id="password-confirm"
-                                                           placeholder="{{ __('auth.Password') }}" name="password_confirmation"
-                                                           required autocomplete="new-password">
-                                                </div>
-                                                <div class="form-group">
-                                                    <small>{{__("By clicking on Register, you acknowledge the validity of the data you have registered, and you pledge not to misuse the services provided through this site in any way, and take legal responsibility in case you violate the terms of service")}}
-                                                    </small>
-                                                </div>
-                                                <div class="form-group row mb-0">
-                                                    <div class="col-md-6 offset-md-4">
-                                                        <button type="submit" class="btn btn-primary">
-                                                            {{ __('auth.Register') }}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                            <hr>
-                                            <div class="text-center"><small class="mr-25">{{__('Already have account')}}: </small><a href="/login"><small> {{__('Login')}}</small></a>.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @else
-                            <div class="col-md-6 col-12 px-0">
-                                    <div
-                                            class="card disable-rounded-right mb-0 p-2 h-100 d-flex justify-content-center">
-                                        <div class="card-header pb-1">
-                                            <div class="card-title">
-                                                <h4 class="text-center mb-2">{{ __('auth.Registration Disabled') }}</h4>
-                                            </div>
-                                        </div>
-                                        <div class="card-content">
-                                            <div class="card-body">
 
-                                                <form>
+<body>
+  <!-- Content -->
 
-                                                    <div class="form-group">
-                                                        <label class="text-bold-600"
-                                                               for="first_name_en">{{ __('auth.English Name') }}</label>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <input value="{{ old('first_name_en') }}" name="first_name_en" type="text"
-                                                                       class="form-control" id="first_name_en"
-                                                                       placeholder="{{ __('auth.First English Name') }}" disabled
-                                                                       autocomplete="first_name_en" autofocus />
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <input value="{{ old('last_name_en') }}" name="last_name_en" type="text"
-                                                                       class="form-control" id="last_name_en"
-                                                                       placeholder="{{ __('auth.Last English Name') }}" disabled
-                                                                       autocomplete="last_name_en" />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <ul class="list-unstyled mb-0">
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio" name="gender" value="Male" id="rad1" checked="" disabled>
-                                                                        <label for="rad1">{{__('Male')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio" name="gender" value="Female" id="rad2" disabled>
-                                                                        <label for="rad2">{{__('Female')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="text-bold-600"
-                                                               for="exampleInputEmail1">{{ __('auth.E-Mail') }}</label>
-                                                        <input value="{{ old('email') }}" name="email" type="email"
-                                                               class="form-control" id="email"
-                                                               placeholder="{{ __('auth.E-Mail') }}" disabled
-                                                               autocomplete="email">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="text-bold-600"
-                                                               for="phone">{{ __('auth.Phone') }}</label>
-                                                        <input type="text" class="form-control" id="phone"
-                                                               placeholder="{{ __('auth.Phone') }}" value="{{ old('phone') }}" name="phone"
-                                                               required autocomplete="new-phone" disabled>
-                                                    </div>
+  <div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+      <div class="authentication-inner py-6">
+        <!-- Register Card -->
+        <div class="card">
+          <div class="card-body">
+            <!-- Logo -->
+            <div class="app-brand justify-content-center mb-6">
+              <a href="index.html" class="app-brand-link">
+                <span class="app-brand-logo demo">
+                  <svg width="32" height="22" viewBox="0 0 32 22" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                      d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
+                      fill="#7367F0" />
+                    <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd"
+                      d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z" fill="#161616" />
+                    <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd"
+                      d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z" fill="#161616" />
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                      d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
+                      fill="#7367F0" />
+                  </svg>
+                </span>
+                <span class="app-brand-text demo text-heading fw-bold">Vuexy</span>
+              </a>
+            </div>
+            <!-- /Logo -->
+            <h4 class="mb-1">Adventure starts here 🚀</h4>
+            <p class="mb-6">Make your app management easy and fun!</p>
 
-                                                    <div class="form-group">
-                                                        <label class="text-bold-600"
-                                                               for="password">{{ __('auth.Password') }}</label>
-                                                        <input type="password" class="form-control" id="password"
-                                                               placeholder="{{ __('auth.Password') }}" name="password"
-                                                               disabled autocomplete="new-password">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="text-bold-600"
-                                                               for="password-confirm">{{ __('auth.Confirm') }}</label>
-                                                        <input type="password" class="form-control" id="password-confirm"
-                                                               placeholder="{{ __('auth.Password') }}" name="password_confirmation"
-                                                               disabled autocomplete="new-password">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <small style="color:#f2f4f4;">{{__("By clicking on Register, you acknowledge the validity of the data you have registered, and you pledge not to misuse the services provided through this site in any way, and take legal responsibility in case you violate the terms of service")}}
-                                                        </small>
-                                                    </div>
-                                                    <div class="form-group row mb-0">
-                                                        <div class="col-md-6 offset-md-4">
-                                                            <button type="submit" class="btn btn-primary" disabled>
-                                                                {{ __('auth.Register') }}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                                <hr>
-                                                <div class="text-center"><small class="mr-25">{{__('Already have account')}}: </small><a href="/login"><small> {{__('Login')}}</small></a>.
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                            <!-- right section image -->
-                            <div class="col-md-6 d-md-block d-none text-center align-self-center p-3">
-                                <div class="card-content">
-                                    <img class="img-fluid" src="/app-assets/images/pages/login.png"
-                                         alt="branding logo">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <form id="formAuthentication" class="mb-6" action="index.html" method="GET">
+              <div class="mb-6">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username"
+                  placeholder="Enter your username" autofocus />
+              </div>
+              <div class="mb-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="text" class="form-control" id="email" name="email"
+                  placeholder="Enter your email" />
+              </div>
+              <div class="mb-6 form-password-toggle">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-group input-group-merge">
+                  <input type="password" id="password" class="form-control" name="password"
+                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                    aria-describedby="password" />
+                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                 </div>
-            </section>
-            <!-- login page ends -->
+              </div>
+
+              <div class="my-8">
+                <div class="form-check mb-0 ms-2">
+                  <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
+                  <label class="form-check-label" for="terms-conditions">
+                    I agree to
+                    <a href="javascript:void(0);">privacy policy & terms</a>
+                  </label>
+                </div>
+              </div>
+              <button class="btn btn-primary d-grid w-100">Sign up</button>
+            </form>
+
+            <p class="text-center">
+              <span>Already have an account?</span>
+              <a href="auth-login-basic.html">
+                <span>Sign in instead</span>
+              </a>
+            </p>
+
+            <div class="divider my-6">
+              <div class="divider-text">or</div>
+            </div>
+
+            <div class="d-flex justify-content-center">
+              <a href="javascript:;" class="btn btn-sm btn-icon rounded-pill btn-text-facebook me-1_5">
+                <i class="tf-icons ti ti-brand-facebook-filled"></i>
+              </a>
+
+              <a href="javascript:;" class="btn btn-sm btn-icon rounded-pill btn-text-twitter me-1_5">
+                <i class="tf-icons ti ti-brand-twitter-filled"></i>
+              </a>
+
+              <a href="javascript:;" class="btn btn-sm btn-icon rounded-pill btn-text-github me-1_5">
+                <i class="tf-icons ti ti-brand-github-filled"></i>
+              </a>
+
+              <a href="javascript:;" class="btn btn-sm btn-icon rounded-pill btn-text-google-plus">
+                <i class="tf-icons ti ti-brand-google-filled"></i>
+              </a>
+            </div>
+          </div>
         </div>
+        <!-- Register Card -->
+      </div>
     </div>
-</div>
-<!-- END: Content-->
-<!-- BEGIN: Vendor JS-->
-<script src="/app-assets/vendors/js/vendors.min.js"></script>
-<script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.tools.js"></script>
-<script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.defaults.js"></script>
-<script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.min.js"></script>
-<!-- BEGIN Vendor JS-->
-<!-- BEGIN: Page Vendor JS-->
-<!-- END: Page Vendor JS-->
-<!-- BEGIN: Theme JS-->
-<script src="/app-assets/js/scripts/configs/vertical-menu-dark.js"></script>
-<script src="/app-assets/js/core/app-menu.js"></script>
-<script src="/app-assets/js/core/app.js"></script>
-<script src="/app-assets/js/scripts/components.js"></script>
-<script src="/app-assets/js/scripts/footer.js"></script>
-<!-- END: Theme JS-->
-<!-- BEGIN: Page JS-->
-<!-- END: Page JS-->
+  </div>
+
+  <!-- / Content -->
+
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+
+  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
+  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/vuexy/assets/vendor/js/menu.js"></script>
+
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+
+  <!-- Main JS -->
+  <script src="/vuexy/assets/js/main.js"></script>
+
+  <!-- Page JS -->
+  <script src="/vuexy/assets/js/pages-auth.js"></script>
 </body>
-<!-- END: Body-->
+
 </html>
