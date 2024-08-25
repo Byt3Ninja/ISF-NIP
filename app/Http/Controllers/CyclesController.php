@@ -8,6 +8,7 @@ use App\FinalData;
 use App\Finalscreening;
 use App\Formdata;
 use App\Formfield;
+use App\Jobs\ExportCycleCompData;
 use App\Screening;
 use App\TrainingSession;
 use Carbon\Carbon;
@@ -26,6 +27,23 @@ use Illuminate\Support\Facades\Log;
 
 class CyclesController extends Controller
 {
+
+    public function exportcyclesComp(Request $request)
+    {
+        // تحقق من أن البريد الإلكتروني موجود
+       
+        $data2 = [
+            'step' => $request->input('step'),
+            'userEmail' => auth()->user()->email
+        ];
+
+        // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
+        ExportCycleCompData::dispatch($data2);
+
+        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
+    }
+
+
 
     public function changAll(Request $request ){
 

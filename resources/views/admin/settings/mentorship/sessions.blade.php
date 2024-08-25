@@ -23,12 +23,16 @@
 
                                         @if(Request()->show=='all')
                                             {{__('cycles.All requests')}}
+                                            
                                         @elseif(!Request()->show)
                                             {{__('cycles.New requests only')}}
+                                            
                                         @elseif(Request()->show=='approved')
                                             {{__('cycles.approved requests')}}
+                                           
                                         @elseif(Request()->show=='disapproved')
                                             {{__('cycles.disapproved requests')}}
+                                            
                                         @endif
 
                                     </li>
@@ -84,6 +88,11 @@
             <div class="card-body">
             <div class="card-text">
                 <div class="table-responsive">
+
+                    <!-- we get value from Select box Ely fo2 class name stepsExcel -->
+                    <div class="btn btn-success ExportExcelMentor">Export</div>
+                    <input type="hidden" class="Request" value="{{Request()->show}}">
+
                     <table class="table mb-0" id="userstable">
                         <thead class="thead-dark">
                         <tr>

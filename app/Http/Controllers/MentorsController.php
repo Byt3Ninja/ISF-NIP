@@ -7,6 +7,7 @@ use App\Cycle;
 use App\CyclesMentors;
 use App\Events\WebMessage;
 use App\Factories\OnlineMeetingFactory;
+use App\Jobs\ExportMentorsData;
 use App\MentorshipRequest;
 use App\Schedule;
 use App\User;
@@ -26,6 +27,23 @@ class MentorsController extends Controller
         $this->meetingService =  OnlineMeetingFactory::create();
     }
   
+
+    public function expormentorship(Request $request)
+    {
+        // تحقق من أن البريد الإلكتروني موجود
+       
+        $data4 = [
+            'request' => $request->input('request'),
+            'userEmail' => auth()->user()->email
+        ];
+
+        // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
+        ExportMentorsData::dispatch($data4);
+
+        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
+    }
+
+
     public function index($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
