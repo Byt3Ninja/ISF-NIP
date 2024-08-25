@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Company;
 use App\Formdata;
 use App\Formfield;
+use App\Jobs\ExportResScreenData;
 use App\Notifications\ChangeCycle;
 use App\Notifications\TemplateEmail;
 use App\Screening;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
+use App\Jobs\ExportScreeneData;
+
 
 class ScreeningController extends Controller
 {
@@ -233,4 +236,24 @@ class ScreeningController extends Controller
             return response()->json(['state' => 'failed'], 500);
             }
     }
+
+
+    public function exportresultScreen(Request $request)
+    {
+        // تحقق من أن البريد الإلكتروني موجود
+       
+        $data1 = [
+            'step' => $request->input('step'),
+            'formid' => $request->input('formid'),
+            'exportcstep' => $request->input('exportcstep'),
+            'userEmail' => auth()->user()->email
+        ];
+
+        // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
+        ExportResScreenData::dispatch($data1);
+
+        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
+    }
+
+
 }

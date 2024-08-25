@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Factories\OnlineMeetingFactory;
+use App\Jobs\ExportTresultData;
 use App\Notifications\TemplateEmail;
 use App\Notifications\TrainerEmail;
 use App\Step;
@@ -31,6 +32,23 @@ class TrainingController extends Controller
     public function __construct()
     {
         $this->meetingService =  OnlineMeetingFactory::create();
+    }
+
+
+    public function exportTresult(Request $request)
+    {
+        // تحقق من أن البريد الإلكتروني موجود
+       
+        $data2 = [
+            'step' => $request->input('step'),
+            'location'=> $request->input('location'),
+            'userEmail' => auth()->user()->email
+        ];
+
+        // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
+        ExportTresultData::dispatch($data2);
+
+        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
 
 

@@ -57,7 +57,7 @@
                          <span class="btn btn-block btn-success align-middle ml-25"><i class="bx bx-star" ></i> {{__('cycles.New')}}</span>
                     </div>
                     
-
+                <div class="btn btn-success ExportCycle">Export</div>
                 </div>
                 <div class="organizations-list-table">
                     <div class="card">

@@ -62,7 +62,7 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select cycle from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="ccycle" class="select form-control" onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
+                                            <select id="ccycle" class="select form-control cyclesExcel" onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
                                                 @foreach($cycles as $cycle)
                                                     <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.Start')}} {{$cycle->start->format('d-m')}}) - {{ optional($cycle->organization)->name }} </option>
                                                 @endforeach
@@ -99,6 +99,9 @@
                     
                     <div class="table-responsive">
                         
+<!-- we get value from Select box Ely fo2 class name stepsExcel -->
+<div class="btn btn-success ExportCycleComp">Export</div>
+<br><br><br>
                         <table class="table mb-0">
                             <div class="media align-items-center col-md-3">
                                 <select class="form-control ChangeAllBox">

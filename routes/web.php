@@ -207,6 +207,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('cycles/save','CyclesController@saveForm');
     Route::get('cycles/my/{id}','CyclesController@my');
     Route::post('change/cyc','CyclesController@changAll');
+    Route::get('/export-cyclesComp', 'CyclesController@exportcyclesComp');
 
     //Screening
     Route::get('screening','ScreeningController@index');
@@ -218,6 +219,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('screening/{fid}/{cid}','ScreeningController@view');
     Route::get('screening/get/{fid}/{sid}/{pid}','ScreeningController@getusers');
     Route::post('screening/changestep','ScreeningController@changestep');
+    Route::get('/export-Result', 'ScreeningController@exportresultScreen');
+
     //ZOOM
     Route::get('zoom/all','MeetingController@showall');
     Route::get('zoom/{id}/get','MeetingController@show');
@@ -238,6 +241,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('mentorship/mine','MentorsController@mine');
     Route::post('mentorship/rate','MentorsController@rate');
     Route::post('mentorship/delsession/{id}' ,'MentorsController@delsession');
+    Route::get('/export-mentorship', 'MentorsController@expormentorship');
+
+
+
 
     //Training
     Route::get('training/all/{id?}','TrainingController@all')->name('training.all');
@@ -259,6 +266,9 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('training/session' ,'TrainingController@session');
     Route::post('training/editsession' ,'TrainingController@editsession');
     Route::post('trainings/getdsc/{id}' ,'TrainingController@getdsc');
+    Route::get('/export-Tresult', 'TrainingController@exportTresult');
+
+
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
@@ -291,7 +301,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 
 //Program List
 Route::resource('programlist', 'ProgramController');
-
+Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     // ===============> Mentor Dashboard Routes <===============
     Route::group(['prefix' => 'mentor','namespace'=>'Mentor'],function (){
