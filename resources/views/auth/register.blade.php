@@ -209,7 +209,7 @@
               </p>
 
               <div class="divider my-6">
-                <div class="divider-text">or</div>
+                <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
               </div>
 
               <div class="container mt-5">
