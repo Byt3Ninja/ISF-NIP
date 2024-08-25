@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html class="loading" lang="{{ $l }}" data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-  style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};">
+<html lang="{{ $l }}">
+<html lang="{{ $l }}" dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
+  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-theme="theme-default"
+  data-assets-path="/vuexy/assets/" data-template="vertical-menu-template" data-style="light">
 
 <head>
   <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -64,102 +67,159 @@
 <!-- BEGIN: Body-->
 
 <body>
+  @php
+    $brandName = 'GrowthLabs';
+    $formHeading = $l == 'ar' ? 
+      'تبدأ المغامرة من هنا'
+    : 'Adventure starts here';
+    $formSubHeading =
+        $l == 'ar'
+            ? 'اجعل إدارة تطبيقك سهلة وممتعة!'
+            : 'Make your app management easy and fun!';
+    $firstName = $l == 'ar' ? 'الاسم الأول' : 'First Name';
+    $secondName = $l == 'ar' ? 'الاسم الاخير' : 'Last Name';
+    $gender = $l == 'ar' ? 'النوع' : 'Gender';
+    $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
+  @endphp
   <!-- Content -->
 
   <div class="container-xxl">
     <div class="authentication-wrapper authentication-basic container-p-y">
       <div class="authentication-inner py-6">
         <!-- Register Card -->
-        <div class="card">
-          <div class="card-body">
-            <!-- Logo -->
-            <div class="app-brand justify-content-center mb-6">
-              <a href="index.html" class="app-brand-link">
-                <span class="app-brand-logo demo">
-                  <svg width="32" height="22" viewBox="0 0 32 22" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd"
-                      d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
-                      fill="#7367F0" />
-                    <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd"
-                      d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z" fill="#161616" />
-                    <path opacity="0.06" fill-rule="evenodd" clip-rule="evenodd"
-                      d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z" fill="#161616" />
-                    <path fill-rule="evenodd" clip-rule="evenodd"
-                      d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
-                      fill="#7367F0" />
-                  </svg>
-                </span>
-                <span class="app-brand-text demo text-heading fw-bold">Vuexy</span>
-              </a>
-            </div>
-            <!-- /Logo -->
-            <h4 class="mb-1">Adventure starts here 🚀</h4>
-            <p class="mb-6">Make your app management easy and fun!</p>
-
-            <form id="formAuthentication" class="mb-6" action="index.html" method="GET">
-              <div class="mb-6">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" name="username"
-                  placeholder="Enter your username" autofocus />
+        @if (App\Settings::findOrFail(1)->set_order)
+          <div class="card">
+            <div class="card-body">
+              
+              <!-- Logo -->
+              <div class="app-brand justify-content-center mb-6">
+                <a class="app-brand-link">
+                  <span class="app-brand-logo demo">
+                    <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
+                  </span>
+                  <span class="app-brand-text demo text-heading fw-bold">
+                    {{ $brandName }}
+                  </span>
+                </a>
               </div>
-              <div class="mb-6">
-                <label for="email" class="form-label">Email</label>
-                <input type="text" class="form-control" id="email" name="email"
-                  placeholder="Enter your email" />
-              </div>
-              <div class="mb-6 form-password-toggle">
-                <label class="form-label" for="password">Password</label>
-                <div class="input-group input-group-merge">
-                  <input type="password" id="password" class="form-control" name="password"
-                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                    aria-describedby="password" />
-                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+              <!-- /Logo -->
+              <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
+              <p class="mb-6">{{ $formSubHeading }}</p>
+              
+              @if (count($errors) > 0)
+                <div class="alert alert-danger">
+                  <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                  </ul>
                 </div>
-              </div>
+              @endif
 
-              <div class="my-8">
-                <div class="form-check mb-0 ms-2">
-                  <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
-                  <label class="form-check-label" for="terms-conditions">
-                    I agree to
-                    <a href="javascript:void(0);">privacy policy & terms</a>
-                  </label>
+              <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('register') }}">
+                @csrf
+                <div class="mb-6">
+                  <label for="username" class="form-label">{{$firstName }}</label>
+                  <input value="{{ old('first_name_en') }}" name="first_name_en" type="text"
+                  class="form-control" id="first_name_en"
+                  placeholder="{{ __('auth.First English Name') }}" required
+                  autocomplete="first_name_en" autofocus />
                 </div>
+                <div class="mb-6">
+                  <label for="username" class="form-label">{{ $secondName }}</label>
+                  <input value="{{ old('last_name_en') }}" name="last_name_en" type="text"
+                  class="form-control" id="last_name_en"
+                  placeholder="{{ __('auth.Last English Name') }}" required
+                  autocomplete="last_name_en" />
+                </div>
+                <div class="mb-6">
+                  <label for="email" class="form-label">{{ __('auth.E-Mail') }}</label>
+                  <input value="{{ old('email') }}" name="email" type="email"
+                  class="form-control" 
+                  placeholder="{{ __('auth.E-Mail') }}" required
+                  autocomplete="email" />
+                </div>
+                <div class="mb-6 form-password-toggle">
+                  <label class="form-label" for="password">{{ __('auth.Password') }}</label>
+                  <div class="input-group input-group-merge">
+                    <input type="password" class="form-control" id="password"
+                      placeholder="{{ __('auth.Password') }}" name="password"
+                      required autocomplete="password"
+                      aria-describedby="password" />
+                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                  </div>
+                </div>
+                <div class="mb-6 form-password-toggle">
+                  <label class="form-label" for="password">{{ __('auth.Confirm') }}</label>
+                  <div class="input-group input-group-merge">
+                    <input type="password" class="form-control" id="confirm-password"
+                      placeholder="{{ __('auth.Password') }}" name="password_confirmation"
+                      required autocomplete="new-password"
+                      aria-describedby="password" />
+                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                  </div>
+                </div>
+                <div class="mb-6">
+                  <label class="form-label"
+                          for="phone">{{ __('auth.Phone') }}</label>
+                  <input type="text" class="form-control" id="phone"
+                    placeholder="{{ __('auth.Phone') }}" value="{{ old('phone') }}" name="phone"
+                    required autocomplete="phone" />
+                </div>
+
+                <div class="form-group mb-6">
+                  <label class="form-label mb-3" for="country">{{ $gender }}</label>
+                  <ul class="list-unstyled mb-0">
+                    <li class="d-inline-block mx-2 mb-1">
+                      <fieldset>
+                          <div class="radio">
+                              <input type="radio" name="gender" value="Male" id="rad1" checked="">
+                              <label for="rad1">{{__('Male')}}</label>
+                          </div>
+                      </fieldset>
+                    </li>
+                    <li class="d-inline-block mx-2 mb-1">
+                      <fieldset>
+                          <div class="radio">
+                              <input type="radio" name="gender" value="Female" id="rad2">
+                              <label for="rad2">{{__('Female')}}</label>
+                          </div>
+                      </fieldset>
+                    </li>
+                  </ul>
+                </div>
+
+                {{-- <div class="my-8">
+                  <div class="form-check mb-0 ms-2">
+                    <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
+                    <label class="form-check-label" for="terms-conditions">
+                      I agree to
+                      <a href="javascript:void(0);">privacy policy & terms</a>
+                    </label>
+                  </div>
+                </div> --}}
+                <button class="btn btn-primary d-grid w-100"> {{ __('auth.Register') }}</button>
+              </form>
+
+              <p class="text-center">
+                <span>{{__('Already have account')}}{{$l == 'ar' ? '؟' : '?'}}</span>
+                <a href="/login">
+                  <span>{{__('Login')}}</span>
+                </a>
+              </p>
+
+              <div class="divider my-6">
+                <div class="divider-text">or</div>
               </div>
-              <button class="btn btn-primary d-grid w-100">Sign up</button>
-            </form>
 
-            <p class="text-center">
-              <span>Already have an account?</span>
-              <a href="auth-login-basic.html">
-                <span>Sign in instead</span>
-              </a>
-            </p>
-
-            <div class="divider my-6">
-              <div class="divider-text">or</div>
-            </div>
-
-            <div class="d-flex justify-content-center">
-              <a href="javascript:;" class="btn btn-sm btn-icon rounded-pill btn-text-facebook me-1_5">
-                <i class="tf-icons ti ti-brand-facebook-filled"></i>
-              </a>
-
-              <a href="javascript:;" class="btn btn-sm btn-icon rounded-pill btn-text-twitter me-1_5">
-                <i class="tf-icons ti ti-brand-twitter-filled"></i>
-              </a>
-
-              <a href="javascript:;" class="btn btn-sm btn-icon rounded-pill btn-text-github me-1_5">
-                <i class="tf-icons ti ti-brand-github-filled"></i>
-              </a>
-
-              <a href="javascript:;" class="btn btn-sm btn-icon rounded-pill btn-text-google-plus">
-                <i class="tf-icons ti ti-brand-google-filled"></i>
-              </a>
+              <div class="container mt-5">
+                <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
+                  <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
+                </a>
+              </div>
             </div>
           </div>
-        </div>
+        @endif
         <!-- Register Card -->
       </div>
     </div>
@@ -189,6 +249,11 @@
 
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
+
+  <!-- Language -->
+  <script>
+    const lang = '{{ $l }}';
+  </script>
 
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-auth.js"></script>
