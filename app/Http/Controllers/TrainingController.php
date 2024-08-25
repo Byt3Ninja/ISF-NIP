@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Company;
 use App\Factories\OnlineMeetingFactory;
 use App\Jobs\ExportTresultData;
+use App\Notifications\ChangeCycle;
 use App\Notifications\TemplateEmail;
 use App\Notifications\TrainerEmail;
 use App\Step;
@@ -50,6 +52,62 @@ class TrainingController extends Controller
 
         return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
+
+
+    public function changAllTL(Request $request ){
+
+        
+
+        $this->validate($request, [
+            
+            'checkget' => 'required|integer',
+            'compid' => 'required|array',
+            'compid.*' => 'required|integer',
+            
+        ]);
+        $checkget = $request->input('checkget');
+        $compid = $request->input('compid');
+        foreach ($compid as $index => $id) {
+           
+            $company = Company::where('id',$id)->first();
+            $data['last_step']= Step::findOrFail($checkget)->title;
+            if ($checkget==0) {
+                $by = Auth::id();
+            } else {
+                $cstep = Step::findOrFail($checkget);
+                if ($cstep->arr > 1) {$approved=1;$by=Auth::id();}
+                $data['new_step']=$cstep->title;
+            }
+            $update = $company->update(['step'=>$checkget, 'approved'=>$approved, 'approved_by'=>$by]);
+            dd($update);
+            if ($checkget!=0) {
+            /// notify Company Owner via Mail
+            $company_owner = $company->user;
+            $data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;
+            $data['owner_name_ar'] = $company_owner->first_name_ar . " " . $company_owner->last_name_ar;
+            $data['company_name_ar'] = $company_owner->company->name_ar;
+            $data['company_name_en'] = $company_owner->company->name_en;
+            $data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
+            $data['organization_name_en'] = $cstep->cycle->organization->name_en;
+
+            $mail = new ChangeCycle($data);
+//            $MSG = new TemplateEmail;
+//            $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
+            $company_owner->notify($mail);
+             }
+            }
+            /// End of mail send
+            if ($update) {
+            return response()->json(['state' => 'success'], 200);
+            } else {
+            return response()->json(['state' => 'failed'], 500);
+            }
+
+
+
+        return response()->json(['state' => 'success'], 200);
+    }
+
 
 
     public function all($id=0) {
@@ -205,7 +263,16 @@ class TrainingController extends Controller
         if ($csession) {
             $contents = TrainingContent::where('training_id', $csession->location)->count();
         }
-        return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents'));
+
+        $steps11 = Step::where('id', $csession->step_id)->orderBy('arr')->get();
+      foreach ($steps11 as $steps1) {
+        $companies = Company::where('cycle',$steps1->cycle_id)->get();
+      }
+        $uniqueCycleIds = $companies->pluck('cycle')->unique();
+        $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
+       
+
+        return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
     }
     public function sessions($id=0) {
         $this->preProcessingCheck('edit_cycles');

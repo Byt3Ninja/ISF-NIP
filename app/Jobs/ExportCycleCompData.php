@@ -106,7 +106,7 @@ class ExportCycleCompData implements ShouldQueue
 
     // إنشاء اسم الملف مع تاريخ
     $fileName = 'Company_' . date('Y-m-d') . '.xlsx';
-    $tempFilePath = storage_path('app/temp/' . $fileName);
+    $tempFilePath = storage_path('app/' . $fileName);
 
     // حفظ الملف في مجلد مؤقت
     $writer->save($tempFilePath);

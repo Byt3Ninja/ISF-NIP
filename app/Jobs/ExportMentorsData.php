@@ -263,7 +263,7 @@ MentorshipRequest::when(!is_null($organization_id), function($q) use($organizati
 
     // إنشاء اسم الملف مع تاريخ
     $fileName = 'Mentors_' . date('Y-m-d') . '.xlsx';
-    $tempFilePath = storage_path('app/temp/' . $fileName);
+    $tempFilePath = storage_path('app/' . $fileName);
 
     // حفظ الملف في مجلد مؤقت
     $writer->save($tempFilePath);
