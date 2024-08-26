@@ -108,7 +108,7 @@ class ExportTresultData implements ShouldQueue
 
     // إنشاء اسم الملف مع تاريخ
     $fileName = 'Training_Result_' . date('Y-m-d') . '.xlsx';
-    $tempFilePath = storage_path('app/temp/' . $fileName);
+    $tempFilePath = storage_path('app/' . $fileName);
 
     // حفظ الملف في مجلد مؤقت
     $writer->save($tempFilePath);

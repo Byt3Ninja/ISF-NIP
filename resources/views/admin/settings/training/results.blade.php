@@ -97,10 +97,24 @@
 
                     <!-- we get value from Select box Ely fo2 class name stepsExcel -->
                     <div class="btn btn-success ExportExcelTresult">Export</div>
+                    <br><br><br>
                     <input type="hidden" class="step_id" value="{{$csession->step_id}}">
                     <table class="table mb-0">
+
+                        <div class="media align-items-center col-md-3">
+                            <select class="select form-control ChangeAllBoxTR" >
+                                <option value="0" >Disapprove</option>
+                                @foreach($steps as $step)
+                                    <option value="{{$step->id}}" >{{$step->title}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        
+
                         <thead class="thead-dark">
                         <tr>
+                            <th><input type="checkbox" class="checkAllTR" ></th>
                             <th>{{__('cycles.Company')}}</th>
                             <th>{{__('cycles.User/Title')}}</th>
                             <th>{{__('cycles.Completed')}}</th>
@@ -113,6 +127,12 @@
                         @endphp
                         @foreach($companies as $company)
                             <tr>
+                                <td>
+                                    <div class="media align-items-center">
+                                        <input type="checkbox" class="chboxTresult" do="{{$company->id}}" userid="{{$company->user->id}}" value="1" name="chboxcyclesReg[]" >
+                                    </div>
+                                </td>
+
                                 <td>
                                     <div class="media align-items-center">
                                         <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">

@@ -267,6 +267,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('training/editsession' ,'TrainingController@editsession');
     Route::post('trainings/getdsc/{id}' ,'TrainingController@getdsc');
     Route::get('/export-Tresult', 'TrainingController@exportTresult');
+    Route::post('trainings/change/Tresult','TrainingController@changAllTL');
+
 
 
 

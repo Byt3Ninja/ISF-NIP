@@ -15,7 +15,11 @@ $(document).ready(function () {
             $('.chboxcyclesReg:checked').each(function() {
                 compid.push($(this).attr('do'));
             });
-
+            
+            if(compid==""){
+                alert("You Didn't Choose any Company");
+                location.reload();
+            }
  
             $.ajax({
                 url: '/dashboard/change/cyc', 
@@ -29,6 +33,47 @@ $(document).ready(function () {
                     
                     alert(response.state);
                     location.reload();
+                },
+                error: function(error) {
+                    console.error(error.responseText);
+                }
+            });
+        
+    });
+
+
+    // Result Training
+    $('.checkAllTR').on('click', function() {
+        $('.chboxTresult').prop('checked', this.checked);
+    });
+
+    $('.ChangeAllBoxTR').change(function() {
+        
+        var checkget = $(this).val();
+            
+            var compid = [];
+            $('.chboxTresult:checked').each(function() {
+                compid.push($(this).attr('do'));
+                
+            });
+
+            if(compid==""){
+                alert("You Didn't Choose any Company");
+                location.reload();
+            }
+
+            $.ajax({
+                url: '/dashboard/trainings/change/Tresult', 
+                method: 'post',
+                data: {
+                    'compid': compid,
+                    'checkget': checkget,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    
+                    alert(response.state);
+                     location.reload();
                 },
                 error: function(error) {
                     console.error(error.responseText);
