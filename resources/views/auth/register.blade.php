@@ -69,13 +69,8 @@
 <body>
   @php
     $brandName = 'GrowthLabs';
-    $formHeading = $l == 'ar' ? 
-      'تبدأ المغامرة من هنا'
-    : 'Adventure starts here';
-    $formSubHeading =
-        $l == 'ar'
-            ? 'اجعل إدارة تطبيقك سهلة وممتعة!'
-            : 'Make your app management easy and fun!';
+    $formHeading = $l == 'ar' ? 'تبدأ المغامرة من هنا' : 'Adventure starts here';
+    $formSubHeading = $l == 'ar' ? 'اجعل إدارة تطبيقك سهلة وممتعة!' : 'Make your app management easy and fun!';
     $firstName = $l == 'ar' ? 'الاسم الأول' : 'First Name';
     $secondName = $l == 'ar' ? 'الاسم الاخير' : 'Last Name';
     $gender = $l == 'ar' ? 'النوع' : 'Gender';
@@ -83,29 +78,42 @@
   @endphp
   <!-- Content -->
 
-  <div class="container-xxl">
-    <div class="authentication-wrapper authentication-basic container-p-y">
-      <div class="authentication-inner py-6">
-        <!-- Register Card -->
-        @if (App\Settings::findOrFail(1)->set_order)
-          <div class="card">
-            <div class="card-body">
-              
-              <!-- Logo -->
-              <div class="app-brand justify-content-center mb-6">
-                <a class="app-brand-link">
-                  <span class="app-brand-logo demo">
-                    <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
-                  </span>
-                  <span class="app-brand-text demo text-heading fw-bold">
-                    {{ $brandName }}
-                  </span>
-                </a>
-              </div>
-              <!-- /Logo -->
-              <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
-              <p class="mb-6">{{ $formSubHeading }}</p>
-              
+  <div class="authentication-wrapper authentication-cover">
+     <!-- Logo -->
+     <a href="/dashboard" class="app-brand auth-cover-brand">
+      <span class="app-brand-logo demo">
+        <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
+      </span>
+      <span class="app-brand-text demo text-heading fw-bold">{{ $brandName }}</span>
+    </a>
+    <!-- /Logo -->
+    <div class="authentication-inner row m-0">
+      <!-- /Left Text -->
+      <div class="d-none d-lg-flex col-lg-8 p-0">
+        <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
+          <img src="/vuexy/assets/img/illustrations/auth-register-illustration-light.png" alt="auth-register-cover"
+            class="my-5 auth-illustration" data-app-light-img="illustrations/auth-register-illustration-light.png"
+            data-app-dark-img="illustrations/auth-register-illustration-dark.png" 
+            loading="lazy"
+          />
+
+          <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-register-cover"
+            class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png"
+            data-app-dark-img="illustrations/bg-shape-image-dark.png" 
+            loading="lazy"
+          />
+        </div>
+      </div>
+      <!-- /Left Text -->
+
+      <!-- Register -->
+      @if (App\Settings::findOrFail(1)->set_order)
+        <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
+          <div class="w-px-400 mx-auto mt-12 pt-5">
+            <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
+            <p class="mb-6">{{ $formSubHeading }}</p>
+
+            <div>
               @if (count($errors) > 0)
                 <div class="alert alert-danger">
                   <ul>
@@ -115,113 +123,137 @@
                   </ul>
                 </div>
               @endif
+            </div>
 
-              <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('register') }}">
-                @csrf
-                <div class="mb-6">
-                  <label for="username" class="form-label">{{$firstName }}</label>
-                  <input value="{{ old('first_name_en') }}" name="first_name_en" type="text"
-                  class="form-control" id="first_name_en"
-                  placeholder="{{ __('auth.First English Name') }}" required
-                  autocomplete="first_name_en" autofocus />
+            <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('register') }}">
+              @csrf
+              <div class="mb-6">
+                <label for="username" class="form-label">{{$firstName }}</label>
+                <input value="{{ old('first_name_en') }}" name="first_name_en" type="text"
+                class="form-control" id="first_name_en"
+                placeholder="{{ __('auth.First English Name') }}" required
+                autocomplete="first_name_en" autofocus />
+              </div>
+              <div class="mb-6">
+                <label for="username" class="form-label">{{ $secondName }}</label>
+                <input value="{{ old('last_name_en') }}" name="last_name_en" type="text"
+                class="form-control" id="last_name_en"
+                placeholder="{{ __('auth.Last English Name') }}" required
+                autocomplete="last_name_en" />
+              </div>
+              <div class="mb-6">
+                <label for="email" class="form-label">{{ __('auth.E-Mail') }}</label>
+                <input value="{{ old('email') }}" name="email" type="email"
+                class="form-control" 
+                placeholder="{{ __('auth.E-Mail') }}" required
+                autocomplete="email" />
+              </div>
+              <div class="mb-6 form-password-toggle">
+                <label class="form-label" for="password">{{ __('auth.Password') }}</label>
+                <div class="input-group input-group-merge">
+                  <input type="password" class="form-control" id="password"
+                    placeholder="{{ __('auth.Password') }}" name="password"
+                    required autocomplete="password"
+                    aria-describedby="password" />
+                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                 </div>
-                <div class="mb-6">
-                  <label for="username" class="form-label">{{ $secondName }}</label>
-                  <input value="{{ old('last_name_en') }}" name="last_name_en" type="text"
-                  class="form-control" id="last_name_en"
-                  placeholder="{{ __('auth.Last English Name') }}" required
-                  autocomplete="last_name_en" />
+              </div>
+              <div class="mb-6 form-password-toggle">
+                <label class="form-label" for="password">{{ __('auth.Confirm') }}</label>
+                <div class="input-group input-group-merge">
+                  <input type="password" class="form-control" id="confirm-password"
+                    placeholder="{{ __('auth.Password') }}" name="password_confirmation"
+                    required autocomplete="new-password"
+                    aria-describedby="password" />
+                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                 </div>
-                <div class="mb-6">
-                  <label for="email" class="form-label">{{ __('auth.E-Mail') }}</label>
-                  <input value="{{ old('email') }}" name="email" type="email"
-                  class="form-control" 
-                  placeholder="{{ __('auth.E-Mail') }}" required
-                  autocomplete="email" />
-                </div>
-                <div class="mb-6 form-password-toggle">
-                  <label class="form-label" for="password">{{ __('auth.Password') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input type="password" class="form-control" id="password"
-                      placeholder="{{ __('auth.Password') }}" name="password"
-                      required autocomplete="password"
-                      aria-describedby="password" />
-                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-                  </div>
-                </div>
-                <div class="mb-6 form-password-toggle">
-                  <label class="form-label" for="password">{{ __('auth.Confirm') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input type="password" class="form-control" id="confirm-password"
-                      placeholder="{{ __('auth.Password') }}" name="password_confirmation"
-                      required autocomplete="new-password"
-                      aria-describedby="password" />
-                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-                  </div>
-                </div>
-                <div class="mb-6">
-                  <label class="form-label"
-                          for="phone">{{ __('auth.Phone') }}</label>
-                  <input type="text" class="form-control" id="phone"
-                    placeholder="{{ __('auth.Phone') }}" value="{{ old('phone') }}" name="phone"
-                    required autocomplete="phone" />
-                </div>
-
-                <div class="form-group mb-6">
-                  <label class="form-label mb-3" for="country">{{ $gender }}</label>
-                  <ul class="list-unstyled mb-0">
-                    <li class="d-inline-block mx-2 mb-1">
-                      <fieldset>
-                          <div class="radio">
-                              <input type="radio" name="gender" value="Male" id="rad1" checked="">
-                              <label for="rad1">{{__('Male')}}</label>
-                          </div>
-                      </fieldset>
-                    </li>
-                    <li class="d-inline-block mx-2 mb-1">
-                      <fieldset>
-                          <div class="radio">
-                              <input type="radio" name="gender" value="Female" id="rad2">
-                              <label for="rad2">{{__('Female')}}</label>
-                          </div>
-                      </fieldset>
-                    </li>
-                  </ul>
-                </div>
-
-                {{-- <div class="my-8">
-                  <div class="form-check mb-0 ms-2">
-                    <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
-                    <label class="form-check-label" for="terms-conditions">
-                      I agree to
-                      <a href="javascript:void(0);">privacy policy & terms</a>
-                    </label>
-                  </div>
-                </div> --}}
-                <button class="btn btn-primary d-grid w-100"> {{ __('auth.Register') }}</button>
-              </form>
-
-              <p class="text-center">
-                <span>{{__('Already have account')}}{{$l == 'ar' ? '؟' : '?'}}</span>
-                <a href="/login">
-                  <span>{{__('Login')}}</span>
-                </a>
-              </p>
-
-              <div class="divider my-6">
-                <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
               </div>
 
-              <div class="container mt-5">
-                <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
-                  <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
-                </a>
+              <div class="mb-6">
+                <label class="form-label" for="phone">{{ __('auth.Phone') }}</label>
+                <div class="input-group">
+                  <div style="width: 125px">
+                    <select class="form-select" name="country_code" id="country_code" required>
+                      <option value="+20">+20 (EG)</option>
+                      <option value="+212">+212 (MA)</option>
+                      <option value="+213">+213 (DZ)</option>
+                      <option value="+216">+216 (TN)</option>
+                      <option value="+218">+218 (LY)</option>
+                      <option value="+973">+973 (BH)</option>
+                      <option value="+965">+965 (KW)</option>
+                      <option value="+968">+968 (OM)</option>
+                      <option value="+974">+974 (QA)</option>
+                      <option value="+966">+966 (KSA)</option>
+                      <option value="+971">+971 (AE)</option>
+                      <option value="+962">+962 (JO)</option>
+                      <option value="+964">+964 (IQ)</option>
+                      <option value="+963">+963 (SY)</option>
+                      <option value="+961">+961 (LB)</option>
+                      <option value="+970">+970 (PS)</option>
+                      <option value="+249">+249 (SD)</option>
+                      <option value="+967">+967 (YE)</option>
+                    </select>
+                  </div>
+                  <input type="text" class="form-control mx-2 rounded" id="phone"
+                      placeholder="{{ __('auth.Phone') }}" value="{{ old('phone') }}" name="phone"
+                      required autocomplete="phone" />
+                </div>
               </div>
+
+              <div class="form-group mb-3">
+                <label class="form-label mb-3" for="country">{{ $gender }}</label>
+                <ul class="list-unstyled mb-0">
+                  <li class="d-inline-block mx-2 mb-1">
+                    <fieldset>
+                        <div class="radio">
+                            <input type="radio" name="gender" value="Male" id="rad1" checked="">
+                            <label for="rad1">{{__('Male')}}</label>
+                        </div>
+                    </fieldset>
+                  </li>
+                  <li class="d-inline-block mx-2 mb-1">
+                    <fieldset>
+                        <div class="radio">
+                            <input type="radio" name="gender" value="Female" id="rad2">
+                            <label for="rad2">{{__('Female')}}</label>
+                        </div>
+                    </fieldset>
+                  </li>
+                </ul>
+              </div>
+
+              {{-- <div class="my-8">
+                <div class="form-check mb-0 ms-2">
+                  <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
+                  <label class="form-check-label" for="terms-conditions">
+                    I agree to
+                    <a href="javascript:void(0);">privacy policy & terms</a>
+                  </label>
+                </div>
+              </div> --}}
+              <button class="btn btn-primary d-grid w-100"> {{ __('auth.Register') }}</button>
+            </form>
+
+            <p class="text-center">
+              <span>{{__('Already have account')}}{{$l == 'ar' ? '؟' : '?'}}</span>
+              <a href="/login">
+                <span>{{__('Login')}}</span>
+              </a>
+            </p>
+
+            <div class="divider my-6">
+              <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+            </div>
+
+            <div class="container mt-5">
+              <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
+                <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
+              </a>
             </div>
           </div>
-        @endif
-        <!-- Register Card -->
-      </div>
+        </div>
+      @endif
+      <!-- /Register -->
     </div>
   </div>
 
