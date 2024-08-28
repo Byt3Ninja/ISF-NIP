@@ -5,6 +5,7 @@ use App\Organization;
 use App\QuestionsBank;
 use App\QuestionCategories;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class QuestionsBankController extends Controller
 {
@@ -49,6 +50,23 @@ class QuestionsBankController extends Controller
 			}
 			$request->merge(['quiz_answer_status' => $quiz_answer_status]);
 		}
+
+		$validator = Validator::make($request->all(), [
+			'organization_id' => 'required|exists:organizations,id',
+			'category_id' => 'required|exists:question_categories,id',
+			'difficulty' => 'required|in:easy,medium,hard',
+			'question' => 'required|string',
+			'type' => 'required|in:mcq,tfq',
+			'correct' => 'required_if:type,tfq|in:tfq_true,tfq_false',
+			'explanation' => 'nullable|sometimes',
+			'quiz_answer_text' => 'required_if:type,mcq|array',
+			"quiz_answer_text.*" => "required_if:type,mcq|nullable|string",
+			'quiz_answer_status' => 'required_if:type,mcq|array',
+			"quiz_answer_status.*" => "required_if:type,mcq|boolean",
+		]);
+		$errors = [];
+		if( $validator->fails() ) { $errors = $validator->errors()->toArray(); }
+		if( count( $errors ) ) { return back()->withInput( $request->all() )->with('success', false)->withErrors( $errors ); }
 		$this->validate($request, [
 			'organization_id' => 'required|exists:organizations,id',
 			'category_id' => 'required|exists:question_categories,id',
@@ -58,9 +76,9 @@ class QuestionsBankController extends Controller
 			'correct' => 'required_if:type,tfq|in:tfq_true,tfq_false',
 			'explanation' => 'nullable|sometimes',
 			'quiz_answer_text' => 'required_if:type,mcq|array',
-			"quiz_answer_text.*" => "required|string",
+			"quiz_answer_text.*" => "required_if:type,mcq|nullable|string",
 			'quiz_answer_status' => 'required_if:type,mcq|array',
-			"quiz_answer_status.*" => "required|boolean",
+			"quiz_answer_status.*" => "required_if:type,mcq|boolean",
 		]);
 		$answers = [];
 		$correct = null;

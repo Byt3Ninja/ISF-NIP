@@ -74,19 +74,19 @@
 													<label for="organization_id">{{ __('admin.Organization')}}</label>
 													<select class="custom-select" name="organization_id" id="organization_id" required>
 														@foreach( $organizations as $organization )
-															<option value="{{ $organization->id }}">{{ $organization->{'name_' . $l} }}</option>
+															<option value="{{ $organization->id }}" {{ !empty( old('organization_id') ) && old('organization_id') == $organization->id ? 'selected' : '' }}>{{ $organization->{'name_' . $l} }}</option>
 														@endforeach
 													</select>
 												</fieldset>
 												<fieldset class="form-group">
 													<label for="question">{{ __('admin.question')}}</label>
-													<input value="" name="question" type="text" class="form-control" id="question" placeholder="{{ __('admin.question') }}" required />
+													<input value="{{ old('question') }}" name="question" type="text" class="form-control" id="question" placeholder="{{ __('admin.question') }}" required />
 												</fieldset>
 												<fieldset class="form-group">
 													<label for="type">{{ __('admin.question_Type')}}</label>
 													<select class="custom-select" name="type" id="type" required>
-														<option value="mcq">{{ __('admin.type_mcq') }}</option>
-														<option value="tfq">{{ __('admin.type_tfq') }}</option>
+														<option value="mcq" {{ !empty( old('type') ) && old('type') == 'mcq' ? 'selected' : '' }}>{{ __('admin.type_mcq') }}</option>
+														<option value="tfq" {{ !empty( old('type') ) && old('type') == 'tfq' ? 'selected' : '' }}>{{ __('admin.type_tfq') }}</option>
 													</select>
 												</fieldset>
 											</div>
@@ -96,23 +96,23 @@
 													<label for="category_id">{{ __('admin.questionCategory')}}</label>
 													<select class="custom-select" name="category_id" id="category_id" required>
 														@foreach( $organizations->first()->questionsCategories as $category )
-															<option value="{{ $category['id'] }}">{{ $category['title'] }}</option>
+															<option value="{{ $category['id'] }}" {{ !empty( old('category_id') ) && old('category_id') == $category['id'] ? 'selected' : '' }}>{{ $category['title'] }}</option>
 														@endforeach
 													</select>
 												</fieldset>
 												<fieldset class="form-group">
 													<label for="difficulty">{{ __('admin.difficultyLevel')}}</label>
 													<select class="custom-select" name="difficulty" id="difficulty" required>
-														<option value="easy">{{ __('admin.difficulty_easy') }}</option>
-														<option value="medium">{{ __('admin.difficulty_medium') }}</option>
-														<option value="hard">{{ __('admin.difficulty_hard') }}</option>
+														<option value="easy" {{ !empty( old('difficulty') ) && old('difficulty') == 'easy' ? 'selected' : '' }}>{{ __('admin.difficulty_easy') }}</option>
+														<option value="medium" {{ !empty( old('difficulty') ) && old('difficulty') == 'medium' ? 'selected' : '' }}>{{ __('admin.difficulty_medium') }}</option>
+														<option value="hard" {{ !empty( old('difficulty') ) && old('difficulty') == 'hard' ? 'selected' : '' }}>{{ __('admin.difficulty_hard') }}</option>
 													</select>
 												</fieldset>
 												<fieldset id="tfq-block" class="form-group d-none">
 													<label for="correct">{{ __('admin.answerType')}}</label>
 													<select class="custom-select" name="correct" id="correct">
-														<option value="tfq_true">{{ __('admin.tfq_statement_true') }}</option>
-														<option value="tfq_false">{{ __('admin.tfq_statement_false') }}</option>
+														<option value="tfq_true" {{ !empty( old('correct') ) && old('correct') == 'tfq_true' ? 'selected' : '' }}>{{ __('admin.tfq_statement_true') }}</option>
+														<option value="tfq_false" {{ !empty( old('correct') ) && old('correct') == 'tfq_false' ? 'selected' : '' }}>{{ __('admin.tfq_statement_false') }}</option>
 													</select>
 												</fieldset>
 												<fieldset id="mcq-block" class="form-group">
@@ -136,13 +136,13 @@
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
 													<label for="explanation">{{ __('admin.explanation')}}</label>
-													<textarea class="form-control" id="explanation" name="explanation" rows="5" name="desc_en"></textarea>
+													<textarea class="form-control" id="explanation" name="explanation" rows="5" name="desc_en">{{ old('explanation') }}</textarea>
 												</fieldset>
 											</div>
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
 													<label for="tags">{{ __('admin.questionTags')}}</label>
-													<input value="" name="tags" type="text" class="form-control" id="tags" placeholder="{{ __('admin.questionTagsPlaceholder') }}" />
+													<input value="{{ old('tags') }}" name="tags" type="text" class="form-control" id="tags" placeholder="{{ __('admin.questionTagsPlaceholder') }}" />
 												</fieldset>
 											</div>
 										</div>
