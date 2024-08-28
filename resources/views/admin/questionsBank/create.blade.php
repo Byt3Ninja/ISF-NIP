@@ -69,7 +69,7 @@
 									<form method="post" action="{{ route('questions-bank.store') }}">
 										{!! csrf_field() !!}
 										<div class="row">
-											<div class="col-lg-6 col-md-6 col-sm-12">
+											<div class="col-lg-4 col-md-4 col-sm-12">
 												<fieldset class="form-group">
 													<label for="organization_id">{{ __('admin.Organization')}}</label>
 													<select class="custom-select" name="organization_id" id="organization_id" required>
@@ -78,6 +78,29 @@
 														@endforeach
 													</select>
 												</fieldset>
+											</div>
+											<div class="col-lg-4 col-md-4 col-sm-12">
+												<fieldset class="form-group">
+													<label for="question_group">{{ __('admin.questionGroup')}}</label>
+													<select class="custom-select" name="question_group" id="question_group" required>
+														<option value="quiz" {{ !empty( old('question_group') ) && old('question_group') == 'quiz' ? 'selected' : '' }}>{{ __('admin.question_type_quiz') }}</option>
+														<option value="survey" {{ !empty( old('question_group') ) && old('question_group') == 'survey' ? 'selected' : '' }}>{{ __('admin.question_type_survey') }}</option>
+													</select>
+												</fieldset>
+											</div>
+											<div class="col-lg-4 col-md-4 col-sm-12">
+												<fieldset class="form-group">
+													<label for="category_id">{{ __('admin.questionCategory')}}</label>
+													<select class="custom-select" name="category_id" id="category_id" required>
+														@foreach( $organizations->first()->questionsCategories as $category )
+															<option value="{{ $category['id'] }}" {{ !empty( old('category_id') ) && old('category_id') == $category['id'] ? 'selected' : '' }}>{{ $category['title'] }}</option>
+														@endforeach
+													</select>
+												</fieldset>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
 													<label for="question">{{ __('admin.question')}}</label>
 													<input value="{{ old('question') }}" name="question" type="text" class="form-control" id="question" placeholder="{{ __('admin.question') }}" required />
@@ -92,14 +115,6 @@
 											</div>
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
-												<fieldset class="form-group">
-													<label for="category_id">{{ __('admin.questionCategory')}}</label>
-													<select class="custom-select" name="category_id" id="category_id" required>
-														@foreach( $organizations->first()->questionsCategories as $category )
-															<option value="{{ $category['id'] }}" {{ !empty( old('category_id') ) && old('category_id') == $category['id'] ? 'selected' : '' }}>{{ $category['title'] }}</option>
-														@endforeach
-													</select>
-												</fieldset>
 												<fieldset class="form-group">
 													<label for="difficulty">{{ __('admin.difficultyLevel')}}</label>
 													<select class="custom-select" name="difficulty" id="difficulty" required>

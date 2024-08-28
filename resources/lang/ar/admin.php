@@ -549,4 +549,7 @@ return [
 	'Remove' => 'إزالة',
 	'Keywords' => 'بحث بالكلمة',
 	'noResultsMatch' => 'لم يتم العثور على نتائج تتوافق مع معايير البحث الخاصة بك',
+	'questionGroup' => 'تصنيف السؤال',
+	'question_type_quiz' => 'اختبار',
+	'question_type_survey' => 'استطلاع',
 ];

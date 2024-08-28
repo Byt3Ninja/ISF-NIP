@@ -17,6 +17,7 @@ class QuestionsBank extends Model
 	protected $fillable = [
 		'organization_id',
 		'category_id',
+		'group',
 		'question',
 		'type',
 		'correct',
@@ -29,6 +30,7 @@ class QuestionsBank extends Model
 	protected $casts = [
 		'organization_id' => 'integer',
 		'category_id' => 'integer',
+		'group' => 'string',
 		'question' => 'string',
 		'type' => 'string',
 		'correct' => 'boolean',

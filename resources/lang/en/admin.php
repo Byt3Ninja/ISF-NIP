@@ -549,4 +549,7 @@ return [
 	'Remove' => 'Remove',
 	'Keywords' => 'Keywords',
 	'noResultsMatch' => 'No results found matches with you criteria',
+	'questionGroup' => 'Question group',
+	'question_type_quiz' => 'Quiz',
+	'question_type_survey' => 'Survey',
 ];
