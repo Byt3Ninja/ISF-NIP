@@ -167,7 +167,7 @@ class quizzesController extends Controller
 		if( empty( $quiz ) ) { return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']); }
 		else
 		{
-			$questions = QuestionsBank::where('organization_id', $quiz->organization_id)->with(['category'])->get();
+			$questions = QuestionsBank::where('organization_id', $quiz->organization_id)->where('group', 'quiz')->with(['category'])->get();
 			$tags = array_unique(array_reduce($questions->pluck('tags')->toArray(), 'array_merge', []));
 			return view('admin.quizzes.questions', compact('quiz', 'questions', 'tags'));
 		}
