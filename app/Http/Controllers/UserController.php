@@ -94,7 +94,10 @@ class UserController extends Controller
             }else{
                 $img_url = '';
             }
-            $result = User::create($request->except(['img_url']) + ['img_url' => $img_url]);
+            $inputs = $request->except(['img_url']) + ['img_url' => $img_url];
+            $inputs['password'] = Hash::make( $inputs['password'] );
+            $inputs['password_confirmation'] = Hash::make( $inputs['password_confirmation'] );
+            $result = User::create( $inputs );
 
             $result->assignRole($request->role);
 
