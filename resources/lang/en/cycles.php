@@ -153,6 +153,8 @@ return [
     'Select training from list' => 'Select training from list',
     'Completed' => 'Completed',
     'Error' => 'Error',
+    'NA' => 'Not Avilable',
+    'nosubscripe' => 'You are not subscribed to any training programs',
     'No training courses into cycles' => 'No training courses into cycles',
     'Back to Manage cycles' => 'Back to Manage cycles',
     'all online training sessions' => 'All online training sessions',
@@ -231,6 +233,14 @@ return [
     'Are you sure, Delete current step and all its contents?'=>'Are you sure, Delete current step and all its contents?',
     'cant undo' => 'All forms, training, steps, users data, steps will be deleted, and can not undo?',
     'Add Judges first'=>'Add Judges First',
-    'Attendance'=>'Session Attendance'
+    'Attendance'=>'Session Attendance',
+    'Name' => 'Program Name',
+    'Program Start Date' => 'Program Start Date  ',
+    'Program End Date' => 'Program End Date',
+    'Private Link' => 'Private Link',
+    'Number of joined Startup' => 'Number of joined Startup',
+    'Numbers of cycles' => 'Numbers of cycles',
+    'Organization Name'=>'Organization Name',
+    'Organization logo'=>'Organization logo'
 ];
 

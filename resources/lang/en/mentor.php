@@ -5,6 +5,7 @@ return [
         'index'=>'Tasks of Mentorship sessions',
         'create'=>'Add a new task',
         'all'=>'View all tasks',
+        'noCompany'=>'No Company Exist',
         'title'=>'task title',
         'description'=>'task description',
         'mentorship request'=>'mentorship session',

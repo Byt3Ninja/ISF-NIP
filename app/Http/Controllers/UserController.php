@@ -16,6 +16,7 @@ use Log;
 use Exception;
 use Session;
 use Hash;
+use Illuminate\Support\Facades\Log as FacadesLog;
 
 class UserController extends Controller
 {
@@ -178,13 +179,19 @@ class UserController extends Controller
             else
                 return back()->withInput()->with( ['msg' => 'FailedStore'] );
 
-        }catch (Exception $e){dd($e);
+        }catch (Exception $e){
+            
+            return back()->withInput()->with(['msg' => 'emailExist']);
+            
+            
+            dd($e);
 
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
 
         }
+        
     }
      /**
      * Update the specified resource in storage.

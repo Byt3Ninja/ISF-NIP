@@ -7,6 +7,8 @@
 
 (function (window, document, $) {
   'use strict';
+
+  
   // main menu active gradient colors object
   var themeColor = {
     "theme-primary": "rgba(90, 141, 238, 0.2)",

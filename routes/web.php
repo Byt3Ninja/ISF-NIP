@@ -36,20 +36,20 @@ Route::get('test',function(){
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');
-//Route::get('home','IndexController@home');
-//Route::get('about','IndexController@home');
-//Route::get('faqs','IndexController@home');
-//Route::get('contact','IndexController@home');
-//Route::get('events','IndexController@home');
-//Route::get('csr-events','IndexController@home');
-//Route::get('blog','IndexController@home');
-//Route::get('blog/{id}','IndexController@post');
-//Route::post('message','IndexController@message');
-//Route::post('sendmsg','IndexController@sendmsg');
-//Route::get('page/{id}','IndexController@page');
-//Route::get('search','IndexController@search');
-//Route::get('event/{id}','IndexController@event');
-//Route::post('eventregister','IndexController@eventregister');
+Route::get('home','IndexController@home');
+Route::get('about','IndexController@home');
+Route::get('faqs','IndexController@home');
+Route::get('contact','IndexController@home');
+Route::get('events','IndexController@home');
+Route::get('csr-events','IndexController@home');
+Route::get('blog','IndexController@home');
+Route::get('blog/{id}','IndexController@post');
+Route::post('message','IndexController@message');
+Route::post('sendmsg','IndexController@sendmsg');
+Route::get('page/{id}','IndexController@page');
+Route::get('search','IndexController@search');
+Route::get('event/{id}','IndexController@event');
+Route::post('eventregister','IndexController@eventregister');
 
 Auth::routes(['verify' => true]);
 Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],function(){
@@ -206,6 +206,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('cycles/view/{c?}/{s?}','CyclesController@view');
     Route::post('cycles/save','CyclesController@saveForm');
     Route::get('cycles/my/{id}','CyclesController@my');
+    Route::post('change/cyc','CyclesController@changAll');
+    Route::get('/export-cyclesComp', 'CyclesController@exportcyclesComp');
 
     //Screening
     Route::get('screening','ScreeningController@index');
@@ -217,6 +219,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('screening/{fid}/{cid}','ScreeningController@view');
     Route::get('screening/get/{fid}/{sid}/{pid}','ScreeningController@getusers');
     Route::post('screening/changestep','ScreeningController@changestep');
+    Route::get('/export-Result', 'ScreeningController@exportresultScreen');
+
     //ZOOM
     Route::get('zoom/all','MeetingController@showall');
     Route::get('zoom/{id}/get','MeetingController@show');
@@ -237,6 +241,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('mentorship/mine','MentorsController@mine');
     Route::post('mentorship/rate','MentorsController@rate');
     Route::post('mentorship/delsession/{id}' ,'MentorsController@delsession');
+    Route::get('/export-mentorship', 'MentorsController@expormentorship');
+
+
+
 
     //Training
     Route::get('training/all/{id?}','TrainingController@all')->name('training.all');
@@ -258,6 +266,19 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('training/session' ,'TrainingController@session');
     Route::post('training/editsession' ,'TrainingController@editsession');
     Route::post('trainings/getdsc/{id}' ,'TrainingController@getdsc');
+    Route::get('/export-Tresult', 'TrainingController@exportTresult');
+    Route::post('trainings/change/Tresult','TrainingController@changAllTL');
+
+
+
+
+    // questions bank
+    Route::resource('question-categories', 'QuestionCategoriesController');
+    Route::resource('questions-bank', 'QuestionsBankController');
+    Route::resource('quizzes', 'quizzesController');
+    Route::get('quizzes/{quiz}/questions', 'quizzesController@get_questions')->name('quizzes.questions');
+    Route::post('quizzes/{quiz}/questions', 'quizzesController@save_questions')->name('quizzes.saveQuestions');
+
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
     Route::get('/roomImages/{id}','RoomsController@roomImages')->name('roomImages');
@@ -279,6 +300,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
     Route::post('final/delsession/{id}' ,'FinalscreeningController@delsession');
 
+
+//Program List
+Route::resource('programlist', 'ProgramController');
+Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     // ===============> Mentor Dashboard Routes <===============
     Route::group(['prefix' => 'mentor','namespace'=>'Mentor'],function (){
