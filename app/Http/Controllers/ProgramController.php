@@ -28,16 +28,21 @@ class ProgramController extends Controller
      */
     public function index()
     {
+<<<<<<< HEAD
         if(auth()->user()->title_en == 'Administrator'){
 
          $cycles = Cycle::all();
         
         }else{
             
+=======
+        if( !Auth()->user()->hasRole('Admin') ) { $cycles = Cycle::all(); }
+        else
+        {
+>>>>>>> f7ca7b3845abf80b5120552d6efc830d47be39a4
             $Organization = Organization::where('user_id','=', auth()->user()->id)->first();
-            
-            $cycles = Cycle::where('organization_id','=', $Organization->id)->get();
-            
+            if( !empty( $Organization ) ) { $cycles = Cycle::where('organization_id','=', $Organization->id)->get(); }
+            else { $cycles = Cycle::where('id', '=', 0)->get(); }
         }
         return view('admin.programs.index', compact('cycles'));
     }

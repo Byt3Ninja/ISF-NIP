@@ -5,6 +5,7 @@ use App\Organization;
 use App\QuestionsBank;
 use App\QuestionCategories;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class QuestionsBankController extends Controller
 {
@@ -49,19 +50,25 @@ class QuestionsBankController extends Controller
 			}
 			$request->merge(['quiz_answer_status' => $quiz_answer_status]);
 		}
-		$this->validate($request, [
+
+		$rules = [
 			'organization_id' => 'required|exists:organizations,id',
 			'category_id' => 'required|exists:question_categories,id',
 			'difficulty' => 'required|in:easy,medium,hard',
 			'question' => 'required|string',
 			'type' => 'required|in:mcq,tfq',
+			'question_group' => 'required|in:quiz,survey',
 			'correct' => 'required_if:type,tfq|in:tfq_true,tfq_false',
 			'explanation' => 'nullable|sometimes',
 			'quiz_answer_text' => 'required_if:type,mcq|array',
-			"quiz_answer_text.*" => "required|string",
+			"quiz_answer_text.*" => "required_if:type,mcq|nullable|string",
 			'quiz_answer_status' => 'required_if:type,mcq|array',
-			"quiz_answer_status.*" => "required|boolean",
-		]);
+			"quiz_answer_status.*" => "required_if:type,mcq|boolean",
+		];
+		$validator = Validator::make($request->all(), $rules);
+		$errors = [];
+		if( $validator->fails() ) { $errors = $validator->errors()->toArray(); }
+		if( count( $errors ) ) { return back()->withInput( $request->all() )->with('success', false)->withErrors( $errors ); }
 		$answers = [];
 		$correct = null;
 		if( $request->type == 'mcq' && ( $request->has('quiz_answer_text') ) && ( $request->has('quiz_answer_status') )  )
@@ -75,6 +82,7 @@ class QuestionsBankController extends Controller
 		$question = new QuestionsBank;
 		$question->organization_id = $request->organization_id;
 		$question->category_id = $request->category_id;
+		$question->group = $request->question_group;
 		$question->question = $request->question;
 		$question->type = $request->type;
 		$question->correct = $correct;
@@ -132,6 +140,7 @@ class QuestionsBankController extends Controller
 				'difficulty' => 'required|in:easy,medium,hard',
 				'question' => 'required|string',
 				'type' => 'required|in:mcq,tfq',
+				'question_group' => 'required|in:quiz,survey',
 				'correct' => 'required_if:type,tfq|in:tfq_true,tfq_false',
 				'explanation' => 'nullable|sometimes',
 				'quiz_answer_text' => 'required_if:type,mcq|array',
@@ -155,6 +164,7 @@ class QuestionsBankController extends Controller
 			}
 			$question->organization_id = $request->organization_id;
 			$question->category_id = $request->category_id;
+			$question->group = $request->question_group;
 			$question->question = $request->question;
 			$question->type = $request->type;
 			$question->correct = $correct;
