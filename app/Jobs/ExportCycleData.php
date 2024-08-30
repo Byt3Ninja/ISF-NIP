@@ -30,7 +30,8 @@ class ExportCycleData implements ShouldQueue
     public function handle()
     {
 
-        if(auth()->user()->title_en == 'Administrator'){
+       
+        if(!Auth()->user()->hasRole('Admin')){
          $cycles = Cycle::all();
         
         }else{
@@ -55,7 +56,7 @@ class ExportCycleData implements ShouldQueue
         // كتابة بيانات المستخدمين
         $row = 2; // بداية الصف الثاني
 
-            if(auth()->user()->title_en == 'Administrator'){
+            if(!Auth()->user()->hasRole('Admin')){
          $cycles = Cycle::all();
          Cycle::chunk(1000, function($cycles) use (&$sheet, &$row) {
             foreach ($cycles as $cycle) {
