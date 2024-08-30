@@ -29,9 +29,11 @@ class ProgramController extends Controller
     public function index()
     {
         if(auth()->user()->title_en == 'Administrator'){
+
          $cycles = Cycle::all();
         
         }else{
+            
             $Organization = Organization::where('user_id','=', auth()->user()->id)->first();
             
             $cycles = Cycle::where('organization_id','=', $Organization->id)->get();

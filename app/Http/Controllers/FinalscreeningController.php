@@ -134,14 +134,26 @@ class FinalscreeningController extends Controller
     {
         if ($request->period) {
             $topic = "Final Screening (C" . $request->company . ')';
-            $data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
+            $data = ['topic' => $topic,
+             "start_time" => $request->date,
+              'duration' => $request->period,
+               'host_video' => 1,
+                'participant_video' => 1
+            ];
             $onlineMeeting = $this->meetingService->createMeeting($data);
             if (!$onlineMeeting['success']) {
                 return back()->with(['message2' => "API Error, can't create zoom meeting."]);
             }
 
-            $finalScreening = Finalscreening::where('step_id', $request->step)->where('company_id', $request->company)->update(['datetime' => $request->date, 'duration' => $request->duration,
-                'zoom_id' => $onlineMeeting['data']['id'], 'start_url' =>  $onlineMeeting['data']['start_url'], 'join_url' =>  $onlineMeeting['data']['join_url']]);
+            $finalScreening = Finalscreening::where('step_id', $request->step)->where('company_id', $request->company)->first();
+            
+            $finalScreening->update([
+                'datetime' => $request->date,
+                'duration' => $request->duration,
+                'zoom_id' => $onlineMeeting['data']['id'],
+                'start_url' =>  $onlineMeeting['data']['start_url'],
+                'join_url' =>  $onlineMeeting['data']['join_url']
+                ]);
 
             $startup_owner = Company::findOrFail($request->company)->user;
             $startup_owner_name = $startup_owner->name;
