@@ -212,8 +212,8 @@
                                                                     <button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary">
                                                                         <i class="bx bx-user"></i></button></a>
                                                             @else
-{{--                                                                <button title="Edit" onclick="edit({{$company->fsession($cstep->id)->id}})" type="button" class="btn btn-icon rounded-circle btn-info">--}}
-{{--                                                                    <i class="bx bxs-edit-alt"></i></button>--}}
+                                                                <button title="Edit" onclick="edit({{$company->fsession($cstep->id)->id}})" type="button" class="btn btn-icon rounded-circle btn-info">
+                                                                   <i class="bx bxs-edit-alt"></i></button>
 
                                                                 <button title="Delete" onclick="deleteme({{$company->fsession($cstep->id)->id}})" type="button" class="btn btn-icon rounded-circle btn-danger">
                                                                     <i class="bx bx-trash"></i></button>
@@ -387,6 +387,7 @@
     <script>
         $('.date').datetimepicker({timepicker:false,format:'Y-m-d'});
         $('#date').datetimepicker({timepicker:true,format:'Y-m-d H:i'});
+
         function edit(id) {
             $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
             $.ajax({
@@ -436,6 +437,11 @@
             $('#cid').val(company); 
             $('#addzoom').modal('show');
         }
+        function edit(company) {
+            $('#cid').val(company); 
+            $('#ModifyRequest').modal('show');
+        }
+       
         function deleteme(id) {
             let url = '/dashboard/final/delsession/' + id;
             let token = '{{ csrf_token() }}';

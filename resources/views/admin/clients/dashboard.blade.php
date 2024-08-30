@@ -28,13 +28,29 @@
 	$mentors = \App\CyclesMentors::where('cycle_id', Auth::user()->company->cycle??0)->get();
 	$m_count = count($mentors);
 	/// Next session
-	$nextsession = \App\MentorshipRequest::where('user_id',Auth::id())->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
+	// $nextsession = \App\MentorshipRequest::where('user_id',Auth::id())->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
+	$days = request()->query('days', 14);
+	
+	$nextSessions = \App\MentorshipRequest::where('user_id', Auth::id())
+    ->where(function ($query) {
+        $query->where('approved', 'Yes')
+              ->orWhereNull('approved');
+    })
+    ->whereBetween('zoom_date', [
+        Carbon\Carbon::now()->startOfDay(), // بداية اليوم الحالي
+        Carbon\Carbon::now()->addDays($days)->endOfDay() // نهاية اليوم الـ 14 القادم
+    ])
+    ->orderBy('zoom_date', 'ASC')
+    ->get();
+	
+	
 	/// Rating
 	$notrated_ser = \App\ServicesRequests::where('user_id',Auth::id())->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
 	$notrated_men = \App\MentorshipRequest::where('user_id',Auth::id())->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
 	/// My sessions
 	if( !empty( Auth::user()->company ) ) { $sessions = \App\TrainingSession::where("step_id", Auth::user()->company->step)->orderBy('datetime','ASC')->take(3)->get(); }
 	else { $sessions = []; }
+
 
 @endphp
 <!-- BEGIN: Content-->
@@ -194,6 +210,7 @@
 					</div>
 				</div>
 			</section>
+			
 			@if( Auth::user()->company && Auth::user()->company->cycle )
 				<section>
 					<div class="row">
@@ -424,6 +441,122 @@
 				</section>
 			@endif
 			@if( Auth::user()->company->approved ?? null && count( $mentors ) )
+			<section>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card">
+							<div class="card-header border-bottom">
+								<h4 class="card-title align-items-center">
+									<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
+									@if($days!=14)
+									<div onclick="redirectWithDays('14')" class="btn btn-success" id="forteenDays"> 14 Days</div>
+									@else
+									<div onclick="redirectWithDays('14')" class="btn btn-warning" id="forteenDays"> 14 Days</div>
+									@endif
+									@if($days!=7)
+									<div onclick="redirectWithDays('7')" class="btn btn-success" id="sevenDays"> 7 Days</div>
+									@else
+									<div onclick="redirectWithDays('7')" class="btn btn-warning" id="sevenDays"> 7 Days</div>
+									@endif
+
+									
+								</h4>
+
+								<div class="card-body">
+									<div class="card ">
+										<div class="table-responsive">
+											<table class="table mb-0" id="userstable">
+												<thead class="thead-dark">
+												<tr>
+													{{-- <th>{{__('cycles.Company')}}</th> --}}
+													<th>{{__('cycles.User/Title')}}</th>
+													<th>{{__('cycles.Mentor')}}</th>
+													<th>{{__('cycles.Rate/Comment')}}</th>
+													<th>{{__('cycles.Date/Time')}}</th>
+													<th>{{__('cycles.Approved')}}</th>
+													<th>{{__('cycles.Done')}}</th>
+													<th>{{__('cycles.Actions')}}</th>
+												</tr>
+												</thead>
+												<tbody>
+												@foreach($nextSessions as $session)
+													<tr>
+														{{-- <td>
+															<div class="media align-items-center">
+																<a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
+																	<img src="{{$session->user->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+																</a>
+																<a href="/dashboard/companyProfile/{{$session->user->company->id}}">
+																	<div class="media align-items-center">
+																		{{$session->user->company->{'name_'.$l} }}
+																	</div>
+																</a>
+															</div>
+														</td> --}}
+														<td>
+															<div class="media align-items-center">
+																<a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
+																	<img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+																</a>
+																<a href="/dashboard/users/{{$session->user_id}}/edit">
+																	<div class="media-body">
+																		<h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
+																		<span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
+																	</div>
+																</a>
+															</div>
+														</td>
+														<td>
+															<div style="cursor: pointer;" class="chip mr-1" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
+																<div class="chip-body">
+																	<div class="avatar">
+																		<img class="img-fluid" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
+																	</div>
+															<span class="chip-text">
+														{{$session->mentor->name}}
+															</span>
+																</div>
+															</div>
+														</td>
+														<td>
+															<small>{!!  $session->rate_comment?
+																 str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->rating).
+															'<br>'.$session->rate_comment:$session->comment  !!}</small>
+														</td>
+														<td>
+															{{$session->zoom_date}}
+															<br>({{$session->period}}M)
+														</td>
+														<td>
+															<div class="media align-items-center">
+																{!!  __($session->approved) ??'<span class="warning">'.__('Waiting').'</span>'  !!}
+															</div>
+														</td>
+														<td>
+															{{$session->done?__('Yes'):__('No')}}
+														</td>
+														<td>
+															<a href="{{$session->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>
+														</td>
+													</tr>
+												@endforeach
+						
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+								
+
+							</div>
+
+							
+						</div>
+					</div>
+				</div>
+			</section>
+
+
 				<section>
 					<div class="row">
 						<div class="col-md-12">
@@ -431,13 +564,7 @@
 								<div class="card-header border-bottom">
 									<h4 class="card-title align-items-center">
 										<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.Mentors") }} :
-										@if( $nextsession )
-											<h2 class="text-danger">
-												{{__('dashboard.Your next mentorship session with')}} 
-												<a href="{{$nextsession->join_url}}" target="_blank">{{$nextsession->mentor->{'first_name_'.$l} }} {{$nextsession->mentor->{'last_name_'.$l} }}</a> 
-												{{__('dashboard.will start')}} {{$nextsession->zoom_date}}  <a href="{{$nextsession->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>.
-											</h2>
-										@endif
+										
 									</h4>
 
 								</div>
@@ -666,9 +793,28 @@
 	<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
 	<script src="/app-assets/vendors/js/extensions/swiper.min.js"></script>
 	<script src="/js/jquery.datetimepicker.full.min.js"></script>
+
+
+
+
+	
 	@if( $notrated_men or $notrated_ser )
 		<script src="/app-assets/vendors/js/extensions/jquery.rateyo.min.js"></script>
 		<script>
+
+function redirectWithDays(showValue) {
+    // الحصول على قيم التواريخ
+    const forteendays = document.getElementById('forteenDays').value;
+    const sevendays = document.getElementById('sevenDays').value;
+
+    // التحقق من وجود تواريخ والتحقق من تنسيقها لضمان التوافق
+    let url = `/dashboard?days=${showValue}`;
+
+    // إعادة التوجيه إلى الرابط المناسب
+    window.location.href = url;
+}
+
+
 			$(function () {
 				var isRtl = $('html').attr('data-textdirection') === 'rtl';
 				var fullStar = $('.full-star-ratings');

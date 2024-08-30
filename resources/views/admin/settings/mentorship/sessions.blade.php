@@ -77,17 +77,45 @@
         <div class="card-header">
             <div class="card-title">
 {{--                @if (Request()->show)--}}
-                <a href="/dashboard/mentorship/sessions?show=all" class="btn btn-light-primary glow width-200 {{ Request()->show=='all'?'active':'' }}">{{__('cycles.All requests')}}</a>
-                <a href="/dashboard/mentorship/sessions" class="btn btn-light-warning glow width-200 {{ !Request()->show?'active':'' }}">{{__('cycles.New requests only')}}</a>
-                <a href="/dashboard/mentorship/sessions?show=approved" class="btn btn-light-success glow width-200 {{ Request()->show=='approved'?'active':'' }}">{{__('cycles.approved requests')}}</a>
-                <a href="/dashboard/mentorship/sessions?show=disapproved" class="btn btn-light-danger glow width-200 {{ Request()->show=='disapproved'?'active':'' }}">{{__('cycles.disapproved requests')}}</a>
+                <!-- إدخال تاريخ النهاية -->
+
+
+<!-- الروابط المعدلة لإرسال التاريخ -->
+<div onclick="redirectWithDates('all')" class="btn btn-light-primary glow width-200 {{ request()->show=='all' ? 'active' : '' }}">
+    {{ __('cycles.All requests') }}
+</div>
+
+<div href="#" onclick="redirectWithDates('')" class="btn btn-light-warning glow width-200 {{ !request()->show ? 'active' : '' }}">
+    {{ __('cycles.New requests only') }}
+</div>
+
+<div href="#" onclick="redirectWithDates('approved')" class="btn btn-light-success glow width-200 {{ request()->show=='approved' ? 'active' : '' }}">
+    {{ __('cycles.approved requests') }}
+</div>
+
+<div href="#" onclick="redirectWithDates('disapproved')" class="btn btn-light-danger glow width-200 {{ request()->show=='disapproved' ? 'active' : '' }}">
+    {{ __('cycles.disapproved requests') }}
+</div>
                 {{--                @else--}}
 {{--                @endif--}}
             </div>
         </div>
+    <div>
+
+    </div>
             <div class="card-body">
+                <div class="col-md-3" style="display: inline-block">
+                <input type="text" class="datewithouttime form-control" id="start_date" value="{{ request('start_date') }}" name="start_date" placeholder="Start Date">
+                </div>
+                <div class="col-md-3" style="display: inline-block">
+                <input type="text" class="datewithouttime form-control" id="end_date" value="{{ request('end_date') }}" name="end_date" placeholder="End Date">
+                </div>
+                <br><br>
             <div class="card-text">
                 <div class="table-responsive">
+                          <!-- إدخال تاريخ البداية -->
+                    
+              
 
                     <!-- we get value from Select box Ely fo2 class name stepsExcel -->
                     <div class="btn btn-success ExportExcelMentor">Export</div>
@@ -96,6 +124,7 @@
                     <table class="table mb-0" id="userstable">
                         <thead class="thead-dark">
                         <tr>
+                            
                             <th>{{__('cycles.Company')}}</th>
                             <th>{{__('cycles.User/Title')}}</th>
                             <th>{{__('cycles.Mentor')}}</th>
@@ -108,7 +137,9 @@
                         </thead>
                         <tbody>
                         @foreach($sessions as $session)
+                        
                             <tr>
+                                
                                 <td>
                                     <div class="media align-items-center">
                                         <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
@@ -278,10 +309,16 @@
     <script>
         $(document).ready(function() {
             $('.table').DataTable({
-                "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
-                "columnDefs": [
-                    {"orderable": false, "targets":  [7]},
-                ],
+    "responsive": true,
+    "searching": true,
+    "lengthChange": false,
+    "paging": true,
+    "bInfo": false,
+    "order": [], // ترتيب الجدول حسب العمود الأول تصاعديًا
+    "columnDefs": [
+      
+        {"orderable": true, "targets": 7}, // تفعيل الفرز للعمود الأول فقط
+    ],
                 @if ($l=='ar')
                 "language": {
                     "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
@@ -298,6 +335,7 @@
     </script>
         <script>
             $('.date').datetimepicker({timepicker:true,format:'Y-m-d H:i'});
+            $('.datewithouttime').datetimepicker({format:'Y-m-d'});
             function edit(id) {
                     $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                     $.ajax({
@@ -317,6 +355,35 @@
                             alert("Error Occurred, Try again!");
                         }});
             }
+
+
+            function redirectWithDates(showValue) {
+    // الحصول على قيم التواريخ
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+
+    // التحقق من وجود تواريخ والتحقق من تنسيقها لضمان التوافق
+    let url = `/dashboard/mentorship/sessions?show=${showValue}`;
+
+    // إذا كانت start_date و end_date موجودة، أضفها إلى الرابط
+    if (startDate && endDate) {
+        const formattedStartDate = formatDate(startDate);
+        const formattedEndDate = formatDate(endDate);
+        url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
+    }
+
+    // إعادة التوجيه إلى الرابط المناسب
+    window.location.href = url;
+}
+
+    // دالة لتحويل صيغة التاريخ إلى 'YYYY-MM-DD' لضمان الثبات
+    function formatDate(date) {
+        const dateObj = new Date(date);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
           
             function mentor(id,name,rating) {
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});

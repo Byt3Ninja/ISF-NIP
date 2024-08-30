@@ -39,8 +39,9 @@ class Finalscreening extends Model
     }
 
     public function evaluationJudgers(){
+        return $this->belongsToMany(User::class, 'finalscreenings', 'judges', 'id');
 
-        return User::whereIn('id',$this->attributes['judges'])->get();
+       
     }
     public function CalenderSync()
     {

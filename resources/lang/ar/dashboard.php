@@ -27,6 +27,7 @@ return [
     'No Final screening started yet' => 'لا توجد تقييمات نهائية حالياً',
     'My Requests' => 'طلباتي',
     'Mentors' => 'المرشدين',
+    'MentorsSession' => 'جلسات المرشدين',
     'No Cycles started yet' => 'لا يوجد دورات جديدة حاليا',
     'Your next mentorship session with' => 'اجتماعك القادم سيكون مع',
     'will start' => 'سوف يبدأ',
