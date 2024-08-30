@@ -15,7 +15,7 @@ $(document).ready(function () {
             $('.chboxcyclesReg:checked').each(function() {
                 compid.push($(this).attr('do'));
             });
-            
+
             if(compid==""){
                 alert("You Didn't Choose any Company");
                 location.reload();
@@ -196,6 +196,7 @@ $(document).ready(function () {
 
     });
 
+    
 
     if ($("#result-list-datatable").length > 0) {
         usersTable = $("#result-list-datatable").DataTable({

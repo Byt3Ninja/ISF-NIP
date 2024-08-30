@@ -124,6 +124,7 @@
                     <table class="table mb-0" id="userstable">
                         <thead class="thead-dark">
                         <tr>
+                            
                             <th>{{__('cycles.Company')}}</th>
                             <th>{{__('cycles.User/Title')}}</th>
                             <th>{{__('cycles.Mentor')}}</th>
@@ -136,7 +137,9 @@
                         </thead>
                         <tbody>
                         @foreach($sessions as $session)
+                        
                             <tr>
+                                
                                 <td>
                                     <div class="media align-items-center">
                                         <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
@@ -306,10 +309,16 @@
     <script>
         $(document).ready(function() {
             $('.table').DataTable({
-                "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
-                "columnDefs": [
-                    {"orderable": false, "targets":  [7]},
-                ],
+    "responsive": true,
+    "searching": true,
+    "lengthChange": false,
+    "paging": true,
+    "bInfo": false,
+    "order": [], // ترتيب الجدول حسب العمود الأول تصاعديًا
+    "columnDefs": [
+      
+        {"orderable": true, "targets": 7}, // تفعيل الفرز للعمود الأول فقط
+    ],
                 @if ($l=='ar')
                 "language": {
                     "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
@@ -349,26 +358,23 @@
 
 
             function redirectWithDates(showValue) {
-        // الحصول على قيم التواريخ
-        const startDate = document.getElementById('start_date').value;
-        const endDate = document.getElementById('end_date').value;
+    // الحصول على قيم التواريخ
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
 
-        // تحقق من وجود التواريخ قبل إعادة التوجيه
-        if (!startDate || !endDate) {
-            alert("الرجاء إدخال تواريخ صحيحة.");
-            return;
-        }
+    // التحقق من وجود تواريخ والتحقق من تنسيقها لضمان التوافق
+    let url = `/dashboard/mentorship/sessions?show=${showValue}`;
 
-        // التحقق من تنسيق التواريخ لضمان التوافق
+    // إذا كانت start_date و end_date موجودة، أضفها إلى الرابط
+    if (startDate && endDate) {
         const formattedStartDate = formatDate(startDate);
         const formattedEndDate = formatDate(endDate);
-
-        // إعداد الرابط مع التواريخ
-        let url = `/dashboard/mentorship/sessions?show=${showValue}&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
-
-        // إعادة التوجيه
-        window.location.href = url;
+        url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
     }
+
+    // إعادة التوجيه إلى الرابط المناسب
+    window.location.href = url;
+}
 
     // دالة لتحويل صيغة التاريخ إلى 'YYYY-MM-DD' لضمان الثبات
     function formatDate(date) {

@@ -194,6 +194,7 @@
 					</div>
 				</div>
 			</section>
+			
 			@if( Auth::user()->company && Auth::user()->company->cycle )
 				<section>
 					<div class="row">
