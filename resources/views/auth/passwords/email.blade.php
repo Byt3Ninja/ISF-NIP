@@ -70,10 +70,11 @@
   <div class="authentication-wrapper authentication-cover">
     <!-- Logo -->
     <a href="/dashboard" class="app-brand auth-cover-brand">
-      <span class="app-brand-logo demo">
+      <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
+      {{-- <span class="app-brand-logo demo">
         <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
-      </span>
-      <span class="app-brand-text demo text-heading fw-bold">GrowthLabs</span>
+      </span> --}}
+      {{-- <span class="app-brand-text demo text-heading fw-bold">{{ $brandName }}</span> --}}
     </a>
     <!-- /Logo -->
     <div class="authentication-inner row m-0">

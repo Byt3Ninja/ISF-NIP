@@ -461,7 +461,6 @@
 
 @section('pagescripts')
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-  {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script> --}}
 
   <script>
     $(document).ready(function() {
@@ -474,15 +473,6 @@
   </script>
 
   <script>
-    // $('.date').datetimepicker({
-    //   timepicker: false,
-    //   format: 'Y-m-d'
-    // });
-    // $('.time').datetimepicker({
-    //   datepicker: false,
-    //   format: 'H:i'
-    // });
-
     function modify(type, id, stat) {
       $.ajaxSetup({
         headers: {
