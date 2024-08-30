@@ -200,7 +200,7 @@
               @foreach ($mentorshipRequests as $session)
                 <tr>
                   <td>
-                    <div class="media align-items-center">
+                    <div class="d-flex align-items-center">
                       <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $session->user->company->id }}">
                         <img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
                           height="40" width="40">
@@ -213,7 +213,7 @@
                     </div>
                   </td>
                   <td>
-                    <div class="media align-items-center">
+                    <div class="d-flex align-items-center">
                       <a class="media-left mr-50" href="/dashboard/users/{{ $session->user->company->user->id }}/edit">
                         <img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle" height="40"
                           width="40">
@@ -229,10 +229,11 @@
                   <td>
                     <div style="cursor: pointer;" class="chip mr-1"
                       onclick="mentor({{ $session->mentor_id }},'{{ $session->mentor->name }}','{{ $session->mentor->mrating() }}')">
-                      <div class="chip-body">
+                      <div class="d-flex align-items-center">
                         <div class="avatar">
                           <img class="img-fluid" src="{{ $session->mentor->image_url }}" alt="Mentor photo"
-                            height="20" width="20">
+                            height="20" width="20"
+                          />
                         </div>
                         <span class="chip-text">
                           {{ $session->mentor->name }}
@@ -247,11 +248,11 @@
                   <td>
                     <button title="Approve" onclick="approve({{ $session->id }},'Yes')" type="button"
                       class="btn btn-icon rounded-circle btn-label-success">
-                      <i class="ti ti-check"></i>
+                      <i class="ti ti-check ti-24px"></i>
                     </button>
                     <button title="Dispprove" onclick="approve({{ $session->id }}, 'No')" type="button"
                       class="btn btn-icon rounded-circle btn-label-danger">
-                      <i class="ti ti-x"></i>
+                      <i class="ti ti-x ti-24px"></i>
                     </button>
                   </td>
                 </tr>

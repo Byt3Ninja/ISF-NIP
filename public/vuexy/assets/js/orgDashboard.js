@@ -98,12 +98,12 @@
       },
       series: [
         {
-          data: seriesData,
+          data: seriesData.slice(-10),  // Latest 10
           name: seriesName
         }
       ],
       xaxis: {
-        categories: barChartCategories,
+        categories: barChartCategories.slice(-10), // Latest 10
         axisBorder: {
           show: false
         },
