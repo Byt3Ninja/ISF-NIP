@@ -285,7 +285,7 @@
                               </td>
                               <td>
                                 <span
-                                  class="badge badge-light-{{ $weight < 25 ? 'danger' : ($weight < 50 ? 'warning' : 'success') }}">
+                                  class="btn btn-light-{{ $weight < 25 ? 'danger' : ($weight < 50 ? 'warning' : 'success') }}">
                                   {{ $weight }} %</span>
                               </td>
                             </tr>
@@ -395,14 +395,14 @@
                                 @if ($fcompany->join_url)
                                   <a href="{{ $fcompany->join_url }}" target="_blank">
                                     <button title="Join" type="button"
-                                      class="btn btn-icon rounded-circle btn-light-primary">
-                                      <i class="bx bx-user"></i></button>
+                                      class="btn btn-icon rounded-circle btn-label-primary">
+                                      <i class="ti ti-user"></i></button>
                                   </a>
                                   <a href="/dashboard/final/{{ $step->id }}/{{ $fcompany->company_id }}"
                                     target="_blank">
                                     <button title="Open form" type="button"
-                                      class="btn btn-icon rounded-circle btn-light-success">
-                                      <i class="bx bx-file"></i></button>
+                                      class="btn btn-icon rounded-circle btn-label-success">
+                                      <i class="ti ti-file"></i></button>
                                   </a>
                                 @else
                                   {{ __('dashboard.Not started') }}
