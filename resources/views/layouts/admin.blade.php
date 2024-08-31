@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ $l }}">
-<html
+<html 
   lang="{{ $l }}" 
   dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
   data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
