@@ -16,7 +16,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="app-email card">
         <div class="row g-0">
-          <!-- Email Sidebar -->
+          <!-- Inbox Sidebar -->
           <div class="col app-email-sidebar border-end flex-grow-0" id="app-email-sidebar">
             <div class="btn-compost-wrapper d-grid">
               <button class="btn btn-primary btn-compose" data-bs-toggle="modal" data-bs-target="#emailComposeSidebar"
@@ -24,9 +24,9 @@
                 Compose
               </button>
             </div>
-            <!-- Email Filters -->
+            <!-- Inbox Filters -->
             <div class="email-filters pt-4 pb-2">
-              <!-- Email Filters: Folder -->
+              <!-- Inbox Filters: Folder -->
               <ul class="email-filter-folders list-unstyled">
                 <li class="active d-flex justify-content-between align-items-center mb-1" data-target="inbox">
                   <a href="javascript:void(0);" class="d-flex flex-wrap align-items-center">
@@ -68,7 +68,7 @@
                   </a>
                 </li>
               </ul>
-              <!-- Email Filters: Labels -->
+              <!-- Inbox Filters: Labels -->
               <div class="email-filter-labels pt-4">
                 <p class="small mx-6 text-muted text-uppercase">Labels</p>
                 <ul class="list-unstyled mb-2">
@@ -103,11 +103,11 @@
           </div>
           <!--/ Email Sidebar -->
 
-          <!-- Emails List -->
+          <!-- Inbox List -->
           <div class="col app-emails-list">
             <div class="card shadow-none border-0 rounded-0">
               <div class="card-body emails-list-header p-3 py-2">
-                <!-- Email List: Search -->
+                <!-- Inbox List: Search -->
                 <div class="d-flex justify-content-between align-items-center px-3 mt-2">
                   <div class="d-flex align-items-center w-100">
                     <i class="ti ti-menu-2 ti-lg cursor-pointer d-block d-lg-none me-4 mb-4" data-bs-toggle="sidebar"
@@ -118,13 +118,14 @@
                           <i class="ti ti-search ti-lg"></i>
                         </span>
                         <input type="text" class="form-control email-search-input border-0 py-0"
-                          placeholder="Search messages" aria-label="Search mail" aria-describedby="email-search" />
+                          placeholder="{{ $l == 'ar' ? 'ابحث في الرسايل' : 'Search messages' }}"
+                          aria-label="Search mail" aria-describedby="email-search" />
                       </div>
                     </div>
                   </div>
                 </div>
                 <hr class="mx-n3 emails-list-header-hr mb-2" />
-                <!-- Email List: Actions -->
+                <!-- Inbox List: Actions -->
                 <div class="d-flex justify-content-between align-items-center ps-1">
                   <div class="d-flex align-items-center">
                     <div class="form-check mb-0 ms-2">
@@ -203,14 +204,12 @@
                 </div>
               </div>
               <hr class="container-m-nx m-0" />
-              <!-- Email List: Items -->
+              <!-- Inbox List: Items -->
               <div class="email-list pt-0">
                 @php($n = 1)
-                {{-- @if (count($received) > 0) --}}
+                @if (count($received) > 0)
                   <ul class="list-unstyled m-0">
-                    {{-- Render 5 items --}}
-                    @for($i = 0; $i < 5; $i++)
-                    {{-- @foreach ($received as $received) --}}
+                    @foreach ($received as $received)
                     <li class="email-list-item d-flex align-items-center" data-starred="true" data-bs-toggle="sidebar"
                       data-target="#app-email-view">
                       <div class="d-flex align-items-center w-100">
@@ -245,26 +244,25 @@
                         </div>
                       </div>
                     </li>
-                    @endfor
-                    {{-- @endforeach --}}
+                    @endforeach
                   </ul>
-                {{-- @else --}}
+                @else
                   <ul class="list-unstyled mt-10">
                     <li class="email-list-empty text-center">
                       {{ __('messages.No Received Messages') }}      
                     </li>
                   </ul>
-                {{-- @endif --}}
+                @endif
               </div>
             </div>
             <div class="app-overlay"></div>
           </div>
           <!-- /Emails List -->
 
-          <!-- Email View -->
+          <!-- Inbox View -->
           <div class="col app-email-view flex-grow-0 bg-lighter" id="app-email-view">
             <div class="card shadow-none border-0 rounded-0 app-email-view-header p-5 pt-md-4 py-2">
-              <!-- Email View : Title  bar-->
+              <!-- Inbox View : Title  bar-->
               <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center overflow-hidden">
                   <span class="ms-sm-2 me-4"><i class="ti ti-chevron-left ti-md cursor-pointer"
@@ -272,7 +270,7 @@
                   <h6 class="text-truncate mb-0 me-2 fw-normal">Focused impactful open issues</h6>
                   <span class="badge bg-label-warning rounded-pill">Important</span>
                 </div>
-                <!-- Email View : Action bar-->
+                <!-- Inbox View : Action bar-->
                 <div class="d-flex align-items-center">
                   <span class="btn btn-icon p-0 me-2 text-muted">
                     <i class="ti ti-chevron-left ti-md"></i>
@@ -371,10 +369,10 @@
               </div>
             </div>
             <hr class="m-0" />
-            <!-- Email View : Content-->
+            <!-- Inbox View : Content-->
             <div class="app-email-view-content py-4">
               <p class="email-earlier-msgs text-center cursor-pointer mb-12">1 Earlier Message</p>
-              <!-- Email View : Previous mails-->
+              <!-- Inbox View : Previous mails-->
               <div class="card email-card-prev mx-sm-6 mx-3">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap border-bottom">
                   <div class="d-flex align-items-center mb-sm-0 mb-3">
@@ -436,7 +434,7 @@
                   </div>
                 </div>
               </div>
-              <!-- Email View : Last mail-->
+              <!-- Inbox View : Last mail-->
               <div class="card email-card-last mx-sm-6 mx-3 mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap border-bottom">
                   <div class="d-flex align-items-center mb-sm-0 mb-3">
@@ -498,7 +496,7 @@
                   </div>
                 </div>
               </div>
-              <!-- Email View : Reply mail-->
+              <!-- Inbox View : Reply mail-->
               <div class="email-reply card mt-4 mx-sm-6 mx-3 mb-4">
                 <h6 class="card-header border-0 fw-normal pb-4">Reply to Ross Geller</h6>
                 <div class="card-body pt-0 ps-3">
@@ -530,7 +528,7 @@
               </div>
             </div>
           </div>
-          <!-- Email View -->
+          <!-- Inbox View -->
         </div>
 
         <!-- Compose Email -->
