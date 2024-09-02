@@ -268,6 +268,7 @@ $('.ZOOM_CLIENT').hide();
         $('.ZOOM_CLIENT').hide();
 
     }else if(meeting == 'Zoom'){
+        
         $('.GOOGLE_CLIENT_ID').hide();
         $('.MICROSOFT_CLIENT').hide();
         $('.ZOOM_CLIENT').show();
