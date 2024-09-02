@@ -161,7 +161,7 @@
                                     </div>
                                     <div class="table-responsive">
                                         <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-                                        <div class="btn btn-success ExportExcelScreesRes">Export</div>
+                                        <div class="btn btn-success ExportExcelScreesRes">{{__('cycles.Export')}}</div>
                                         
                                         <table id="result-list-datatable" class=" table mb-0">
                                             <thead class="thead-dark">
@@ -299,6 +299,12 @@
                 @endif
             });
         });
+
+        const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+        exportError: "{{ __('messages.export_error') }}",
+        fillRequiredFields: "{{ __('messages.fill_required_fields') }}"
+    };
     </script>
 
     <script>

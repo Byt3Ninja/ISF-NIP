@@ -552,4 +552,5 @@ return [
 	'questionGroup' => 'تصنيف السؤال',
 	'question_type_quiz' => 'اختبار',
 	'question_type_survey' => 'استطلاع',
+	'settings'=>'الاعدادات',
 ];

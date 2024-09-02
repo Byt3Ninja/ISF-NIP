@@ -96,7 +96,7 @@
                 <div class="table-responsive">
 
                     <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-                    <div class="btn btn-success ExportExcelTresult">Export</div>
+                    <div class="btn btn-success ExportExcelTresult">{{__('cycles.Export')}}</div>
                     <br><br><br>
                     <input type="hidden" class="step_id" value="{{$csession->step_id}}">
                     <table class="table mb-0">
@@ -231,6 +231,11 @@
                 @endif
             });
         });
+
+        const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+    };
+
     </script>
     <script>
             function changestep(company,step){

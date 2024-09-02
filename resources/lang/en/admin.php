@@ -552,4 +552,5 @@ return [
 	'questionGroup' => 'Question group',
 	'question_type_quiz' => 'Quiz',
 	'question_type_survey' => 'Survey',
+	'settings'=>'Settings',
 ];
