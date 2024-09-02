@@ -404,6 +404,14 @@
                         <span class="menu-title">{{__('admin.Reports')}}</span></a>
                 </li>
             @endcan
+
+            @can ('view_report')
+                <li class="{{Request::is('reports*')?'active':''}} nav-item"><a href="/dashboard/settings"><i
+                                class="menu-cof" data-icon="notebook"></i>
+                        <span class="menu-title">{{__('admin.settings')}}</span></a>
+                </li>
+            @endcan
+            
             <li class=" navigation-header"><span></span>
             </li>
 

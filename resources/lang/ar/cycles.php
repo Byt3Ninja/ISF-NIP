@@ -239,6 +239,11 @@ return [
     'Number of joined Startup' => 'عدد المشتركين',
     'Numbers of cycles' => 'عدد المراحل',
     'Organization Name'=>'اسم الحاضنة',
-    'Organization logo'=>'شعار الحاضنة'
+    'Organization logo'=>'شعار الحاضنة',
+    'search'=>'بحث',
+    'Export'=>'استخراج',
+    'showAll'=>'مشاهدة الكل',
+    'days'=>'ايام',
+    'export_willsuccess'=>'سوف نرسل لك البريد عندما يكون جاهزاً',
     ];
 

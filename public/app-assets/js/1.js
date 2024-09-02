@@ -109,6 +109,8 @@ $(document).ready(function () {
             return;
         }
 
+        alert(messages.exportSuccess);
+
         $.ajax({
             url: `/dashboard/export-Result`,
             type: 'GET',
@@ -117,7 +119,8 @@ $(document).ready(function () {
                 exportcstep:exportcstep
             },
             success: function(response) {
-                alert(response.message);
+                
+                // alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -134,14 +137,14 @@ $(document).ready(function () {
             alert('Please make sure all required fields are filled.');
             return;
         }
-
+alert(messages.exportSuccess);
         $.ajax({
             url: `/dashboard/export-cyclesComp`,
             type: 'GET',
             data:{step:step
             },
             success: function(response) {
-                alert(response.message);
+                // alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -159,7 +162,7 @@ $(document).ready(function () {
             alert('Please make sure all required fields are filled.');
             return;
         }
-
+        alert(messages.exportSuccess);
         $.ajax({
             url: `/dashboard/export-Tresult`,
             type: 'GET',
@@ -167,7 +170,7 @@ $(document).ready(function () {
                 location:location
             },
             success: function(response) {
-                alert(response.message);
+                // alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -179,14 +182,14 @@ $(document).ready(function () {
 
     $(document).on('click', '.ExportExcelMentor', function() {
         var request = $('.Request').val();
-        
+        alert(messages.exportSuccess);
         $.ajax({
             url: `/dashboard/export-mentorship`,
             type: 'GET',
             data:{request:request
             },
             success: function(response) {
-                alert(response.message);
+                // alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -249,7 +252,32 @@ $(document).ready(function () {
 
 
 
+$(document).on('change', '.Meeting', function(){
+    var meeting = $(this).val();
 
+    if(meeting == 'Google'){
+$('.GOOGLE_CLIENT_ID').show();
+$('.MICROSOFT_CLIENT').hide();
+$('.ZOOM_CLIENT').hide();
+
+
+    }else if(meeting == 'Microsoft'){
+
+        $('.GOOGLE_CLIENT_ID').hide();
+        $('.MICROSOFT_CLIENT').show();
+        $('.ZOOM_CLIENT').hide();
+
+    }else if(meeting == 'Zoom'){
+        $('.GOOGLE_CLIENT_ID').hide();
+        $('.MICROSOFT_CLIENT').hide();
+        $('.ZOOM_CLIENT').show();
+
+    }
+
+
+
+
+});
 
 
 

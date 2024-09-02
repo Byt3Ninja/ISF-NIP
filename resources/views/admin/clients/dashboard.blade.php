@@ -449,23 +449,23 @@
 								<h4 class="card-title align-items-center">
 									<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
 									@if($days!=14)
-									<div onclick="redirectWithDays('14')" class="btn btn-success" id="forteenDays"> 14 Days</div>
+									<div onclick="redirectWithDays('14')" class="btn btn-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
 									@else
-									<div onclick="redirectWithDays('14')" class="btn btn-warning" id="forteenDays"> 14 Days</div>
+									<div onclick="redirectWithDays('14')" class="btn btn-warning" id="forteenDays"> 14 {{__('cycles.days')}}</div>
 									@endif
 									@if($days!=7)
-									<div onclick="redirectWithDays('7')" class="btn btn-success" id="sevenDays"> 7 Days</div>
+									<div onclick="redirectWithDays('7')" class="btn btn-success" id="sevenDays"> 7 {{__('cycles.days')}}</div>
 									@else
-									<div onclick="redirectWithDays('7')" class="btn btn-warning" id="sevenDays"> 7 Days</div>
+									<div onclick="redirectWithDays('7')" class="btn btn-warning" id="sevenDays"> 7 {{__('cycles.days')}}</div>
 									@endif
-
+									<a href="/dashboard/mentorship/mine"><div class="btn btn-info">{{__('cycles.showAll')}}</div></a>
 									
 								</h4>
 
 								<div class="card-body">
 									<div class="card ">
 										<div class="table-responsive">
-											<table class="table mb-0" id="userstable">
+											<table class="table mb-0 sessonsTable" >
 												<thead class="thead-dark">
 												<tr>
 													{{-- <th>{{__('cycles.Company')}}</th> --}}
@@ -851,6 +851,35 @@ function redirectWithDays(showValue) {
 			@endif
 		});
 
+		$(document).ready(function() {
+			$(".sessonsTable").DataTable({
+				"responsive": true,
+				"searching": true,
+				"lengthChange": false,
+				"paging": false,
+				"bInfo": false,
+				"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
+				@if( $l == 'ar' )
+				"language": {
+					"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
+					"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
+					"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
+					"sInfo":		 "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+					"sInfoEmpty":	"يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+					"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
+					"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
+					"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+				}
+				@endif
+			});
+			@if ($notrated_men or $notrated_ser)
+			//Open rate popup
+			$("#RequestRate").modal("show");
+			@endif
+		});
+
+		
+		
 		$("#date").datetimepicker({
 			format: 'Y-m-d H:i', onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
 			maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',

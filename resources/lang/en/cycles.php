@@ -241,6 +241,11 @@ return [
     'Number of joined Startup' => 'Number of joined Startup',
     'Numbers of cycles' => 'Numbers of cycles',
     'Organization Name'=>'Organization Name',
-    'Organization logo'=>'Organization logo'
+    'Organization logo'=>'Organization logo',
+    'search'=>'Search',
+    'Export'=>'Export',
+    'showAll'=>'Show All',
+    'days'=>'Days',
+    'export_willsuccess'=>'Export process started. You will receive an email with the download attached.',
 ];
 

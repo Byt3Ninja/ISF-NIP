@@ -292,4 +292,10 @@ class HomeController extends Controller
         if (count($menu)==0 or !$doc) {abort(404);}
         return view('admin.documentation', compact('doc','menu'));
     }
+
+    
+
+
+
+
 }

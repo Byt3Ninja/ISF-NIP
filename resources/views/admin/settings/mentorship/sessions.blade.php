@@ -81,19 +81,19 @@
 
 
 <!-- الروابط المعدلة لإرسال التاريخ -->
-<div onclick="redirectWithDates('all')" class="btn btn-light-primary glow width-200 {{ request()->show=='all' ? 'active' : '' }}">
+<div onclick="redirect('all')" class="btn btn-light-primary glow width-200 {{ request()->show=='all' ? 'active' : '' }}">
     {{ __('cycles.All requests') }}
 </div>
 
-<div href="#" onclick="redirectWithDates('')" class="btn btn-light-warning glow width-200 {{ !request()->show ? 'active' : '' }}">
+<div href="#" onclick="redirect('')" class="btn btn-light-warning glow width-200 {{ !request()->show ? 'active' : '' }}">
     {{ __('cycles.New requests only') }}
 </div>
 
-<div href="#" onclick="redirectWithDates('approved')" class="btn btn-light-success glow width-200 {{ request()->show=='approved' ? 'active' : '' }}">
+<div href="#" onclick="redirect('approved')" class="btn btn-light-success glow width-200 {{ request()->show=='approved' ? 'active' : '' }}">
     {{ __('cycles.approved requests') }}
 </div>
 
-<div href="#" onclick="redirectWithDates('disapproved')" class="btn btn-light-danger glow width-200 {{ request()->show=='disapproved' ? 'active' : '' }}">
+<div href="#" onclick="redirect('disapproved')" class="btn btn-light-danger glow width-200 {{ request()->show=='disapproved' ? 'active' : '' }}">
     {{ __('cycles.disapproved requests') }}
 </div>
                 {{--                @else--}}
@@ -104,13 +104,8 @@
 
     </div>
             <div class="card-body">
-                <div class="col-md-3" style="display: inline-block">
-                <input type="text" class="datewithouttime form-control" id="start_date" value="{{ request('start_date') }}" name="start_date" placeholder="Start Date">
-                </div>
-                <div class="col-md-3" style="display: inline-block">
-                <input type="text" class="datewithouttime form-control" id="end_date" value="{{ request('end_date') }}" name="end_date" placeholder="End Date">
-                </div>
-                <br><br>
+                
+                
             <div class="card-text">
                 <div class="table-responsive">
                           <!-- إدخال تاريخ البداية -->
@@ -118,7 +113,26 @@
               
 
                     <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-                    <div class="btn btn-success ExportExcelMentor">Export</div>
+                    <div class="btn btn-success ExportExcelMentor">{{__('cycles.Export')}}</div>
+                    <div class="col-md-3" style="display: inline-block">
+                        <input type="text" class="datewithouttime form-control" id="start_date" value="{{ request('start_date') }}" name="start_date" placeholder="Start Date">
+                        </div>
+                        <div class="col-md-3" style="display: inline-block">
+                        <input type="text" class="datewithouttime form-control" id="end_date" value="{{ request('end_date') }}" name="end_date" placeholder="End Date">
+                        </div>
+                        <div class="col-md-3" style="display: inline-block">
+                        <select class="form-control " id="showValueSelect">
+                            <option value="all" {{ request()->show=='all' ? 'selected' : '' }} >{{ __('cycles.All requests') }}</option>
+                            <option value="" {{ !request()->show ? 'selected' : '' }} >{{ __('cycles.New requests only') }}</option>
+                            <option value="approved" {{ request()->show=='approved' ? 'selected' : '' }} >{{ __('cycles.approved requests') }}</option>
+                            <option value="disapproved" {{ request()->show=='disapproved' ? 'selected' : '' }} >{{ __('cycles.disapproved requests') }}</option>
+                        </select>
+
+                        </div>
+
+                        <div class="btn btn-info" id="searchBot">{{__('cycles.search')}} </div>
+
+
                     <input type="hidden" class="Request" value="{{Request()->show}}">
 
                     <table class="table mb-0" id="userstable">
@@ -355,22 +369,41 @@
                             alert("Error Occurred, Try again!");
                         }});
             }
+            const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+    };
 
+            document.getElementById('searchBot').addEventListener('click', redirectWithDates);
 
-            function redirectWithDates(showValue) {
-    // الحصول على قيم التواريخ
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
+function redirectWithDates() {
+// الحصول على قيم التواريخ
+const startDate = document.getElementById('start_date').value;
+const endDate = document.getElementById('end_date').value;
+
+const showValue = document.getElementById('showValueSelect').value;
+
+// التحقق من وجود تواريخ والتحقق من تنسيقها لضمان التوافق
+let url = `/dashboard/mentorship/sessions?show=${showValue}`;
+
+// إذا كانت start_date و end_date موجودة، أضفها إلى الرابط
+if (startDate && endDate) {
+const formattedStartDate = formatDate(startDate);
+const formattedEndDate = formatDate(endDate);
+url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
+}
+
+// إعادة التوجيه إلى الرابط المناسب
+window.location.href = url;
+}
+
+            function redirect(showValue) {
+  
 
     // التحقق من وجود تواريخ والتحقق من تنسيقها لضمان التوافق
     let url = `/dashboard/mentorship/sessions?show=${showValue}`;
 
     // إذا كانت start_date و end_date موجودة، أضفها إلى الرابط
-    if (startDate && endDate) {
-        const formattedStartDate = formatDate(startDate);
-        const formattedEndDate = formatDate(endDate);
-        url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
-    }
+    
 
     // إعادة التوجيه إلى الرابط المناسب
     window.location.href = url;
