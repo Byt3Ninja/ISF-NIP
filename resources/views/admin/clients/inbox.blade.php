@@ -21,9 +21,7 @@
             <div class="card shadow-none border-0 rounded-0">
               <div class="card-body emails-list-header p-3 py-2">
                 <h4 class="px-4 mt-4">
-                  {{
-                    $l == 'ar' ? 'الرسائل الواردة' : 'Received Messages'
-                  }}
+                  {{ $l == 'ar' ? 'الرسائل الواردة' : 'Received Messages' }}
                 </h4>
                 <!-- Inbox List: Search -->
                 {{-- <div class="d-flex justify-content-between align-items-center px-3 mt-2">
@@ -137,80 +135,81 @@
         </div>
       </div>
     </div>
-    <!-- Modal -->
-  @stop
+  </div>
+  <!-- Modal -->
+@stop
 
-  @section('scripts')
-    <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
-    <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-    <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-    <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
+@section('scripts')
+  <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
 
-    @if ($l == 'ar')
-      <script type="text/javascript">
-        $(document).ready(function() {
-          $('.zero-configuration').DataTable({
-            "language": {
-              "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-              "sLoadingRecords": "جارٍ التحميل...",
-              "sProcessing": "جارٍ التحميل...",
-              "sLengthMenu": "أظهر _MENU_ مدخلات",
-              "sZeroRecords": "لم يعثر على أية سجلات",
-              "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-              "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-              "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-              "sInfoPostFix": "",
-              "sSearch": "ابحث:",
-              "sUrl": "",
-              "oPaginate": {
-                "sFirst": "الأول",
-                "sPrevious": "السابق",
-                "sNext": "التالي",
-                "sLast": "الأخير"
-              },
-              "oAria": {
-                "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-                "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-              }
+  @if ($l == 'ar')
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('.zero-configuration').DataTable({
+          "language": {
+            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+            "sLoadingRecords": "جارٍ التحميل...",
+            "sProcessing": "جارٍ التحميل...",
+            "sLengthMenu": "أظهر _MENU_ مدخلات",
+            "sZeroRecords": "لم يعثر على أية سجلات",
+            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+            "sInfoPostFix": "",
+            "sSearch": "ابحث:",
+            "sUrl": "",
+            "oPaginate": {
+              "sFirst": "الأول",
+              "sPrevious": "السابق",
+              "sNext": "التالي",
+              "sLast": "الأخير"
+            },
+            "oAria": {
+              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
             }
-          });
+          }
         });
-      </script>
-    @endif
-    <script>
-      function OpenModal(id) {
-        $.ajax({
-          type: " GET",
-          url: "/dashboard/openmsg",
-          data: {
-            "id": id,
-            "type": 1
-          },
-          success: function(response) {
-            var trrow = $("#" + 'read' + id);
-            var trno = $("#" + 'No' + id);
-            trrow.css({
-              "font-weight": "unset"
-            });
-            trno.html('{{ __('messages.Yes') }}');
-            $('#from').text("'" + response['subject'] +
-              "' {{ __('messages.From') }}: " + response['first_name_{{ $l == 'ar' ? 'ar' : 'en' }}'] + " " +
-              response['last_name_{{ $l == 'ar' ? 'ar' : 'en' }}']);
-            $('#date').text(response['created_at']);
-            $('#message').text(response['message']);
-            $('#receiver').val(response['sender']);
-            $('#messgeId').val(response['id']);
-            $('#subject').val("Reply to: " + (response['subject']).replace('Reply to:', ''));
-          },
-          error: function(error) {
-            console.log(error);
-            alert(" Error Occurred, Try again!");
-          },
-        });
-      }
+      });
     </script>
-  @stop
+  @endif
+  <script>
+    function OpenModal(id) {
+      $.ajax({
+        type: " GET",
+        url: "/dashboard/openmsg",
+        data: {
+          "id": id,
+          "type": 1
+        },
+        success: function(response) {
+          var trrow = $("#" + 'read' + id);
+          var trno = $("#" + 'No' + id);
+          trrow.css({
+            "font-weight": "unset"
+          });
+          trno.html('{{ __('messages.Yes') }}');
+          $('#from').text("'" + response['subject'] +
+            "' {{ __('messages.From') }}: " + response['first_name_{{ $l == 'ar' ? 'ar' : 'en' }}'] + " " +
+            response['last_name_{{ $l == 'ar' ? 'ar' : 'en' }}']);
+          $('#date').text(response['created_at']);
+          $('#message').text(response['message']);
+          $('#receiver').val(response['sender']);
+          $('#messgeId').val(response['id']);
+          $('#subject').val("Reply to: " + (response['subject']).replace('Reply to:', ''));
+        },
+        error: function(error) {
+          console.log(error);
+          alert(" Error Occurred, Try again!");
+        },
+      });
+    }
+  </script>
+@stop
 
-  @section('pagescripts')
-    <script src="/vuexy/assets/js/app-email.js"></script>
-  @stop
+@section('pagescripts')
+  <script src="/vuexy/assets/js/app-email.js"></script>
+@stop
