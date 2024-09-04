@@ -285,7 +285,6 @@ public function calendar(Request $request){
         $id = $request->input('id');
         $site_ar_title = $request->input('site_ar_title');
         $site_title = $request->input('site_title');
-        $gtag = $request->input('gtag');
         $autoact = $request->input('autoact');
         $Platform_Name = $request->input('Platform_Name');
         $Platform_support_email = $request->input('Platform_support_email');
@@ -300,7 +299,6 @@ public function calendar(Request $request){
 
         $updateSittings->ar_title = $site_ar_title;
         $updateSittings->title = $site_title;
-        $updateSittings->url = $gtag;
         $request->input('autoact')=='on'?$updateSittings->set_order = 1:$updateSittings->set_order = null;
         $updateSittings->Platform_Name = $Platform_Name;
         $updateSittings->Platform_support_email = $Platform_support_email;
@@ -329,14 +327,14 @@ public function update_settinglogo(Request $request){
     
         // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
         // هنا نضيف "new_" كبادئة لاسم الصورة
-        $newName = $updateSittings->Platform_Name; 
+        $newName = 'logo'; 
     
         // تحديد الامتداد الأصلي للصورة
         $extension = $image->getClientOriginalExtension();
     
         // تركيب الاسم الجديد مع الامتداد
         $logo = $newName . '.' . $extension;
-        $destinationPath = public_path('images/header');
+        $destinationPath = public_path('images/logo');
 
         if (!file_exists($destinationPath)) {
             mkdir($destinationPath, 0777, true); // إنشاء المجلد إذا لم يكن موجودًا
@@ -356,7 +354,7 @@ public function update_settinglogo(Request $request){
     
         // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
         // هنا نضيف "new_" كبادئة لاسم الصورة
-        $newName = $updateSittings->Platform_Name; 
+        $newName = 'mailheader'; 
     
         // تحديد الامتداد الأصلي للصورة
         $extension = $image->getClientOriginalExtension();
@@ -364,7 +362,7 @@ public function update_settinglogo(Request $request){
         // تركيب الاسم الجديد مع الامتداد
         $header = $newName . '.' . $extension;
 
-        $destinationPath = public_path('images/header');
+        $destinationPath = public_path('images/logo');
 
         if (!file_exists($destinationPath)) {
             mkdir($destinationPath, 0777, true); // إنشاء المجلد إذا لم يكن موجودًا
@@ -383,7 +381,7 @@ public function update_settinglogo(Request $request){
     
         // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
         // هنا نضيف "new_" كبادئة لاسم الصورة
-        $newName = $updateSittings->Platform_Name; 
+        $newName = 'mailfooter'; 
     
         // تحديد الامتداد الأصلي للصورة
         $extension = $image->getClientOriginalExtension();
@@ -391,7 +389,7 @@ public function update_settinglogo(Request $request){
         // تركيب الاسم الجديد مع الامتداد
         $footer = $newName . '.' . $extension;
     
-        $destinationPath = public_path('images/header');
+        $destinationPath = public_path('images/logo');
 
         if (!file_exists($destinationPath)) {
             mkdir($destinationPath, 0777, true); // إنشاء المجلد إذا لم يكن موجودًا
@@ -417,12 +415,11 @@ public function update_settinglogo(Request $request){
 public function update_settingstwo(Request $request){
    
     $id = $request->input('id');
-    $google = $request->input('google');
-    
+    $gtag = $request->input('gtag');
 
     $updateSittings = Settings::where('id', $id)->first();
 
-    $updateSittings->google = $google;
+    $updateSittings->url = $gtag;
     $updateSittings->save();
 
 
@@ -454,15 +451,21 @@ public function update_settingspush(Request $request){
    
     $id = $request->input('id');
     $BroadCast = $request->input('BroadCast');
-    $Secret_Key = $request->input('Secret_Key');
-    $Client_ID = $request->input('Client_ID');
-    $Cluster_name = $request->input('Cluster_name');
+    $PUSHER_APP_KEY = $request->input('PUSHER_APP_KEY');
+    $PUSHER_APP_ID = $request->input('PUSHER_APP_ID');
+    $PUSHER_APP_SECRET = $request->input('PUSHER_APP_SECRET');
+    $PUSHER_APP_CLUSTER = $request->input('PUSHER_APP_CLUSTER');
+    $MIX_PUSHER_APP_KEY = $request->input('MIX_PUSHER_APP_KEY');
+    $MIX_PUSHER_APP_CLUSTER = $request->input('MIX_PUSHER_APP_CLUSTER');
     
     $updateSittings = Settings::where('id', $id)->first();
     $updateSittings->BroadCast = $BroadCast;
-    $updateSittings->Secret_Key = $Secret_Key;
-    $updateSittings->Client_ID = $Client_ID;
-    $updateSittings->Cluster_name = $Cluster_name;
+    $updateSittings->PUSHER_APP_KEY = $PUSHER_APP_KEY;
+    $updateSittings->PUSHER_APP_ID = $PUSHER_APP_ID;
+    $updateSittings->PUSHER_APP_SECRET = $PUSHER_APP_SECRET;
+    $updateSittings->PUSHER_APP_CLUSTER = $PUSHER_APP_CLUSTER;
+    $updateSittings->MIX_PUSHER_APP_KEY = $MIX_PUSHER_APP_KEY;
+    $updateSittings->MIX_PUSHER_APP_CLUSTER = $MIX_PUSHER_APP_CLUSTER;
     $updateSittings->save();
 
 

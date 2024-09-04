@@ -70,9 +70,9 @@
                                                         value="{{ old('name_ar') }}">
                                                 </fieldset>
                                                 <fieldset class="form-group">
-                                                    <label for="basicInput">{{__('admin.Price')}}</label>
+                                                    <label for="basicInput">{{__('admin.Price')}} {{$Setting->Currency}}</label>
                                                     <input style="direction: ltr;" type="text" class="form-control col-md-3 col-sm-12" id="price" name='price'
-                                                           required placeholder="{{__('admin.Price in EGP')}}"
+                                                           required placeholder="{{__('admin.Price')}} {{$Setting->Currency}}"
                                                            value="{{ old('price') }}">
                                                 </fieldset>
 

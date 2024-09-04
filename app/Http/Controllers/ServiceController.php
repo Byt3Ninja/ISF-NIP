@@ -39,7 +39,8 @@ class ServiceController extends Controller
 
             $user =  $this->preProcessingCheck('view_service');
             $services = Service::with('serviceCategory')->get();
-            return view('admin/settings/services/index', compact('services'));
+            $Setting = \App\Settings::where('id', 1)->first();
+            return view('admin/settings/services/index', compact('services','Setting'));
 
         }catch (Exception $e){
 
@@ -61,7 +62,8 @@ class ServiceController extends Controller
 
             $user =  $this->preProcessingCheck('add_service');
             $serviceCategories = ServiceCategory::all();
-            return view('admin/settings/services/create', compact('serviceCategories'));
+            $Setting = \App\Settings::where('id', 1)->first();
+            return view('admin/settings/services/create', compact('serviceCategories','Setting'));
 
         }catch (Exception $e){
 

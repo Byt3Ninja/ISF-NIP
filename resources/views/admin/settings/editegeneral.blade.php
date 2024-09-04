@@ -54,6 +54,7 @@
                                             </div>
                      </div>
 					 @endif
+                     
                     <div class="row match-height">
                         <div class="col-12">
                             <form class="form" action= "{{route('updateone')}}" method="POST" enctype="multipart/form-data">
@@ -79,12 +80,7 @@
                                                 <label for="site_title">{{__('settings.ENGLISHWEBSITETITLE')}}</label>
                                             </div>
                                         </div>
-                                        <div class="col-md-12 col-12">
-                                            <div class="form-label-group">
-                                                <input style="direction: ltr;" type="text" class="form-control" value="{{$Title->url}}" name="gtag" id="gtag" >
-                                                <label for="gtag">{{__('settings.Google Analytics Code')}}</label>
-                                            </div>
-                                        </div>
+                                        
                                         <div class="col-md-12 col-12">
                                             <div class="custom-control custom-switch custom-control-inline mb-1">
                                                 <span>{{__('settings.Enable registration')}}</span>&nbsp;
@@ -146,10 +142,10 @@
 
                                                     @php $timezones = DateTimeZone::listIdentifiers(); 
                                                     
-    //                                                 $selectedTimezones = array_filter($timezones, function ($timezone) {
+    //  $selectedTimezones = array_filter($timezones, function ($timezone) {
     //     return in_array($timezone, [
     //         'Africa/Cairo',     // مصر
-    //         'Asia/Bahrain',     // البحرين
+    //         'Asia/Bahrain',     // البحرين   
     //         'Asia/Riyadh',      // السعودية
     //     ]);
     // }); 
@@ -157,9 +153,11 @@
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-group">
                                                             <label for="timezone">{{ __('settings.timezone')}} *</label>
-                                                            <select class="form-control" id="timezone" name='timezone' >
+
+                                                            <select class="select form-control" id="timezone" name='timezone' >
+
                                                                 <option value="">{{ __('settings.timezone')}}</option>
-                                                               
+
                                                                    @foreach ($timezones  as $timezone)
         @php
             // حساب فرق التوقيت للمنطقة الزمنية
@@ -178,7 +176,7 @@
                                                             <select class="form-control" id="Currency" name='Currency' >
                                                                 <option value="">{{ __('settings.Currency')}}</option>
                                                                
-                                                                    <option value="US"  {{($Title->Currency=='US')? 'selected':''}}> $ </option>
+                                                                    <option value="$"  {{($Title->Currency=='$')? 'selected':''}}> US </option>
                                                                     <option value="LE"  {{($Title->Currency=='LE')? 'selected':''}}> L.E </option>
                                                                
                                                             </select>
@@ -198,6 +196,7 @@
 
 
                             <form class="form" action= "{{route('updatelogo')}}" method="POST" enctype="multipart/form-data">
+
                                 {!! csrf_field() !!}
                             @method('PUT')
                             <input type="hidden" name="id" value="{{$Title->id}}">
@@ -209,19 +208,19 @@
                                     <div class="card-body">
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input id="logo" style="direction: rtl;" type="file" class="form-control" value="{{$Title->Logo}}" name="logo" required>
+                                                            <input id="logo" style="direction: rtl;" type="file" class="form-control" value="{{$Title->Logo}}" name="logo" >
                                                             <label for="logo">{{__('settings.Logo')}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input id="header" type="file" class="form-control" value="{{$Title->header}}" name="header" required>
+                                                            <input id="header" type="file" class="form-control" value="{{$Title->header}}" name="header" >
                                                             <label for="header">{{__('settings.header')}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input type="file" class="form-control" value="{{$Title->footer}}" name="footer" id="footer" required>
+                                                            <input type="file" class="form-control" value="{{$Title->footer}}" name="footer" id="footer" >
                                                             <label for="footer">{{__('settings.footer')}}</label>
                                                         </div>
                                                     </div>
@@ -244,13 +243,16 @@
                                 </div>
                                 <div class="card-content">
                                     <div class="card-body">
+                                                
+                                                    
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input id="google" type="text" class="form-control" value="{{$Title->google}}" name="google" required>
-                                                            <label for="google">{{__('settings.google')}}</label>
+                                                            <input style="direction: ltr;" type="text" class="form-control" value="{{$Title->url}}" name="gtag" id="gtag" >
+                                                            <label for="gtag">{{__('settings.Google Analytics Code')}}</label>
                                                         </div>
                                                     </div>
-                                                    
+
+
                                                     <div class="col-12 d-flex justify-content-end">
                                                         <button type="submit" class="btn btn-primary mr-1 mb-1">{{__('settings.Submit')}}</button>
                                                     </div>
@@ -271,26 +273,26 @@
                                     <div class="card-body">
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input id="host" type="text" class="form-control" value="{{$Title->host}}" name="host" required>
+                                                            <input id="host" type="text" class="form-control" value="{{$Title->host}}" name="host" >
                                                             <label for="host">{{__('settings.host')}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input id="Mail" type="text" class="form-control" value="{{$Title->Mail}}" name="Mail" required>
+                                                            <input id="Mail" type="text" class="form-control" value="{{$Title->Mail}}" name="Mail" >
                                                             <label for="Mail">{{__('settings.Mail')}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input type="text" class="form-control" value="{{$Title->Mailpassword}}" name="Mailpassword" id="Mailpassword" required>
+                                                            <input type="text" class="form-control" value="{{$Title->Mailpassword}}" name="Mailpassword" id="Mailpassword" >
                                                             <label for="Mailpassword">{{__('settings.Mailpassword')}}</label>
                                                         </div>
                                                     </div>
 
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input type="text" class="form-control" value="{{$Title->Port}}" name="Port" id="Port" required>
+                                                            <input type="text" class="form-control" value="{{$Title->Port}}" name="Port" id="Port" >
                                                             <label for="Port">{{__('settings.Port')}}</label>
                                                         </div>
                                                     </div>
@@ -325,21 +327,42 @@
                                         </div>
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input id="Secret_Key" type="text" class="form-control" value="{{$Title->Secret_Key}}" name="Secret_Key" required>
-                                                            <label for="Secret_Key">{{__('settings.Secret_Key')}}</label>
+                                                            <input id="PUSHER_APP_KEY" type="text" class="form-control" value="{{$Title->PUSHER_APP_KEY}}" name="PUSHER_APP_KEY" >
+                                                            <label for="PUSHER_APP_KEY">{{__('settings.PUSHER_APP_KEY')}}</label>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input type="text" class="form-control" value="{{$Title->Client_ID}}" name="Client_ID" id="Client_ID" required>
-                                                            <label for="Client_ID">{{__('settings.Client_ID')}}</label>
+                                                            <input type="text" class="form-control" value="{{$Title->PUSHER_APP_ID}}" name="PUSHER_APP_ID" id="PUSHER_APP_ID" >
+                                                            <label for="PUSHER_APP_ID">{{__('settings.PUSHER_APP_ID')}}</label>
                                                         </div>
                                                     </div>
 
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
-                                                            <input type="text" class="form-control" value="{{$Title->Cluster_name}}" name="Cluster_name" id="Cluster_name" required>
-                                                            <label for="Cluster_name">{{__('settings.Cluster_name')}}</label>
+                                                            <input type="text" class="form-control" value="{{$Title->PUSHER_APP_SECRET}}" name="PUSHER_APP_SECRET" id="PUSHER_APP_SECRET" >
+                                                            <label for="PUSHER_APP_SECRET">{{__('settings.PUSHER_APP_SECRET')}}</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-12 col-12">
+                                                        <div class="form-label-group">
+                                                            <input type="text" class="form-control" value="{{$Title->PUSHER_APP_CLUSTER}}" name="PUSHER_APP_CLUSTER" id="PUSHER_APP_CLUSTER" >
+                                                            <label for="PUSHER_APP_CLUSTER">{{__('settings.PUSHER_APP_CLUSTER')}}</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-12 col-12">
+                                                        <div class="form-label-group">
+                                                            <input type="text" class="form-control" value="{{$Title->MIX_PUSHER_APP_KEY}}" name="MIX_PUSHER_APP_KEY" id="MIX_PUSHER_APP_KEY" >
+                                                            <label for="MIX_PUSHER_APP_KEY">{{__('settings.MIX_PUSHER_APP_KEY')}}</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-12 col-12">
+                                                        <div class="form-label-group">
+                                                            <input type="text" class="form-control" value="{{$Title->MIX_PUSHER_APP_CLUSTER}}" name="MIX_PUSHER_APP_CLUSTER" id="MIX_PUSHER_APP_CLUSTER" required>
+                                                            <label for="MIX_PUSHER_APP_CLUSTER">{{__('settings.MIX_PUSHER_APP_CLUSTER')}}</label>
                                                         </div>
                                                     </div>
                                                    

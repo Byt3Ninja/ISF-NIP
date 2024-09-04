@@ -98,7 +98,7 @@
                                                      <td>{{$num+1}}</td>
                                                      <td><a href="#" onclick="openservice({{$row->id}})">{{ $row->{'name_'.$l} }}</a></td>
                                                      <td>{{ substr(strip_tags($row->{'description_'.$l}),0,40) }}...</td>
-                                                     <td>{{ $row->price }} SAR</td>
+                                                     <td>{{ $row->price }} {{ $Setting->Currency }}</td>
                                                      <td>{!!$row->totalRate()?str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$row->totalRate()):''!!}</td>
                                                 </tr>
                                                 @endforeach

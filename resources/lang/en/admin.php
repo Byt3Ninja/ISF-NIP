@@ -352,7 +352,7 @@ return [
 	'problem'=> 'Problem',
 	'idea'=> 'Problem',
 	'est_date'=> 'Establishment date',
-	'raised_fund_egp'=> 'Raised Fund in $',
+	'raised_fund_egp'=> 'Raised Fund in ',
 	'team_num'=> 'Team number',
 	'Fax'=> 'Fax',
 	'stage'=> 'Stage',

@@ -7,7 +7,10 @@
                     <img src="{{ auth()->user()->company->cycledata->organization->image_url}}" alt="avatar" height="40" width="80">
 
                 @else
-                    <img src="/images/logo/arweqah.png" alt="avatar" height="50" width="150">
+                @php
+    $setting = \App\Settings::where('id', 1)->first();
+    @endphp
+                    <img src="/images/logo/{{$setting->Logo}}" alt="avatar" height="50" width="150">
                 @endif
             </a>
         </li>
@@ -22,7 +25,7 @@
         <li class="nav-item mr-auto">
             <a class="navbar-brand" href="/dashboard">
                 <h2 class="brand-text mb-0"
-                    style="padding-right:0!important;">{{ is_null(auth()->user()->organization_id)?config('app.name') : auth()->user()->organization->name }}</h2>
+                    style="padding-right:0!important;">{{ is_null(auth()->user()->organization_id)? $setting->Platform_Name : auth()->user()->organization->name }}</h2>
             </a>
         </li>
 
