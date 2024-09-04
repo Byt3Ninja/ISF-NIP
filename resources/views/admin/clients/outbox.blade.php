@@ -7,6 +7,7 @@
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @stop
 
 @section('content')
@@ -21,7 +22,7 @@
             <div class="card shadow-none border-0 rounded-0">
               <div class="card-body emails-list-header p-3 py-2">
                 <h4 class="px-4 mt-4">
-                  {{ $l == 'ar' ? 'الرسائل المرسلة' : 'sent Messages' }}
+                  {{ $l == 'ar' ? 'الرسائل المرسلة' : 'Sent Messages' }}
                 </h4>
                 <!-- Inbox List: Search -->
                 {{-- <div class="d-flex justify-content-between align-items-center px-3 mt-2">
@@ -65,7 +66,7 @@
                           </div>
                           <div class="email-list-item-meta ms-auto d-flex align-items-center justify-content-end">
                             <small class="email-list-item-time text-muted mx-6"
-                              style="width: 70px;">{{ $sent->created_at }}
+                              style="width: 90px;">{{ $sent->created_at }}
                             </small>
 
                             <button type="button" id="msg" onclick="OpenModal({{ $sent->id }});"
@@ -74,8 +75,7 @@
                               <i class="ti ti-hand-finger"></i>
                             </button>
 
-                            <a onclick="return confirm('{{ __('Are you sure?') }}');"
-                              href="{{ URL::to('/dashboard/deletemsg/' . $sent->id ?? null) }}"
+                            <a id="DelMe" onclick="delme({{ $sent->id }})" href="javascript:void(0);"
                               class="btn btn-icon btn-label-danger rounded-circle">
                               <i class="ti ti-trash"></i>
                             </a>
@@ -117,16 +117,13 @@
           <p><b>{{ __('messages.Message') }}:</b></p> <span id="message"></span>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary send-btn">
-            <i class="ti ti-x d-block d-sm-none"></i>
-            <span class="d-none d-sm-inline"> {{ __('messages.Send') }}</span>
-          </button>
-          <a id="DelMe" onclick="return confirm('{{ __('Are you sure?') }}');" href="#">
+          <a onclick="delme({{ $sent->id }})" href="javascript:void(0);">
             <button type="button" class="btn btn-label-danger">
               <i class="ti ti-x d-block d-sm-none"></i>
               <span class="d-none d-sm-block">{{ __('messages.Delete') }}</span>
-            </button></a>
-          <button type="button" class="btn btn-label-secondary" data-dismiss="modal">
+            </button>
+          </a>
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal" aria-label="Close">
             <i class="ti ti-x d-block d-sm-none"></i>
             <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
           </button>
@@ -141,6 +138,7 @@
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 
   @if ($l == 'ar')
     <script type="text/javascript">
