@@ -1,12 +1,13 @@
 @extends('layouts.admin')
-@section('vendorstyle')
-@stop
+
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
   <link rel="stylesheet" type="text/css" href="/app-assets/css{{ $l == 'ar' ? '-rtl' : '' }}/pages/search.css">
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+  {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" /> --}}
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @stop
+
 @section('title', __('admin.Dashboard'))
 @section('subTitle', __('admin.Services directory'))
 
@@ -15,25 +16,7 @@
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
-      {{-- <div class="content-header row">
-        <div class="content-header-left col-12 mb-2 mt-1">
-          <div class="row breadcrumbs-top">
-            <div class="col-12">
-              <h5 class="content-header-title float-left pr-1 mb-0">{{ __('admin.directory') }}</h5>
-              <div class="breadcrumb-wrapper col-12">
-                <ol class="breadcrumb p-0 mb-0">
-                  <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
-                  </li>
-                  <li class="breadcrumb-item active">{{ __('admin.Search') }}
-                  </li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> --}}
       <div class="content-body card">
-        
         <div class="search-bar-wrapper">
           <form id="search" method="get">
             <!-- Search Bar -->
@@ -126,7 +109,7 @@
     </div>
   </div>
   <!-- END: Content-->
-  
+
   <!--Service Modal -->
   <div class="modal fade text-left" id="service-data" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
     aria-hidden="true">
@@ -215,7 +198,8 @@
   <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
   <script src="/app-assets/js/scripts/datatables/datatable.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+
   <script>
     $('#date').datetimepicker({
       format: 'Y-m-d H:i',
@@ -287,10 +271,14 @@
     }
 
     function displayMessage(message) {
-      toastr.success(message, '{{ __('admin.Service request') }}');
+      //toastr.success(message, '{{ __('admin.Service request') }}');
+      Swal.fire({
+        title: '{{ __('admin.Service request') }}',
+        text: message,
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
     }
   </script>
 
-@stop
-@section('pagescripts')
 @stop
