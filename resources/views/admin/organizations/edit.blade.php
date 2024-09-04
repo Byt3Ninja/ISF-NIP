@@ -71,8 +71,8 @@
 												<fieldset class="form-group mt-2">
 													<label for="status">{{ __('admin.Organization Status')}}</label>
 													<select class="custom-select" name="status" id="status">
-														<option value="1" {{ intval( $organization->status ) == 0 || $organization->status === true ? 'selected' : '' }} >{{ __('admin.Active') }}</option>
-														<option value="0" {{ intval( $organization->status ) == 1 || $organization->status === false ? 'selected' : '' }} >{{ __('admin.Not Active') }}</option>
+														<option value="1" {{ intval( $organization->status ) == 1 || $organization->status === true ? 'selected' : '' }} >{{ __('admin.Active') }}</option>
+														<option value="0" {{ intval( $organization->status ) == 0 || $organization->status === false ? 'selected' : '' }} >{{ __('admin.Not Active') }}</option>
 													</select>
 												</fieldset>
 												<fieldset class="form-group">

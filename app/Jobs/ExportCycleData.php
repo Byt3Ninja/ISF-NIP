@@ -31,14 +31,20 @@ class ExportCycleData implements ShouldQueue
     {
 
        
-        if(!Auth()->user()->hasRole('Admin')){
+        if(Auth()->user()->hasRole('Admin')){
+
          $cycles = Cycle::all();
         
         }else{
+
+
+            
             $Organization = Organization::where('user_id','=', auth()->user()->id)->first();
             
             $cycles = Cycle::where('organization_id','=', $Organization->id)->get();
             
+
+
         }
 
         $spreadsheet = new Spreadsheet();
@@ -56,7 +62,7 @@ class ExportCycleData implements ShouldQueue
         // كتابة بيانات المستخدمين
         $row = 2; // بداية الصف الثاني
 
-            if(!Auth()->user()->hasRole('Admin')){
+            if(Auth()->user()->hasRole('Admin')){
          $cycles = Cycle::all();
          Cycle::chunk(1000, function($cycles) use (&$sheet, &$row) {
             foreach ($cycles as $cycle) {

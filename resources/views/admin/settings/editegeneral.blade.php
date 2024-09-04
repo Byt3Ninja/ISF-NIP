@@ -69,19 +69,19 @@
                                     <div class="card-body">
                                         <div class="col-md-12 col-12">
                                             <div class="form-label-group">
-                                                <input style="direction: rtl;" type="text" class="form-control" value="{{$Title->ar_title}}" name="site_ar_title" required>
+                                                <input style="direction: rtl;" type="text" class="form-control" value="{{$Title->ar_title}}" name="site_ar_title" >
                                                 <label for="site_ar_title">{{__('settings.ARABICWEBSITETITLE')}}</label>
                                             </div>
                                         </div>
                                         <div class="col-md-12 col-12">
                                             <div class="form-label-group">
-                                                <input style="direction: ltr;" type="text" class="form-control" value="{{$Title->title}}" name="site_title" required>
+                                                <input style="direction: ltr;" type="text" class="form-control" value="{{$Title->title}}" name="site_title" >
                                                 <label for="site_title">{{__('settings.ENGLISHWEBSITETITLE')}}</label>
                                             </div>
                                         </div>
                                         <div class="col-md-12 col-12">
                                             <div class="form-label-group">
-                                                <input style="direction: ltr;" type="text" class="form-control" value="{{$Title->url}}" name="gtag" id="gtag" required>
+                                                <input style="direction: ltr;" type="text" class="form-control" value="{{$Title->url}}" name="gtag" id="gtag" >
                                                 <label for="gtag">{{__('settings.Google Analytics Code')}}</label>
                                             </div>
                                         </div>
@@ -110,7 +110,7 @@
                                                         <div class="form-group">
                                                             <label for="state_id">{{ __('admin.Country')}}</label>
 
-                                                            <select class="form-control" required id="country_id" name='Country'>
+                                                            <select class="form-control" id="country_id" name='Country'>
                                                                 <option value="">{{ __('admin.Country')}}</option>
                                                                 @foreach($countries as $country)
                                                                     <option value="{{$country->id}}" {{($country->id==$Title->Country)? 'selected':''}}>{{$country->{'name_'.$l} }}</option>
@@ -122,7 +122,7 @@
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-group">
                                                             <label for="state_id">{{ __('admin.State')}} *</label>
-                                                            <select class="form-control" required id="state_id" name='State' >
+                                                            <select class="form-control" id="state_id" name='State' >
                                                                 <option value="">{{ __('admin.State')}}</option>
                                                                 @foreach($states as $state)
                                                                     <option value="{{$state->id}}"  {{($state->id==$Title->State)? 'selected':''}}> {{$state->{'name_'.$l} }}</option>
@@ -134,7 +134,7 @@
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-group">
                                                             <label for="Default_Language">{{ __('settings.Default_Language')}} *</label>
-                                                            <select class="form-control" required id="Default_Language" name='Default_Language' >
+                                                            <select class="form-control" id="Default_Language" name='Default_Language' >
                                                                 <option value="">{{ __('settings.Default_Language')}}</option>
                                                                
                                                                     <option value="ar"  {{($Title->Default_Language=='ar')? 'selected':''}}> العربية </option>
@@ -143,23 +143,43 @@
                                                             </select>
                                                         </div>
                                                     </div>
+
+                                                    @php $timezones = DateTimeZone::listIdentifiers(); 
                                                     
-                                                   
+    //                                                 $selectedTimezones = array_filter($timezones, function ($timezone) {
+    //     return in_array($timezone, [
+    //         'Africa/Cairo',     // مصر
+    //         'Asia/Bahrain',     // البحرين
+    //         'Asia/Riyadh',      // السعودية
+    //     ]);
+    // }); 
+                                                    @endphp
                                                     <div class="col-md-12 col-12">
-                                                        <div class="form-label-group">
-                                                            <input style="direction: ltr;" type="text" class="form-control" value="{{$Title->timezone}}" name="timezone" id="timezone" required>
-                                                            <label for="timezone">{{__('settings.timezone')}}</label>
+                                                        <div class="form-group">
+                                                            <label for="timezone">{{ __('settings.timezone')}} *</label>
+                                                            <select class="form-control" id="timezone" name='timezone' >
+                                                                <option value="">{{ __('settings.timezone')}}</option>
+                                                               
+                                                                   @foreach ($timezones  as $timezone)
+        @php
+            // حساب فرق التوقيت للمنطقة الزمنية
+            $time = new DateTime('now', new DateTimeZone($timezone));
+            $offset = $time->format('P'); // عرض فرق التوقيت مثل +02:00 أو -05:00
+        @endphp
+                                                        <option value="{{$timezone}}"  {{($Title->timezone==$timezone)? 'selected':''}}> {{$timezone}}  ({{ $offset }}) </option>
+                                                               @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
 
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-group">
                                                             <label for="Currency">{{ __('settings.Currency')}} *</label>
-                                                            <select class="form-control" required id="Currency" name='Currency' >
+                                                            <select class="form-control" id="Currency" name='Currency' >
                                                                 <option value="">{{ __('settings.Currency')}}</option>
                                                                
-                                                                    <option value="Dollar"  {{($Title->Currency=='Dollar')? 'selected':''}}> Dollar </option>
-                                                                    <option value="جنيه"  {{($Title->Currency=='جنيه')? 'selected':''}}> جنيه </option>
+                                                                    <option value="US"  {{($Title->Currency=='US')? 'selected':''}}> $ </option>
+                                                                    <option value="LE"  {{($Title->Currency=='LE')? 'selected':''}}> L.E </option>
                                                                
                                                             </select>
                                                         </div>
