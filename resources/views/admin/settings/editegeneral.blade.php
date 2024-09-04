@@ -143,12 +143,32 @@
                                                             </select>
                                                         </div>
                                                     </div>
+
+                                                    @php $timezones = DateTimeZone::listIdentifiers(); 
                                                     
-                                                   
+    //                                                 $selectedTimezones = array_filter($timezones, function ($timezone) {
+    //     return in_array($timezone, [
+    //         'Africa/Cairo',     // مصر
+    //         'Asia/Bahrain',     // البحرين
+    //         'Asia/Riyadh',      // السعودية
+    //     ]);
+    // }); 
+                                                    @endphp
                                                     <div class="col-md-12 col-12">
-                                                        <div class="form-label-group">
-                                                            <input style="direction: ltr;" type="text" class="form-control" value="{{$Title->timezone}}" name="timezone" id="timezone" required>
-                                                            <label for="timezone">{{__('settings.timezone')}}</label>
+                                                        <div class="form-group">
+                                                            <label for="timezone">{{ __('settings.timezone')}} *</label>
+                                                            <select class="form-control" required id="timezone" name='timezone' >
+                                                                <option value="">{{ __('settings.timezone')}}</option>
+                                                               
+                                                                   @foreach ($timezones  as $timezone)
+        @php
+            // حساب فرق التوقيت للمنطقة الزمنية
+            $time = new DateTime('now', new DateTimeZone($timezone));
+            $offset = $time->format('P'); // عرض فرق التوقيت مثل +02:00 أو -05:00
+        @endphp
+                                                        <option value=""  {{($Title->timezone==$timezone)? 'selected':''}}> {{$timezone}}  ({{ $offset }}) </option>
+                                                               @endforeach
+                                                            </select>
                                                         </div>
                                                     </div>
 
@@ -158,8 +178,8 @@
                                                             <select class="form-control" required id="Currency" name='Currency' >
                                                                 <option value="">{{ __('settings.Currency')}}</option>
                                                                
-                                                                    <option value="Dollar"  {{($Title->Currency=='Dollar')? 'selected':''}}> Dollar </option>
-                                                                    <option value="جنيه"  {{($Title->Currency=='جنيه')? 'selected':''}}> جنيه </option>
+                                                                    <option value="Dollar"  {{($Title->Currency=='US')? 'selected':''}}> $ </option>
+                                                                    <option value="جنيه"  {{($Title->Currency=='LE')? 'selected':''}}> L.E </option>
                                                                
                                                             </select>
                                                         </div>

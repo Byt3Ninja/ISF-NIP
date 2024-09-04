@@ -38,7 +38,7 @@ class SettingsController extends Controller
     }
     public function update_settings(Request $request){
             $this->preProcessingCheck('edit_settings');
-		
+			$Title = Settings::findOrfail('1');
 			$Icon1 = Settings::findOrfail('2');
 			$Icon2 = Settings::findOrfail('3');
 			$Icon3 = Settings::findOrfail('4');

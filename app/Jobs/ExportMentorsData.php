@@ -56,7 +56,7 @@ class ExportMentorsData implements ShouldQueue
         // كتابة بيانات المستخدمين
         $row = 2; // بداية الصف الثاني
 
-        if(!Auth()->user()->hasRole('Admin')){
+        if(Auth()->user()->hasRole('Admin')){
 
         if ($request == 'all') {
             

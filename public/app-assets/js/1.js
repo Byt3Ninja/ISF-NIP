@@ -84,11 +84,13 @@ $(document).ready(function () {
 
 
     $(document).on('click', '.ExportCycle', function() {
+
+        alert(messages.exportSuccess);
         $.ajax({
             url: `/dashboard/export-Prog`,
             type: 'GET',
             success: function(data) {
-                alert(data.message);
+                // alert(data.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -104,8 +106,8 @@ $(document).ready(function () {
         var formid = $('.formid').val();
         var exportcstep = $('.exportcurrentstep').val();
 
-        if(!step || !formid || !exportcstep) {
-            alert('Please make sure all required fields are filled.');
+        if(step ==0 || !formid || !exportcstep) {
+            alert(messages.exportNotSuccess);
             return;
         }
 
@@ -133,11 +135,13 @@ $(document).ready(function () {
     $(document).on('click', '.ExportCycleComp', function() {
         var step = $('.cyclesExcel').val();
 
-        if(!step) {
-            alert('Please make sure all required fields are filled.');
+        if(step==0) {
+            alert(messages.exportNotSuccess);
             return;
         }
+
 alert(messages.exportSuccess);
+
         $.ajax({
             url: `/dashboard/export-cyclesComp`,
             type: 'GET',
@@ -268,7 +272,7 @@ $('.ZOOM_CLIENT').hide();
         $('.ZOOM_CLIENT').hide();
 
     }else if(meeting == 'Zoom'){
-        
+
         $('.GOOGLE_CLIENT_ID').hide();
         $('.MICROSOFT_CLIENT').hide();
         $('.ZOOM_CLIENT').show();
