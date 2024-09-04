@@ -12,7 +12,7 @@
 		@include('admin.includes.menu')
     </div>
     @php
-    $pusherAppKey = \App\Settings::where('id', 1)->first();
+    $pusherSetting = \App\Settings::where('id', 1)->first();
     @endphp
  
     <!-- END: Main Menu-->
