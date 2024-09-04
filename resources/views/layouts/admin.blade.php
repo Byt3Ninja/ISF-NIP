@@ -11,6 +11,10 @@
     <div class="main-menu menu-fixed menu-{{session('layout')=='light'?'light':'dark'}} menu-accordion menu-shadow" data-scroll-to-active="true">
 		@include('admin.includes.menu')
     </div>
+    @php
+    $pusherSetting = \App\Settings::where('id', 1)->first();
+    @endphp
+ 
     <!-- END: Main Menu-->
 	<!-- Start Content -->
 		@yield('content')
@@ -27,7 +31,7 @@
     <script src="//js.pusher.com/3.1/pusher.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function (){
-
+            var pusherAppKey = "{{ $pusherSetting->PUSHER_APP_KEY }}";
 
             var notificationsWrapper   = $('.dropdown-menu-media');
             var countWrapper = $('.dropdown-notification');
