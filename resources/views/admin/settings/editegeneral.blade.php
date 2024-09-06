@@ -321,7 +321,7 @@
                                                 <fieldset class="form-group">
                                                     <select class="form-control" id="BroadCast" name="BroadCast" required>
                                                         <option value="0" selected></option>
-                                                        <option value="Pusher" {{($Title->BroadCast=='Pusher')? 'selected':''}} >Pusher</option>
+                                                        <option value="pusher" {{($Title->BroadCast=='pusher')? 'selected':''}} >Pusher</option>
                                                     </select>
                                                 </fieldset>
                                         </div>
