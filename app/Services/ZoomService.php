@@ -71,7 +71,8 @@ class ZoomService implements OnlineMeetingServiceInterface
     private function retrieveZoomUrl()
     {
         $Setting = Settings::where('id', 1)->first();
-        if($Setting){
+        $zoom_api_url = $Setting->ZOOM_API_URL;
+        if(!empty($Setting) && !empty($zoom_api_url)){
         $ZOOM_API_URL = $Setting->ZOOM_API_URL;
         }else{
             $ZOOM_API_URL = 'https://api.zoom.us/v2/';
