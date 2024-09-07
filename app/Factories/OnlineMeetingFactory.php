@@ -9,7 +9,8 @@ class OnlineMeetingFactory
 {
     public static function create(): OnlineMeetingServiceInterface
     {
-        $service = env('ONLINE_MEETING_PROVIDER');
+        $Setting = \App\Settings::where('id', 1)->first();
+        $service = $Setting->Meeting;
 
         switch ($service) {
             case 'Zoom':

@@ -60,7 +60,7 @@ class ZoomService implements OnlineMeetingServiceInterface
         $response = $client->request('POST', "https://zoom.us/oauth/token", [
             'form_params' => [
                 'grant_type' => 'account_credentials',
-                'account_id' => $ZOOM_ACCOUNT_ID ,
+                'account_id' => $ZOOM_ACCOUNT_ID,
             ],
         ]);
 
