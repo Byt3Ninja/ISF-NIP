@@ -71,6 +71,20 @@
 											</thead>
 											<tbody>
 												@foreach( $quizzes as $quiz )
+													@php
+														$participates = $quiz->results->groupBy('user_id');
+														$passed_participates = $participates->filter(function( $item ) use ( $quiz ) {
+															$passed = $item->where('score', '>=', $quiz->passing_criteria);
+															$failed = $item->where('score', '<', $quiz->passing_criteria);
+															if( $passed->count() >= 1 ) { return true; }
+															else
+															{
+																if( $failed->count() >= $quiz->attempts ) { return false; }
+																if( now()->format('Y-m-d H:i:s') >= $quiz->end->format('Y-m-d H:i:s') ) { return false; }
+																return true;
+															}
+														});
+													@endphp
 													<tr>
 														<td><a href="{{ URL::to('dashboard/quizzes/' . $quiz->id . '/edit') }}">{{ $quiz->id }}</a></td>
 														<td>{!! $quiz->title !!}</td>
@@ -87,8 +101,14 @@
 															<span title="{{ $quiz->start }}" class="badge badge-primary"> {{ __('admin.From') }} {{ $quiz->start->format('Y-m-d') }} </span> <br />
 															<span title="{{ $quiz->end }}" class="badge badge-dark"> {{ __('admin.To') }} {{ $quiz->end->format('Y-m-d') }} </span>
 														</td>
-														<td class="text-center"> {{ $quiz->results->count() }} </td>
-														<td class="text-center"> - </td>
+														<td class="text-center"> {{ $participates->count() }} </td>
+														<td class="text-center">
+															@if( $participates->count() >= 1 )
+																{{ ( round( floatval( $passed_participates->count() / $participates->count() ), 2 ) * 100 ) . '%' }}
+															@else
+																-
+															@endif
+														</td>
 														<td class="text-center">
 															<div class="btn-group w-100">
 																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>

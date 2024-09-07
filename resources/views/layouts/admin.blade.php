@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="{{ $l }}">
 <html class="loading" lang="{{ $l }}" data-textdirection="{{$l=="ar" ? 'rtl' : 'ltr'}}">
 <head>
 		@include('admin.includes.head')
@@ -102,50 +101,49 @@
     </script>
     <!-- End of Pusher -->
     @endhasanyrole
-        <script>
-            function sweet_delete(url, message, user_id) {
-                $("#row_" + user_id).css('background-color', '#000000').css('color', 'white');
-                swal({
-                    title: message,
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                    showCloseButton: true,
-                    showCancelButton: true,
-                    focusConfirm: false,
-                    confirmButtonText: "{{ __('Confirm & Delete') }}",
-                    cancelButtonText: "{{ __('Cancel') }}",
-                }).then((willDelete) => {
-                    if (willDelete.value)  {
-                        $.ajax({
-                            url: url,
-                            type: 'post', // Use POST method
-                            data: {
-                                _method: 'DELETE', // Specify DELETE method using _method parameter
-                                _token: '{{ csrf_token() }}' // Include CSRF token for Laravel
-                            },
-                            success: function(response) {
-                                swal({
-                                    title: "{{ trans('alert') }}",
-                                    text: "{{ trans('admin.DeletedSuccessfully') }}",
-                                    icon: "success",
-                                    timer: 1000
-                                });
-                                $("#row_" + user_id).hide(1000);
-                            },
-                            error: function(xhr, status, error) {
-                                // Handle errors here
-                                console.error(error);
-                            }
-                        });
-                    } else {
-                        $("#row_" + user_id).removeAttr('style');
-                    }
-                });
-            }
-        </script>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
+    <script>
+        function sweet_delete(url, message, user_id) {
+            $("#row_" + user_id).css('background-color', '#000000').css('color', 'white');
+            swal({
+                title: message,
+                type: "warning",
+                buttons: true,
+                dangerMode: true,
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText: "{{ __('Confirm & Delete') }}",
+                cancelButtonText: "{{ __('Cancel') }}",
+            }).then((willDelete) => {
+                if (willDelete.value)  {
+                    $.ajax({
+                        url: url,
+                        type: 'post', // Use POST method
+                        data: {
+                            _method: 'DELETE', // Specify DELETE method using _method parameter
+                            _token: '{{ csrf_token() }}' // Include CSRF token for Laravel
+                        },
+                        success: function(response) {
+                            swal({
+                                title: "{{ trans('alert') }}",
+                                text: "{{ trans('admin.DeletedSuccessfully') }}",
+                                icon: "success",
+                                timer: 1000
+                            });
+                            $("#row_" + user_id).hide(1000);
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle errors here
+                            console.error(error);
+                        }
+                    });
+                } else {
+                    $("#row_" + user_id).removeAttr('style');
+                }
+            });
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
     <script src="/app-assets/js/scripts/forms/select/form-select2.js"></script>
     <script src="/app-assets/js/scripts/extensions/sweet-alerts.js"></script>
     <script src="/app-assets/vendors/js/extensions/sweetalert2.all.min.js"></script>
