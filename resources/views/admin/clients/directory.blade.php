@@ -86,13 +86,31 @@
                             @foreach ($services as $num => $row)
                               <tr>
                                 <td>{{ $num + 1 }}</td>
-                                <td><a href="#"
-                                    onclick="openservice({{ $row->id }})">{{ $row->{'name_' . $l} }}</a></td>
+                                <td>
+                                  <a href="#" onclick="openservice({{ $row->id }})">{{ $row->{'name_' . $l} }}</a>
+                                </td>
                                 <td>{{ substr(strip_tags($row->{'description_' . $l}), 0, 40) }}...</td>
                                 <td>{{ $row->price }} SAR</td>
-                                <td>{!! $row->totalRate()
-                                    ? str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>', $row->totalRate())
-                                    : '' !!}</td>
+                                <td>
+                                  <span class="d-flex align-items-center">
+                                    {!! $row->totalRate()
+                                      ? str_repeat
+                                      ('
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#fc960f"     stroke="#fc960f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-star" style="margin: 0 5px 0 5px;">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
+                                      </svg>
+                                      ',
+                                      $row->totalRate(),
+                                      )
+                                      : '
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#fc960f"     stroke="#fc960f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-star" style="margin: 0 5px 0 5px;">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
+                                      </svg>  0' 
+                                    !!}
+                                  </span>
+                                </td>
                               </tr>
                             @endforeach
                           </tbody>
