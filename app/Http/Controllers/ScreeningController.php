@@ -252,7 +252,7 @@ class ScreeningController extends Controller
         // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
         ExportResScreenData::dispatch($data1);
 
-        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
+        return response()->json(['message' => __('cycles.export_success')]);
     }
 
 

@@ -6,6 +6,7 @@ use App\Like;
 
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Quizzes extends Model
 {
@@ -67,5 +68,10 @@ class Quizzes extends Model
 	public function results()
 	{
 		return $this->hasMany(QuizResults::class, 'quiz_id');
+	}
+
+	public function myAttempts()
+	{
+		return $this->hasMany(QuizResults::class, 'quiz_id')->where('user_id', Auth::id());
 	}
 }

@@ -41,4 +41,9 @@ class QuizResults extends Model
 	{
 		return $this->belongsTo(User::class, 'user_id');
 	}
+
+	public function responses()
+	{
+		return $this->hasMany(QuizResponses::class, 'result_id');
+	}
 }

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="{{ $l }}">
 <html class="loading" lang="{{ $l }}" data-textdirection="{{$l=="ar" ? 'rtl' : 'ltr'}}">
 <head>
 		@include('admin.includes.head')
@@ -11,6 +10,10 @@
     <div class="main-menu menu-fixed menu-{{session('layout')=='light'?'light':'dark'}} menu-accordion menu-shadow" data-scroll-to-active="true">
 		@include('admin.includes.menu')
     </div>
+    @php
+    $pusherSetting = \App\Settings::where('id', 1)->first();
+    @endphp
+ 
     <!-- END: Main Menu-->
 	<!-- Start Content -->
 		@yield('content')
@@ -27,7 +30,7 @@
     <script src="//js.pusher.com/3.1/pusher.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function (){
-
+            var pusherAppKey = "{{ $pusherSetting->PUSHER_APP_KEY }}";
 
             var notificationsWrapper   = $('.dropdown-menu-media');
             var countWrapper = $('.dropdown-notification');
@@ -38,7 +41,7 @@
 
             // Enable pusher logging - don't include this in production
             Pusher.logToConsole = false;
-            var pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
+            var pusher = new Pusher(pusherAppKey, {
                 // cluster: 'eu'
                 encrypted: true
             });
@@ -98,50 +101,49 @@
     </script>
     <!-- End of Pusher -->
     @endhasanyrole
-        <script>
-            function sweet_delete(url, message, user_id) {
-                $("#row_" + user_id).css('background-color', '#000000').css('color', 'white');
-                swal({
-                    title: message,
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                    showCloseButton: true,
-                    showCancelButton: true,
-                    focusConfirm: false,
-                    confirmButtonText: "{{ __('Confirm & Delete') }}",
-                    cancelButtonText: "{{ __('Cancel') }}",
-                }).then((willDelete) => {
-                    if (willDelete.value)  {
-                        $.ajax({
-                            url: url,
-                            type: 'post', // Use POST method
-                            data: {
-                                _method: 'DELETE', // Specify DELETE method using _method parameter
-                                _token: '{{ csrf_token() }}' // Include CSRF token for Laravel
-                            },
-                            success: function(response) {
-                                swal({
-                                    title: "{{ trans('alert') }}",
-                                    text: "{{ trans('admin.DeletedSuccessfully') }}",
-                                    icon: "success",
-                                    timer: 1000
-                                });
-                                $("#row_" + user_id).hide(1000);
-                            },
-                            error: function(xhr, status, error) {
-                                // Handle errors here
-                                console.error(error);
-                            }
-                        });
-                    } else {
-                        $("#row_" + user_id).removeAttr('style');
-                    }
-                });
-            }
-        </script>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
+    <script>
+        function sweet_delete(url, message, user_id) {
+            $("#row_" + user_id).css('background-color', '#000000').css('color', 'white');
+            swal({
+                title: message,
+                type: "warning",
+                buttons: true,
+                dangerMode: true,
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText: "{{ __('Confirm & Delete') }}",
+                cancelButtonText: "{{ __('Cancel') }}",
+            }).then((willDelete) => {
+                if (willDelete.value)  {
+                    $.ajax({
+                        url: url,
+                        type: 'post', // Use POST method
+                        data: {
+                            _method: 'DELETE', // Specify DELETE method using _method parameter
+                            _token: '{{ csrf_token() }}' // Include CSRF token for Laravel
+                        },
+                        success: function(response) {
+                            swal({
+                                title: "{{ trans('alert') }}",
+                                text: "{{ trans('admin.DeletedSuccessfully') }}",
+                                icon: "success",
+                                timer: 1000
+                            });
+                            $("#row_" + user_id).hide(1000);
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle errors here
+                            console.error(error);
+                        }
+                    });
+                } else {
+                    $("#row_" + user_id).removeAttr('style');
+                }
+            });
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
     <script src="/app-assets/js/scripts/forms/select/form-select2.js"></script>
     <script src="/app-assets/js/scripts/extensions/sweet-alerts.js"></script>
     <script src="/app-assets/vendors/js/extensions/sweetalert2.all.min.js"></script>

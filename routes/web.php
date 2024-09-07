@@ -58,6 +58,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/', 'HomeController@index')->name('admin');
 	Route::get('/dashboard', 'HomeController@index')->name('dashboard');
 	Route::get('/dark','HomeController@dark');
+
+
     //Roles
     Route::get('documentation/view/{id?}','HomeController@help');
     Route::resource('documentation', 'DocumentationController');
@@ -110,6 +112,13 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::post('updateaboutus', 'SettingsController@update_aboutus');
 	Route::any('setcontactus', 'SettingsController@get_contactus');
 	Route::post('updatecontactus', 'SettingsController@update_contactus');
+    Route::put('settings/Updateone', 'SettingsController@update_settingsone')->name('updateone');
+    Route::put('settings/Updatelogo', 'SettingsController@update_settinglogo')->name('updatelogo');
+    Route::put('settings/Updatetwo', 'SettingsController@update_settingstwo')->name('updatetwo');
+    Route::put('settings/UpdateMail', 'SettingsController@update_settingsmail')->name('updateMail');
+    Route::put('settings/UpdatePush', 'SettingsController@update_settingspush')->name('updatePush');
+    Route::put('settings/UpdateMeeting', 'SettingsController@update_settingsMeeting')->name('updateMeeting');
+
 	//services categories Manager routes
 	Route::resource('serviceCategories', 'ServiceCategoryController');
 	//Services Manager routes
@@ -242,7 +251,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('mentorship/rate','MentorsController@rate');
     Route::post('mentorship/delsession/{id}' ,'MentorsController@delsession');
     Route::get('/export-mentorship', 'MentorsController@expormentorship');
-
+   
 
 
 
@@ -259,6 +268,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('training/storecontent', 'TrainingController@storecontent');
     Route::get('training/my','TrainingController@mysessions')->name('training.my');
     Route::get('training/my/{id}','TrainingController@my');
+    Route::get('training/my/{id}/quiz/{quiz_id}','TrainingController@myQuiz')->name('quiz.overview');
+    Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}','TrainingController@myQuizResponses')->name('quiz.response');
+    Route::post('training/my/{id}/quiz/{quiz_id}','TrainingController@doQuiz')->name('quiz.start');
+
     Route::get('training/results/{id?}','TrainingController@results');
     Route::get('training/sessions/{id?}','TrainingController@sessions');
     Route::post('training/addsession' ,'TrainingController@addsession');
@@ -275,9 +288,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
     Route::resource('questions-bank', 'QuestionsBankController');
-    Route::resource('quizzes', 'quizzesController');
+    Route::resource('quizzes', 'quizzesController')->except(['show']);;
     Route::get('quizzes/{quiz}/questions', 'quizzesController@get_questions')->name('quizzes.questions');
     Route::post('quizzes/{quiz}/questions', 'quizzesController@save_questions')->name('quizzes.saveQuestions');
+    Route::get('quizzes/my', 'quizzesController@my')->name('quizzes.dashboard');
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');

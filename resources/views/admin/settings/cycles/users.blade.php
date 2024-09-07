@@ -52,6 +52,15 @@
                                             </div>
                      </div>
 					 @endif
+                     @php
+                               $com = \App\Company::where('cycle',$id)->get();
+                           @endphp
+                           @if($com->count() == 0 )
+                            <input type="hidden" class="cyclesExcel" value="0" >
+                            @else
+                            <input type="hidden" class="cyclesExcel" value="{{request()->route('id')}}" >
+                            @endif
+                 
                     <div class="row match-height">
                         <div class="col-xl-12 col-md-12 col-sm-12">
                             <div class="card">
@@ -62,11 +71,12 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select cycle from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="ccycle" class="select form-control cyclesExcel" onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
+                                            <select id="ccycle" class="select form-control" onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
                                                 @foreach($cycles as $cycle)
                                                     <option value="{{$cycle->id}}" {{$cycle->id==$id?'selected':''}}>{{$cycle->title}} ({{__('cycles.Start')}} {{$cycle->start->format('d-m')}}) - {{ optional($cycle->organization)->name }} </option>
                                                 @endforeach
                                             </select>
+                                            
                                         <div class="input-group-append">
                                     <button class="btn btn-secondary" onclick="window.location.href='/dashboard/cycles/{{$id}}'">
                                                 <i class="bx bx-spreadsheet"></i> <span class="align-middle ml-25">{{__('cycles.steps')}}</span>
@@ -100,7 +110,7 @@
                     <div class="table-responsive">
                         
 <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-<div class="btn btn-success ExportCycleComp">Export</div>
+<div class="btn btn-success ExportCycleComp">{{__('cycles.Export')}}</div>
 <br><br><br>
                         <table class="table mb-0">
                             <div class="media align-items-center col-md-3">
@@ -369,6 +379,12 @@
             } else {
                 location.reload();
             }}
+
+            const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+        exportNotSuccess: "{{ __('cycles.export_Notsuccess') }}",
+    };
+
     </script>
 
 @stop

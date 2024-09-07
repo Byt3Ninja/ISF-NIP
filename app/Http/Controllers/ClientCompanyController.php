@@ -13,6 +13,7 @@ use App\State;
 use App\City;
 use App\Company;
 use App\Like;
+use App\Settings;
 use DB;
 use Auth;
 use Log;
@@ -59,10 +60,11 @@ class ClientCompanyController extends Controller
             $countries = Country::all();
             $states = State::all();
             $cities = City::all();
+            $Setting = Settings::where('id', 1)->first();
             $sectors = Sector::whereNull('parent_id')->get();
             $funding_rounds=auth()->user()->company?auth()->user()->company->fundingRounds:[];
             return view('admin/clients/company', compact(
-                'client', 'states', 'cities','countries','sectors','funding_rounds'
+                'client', 'states', 'cities','countries','sectors','funding_rounds','Setting'
             ));
         }catch (Exception $e){
             //log what happend

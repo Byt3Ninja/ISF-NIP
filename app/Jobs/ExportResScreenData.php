@@ -61,9 +61,9 @@ class ExportResScreenData implements ShouldQueue
         // كتابة بيانات المستخدمين
         $row = 2; // بداية الصف الثاني
 
-        if(auth()->user()->title_en == 'Administrator'){
+        if(Auth()->user()->hasRole('Admin')){
 
-            Company::chunk(1000, function($companies) use (&$sheet, &$row, $formid, $exportcstep) {
+            Company::where('step', $step)->chunk(1000, function($companies) use (&$sheet, &$row, $formid, $exportcstep) {
                 foreach ($companies as $companie) {
                     
                     $sheet->setCellValue('A' . $row, $companie->id);

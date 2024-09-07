@@ -27,6 +27,7 @@ return [
     'No Final screening started yet' => 'No Final screening started yet',
     'My Requests' => 'My Requests',
     'Mentors' => 'Mentors',
+    'MentorsSession' => 'Mentors Sessions',
     'No Cycles started yet' => 'No Cycles started yet',
     'Your next mentorship session with' => 'Your next mentorship session with',
     'will start' => 'will start',

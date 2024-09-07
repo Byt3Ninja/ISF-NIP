@@ -64,7 +64,7 @@
                                     <div class="card-body">
                                         <span>{{__('cycles.Select screening from list')}}</span>
                                         <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control stepsExcel"
+                                            <select id="cstep" class="select form-control"
                                                     onchange="window.open('/dashboard/screening/results/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($steps as $step)
                                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}}
@@ -102,6 +102,11 @@
                         $companies = \App\Company::whereIn('step',$clist)->get();
                     @endphp
                     
+                @if($companies->count() == 0 )
+                 <input type="hidden" class="stepsExcel" value="0" >
+                 @else
+                 <input type="hidden" class="stepsExcel" value="{{request()->route('id')}}" >
+                 @endif
                     <section class="row">
                         <div class="col-xl-12 col-md-12 col-sm-12">
                             <div class="card">
@@ -161,7 +166,7 @@
                                     </div>
                                     <div class="table-responsive">
                                         <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-                                        <div class="btn btn-success ExportExcelScreesRes">Export</div>
+                                        <div class="btn btn-success ExportExcelScreesRes">{{__('cycles.Export')}}</div>
                                         
                                         <table id="result-list-datatable" class=" table mb-0">
                                             <thead class="thead-dark">
@@ -299,6 +304,11 @@
                 @endif
             });
         });
+
+        const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+        exportNotSuccess: "{{ __('cycles.export_Notsuccess') }}",
+    };
     </script>
 
     <script>

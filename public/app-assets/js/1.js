@@ -15,7 +15,7 @@ $(document).ready(function () {
             $('.chboxcyclesReg:checked').each(function() {
                 compid.push($(this).attr('do'));
             });
-            
+
             if(compid==""){
                 alert("You Didn't Choose any Company");
                 location.reload();
@@ -84,11 +84,13 @@ $(document).ready(function () {
 
 
     $(document).on('click', '.ExportCycle', function() {
+
+        alert(messages.exportSuccess);
         $.ajax({
             url: `/dashboard/export-Prog`,
             type: 'GET',
             success: function(data) {
-                alert(data.message);
+                // alert(data.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -104,10 +106,12 @@ $(document).ready(function () {
         var formid = $('.formid').val();
         var exportcstep = $('.exportcurrentstep').val();
 
-        if(!step || !formid || !exportcstep) {
-            alert('Please make sure all required fields are filled.');
+        if(step ==0 || !formid || !exportcstep) {
+            alert(messages.exportNotSuccess);
             return;
         }
+
+        alert(messages.exportSuccess);
 
         $.ajax({
             url: `/dashboard/export-Result`,
@@ -117,7 +121,8 @@ $(document).ready(function () {
                 exportcstep:exportcstep
             },
             success: function(response) {
-                alert(response.message);
+                
+                // alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -130,10 +135,12 @@ $(document).ready(function () {
     $(document).on('click', '.ExportCycleComp', function() {
         var step = $('.cyclesExcel').val();
 
-        if(!step) {
-            alert('Please make sure all required fields are filled.');
+        if(step==0) {
+            alert(messages.exportNotSuccess);
             return;
         }
+
+alert(messages.exportSuccess);
 
         $.ajax({
             url: `/dashboard/export-cyclesComp`,
@@ -141,7 +148,7 @@ $(document).ready(function () {
             data:{step:step
             },
             success: function(response) {
-                alert(response.message);
+                // alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -159,7 +166,7 @@ $(document).ready(function () {
             alert('Please make sure all required fields are filled.');
             return;
         }
-
+        alert(messages.exportSuccess);
         $.ajax({
             url: `/dashboard/export-Tresult`,
             type: 'GET',
@@ -167,7 +174,7 @@ $(document).ready(function () {
                 location:location
             },
             success: function(response) {
-                alert(response.message);
+                // alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -179,14 +186,14 @@ $(document).ready(function () {
 
     $(document).on('click', '.ExportExcelMentor', function() {
         var request = $('.Request').val();
-        
+        alert(messages.exportSuccess);
         $.ajax({
             url: `/dashboard/export-mentorship`,
             type: 'GET',
             data:{request:request
             },
             success: function(response) {
-                alert(response.message);
+                // alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);
@@ -196,6 +203,7 @@ $(document).ready(function () {
 
     });
 
+    
 
     if ($("#result-list-datatable").length > 0) {
         usersTable = $("#result-list-datatable").DataTable({
@@ -248,7 +256,33 @@ $(document).ready(function () {
 
 
 
+$(document).on('change', '.Meeting', function(){
+    var meeting = $(this).val();
 
+    if(meeting == 'Google'){
+$('.GOOGLE_CLIENT_ID').show();
+$('.MICROSOFT_CLIENT').hide();
+$('.ZOOM_CLIENT').hide();
+
+
+    }else if(meeting == 'Microsoft'){
+
+        $('.GOOGLE_CLIENT_ID').hide();
+        $('.MICROSOFT_CLIENT').show();
+        $('.ZOOM_CLIENT').hide();
+
+    }else if(meeting == 'Zoom'){
+
+        $('.GOOGLE_CLIENT_ID').hide();
+        $('.MICROSOFT_CLIENT').hide();
+        $('.ZOOM_CLIENT').show();
+
+    }
+
+
+
+
+});
 
 
 

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 use App\Calendar;
+use App\Country;
 use App\Cycle;
 use App\MentorshipRequest;
 use App\Notifications\TemplateEmail;
@@ -12,6 +13,9 @@ use DB;
 use Carbon\Carbon;
 use Auth;
 use App\Event;
+use App\State;
+use Illuminate\Support\Facades\Storage;
+
 
 class SettingsController extends Controller
 {
@@ -27,9 +31,12 @@ class SettingsController extends Controller
 			$Img2 =  Settings::findOrfail('8');
 			$Img3 =  Settings::findOrfail('9');
 			$Counters = Settings::where('type','6')->get();
+            $countries = Country::all();
+            $states= State::all();
             return view('admin.settings.editegeneral')
                 ->with('Title',$Title)->with('Icons',$Icons)->with('Img1',$Img1)
-				->with('Img2',$Img2)->with('Img3',$Img3)->with('Counters',$Counters);
+				->with('Img2',$Img2)->with('Img3',$Img3)->with('Counters',$Counters)
+                ->with('countries',$countries)->with('states',$states);
     }
     public function update_settings(Request $request){
             $this->preProcessingCheck('edit_settings');
@@ -39,19 +46,9 @@ class SettingsController extends Controller
 			$Icon3 = Settings::findOrfail('4');
 			$Icon4 = Settings::findOrfail('5');
 			$Icon5 = Settings::findOrfail('6');
-			$Img1 =  Settings::findOrfail('7');
-			$Img2 =  Settings::findOrfail('8');
-			$Img3 =  Settings::findOrfail('9');
-			$counter1 = Settings::findOrfail('12');
-            $counter2 = Settings::findOrfail('13');
-            $counter3 = Settings::findOrfail('14');
-            $counter4 = Settings::findOrfail('15');
 
-			$Title->title = $request->input('site_title');
-            $Title->ar_title = $request->input('site_ar_title');
-            $request->input('autoact')=='on'?$Title->set_order = 1:$Title->set_order = null;
-            $Title->url = $request->input('gtag');
-			$Title->Save();
+			
+            
  			$Icon1->url = $request->input('facebook');
 			$Icon1->Save();
  			$Icon2->url = $request->input('twitter');
@@ -63,87 +60,7 @@ class SettingsController extends Controller
 			$Icon5->url = $request->input('linkedin');
 			$Icon5->Save();
 			/// Img 1
-						if($request->file('img1')){
-if(in_array($request->file('img1')->getClientMimeType(),["image/png","image/jpeg","image/gif"]))
-		{
-            $file = $request->file('img1');
-            $path = 'images/resource/';
-            $fileExtension = $request->file('img1')->getClientOriginalExtension();
-            $filename = \Illuminate\Support\Str::random(5).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10,'i1');
-            $filename2 =$filename.'.'.$fileExtension;
-            $file->move($path, $filename.'.'.$fileExtension);
-			$Img1->img_url = $filename2 ;
-		}}
-			$Img1->title = $request->input('img1title');
-			$Img1->ar_title = $request->input('ar_img1title');
-			$Img1->set1 = $request->input('img1title2');
-			$Img1->ar_set1 = $request->input('ar_img1title2');
-			$Img1->dsc = $request->input('img1dsc');
-			$Img1->ar_dsc = $request->input('ar_img1dsc');
-			$Img1->url = $request->input('img1url');
-			$Img1->Save();
-			/// Img 2
-						if($request->file('img2')){
-if(in_array($request->file('img2')->getClientMimeType(),["image/png","image/jpeg","image/gif"]))
-		{
-            $file = $request->file('img2');
-            $path = 'images/resource/';
-            $fileExtension = $request->file('img2')->getClientOriginalExtension();
-            $filename = \Illuminate\Support\Str::random(5).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10,'i2');
-            $filename2 =$filename.'.'.$fileExtension;
-            $file->move($path, $filename.'.'.$fileExtension);
-			$Img2->img_url = $filename2 ;
-		}}
-			$Img2->title = $request->input('img2title');
-			$Img2->ar_title = $request->input('ar_img2title');
-			$Img2->set1 = $request->input('img2title2');
-			$Img2->ar_set1 = $request->input('ar_img2title2');
-			$Img2->dsc = $request->input('img2dsc');
-			$Img2->ar_dsc = $request->input('ar_img2dsc');
-			$Img2->url = $request->input('img2url');
-			$Img2->Save();
-		/// Img 3
-						if($request->file('img3')){
-if(in_array($request->file('img3')->getClientMimeType(),["image/png","image/jpeg","image/gif"]))
-		{
-            $file = $request->file('img3');
-            $path = 'images/resource/';
-            $fileExtension = $request->file('img3')->getClientOriginalExtension();
-            $filename = \Illuminate\Support\Str::random(5).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10,'i3');
-            $filename2 =$filename.'.'.$fileExtension;
-            $file->move($path, $filename.'.'.$fileExtension);
-			$Img3->img_url = $filename2 ;
-		}}
-			$Img3->title = $request->input('img3title');
-			$Img3->ar_title = $request->input('ar_img3title');
-			$Img3->set1 = $request->input('img3title2');
-			$Img3->ar_set1 = $request->input('ar_img3title2');
-			$Img3->dsc = $request->input('img3dsc');
-			$Img3->ar_dsc = $request->input('ar_img3dsc');
-			$Img3->url = $request->input('img3url');
-			$Img3->Save();
 
-			/// Save Counters
-            $counter1->title = $request->input('ct12title');
-            $counter1->ar_title = $request->input('ct12titlear');
-            $counter1->dsc = $request->input('ct12num');
-            $counter1->img_url = $request->input('ct12icon');
-            $counter1->Save();
-            $counter2->title = $request->input('ct13title');
-            $counter2->ar_title = $request->input('ct13titlear');
-            $counter2->dsc = $request->input('ct13num');
-            $counter2->img_url = $request->input('ct13icon');
-            $counter2->Save();
-            $counter3->title = $request->input('ct14title');
-            $counter3->ar_title = $request->input('ct14titlear');
-            $counter3->dsc = $request->input('ct14num');
-            $counter3->img_url = $request->input('ct14icon');
-            $counter3->Save();
-            $counter4->title = $request->input('ct15title');
-            $counter4->ar_title = $request->input('ct15titlear');
-            $counter4->dsc = $request->input('ct15num');
-            $counter4->img_url = $request->input('ct15icon');
-            $counter4->Save();
 
             return redirect()->back()->with('message', 'StoredSuccessfully');
     }
@@ -363,4 +280,250 @@ public function calendar(Request $request){
             'state' => 'failed'
         ], 500);
     }
+
+
+    public function update_settingsone(Request $request){
+        
+        $id = $request->input('id');
+        $site_ar_title = $request->input('site_ar_title');
+        $site_title = $request->input('site_title');
+        $autoact = $request->input('autoact');
+        $Platform_Name = $request->input('Platform_Name');
+        $Platform_support_email = $request->input('Platform_support_email');
+        $Country = $request->input('Country');
+        $State = $request->input('State');
+        $Default_Language = $request->input('Default_Language');
+        $timezone = $request->input('timezone');
+        $Currency = $request->input('Currency');
+        
+
+        $updateSittings = Settings::where('id', $id)->first();
+
+        $updateSittings->ar_title = $site_ar_title;
+        $updateSittings->title = $site_title;
+        $request->input('autoact')=='on'?$updateSittings->set_order = 1:$updateSittings->set_order = null;
+        $updateSittings->Platform_Name = $Platform_Name;
+        $updateSittings->Platform_support_email = $Platform_support_email;
+        $updateSittings->Country = $Country;
+        $updateSittings->State = $State;
+        $updateSittings->Default_Language = $Default_Language;
+        $updateSittings->timezone = $timezone;
+        $updateSittings->Currency = $Currency;
+        $updateSittings->save();
+
+
+        return redirect()->back()->with('message', 'StoredSuccessfully');
+}
+public function update_settinglogo(Request $request){
+        
+    $id = $request->input('id');
+
+    $updateSittings = Settings::where('id', $id)->first();
+   
+    
+    if ($request->hasFile('logo')) {
+        $image = $request->file('logo');
+    
+        // الحصول على اسم الصورة الأصلي بدون الامتداد
+        $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+    
+        // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
+        $newName = 'logo'; 
+    
+        // تحديد الامتداد الأصلي للصورة
+        $extension = $image->getClientOriginalExtension();
+    
+        // تركيب الاسم الجديد مع الامتداد
+        $logo = $newName . '.' . $extension;
+    
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $path = $image->storeAs('', $logo, 'logo_uploads');
+        
+    
+    } else {
+        $logo = $updateSittings->Logo; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+    }
+
+    if ($request->hasFile('header')) {
+        $image = $request->file('header');
+    
+        // الحصول على اسم الصورة الأصلي بدون الامتداد
+        $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+    
+        // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
+        // هنا نضيف "new_" كبادئة لاسم الصورة
+        $newName = 'mailheader'; 
+    
+        // تحديد الامتداد الأصلي للصورة
+        $extension = $image->getClientOriginalExtension();
+    
+        // تركيب الاسم الجديد مع الامتداد
+        $header = $newName . '.' . $extension;
+
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $path = $image->storeAs('', $header, 'logo_uploads');
+       
+    } else {
+        $header = $updateSittings->header; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+    }
+
+    if ($request->hasFile('footer')) {
+        $image = $request->file('footer');
+    
+        // الحصول على اسم الصورة الأصلي بدون الامتداد
+        $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+    
+        // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
+        // هنا نضيف "new_" كبادئة لاسم الصورة
+        $newName = 'mailfooter'; 
+    
+        // تحديد الامتداد الأصلي للصورة
+        $extension = $image->getClientOriginalExtension();
+    
+        // تركيب الاسم الجديد مع الامتداد
+        $footer = $newName . '.' . $extension;
+    
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $path = $image->storeAs('', $footer, 'logo_uploads');
+
+
+        // حفظ الصورة بالاسم الجديد
+        // $image->storeAs('public/images/footer', $footer);
+    } else {
+        $footer = $updateSittings->footer; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+    }
+
+    
+
+    $updateSittings->Logo = $logo;
+    $updateSittings->header = $header;
+    $updateSittings->footer = $footer;
+    $updateSittings->save();
+
+
+    return redirect()->back()->with('message', 'StoredSuccessfully');
+}
+
+public function update_settingstwo(Request $request){
+   
+    $id = $request->input('id');
+    $gtag = $request->input('gtag');
+
+    $updateSittings = Settings::where('id', $id)->first();
+
+    $updateSittings->url = $gtag;
+    $updateSittings->save();
+
+
+    return redirect()->back()->with('message', 'StoredSuccessfully');
+}
+
+public function update_settingsmail(Request $request){
+        
+   
+    $id = $request->input('id');
+    $host = $request->input('host');
+    $Mail = $request->input('Mail');
+    $Mailpassword = $request->input('Mailpassword');
+    $Port = $request->input('Port');
+
+    $updateSittings = Settings::where('id', $id)->first();
+    $updateSittings->host = $host;
+    $updateSittings->Mail = $Mail;
+    $updateSittings->Mailpassword = $Mailpassword;
+    $updateSittings->Port = $Port;
+    $updateSittings->save();
+
+
+    return redirect()->back()->with('message', 'StoredSuccessfully');
+}
+
+public function update_settingspush(Request $request){
+        
+   
+    $id = $request->input('id');
+    $BroadCast = $request->input('BroadCast');
+    $PUSHER_APP_KEY = $request->input('PUSHER_APP_KEY');
+    $PUSHER_APP_ID = $request->input('PUSHER_APP_ID');
+    $PUSHER_APP_SECRET = $request->input('PUSHER_APP_SECRET');
+    $PUSHER_APP_CLUSTER = $request->input('PUSHER_APP_CLUSTER');
+    $MIX_PUSHER_APP_KEY = $request->input('MIX_PUSHER_APP_KEY');
+    $MIX_PUSHER_APP_CLUSTER = $request->input('MIX_PUSHER_APP_CLUSTER');
+    
+    $updateSittings = Settings::where('id', $id)->first();
+    $updateSittings->BroadCast = $BroadCast;
+    $updateSittings->PUSHER_APP_KEY = $PUSHER_APP_KEY;
+    $updateSittings->PUSHER_APP_ID = $PUSHER_APP_ID;
+    $updateSittings->PUSHER_APP_SECRET = $PUSHER_APP_SECRET;
+    $updateSittings->PUSHER_APP_CLUSTER = $PUSHER_APP_CLUSTER;
+    $updateSittings->MIX_PUSHER_APP_KEY = $MIX_PUSHER_APP_KEY;
+    $updateSittings->MIX_PUSHER_APP_CLUSTER = $MIX_PUSHER_APP_CLUSTER;
+    $updateSittings->save();
+
+
+    return redirect()->back()->with('message', 'StoredSuccessfully');
+}
+
+public function update_settingsMeeting(Request $request){
+       
+    $id = $request->input('id');
+    $Meeting = $request->input('Meeting');
+    $GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
+    $GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
+    $GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
+    $MICROSOFT_CLIENT_ID = $request->input('MICROSOFT_CLIENT_ID');
+    $MICROSOFT_CLIENT_SECRET_VALUE = $request->input('MICROSOFT_CLIENT_SECRET_VALUE');
+    $MICROSOFT_TENANT_ID = $request->input('MICROSOFT_TENANT_ID');
+    $MICROSOFT_CLIENT_SECRET_ID = $request->input('MICROSOFT_CLIENT_SECRET_ID');
+    $MICROSOFT_APP_EMAIL = $request->input('MICROSOFT_APP_EMAIL');
+    $MICROSOFT_REDIRECT_URI = $request->input('MICROSOFT_REDIRECT_URI');
+    $ZOOM_CLIENT_ID = $request->input('ZOOM_CLIENT_ID');
+    $ZOOM_CLIENT_SECRET = $request->input('ZOOM_CLIENT_SECRET');
+    $ZOOM_ACCOUNT_ID = $request->input('ZOOM_ACCOUNT_ID');
+    
+
+    $updateSittings = Settings::where('id', $id)->first();
+    $updateSittings->Meeting = $Meeting;
+    if($Meeting == 'Google'){
+        
+        $updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
+        $updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
+        $updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
+        $updateSittings->save();
+    }
+    if($Meeting == 'Microsoft'){
+        $updateSittings->MICROSOFT_CLIENT_ID = $MICROSOFT_CLIENT_ID;
+        $updateSittings->MICROSOFT_CLIENT_SECRET_VALUE = $MICROSOFT_CLIENT_SECRET_VALUE;
+        $updateSittings->MICROSOFT_TENANT_ID = $MICROSOFT_TENANT_ID;
+        $updateSittings->MICROSOFT_CLIENT_SECRET_ID = $MICROSOFT_CLIENT_SECRET_ID;
+        $updateSittings->MICROSOFT_APP_EMAIL = $MICROSOFT_APP_EMAIL;
+        $updateSittings->MICROSOFT_REDIRECT_URI = $MICROSOFT_REDIRECT_URI;
+        $updateSittings->save();
+    }
+    if($Meeting == 'Zoom'){
+        $updateSittings->ZOOM_CLIENT_ID = $ZOOM_CLIENT_ID;
+        $updateSittings->ZOOM_CLIENT_SECRET = $ZOOM_CLIENT_SECRET;
+        $updateSittings->ZOOM_ACCOUNT_ID = $ZOOM_ACCOUNT_ID;
+        $updateSittings->save();
+    }
+
+
+    return redirect()->back()->with('message', 'StoredSuccessfully');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

@@ -28,6 +28,7 @@ class MentorsController extends Controller
     }
   
 
+
     public function expormentorship(Request $request)
     {
         // تحقق من أن البريد الإلكتروني موجود
@@ -167,21 +168,66 @@ class MentorsController extends Controller
         $organization_id=auth()->user()->organization_id;
 
         if ($request->show == 'all') {
-            $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->where('organization_id',$organization_id);
-            })->get();
+
+            $sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->where('organization_id', $organization_id);
+            })->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                // التأكد من أن التواريخ متوافقة مع التنسيق المناسب
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+        
+                // البحث باستخدام التاريخ من وإلى
+                return $q->whereDate('zoom_date', '>=', $startDate)
+                         ->whereDate('zoom_date', '<=', $endDate);
+            })->orderBy('id','DESC')->get();
+
         } elseif ($request->show == 'approved')  {
             $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
-            })->whereNotNull('start_url')->get();
+            })->whereNotNull('start_url')
+            ->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                // التأكد من أن التواريخ متوافقة مع التنسيق المناسب
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+        
+                // البحث باستخدام التاريخ من وإلى
+                return $q->whereDate('zoom_date', '>=', $startDate)
+                         ->whereDate('zoom_date', '<=', $endDate);
+            })->orderBy('id','DESC')->get();
+
+
+
         } elseif ($request->show == 'disapproved')  {
             $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
-            })->where('approved','No')->get();
+            })->where('approved','No')
+            ->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                // التأكد من أن التواريخ متوافقة مع التنسيق المناسب
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+        
+                // البحث باستخدام التاريخ من وإلى
+                return $q->whereDate('zoom_date', '>=', $startDate)
+                         ->whereDate('zoom_date', '<=', $endDate);
+            })->orderBy('id','DESC')->get();
+
+
         } else {
+
             $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
-            })->whereNull('approved')->get();
+            })->whereNull('approved')
+            ->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                // التأكد من أن التواريخ متوافقة مع التنسيق المناسب
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+        
+                // البحث باستخدام التاريخ من وإلى
+                return $q->whereDate('zoom_date', '>=', $startDate)
+                         ->whereDate('zoom_date', '<=', $endDate);
+            })->orderBy('id','DESC')->get();
+
+
         }
         return view('admin.settings.mentorship.sessions', compact( 'sessions'));
     }

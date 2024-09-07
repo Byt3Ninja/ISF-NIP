@@ -59,7 +59,7 @@ class ExportTresultData implements ShouldQueue
         // كتابة بيانات المستخدمين
         $row = 2; // بداية الصف الثاني
 
-        if(auth()->user()->title_en == 'Administrator'){
+        if(Auth()->user()->hasRole('Admin')){
 
             Company::chunk(1000, function($companies) use (&$sheet, &$row, $location) {
                 foreach ($companies as $companie) {

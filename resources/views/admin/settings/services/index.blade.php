@@ -71,7 +71,7 @@
                                                         <td>{{$index++}}</td>
                                                         <td>{{$service->name_en}}</td>
                                                         <td>{{$service->name_ar}}</td>
-                                                        <td>{{$service->price>0?$service->price." SAR":'Free'}}</td>
+                                                        <td>{{$service->price>0?$service->price. $Setting->Currency:'Free'}}</td>
                                                         <td>{{$service->created_at}}</td>
                                                         <td>
                                                             @can('edit_service')

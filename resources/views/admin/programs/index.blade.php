@@ -57,7 +57,7 @@
                          <span class="btn btn-block btn-success align-middle ml-25"><i class="bx bx-star" ></i> {{__('cycles.New')}}</span>
                     </div>
                     
-                <div class="btn btn-success ExportCycle">Export</div>
+                <div class="btn btn-success ExportCycle">{{__('cycles.Export')}}</div>
                 </div>
                 <div class="organizations-list-table">
                     <div class="card">
@@ -252,7 +252,9 @@
                     }});
             })});
 
-       
+            const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+    };
 
         function DoChange(set, cycle) {
            

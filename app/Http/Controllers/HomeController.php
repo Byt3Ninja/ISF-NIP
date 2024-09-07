@@ -245,7 +245,8 @@ class HomeController extends Controller
                 });
         }
         $services = $services->get();
-        return view('admin.clients.directory')->with('services', $services);
+        $Setting = \App\Settings::where('id', 1)->first();
+        return view('admin.clients.directory')->with('services', $services)->with('Setting', $Setting);
     }
     public function rateservice($id,Request $request){
         if ($request && $id){
@@ -292,4 +293,10 @@ class HomeController extends Controller
         if (count($menu)==0 or !$doc) {abort(404);}
         return view('admin.documentation', compact('doc','menu'));
     }
+
+    
+
+
+
+
 }

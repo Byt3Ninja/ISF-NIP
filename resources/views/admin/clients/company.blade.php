@@ -249,9 +249,9 @@
                                                                     </div>
                                                                     <div class="col-md-6 col-12">
                                                                         <div class="form-label-group mt-75">
-                                                                            <label for="raised_fund">{{ __('admin.raised_fund_egp') }}</label>
+                                                                            <label for="raised_fund">{{ __('admin.raised_fund_egp') }} {{ $Setting->Currency}}</label>
                                                                             <input type="number" class="form-control" id="raised_fund"
-                                                                                   placeholder="{{ __('admin.raised_fund_egp') }}" value="{{($client->company)? $client->company->raised_fund:old('raised_fund')}}" name="raised_fund"
+                                                                                   placeholder="{{ __('admin.raised_fund_egp') }} {{ $Setting->Currency}}" value="{{($client->company)? $client->company->raised_fund:old('raised_fund')}}" name="raised_fund"
                                                                                    autocomplete="raised_fund">
                                                                         </div>
                                                                     </div>
