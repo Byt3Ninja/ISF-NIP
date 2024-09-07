@@ -73,7 +73,7 @@
 															@php $attempts = $quiz->myAttempts; @endphp
 															@if( $attempts->where('score', '>=', $quiz->passing_criteria)->count() >= 1 )
 																<span class="badge badge-success"> {{ __('admin.quizPassed') }} </span>
-															@elseif( $attempts->where('score', '<', $quiz->passing_criteria) >= $quiz->attempts )
+															@elseif( $attempts->where('score', '<', $quiz->passing_criteria)->count() >= $quiz->attempts )
 																<span class="badge badge-danger"> {{ __('admin.quizFailed') }} </span>
 															@elseif( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') )
 																<span class="badge badge-secondary"> {{ __('admin.quizNotStartedYet') }} </span>
