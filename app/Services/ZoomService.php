@@ -41,7 +41,7 @@ class ZoomService implements OnlineMeetingServiceInterface
     protected function generateZoomToken()
     {
         $Setting = Settings::where('id', 1)->first();
-        if(!$Setting){
+        if($Setting){
         $ZOOM_CLIENT_ID = $Setting->ZOOM_CLIENT_ID;
         $ZOOM_CLIENT_SECRET= $Setting->ZOOM_CLIENT_SECRET;
         $ZOOM_ACCOUNT_ID= $Setting->ZOOM_ACCOUNT_ID;
