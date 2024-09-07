@@ -319,7 +319,7 @@ class TrainingController extends Controller
                 $diff = $available_at->diff(now());
                 $time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
             }
-            return view('admin/clients/quiz_overview', compact('quiz', 'training', 'questions', 'tags', 'attempts', 'available', 'available_at', 'time_remaining', 'completion_percentage', 'allowActions', 'active_now'));
+            return view('admin/clients/quiz/overview', compact('quiz', 'training', 'questions', 'tags', 'attempts', 'available', 'available_at', 'time_remaining', 'completion_percentage', 'allowActions', 'active_now'));
         } else { return abort(401); }
     }
 
@@ -451,7 +451,7 @@ class TrainingController extends Controller
     
                 $diff = now()->diff( $time_limit );
                 $time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
-                return view('admin/clients/quiz_taking', compact('quiz', 'training', 'questions', 'question', 'response', 'time_remaining'));
+                return view('admin/clients/quiz/taking', compact('quiz', 'training', 'questions', 'question', 'response', 'time_remaining'));
             }
             else
             {
@@ -483,7 +483,7 @@ class TrainingController extends Controller
 
             $training = $quiz->training;
             if( empty( $training ) ) { return abort(404); }
-            return view('admin/clients/quiz_results', compact('quiz', 'results', 'training'));
+            return view('admin/clients/quiz/results', compact('quiz', 'results', 'training'));
         } else { return abort(401); }
     }
 

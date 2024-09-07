@@ -587,5 +587,8 @@ return [
 	'quizOk' => 'Ok',
 	'quizCorrectAnswer' => 'Correct answer',
 	'quizWrongAnswer' => 'Wrong answer',
+	'quizNotStartedYet' => 'Not started yet',
+	'quizNotTaken' => 'Not taken',
+	'My Quizzes' => 'My Quizzes',
 	'settings'=>'Settings',
 ];

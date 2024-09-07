@@ -134,6 +134,12 @@
                 <span class="menu-title">{{__('admin.My courses')}}</span>
             </a>
         </li>
+        <li class="{{Request::is('dashboard/quizzes/my*')?'active':''}} nav-item">
+            <a href="/dashboard/quizzes/my">
+                <i class="menu-livicon" data-icon="question-alt"></i>
+                <span class="menu-title">{{__('admin.My Quizzes')}}</span>
+            </a>
+        </li>
         <li class="{{Request::is('dashboard/startup/mentorshipTasks*')?'active':''}} nav-item">
             <a href="{{ route('startup.mentorshipTasks.home') }}">
                 <i class="menu-livicon" data-icon="briefcase"></i>
