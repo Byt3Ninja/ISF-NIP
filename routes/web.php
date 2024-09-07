@@ -288,9 +288,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
     Route::resource('questions-bank', 'QuestionsBankController');
-    Route::resource('quizzes', 'quizzesController');
+    Route::resource('quizzes', 'quizzesController')->except(['show']);;
     Route::get('quizzes/{quiz}/questions', 'quizzesController@get_questions')->name('quizzes.questions');
     Route::post('quizzes/{quiz}/questions', 'quizzesController@save_questions')->name('quizzes.saveQuestions');
+    Route::get('quizzes/my', 'quizzesController@my')->name('quizzes.dashboard');
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');

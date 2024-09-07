@@ -119,7 +119,7 @@
 													</tr>
 													<tr>
 														<td class="w-15"> {{ __('admin.TimeLimit') }} </td>
-														<td>{{ $quiz->time_limit > 60 ? intval($quiz->time_limit / 60) . ' ' . __('admin.hours') . ' ' . ($quiz->time_limit % 60) . ' ' . __('admin.minutes') : $quiz->time_limit . ' ' . __('admin.minutes') }}</td>
+														<td>{{ $quiz->time_limit > 60 ? intval($quiz->time_limit / 60) . ' ' . __('admin.hours') . ' ' . ($quiz->time_limit % 60 > 0 ? intval($quiz->time_limit % 60) . ' ' . __('admin.minutes') : '')  : $quiz->time_limit . ' ' . __('admin.minutes') }}</td>
 													</tr>
 													<tr>
 														<td class="w-15"> {{ __('admin.quizAttempts') }} </td>

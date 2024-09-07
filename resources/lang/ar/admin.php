@@ -587,5 +587,8 @@ return [
 	'quizOk' => 'حسنا',
 	'quizCorrectAnswer' => 'الإجابة صحيحة',
 	'quizWrongAnswer' => 'الإجابة خاطئة',
+	'quizNotStartedYet' => 'لم يبدأ بعد',
+	'quizNotTaken' => 'لم يتم الاختبار',
+	'My Quizzes' => 'إختباراتي',
 	'settings'=>'الاعدادات',
 ];

@@ -189,4 +189,25 @@ class quizzesController extends Controller
 			return redirect()->route('quizzes.questions', ['quiz' => $id])->with('success', 'StoredSuccessfully');
 		}
 	}
+
+	public function my()
+	{
+		$user = auth()->user();
+		if( $user->hasRole(['Registered']) )
+		{
+			if( !$user->HaveCompany ) { return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']); }
+			if( !$user->company ) { return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']); }
+
+			$company = $user->company;
+			$cycleData = $company->cycledata;
+
+			if( empty( $cycleData ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
+			if( empty( $cycleData->organization_id ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
+
+			$organization_id = $cycleData->organization_id;
+			$quizzes = Quizzes::where('status', 'published')->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->get();
+			
+			return view('admin/clients/quiz/dashboard', compact('quizzes'));
+		} else { return abort(401); }
+	}
 }
