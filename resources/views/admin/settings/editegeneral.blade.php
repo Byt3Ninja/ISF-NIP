@@ -57,6 +57,7 @@
                      
                     <div class="row match-height">
                         <div class="col-12">
+                            
                             <form class="form" action= "{{route('updateone')}}" method="POST" enctype="multipart/form-data">
                                 {!! csrf_field() !!}
                             @method('PUT')

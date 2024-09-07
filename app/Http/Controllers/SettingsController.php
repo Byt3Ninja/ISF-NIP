@@ -14,6 +14,8 @@ use Carbon\Carbon;
 use Auth;
 use App\Event;
 use App\State;
+use Illuminate\Support\Facades\Storage;
+
 
 class SettingsController extends Controller
 {
@@ -326,7 +328,6 @@ public function update_settinglogo(Request $request){
         $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
     
         // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-        // هنا نضيف "new_" كبادئة لاسم الصورة
         $newName = 'logo'; 
     
         // تحديد الامتداد الأصلي للصورة
@@ -334,16 +335,13 @@ public function update_settinglogo(Request $request){
     
         // تركيب الاسم الجديد مع الامتداد
         $logo = $newName . '.' . $extension;
-        $destinationPath = public_path('images/logo');
-
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0777, true); // إنشاء المجلد إذا لم يكن موجودًا
-        }
-        $image->move($destinationPath, $logo);
-        // حفظ الصورة بالاسم الجديد
-        // $image->storeAs('public/images/logo', $logo);
+    
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $path = $image->storeAs('', $logo, 'logo_uploads');
+        
+    
     } else {
-        $logo = null; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+        $logo = $updateSittings->Logo; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
     }
 
     if ($request->hasFile('header')) {
@@ -362,15 +360,11 @@ public function update_settinglogo(Request $request){
         // تركيب الاسم الجديد مع الامتداد
         $header = $newName . '.' . $extension;
 
-        $destinationPath = public_path('images/logo');
-
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0777, true); // إنشاء المجلد إذا لم يكن موجودًا
-        }
-        $image->move($destinationPath, $header);
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $path = $image->storeAs('', $header, 'logo_uploads');
        
     } else {
-        $header = null; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+        $header = $updateSittings->header; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
     }
 
     if ($request->hasFile('footer')) {
@@ -389,16 +383,14 @@ public function update_settinglogo(Request $request){
         // تركيب الاسم الجديد مع الامتداد
         $footer = $newName . '.' . $extension;
     
-        $destinationPath = public_path('images/logo');
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $path = $image->storeAs('', $footer, 'logo_uploads');
 
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0777, true); // إنشاء المجلد إذا لم يكن موجودًا
-        }
-        $image->move($destinationPath, $footer);
+
         // حفظ الصورة بالاسم الجديد
         // $image->storeAs('public/images/footer', $footer);
     } else {
-        $footer = null; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+        $footer = $updateSittings->footer; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
     }
 
     

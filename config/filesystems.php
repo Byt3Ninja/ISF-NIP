@@ -60,6 +60,12 @@ return [
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],
+        'logo_uploads' => [
+            'driver' => 'local',
+            'root' => public_path('images/logo'), // المسار المطلوب
+            'url' => env('APP_URL') . '/images/logo',
+            'visibility' => 'public',
+        ],
         'UsersDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads'),
