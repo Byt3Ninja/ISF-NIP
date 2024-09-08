@@ -18,6 +18,11 @@ class BroadcastConfigService
                 'PUSHER_APP_SECRET' => '',
                 'PUSHER_APP_ID' => '',
                 'PUSHER_APP_CLUSTER' => '',
+
+                'GOOGLE_CLIENT_ID' => '',
+                'GOOGLE_CLIENT_SECRET' => '',
+                'GOOGLE_REDIRECT' => '',
+
             ];
         }
     
@@ -28,6 +33,20 @@ class BroadcastConfigService
             'PUSHER_APP_SECRET' => $settings->PUSHER_APP_SECRET ?? '',
             'PUSHER_APP_ID' => $settings->PUSHER_APP_ID ?? '',
             'PUSHER_APP_CLUSTER' => $settings->PUSHER_APP_CLUSTER ?? '',
+
+            'GOOGLE_CLIENT_ID' => $settings->GOOGLE_CLIENT_ID ?? '',
+            'GOOGLE_CLIENT_SECRET' => $settings->GOOGLE_CLIENT_SECRET ?? '',
+            'GOOGLE_REDIRECT' => $settings->GOOGLE_REDIRECT ?? '',
+
+            'MICROSOFT_CLIENT_ID' => $settings->MICROSOFT_CLIENT_ID ?? '',
+            'MICROSOFT_CLIENT_SECRET_VALUE' => $settings->MICROSOFT_CLIENT_SECRET_VALUE ?? '',
+            'MICROSOFT_TENANT_ID' => $settings->MICROSOFT_TENANT_ID ?? '',
+            'MICROSOFT_CLIENT_SECRET_ID' => $settings->MICROSOFT_CLIENT_SECRET_ID ?? '',
+            'MICROSOFT_APP_EMAIL' => $settings->MICROSOFT_APP_EMAIL ?? '',
+            'MICROSOFT_REDIRECT_URI' => $settings->MICROSOFT_REDIRECT_URI ?? '',
+
         ];
+
+        
     }
 }
