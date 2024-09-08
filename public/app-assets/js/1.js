@@ -265,7 +265,7 @@ $('.MICROSOFT_CLIENT').hide();
 $('.ZOOM_CLIENT').hide();
 
 
-    }else if(meeting == 'Microsoft'){
+    }else if(meeting == 'Teams'){
 
         $('.GOOGLE_CLIENT_ID').hide();
         $('.MICROSOFT_CLIENT').show();

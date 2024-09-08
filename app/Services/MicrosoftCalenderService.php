@@ -5,7 +5,7 @@ use GuzzleHttp\Client;
 use Microsoft\Graph\Graph;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Microsoft\Graph\Model;
-
+use App\Settings;
 
 class MicrosoftCalenderService{
     public $provider;
@@ -13,10 +13,20 @@ class MicrosoftCalenderService{
     protected $graph;
     public function __construct()
     {
+        $Setting = Settings::where('id', 1)->first();
+        if($Setting){
+        $MICROSOFT_CLIENT_ID = $Setting->MICROSOFT_CLIENT_ID;
+        $MICROSOFT_CLIENT_SECRET_VALUE = $Setting->MICROSOFT_CLIENT_SECRET_VALUE;
+        $MICROSOFT_REDIRECT_URI = $Setting->MICROSOFT_REDIRECT_URI;
+        }else{
+            $MICROSOFT_CLIENT_ID = '';
+            $MICROSOFT_CLIENT_SECRET_VALUE= '';
+            $MICROSOFT_REDIRECT_URI= '';
+        }
         $this->provider = new GenericProvider([
-            'clientId'                => env('MICROSOFT_CLIENT_ID'),
-            'clientSecret'            => env('MICROSOFT_CLIENT_SECRET_VALUE'),
-            'redirectUri'             => env('MICROSOFT_REDIRECT_URI'),
+            'clientId'                => $MICROSOFT_CLIENT_ID,
+            'clientSecret'            => $MICROSOFT_CLIENT_SECRET_VALUE,
+            'redirectUri'             => $MICROSOFT_REDIRECT_URI,
             'urlAuthorize'            => 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
             'urlAccessToken'          => 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
             'urlResourceOwnerDetails' => '',

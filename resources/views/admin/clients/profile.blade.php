@@ -1,692 +1,723 @@
 @extends('layouts.admin')
-@section('title', __('admin.Profile') )
+@section('title', __('admin.Profile'))
 @section('subTitle', __('admin.Edit your profile information'))
+
+@section('style')
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-profile.css" />
+@stop
+
 @section('content')
-    <!-- BEGIN: Content-->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
-            @include('admin.includes.heading')
-            <div class="content-body">
-                <form method="post" action="{{route('update_my_profile')}}"
-                      enctype="multipart/form-data">
-                    {{--                ================> Section Main Profile <==================--}}
-                    <section id="basic-input">
-                        <div class="row">
-                            <div class="col-md-{{$client->img_url?9:12}}">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4 class="card-title">{{__('admin.Edit your profile information')}}</h4>
-                                    </div>
-                                    <div class="card-content">
-                                        <div class="card-body">
-                                            @if(session()->has('msg'))
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="alert alert-{{Session::get('class')}} alert-dismissible  mb-2"
-                                                             role="alert">
-                                                            <button type="button" class="close" data-dismiss="alert"
-                                                                    aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                            <div class="d-flex align-items-center">
-                                                                <i class="bx bx-error"></i>
-                                                                <span>
-                                                        {{ __('admin.'.session()->get('msg')) }}
-                                                                    {{ Session::forget('msg') }}
-                                                    </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endif
-                                            <!-- Validation messages -->
-                                            @if(count($errors) >0)
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="alert alert-danger">
-                                                            <ul>
-                                                                @foreach($errors->all() as $error)
-                                                                    <li>{{ $error }} </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endif
+  <!-- Content wrapper -->
+  <div class="content-wrapper">
+    <!-- Content -->
 
-                                            {!! csrf_field() !!}
-                                            <div class="row mt-75">
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-label-group mt-75">
-                                                        <input value="{{ $client->first_name_en}}"
-                                                               name="first_name_en" type="text" class="form-control"
-                                                               id="first_name_en" style="direction: ltr;"
-                                                               placeholder="{{ __('admin.First Name') }}" required
-                                                               autocomplete="first_name_en" autofocus/>
-                                                        <label for="first_name_en">{{__('admin.English UserName')}}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-label-group mt-75">
-                                                        <input value="{{ $client->last_name_en }}" name="last_name_en"
-                                                               type="text" class="form-control" id="last_name_en"
-                                                               style="direction: ltr;"
-                                                               placeholder="{{ __('admin.Last Name') }}" required
-                                                               autocomplete="last_name_en"/>
-                                                        <label for="last_name_en">{{__('admin.Last Name')}}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-12 col-12">
-                                                    <div class="form-label-group">
-                                                        <ul class="list-unstyled mb-0">
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio" name="gender" value="Male"
-                                                                               id="g1" {{ $client->gender=='Male' ? 'checked=""' :''}} >
-                                                                        <label for="g1">{{__('Male')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio" name="gender" value="Female"
-                                                                               id="g2" {{ $client->gender=='Female' ? 'checked=""' :''}}>
-                                                                        <label for="g2">{{__('Female')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-label-group">
-                                                        <input value="{{ $client->first_name_ar }}"
-                                                               name="first_name_ar" type="text" class="form-control"
-                                                               id="first_name_ar" style="direction: rtl;"
-                                                               placeholder="{{ __('admin.First Name') }}" required
-                                                               autocomplete="first_name_ar" autofocus/>
-                                                        <label for="first_name_ar">{{__('admin.Arabic UserName')}}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-label-group">
-                                                        <input value="{{ $client->last_name_ar }}" name="last_name_ar"
-                                                               type="text" class="form-control" id="last_name_ar"
-                                                               style="direction: rtl;"
-                                                               placeholder="{{ __('admin.Last Name') }}" required
-                                                               autocomplete="last_name_ar"/>
-                                                        <label for="last_name_ar">{{__('admin.Last Name')}}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-label-group mt-75">
-                                                        <input value="{{ $client->title_ar }}" name="title_ar"
-                                                               type="title_ar"
-                                                               class="form-control" id="title_ar"
-                                                               style="direction: rtl;"
-                                                               placeholder="{{ __('admin.JobTitleAr') }}" required
-                                                               autocomplete="title_ar">
-                                                        <label for="title_ar">{{__('admin.JobTitleAr')}}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-label-group mt-75">
-                                                        <input value="{{ $client->title_en }}" name="title_en"
-                                                               type="title_en"
-                                                               class="form-control" id="title_en"
-                                                               style="direction: ltr;"
-                                                               placeholder="{{ __('admin.JobTitleEn') }}" required
-                                                               autocomplete="title_en">
-                                                        <label for="title_en">{{__('admin.JobTitleEn')}}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-label-group mt-75">
-                                                        <input value="{{ $client->email }}" name="email" type="email"
-                                                               class="form-control" id="email" style="direction: ltr;"
-                                                               placeholder="{{ __('admin.E-mail') }}" required
-                                                               autocomplete="email">
-                                                        <label for="email">{{ __('admin.E-mail') }}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-label-group mt-75">
-                                                        <input type="text" class="form-control" id="phone"
-                                                               style="direction: ltr;"
-                                                               placeholder="{{ __('admin.Phone') }}"
-                                                               value="{{ $client->phone }}" name="phone"
-                                                               required autocomplete="new-phone">
-                                                        <label for="phone">{{ __('admin.Phone') }}</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4 col-12">
-                                                    <div class="form-group">
-                                                        <label for="state_id">{{ __('admin.Country')}}</label>
-
-                                                        <select class="form-control" required
-                                                                id="country_id" name='country_id'>
-                                                            <option value="">{{ __('admin.Country')}}</option>
-                                                            @foreach($countries as $country)
-                                                                <option value="{{$country->id}}" {{($country->id==$client->country_id)? 'selected':''}}>{{$country->{'name_'.$l} }}</option>
-                                                            @endforeach
-                                                        </select>
-
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4 col-12">
-                                                    <div class="form-group">
-                                                        <label for="state_id">{{ __('admin.State')}}</label>
-
-                                                        <select class="form-control" required
-                                                                id="state_id" name='state_id'>
-                                                            <option value="">{{ __('admin.State')}}</option>
-                                                            @php $name = 'name_'.$l; @endphp
-                                                            @if($client->state_id)
-                                                                <option value="{{$client->state_id}}"
-                                                                        selected>{{$client->state->{'name_'.$l} }}</option>
-                                                            @endif
-                                                        </select>
-
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4 col-12">
-                                                    <div class="form-group">
-                                                        <label for="city_id">{{ __('admin.City')}}</label>
-                                                        <select class="form-control" required
-                                                                id="city_id" name='city_id'>
-                                                            <option value="">{{ __('admin.City')}}</option>
-                                                            @php $name = 'name_'.$l; @endphp
-                                                            @if($client->city_id)
-                                                                <option value="{{$client->city_id}}"
-                                                                        selected>{{$client->city->{'name_'.$l} }}</option>
-                                                            @endif
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <div class="form-group">
-                                                        <label for="basicInput">{{ __('admin.Image')}}</label>
-                                                        <div class="input-group">
-                                                            <div class="input-group-prepend">
-                                                            <span class="input-group-text"
-                                                                  id="inputGroupFileAddon01">{{ __('admin.Upload')}}</span>
-                                                            </div>
-                                                            <div class="custom-file">
-                                                                <input type="file" class="custom-file-input"
-                                                                       id="img_url"
-                                                                       name="img_url" accept="image/*"
-                                                                       style="direction: ltr;"
-                                                                       aria-describedby="inputGroupFileAddon00">
-                                                                <label class="custom-file-label"
-                                                                       for="inputGroupFile00">{{ __('admin.SelectFile')}}</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-12 col-12">
-                                                    <div class="form-group mt-75">
-                                                        <label for="basicInput">{{ __('auth.DoYouHaveCompany')}}</label>
-                                                        <ul class="list-unstyled mb-0">
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio" name="HaveCompany" value="1"
-                                                                               id="h1" {{$client->HaveCompany?'checked=""':''}}>
-                                                                        <label for="h1">{{__('Yes')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio" name="HaveCompany" value=""
-                                                                               id="h2" {{$client->HaveCompany?'':'checked=""'}}>
-                                                                        <label for="h2">{{__('No')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-12 d-flex justify-content-end">
-                                                    <button type="submit"
-                                                            class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                            @if($client->img_url)
-                                <div class="col-md-3">
-                                    <div class="card">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <img style="width: 100%;" class="img-responsive pad"
-                                                     src="/191014/{{$client->img_url ??'../images/placeholder.jpg' }}"
-                                                     alt="{{ $client->first_name_en}}">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </section>
-                    {{--                ================> Section Mentor Bio <====================--}}
-                    @role('Mentor')
-                    <input type="hidden" name="mentor_section" value="1">
-                    <a id="bio">
-                        <section id="basic-input">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h4 class="card-title">{{__('admin.addbio')}}</h4>
-                                        </div>
-                                        <div class="card-content">
-                                            <div class="card-body">
-
-                                                <div class="row">
-
-                                                    <div class="col-md-12">
-                                                        <div class="col-md-12 col-12">
-                                                            <label for="linkedin">{{ __('admin.Linkedin') }}</label>
-                                                            <div class="form-group">
-                                                                <input value="{{ $client->bio?$client->bio->linkedin:'' }}"
-                                                                       name="linkedin" type="text"
-                                                                       class="form-control" id="linkedin"
-                                                                       style="direction: ltr;"
-                                                                       placeholder="{{ __('admin.Linkedin')}} - https://linkedin.com/in/yourname"
-                                                                       autocomplete="linkedin">
-
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-12 col-12">
-                                                            <label>{{__('admin.arbio')}}: </label>
-                                                            <div class="form-group">
-                                                                <textarea class="form-control" id="bio_ar" name='bio_ar'
-                                                                          rows="3" dir="rtl"
-                                                                          placeholder="{{__('admin.writebioar')}}">{{$client->bio->bio_ar??''}}</textarea>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-12 col-12">
-                                                            <label>{{__('admin.enbio')}}: </label>
-                                                            <div class="form-group">
-                                                                <textarea class="form-control" id="bio_en" name='bio_en'
-                                                                          rows="3" dir="ltr"
-                                                                          placeholder="{{__('admin.writebioen')}}">{{$client->bio->bio_en??''}}</textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-
-                                                <div class="col-md-12 col-12">
-                                                    <div class="form-label-group">
-                                                        <h6 for="selectExpertises">{{__('admin.SelectExpertises')}}</h6>
-                                                        <p>{{__('admin.SelectMultiExpertises')}}.</p>
-                                                        <div class="form-group">
-                                                            <select name="expertises[]" class="select2 form-control"
-                                                                    multiple="multiple" id="selectExpertises">
-                                                                @foreach( $expertises as $expertise_group )
-                                                                    <optgroup label="{{ $expertise_group->title }}">
-                                                                        @foreach( $expertise_group->children as $expertise )
-                                                                            <option value="{{ $expertise->id }}"  @if(in_array($expertise->id,$client->mentorExpertises()->pluck('expertises.id')->toArray())) selected @endif>{{ $expertise->title }}</option>
-                                                                        @endforeach
-                                                                    </optgroup>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-12 col-12">
-                                                    <div class="form-group mt-75">
-                                                        <label for="basicInput">{{ __('admin.Entrepreneurial Experience')}}</label>
-                                                        <ul class="list-unstyled mb-0">
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio"
-                                                                               name="entrepreneurial_experience"
-                                                                               value="1"
-                                                                               class="entrepreneurial_experience"
-                                                                               id="e1" {{optional($client->bio)->entrepreneurial_experience?'checked=""':''}}>
-                                                                        <label for="e1">{{__('Yes')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio"
-                                                                               name="entrepreneurial_experience"
-                                                                               value="0"
-                                                                               class="entrepreneurial_experience"
-                                                                               id="e2" {{optional($client->bio)->entrepreneurial_experience?'':'checked=""'}}>
-                                                                        <label for="e2">{{__('No')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-
-                                                <br>
-                                                <div class="col-md-12 col-12" style="display: none;"
-                                                     id="entrepreneurial_experience_brief">
-                                                    <div class="form-label-group">
-                                                        <p>{{__('admin.Entrepreneurial Experience desc')}}.</p>
-                                                        <textarea class="form-control" id="basicTextarea" rows="8"
-                                                                  name="entrepreneurial_experience_brief"
-                                                                  required>{{$client->bio?$client->bio->entrepreneurial_experience_brief:old('entrepreneurial_experience_brief')}} </textarea>
-                                                        <label for="tcontent">{{__('admin.Entrepreneurial Experience Brief')}}</label>
-
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-12 col-12">
-                                                    <div class="form-group mt-75">
-                                                        <label for="basicInput">{{ __('admin.Profile Privacy')}}</label>
-                                                        <ul class="list-unstyled mb-0">
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio"
-                                                                               name="profile_privacy"
-                                                                               value="1"
-                                                                               class="profile_privacy"
-                                                                               id="p1" {{optional($client->bio)->profile_privacy?'checked=""':''}}>
-                                                                        <label for="p1">{{__('Yes')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                            <li class="d-inline-block mr-2 mb-1">
-                                                                <fieldset>
-                                                                    <div class="radio">
-                                                                        <input type="radio"
-                                                                               name="profile_privacy"
-                                                                               value="0"
-                                                                               class="profile_privacy"
-                                                                               id="e2" {{optional($client->bio)->profile_privacy?'':'checked=""'}}>
-                                                                        <label for="p2">{{__('No')}}</label>
-                                                                    </div>
-                                                                </fieldset>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-12 col-12">
-                                                    <label for="approach">{{ __('admin.mentorship approach') }} :</label>
-                                                    <div class="form-group" id="approach">
-                                                        <div class="checkbox mr-5">
-                                                            <input type='checkbox' id="checkbox1" class="checkbox-input"
-                                                                   name='mentorship_approach[]' {{$client->bio && in_array('E-mail',$client->bio->mentorship_approaches)?'checked=""':''}} value="E-mail">
-                                                            <label for="checkbox1">
-                                                                {{__('admin.E-mail')}}
-                                                            </label>
-                                                        </div>
-                                                        <div class="checkbox mr-5">
-                                                            <input type='checkbox' id="checkbox2" class="checkbox-input"
-                                                                   name='mentorship_approach[]' {{$client->bio && in_array('phone calls',$client->bio->mentorship_approaches)?'checked=""':''}} value="phone calls">
-                                                            <label for="checkbox2">
-                                                                {{__('admin.phone calls')}}
-                                                            </label>
-                                                        </div>
-                                                        <div class="checkbox mr-5">
-                                                            <input type='checkbox' id="checkbox3" class="checkbox-input"
-                                                                   name='mentorship_approach[]' {{$client->bio && in_array('video calls',$client->bio->mentorship_approaches)?'checked=""':''}} value="video calls">
-                                                            <label for="checkbox3">
-                                                                {{__('admin.video calls')}}
-                                                            </label>
-                                                        </div>
-                                                        <div class="checkbox mr-5">
-                                                            <input type='checkbox' id="checkbox4" class="checkbox-input"
-                                                                   name='mentorship_approach[]' {{$client->bio && in_array('in-person meetings',$client->bio->mentorship_approaches)?'checked=""':''}} value="in-person meetings">
-                                                            <label for="checkbox4">
-                                                                {{__('admin.in-person meetings')}}
-                                                            </label>
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <br>
-                                                <div class="row">
-                                                    <div class="col-12 d-flex justify-content-end">
-                                                        <button type="submit"
-                                                                class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                        </section>
-                    </a>
-                    @endrole
-
-                </form>
-
-                {{--         =====================> Section Password <=======================--}}
-                <section id="basic-input">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="card-title">{{__('admin.Change your account password')}}</h4>
-                                </div>
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <form method="post" action="{{route('update_my_profile_password')}}"
-                                              enctype="multipart/form-data">
-                                            {!! csrf_field() !!}
-                                            <div class="row">
-                                                <div class="col-md-12">
-
-                                                    <fieldset class="form-group">
-                                                        <label class="text-bold-600"
-                                                               for="password">{{ __('admin.Password') }}</label>
-                                                        <input type="password" class="form-control" id="password"
-                                                               placeholder="{{ __('admin.Password') }}" name="password"
-                                                               required autocomplete="new-password">
-                                                    </fieldset>
-
-                                                    <fieldset class="form-group">
-                                                        <label class="text-bold-600"
-                                                               for="password-confirm">{{ __('admin.Confirm') }}</label>
-                                                        <input type="password" class="form-control"
-                                                               id="password-confirm"
-                                                               placeholder="{{ __('admin.Password') }}"
-                                                               name="password_confirmation"
-                                                               required autocomplete="new-password">
-                                                    </fieldset>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-12 d-flex justify-content-end">
-                                                    <button type="submit"
-                                                            class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <!-- Header -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-6">
+            <div class="user-profile-header-banner">
+              <img src="/vuexy/assets/img/pages/profile-banner.png" alt="Banner image" class="rounded-top" />
             </div>
+            <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
+              <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+                <img src="{{ $client->image_url }}" alt="user image" class="d-block ms-0 ms-sm-6 rounded user-profile-img"
+                  style="height: 130px" />
+              </div>
+              <div class="flex-grow-1 mt-3 mt-lg-5">
+                <div
+                  class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-5 flex-md-row flex-column gap-4">
+                  <div class="user-profile-info">
+                    <h4 class="mb-2 mt-lg-6">
+                      {{ 
+                        $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en
+                      }}
+                    </h4>
+                    <ul
+                      class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
+                      <li class="list-inline-item d-flex gap-2 align-items-center">
+                        <i class="ti ti-palette ti-lg"></i><span class="fw-medium">
+                          {{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
+                        </span>
+                      </li>
+                      <li class="list-inline-item d-flex gap-2 align-items-center">
+                        <i class="ti ti-map-pin ti-lg"></i><span
+                          class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
+                      </li>
+                      <li class="list-inline-item d-flex gap-2 align-items-center">
+                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined April 2021</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <a href="javascript:void(0)" class="btn btn-primary mb-1">
+                    <i class="ti ti-user-check ti-xs me-2"></i>Connected
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <!-- END: Content-->
-        @stop
-        @section('pagescripts')
-            <script>
-                $(document).ready(function () {
-                    getStates($('#country_id').val());
-                    $('#country_id').change(function () {
-                        getStates($(this).val());
-                    });
-                    $('#state_id').change(function () {
-                        getCities($(this).val());
-                    });
-                });
+      </div>
+      <!--/ Header -->
 
-                function getStates(country_id) {
-                    var $state = $('#state_id');
-                    var currentState = '{{ $client->state_id }}';
-                    var selected = '';
-                    $.ajax({
-                        url: "{{ route('get_states_by_country') }}",
-                        data: {
-                            country_id: country_id
-                        },
-                        success: function (data) {
-                            $state.html('<option value="" >{{ __('admin.State')}}</option>');
-                            $.each(data, function (id, value) {
-                                // selected = '';
-                                if (currentState === id) {
-                                    selected = 'selected';
-                                    getCities(id)
-                                } else {
-                                    selected = '';
-                                }
-                                $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
-                                $('#city_id').html('<option value="" >{{ __('admin.City')}}</option>');
-                            });
-                            $('#state').show(150);
-                        }
-                    });
-                }
+      <!-- Navbar pills -->
+      <div class="row">
+        <div class="col-md-12">
+          <div class="nav-align-top">
+            <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-2 gap-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="javascript:void(0);"><i class="ti-sm ti ti-user-check me-1_5"></i>
+                  Profile
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="pages-profile-teams.html"><i class="ti-sm ti ti-users me-1_5"></i> Teams</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="pages-profile-projects.html"><i class="ti-sm ti ti-layout-grid me-1_5"></i>
+                  Projects</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="pages-profile-connections.html"><i class="ti-sm ti ti-link me-1_5"></i>
+                  Connections</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!--/ Navbar pills -->
 
-                function getCities(state_id) {
-                    var $city = $('#city_id');
-                    var currentCity = '{{ $client->city_id }}';
-                    var selected = '';
-                    $.ajax({
-                        url: "{{ route('cities.index') }}",
-                        data: {
-                            state_id: state_id
-                        },
-                        success: function (data) {
-                            $city.html('<option value="" >{{ __('admin.City')}}</option>');
-                            $.each(data, function (id, value) {
-                                if (currentCity == id) {
-                                    selected = 'selected';
-                                } else {
-                                    selected = '';
-                                }
-                                $city.append('<option value="' + id + '" ' + selected + ' >' + value + '</option>');
-                            });
-                            $('#city').show(150);
-                        }
-                    });
-                }
-            </script>
-            @role('Mentor')
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.2/tinymce.min.js"
-                    referrerpolicy="origin"></script>
-            <script>
-                var useDarkMode = window.matchMedia('(prefers-color-scheme: light)').matches;
+      <!-- User Profile Content -->
+      <div class="row">
+        <div class="col-xl-4 col-lg-5 col-md-5">
+          <!-- About User -->
+          <div class="card mb-6">
+            <div class="card-body">
+              <small class="card-text text-uppercase text-muted small">
+                {{ $l == 'ar' ? 'المعلومات الشخصية' : 'About' }}
+              </small>
+              <ul class="list-unstyled my-3 py-1">
+                <li class="d-flex align-items-center mb-4">
+                  <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</span>
+                  <span>{{ 
+                  $l == 'ar' 
+                  ? $client->first_name_arز . ' ' . $client->last_name_ar 
+                  : $client->first_name_en . ' ' . $client->last_name_en
+                  }}</span>
+                </li>
+                <li class="d-flex align-items-center mb-4">
+                  <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'الحالة' : 'Status' }}:
+                  </span>
+                  <span>{{ $l == 'ar' ? 'نشط' : 'Active' }}</span>
+                </li>
+                <li class="d-flex align-items-center mb-4">
+                  <i class="ti ti-crown ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:
+                  </span>
+                  <span>
+                    {{ $l == 'ar' ? $client->title_ar : $client->title_en }}
+                  </span>
+                </li>
+                <li class="d-flex align-items-center mb-4">
+                  <i class="ti ti-flag ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
+                  </span>
+                  <span>
+                    {{ $client->country->{'name_' . $l} }}
+                  </span>
+                </li>
+                <li class="d-flex align-items-center mb-2">
+                  <i class="ti ti-language ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar'
+                        ? 'اللغات:'
+                        : '
+                                        Languages:' }}
+                  </span>
+                  <span>
+                    {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
+                  </span>
+                </li>
+              </ul>
+              <small class="card-text text-uppercase text-muted small">
+                {{ $l == 'ar' ? 'التواصل' : 'Contact' }}
+              </small>
+              <ul class="list-unstyled my-3 py-1">
+                <li class="d-flex align-items-center mb-4">
+                  <i class="ti ti-phone-call ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'الهاتف:' : 'Phone:' }}
+                  </span>
+                  <span>{{ $client->phone }}</span>
+                </li>
+                {{-- @role('Mentor')
+                  <li class="d-flex align-items-center mb-4">
+                    <i class="ti ti-messages ti-lg"></i><span class="fw-medium mx-2">
+                      {{ $l == 'ar' ? 'ليتكدان' : 'linkedin' }}:
+                    </span>
+                    <span>
+                      {{ $client->linkedin }}
+                    </span>
+                  </li>
+                @endrole --}}
 
-                tinymce.init({
-                    selector: '#basicTextarea',
-                    plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor insertdatetime advlist lists wordcount textpattern noneditable help charmap quickbars emoticons',
-                    imagetools_cors_hosts: ['picsum.photos'],
-                    menubar: 'edit view insert format tools table help',
-                    toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview  print | insertfile image media template link anchor codesample | ltr rtl',
-                    toolbar_sticky: true,
-                    autosave_ask_before_unload: true,
-                    autosave_interval: '30s',
-                    autosave_prefix: '{path}{query}-{id}-',
-                    autosave_restore_when_empty: false,
-                    autosave_retention: '2m',
-                    image_advtab: true,
-                    importcss_append: true,
-                    template_cdate_format: '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
-                    template_mdate_format: '[Date Modified (MDATE): %m/%d/%Y : %H:%M:%S]',
-                    height: 400,
-                    image_caption: true,
-                    quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
-                    noneditable_noneditable_class: 'mceNonEditable',
-                    toolbar_mode: 'sliding',
-                    contextmenu: 'link image imagetools table',
-                    skin: useDarkMode ? 'oxide-dark' : 'oxide',
-                    content_css: useDarkMode ? 'dark' : 'default',
-                    content_style: 'body { font-family:Times New Roman,Arial,sans-serif; font-size:14px }',
-                    image_title: true,
-                    automatic_uploads: true,
-                    media_live_embeds: true,
-                    relative_urls: false,
-                    remove_script_host: false,
-                    images_upload_url: "{{ route('training.upload', ['_token' => csrf_token() ])}}",
-                    file_picker_types: 'image',
-                    convert_urls: true,
-                    file_picker_callback: function (cb, value, meta) {
-                        var input = document.createElement('input');
-                        input.setAttribute('type', 'file');
-                        input.setAttribute('accept', 'image/*');
-                        input.onchange = function () {
-                            var file = this.files[0];
-                            var reader = new FileReader();
-                            reader.readAsDataURL(file);
-                            reader.onload = function () {
-                                var id = 'blobid' + (new Date()).getTime();
-                                var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                                var base64 = reader.result.split(',')[1];
-                                var blobInfo = blobCache.create(id, file, base64);
-                                blobCache.add(blobInfo);
-                                cb(blobInfo.blobUri(), {title: file.name});
-                            };
-                        };
-                        input.click();
-                    }
-                });
-                @if($l=='ar')
-                    tinyMCE.settings['directionality'] = 'rtl';
-                @endif
-            </script>
-            <script>
-                $(document).ready(function () {
-                    @if($client->bio)
-                        switch ('{{ $client->bio->entrepreneurial_experience }}') {
-                        case '1':
-                            $('#entrepreneurial_experience_brief').show();
-                            break;
-                        case '0':
-                            $('#entrepreneurial_experience_brief').hide();
-                            break;
-                        default:
-                            $('#entrepreneurial_experience_brief').hide();
-                            break;
-                    }
-                    @endif
+                <li class="d-flex align-items-center mb-4">
+                  <i class="ti ti-mail ti-lg"></i><span class="fw-medium mx-2">
+                    {{ $l == 'ar' ? 'البريد الإلكتروني:' : 'Email:' }}
+                  </span>
+                  <span>{{ $client->email }}</span>
+                </li>
+              </ul>
+              <small class="card-text text-uppercase text-muted small">Teams</small>
+              <ul class="list-unstyled mb-0 mt-3 pt-1">
+                <li class="d-flex flex-wrap mb-4">
+                  <span class="fw-medium me-2">Backend Developer</span><span>(126 Members)</span>
+                </li>
+                <li class="d-flex flex-wrap">
+                  <span class="fw-medium me-2">React Developer</span><span>(98 Members)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <!--/ About User -->
+          <!-- Profile Overview -->
+          <div class="card mb-6">
+            <div class="card-body">
+              <small class="card-text text-uppercase text-muted small">Overview</small>
+              <ul class="list-unstyled mb-0 mt-3 pt-1">
+                <li class="d-flex align-items-end mb-4">
+                  <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">Task Compiled:</span>
+                  <span>13.5k</span>
+                </li>
+                <li class="d-flex align-items-end mb-4">
+                  <i class="ti ti-layout-grid ti-lg"></i><span class="fw-medium mx-2">Projects Compiled:</span>
+                  <span>146</span>
+                </li>
+                <li class="d-flex align-items-end">
+                  <i class="ti ti-users ti-lg"></i><span class="fw-medium mx-2">Connections:</span>
+                  <span>897</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <!--/ Profile Overview -->
+        </div>
+        <div class="col-xl-8 col-lg-7 col-md-7">
+          <!-- Activity Timeline -->
+          <div class="card card-action mb-6">
+            <div class="card-header align-items-center">
+              <h5 class="card-action-title mb-0">
+                <i class="ti ti-chart-bar ti-lg text-body me-4"></i>Activity Timeline
+              </h5>
+            </div>
+            <div class="card-body pt-3">
+              <ul class="timeline mb-0">
+                <li class="timeline-item timeline-item-transparent">
+                  <span class="timeline-point timeline-point-primary"></span>
+                  <div class="timeline-event">
+                    <div class="timeline-header mb-3">
+                      <h6 class="mb-0">12 Invoices have been paid</h6>
+                      <small class="text-muted">12 min ago</small>
+                    </div>
+                    <p class="mb-2">Invoices have been paid to the company</p>
+                    <div class="d-flex align-items-center mb-2">
+                      <div class="badge bg-lighter rounded d-flex align-items-center">
+                        <img src="/vuexy/assets//img/icons/misc/pdf.png" alt="img" width="15"
+                          class="me-2" />
+                        <span class="h6 mb-0 text-body">invoices.pdf</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="timeline-item timeline-item-transparent">
+                  <span class="timeline-point timeline-point-success"></span>
+                  <div class="timeline-event">
+                    <div class="timeline-header mb-3">
+                      <h6 class="mb-0">Client Meeting</h6>
+                      <small class="text-muted">45 min ago</small>
+                    </div>
+                    <p class="mb-2">Project meeting with john @10:15am</p>
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                      <div class="d-flex flex-wrap align-items-center mb-50">
+                        <div class="avatar avatar-sm me-3">
+                          <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
+                        </div>
+                        <div>
+                          <p class="mb-0 small fw-medium">Lester McCarthy (Client)</p>
+                          <small>CEO of Pixinvent</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="timeline-item timeline-item-transparent">
+                  <span class="timeline-point timeline-point-info"></span>
+                  <div class="timeline-event">
+                    <div class="timeline-header mb-3">
+                      <h6 class="mb-0">Create a new project for client</h6>
+                      <small class="text-muted">2 Day Ago</small>
+                    </div>
+                    <p class="mb-2">6 team members in a project</p>
+                    <ul class="list-group list-group-flush">
+                      <li
+                        class="list-group-item d-flex justify-content-between align-items-center flex-wrap border-top-0 p-0">
+                        <div class="d-flex flex-wrap align-items-center">
+                          <ul class="list-unstyled users-list d-flex align-items-center avatar-group m-0 me-2">
+                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
+                              title="Vinnie Mostowy" class="avatar pull-up">
+                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/1.png" alt="Avatar" />
+                            </li>
+                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
+                              title="Allen Rieske" class="avatar pull-up">
+                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/4.png" alt="Avatar" />
+                            </li>
+                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
+                              title="Julee Rossignol" class="avatar pull-up">
+                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/2.png" alt="Avatar" />
+                            </li>
+                            <li class="avatar">
+                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip"
+                                data-bs-placement="bottom" title="3 more">+3</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <!--/ Activity Timeline -->
+          <div class="row">
+            <!-- Connections -->
+            <div class="col-lg-12 col-xl-6">
+              <div class="card card-action mb-6">
+                <div class="card-header align-items-center">
+                  <h5 class="card-action-title mb-0">Connections</h5>
+                  <div class="card-action-element">
+                    <div class="dropdown">
+                      <button type="button"
+                        class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow p-0 text-muted"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="ti ti-dots-vertical ti-md text-muted"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="javascript:void(0);">Share connections</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
+                        <li>
+                          <hr class="dropdown-divider" />
+                        </li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <ul class="list-unstyled mb-0">
+                    <li class="mb-4">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">Cecilia Payne</h6>
+                            <small>45 Connections</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <button class="btn btn-label-primary btn-icon">
+                            <i class="ti ti-user-check ti-md"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="mb-4">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/avatars/3.png" alt="Avatar" class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">Curtis Fletcher</h6>
+                            <small>1.32k Connections</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <button class="btn btn-primary btn-icon"><i class="ti ti-user-x ti-md"></i></button>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="mb-4">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/avatars/10.png" alt="Avatar" class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">Alice Stone</h6>
+                            <small>125 Connections</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <button class="btn btn-primary btn-icon"><i class="ti ti-user-x ti-md"></i></button>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="mb-4">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">Darrell Barnes</h6>
+                            <small>456 Connections</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <button class="btn btn-label-primary btn-icon">
+                            <i class="ti ti-user-check ti-md"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </li>
 
-                    $('.entrepreneurial_experience').change(function () {
-                        var value = $(this).val();
-                        switch (value) {
-                            case '1':
-                                $('#entrepreneurial_experience_brief').show();
-                                break;
-                            case '0':
-                                $('#entrepreneurial_experience_brief').hide();
-                                break;
-                            default:
-                                $('#entrepreneurial_experience_brief').hide();
-                                break;
-                        }
-                    });
-                });
-            </script>
-            @endrole
+                    <li class="mb-6">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/avatars/12.png" alt="Avatar" class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">Eugenia Moore</h6>
+                            <small>1.2k Connections</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <button class="btn btn-label-primary btn-icon">
+                            <i class="ti ti-user-check ti-md"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="text-center">
+                      <a href="javascript:;">View all connections</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!--/ Connections -->
+            <!-- Teams -->
+            <div class="col-lg-12 col-xl-6">
+              <div class="card card-action mb-6">
+                <div class="card-header align-items-center">
+                  <h5 class="card-action-title mb-0">Teams</h5>
+                  <div class="card-action-element">
+                    <div class="dropdown">
+                      <button type="button" class="btn btn-icon btn-text-secondary dropdown-toggle hide-arrow p-0"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="ti ti-dots-vertical text-muted"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="javascript:void(0);">Share teams</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
+                        <li>
+                          <hr class="dropdown-divider" />
+                        </li>
+                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <ul class="list-unstyled mb-0">
+                    <li class="mb-4">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/icons/brands/react-label.png" alt="Avatar"
+                              class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">React Developers</h6>
+                            <small>72 Members</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <a href="javascript:;"><span class="badge bg-label-danger">Developer</span></a>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="mb-4">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/icons/brands/support-label.png" alt="Avatar"
+                              class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">Support Team</h6>
+                            <small>122 Members</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <a href="javascript:;"><span class="badge bg-label-primary">Support</span></a>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="mb-4">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/icons/brands/figma-label.png" alt="Avatar"
+                              class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">UI Designers</h6>
+                            <small>7 Members</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <a href="javascript:;"><span class="badge bg-label-info">Designer</span></a>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="mb-4">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/icons/brands/vue-label.png" alt="Avatar"
+                              class="rounded-circle" />
+                          </div>
+                          <div class="me-2">
+                            <h6 class="mb-0">Vue.js Developers</h6>
+                            <small>289 Members</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <a href="javascript:;"><span class="badge bg-label-danger">Developer</span></a>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="mb-6">
+                      <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="avatar me-2">
+                            <img src="/vuexy/assets/img/icons/brands/twitter-label.png" alt="Avatar"
+                              class="rounded-circle" />
+                          </div>
+                          <div class="me-w">
+                            <h6 class="mb-0">Digital Marketing</h6>
+                            <small>24 Members</small>
+                          </div>
+                        </div>
+                        <div class="ms-auto">
+                          <a href="javascript:;"><span class="badge bg-label-secondary">Marketing</span></a>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="text-center">
+                      <a href="javascript:;">View all teams</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!--/ Teams -->
+          </div>
+          <!-- Projects table -->
+          <div class="card mb-4">
+            <div class="card-datatable table-responsive">
+              <table class="datatables-projects table border-top">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Project</th>
+                    <th>Leader</th>
+                    <th>Team</th>
+                    <th class="w-px-200">Progress</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+          </div>
+          <!--/ Projects table -->
+        </div>
+      </div>
+      <!--/ User Profile Content -->
+    </div>
+    <!-- / Content -->
 
+    <div class="content-backdrop fade"></div>
+  </div>
+  <!-- Content wrapper -->
+@stop
+
+<!-- Page JS -->
+@section('pagescripts')
+  <script src="/vuexy/assets/js/pages-profile.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      getStates($('#country_id').val());
+      $('#country_id').change(function() {
+        getStates($(this).val());
+      });
+      $('#state_id').change(function() {
+        getCities($(this).val());
+      });
+    });
+
+    function getStates(country_id) {
+      var $state = $('#state_id');
+      var currentState = '{{ $client->state_id }}';
+      var selected = '';
+      $.ajax({
+        url: "{{ route('get_states_by_country') }}",
+        data: {
+          country_id: country_id
+        },
+        success: function(data) {
+          $state.html('<option value="" >{{ __('admin.State') }}</option>');
+          $.each(data, function(id, value) {
+            // selected = '';
+            if (currentState === id) {
+              selected = 'selected';
+              getCities(id)
+            } else {
+              selected = '';
+            }
+            $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
+            $('#city_id').html('<option value="" >{{ __('admin.City') }}</option>');
+          });
+          $('#state').show(150);
+        }
+      });
+    }
+
+    function getCities(state_id) {
+      var $city = $('#city_id');
+      var currentCity = '{{ $client->city_id }}';
+      var selected = '';
+      $.ajax({
+        url: "{{ route('cities.index') }}",
+        data: {
+          state_id: state_id
+        },
+        success: function(data) {
+          $city.html('<option value="" >{{ __('admin.City') }}</option>');
+          $.each(data, function(id, value) {
+            if (currentCity == id) {
+              selected = 'selected';
+            } else {
+              selected = '';
+            }
+            $city.append('<option value="' + id + '" ' + selected + ' >' + value + '</option>');
+          });
+          $('#city').show(150);
+        }
+      });
+    }
+  </script>
+  @role('Mentor')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.2/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+      var useDarkMode = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+      tinymce.init({
+        selector: '#basicTextarea',
+        plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor insertdatetime advlist lists wordcount textpattern noneditable help charmap quickbars emoticons',
+        imagetools_cors_hosts: ['picsum.photos'],
+        menubar: 'edit view insert format tools table help',
+        toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview  print | insertfile image media template link anchor codesample | ltr rtl',
+        toolbar_sticky: true,
+        autosave_ask_before_unload: true,
+        autosave_interval: '30s',
+        autosave_prefix: '{path}{query}-{id}-',
+        autosave_restore_when_empty: false,
+        autosave_retention: '2m',
+        image_advtab: true,
+        importcss_append: true,
+        template_cdate_format: '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
+        template_mdate_format: '[Date Modified (MDATE): %m/%d/%Y : %H:%M:%S]',
+        height: 400,
+        image_caption: true,
+        quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+        noneditable_noneditable_class: 'mceNonEditable',
+        toolbar_mode: 'sliding',
+        contextmenu: 'link image imagetools table',
+        skin: useDarkMode ? 'oxide-dark' : 'oxide',
+        content_css: useDarkMode ? 'dark' : 'default',
+        content_style: 'body { font-family:Times New Roman,Arial,sans-serif; font-size:14px }',
+        image_title: true,
+        automatic_uploads: true,
+        media_live_embeds: true,
+        relative_urls: false,
+        remove_script_host: false,
+        images_upload_url: "{{ route('training.upload', ['_token' => csrf_token()]) }}",
+        file_picker_types: 'image',
+        convert_urls: true,
+        file_picker_callback: function(cb, value, meta) {
+          var input = document.createElement('input');
+          input.setAttribute('type', 'file');
+          input.setAttribute('accept', 'image/*');
+          input.onchange = function() {
+            var file = this.files[0];
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function() {
+              var id = 'blobid' + (new Date()).getTime();
+              var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+              var base64 = reader.result.split(',')[1];
+              var blobInfo = blobCache.create(id, file, base64);
+              blobCache.add(blobInfo);
+              cb(blobInfo.blobUri(), {
+                title: file.name
+              });
+            };
+          };
+          input.click();
+        }
+      });
+      @if ($l == 'ar')
+        tinyMCE.settings['directionality'] = 'rtl';
+      @endif
+    </script>
+    <script>
+      $(document).ready(function() {
+        @if ($client->bio)
+          switch ('{{ $client->bio->entrepreneurial_experience }}') {
+            case '1':
+              $('#entrepreneurial_experience_brief').show();
+              break;
+            case '0':
+              $('#entrepreneurial_experience_brief').hide();
+              break;
+            default:
+              $('#entrepreneurial_experience_brief').hide();
+              break;
+          }
+        @endif
+
+        $('.entrepreneurial_experience').change(function() {
+          var value = $(this).val();
+          switch (value) {
+            case '1':
+              $('#entrepreneurial_experience_brief').show();
+              break;
+            case '0':
+              $('#entrepreneurial_experience_brief').hide();
+              break;
+            default:
+              $('#entrepreneurial_experience_brief').hide();
+              break;
+          }
+        });
+      });
+    </script>
+  @endrole
 @stop

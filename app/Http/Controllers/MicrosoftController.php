@@ -7,6 +7,8 @@ use League\OAuth2\Client\Provider\GenericProvider;
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
 use GuzzleHttp\Client;
+use App\Settings;
+
 
 class MicrosoftController extends Controller
 {
@@ -91,10 +93,21 @@ class MicrosoftController extends Controller
 
     protected function getAccessToken()
     {
-        $response = $this->client->post('https://login.microsoftonline.com/' . env('MICROSOFT_TENANT_ID') . '/oauth2/v2.0/token', [
+        $Setting = Settings::where('id', 1)->first();
+        if($Setting){
+        $MICROSOFT_CLIENT_ID = $Setting->MICROSOFT_CLIENT_ID;
+        $MICROSOFT_CLIENT_SECRET_VALUE= $Setting->MICROSOFT_CLIENT_SECRET_VALUE;
+        $MICROSOFT_TENANT_ID= $Setting->MICROSOFT_TENANT_ID;
+        }else{
+            $MICROSOFT_CLIENT_ID = '';
+            $MICROSOFT_CLIENT_SECRET_VALUE= '';
+            $MICROSOFT_TENANT_ID= '';
+        }
+
+        $response = $this->client->post('https://login.microsoftonline.com/' . $MICROSOFT_TENANT_ID . '/oauth2/v2.0/token', [
             'form_params' => [
-                'client_id' => env('MICROSOFT_CLIENT_ID'),
-                'client_secret' => env('MICROSOFT_CLIENT_SECRET_VALUE'),
+                'client_id' => $MICROSOFT_CLIENT_ID,
+                'client_secret' => $MICROSOFT_CLIENT_SECRET_VALUE,
                 'scope' => 'https://graph.microsoft.com/.default',
                 'grant_type' => 'client_credentials',
             ],

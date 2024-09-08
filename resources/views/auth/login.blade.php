@@ -1,194 +1,238 @@
 <!DOCTYPE html>
-<html class="loading" lang="{{$l}}" data-textdirection="{{$l=='ar'?'rtl':'ltr'}}" style="direction: {{$l=='ar'?'rtl':'ltr'}};">
+<html lang="{{ $l }}">
+<html lang="{{ $l }}" dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
+  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-theme="theme-default"
+  data-assets-path="/vuexy/assets/" data-template="vertical-menu-template" data-style="light">
+
 <head>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-    <meta name="description" content="VI Login">
-    <meta name="author" content="info@growthlabs.app">
-    <title>{{__('Login Page')}} - {{ App\Settings::findorfail(1)->first('title')->title }} - v1</title>
-    <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
-    <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
-    <link href="https://fonts.googleapis.com/css?family=Rubik:300,400,500,600%7CIBM+Plex+Sans:300,400,500,600,700"
-          rel="stylesheet">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="VI Login">
+  <meta name="author" content="info@growthlabs.app">
+  <title>{{ __('Login Page') }} - {{ App\Settings::findorfail(1)->first('title')->title }} - v1</title>
+  <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
+  <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
+
+  <!-- Fonts -->
+  @if ($l == 'ar')
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
-    <!-- BEGIN: Vendor CSS-->
-    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/vendors{{$l=='ar'?'-rtl':''}}.min.css">
-    <!-- END: Vendor CSS-->
-    <!-- BEGIN: Theme CSS-->
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/bootstrap-extended.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/colors.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/components.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/themes/dark-layout.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/themes/semi-dark-layout.css">
-    <!-- END: Theme CSS-->
-    <!-- BEGIN: Page CSS-->
-    <link rel="stylesheet" type="text/css"
-          href="/app-assets/css{{$l=='ar'?'-rtl':''}}/core/menu/menu-types/vertical-menu.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/authentication.css">
-    <!-- END: Page CSS-->
-    <!-- BEGIN: Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="/assets/css/style{{$l=='ar'?'-rtl':''}}.css">
-    <!-- END: Custom CSS-->
+  @else
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+      rel="stylesheet" />
+  @endif
+  <!-- End Fonts -->
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/fontawesome.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/tabler-icons.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/flag-icons.css" />
+  <!-- End Icons -->
+
+  <!-- Core CSS -->
+
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
+
+  <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
+
+  <!-- Vendors CSS -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
+
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+  <!-- Vendor -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+
+  <!-- Page CSS -->
+  <!-- Page -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
+
+  <!-- Helpers -->
+  <script src="/vuexy/assets/vendor/js/helpers.js"></script>
+  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+
+  <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+  <script src="/vuexy/assets/vendor/js/template-customizer.js"></script>
+
+  <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+  <script src="/vuexy/assets/js/config.js"></script>
 </head>
 <!-- END: Head-->
 <!-- BEGIN: Body-->
-<body
-    class="vertical-layout vertical-menu-modern semi-dark-layout 1-column navbar-sticky footer-static bg-full-screen-image  blank-page blank-page"
-    data-open="click" data-menu="vertical-menu-modern" data-col="1-column" data-layout="semi-dark-layout">
-<!-- BEGIN: Content-->
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
-        <div class="content-header row">
-        </div>
-        <div class="content-body">
-            <!-- login page start -->
-            <section id="auth-login" class="row flexbox-container">
-                <div class="col-xl-8 col-11">
-                    <div class="card bg-authentication mb-0">
-                        @if(session('error'))
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        <li>{{ session('error') }} </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                        <div class="row m-0">
-                            <!-- left section-login -->
-                            <div class="col-md-6 col-12 px-0">
-                                <div
-                                    class="card disable-rounded-right mb-0 p-2 h-100 d-flex justify-content-center">
-                                    <div class="card-header pb-1">
-                                        <div class="card-title">
-                                            <h4 class="text-center mb-2">{{__('Welcome Back')}}</h4>
-                                        </div>
-                                    </div>
-                                    <div class="card-content">
-                                        <div class="card-body">
-                                            <div class="d-flex flex-md-row flex-column justify-content-around">
-                                                <a href="{{ url('/auth/redirect/google') }}"
-                                                   class="btn btn-social btn-google btn-block font-small-3 mr-md-1 mb-md-0 mb-1">
-                                                    <i class="bx bxl-google font-medium-3"></i><span
-                                                        class="pl-50 d-block text-center">{{__('Google')}}</span></a>
-{{--                                                <a href="{{ url('/auth/redirect/facebook') }}"--}}
-{{--                                                   class="btn btn-social btn-block mt-0 btn-facebook font-small-3">--}}
-{{--                                                    <i class="bx bxl-facebook-square font-medium-3"></i><span--}}
-{{--                                                        class="pl-50 d-block text-center">{{__('Facebook')}}</span></a>--}}
-                                            </div>
-                                                             @if ($errors->has('social'))
-                                                        <span class="help-block warning"><br>
-                                                            {{__('You already have an account, Login with your email, or reset your account')}}!!
-                                                        </span>
-                                                    		@endif
-                                            <div class="divider">
-                                                <div class="divider-text text-uppercase text-muted"><small>
-                                                        {{__('or login with email')}}</small>
-                                                </div>
-                                            </div>
-                                            <form method="POST" action="{{ route('login') }}">
-                                                @csrf
-                                                <div class="form-group mb-50">
-                                                    <label class="text-bold-600"
-                                                           for="exampleInputEmail1">{{ __('auth.E-Mail') }}</label>
-                                                    <input value="{{ old('email') }}" name="email" type="email"
-                                                           class="form-control" id="email"
-                                                           placeholder="{{ __('auth.E-Mail') }}" required
-                                                           autocomplete="email" autofocus>
 
-                                                             @if ($errors->has('email'))
-                                                        <span class="help-block">
-                                                            {{ $errors->first('email') }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="text-bold-600"
-                                                           for="exampleInputPassword1">{{ __('auth.Password') }}</label>
-                                                    <input type="password" class="form-control" id="password"
-                                                           placeholder="{{ __('auth.Password') }}" name="password"
-                                                           required autocomplete="current-password">
-                                                    @if ($errors->has('password'))
-                                                        <span class="help-block">
-                                                            {{ $errors->first('password') }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                                <div
-                                                    class="form-group d-flex flex-md-row flex-column justify-content-between align-items-center">
-                                                    <div class="text-left">
-                                                        <div class="checkbox checkbox-sm">
-                                                            <input type="checkbox" class="form-check-input"
-                                                                   id="exampleCheck1"
-                                                                {{ old('remember') ? 'checked' : '' }}>
-                                                            <label class="checkboxsmall"
-                                                                   for="exampleCheck1"><small>{{ __('auth.Remember') }}</small></label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-right"><a
-                                                            href="{{ route('password.request') }}"
-                                                            class="card-link"><small>{{__('Forgot Password?')}}</small></a>
-                                                    </div>
-                                                </div>
-                                                <button type="submit"
-                                                        class="btn btn-primary glow w-100 position-relative">
-                                                    {{__('auth.Login')}}<i id="icon-arrow"
-                                                                           class="bx bx-{{$l=='ar'?'left':'right'}}-arrow-alt"></i></button>
-                                            </form>
-                                            <hr>
-                                            <div class="text-center"><small class="mr-25">{{__("Don't have an account")}}?</small><a href="/register"> <small> {{__('Sign up')}},</small> </a> <small class="mr-25"> {{__('or click')}} </small> <a href="/"><small> {{__('here')}} </small></a> <small class="mr-25">{{__('to go home')}}.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- right section image -->
-                            <div class="col-md-6 d-md-block d-none text-center align-self-center p-3">
-                                <div class="card-content">
-                                    <img class="img-fluid" src="/app-assets/images/pages/login.png"
-                                         alt="branding logo">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<body>
+  <!-- Content -->
+  @php
+    $brandName = 'GrowthLabs';
+    $formHeading = $l == 'ar' ? 'مرحبًا بعودتك' : 'Welcome to GrowthLabs';
+    $formSubHeading =
+        $l == 'ar'
+            ? 'الرجاء تسجيل الدخول إلى حسابك وابدأ المغامرة'
+            : 'Please sign-in to your account and
+  start the adventure';
+    $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
+  @endphp
+
+  <!-- Content -->
+
+  <div class="authentication-wrapper authentication-cover">
+    <!-- Logo -->
+    <a href="/dashboard" class="app-brand auth-cover-brand">
+      <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
+      {{-- <span class="app-brand-logo demo">
+        <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
+      </span> --}}
+      {{-- <span class="app-brand-text demo text-heading fw-bold">{{ $brandName }}</span> --}}
+    </a>
+    <!-- /Logo -->
+
+    <div class="authentication-inner row m-0">
+      <!-- /Left Text -->
+      <div class="d-none d-lg-flex col-lg-8 p-0">
+        <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
+          <img src="/vuexy/assets/img/illustrations/auth-login-illustration-light.png" alt="auth-login-cover"
+            class="my-5 auth-illustration" data-app-light-img="illustrations/auth-login-illustration-light.png"
+            data-app-dark-img="illustrations/auth-login-illustration-dark.png" 
+            loading="lazy"
+          />
+
+          <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-login-cover" class="platform-bg"
+            data-app-light-img="illustrations/bg-shape-image-light.png"
+            data-app-dark-img="illustrations/bg-shape-image-dark.png" 
+            loading="lazy"
+          />
+        </div>
+      </div>
+      <!-- /Left Text -->
+
+      <!-- Login -->
+      <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
+        <div class="w-px-400 mx-auto mt-12 pt-5">
+          <h4 class="mb-1">{{ $formHeading }}</h4>
+          <p class="mb-6">{{ $formSubHeading }}</p>
+          
+          <!-- Auth Errors -->
+          <div>
+            @if (session('error'))
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="alert alert-danger">
+                    <ul>
+                      <li>{{ session('error') }} </li>
+                    </ul>
+                  </div>
                 </div>
-            </section>
-            <!-- login page ends -->
+              </div>
+            @endif
+  
+            @if ($errors->has('social'))
+              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                {{ __('You already have an account, Login with your email, or reset your account') }}!!
+              </div>
+            @elseif ($errors->has('email'))
+              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                {{ $errors->first('email') }}
+              </div>
+            @elseif ($errors->has('password'))
+              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                {{ $errors->first('password') }}
+              </div>
+            @endif
+            <!-- / Auth Errors -->
+          </div>
 
+          <form id="formAuthentication" class="mb-4" method="POST" action="{{ route('login') }}">
+            @csrf
+            <div class="mb-6">
+              <label for="email" class="form-label">{{ __('auth.E-Mail') }}</label>
+              <input value="{{ old('email') }}" name="email" type="email" class="form-control" id="email"
+                placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" autofocus />
+            </div>
+            <div class="mb-6 form-password-toggle">
+              <label class="form-label" for="password">{{ __('auth.Password') }}</label>
+              <div class="input-group input-group-merge">
+                <input type="password" id="password" class="form-control" placeholder="{{ __('auth.Password') }}"
+                  name="password" required aria-describedby="password" />
+                <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+              </div>
+            </div>
+            <div class="my-8">
+              <div class="d-flex justify-content-between">
+                <div class="form-check mb-0 ms-2">
+                  <input class="form-check-input" type="checkbox" id="remember-me"
+                    {{ old('remember') ? 'checked' : '' }} />
+                  <label class="form-check-label" for="remember-me">{{ __('auth.Remember') }}</label>
+                </div>
+                <a href="{{ route('password.request') }}">
+                  <p class="mb-0">{{ __('Forgot Password?') }}</p>
+                </a>
+              </div>
+            </div>
+            <div class="mb-6">
+              <button class="btn btn-primary d-grid w-100" type="submit">{{ __('auth.Login') }}</button>
+            </div>
+          </form>
+
+          <p class="text-center">
+            <span>{{ __("Don't have an account") }}{{ $l == 'ar' ? '؟' : '?' }}</span>
+            <a href="/register">
+              <span>{{ __('Sign up') }}</span>
+            </a>
+          </p>
+
+          <div class="divider my-6">
+            <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+          </div>
+
+          <div class="container mt-5">
+            <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
+              <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
+            </a>
+          </div>
         </div>
+      </div>
+      <!-- /Login -->
     </div>
-</div>
-<!-- END: Content-->
+  </div>
+  <!-- /Content -->
 
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
 
-<!-- BEGIN: Vendor JS-->
-<script src="/app-assets/vendors/js/vendors.min.js"></script>
-<script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.tools.js"></script>
-<script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.defaults.js"></script>
-<script src="/app-assets/fonts/LivIconsEvo/js/LivIconsEvo.min.js"></script>
-<!-- BEGIN Vendor JS-->
+  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
+  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
+  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/vuexy/assets/vendor/js/menu.js"></script>
 
-<!-- BEGIN: Page Vendor JS-->
-<!-- END: Page Vendor JS-->
+  <!-- endbuild -->
 
-<!-- BEGIN: Theme JS-->
-<script src="/app-assets/js/scripts/configs/vertical-menu-dark.js"></script>
-<script src="/app-assets/js/core/app-menu.js"></script>
-<script src="/app-assets/js/core/app.js"></script>
-<script src="/app-assets/js/scripts/components.js"></script>
-<script src="/app-assets/js/scripts/footer.js"></script>
-<!-- END: Theme JS-->
+  <!-- Vendors JS -->
+  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 
-<!-- BEGIN: Page JS-->
-<!-- END: Page JS-->
+  <!-- Main JS -->
+  <script src="/vuexy/assets/js/main.js"></script>
 
+  <!-- Language -->
+  <script>
+    const lang = '{{ $l }}';
+  </script>
+
+  <!-- Page JS -->
+  <script src="/vuexy/assets/js/pages-auth.js"></script>
 </body>
-<!-- END: Body-->
 
 </html>

@@ -1,266 +1,329 @@
 @extends('layouts.admin')
-@section('content')
-  <!-- BEGIN: Content-->
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-12 mb-2 mt-1">
-                    <div class="row breadcrumbs-top">
-                        <div class="col-12">
-                            <h5 class="content-header-title float-left pr-1 mb-0">{{__('admin.Messages')}}</h5>
-                            <div class="breadcrumb-wrapper col-12">
-                                <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
-                                    </li>
-                                    <li class="breadcrumb-item active">{{__('messages.ShowMessages')}}
-                                    </li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="content-body">
-                @if(session()->has('msg'))
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="alert alert-{{session()->get('class')}} mb-2" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert"
-                                            aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                    <div class="d-flex align-items-center">
-                                        <i class="bx bx-{{session()->get('class')=='success'?'like':'error'}}"></i>
-                                        <span>
-                                                            {{ __('admin.'.session()->get('msg')) }}
-                                            {{ Session::forget('msg') }}
-                                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-            @endif
-                <!-- Zero configuration table -->
-                <section id="basic-datatable">
-<?php $n=1; ?>
-@if (count($getmsgs)>0)
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                </div>
-                                <div class="card-content">
-                                    <div class="card-body card-dashboard">
-                                        <div class="table-responsive">
-                                            <table class="table zero-configuration">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>{{__('messages.SenderName')}}</th>
-                                                        <th>{{__('messages.Email')}}</th>
-                                                        <th>{{__('messages.Subject')}}</th>
-                                                        <th>{{__('messages.Replied')}}</th>
-                                                        <th>{{__('messages.ReadOpenDelete')}}</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-												@foreach ($getmsgs as $getmsg)
-                                                    <tr {!!$getmsg->read?'id="read'.$getmsg->id.'"':'id="unread'.$getmsg->id.'" style="font-weight:600;"'!!} >
-                                                        <td>{{$n++}}</td>
-                                                        <td>
-                                                            @if ($getmsg->internal_id)
-                                                            <a href="/dashboard/users/{{$getmsg->internal_id}}/edit">{{$getmsg->name}} ({{__('admin.user')}})</a>
-                                                            @else
-                                                             {{$getmsg->name}}
-                                                            @endif
-                                                        </td>
-                                                        <td>{{$getmsg->email}}</td>
-                                                        <td>{{$getmsg->subject}}</td>
-                                                        <td>
-                                                            {{$getmsg->replyBy?__('Yes'):__('No')}}
-                                                        </td>
-                                                        <td>
-                                                            <a href="javascript:void(0);" onclick="makeread({{$getmsg->id}});"><i id="ico{{$getmsg->id}}" class='bx bxs-{{$getmsg->read?"inbox":"envelope"}}'> </i></a> |
-                                                            <a data-toggle="modal" id="msg" data-target="#MessageModal" onclick="OpenModal({{$getmsg->id}})" href="javascript:void(0);"><i class="bx bxs-show"> </i></a> |
-                                   <a onclick="return confirm('{{__('Are you sure?')}}');" href="{{URL::to('/dashboard/deletemsg/'.$getmsg->id ?? null)}}"><i class="bx bx-trash"> </i></a></td>
-                                                    </tr>
-												@endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-@else
-        <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">{{__('admin.Messages')}}</h4>
-            </div>
-            <hr style="margin:-10px 0 5px 0;">
-            <div class="card-body">
-                <h5>   {{__('messages.NoMessages')}} - <a href="/dashboard">{{__('admin.Back')}}</a>. </h5>
-            </div>
-        </div>
 
-@endif
-                </section>
-                <!--/ Zero configuration table -->
-            </div>
-        </div>
-    </div>
-    <!-- END: Content-->
-                                        <div class="modal fade" id="MessageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-scrollable" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="Title">
-														</h5>
-
-                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                            <i class="bx bx-x"></i>
-                                                        </button>
-                                                    </div>
-                                                    <form action="{{URL::to('dashboard/msgreply')}}" method="POST" enctype="multipart/form-data" autocomplete="off">
-                                                    <div class="modal-body">
-                                                        <p class="warning" id="replyby"></p>
-														<p><b>{{__('messages.Phone')}}: </b> <span id="Phone"></span></p>
-														<p><b>{{__('messages.Email')}}: </b>  <span id="Email"></span></p>
-														<p><b>{{__('messages.Date')}}: </b>  <span id="Date"></span></p>
-                                                        <p><b>{{__('messages.IP')}}: </b><span id="UserIp"></span></p>
-                                                        <p><b>{{__('messages.Message')}}:</b></p>  <span id="Message"></span>
-
-                                                        <hr>
-                                                        <h6>{{__('messages.Sendreply')}}:</h6>
-
-                                                            {!! csrf_field() !!}
-                                                        <input type="hidden" name="remail" value="" id="remail">
-                                                        <input type="hidden" name="rname" value="" id="rname">
-                                                        <input type="hidden" name="mid" value="" id="mid">
-                                                            <label>{{__('messages.Subject')}}</label>
-                                                            <div class="form-group">
-                                                                <input name="subject" type="text" placeholder="{{__('messages.Subject')}}" class="form-control" required="">
-                                                            </div>
-                                                            <label>{{__('messages.yourMessage')}}:</label>
-                                                            <div class="form-group">
-                                                        <textarea class="form-control" name='message' rows="3"
-                                                                  placeholder="{{__('messages.Write your message')}}" required></textarea>
-                                                            </div>
-
-                                                    </div>
-
-
-
-                                                    <div class="modal-footer">
-                                                        <button type="submit" class="btn btn-primary send-btn">
-                                                            <i class="bx bx-x d-block d-sm-none"></i>
-                                                            <span class="d-none d-sm-inline"> {{__('messages.Send')}}</span>
-                                                        </button>
-                                                        <a id="DelMe" onclick="return confirm('{{__('Are you sure?')}}');" href="#">
-													<button type="button" class="btn btn-light-danger">
-                                                            <i class="bx bx-x d-block d-sm-none"></i>
-                                                            <span class="d-none d-sm-block">{{__('messages.Delete')}}</span>
-                                                        </button></a>
-                                                        <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
-                                                            <i class="bx bx-x d-block d-sm-none"></i>
-                                                            <span class="d-none d-sm-block">{{__('messages.Close')}}</span>
-                                                        </button>
-                                                    </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+@section('style')
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-email.css" />
 @stop
-@section('scripts')
-@if($l=='ar')
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('.zero-configuration').DataTable({
+
+@section('vendorstyle')
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+@stop
+
+@section('content')
+  <!-- Content wrapper -->
+  <div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-xxl flex-grow-1 container-p-y">
+      @if (session()->has('msg'))
+        <div class="row">
+          <div class="col-md-12">
+            <div class="alert alert-{{ session()->get('class') }} mb-2" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span
+                  aria-hidden="true">&times;</span> </button>
+              <div class="d-flex align-items-center">
+                <i class="bx bx-error"></i>
+                <span>
+                  {{ __('admin.' . session()->get('msg')) }}
+                  {{ Session::forget('msg') }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      @endif
+      <div class="app-email card">
+        <div class="row g-0">
+          <!-- Messages List -->
+          <div class="col app-emails-list">
+            <div class="card shadow-none border-0 rounded-0">
+              <div class="card-body emails-list-header p-3 py-2">
+                <h4 class="px-4 mt-4">
+                  {{ $l == 'ar' ? 'رسائل الزوار' : 'Visitors Messages' }}
+                </h4>
+                <!-- Messages List: Search -->
+                {{-- <div class="d-flex justify-content-between align-items-center px-3 mt-2">
+                  <div class="d-flex align-items-center w-100">
+                    <i class="ti ti-menu-2 ti-lg cursor-pointer d-block d-lg-none me-4 mb-4" data-bs-toggle="sidebar"
+                      data-target="#app-email-sidebar" data-overlay></i>
+                    <div class="mb-4 w-100">
+                      <div class="input-group input-group-merge shadow-none">
+                        <span class="input-group-text border-0 ps-0 py-0" id="email-search">
+                          <i class="ti ti-search ti-lg"></i>
+                        </span>
+                        <input type="text" class="form-control email-search-input border-0 py-0"
+                          placeholder="{{ $l == 'ar' ? 'ابحث في الرسايل' : 'Search messages' }}"
+                          aria-label="Search mail" aria-describedby="email-search" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <hr class="mx-n3 emails-list-header-hr mb-2" /> --}}
+              </div>
+              <hr class="container-m-nx m-0" />
+              <!-- Messages List: Items -->
+              <div class="email-list pt-0">
+                @php($n = 1)
+                @if (count($getmsgs) > 0)
+                  <ul class="list-unstyled m-0">
+                    @foreach ($getmsgs as $getmsg)
+                      <li class="email-list-item d-flex align-items-center" data-starred="true" data-bs-toggle="sidebar"
+                        data-target="#app-email-view">
+                        <div class="d-flex align-items-center w-100">
+                          <div class="form-check mb-0 ms-2">
+                            <input class="email-list-item-input form-check-input" type="checkbox" id="email-4" />
+                            <label class="form-check-label" for="email-4"></label>
+                          </div>
+                          <span class="ms-sm-3 me-4 d-sm-inline-block d-none"><i
+                              class="email-list-item-bookmark ti ti-star ti-md cursor-pointer ms-1"></i></span>
+                          <img src="/vuexy/assets/img/avatars/3.png" alt="user-avatar"
+                            class="d-block flex-shrink-0 rounded-circle me-sm-2 me-0" height="32" width="32" />
+                          <div class="email-list-item-content ms-2 ms-sm-0 me-2">
+                            <span class="email-list-item-username me-2 h6">
+                              @if ($getmsg->internal_id)
+                                <a href="/dashboard/users/{{ $getmsg->internal_id }}/edit">{{ $getmsg->name }}
+                                  ({{ __('admin.user') }})
+                                </a>
+                              @else
+                                {{ $getmsg->name }}
+                              @endif
+                            </span>
+                            <small class="email-list-item-subject d-xl-inline-block d-block">
+                              {{ $getmsg->subject }}
+                            </small>
+                          </div>
+                          <div class="email-list-item-meta ms-auto d-flex align-items-center justify-content-end">
+                            <small class="email-list-item-time text-muted mx-6"
+                              style="width: 70px;">{{ $getmsg->created_at }}
+                            </small>
+
+                            <a href="javascript:void(0);" onclick="makeread({{ $getmsg->id }});"
+                              class="btn btn-icon btn-label-secondary rounded-circle">
+                              <i id="ico{{ $getmsg->id }}"
+                                class='ti ti-{{ $getmsg->read ? 'square-rounded-check' : 'x' }}'>
+                              </i>
+                            </a>
+
+                            <button type="button" id="msg" onclick="OpenModal({{ $getmsg->id }});"
+                              class="btn btn-icon btn-label-info rounded-circle mx-4" data-bs-toggle="modal"
+                              data-bs-target="#MessageModal">
+                              <i class="ti ti-hand-finger"></i>
+                            </button>
+
+                            <a onclick="return confirm('{{ __('Are you sure?') }}');"
+                              href="{{ URL::to('/dashboard/deletemsg/' . $getmsg->id ?? null) }}"
+                              class="btn btn-icon btn-label-danger rounded-circle">
+                              <i class="ti ti-trash"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </li>
+                    @endforeach
+                  </ul>
+                @else
+                  <ul class="list-unstyled mt-10">
+                    <li class="email-list-empty text-center">
+                      {{ __('messages.NoMessages') }}
+                    </li>
+                  </ul>
+                @endif
+              </div>
+            </div>
+            <div class="app-overlay"></div>
+          </div>
+          <!-- /Messages List -->
+        </div>
+      </div>
+      <!-- / Content -->
+      <div class="content-backdrop fade"></div>
+    </div>
+    <!-- Content wrapper -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="MessageModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalScrollableTitle"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="Title">
+            </h5>
+
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <i class="bx bx-x"></i>
+            </button>
+          </div>
+          <form action="{{ URL::to('dashboard/msgreply') }}" method="POST" enctype="multipart/form-data"
+            autocomplete="off">
+            <div class="modal-body">
+              <p class="warning" id="replyby"></p>
+              <p><b>{{ __('messages.Phone') }}: </b> <span id="Phone"></span></p>
+              <p><b>{{ __('messages.Email') }}: </b> <span id="Email"></span></p>
+              <p><b>{{ __('messages.Date') }}: </b> <span id="Date"></span></p>
+              <p><b>{{ __('messages.IP') }}: </b><span id="UserIp"></span></p>
+              <p><b>{{ __('messages.Message') }}:</b></p> <span id="Message"></span>
+
+              <hr>
+              <h6>{{ __('messages.Sendreply') }}:</h6>
+
+              {!! csrf_field() !!}
+              <input type="hidden" name="remail" value="" id="remail">
+              <input type="hidden" name="rname" value="" id="rname">
+              <input type="hidden" name="mid" value="" id="mid">
+              <label>{{ __('messages.Subject') }}</label>
+              <div class="form-group">
+                <input name="subject" type="text" placeholder="{{ __('messages.Subject') }}" class="form-control"
+                  required="">
+              </div>
+              <label class="mt-4">{{ __('messages.yourMessage') }}:</label>
+              <div class="form-group">
+                <textarea class="form-control" name='message' rows="3" placeholder="{{ __('messages.Write your message') }}"
+                  required></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary send-btn">
+                <i class="bx bx-x d-block d-sm-none"></i>
+                <span class="d-none d-sm-inline"> {{ __('messages.Send') }}</span>
+              </button>
+              {{-- <a id="DelMe" onclick="return confirm('{{ __('Are you sure?') }}');" href="#">
+                <button type="button" class="btn btn-light-danger">
+                  <i class="bx bx-x d-block d-sm-none"></i>
+                  <span class="d-none d-sm-block">{{ __('messages.Delete') }}</span>
+                </button></a>
+              <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                <i class="bx bx-x d-block d-sm-none"></i>
+                <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
+              </button> --}}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- Modal -->
+  @stop
+
+  @section('scripts')
+    <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+    <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+    <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+    <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
+
+    @if ($l == 'ar')
+      <script type="text/javascript">
+        $(document).ready(function() {
+          $('.zero-configuration').DataTable({
             "language": {
-    "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول", "sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-	"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
-	"sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل", "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل",
-	"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)", "sInfoPostFix":  "", "sSearch":       "ابحث:", "sUrl":          "",
-	"oPaginate": {"sFirst":    "الأول", "sPrevious": "السابق", "sNext":     "التالي", "sLast":     "الأخير"},
-	"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}}
-        } );});
-	</script>
-@endif
-	<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-	<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-   	<script src="/app-assets/js/scripts/datatables/datatable.js"></script>
-	<script src="/app-assets/js/scripts/modal/components-modal.js"></script>
-	<script>
-        function OpenModal(id){
-            var tno = $("#" + 'read' + id);
-            var tyes = $("#" + 'unread' + id);
-            var ico = $("#" + 'ico' + id);
-            tno.css({"font-weight":"unset"});
-            tno.attr('id','read' + id);
-            tyes.css({"font-weight":"unset"});
-            tyes.attr('id','read' + id);
-            ico.attr('class','bx bxs-inbox');
-            $.ajax({
-                type: "GET",
-                url: "/dashboard/openonemsg/" + id,
-                success: function (response) {
-                    console.log(response);
-                    $('#Title').text(response[0]['subject'] + " {{__('messages.From')}}: " + response[0]['name']);
-                    $('#Email').text(response[0]['email']);
-                    $('#remail').val(response[0]['email']);
-                    $('#rname').val(response[0]['name']);
-                    $('#mid').val(response[0]['id']);
-                    $('#Phone').text(response[0]['phone']);
-                    $('#Date').text(response[0]['created_at']);
-                    $('#Message').text(response[0]['message']);
-                    $('#UserIp').text(response[0]['userip']);
-                    if (response[1]['first_name_en']) {
-                        $('#replyby').html('<b>'+response[1]['first_name_{{$l}}'] + ' ' + response[1]['last_name_{{$l}}'] + ' {{__('messages.replied with')}} ('+ response[0]['reSubject'] + ' - ' + response[0]['reMessage'] +')</b>');
-                    } else {
-                        $('#replyby').html('');
-                    }
-                    $('#DelMe').attr('href','/dashboard/deletemsg/'+id)
-                },
-                error:function(error){
-                    console.log(error);
-                    alert("Error Occurred, Try again!");
-                },
-            });
-        }
-	function makeread(id){
+              "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+              "sLoadingRecords": "جارٍ التحميل...",
+              "sProcessing": "جارٍ التحميل...",
+              "sLengthMenu": "أظهر _MENU_ مدخلات",
+              "sZeroRecords": "لم يعثر على أية سجلات",
+              "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+              "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+              "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+              "sInfoPostFix": "",
+              "sSearch": "ابحث:",
+              "sUrl": "",
+              "oPaginate": {
+                "sFirst": "الأول",
+                "sPrevious": "السابق",
+                "sNext": "التالي",
+                "sLast": "الأخير"
+              },
+              "oAria": {
+                "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+                "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+              }
+            }
+          });
+        });
+      </script>
+    @endif
+
+    <script>
+      function OpenModal(id) {
+        var tno = $("#" + 'read' + id);
+        var tyes = $("#" + 'unread' + id);
+        var ico = $("#" + 'ico' + id);
+        tno.css({
+          "font-weight": "unset"
+        });
+        tno.attr('id', 'read' + id);
+        tyes.css({
+          "font-weight": "unset"
+        });
+        tyes.attr('id', 'read' + id);
+        ico.attr('class', 'bx bxs-inbox');
+        $.ajax({
+          type: "GET",
+          url: "/dashboard/openonemsg/" + id,
+          success: function(response) {
+            console.log(response);
+            $('#Title').text(response[0]['subject'] + " {{ __('messages.From') }}: " + response[0]['name']);
+            $('#Email').text(response[0]['email']);
+            $('#remail').val(response[0]['email']);
+            $('#rname').val(response[0]['name']);
+            $('#mid').val(response[0]['id']);
+            $('#Phone').text(response[0]['phone']);
+            $('#Date').text(response[0]['created_at']);
+            $('#Message').text(response[0]['message']);
+            $('#UserIp').text(response[0]['userip']);
+            if (response[1]['first_name_en']) {
+              $('#replyby').html('<b>' + response[1]['first_name_{{ $l }}'] + ' ' + response[1][
+                'last_name_{{ $l }}'
+              ] + ' {{ __('messages.replied with') }} (' + response[0]['reSubject'] + ' - ' + response[0][
+                'reMessage'
+              ] + ')</b>');
+            } else {
+              $('#replyby').html('');
+            }
+            $('#DelMe').attr('href', '/dashboard/deletemsg/' + id)
+          },
+          error: function(error) {
+            console.log(error);
+            alert("Error Occurred, Try again!");
+          },
+        });
+      }
+
+      function makeread(id) {
         var trrow = $("#" + 'read' + id);
         var trno = $("#" + 'unread' + id);
         var ico = $("#" + 'ico' + id);
         var lnk = 'makeunread';
-        if (trno.length) {var lnk = 'makeread';}
-         $.ajax({
-            type: 'POST',
-            url: lnk+'/'+id,
-            data: {
-                 "_token": "{{ csrf_token() }}",
-                 "id": id
-             },
-             success: function() {
-                 $('#id');
-                 if (trno.length) {
-                     trno.css({"font-weight":"unset"});
-                     trno.attr('id','read' + id);
-                     ico.attr('class','bx bxs-inbox');
-                 }
-                 else {
-                     trrow.css({"font-weight":600});
-                     trrow.attr('id','unread' + id);
-                     ico.attr('class','bx bxs-envelope');
-                 }
-             },
-              error: function() { // if error occurred
-                    alert("DB Error occurred, please try again");
-                },
-                }); }
-	</script>
-@stop
+        if (trno.length) {
+          var lnk = 'makeread';
+        }
+        $.ajax({
+          type: 'POST',
+          url: lnk + '/' + id,
+          data: {
+            "_token": "{{ csrf_token() }}",
+            "id": id
+          },
+          success: function() {
+            $('#id');
+            if (trno.length) {
+              trno.css({
+                "font-weight": "unset"
+              });
+              trno.attr('id', 'read' + id);
+              ico.attr('class', 'bx bxs-inbox');
+            } else {
+              trrow.css({
+                "font-weight": 600
+              });
+              trrow.attr('id', 'unread' + id);
+              ico.attr('class', 'bx bxs-envelope');
+            }
+          },
+          error: function() { // if error occurred
+            alert("DB Error occurred, please try again");
+          },
+        });
+      }
+    </script>
+  @stop
+
+  @section('pagescripts')
+    <script src="/vuexy/assets/js/app-email.js"></script>
+  @stop

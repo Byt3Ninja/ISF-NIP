@@ -41,14 +41,14 @@ return [
     ], 
 
     'google' => [
-        'client_id' => env('GOOGLE_CLIENT_ID'),
-        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT'),
+        'client_id' => config('broadcasting.connections.pusher.GOOGLE_CLIENT_ID'),
+        'client_secret' => config('broadcasting.connections.pusher.GOOGLE_CLIENT_SECRET'),
+        'redirect' => config('broadcasting.connections.pusher.GOOGLE_REDIRECT'),
     ],
     'microsoft' => [
-        'client_id' => env('MICROSOFT_CLIENT_ID'),
-        'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
-        'redirect' => env('MICROSOFT_REDIRECT_URI'),
+        'client_id' => config('broadcasting.connections.pusher.MICROSOFT_CLIENT_ID'),
+        'client_secret' => config('broadcasting.connections.pusher.MICROSOFT_CLIENT_SECRET'),
+        'redirect' => config('broadcasting.connections.pusher.MICROSOFT_REDIRECT_URI'),
     ],
 
 ];

@@ -8,17 +8,31 @@ use Google_Service_Calendar;
 use App\UserOauthToken;
 use Google_Service_Calendar_Event;
 use Carbon\Carbon;
-
+use App\Settings;
 class GoogleCalendarService
 {
     protected $client;
 
+    
+
     public function __construct()
     {
+
+        $Setting = Settings::where('id', 1)->first();
+        if($Setting){
+        $GOOGLE_CLIENT_ID = $Setting->GOOGLE_CLIENT_ID;
+        $GOOGLE_CLIENT_SECRET= $Setting->GOOGLE_CLIENT_SECRET;
+        $CALENDER_GOOGLE_REDIRECT_URI= $Setting->CALENDER_GOOGLE_REDIRECT_URI;
+        }else{
+            $GOOGLE_CLIENT_ID = '';
+            $GOOGLE_CLIENT_SECRET= '';
+            $CALENDER_GOOGLE_REDIRECT_URI= '';
+        }
+        
         $this->client = new Google_Client();
-        $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
-        $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
-        $this->client->setRedirectUri(env('CALENDER_GOOGLE_REDIRECT_URI'));
+        $this->client->setClientId($GOOGLE_CLIENT_ID);
+        $this->client->setClientSecret($GOOGLE_CLIENT_SECRET);
+        $this->client->setRedirectUri($CALENDER_GOOGLE_REDIRECT_URI);
         $this->client->addScope(Google_Service_Calendar::CALENDAR);
     }
 

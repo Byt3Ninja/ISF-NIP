@@ -392,7 +392,7 @@
                                                                 <select class="form-control Meeting" id="Meeting" name="Meeting" required>
                                                                     <option value="0">{{__('settings.Choose')}}</option>
                                                                     <option value="Google" {{($Title->Meeting=='Google')? 'selected':''}} >Google</option>
-                                                                    <option value="Microsoft" {{($Title->Meeting=='Microsoft')? 'selected':''}} >Microsoft</option>
+                                                                    <option value="Teams" {{($Title->Meeting=='Teams')? 'selected':''}} >Teams</option>
                                                                     <option value="Zoom" {{($Title->Meeting=='Zoom')? 'selected':''}} >Zoom</option>
                                                                 </select>
                                                             </fieldset>
@@ -424,7 +424,7 @@
                                                 </div>
 
 
-                                                <div class="MICROSOFT_CLIENT" @if($Title->Meeting != 'Microsoft') style="display: none;" @endif>
+                                                <div class="MICROSOFT_CLIENT" @if($Title->Meeting != 'Teams') style="display: none;" @endif>
 
                                                     <div class="col-md-12 col-12">
                                                         <div class="form-label-group">
