@@ -1,453 +1,232 @@
 @extends('layouts.admin')
+
 @section('vendorstyle')
-    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/charts/apexcharts.css">
-    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/swiper.min.css">
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/apex-charts/apex-charts.css" />
 @stop
+
 @section('style')
-    <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/dashboard-ecommerce.css">
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
 @stop
+
 @section('content')
-    <!-- BEGIN: Content-->
+  @php
+    $countCards = [
+        [
+            'color' => 'success',
+            'href' => '/dashboard/users#search=Manager',
+            'icon' => 'ti ti-user-share',
+            'text' => __('admin.Managers'),
+            'count' => $managers_count,
+        ],
+        [
+            'color' => 'warning',
+            'href' => '/dashboard/organizations',
+            'icon' => 'ti-businessplan',
+            'text' => __('admin.Organizations'),
+            'count' => $organizations_count,
+        ],
+        [
+            'color' => 'secondary',
+            'href' => '/dashboard/requests/all',
+            'icon' => 'ti-speakerphone',
+            'text' => __('admin.Services Requests'),
+            'count' => $servrequests_count,
+        ],
+        [
+            'color' => 'success',
+            'href' => '/dashboard/inbox',
+            'icon' => 'ti-message',
+            'text' => __('admin.New messages'),
+            'count' => $messages_count,
+        ],
+        [
+            'color' => 'danger',
+            'href' => '/dashboard/mymsg',
+            'icon' => 'ti-network',
+            'text' => __('admin.Contact us'),
+            'count' => $cmessages_count,
+        ],
+        [
+            'color' => 'danger',
+            'href' => '/dashboard/cycles',
+            'icon' => 'ti-circles',
+            'text' => __('admin.Cycles'),
+            'count' => $cycles_count,
+        ],
+        [
+            'color' => 'info',
+            'href' => '/dashboard/companies',
+            'icon' => 'ti-building',
+            'text' => __('admin.Startups'),
+            'count' => $startups_count,
+        ],
+        [
+            'color' => 'danger',
+            'href' => '/dashboard/users#search=Mentor',
+            'icon' => 'ti-school',
+            'text' => __('admin.Mentors'),
+            'count' => $mentors_count,
+        ],
+        [
+            'color' => 'secondary',
+            'href' => '/dashboard/mentorship/sessions',
+            'icon' => 'ti-brand-my-oppo',
+            'text' => __('admin.Mentorship requests'),
+            'count' => $mentrequests_count,
+        ],
+        [
+            'color' => 'success',
+            'href' => '/dashboard/mentorship/sessions',
+            'icon' => 'ti-calendar-event',
+            'text' => __('admin.Mentorship requests Duration'),
+            'count' => $mentrequests_period,
+        ],
+        [
+            'color' => 'primary',
+            'href' => '/dashboard/users#search=Judger',
+            'icon' => 'ti-certificate',
+            'text' => __('admin.Judgers'),
+            'count' => $judgers_count,
+        ],
+        [
+            'color' => 'warning',
+            'href' => '/dashboard/training/sessions',
+            'icon' => 'ti-camera-question',
+            'text' => __('admin.Training sessions'),
+            'count' => $sessions_count,
+        ],
+        [
+            'color' => 'info',
+            'href' => '/dashboard/training/sessions',
+            'icon' => 'ti-alarm',
+            'text' => __('admin.Training sessions Duration'),
+            'count' => $sessions_period,
+        ],
+    ];
+  @endphp
 
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-body">
-                @if(session()->has('msg'))
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="alert alert-{{session()->get('class')}} mb-2" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert"
-                                            aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                    <div class="d-flex align-items-center">
-                                        <i class="bx bx-{{session()->get('class')=='success'?'like':'error'}}"></i>
-                                        <span>
-                                                            {{ __('admin.'.session()->get('msg')) }}
-                                            {{ Session::forget('msg') }}
-                                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                <div class="col-12">
-{{--             ==================> Counting Section     <=======================    --}}
-                    <div class="row">
-                        <div class="col-sm-6 col-12 dashboard-users-danger">
-                            <div class="card text-center">
-                                <a href="/dashboard/users#search=Manager">
-                                    <div class="card-content">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-success mx-auto mb-50">
-                                                <i class="bx bxs-user-voice font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Managers')}}</div>
-                                            <h3 class="mb-0">{{$managers_count}}</h3>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-12 dashboard-users-success">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/organizations">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-warning mx-auto mb-50">
-                                                <i class="bx bxs-school font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Organizations')}}</div>
-                                            <h3 class="mb-0">{{$organizations_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 col-12 dashboard-users-success">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/requests/all">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-secondary mx-auto mb-50">
-                                                <i class="bx bxs-megaphone font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Services Requests')}}</div>
-                                            <h3 class="mb-0">{{$servrequests_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 col-12 dashboard-users-success">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/inbox">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
-                                                <i class="bx bxs-conversation font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.New messages')}}</div>
-                                            <h3 class="mb-0">{{$messages_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 col-12 dashboard-users-danger">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/mymsg">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-danger  mx-auto mb-50">
-                                                <i class="bx bxs-message font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Contact us')}}</div>
-                                            <h3 class="mb-0">{{$cmessages_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-12 dashboard-users-success">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/cycles">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-danger mx-auto mb-50">
-                                                <i class="bx bx-clipboard font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Cycles')}}</div>
-                                            <h3 class="mb-0">{{$cycles_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-12 dashboard-users-success">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/companies">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-info mx-auto mb-50">
-                                                <i class="bx bx-buildings font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Startups')}}</div>
-                                            <h3 class="mb-0">{{$startups_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-4 col-12 dashboard-users-danger">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/users#search=Mentor">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
-                                                <i class="bx bxs-graduation font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Mentors')}}</div>
-                                            <h3 class="mb-0">{{$mentors_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 col-12 dashboard-users-danger">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/mentorship/sessions">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-secondary mx-auto mb-50">
-                                                <i class="bx bxs-help-circle font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Mentorship requests')}}</div>
-                                            <h3 class="mb-0">{{$mentrequests_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 col-12 dashboard-users-danger">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/mentorship/sessions">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
-                                                <i class="bx bxs-calendar-event font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Mentorship requests Duration')}}</div>
-                                            <h3 class="mb-0">{{$mentrequests_period}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 col-12 dashboard-users-success">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/users#search=Judger">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
-                                                <i class="bx bxs-filter-alt font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Judgers')}}</div>
-                                            <h3 class="mb-0">{{$judgers_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 col-12 dashboard-users-success">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/training/sessions">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-warning mx-auto mb-50">
-                                                <i class="bx bxs-alarm font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Training sessions')}}</div>
-                                            <h3 class="mb-0">{{$sessions_count}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 col-12 dashboard-users-success">
-                            <div class="card text-center">
-                                <div class="card-content">
-                                    <a href="/dashboard/training/sessions">
-                                        <div class="card-body py-1">
-                                            <div class="badge-circle badge-circle-lg badge-circle-light-info mx-auto mb-50">
-                                                <i class="bx bxs-timer font-medium-5"></i>
-                                            </div>
-                                            <div class="text-muted line-ellipsis">{{__('admin.Training sessions Duration')}}</div>
-                                            <h3 class="mb-0">{{$sessions_period}}</h3>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-
-                    </div>
-
-{{--             ==================>    Charts Section   <==========================  --}}
-                    <section>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-header border-bottom">
-                                        <h4 class="card-title align-items-center">
-                                            <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Cycle Startups Statistics") }}
-                                            :
-                                        </h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="card ">
-                                            <div>
-                                                <canvas id="cycleStartups"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4 class="card-title">{{__('admin.usersdetails')}}</h4>
-                                    </div>
-                                    <div class="card-content">
-                                        <div class="card-body pl-0">
-                                            <div class="height-300">
-                                                <canvas id="bar-chart"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4 class="card-title">{{__('admin.totalusersmf')}} </h4>
-                                    </div>
-                                    <div class="card-content">
-                                        <div class="card-body pl-0">
-                                            <div class="height-300">
-                                                <canvas id="simple-pie-chart"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+  <!-- Content wrapper -->
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-body">
+        @if (session()->has('msg'))
+          <div class="col-12">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="alert alert-{{ session()->get('class') }} mb-2" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                  <div class="d-flex align-items-center">
+                    <i class="bx bx-{{ session()->get('class') == 'success' ? 'like' : 'error' }}"></i>
+                    <span>
+                      {{ __('admin.' . session()->get('msg')) }}
+                      {{ Session::forget('msg') }}
+                    </span>
+                  </div>
                 </div>
+              </div>
             </div>
+          </div>
+        @endif
+      </div>
+      <div class="row g-6">
+        <!-- Count cards -->
+        @foreach ($countCards as $card)
+          <a href="{{ $card['href'] }}" class="col-lg-3 col-sm-6">
+            <div class="card card-border-shadow-{{ $card['color'] }} h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-center align-items-center mb-2">
+                  <div class="avatar me-4">
+                    <span class="avatar-initial rounded bg-label-primary">
+                      <i class="ti {{ $card['icon'] }} text-{{ $card['color'] }} ti-28px"></i>
+                    </span>
+                  </div>
+                  <h4 class="mb-0 text-center">{{ $card['count'] }}</h4>
+                </div>
+                <p class="mb-1 text-center">{{ $card['text'] }}</p>
+              </div>
+            </div>
+          </a>
+        @endforeach
+        <!-- / Count cards -->
+      </div>
+
+      <!-- Horizontal Bar Chart -->
+      <div class="col-12 mt-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <i class="ti ti-device-laptop ti-28px"></i>
+              <h5 class="card-title mb-0 mx-2">{{ __('admin.Cycle Startups Statistics') }}</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="horizontalBarChart"></div>
+          </div>
         </div>
+      </div>
+      <!-- /Horizontal Bar Chart -->
+
+      <div class="row g-3 align-items-center mt-6">
+        <!-- Pie Chart -->
+        <div class="col-md-6 col-12">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="menu-icon tf-icons ti ti-user ti-28px"></i>
+                <h5 class="card-title mb-0">{{ __('admin.totalusersmf') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="pieChart"></div>
+            </div>
+          </div>
+        </div>
+        <!-- /Pie Chart -->
+
+        <!-- Vertical Bar Charts -->
+        <div class="col-md-6 col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-id ti-28px"></i>
+                <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="verticalBarChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- /Vertical Bar Charts -->
+      </div>
     </div>
-    <!-- END: Content-->
+  </div>
 @stop
 
 @section('scripts')
-    <script src="/app-assets/vendors/js/charts/chart.min.js"></script>
-    <script src="/app-assets/vendors/js/charts/apexcharts.min.js"></script>
-    <script src="/app-assets/vendors/js/extensions/swiper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+  <script src="/vuexy/assets/vendor/libs/chartjs/chartjs.js"></script>
 @stop
+
 @section('pagescripts')
-    <script>
+  <script>
+    // Horizontal Bar Chart
+    const seriesName = '{{ __('admin.Registered') }}';
+    const barChartCategories = {!! json_encode($cycles_labels) !!};
+    const seriesData = {!! json_encode($cycles_startups_count) !!};
 
-        $(window).on("load", function () {
-            var $primary = '#5A8DEE',
-                $success = '#39DA8A',
-                $danger = '#FF5B5C',
-                $warning = '#FDAC41',
-                $info = '#00CFDD',
-                $label_color = '#475F7B',
-                grid_line_color = '#dae1e7';
-            var themeColors = [$primary, $warning, $danger, $success, $info, $label_color, $primary, $warning, $danger, $success, $info, $label_color,
-                $primary, $warning, $danger, $success, $info, $label_color, $primary, $warning, $danger, $success, $info, $label_color];
+    // Vertical Bar Chart 
+    const verticalBarLabels = {!! json_encode($usersgov->pluck('state_' . $l)) !!};
+    const verticalBarData = {!! json_encode($usersgov->pluck('total')) !!};
 
-            // Bar Chart
-            // ------------------------------------------
-            //Get the context of the Chart canvas element we want to select
-            var barChartctx = $("#bar-chart");
-            // Chart Options
-            var barchartOptions = {
-                // Elements options apply to all of the options unless overridden in a dataset
-                // In this case, we are setting the border of each bar to be 2px wide
-                elements: {
-                    rectangle: {
-                        borderWidth: 2,
-                        borderSkipped: 'left'
-                    }
-                },
-                responsive: true,
-                maintainAspectRatio: false,
-                responsiveAnimationDuration: 500,
-                legend: {display: false},
-                scales: {
-                    xAxes: [{
-                        display: true,
-                        gridLines: {
-                            color: grid_line_color,
-                        },
-                        scaleLabel: {
-                            display: true,
-                        }
-                    }],
-                    yAxes: [{
-                        display: true,
-                        gridLines: {
-                            color: grid_line_color,
-                        },
-                        scaleLabel: {
-                            display: true,
-                        },
-                        ticks: {
-                            stepSize: 10
-                        },
-                    }],
-                },
-                title: {
-                    display: true,
-                    text: '{{__('admin.totalregisteredusers')}}'
-                },
-            };
-            // Chart Data
-            var barchartData = {
-                labels: {!!$usersgov->pluck('state_'.$l)->toJson()!!},
-                datasets: [{
-                    label: "Total",
-                    data: {!!$usersgov->pluck('total')->toJson()!!},
-                    backgroundColor: themeColors,
-                    borderColor: "transparent"
-                }]
-            };
-            var barChartconfig = {
-                type: 'bar',
-                // Chart Options
-                options: barchartOptions,
-                data: barchartData
-            };
-            // Create the chart
-            var barChart = new Chart(barChartctx, barChartconfig);
-            // Pie Chart
-            // --------------------------------
-            //Get the context of the Chart canvas element we want to select
-            var pieChartctx = $("#simple-pie-chart");
-            // Chart Options
-            var piechartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                responsiveAnimationDuration: 500,
-                title: {
-                    display: true,
-                    text: '{{__('admin.totalregisteredusers')}}'
-                }
-            };
-            // Chart Data
-            var piechartData = {
-                labels: ['{{__('admin.Female')}}', '{{__('admin.Male')}}'],
-                datasets: [{
-                    label: "{{__('admin.totalregistered')}}",
-                    data: {!!$usersgender->pluck('total')->toJson()!!},
-                    backgroundColor: themeColors,
-                }]
-            };
-            var pieChartconfig = {
-                type: 'pie',
-                // Chart Options
-                options: piechartOptions,
-                data: piechartData
-            };
-            // Create the chart
-            var pieSimpleChart = new Chart(pieChartctx, pieChartconfig);
+    // Pie Chart
+    const pieLabels = ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'];
+    const pieData = {!! json_encode($usersgender->pluck('total')) !!};
+  </script>
 
-        });
-    </script>
-
-    <script>
-
-        new Chart(document.getElementById('cycleStartups'), {
-            type: 'bar',
-            data: {
-                labels:{!! json_encode($cycles_labels) !!},
-                datasets: [{
-                    label: '({{ __('admin.Registered') }})',
-                    data: {!! json_encode($cycles_startups_count) !!},
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                backgroundColor : '#f59b9b',
-                indexAxis: 'y',
-                elements: {
-                    bar: {
-                        borderWidth: 2,
-                    }
-                },
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    },
-
-                },
-
-            }
-        });
-
-    </script>
-
+  <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+  <script src="/vuexy/assets/js/charts-apex.js"></script>
+  <script src="/vuexy/assets/js/charts-chartjs.js"></script>
 @stop

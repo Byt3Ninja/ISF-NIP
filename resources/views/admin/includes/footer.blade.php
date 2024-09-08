@@ -1,3 +1,54 @@
-<p class="clearfix mb-0"><span class="float-left d-inline-block" style="direction: ltr">VI portal v2.0 - {{-- USAID Funded --}} &copy; {{ date('Y') }}</span>{{-- <span class="float-right d-sm-inline-block d-none">Developed by <i class="bx bxs-heart pink mx-50 font-small-3"></i><a class="text-uppercase" href="https://masterencode.com" target="_blank">masterencode</a></span> --}}
-<button class="btn btn-primary btn-icon scroll-top" type="button"><i class="bx bx-up-arrow-alt"></i></button>
+<p class="d-flex justify-content-between align-items-center">
+  <span class="float-left d-inline-block" style="direction: ltr">
+    VI portal v2.0 -
+    {{-- USAID Funded --}} &copy; {{ date('Y') }}
+  </span>
+  {{-- <span class="float-right d-sm-inline-block d-none">Developed by <i class="bx bxs-heart pink mx-50 font-small-3"></i><a class="text-uppercase" href="https://masterencode.com" target="_blank">masterencode</a></span> --}}
+  <button class="btn btn-primary btn-icon scroll-top" type="button">
+    <i class="ti ti-arrow-up"></i>
+  </button>
 </p>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function scrollToTop(duration) {
+      const scrollTopButton = document.querySelector('.scroll-top');
+
+      if (scrollTopButton) {
+        // Check to see if the window is top, if not, then display the button
+        window.addEventListener('scroll', function() {
+          if (window.scrollY > 200) {
+            scrollTopButton.style.display = 'block';
+          } else {
+            scrollTopButton.style.display = 'none';
+          }
+        });
+
+        // Click event to scroll to top
+        scrollTopButton.addEventListener('click', function() {
+          const startPosition = window.pageYOffset;
+          const startTime = performance.now();
+
+          function scrollAnimation(currentTime) {
+            const elapsedTime = currentTime - startTime;
+            const progress = Math.min(elapsedTime / duration, 1);
+
+            window.scrollTo(0, startPosition * (1 - easeInOutCubic(progress)));
+
+            if (progress < 1) {
+              requestAnimationFrame(scrollAnimation);
+            }
+          }
+
+          function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          }
+
+          requestAnimationFrame(scrollAnimation);
+        });
+      }
+    }
+
+    scrollToTop(1000); // Scroll to top over 1 second
+  });
+</script>
