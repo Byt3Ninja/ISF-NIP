@@ -13,6 +13,8 @@ class TemplateEmail extends Notification implements ShouldQueue
 {
     use Queueable;
     public $Message;
+    public $ActionText= 'Open VI portal';
+    public $ActionUrl=null;
     /**
      * Create a new notification instance.
      *
@@ -42,12 +44,13 @@ class TemplateEmail extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        $url= is_null($this->ActionUrl)?url($this->Message[3]):$this->ActionUrl;
         return (new MailMessage)
         ->subject($this->Message[0]) // it will use this class name if you don't specify
         ->greeting($this->Message[1]) // example: Dear Sir, Hello Madam, etc ...
         ->level('info')// It is kind of email. Available options: info, success, error. Default: info
         ->line($this->Message[2])
-        ->action('Open VI portal', url($this->Message[3]))
+        ->action($this->ActionText, $url)
         ->line('Thank you for using our system!')
         ->salutation('Kind regards,');  // example: best regards, thanks, etc ...
     }

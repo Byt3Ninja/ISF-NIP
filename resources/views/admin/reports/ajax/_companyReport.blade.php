@@ -219,7 +219,7 @@
                                             @elseif ($session->type=='offline')
                                                 <b>{{__('cycles.trainer name')}}:</b> {{$session->trainer_name}}<br><b>{{__('cycles.training location')}}:</b> {{$session->location}} <br>
                                             @else
-                                                <a href="/dashboard/training/all/{{$session->location}}">{{ $session->course->title }} </a>
+                                                <a href="/dashboard/training/all/{{$session->location}}">{{ optional($session->course)->title }} </a>
                                             @endif
 
                                         </td>

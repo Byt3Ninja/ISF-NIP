@@ -63,7 +63,7 @@
                                 <div class="card-body">
                                     <span>{{__('cycles.Select training from list')}}</span>
                                     <fieldset class="input-group">
-                                            <select id="cstep" class="select form-control" onchange="window.open('/dashboard/training/results/'+this.options[this.selectedIndex].value,'_self');">
+                                            <select id="cstep" class="select form-control cyclesExcel" onchange="window.open('/dashboard/training/results/'+this.options[this.selectedIndex].value,'_self');">
                                                 @foreach($sessions as $step)
                                                     <option value="{{$step->id}}" {{$step->id==$id?'selected':''}}>{{$step->title}} - {{$step->step->title}} ({{__('cycles.Cycle')}} "{{$step->step->cycle->title}}" - {{__('cycles.Start')}} {{$step->step->from->format('d-m')}}) - {{ optional(optional(optional($step->step)->cycle)->organization)->name }}</option>
                                                 @endforeach
@@ -94,9 +94,27 @@
         <div class="card-body">
 
                 <div class="table-responsive">
+
+                    <!-- we get value from Select box Ely fo2 class name stepsExcel -->
+                    <div class="btn btn-success ExportExcelTresult">{{__('cycles.Export')}}</div>
+                    <br><br><br>
+                    <input type="hidden" class="step_id" value="{{$csession->step_id}}">
                     <table class="table mb-0">
+
+                        <div class="media align-items-center col-md-3">
+                            <select class="select form-control ChangeAllBoxTR" >
+                                <option value="0" >Disapprove</option>
+                                @foreach($steps as $step)
+                                    <option value="{{$step->id}}" >{{$step->title}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        
+
                         <thead class="thead-dark">
                         <tr>
+                            <th><input type="checkbox" class="checkAllTR" ></th>
                             <th>{{__('cycles.Company')}}</th>
                             <th>{{__('cycles.User/Title')}}</th>
                             <th>{{__('cycles.Completed')}}</th>
@@ -109,6 +127,12 @@
                         @endphp
                         @foreach($companies as $company)
                             <tr>
+                                <td>
+                                    <div class="media align-items-center">
+                                        <input type="checkbox" class="chboxTresult" do="{{$company->id}}" userid="{{$company->user->id}}" value="1" name="chboxcyclesReg[]" >
+                                    </div>
+                                </td>
+
                                 <td>
                                     <div class="media align-items-center">
                                         <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
@@ -134,6 +158,7 @@
                                         </a>
                                     </div>
                                 </td>
+                                <input type="hidden" class="location" value="{{$csession->location}}" >
                                 @php
                                 $cc = \App\TrainingCompleted::where('user_id',$company->user->id)->where('course_id',$csession->location)->count();
                                 $per = $contents? $cc/$contents*100 :'0';
@@ -206,6 +231,11 @@
                 @endif
             });
         });
+
+        const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+    };
+
     </script>
     <script>
             function changestep(company,step){

@@ -7,6 +7,7 @@ use App\Cycle;
 use App\CyclesMentors;
 use App\Events\WebMessage;
 use App\Factories\OnlineMeetingFactory;
+use App\Jobs\ExportMentorsData;
 use App\MentorshipRequest;
 use App\Schedule;
 use App\User;
@@ -26,6 +27,24 @@ class MentorsController extends Controller
         $this->meetingService =  OnlineMeetingFactory::create();
     }
   
+
+
+    public function expormentorship(Request $request)
+    {
+        // تحقق من أن البريد الإلكتروني موجود
+       
+        $data4 = [
+            'request' => $request->input('request'),
+            'userEmail' => auth()->user()->email
+        ];
+
+        // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
+        ExportMentorsData::dispatch($data4);
+
+        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
+    }
+
+
     public function index($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
@@ -77,7 +96,7 @@ class MentorsController extends Controller
                 $fileName = $request->file('file_url');
                 $fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
             }
-            MentorshipRequest::insert([
+            MentorshipRequest::create([
                 'mentor_id' => $request->mentorid, 'user_id' => Auth::id(), 'comment' => $request->notes,
                 'zoom_date' => $request->date, 'period' => $request->period, 'fileurl' => $fileName,
                 'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id
@@ -104,7 +123,7 @@ class MentorsController extends Controller
                 if (!$onlineMeeting['success']) {return back()->with(['message2' => "Error, can't create online meeting."]);}
 
                 $dateFormat = new \DateTime($date);
-                MentorshipRequest::insert([
+                MentorshipRequest::create([
                     'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
                     'admin_id' => Auth::id(), 'start_url' => $onlineMeeting['data']['start_url'], 'join_url' => $onlineMeeting['data']['join_url'],
                     'zoom_date' => $dateFormat->format('Y-m-d H:i'), 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
@@ -149,21 +168,66 @@ class MentorsController extends Controller
         $organization_id=auth()->user()->organization_id;
 
         if ($request->show == 'all') {
-            $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->where('organization_id',$organization_id);
-            })->get();
+
+            $sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->where('organization_id', $organization_id);
+            })->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                // التأكد من أن التواريخ متوافقة مع التنسيق المناسب
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+        
+                // البحث باستخدام التاريخ من وإلى
+                return $q->whereDate('zoom_date', '>=', $startDate)
+                         ->whereDate('zoom_date', '<=', $endDate);
+            })->orderBy('id','DESC')->get();
+
         } elseif ($request->show == 'approved')  {
             $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
-            })->whereNotNull('start_url')->get();
+            })->whereNotNull('start_url')
+            ->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                // التأكد من أن التواريخ متوافقة مع التنسيق المناسب
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+        
+                // البحث باستخدام التاريخ من وإلى
+                return $q->whereDate('zoom_date', '>=', $startDate)
+                         ->whereDate('zoom_date', '<=', $endDate);
+            })->orderBy('id','DESC')->get();
+
+
+
         } elseif ($request->show == 'disapproved')  {
             $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
-            })->where('approved','No')->get();
+            })->where('approved','No')
+            ->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                // التأكد من أن التواريخ متوافقة مع التنسيق المناسب
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+        
+                // البحث باستخدام التاريخ من وإلى
+                return $q->whereDate('zoom_date', '>=', $startDate)
+                         ->whereDate('zoom_date', '<=', $endDate);
+            })->orderBy('id','DESC')->get();
+
+
         } else {
+
             $sessions = MentorshipRequest::when(!is_null($organization_id),function ($q) use($organization_id){
                 return $q->where('organization_id',$organization_id);
-            })->whereNull('approved')->get();
+            })->whereNull('approved')
+            ->when($request->start_date && $request->end_date, function ($q) use ($request) {
+                // التأكد من أن التواريخ متوافقة مع التنسيق المناسب
+                $startDate = date('Y-m-d', strtotime($request->start_date));
+                $endDate = date('Y-m-d', strtotime($request->end_date));
+        
+                // البحث باستخدام التاريخ من وإلى
+                return $q->whereDate('zoom_date', '>=', $startDate)
+                         ->whereDate('zoom_date', '<=', $endDate);
+            })->orderBy('id','DESC')->get();
+
+
         }
         return view('admin.settings.mentorship.sessions', compact( 'sessions'));
     }
@@ -187,7 +251,7 @@ class MentorsController extends Controller
         $start = $onlineMeeting['data']['start_url'];
         $join = $onlineMeeting['data']['join_url'];
       }
-      MentorshipRequest::where('id',$request->id)->update(['period'=> $request->period, 'zoom_date'=>$request->date, 'admin_comment' => $request->notes, 'approved'=>$approved, 'start_url' => $start, 'join_url' => $join ]);
+      MentorshipRequest::find($request->id)->update(['period'=> $request->period, 'zoom_date'=>$request->date, 'admin_comment' => $request->notes, 'approved'=>$approved, 'start_url' => $start, 'join_url' => $join ]);
           /// Notify Mentor
           $session = MentorshipRequest::findOrFail($request->id);
           $rname = User::findOrFail($session->mentor_id);
@@ -232,7 +296,7 @@ class MentorsController extends Controller
                              $start = $onlineMeeting['data']['start_url'];
                              $join = $onlineMeeting['data']['join_url'];
                          }
-                    MentorshipRequest::where('id',$request->id)->update(['approved'=>$request->stat, 'start_url' => $start, 'join_url' => $join ]);
+                    MentorshipRequest::find($request->id)->update(['approved'=>$request->stat, 'start_url' => $start, 'join_url' => $join ]);
                     /// Notify Mentor
                     $session = MentorshipRequest::findOrFail($request->id);
                     $rname = User::findOrFail($session->mentor_id);
@@ -282,7 +346,6 @@ class MentorsController extends Controller
                     return back()->with(['msg' => 'Saved', 'class' => 'success']);
                 }
             } catch (Exception $e) {
-                dd($e);
                 return response()->json(['state' => 'failed','e'=>$e], 500);
             }
     }
@@ -297,6 +360,22 @@ class MentorsController extends Controller
             return back();
         }else {
             return back();
+        }
+    }
+    public function delsession($id, Request $request){
+        $this->preProcessingCheck('edit_cycles');
+//        $zoomid = TrainingSession::findOrFail($id)->zoom_id;
+        if($request) {
+//            if ($zoomid) {
+//                $zoom = $this->delete($zoomid);
+//                if (!$zoom['success']) {
+//                    return response()->json(['state' => 'failed'], 500);
+//                }
+//            }
+            MentorshipRequest::findOrFail($id)->delete();
+            return response()->json(['state' => 'success'], 200);
+        } else {
+            return response()->json(['state' => 'failed'], 500);
         }
     }
 }

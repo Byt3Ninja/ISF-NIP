@@ -2,7 +2,9 @@
 
 /* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
 
-
+Route::get('test',function(){
+    
+});
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -34,20 +36,20 @@
 /// Frontend routes ///
 Route::get('lang/{locale}','IndexController@lang');
 Route::get('/','IndexController@home');
-//Route::get('home','IndexController@home');
-//Route::get('about','IndexController@home');
-//Route::get('faqs','IndexController@home');
-//Route::get('contact','IndexController@home');
-//Route::get('events','IndexController@home');
-//Route::get('csr-events','IndexController@home');
-//Route::get('blog','IndexController@home');
-//Route::get('blog/{id}','IndexController@post');
-//Route::post('message','IndexController@message');
-//Route::post('sendmsg','IndexController@sendmsg');
-//Route::get('page/{id}','IndexController@page');
-//Route::get('search','IndexController@search');
-//Route::get('event/{id}','IndexController@event');
-//Route::post('eventregister','IndexController@eventregister');
+Route::get('home','IndexController@home');
+Route::get('about','IndexController@home');
+Route::get('faqs','IndexController@home');
+Route::get('contact','IndexController@home');
+Route::get('events','IndexController@home');
+Route::get('csr-events','IndexController@home');
+Route::get('blog','IndexController@home');
+Route::get('blog/{id}','IndexController@post');
+Route::post('message','IndexController@message');
+Route::post('sendmsg','IndexController@sendmsg');
+Route::get('page/{id}','IndexController@page');
+Route::get('search','IndexController@search');
+Route::get('event/{id}','IndexController@event');
+Route::post('eventregister','IndexController@eventregister');
 
 Auth::routes(['verify' => true]);
 Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],function(){
@@ -56,12 +58,12 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/', 'HomeController@index')->name('admin');
 	Route::get('/dashboard', 'HomeController@index')->name('dashboard');
 	Route::get('/dark','HomeController@dark');
+
+
     //Roles
     Route::get('documentation/view/{id?}','HomeController@help');
     Route::resource('documentation', 'DocumentationController');
-    // Calendar
-	Route::get('calendar','CalenderController@index')->name('calendar');
-    Route::post('calendarViewCall','CalenderController@ViewCall')->name('calendarAjax');
+
 
     Route::get('calendar/{id}/edit','SettingsController@editcal');
     Route::post('calendar/{id}/update','SettingsController@updatecal');
@@ -110,6 +112,13 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::post('updateaboutus', 'SettingsController@update_aboutus');
 	Route::any('setcontactus', 'SettingsController@get_contactus');
 	Route::post('updatecontactus', 'SettingsController@update_contactus');
+    Route::put('settings/Updateone', 'SettingsController@update_settingsone')->name('updateone');
+    Route::put('settings/Updatelogo', 'SettingsController@update_settinglogo')->name('updatelogo');
+    Route::put('settings/Updatetwo', 'SettingsController@update_settingstwo')->name('updatetwo');
+    Route::put('settings/UpdateMail', 'SettingsController@update_settingsmail')->name('updateMail');
+    Route::put('settings/UpdatePush', 'SettingsController@update_settingspush')->name('updatePush');
+    Route::put('settings/UpdateMeeting', 'SettingsController@update_settingsMeeting')->name('updateMeeting');
+
 	//services categories Manager routes
 	Route::resource('serviceCategories', 'ServiceCategoryController');
 	//Services Manager routes
@@ -207,6 +216,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('cycles/view/{c?}/{s?}','CyclesController@view');
     Route::post('cycles/save','CyclesController@saveForm');
     Route::get('cycles/my/{id}','CyclesController@my');
+    Route::post('change/cyc','CyclesController@changAll');
+    Route::get('/export-cyclesComp', 'CyclesController@exportcyclesComp');
 
     //Screening
     Route::get('screening','ScreeningController@index');
@@ -218,6 +229,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('screening/{fid}/{cid}','ScreeningController@view');
     Route::get('screening/get/{fid}/{sid}/{pid}','ScreeningController@getusers');
     Route::post('screening/changestep','ScreeningController@changestep');
+    Route::get('/export-Result', 'ScreeningController@exportresultScreen');
+
     //ZOOM
     Route::get('zoom/all','MeetingController@showall');
     Route::get('zoom/{id}/get','MeetingController@show');
@@ -237,6 +250,12 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('mentorship/addwait','MentorsController@addwait');
     Route::get('mentorship/mine','MentorsController@mine');
     Route::post('mentorship/rate','MentorsController@rate');
+    Route::post('mentorship/delsession/{id}' ,'MentorsController@delsession');
+    Route::get('/export-mentorship', 'MentorsController@expormentorship');
+   
+
+
+
     //Training
     Route::get('training/all/{id?}','TrainingController@all')->name('training.all');
     Route::get('training/edit/{id}','TrainingController@edit');
@@ -250,6 +269,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('training/storecontent', 'TrainingController@storecontent');
     Route::get('training/my','TrainingController@mysessions')->name('training.my');
     Route::get('training/my/{id}','TrainingController@my');
+    Route::get('training/my/{id}/quiz/{quiz_id}','TrainingController@myQuiz')->name('quiz.overview');
+    Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}','TrainingController@myQuizResponses')->name('quiz.response');
+    Route::post('training/my/{id}/quiz/{quiz_id}','TrainingController@doQuiz')->name('quiz.start');
+
     Route::get('training/results/{id?}','TrainingController@results');
     Route::get('training/sessions/{id?}','TrainingController@sessions');
     Route::post('training/addsession' ,'TrainingController@addsession');
@@ -257,6 +280,20 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('training/session' ,'TrainingController@session');
     Route::post('training/editsession' ,'TrainingController@editsession');
     Route::post('trainings/getdsc/{id}' ,'TrainingController@getdsc');
+    Route::get('/export-Tresult', 'TrainingController@exportTresult');
+    Route::post('trainings/change/Tresult','TrainingController@changAllTL');
+
+
+
+
+    // questions bank
+    Route::resource('question-categories', 'QuestionCategoriesController');
+    Route::resource('questions-bank', 'QuestionsBankController');
+    Route::resource('quizzes', 'quizzesController')->except(['show']);;
+    Route::get('quizzes/{quiz}/questions', 'quizzesController@get_questions')->name('quizzes.questions');
+    Route::post('quizzes/{quiz}/questions', 'quizzesController@save_questions')->name('quizzes.saveQuestions');
+    Route::get('quizzes/my', 'quizzesController@my')->name('quizzes.dashboard');
+
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
     Route::get('/roomImages/{id}','RoomsController@roomImages')->name('roomImages');
@@ -276,25 +313,48 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('final/results/{id?}','FinalscreeningController@results');
     Route::get('final/{step_id}/{company_id}','FinalscreeningController@view');
     Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
+    Route::post('final/delsession/{id}' ,'FinalscreeningController@delsession');
+
+
+//Program List
+Route::resource('programlist', 'ProgramController');
+Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     // ===============> Mentor Dashboard Routes <===============
-    Route::group(['prefix' => 'mentor'],function (){
-        Route::get('mentorshipSessions','Mentor\MentorshipController@index')->name('mentorshipSessions.index');
-        Route::get('meetingRedirect/{mentorship_request_id}','Mentor\MentorshipController@meetingRedirect')->name('meetingRedirect');
-        Route::resource('mentorshipTasks','Mentor\MentorshipTaskController');
-        Route::post('mentorshipTasks/send/comment','Mentor\MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+    Route::group(['prefix' => 'mentor','namespace'=>'Mentor'],function (){
+        Route::get('mentorshipSessions','MentorshipController@index')->name('mentorshipSessions.index');
+        Route::get('meetingRedirect/{mentorship_request_id}','MentorshipController@meetingRedirect')->name('meetingRedirect');
+        Route::resource('mentorshipTasks','MentorshipTaskController');
+        Route::post('mentorshipTasks/send/comment','MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
 
     });
 
+
+
     // =====================> Startup Routes <===========
 
-    Route::group(['prefix' => 'startup','as'=>'startup.'],function (){
-        Route::get('mentorshipTasks','Startup\MentorshipTaskController@home')->name('mentorshipTasks.home');
-        Route::get('mentorshipTasks/{mentorship_id}','Startup\MentorshipTaskController@index')->name('mentorshipTasks.index');
-        Route::get('mentorshipTasks/show/{mentorshipTask}','Startup\MentorshipTaskController@show')->name('mentorshipTasks.show');
-        Route::post('mentorshipTasks/complete/{mentorshipTask}','Startup\MentorshipTaskController@complete')->name('mentorshipTasks.complete');
-        Route::post('mentorshipTasks/send/comment','Startup\MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
-        Route::resource('fundingRounds','Startup\FundingRoundController')->except(['index','show']);
+    Route::group(['prefix' => 'startup','as'=>'startup.','namespace'=>'Startup'],function (){
+        Route::get('mentorshipTasks','MentorshipTaskController@home')->name('mentorshipTasks.home');
+        Route::get('mentorshipTasks/{mentorship_id}','MentorshipTaskController@index')->name('mentorshipTasks.index');
+        Route::get('mentorshipTasks/show/{mentorshipTask}','MentorshipTaskController@show')->name('mentorshipTasks.show');
+        Route::post('mentorshipTasks/complete/{mentorshipTask}','MentorshipTaskController@complete')->name('mentorshipTasks.complete');
+        Route::post('mentorshipTasks/send/comment','MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+        Route::resource('fundingRounds','FundingRoundController')->except(['index']);
+    });
+
+    // =================> Calender Routes <==================
+    Route::group(['prefix' => 'calendar','namespace'=>'Calender'],function () {
+        Route::get('/','CalenderController@index')->name('calendar');
+        Route::post('calendarViewCall','CalenderController@ViewCall')->name('calendarAjax');
+        // ===>  google sync <=====
+        Route::get('login/google', 'GoogleCalendarController@redirectToGoogle')->name('calender.login.google');
+        Route::get('callback/google', 'GoogleCalendarController@handleGoogleCallback')->name('calender.callback.google');
+        Route::get('sync-events', 'GoogleCalendarController@syncEvents')->name('calender.syncEvents');
+
+        // ====> Microsoft sync <=====
+        Route::get('login/microsoft', 'MicrosoftCalendarController@redirectToMicrosoft')->name('calender.login.microsoft');
+        Route::get('callback/microsoft', 'MicrosoftCalendarController@handleMicrosoftCallback')->name('calender.callback.microsoft');
+        Route::get('microsoft-sync-events', 'MicrosoftCalendarController@syncEvents')->name('calender.MicrosoftsyncEvents');
 
     });
 

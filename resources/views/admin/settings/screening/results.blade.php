@@ -101,6 +101,12 @@
                         if($form) {$clist = [$form->id,$cstep->id];}
                         $companies = \App\Company::whereIn('step',$clist)->get();
                     @endphp
+                    
+                @if($companies->count() == 0 )
+                 <input type="hidden" class="stepsExcel" value="0" >
+                 @else
+                 <input type="hidden" class="stepsExcel" value="{{request()->route('id')}}" >
+                 @endif
                     <section class="row">
                         <div class="col-xl-12 col-md-12 col-sm-12">
                             <div class="card">
@@ -159,7 +165,10 @@
                                     <div class="card border-light">
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table mb-0">
+                                        <!-- we get value from Select box Ely fo2 class name stepsExcel -->
+                                        <div class="btn btn-success ExportExcelScreesRes">{{__('cycles.Export')}}</div>
+                                        
+                                        <table id="result-list-datatable" class=" table mb-0">
                                             <thead class="thead-dark">
                                             <tr>
                                                 <th>{{__('cycles.Company')}}</th>
@@ -204,7 +213,9 @@
                                                         </div>
                                                     </td>
                                                     <td>
+                                                        
                                                         @if($form->id)
+                                                        <input type="hidden" class="formid" value="{{$form->id}}" >
                                                             @foreach(\App\User::whereIn('id',$company->judges($company->id,$form->id))->get() as $judger)
                                                                 <div class="chip mr-1">
                                                                     <div class="chip-body">
@@ -227,7 +238,7 @@
                                                     </td>
                                                     <td>
                                                         <div class="media align-items-center">
-                                                            <select id="cstep" class="select form-control"
+                                                            <select id="cstep" class="select form-control exportcurrentstep"
                                                                     onchange="changestep({{$company->id}},this.options[this.selectedIndex].value)">
                                                                 <option value="0">{{__('cycles.Disapprove')}}</option>
                                                                 @foreach(\App\Step::where('cycle_id',$company->cycle)->orderBy('arr')->get() as $step)
@@ -264,9 +275,11 @@
 
 @stop
 @section('pagescripts')
-    <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-    <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-
+<script src="/app-assets/js/scripts/pages/page-users.js"></script>
+<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
+<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
+<script src="/app-assets/js/scripts/datatables/datatable.js"></script>
+<script src="/app-assets/js/scripts/modal/components-modal.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             $('.table').DataTable({
@@ -291,6 +304,11 @@
                 @endif
             });
         });
+
+        const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+        exportNotSuccess: "{{ __('cycles.export_Notsuccess') }}",
+    };
     </script>
 
     <script>

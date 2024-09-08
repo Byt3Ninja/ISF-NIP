@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class TrainingSession extends Model
 {
-    use Auditable;
+//    use Auditable;
     protected $table = 'training_sessions';
-    protected $fillable = ['step_id', 'title', 'dsc', 'datetime', 'duration', 'zoom_id', 'start_url', 'join_url'];
+    protected $fillable = ['step_id', 'title', 'dsc', 'datetime', 'duration', 'zoom_id', 'start_url', 'join_url','trainer_name','trainer_email','location'];
     protected $casts = ['datetime'  => 'date:Y-m-d H:i',];
 
 
@@ -36,5 +36,9 @@ class TrainingSession extends Model
 
     public function course(){
         return $this->belongsTo(Training::class,'location');
+    }
+    public function CalenderSync()
+    {
+        return $this->morphMany(CalenderSync::class, 'calenderable');
     }
 }

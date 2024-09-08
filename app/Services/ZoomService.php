@@ -3,7 +3,7 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use Log;
-
+use App\Settings;
 class ZoomService implements OnlineMeetingServiceInterface
 {
     const MEETING_TYPE_INSTANT = 1;
@@ -40,9 +40,19 @@ class ZoomService implements OnlineMeetingServiceInterface
 //    }
     protected function generateZoomToken()
     {
+        $Setting = Settings::where('id', 1)->first();
+        if($Setting){
+        $ZOOM_CLIENT_ID = $Setting->ZOOM_CLIENT_ID;
+        $ZOOM_CLIENT_SECRET= $Setting->ZOOM_CLIENT_SECRET;
+        $ZOOM_ACCOUNT_ID= $Setting->ZOOM_ACCOUNT_ID;
+        }else{
+            $ZOOM_CLIENT_ID = '';
+            $ZOOM_CLIENT_SECRET= '';
+            $ZOOM_ACCOUNT_ID= '';
+        }
         $client = new Client([
             'headers' => [
-                'Authorization' => 'Basic ' . base64_encode(env('ZOOM_CLIENT_ID','') . ':' . env('ZOOM_CLIENT_SECRET','')),
+                'Authorization' => 'Basic ' . base64_encode( $ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
                 'Host' => 'zoom.us',
             ],
         ]);
@@ -50,7 +60,7 @@ class ZoomService implements OnlineMeetingServiceInterface
         $response = $client->request('POST', "https://zoom.us/oauth/token", [
             'form_params' => [
                 'grant_type' => 'account_credentials',
-                'account_id' => env('ZOOM_ACCOUNT_ID','') ,
+                'account_id' => $ZOOM_ACCOUNT_ID,
             ],
         ]);
 
@@ -60,7 +70,15 @@ class ZoomService implements OnlineMeetingServiceInterface
 
     private function retrieveZoomUrl()
     {
-        return env('ZOOM_API_URL', 'https://api.zoom.us/v2/');
+        $Setting = Settings::where('id', 1)->first();
+        $zoom_api_url = $Setting->ZOOM_API_URL;
+        if(!empty($Setting) && !empty($zoom_api_url)){
+        $ZOOM_API_URL = $Setting->ZOOM_API_URL;
+        }else{
+            $ZOOM_API_URL = 'https://api.zoom.us/v2/';
+        }
+
+        return $ZOOM_API_URL;
     }
 
     public function toZoomTimeFormat(string $dateTime)

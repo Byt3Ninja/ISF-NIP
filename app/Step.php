@@ -34,6 +34,10 @@ class Step extends Model
     public function companies(){
         return $this->hasMany(Company::class,'step');
     }
+    public function CalenderSync()
+    {
+        return $this->morphMany(CalenderSync::class, 'calenderable');
+    }
     
 
 }

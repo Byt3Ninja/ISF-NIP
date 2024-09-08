@@ -93,10 +93,22 @@ class TeamsService implements OnlineMeetingServiceInterface
 
     protected function getAccessToken()
     {
-        $response = $this->client->post('https://login.microsoftonline.com/' . env('MICROSOFT_TENANT_ID') . '/oauth2/v2.0/token', [
+        $Setting = Settings::where('id', 1)->first();
+        if($Setting){
+        $MICROSOFT_TENANT_ID = $Setting->MICROSOFT_TENANT_ID;
+        $MICROSOFT_CLIENT_ID = $Setting->MICROSOFT_CLIENT_ID;
+        $MICROSOFT_CLIENT_SECRET_VALUE = $Setting->MICROSOFT_CLIENT_SECRET_VALUE;
+        }else{
+            $MICROSOFT_TENANT_ID = '';
+            $MICROSOFT_CLIENT_ID= '';
+            $MICROSOFT_CLIENT_SECRET_VALUE= '';
+        }
+
+
+        $response = $this->client->post('https://login.microsoftonline.com/' . $MICROSOFT_TENANT_ID . '/oauth2/v2.0/token', [
             'form_params' => [
-                'client_id' => env('MICROSOFT_CLIENT_ID'),
-                'client_secret' => env('MICROSOFT_CLIENT_SECRET_VALUE'),
+                'client_id' => $MICROSOFT_CLIENT_ID,
+                'client_secret' => $MICROSOFT_CLIENT_SECRET_VALUE,
                 'scope' => 'https://graph.microsoft.com/.default',
                 'grant_type' => 'client_credentials',
             ],

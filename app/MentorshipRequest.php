@@ -7,8 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class MentorshipRequest extends Model
 {
     protected $table = 'mentorship_requests';
-    protected $fillable = ['organization_id', 'mentor_id', 'user_id', 'comment', 'approved','admin_comment','admin_id','join_url','start_url','rate_comment','done'];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $casts = ['zoom_date'  => 'date:Y-m-d H:i'];
+
+    public function getCodeAttribute(){
+        return "M-".$this->mentor->id.'-'.$this->user->id.'-'.$this->id;
+    }
     public function getZoomDateAttribute()
     {
         return date('Y-m-d h:i a',strtotime($this->attributes['zoom_date']));
@@ -35,5 +39,9 @@ class MentorshipRequest extends Model
     {
         return $this->hasMany(MentorshipTask::class, 'mentorship_request_id', 'id');
 
+    }
+    public function CalenderSync()
+    {
+        return $this->morphMany(CalenderSync::class, 'calenderable');
     }
 }

@@ -70,8 +70,9 @@
                             <div class="card-header border-bottom">
                                 <h4 class="card-title align-items-center">
                                     <i class='bx bx-card font-medium-4 mr-1'></i>{{__('mentor.mentorshipTasks.all')}}:
-                                    <a href="{{ route('mentorshipTasks.create',['mentorship_id'=>$mentorship->id]) }}" class="btn btn-icon rounded-circle btn-success float-right" >
-                                        <i class="bx bx-plus"></i> </a>
+                                    <a href="{{ route('mentorshipTasks.create',['mentorship_id'=>$mentorship->id]) }}" class="btn btn-icon  btn-success float-right" >
+                                        <i class="bx bx-plus"></i>{{__('mentor.mentorshipTasks.create')}}
+                                    </a>
                                 </h4>
                             </div>
                             <div class="card-body">
@@ -80,6 +81,7 @@
                                         <table class="table mb-0" id="userstable">
                                             <thead class="thead-dark">
                                             <tr>
+
                                                 <th class="text-center">{{__('mentor.mentorshipTasks.mentorship request')}}</th>
 {{--                                                <th class="text-center">{{__('mentor.mentorshipTasks.type')}}</th>--}}
                                                 <th class="text-center">{{__('cycles.Company')}}</th>
@@ -93,7 +95,10 @@
 
                                             @foreach($mentorshipTasks as $task)
                                                 <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
+
                                                     <td class="text-center">
+                                                        ({{ $task->mentorshipRequest->code }})
+                                                        <br>
                                                         {{ $task->mentorshipRequest->zoom_date }}
                                                     </td>
                                                     <td class="text-center">
@@ -125,7 +130,7 @@
                                                         {{ $task->title??"-----" }}
                                                     </td>
                                                     <td class="text-center">
-                                                     {{ $task->status =='pending'?__('No'):__('Yes') }}
+                                                     {{ $task->status =='pending'?__('Uncompleted'):__('Completed') }}
                                                     </td>
                                                     <td class="text-center">
                                                         @if(!is_null($task->title))

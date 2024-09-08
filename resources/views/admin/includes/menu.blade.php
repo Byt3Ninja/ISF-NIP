@@ -355,13 +355,13 @@
               </a>
             </li>
             <!--
-                                  <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
-                                    <a href="{{ route('rooms.index') }}">
-                                      <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                                      <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
-                                    </a>
-                                  </li>
-                                -->
+                                    <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
+                                      <a href="{{ route('rooms.index') }}">
+                                        <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                                        <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
+                                      </a>
+                                    </li>
+                                  -->
             <li class="{{ Request::is('dashboard/serviceCategories*') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('serviceCategories.index') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
@@ -438,6 +438,15 @@
         <a class="menu-link" href="{{ route('reports.index') }}">
           <i class="menu-icon tf-icons ti ti-id"></i>
           <div>{{ __('admin.Reports') }}</div>
+        </a>
+      </li>
+    @endcan
+
+    @can('view_report')
+      <li class="{{ Request::is('reports*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="/dashboard/settings">
+          <i class="menu-icon tf-icons ti ti-settings"></i>
+          <div>{{ __('admin.settings') }}</div>
         </a>
       </li>
     @endcan

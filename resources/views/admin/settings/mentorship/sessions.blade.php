@@ -23,12 +23,16 @@
 
                                         @if(Request()->show=='all')
                                             {{__('cycles.All requests')}}
+                                            
                                         @elseif(!Request()->show)
                                             {{__('cycles.New requests only')}}
+                                            
                                         @elseif(Request()->show=='approved')
                                             {{__('cycles.approved requests')}}
+                                           
                                         @elseif(Request()->show=='disapproved')
                                             {{__('cycles.disapproved requests')}}
+                                            
                                         @endif
 
                                     </li>
@@ -73,20 +77,68 @@
         <div class="card-header">
             <div class="card-title">
 {{--                @if (Request()->show)--}}
-                <a href="/dashboard/mentorship/sessions?show=all" class="btn btn-light-primary glow width-200 {{ Request()->show=='all'?'active':'' }}">{{__('cycles.All requests')}}</a>
-                <a href="/dashboard/mentorship/sessions" class="btn btn-light-warning glow width-200 {{ !Request()->show?'active':'' }}">{{__('cycles.New requests only')}}</a>
-                <a href="/dashboard/mentorship/sessions?show=approved" class="btn btn-light-success glow width-200 {{ Request()->show=='approved'?'active':'' }}">{{__('cycles.approved requests')}}</a>
-                <a href="/dashboard/mentorship/sessions?show=disapproved" class="btn btn-light-danger glow width-200 {{ Request()->show=='disapproved'?'active':'' }}">{{__('cycles.disapproved requests')}}</a>
+                <!-- إدخال تاريخ النهاية -->
+
+
+<!-- الروابط المعدلة لإرسال التاريخ -->
+<div onclick="redirect('all')" class="btn btn-light-primary glow width-200 {{ request()->show=='all' ? 'active' : '' }}">
+    {{ __('cycles.All requests') }}
+</div>
+
+<div href="#" onclick="redirect('')" class="btn btn-light-warning glow width-200 {{ !request()->show ? 'active' : '' }}">
+    {{ __('cycles.New requests only') }}
+</div>
+
+<div href="#" onclick="redirect('approved')" class="btn btn-light-success glow width-200 {{ request()->show=='approved' ? 'active' : '' }}">
+    {{ __('cycles.approved requests') }}
+</div>
+
+<div href="#" onclick="redirect('disapproved')" class="btn btn-light-danger glow width-200 {{ request()->show=='disapproved' ? 'active' : '' }}">
+    {{ __('cycles.disapproved requests') }}
+</div>
                 {{--                @else--}}
 {{--                @endif--}}
             </div>
         </div>
+    <div>
+
+    </div>
             <div class="card-body">
+                
+                
             <div class="card-text">
                 <div class="table-responsive">
+                          <!-- إدخال تاريخ البداية -->
+                    
+              
+
+                    <!-- we get value from Select box Ely fo2 class name stepsExcel -->
+                    <div class="btn btn-success ExportExcelMentor">{{__('cycles.Export')}}</div>
+                    <div class="col-md-3" style="display: inline-block">
+                        <input type="text" class="datewithouttime form-control" id="start_date" value="{{ request('start_date') }}" name="start_date" placeholder="Start Date">
+                        </div>
+                        <div class="col-md-3" style="display: inline-block">
+                        <input type="text" class="datewithouttime form-control" id="end_date" value="{{ request('end_date') }}" name="end_date" placeholder="End Date">
+                        </div>
+                        <div class="col-md-3" style="display: inline-block">
+                        <select class="form-control " id="showValueSelect">
+                            <option value="all" {{ request()->show=='all' ? 'selected' : '' }} >{{ __('cycles.All requests') }}</option>
+                            <option value="" {{ !request()->show ? 'selected' : '' }} >{{ __('cycles.New requests only') }}</option>
+                            <option value="approved" {{ request()->show=='approved' ? 'selected' : '' }} >{{ __('cycles.approved requests') }}</option>
+                            <option value="disapproved" {{ request()->show=='disapproved' ? 'selected' : '' }} >{{ __('cycles.disapproved requests') }}</option>
+                        </select>
+
+                        </div>
+
+                        <div class="btn btn-info" id="searchBot">{{__('cycles.search')}} </div>
+
+
+                    <input type="hidden" class="Request" value="{{Request()->show}}">
+
                     <table class="table mb-0" id="userstable">
                         <thead class="thead-dark">
                         <tr>
+                            
                             <th>{{__('cycles.Company')}}</th>
                             <th>{{__('cycles.User/Title')}}</th>
                             <th>{{__('cycles.Mentor')}}</th>
@@ -99,7 +151,9 @@
                         </thead>
                         <tbody>
                         @foreach($sessions as $session)
+                        
                             <tr>
+                                
                                 <td>
                                     <div class="media align-items-center">
                                         <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
@@ -155,13 +209,15 @@
                                     {{$session->done?__('Yes'):__('No')}}
                                 </td>
                                 <td>
+                                    <button title="Edit" onclick="edit({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-info">
+                                        <i class="bx bxs-edit-alt"></i></button>
+                                    <button title="Delete" onclick="deleteme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-danger">
+                                        <i class="bx bx-trash"></i></button>
                                   @if(!$session->approved)
                                     <button title="Approve" onclick="approve({{$session->id}},'Yes')" type="button" class="btn btn-icon rounded-circle btn-light-success">
                                         <i class="bx bx-check-square"></i></button>
                                     <button title="Dispprove" onclick="approve({{$session->id}}, 'No')" type="button" class="btn btn-icon rounded-circle btn-light-danger">
                                         <i class="bx bxs-x-square"></i></button>
-                                    <button title="Edit" onclick="edit({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-                                        <i class="bx bxs-edit-alt"></i></button>
                                         @endif
                                   @if($session->join_url)
                                   <a href="{{$session->start_url}}" target="_blank">
@@ -267,10 +323,16 @@
     <script>
         $(document).ready(function() {
             $('.table').DataTable({
-                "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
-                "columnDefs": [
-                    {"orderable": false, "targets":  [7]},
-                ],
+    "responsive": true,
+    "searching": true,
+    "lengthChange": false,
+    "paging": true,
+    "bInfo": false,
+    "order": [], // ترتيب الجدول حسب العمود الأول تصاعديًا
+    "columnDefs": [
+      
+        {"orderable": true, "targets": 7}, // تفعيل الفرز للعمود الأول فقط
+    ],
                 @if ($l=='ar')
                 "language": {
                     "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
@@ -287,6 +349,7 @@
     </script>
         <script>
             $('.date').datetimepicker({timepicker:true,format:'Y-m-d H:i'});
+            $('.datewithouttime').datetimepicker({format:'Y-m-d'});
             function edit(id) {
                     $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
                     $.ajax({
@@ -306,6 +369,54 @@
                             alert("Error Occurred, Try again!");
                         }});
             }
+            const messages = {
+        exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+    };
+
+            document.getElementById('searchBot').addEventListener('click', redirectWithDates);
+
+function redirectWithDates() {
+// الحصول على قيم التواريخ
+const startDate = document.getElementById('start_date').value;
+const endDate = document.getElementById('end_date').value;
+
+const showValue = document.getElementById('showValueSelect').value;
+
+// التحقق من وجود تواريخ والتحقق من تنسيقها لضمان التوافق
+let url = `/dashboard/mentorship/sessions?show=${showValue}`;
+
+// إذا كانت start_date و end_date موجودة، أضفها إلى الرابط
+if (startDate && endDate) {
+const formattedStartDate = formatDate(startDate);
+const formattedEndDate = formatDate(endDate);
+url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
+}
+
+// إعادة التوجيه إلى الرابط المناسب
+window.location.href = url;
+}
+
+            function redirect(showValue) {
+  
+
+    // التحقق من وجود تواريخ والتحقق من تنسيقها لضمان التوافق
+    let url = `/dashboard/mentorship/sessions?show=${showValue}`;
+
+    // إذا كانت start_date و end_date موجودة، أضفها إلى الرابط
+    
+
+    // إعادة التوجيه إلى الرابط المناسب
+    window.location.href = url;
+}
+
+    // دالة لتحويل صيغة التاريخ إلى 'YYYY-MM-DD' لضمان الثبات
+    function formatDate(date) {
+        const dateObj = new Date(date);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
           
             function mentor(id,name,rating) {
                 $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
@@ -367,6 +478,35 @@
                         console.log(error);
                         alert("Error Occurred, Try again!");
                     }});
+            }
+            function deleteme(id) {
+                let url = '/dashboard/mentorship/delsession/' + id;
+                let token = '{{ csrf_token() }}';
+                Swal.fire({
+                    title: "{{__('admin.SureDelete')}}",
+                    text: "{{__('admin.Recover')}}",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-danger",
+                    confirmButtonText: "{{__('admin.DYes')}}",
+                    cancelButtonText: "{{__('admin.No')}}!",
+                })
+                    .then((result) => {
+                        if (result.value) {
+                            $.post(url, {'_method': 'POST', '_token': token},
+                                function (response) {
+                                    Swal.fire(
+                                        '{{__('admin.Deleted')}}!',
+                                        '{{__('admin.Session Deleted')}}.',
+                                        'success');
+                                    window.location.href = '/dashboard/mentorship/sessions?show=all';
+                                }).fail(function (error) {
+                                console.log(error);
+                            });
+                        } else {
+                            console.log('Canceled')
+                        }
+                    });
             }
     </script>
 @stop

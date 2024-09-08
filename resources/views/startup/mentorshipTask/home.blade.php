@@ -85,7 +85,21 @@
                                             </tr>
                                             </thead>
                                             <tbody>
+@if(is_array($mentorshipTasks) && in_array("NoCompany", $mentorshipTasks))
 
+<tr>
+    <td class="text-center">
+        {{__('mentor.mentorshipTasks.noCompany')}}
+    </td>
+    <td class="text-center">
+        
+    </td>
+    <td class="text-center">
+        
+    </td>
+</tr>
+
+@else
                                             @foreach($mentorshipTasks as $task)
                                                 <tr>
                                                     <td class="text-center">
@@ -103,7 +117,7 @@
                                                     </td>
                                                 </tr>
                                             @endforeach
-
+@endif
                                             </tbody>
                                         </table>
                                     </div>

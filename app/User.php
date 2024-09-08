@@ -16,7 +16,7 @@ class User extends Authenticatable implements MustVerifyEmail
 //    use Auditable;
     use Notifiable;
     use HasRoles;
-    use SoftDeletes;
+//    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -73,6 +73,14 @@ class User extends Authenticatable implements MustVerifyEmail
     // ===============> Relations <===================
 
     // ===============> General Relations <==============
+    public function oauthToken()
+    {
+        return $this->hasOne(UserOauthToken::class);
+    }
+    public function CalenderSync()
+    {
+        return $this->hasMany(CalenderSync::class, 'user_id');
+    }
     public function country()
     {
         return $this->belongsTo(Country::class,'country_id');

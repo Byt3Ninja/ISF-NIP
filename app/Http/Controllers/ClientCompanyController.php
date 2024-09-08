@@ -13,6 +13,7 @@ use App\State;
 use App\City;
 use App\Company;
 use App\Like;
+use App\Settings;
 use DB;
 use Auth;
 use Log;
@@ -59,10 +60,11 @@ class ClientCompanyController extends Controller
             $countries = Country::all();
             $states = State::all();
             $cities = City::all();
+            $Setting = Settings::where('id', 1)->first();
             $sectors = Sector::whereNull('parent_id')->get();
-            $funding_rounds=auth()->user()->company->fundingRounds;
+            $funding_rounds=auth()->user()->company?auth()->user()->company->fundingRounds:[];
             return view('admin/clients/company', compact(
-                'client', 'states', 'cities','countries','sectors','funding_rounds'
+                'client', 'states', 'cities','countries','sectors','funding_rounds','Setting'
             ));
         }catch (Exception $e){
             //log what happend
@@ -90,13 +92,29 @@ class ClientCompanyController extends Controller
                 $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
                 //resize
                 Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function($con) {$con->aspectRatio();})->save();
-                $result = Company::updateOrCreate(
-                    ['id' => $companyId],
-                    $data + ['logo' => $img_url]
-                );
-            } else {
-                $result = Company::updateOrCreate(['id' => $companyId], $data);
+                $data['logo' ]= $img_url;
             }
+            if ($request->hasFile('business_model')) {
+                $business_model = $request->file('business_model');
+                $business_model = $business_model->store('users', ['disk' => 'public_uploads']);
+                $data['business_model' ]= $business_model;
+            }
+            if ($request->hasFile('business_plan')) {
+                $business_plan = $request->file('business_plan');
+                $business_plan = $business_plan->store('users', ['disk' => 'public_uploads']);
+                $data['business_plan' ]= $business_plan;
+            }
+            if ($request->hasFile('pitch_deck')) {
+                $pitch_deck = $request->file('pitch_deck');
+                $pitch_deck = $pitch_deck->store('users', ['disk' => 'public_uploads']);
+                $data['pitch_deck' ]= $pitch_deck;
+            }
+            if ($request->hasFile('financial_plan')) {
+                $financial_plan = $request->file('financial_plan');
+                $financial_plan = $financial_plan->store('users', ['disk' => 'public_uploads']);
+                $data['financial_plan' ]= $financial_plan;
+            }
+            $result = Company::updateOrCreate(['id' => $companyId], $data);
 
                 $msgtype = 'UpdateComp';
             if(!$companyId) {
