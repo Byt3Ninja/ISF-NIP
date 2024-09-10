@@ -6,9 +6,9 @@
 @section('subTitle', __('admin.Service`s Categories List'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    <div class="content-wrapper">
     @include('admin.includes.heading')
         <div class="invoice-create-btn mb-1">
             <a href="{{route('serviceCategories.create')}}" class="btn btn-primary glow">{{ __('admin.Add New')}}</a>

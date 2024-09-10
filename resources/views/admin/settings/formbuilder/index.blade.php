@@ -20,9 +20,9 @@
 @section('subTitle', __('admin.Edit form'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    <div class="content-wrapper">
         <div class="content-body">
             <section id="kanban-wrapper">
                 <div class="row">

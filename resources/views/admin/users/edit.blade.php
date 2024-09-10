@@ -4,9 +4,9 @@
 @section('subTitle', __('admin.Edit user'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    <div class="content-wrapper">
         @include('admin.includes.heading')
         <div class="content-body">
             <!-- BuilderForm start -->
