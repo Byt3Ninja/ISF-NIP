@@ -9,6 +9,7 @@ use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
 use GuzzleHttp\Client;
 use Log;
+use App\Settings;
 
 class TeamsService implements OnlineMeetingServiceInterface
 {
@@ -130,7 +131,8 @@ class TeamsService implements OnlineMeetingServiceInterface
 
     public function createMeeting($data)
     {
-        $userId = $this->getUserIdByEmail(env('MICROSOFT_APP_EMAIL'));
+        $Setting = Settings::where('id', 1)->first();
+        $userId = $this->getUserIdByEmail($Setting->MICROSOFT_APP_EMAIL);
         $meeting = [
             'subject' => $data['topic'],
             'startDateTime' =>$this->toZoomTimeFormat($data['start_time']),

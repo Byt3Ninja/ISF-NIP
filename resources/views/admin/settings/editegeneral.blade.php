@@ -57,506 +57,558 @@
 
           <div class="row match-height">
             <div class="col-12">
-              <form class="form" action= "{{ route('updateone') }}" method="POST" enctype="multipart/form-data">
-                {!! csrf_field() !!}
-                @method('PUT')
-                <input type="hidden" name="id" value="{{ $Title->id }}">
-                <div class="card">
-                  <div class="card-header" style="margin-bottom: -20px;">
-                    <h3 class="card-title"> {{ __('settings.General Settings') }}</h3>
-                  </div>
-                  <div class="card-content">
-                    <div class="card-body">
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="site_ar_title">{{ __('settings.ARABICWEBSITETITLE') }}</label>
-                          <input type="text" class="form-control"
-                            value="{{ $Title->ar_title }}" name="site_ar_title">
-                        </div>
+              <!-- اعدادات الـ Tabs Start -->
+              <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                  <li class="nav-item">
+                      <a class="nav-link active" id="general-settings-tab" data-bs-toggle="tab" href="#general-settings" role="tab" aria-controls="general-settings" aria-selected="true">{{__('settings.General Settings')}}</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" id="app-identity-tab" data-bs-toggle="tab" href="#app-identity" role="tab" aria-controls="app-identity" aria-selected="false">{{__('settings.Application Identity')}}</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" id="google-Analysis-tab" data-bs-toggle="tab" href="#google-Analysis" role="tab" aria-controls="google-Analysis" aria-selected="false">{{__('settings.Analysis Settings')}}</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" id="SMTP-tab" data-bs-toggle="tab" href="#SMTP" role="tab" aria-controls="SMTP" aria-selected="false">{{__('settings.SMTP Configuration')}}</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" id="Notification-tab" data-bs-toggle="tab" href="#Notification" role="tab" aria-controls="Notification" aria-selected="false">{{__('settings.Push Notification Settings')}}</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" id="Meeting-tab" data-bs-toggle="tab" href="#Meeting" role="tab" aria-controls="Meeting" aria-selected="false">{{__('settings.Meeting Setting')}}</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" id="SocialMediaLinks-tab" data-bs-toggle="tab" href="#SocialMediaLinks" role="tab" aria-controls="SocialMediaLinks" aria-selected="false">{{__('settings.SocialMediaLinks')}}</a>
+                  </li>
+              </ul>
+              <!-- اعدادات الـ Tabs End -->
+
+              <!-- Start Tabs Data -->
+              <div class="tab-content" id="settingsTabsContent">
+                <!-- general settings tab -->
+                <div class="tab-pane fade show active" id="general-settings" role="tabpanel" aria-labelledby="general-settings-tab">
+                  <form class="form" action= "{{ route('updateone') }}" method="POST" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    @method('PUT')
+                    <input type="hidden" name="id" value="{{ $Title->id }}">
+                    <div class="card">
+                      <div class="card-header" style="margin-bottom: -20px;">
+                        <h3 class="card-title"> {{ __('settings.General Settings') }}</h3>
                       </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="site_title">{{ __('settings.ENGLISHWEBSITETITLE') }}</label>
-                          <input type="text" class="form-control" value="{{ $Title->title }}"
-                            name="site_title">
-                        </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="custom-control custom-switch custom-control-inline mb-1 mt-6">
-                          <span>{{ __('settings.Enable registration') }}</span>&nbsp;
-                          <label class="form-label" class="custom-control-label mr-1" for="auto">
-                          <input name="autoact" type="checkbox" class="custom-control-input" id="auto"
-                            {{ $Title->set_order ? 'checked="checked"' : '' }}>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="Platform_Name">{{ __('settings.Platform_Name') }}</label>
-                          <input id="Platform_Name" type="text" class="form-control"
-                            value="{{ $Title->Platform_Name }}" name="Platform_Name" required>
-                        </div>
-                      </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="Platform_support_email">{{ __('settings.Platform_support_email') }}</label>
-                          <input id="Platform_support_email" type="text" class="form-control"
-                            value="{{ $Title->Platform_support_email }}" name="Platform_support_email" required>
-                        </div>
-                      </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="state_id">{{ __('admin.Country') }}</label>
-
-                          <select class="form-control" id="country_id" name='Country'>
-                            <option value="">{{ __('admin.Country') }}</option>
-                            @foreach ($countries as $country)
-                              <option value="{{ $country->id }}" {{ $country->id == $Title->Country ? 'selected' : '' }}>
-                                {{ $country->{'name_' . $l} }}</option>
-                            @endforeach
-                          </select>
-
-                        </div>
-                      </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="state_id">{{ __('admin.State') }} *</label>
-                          <select class="form-control" id="state_id" name='State'>
-                            <option value="">{{ __('admin.State') }}</option>
-                            @foreach ($states as $state)
-                              <option value="{{ $state->id }}" {{ $state->id == $Title->State ? 'selected' : '' }}>
-                                {{ $state->{'name_' . $l} }}</option>
-                            @endforeach
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="Default_Language">{{ __('settings.Default_Language') }} *</label>
-                          <select class="form-control" id="Default_Language" name='Default_Language'>
-                            <option value="">{{ __('settings.Default_Language') }}</option>
-
-                            <option value="ar" {{ $Title->Default_Language == 'ar' ? 'selected' : '' }}> العربية
-                            </option>
-                            <option value="en" {{ $Title->Default_Language == 'en' ? 'selected' : '' }}> English
-                            </option>
-
-                          </select>
-                        </div>
-                      </div>
-
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="timezone">{{ __('settings.timezone') }} *</label>
-
-                          <select class="select form-control" id="timezone" name='timezone'>
-
-                            <option value="">{{ __('settings.timezone') }}</option>
-
-                            @foreach ($timezones as $timezone)
-                              @php
-                                // حساب فرق التوقيت للمنطقة الزمنية
-                                $time = new DateTime('now', new DateTimeZone($timezone));
-                                $offset = $time->format('P'); // عرض فرق التوقيت مثل +02:00 أو -05:00
-                              @endphp
-                              <option value="{{ $timezone }}" {{ $Title->timezone == $timezone ? 'selected' : '' }}>
-                                {{ $timezone }} ({{ $offset }}) </option>
-                            @endforeach
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="Currency">{{ __('settings.Currency') }} *</label>
-                          <select class="form-control" id="Currency" name='Currency'>
-                            <option value="">{{ __('settings.Currency') }}</option>
-
-                            <option value="$" {{ $Title->Currency == '$' ? 'selected' : '' }}> US </option>
-                            <option value="LE" {{ $Title->Currency == 'LE' ? 'selected' : '' }}> L.E </option>
-
-                          </select>
-                        </div>
-                      </div>
-
-
-
-                      <div class="col-12 d-flex justify-content-end mt-6">
-                        <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </form>
-
-
-              <form class="form" action= "{{ route('updatelogo') }}" method="POST" enctype="multipart/form-data">
-
-                {!! csrf_field() !!}
-                @method('PUT')
-                <input type="hidden" name="id" value="{{ $Title->id }}">
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title"> {{ __('settings.Application Identity') }}</h3>
-                  </div>
-                  <div class="card-content">
-                    <div class="card-body">
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="logo">{{ __('settings.Logo') }}</label>
-                          <input id="logo" type="file" class="form-control"
-                            value="{{ $Title->Logo }}" name="logo">
-                        </div>
-                      </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="header">{{ __('settings.header') }}</label>
-                          <input id="header" type="file" class="form-control" value="{{ $Title->header }}"
-                            name="header">
-                          </div>
-                        </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="footer">{{ __('settings.footer') }}</label>
-                          <input type="file" class="form-control" value="{{ $Title->footer }}" name="footer"
-                            id="footer">
-                        </div>
-                      </div>
-
-                      <div class="col-12 d-flex justify-content-end mt-6">
-                        <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </form>
-
-              <form class="form" action= "{{ route('updatetwo') }}" method="POST" enctype="multipart/form-data">
-                {!! csrf_field() !!}
-                @method('PUT')
-                <input type="hidden" name="id" value="{{ $Title->id }}">
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title"> {{ __('settings.Analysis Settings') }}</h3>
-                  </div>
-                  <div class="card-content">
-                    <div class="card-body">
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="gtag">{{ __('settings.Google Analytics Code') }}</label>
-                          <input type="text" class="form-control"
-                            value="{{ $Title->url }}" name="gtag" id="gtag">
-                        </div>
-                      </div>
-
-                      <div class="col-12 d-flex justify-content-end mt-6">
-                        <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </form>
-
-              <form class="form" action= "{{ route('updateMail') }}" method="POST" enctype="multipart/form-data">
-                {!! csrf_field() !!}
-                @method('PUT')
-                <input type="hidden" name="id" value="{{ $Title->id }}">
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title"> {{ __('settings.SMTP Configuration') }}</h3>
-                  </div>
-                  <div class="card-content">
-                    <div class="card-body">
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="host">{{ __('settings.host') }}</label>
-                          <input id="host" type="text" class="form-control" value="{{ $Title->host }}"
-                            name="host">
-                        </div>
-                      </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="Mail">{{ __('settings.Mail') }}</label>
-                          <input id="Mail" type="text" class="form-control" value="{{ $Title->Mail }}"
-                            name="Mail">
-                        </div>
-                      </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="Mailpassword">{{ __('settings.Mailpassword') }}</label>
-                          <input type="text" class="form-control" value="{{ $Title->Mailpassword }}"
-                            name="Mailpassword" id="Mailpassword">
-                        </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="Port">{{ __('settings.Port') }}</label>
-                          <input type="text" class="form-control" value="{{ $Title->Port }}" name="Port"
-                            id="Port">
-                        </div>
-                      </div>
-
-                      <div class="col-12 d-flex justify-content-end mt-6">
-                        <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </form>
-
-
-              <form class="form" action= "{{ route('updatePush') }}" method="POST" enctype="multipart/form-data">
-                {!! csrf_field() !!}
-                @method('PUT')
-                <input type="hidden" name="id" value="{{ $Title->id }}">
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title"> {{ __('settings.Push Notification Settings') }}</h3>
-                  </div>
-                  <div class="card-content">
-                    <div class="card-body">
-                      <div class="col-md-12 col-12">
-                        <label>{{ __('settings.Select BroadCast') }}</label>
-                        <fieldset class="form-label-group">
-                          <select class="form-control" id="BroadCast" name="BroadCast" required>
-                            <option value="0" selected></option>
-                            <option value="pusher" {{ $Title->BroadCast == 'pusher' ? 'selected' : '' }}>Pusher</option>
-                          </select>
-                        </fieldset>
-                      </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="PUSHER_APP_KEY">{{ __('settings.PUSHER_APP_KEY') }}</label>
-                          <input id="PUSHER_APP_KEY" type="text" class="form-control"
-                            value="{{ $Title->PUSHER_APP_KEY }}" name="PUSHER_APP_KEY">
-                        </div>
-                      </div>
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="PUSHER_APP_ID">{{ __('settings.PUSHER_APP_ID') }}</label>
-                          <input type="text" class="form-control" value="{{ $Title->PUSHER_APP_ID }}"
-                            name="PUSHER_APP_ID" id="PUSHER_APP_ID">
-                        </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="PUSHER_APP_SECRET">{{ __('settings.PUSHER_APP_SECRET') }}</label>
-                          <input type="text" class="form-control" value="{{ $Title->PUSHER_APP_SECRET }}"
-                            name="PUSHER_APP_SECRET" id="PUSHER_APP_SECRET">
-                        </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="PUSHER_APP_CLUSTER">{{ __('settings.PUSHER_APP_CLUSTER') }}</label>
-                          <input type="text" class="form-control" value="{{ $Title->PUSHER_APP_CLUSTER }}"
-                            name="PUSHER_APP_CLUSTER" id="PUSHER_APP_CLUSTER">
-                        </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="MIX_PUSHER_APP_KEY">{{ __('settings.MIX_PUSHER_APP_KEY') }}</label>
-                          <input type="text" class="form-control" value="{{ $Title->MIX_PUSHER_APP_KEY }}"
-                            name="MIX_PUSHER_APP_KEY" id="MIX_PUSHER_APP_KEY">
-                          </div>
-                      </div>
-
-                      <div class="col-md-12 col-12">
-                        <div class="form-label-group">
-                          <label class="form-label" for="MIX_PUSHER_APP_CLUSTER">{{ __('settings.MIX_PUSHER_APP_CLUSTER') }}</label>
-                          <input type="text" class="form-control" value="{{ $Title->MIX_PUSHER_APP_CLUSTER }}"
-                            name="MIX_PUSHER_APP_CLUSTER" id="MIX_PUSHER_APP_CLUSTER" required>
-                        </div>
-                      </div>
-
-                      <div class="col-12 d-flex justify-content-end mt-6">
-                        <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </form>
-
-              <form class="form" action= "{{ route('updateMeeting') }}" method="POST"
-                enctype="multipart/form-data">
-                {!! csrf_field() !!}
-                @method('PUT')
-                <input type="hidden" name="id" value="{{ $Title->id }}">
-                <div class="card">
-                  <div class="card-header">
-                    <h3 class="card-title"> {{ __('settings.Meeting Setting') }}</h3>
-                  </div>
-                  <div class="card-content">
-                    <div class="card-body">
-                      <div class="col-md-12 col-12">
-
-                        <label>{{ __('settings.Meeting') }}</label>
-                        <fieldset class="form-label-group">
-                          <select class="form-control Meeting" id="Meeting" name="Meeting" required>
-                            <option value="0">{{ __('settings.Choose') }}</option>
-                            <option value="Google" {{ $Title->Meeting == 'Google' ? 'selected' : '' }}>Google</option>
-                            <option value="Teams" {{ $Title->Meeting == 'Teams' ? 'selected' : '' }}>Teams</option>
-                            <option value="Zoom" {{ $Title->Meeting == 'Zoom' ? 'selected' : '' }}>Zoom</option>
-                          </select>
-                        </fieldset>
-
-                      </div>
-
-                      <div class="GOOGLE_CLIENT_ID" @if ($Title->Meeting != 'Google') style="display: none;" @endif>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="GOOGLE_CLIENT_ID">{{ __('settings.GOOGLE_CLIENT_ID') }}</label>
-                            <input id="GOOGLE_CLIENT_ID" type="text" class="form-control"
-                              value="{{ $Title->GOOGLE_CLIENT_ID }}" name="GOOGLE_CLIENT_ID">
-                          </div>
-                        </div>
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="GOOGLE_CLIENT_SECRET">{{ __('settings.GOOGLE_CLIENT_SECRET') }}</label>
-                            <input type="text" class="form-control" value="{{ $Title->GOOGLE_CLIENT_SECRET }}"
-                              name="GOOGLE_CLIENT_SECRET" id="GOOGLE_CLIENT_SECRET">
-                          </div>
-                        </div>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="GOOGLE_REDIRECT">{{ __('settings.GOOGLE_REDIRECT') }}</label>
-                            <input type="text" class="form-control" value="{{ $Title->GOOGLE_REDIRECT }}"
-                              name="GOOGLE_REDIRECT" id="GOOGLE_REDIRECT">
-                          </div>
-                        </div>
-
-                      </div>
-
-
-                      <div class="MICROSOFT_CLIENT" @if ($Title->Meeting != 'Teams') style="display: none;" @endif>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="MICROSOFT_CLIENT_ID">{{ __('settings.MICROSOFT_CLIENT_ID') }}</label>
-                            <input id="MICROSOFT_CLIENT_ID" type="text" class="form-control"
-                              value="{{ $Title->MICROSOFT_CLIENT_ID }}" name="MICROSOFT_CLIENT_ID">
-                          </div>
-                        </div>
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label
-                              for="MICROSOFT_CLIENT_SECRET_VALUE">{{ __('settings.MICROSOFT_CLIENT_SECRET_VALUE') }}</label>
-                            <input type="text" class="form-control"
-                              value="{{ $Title->MICROSOFT_CLIENT_SECRET_VALUE }}" name="MICROSOFT_CLIENT_SECRET_VALUE"
-                              id="MICROSOFT_CLIENT_SECRET_VALUE">
-                          </div>
-                        </div>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="MICROSOFT_TENANT_ID">{{ __('settings.MICROSOFT_TENANT_ID') }}</label>
-                            <input type="text" class="form-control" value="{{ $Title->MICROSOFT_TENANT_ID }}"
-                              name="MICROSOFT_TENANT_ID" id="MICROSOFT_TENANT_ID">
-                          </div>
-                        </div>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label
-                              for="MICROSOFT_CLIENT_SECRET_ID">{{ __('settings.MICROSOFT_CLIENT_SECRET_ID') }}</label>
-                            <input type="text" class="form-control"
-                              value="{{ $Title->MICROSOFT_CLIENT_SECRET_ID }}" name="MICROSOFT_CLIENT_SECRET_ID"
-                              id="MICROSOFT_CLIENT_SECRET_ID">
-                          </div>
-                        </div>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="MICROSOFT_APP_EMAIL">{{ __('settings.MICROSOFT_APP_EMAIL') }}</label>
-                            <input type="text" class="form-control" value="{{ $Title->MICROSOFT_APP_EMAIL }}"
-                              name="MICROSOFT_APP_EMAIL" id="MICROSOFT_APP_EMAIL">
-                          </div>
-                        </div>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="MICROSOFT_REDIRECT_URI">{{ __('settings.MICROSOFT_REDIRECT_URI') }}</label>
-                            <input type="text" class="form-control" value="{{ $Title->MICROSOFT_REDIRECT_URI }}"
-                              name="MICROSOFT_REDIRECT_URI" id="MICROSOFT_REDIRECT_URI">
-                          </div>
-                        </div>
-
-                      </div>
-
-                      <div class="ZOOM_CLIENT" @if ($Title->Meeting != 'Zoom') style="display: none;" @endif>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="ZOOM_CLIENT_ID">{{ __('settings.ZOOM_CLIENT_ID') }}</label>
-                            <input id="ZOOM_CLIENT_ID" type="text" class="form-control"
-                              value="{{ $Title->ZOOM_CLIENT_ID }}" name="ZOOM_CLIENT_ID">
+                      <div class="card-content">
+                        <div class="card-body">
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="site_ar_title">{{ __('settings.ARABICWEBSITETITLE') }}</label>
+                              <input type="text" class="form-control"
+                                value="{{ $Title->ar_title }}" name="site_ar_title">
                             </div>
-                        </div>
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="ZOOM_CLIENT_SECRET">{{ __('settings.ZOOM_CLIENT_SECRET') }}</label>
-                            <input type="text" class="form-control" value="{{ $Title->ZOOM_CLIENT_SECRET }}"
-                              name="ZOOM_CLIENT_SECRET" id="ZOOM_CLIENT_SECRET">
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="site_title">{{ __('settings.ENGLISHWEBSITETITLE') }}</label>
+                              <input type="text" class="form-control" value="{{ $Title->title }}"
+                                name="site_title">
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="custom-control custom-switch custom-control-inline mb-1 mt-6">
+                              <span>{{ __('settings.Enable registration') }}</span>&nbsp;
+                              <label class="form-label" class="custom-control-label mr-1" for="auto">
+                              <input name="autoact" type="checkbox" class="custom-control-input" id="auto"
+                                {{ $Title->set_order ? 'checked="checked"' : '' }}>
+                              </label>
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="Platform_Name">{{ __('settings.Platform_Name') }}</label>
+                              <input id="Platform_Name" type="text" class="form-control"
+                                value="{{ $Title->Platform_Name }}" name="Platform_Name" required>
+                            </div>
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="Platform_support_email">{{ __('settings.Platform_support_email') }}</label>
+                              <input id="Platform_support_email" type="text" class="form-control"
+                                value="{{ $Title->Platform_support_email }}" name="Platform_support_email" required>
+                            </div>
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="state_id">{{ __('admin.Country') }}</label>
+
+                              <select class="form-control" id="country_id" name='Country'>
+                                <option value="">{{ __('admin.Country') }}</option>
+                                @foreach ($countries as $country)
+                                  <option value="{{ $country->id }}" {{ $country->id == $Title->Country ? 'selected' : '' }}>
+                                    {{ $country->{'name_' . $l} }}</option>
+                                @endforeach
+                              </select>
+
+                            </div>
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="state_id">{{ __('admin.State') }} *</label>
+                              <select class="form-control" id="state_id" name='State'>
+                                <option value="">{{ __('admin.State') }}</option>
+                                @foreach ($states as $state)
+                                  <option value="{{ $state->id }}" {{ $state->id == $Title->State ? 'selected' : '' }}>
+                                    {{ $state->{'name_' . $l} }}</option>
+                                @endforeach
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="Default_Language">{{ __('settings.Default_Language') }} *</label>
+                              <select class="form-control" id="Default_Language" name='Default_Language'>
+                                <option value="">{{ __('settings.Default_Language') }}</option>
+
+                                <option value="ar" {{ $Title->Default_Language == 'ar' ? 'selected' : '' }}> العربية
+                                </option>
+                                <option value="en" {{ $Title->Default_Language == 'en' ? 'selected' : '' }}> English
+                                </option>
+
+                              </select>
+                            </div>
+                          </div>
+
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="timezone">{{ __('settings.timezone') }} *</label>
+
+                              <select class="select form-control" id="timezone" name='timezone'>
+
+                                <option value="">{{ __('settings.timezone') }}</option>
+
+                                @foreach ($timezones as $timezone)
+                                  @php
+                                    // حساب فرق التوقيت للمنطقة الزمنية
+                                    $time = new DateTime('now', new DateTimeZone($timezone));
+                                    $offset = $time->format('P'); // عرض فرق التوقيت مثل +02:00 أو -05:00
+                                  @endphp
+                                  <option value="{{ $timezone }}" {{ $Title->timezone == $timezone ? 'selected' : '' }}>
+                                    {{ $timezone }} ({{ $offset }}) </option>
+                                @endforeach
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="Currency">{{ __('settings.Currency') }} *</label>
+                              <select class="form-control" id="Currency" name='Currency'>
+                                <option value="">{{ __('settings.Currency') }}</option>
+
+                                <option value="$" {{ $Title->Currency == '$' ? 'selected' : '' }}> US </option>
+                                <option value="LE" {{ $Title->Currency == 'LE' ? 'selected' : '' }}> L.E </option>
+
+                              </select>
+                            </div>
+                          </div>
+
+
+
+                          <div class="col-12 d-flex justify-content-end mt-6">
+                            <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
                           </div>
                         </div>
-
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="ZOOM_ACCOUNT_ID">{{ __('settings.ZOOM_ACCOUNT_ID') }}</label>
-                            <input type="text" class="form-control" value="{{ $Title->ZOOM_ACCOUNT_ID }}"
-                              name="ZOOM_ACCOUNT_ID" id="ZOOM_ACCOUNT_ID">
-                          </div>
-                        </div>
-
-                      </div>
-
-                      <div class="col-12 d-flex justify-content-end mt-6">
-                        <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
                       </div>
                     </div>
-                  </div>
+
+                  </form>
                 </div>
-              </form>
+                <!-- End general settings tab -->
 
+                <!-- app identity tab -->
+                <div class="tab-pane fade" id="app-identity" role="tabpanel" aria-labelledby="app-identity-tab">
+                  <form class="form" action= "{{ route('updatelogo') }}" method="POST" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    @method('PUT')
+                    <input type="hidden" name="id" value="{{ $Title->id }}">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title"> {{ __('settings.Application Identity') }}</h3>
+                      </div>
+                      <div class="card-content">
+                        <div class="card-body">
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="logo">{{ __('settings.Logo') }}</label>
+                              <input id="logo" type="file" class="form-control"
+                                value="{{ $Title->Logo }}" name="logo">
+                            </div>
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="header">{{ __('settings.header') }}</label>
+                              <input id="header" type="file" class="form-control" value="{{ $Title->header }}"
+                                name="header">
+                              </div>
+                            </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="footer">{{ __('settings.footer') }}</label>
+                              <input type="file" class="form-control" value="{{ $Title->footer }}" name="footer"
+                                id="footer">
+                            </div>
+                          </div>
 
-
-              <form class="form" id="basicForm" action= "{{ URL::to('dashboard/update_settings') }}"
-                method="POST" enctype="multipart/form-data">
-                {!! csrf_field() !!}
-
-                <div class="card">
-                  <div class="card-header">
-                    <h5 class="card-title">{{ __('settings.SocialMediaLinks') }}</h5>
-                  </div>
-                  <div class="card-content">
-                    <div class="card-body">
-                      @foreach ($Icons as $Icon)
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label class="form-label" for="{{ $Icon->img_url }}">{{ __('settings.URLOF') }} -
-                              {{ $l == 'ar' ? $Icon->ar_title : $Icon->title }}</label>
-                            <input type="text" class="form-control"
-                              value="{{ $Icon->url }}" name="{{ $Icon->img_url }}">
+                          <div class="col-12 d-flex justify-content-end mt-6">
+                            <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
                           </div>
                         </div>
-                      @endforeach
-                      <div class="col-12 d-flex justify-content-end mt-6">
-                        <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
                       </div>
                     </div>
-                  </div>
+                  </form>
                 </div>
-              </form>
+                <!-- app identity settings tab -->
+
+                <!-- google Analysis tab -->
+                <div class="tab-pane fade" id="google-Analysis" role="tabpanel" aria-labelledby="google-Analysis-tab">
+                  <form class="form" action= "{{ route('updatetwo') }}" method="POST" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    @method('PUT')
+                    <input type="hidden" name="id" value="{{ $Title->id }}">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title"> {{ __('settings.Analysis Settings') }}</h3>
+                      </div>
+                      <div class="card-content">
+                        <div class="card-body">
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="gtag">{{ __('settings.Google Analytics Code') }}</label>
+                              <input type="text" class="form-control"
+                                value="{{ $Title->url }}" name="gtag" id="gtag">
+                            </div>
+                          </div>
+
+                          <div class="col-12 d-flex justify-content-end mt-6">
+                            <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <!-- End google Analysis tab -->
+
+                <!-- SMTP tab -->
+                <div class="tab-pane fade" id="SMTP" role="tabpanel" aria-labelledby="SMTP-tab">
+                  <form class="form" action= "{{ route('updateMail') }}" method="POST" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    @method('PUT')
+                    <input type="hidden" name="id" value="{{ $Title->id }}">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title"> {{ __('settings.SMTP Configuration') }}</h3>
+                      </div>
+                      <div class="card-content">
+                        <div class="card-body">
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="host">{{ __('settings.host') }}</label>
+                              <input id="host" type="text" class="form-control" value="{{ $Title->host }}"
+                                name="host">
+                            </div>
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="Mail">{{ __('settings.Mail') }}</label>
+                              <input id="Mail" type="text" class="form-control" value="{{ $Title->Mail }}"
+                                name="Mail">
+                            </div>
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="Mailpassword">{{ __('settings.Mailpassword') }}</label>
+                              <input type="text" class="form-control" value="{{ $Title->Mailpassword }}"
+                                name="Mailpassword" id="Mailpassword">
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="Port">{{ __('settings.Port') }}</label>
+                              <input type="text" class="form-control" value="{{ $Title->Port }}" name="Port"
+                                id="Port">
+                            </div>
+                          </div>
+
+                          <div class="col-12 d-flex justify-content-end mt-6">
+                            <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <!-- End SMTP tab -->
+
+                <!-- Notification tab -->
+                <div class="tab-pane fade" id="Notification" role="tabpanel" aria-labelledby="Notification-tab">
+                  <form class="form" action= "{{ route('updatePush') }}" method="POST" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    @method('PUT')
+                    <input type="hidden" name="id" value="{{ $Title->id }}">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title"> {{ __('settings.Push Notification Settings') }}</h3>
+                      </div>
+                      <div class="card-content">
+                        <div class="card-body">
+                          <div class="col-md-12 col-12">
+                            <label>{{ __('settings.Select BroadCast') }}</label>
+                            <fieldset class="form-label-group">
+                              <select class="form-control" id="BroadCast" name="BroadCast" required>
+                                <option value="0" selected></option>
+                                <option value="pusher" {{ $Title->BroadCast == 'pusher' ? 'selected' : '' }}>Pusher</option>
+                              </select>
+                            </fieldset>
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="PUSHER_APP_KEY">{{ __('settings.PUSHER_APP_KEY') }}</label>
+                              <input id="PUSHER_APP_KEY" type="text" class="form-control"
+                                value="{{ $Title->PUSHER_APP_KEY }}" name="PUSHER_APP_KEY">
+                            </div>
+                          </div>
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="PUSHER_APP_ID">{{ __('settings.PUSHER_APP_ID') }}</label>
+                              <input type="text" class="form-control" value="{{ $Title->PUSHER_APP_ID }}"
+                                name="PUSHER_APP_ID" id="PUSHER_APP_ID">
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="PUSHER_APP_SECRET">{{ __('settings.PUSHER_APP_SECRET') }}</label>
+                              <input type="text" class="form-control" value="{{ $Title->PUSHER_APP_SECRET }}"
+                                name="PUSHER_APP_SECRET" id="PUSHER_APP_SECRET">
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="PUSHER_APP_CLUSTER">{{ __('settings.PUSHER_APP_CLUSTER') }}</label>
+                              <input type="text" class="form-control" value="{{ $Title->PUSHER_APP_CLUSTER }}"
+                                name="PUSHER_APP_CLUSTER" id="PUSHER_APP_CLUSTER">
+                            </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="MIX_PUSHER_APP_KEY">{{ __('settings.MIX_PUSHER_APP_KEY') }}</label>
+                              <input type="text" class="form-control" value="{{ $Title->MIX_PUSHER_APP_KEY }}"
+                                name="MIX_PUSHER_APP_KEY" id="MIX_PUSHER_APP_KEY">
+                              </div>
+                          </div>
+
+                          <div class="col-md-12 col-12">
+                            <div class="form-label-group">
+                              <label class="form-label" for="MIX_PUSHER_APP_CLUSTER">{{ __('settings.MIX_PUSHER_APP_CLUSTER') }}</label>
+                              <input type="text" class="form-control" value="{{ $Title->MIX_PUSHER_APP_CLUSTER }}"
+                                name="MIX_PUSHER_APP_CLUSTER" id="MIX_PUSHER_APP_CLUSTER" required>
+                            </div>
+                          </div>
+
+                          <div class="col-12 d-flex justify-content-end mt-6">
+                            <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <!-- End notification tab -->
+
+                <!-- Meeting tab -->
+                <div class="tab-pane fade" id="Meeting" role="tabpanel" aria-labelledby="Meeting-tab">
+                  <form class="form" action= "{{ route('updateMeeting') }}" method="POST"
+                    enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    @method('PUT')
+                    <input type="hidden" name="id" value="{{ $Title->id }}">
+                    <div class="card">
+                      <div class="card-header">
+                        <h3 class="card-title"> {{ __('settings.Meeting Setting') }}</h3>
+                      </div>
+                      <div class="card-content">
+                        <div class="card-body">
+                          <div class="col-md-12 col-12">
+
+                            <label>{{ __('settings.Meeting') }}</label>
+                            <fieldset class="form-label-group">
+                              <select class="form-control Meeting" id="Meeting" name="Meeting" required>
+                                <option value="0">{{ __('settings.Choose') }}</option>
+                                <option value="Google" {{ $Title->Meeting == 'Google' ? 'selected' : '' }}>Google</option>
+                                <option value="Teams" {{ $Title->Meeting == 'Teams' ? 'selected' : '' }}>Teams</option>
+                                <option value="Zoom" {{ $Title->Meeting == 'Zoom' ? 'selected' : '' }}>Zoom</option>
+                              </select>
+                            </fieldset>
+
+                          </div>
+
+                          <div class="GOOGLE_CLIENT_ID" @if ($Title->Meeting != 'Google') style="display: none;" @endif>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="GOOGLE_CLIENT_ID">{{ __('settings.GOOGLE_CLIENT_ID') }}</label>
+                                <input id="GOOGLE_CLIENT_ID" type="text" class="form-control"
+                                  value="{{ $Title->GOOGLE_CLIENT_ID }}" name="GOOGLE_CLIENT_ID">
+                              </div>
+                            </div>
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="GOOGLE_CLIENT_SECRET">{{ __('settings.GOOGLE_CLIENT_SECRET') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->GOOGLE_CLIENT_SECRET }}"
+                                  name="GOOGLE_CLIENT_SECRET" id="GOOGLE_CLIENT_SECRET">
+                              </div>
+                            </div>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="GOOGLE_REDIRECT">{{ __('settings.GOOGLE_REDIRECT') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->GOOGLE_REDIRECT }}"
+                                  name="GOOGLE_REDIRECT" id="GOOGLE_REDIRECT">
+                              </div>
+                            </div>
+
+                          </div>
+
+
+                          <div class="MICROSOFT_CLIENT" @if ($Title->Meeting != 'Teams') style="display: none;" @endif>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="MICROSOFT_CLIENT_ID">{{ __('settings.MICROSOFT_CLIENT_ID') }}</label>
+                                <input id="MICROSOFT_CLIENT_ID" type="text" class="form-control"
+                                  value="{{ $Title->MICROSOFT_CLIENT_ID }}" name="MICROSOFT_CLIENT_ID">
+                              </div>
+                            </div>
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label
+                                  for="MICROSOFT_CLIENT_SECRET_VALUE">{{ __('settings.MICROSOFT_CLIENT_SECRET_VALUE') }}</label>
+                                <input type="text" class="form-control"
+                                  value="{{ $Title->MICROSOFT_CLIENT_SECRET_VALUE }}" name="MICROSOFT_CLIENT_SECRET_VALUE"
+                                  id="MICROSOFT_CLIENT_SECRET_VALUE">
+                              </div>
+                            </div>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="MICROSOFT_TENANT_ID">{{ __('settings.MICROSOFT_TENANT_ID') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->MICROSOFT_TENANT_ID }}"
+                                  name="MICROSOFT_TENANT_ID" id="MICROSOFT_TENANT_ID">
+                              </div>
+                            </div>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label
+                                  for="MICROSOFT_CLIENT_SECRET_ID">{{ __('settings.MICROSOFT_CLIENT_SECRET_ID') }}</label>
+                                <input type="text" class="form-control"
+                                  value="{{ $Title->MICROSOFT_CLIENT_SECRET_ID }}" name="MICROSOFT_CLIENT_SECRET_ID"
+                                  id="MICROSOFT_CLIENT_SECRET_ID">
+                              </div>
+                            </div>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="MICROSOFT_APP_EMAIL">{{ __('settings.MICROSOFT_APP_EMAIL') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->MICROSOFT_APP_EMAIL }}"
+                                  name="MICROSOFT_APP_EMAIL" id="MICROSOFT_APP_EMAIL">
+                              </div>
+                            </div>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="MICROSOFT_REDIRECT_URI">{{ __('settings.MICROSOFT_REDIRECT_URI') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->MICROSOFT_REDIRECT_URI }}"
+                                  name="MICROSOFT_REDIRECT_URI" id="MICROSOFT_REDIRECT_URI">
+                              </div>
+                            </div>
+
+                          </div>
+
+                          <div class="ZOOM_CLIENT" @if ($Title->Meeting != 'Zoom') style="display: none;" @endif>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="ZOOM_CLIENT_ID">{{ __('settings.ZOOM_CLIENT_ID') }}</label>
+                                <input id="ZOOM_CLIENT_ID" type="text" class="form-control"
+                                  value="{{ $Title->ZOOM_CLIENT_ID }}" name="ZOOM_CLIENT_ID">
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="ZOOM_CLIENT_SECRET">{{ __('settings.ZOOM_CLIENT_SECRET') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->ZOOM_CLIENT_SECRET }}"
+                                  name="ZOOM_CLIENT_SECRET" id="ZOOM_CLIENT_SECRET">
+                              </div>
+                            </div>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="ZOOM_ACCOUNT_ID">{{ __('settings.ZOOM_ACCOUNT_ID') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->ZOOM_ACCOUNT_ID }}"
+                                  name="ZOOM_ACCOUNT_ID" id="ZOOM_ACCOUNT_ID">
+                              </div>
+                            </div>
+
+                          </div>
+
+                          <div class="col-12 d-flex justify-content-end mt-6">
+                            <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <!-- End meeting tab -->
+
+                <!-- Social media links tab -->
+                <div class="tab-pane fade" id="SocialMediaLinks" role="tabpanel" aria-labelledby="SocialMediaLinks-tab">
+                  <form class="form" id="basicForm" action= "{{ URL::to('dashboard/update_settings') }}"
+                    method="POST" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    <div class="card">
+                      <div class="card-header">
+                        <h5 class="card-title">{{ __('settings.SocialMediaLinks') }}</h5>
+                      </div>
+                      <div class="card-content">
+                        <div class="card-body">
+                          @foreach ($Icons as $Icon)
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="{{ $Icon->img_url }}">{{ __('settings.URLOF') }} -
+                                  {{ $l == 'ar' ? $Icon->ar_title : $Icon->title }}</label>
+                                <input type="text" class="form-control"
+                                  value="{{ $Icon->url }}" name="{{ $Icon->img_url }}">
+                              </div>
+                            </div>
+                          @endforeach
+                          <div class="col-12 d-flex justify-content-end mt-6">
+                            <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <!-- End social media links tab -->
+              </div>
+              <!-- End Tabs Data -->
 
               {{-- <div class="card">
                 <div class="card-header">

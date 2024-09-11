@@ -335,6 +335,10 @@ public function update_settinglogo(Request $request){
     
         // تركيب الاسم الجديد مع الامتداد
         $logo = $newName . '.' . $extension;
+
+        if (Storage::disk('logo_uploads')->exists($logo)) {
+            Storage::disk('logo_uploads')->delete($logo);
+        }
     
         // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
         $path = $image->storeAs('', $logo, 'logo_uploads');
@@ -360,6 +364,9 @@ public function update_settinglogo(Request $request){
         // تركيب الاسم الجديد مع الامتداد
         $header = $newName . '.' . $extension;
 
+        if (Storage::disk('logo_uploads')->exists($header)) {
+            Storage::disk('logo_uploads')->delete($header);
+        }
         // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
         $path = $image->storeAs('', $header, 'logo_uploads');
        
@@ -380,9 +387,14 @@ public function update_settinglogo(Request $request){
         // تحديد الامتداد الأصلي للصورة
         $extension = $image->getClientOriginalExtension();
     
+        
         // تركيب الاسم الجديد مع الامتداد
         $footer = $newName . '.' . $extension;
     
+        if (Storage::disk('logo_uploads')->exists($footer)) {
+            Storage::disk('logo_uploads')->delete($footer);
+        }
+
         // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
         $path = $image->storeAs('', $footer, 'logo_uploads');
 
@@ -465,7 +477,7 @@ public function update_settingspush(Request $request){
 }
 
 public function update_settingsMeeting(Request $request){
-       
+      
     $id = $request->input('id');
     $Meeting = $request->input('Meeting');
     $GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
@@ -491,7 +503,7 @@ public function update_settingsMeeting(Request $request){
         $updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
         $updateSittings->save();
     }
-    if($Meeting == 'Microsoft'){
+    if($Meeting == 'Teams'){
         $updateSittings->MICROSOFT_CLIENT_ID = $MICROSOFT_CLIENT_ID;
         $updateSittings->MICROSOFT_CLIENT_SECRET_VALUE = $MICROSOFT_CLIENT_SECRET_VALUE;
         $updateSittings->MICROSOFT_TENANT_ID = $MICROSOFT_TENANT_ID;

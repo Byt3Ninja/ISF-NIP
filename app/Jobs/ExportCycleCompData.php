@@ -57,9 +57,9 @@ class ExportCycleCompData implements ShouldQueue
         // كتابة بيانات المستخدمين
         $row = 2; // بداية الصف الثاني
 
-        if(auth()->user()->title_en == 'Administrator'){
+        if(auth()->user()->hasRole('Admin')) {
 
-            Company::chunk(1000, function($companies) use (&$sheet, &$row) {
+            Company::where('cycle', $step)->chunk(1000, function($companies) use (&$sheet, &$row) {
                 foreach ($companies as $companie) {
                     
                     $sheet->setCellValue('A' . $row, $companie->id);

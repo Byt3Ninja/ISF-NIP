@@ -173,6 +173,137 @@
             </div>
           </div>
         </div>
+		<!-- هناااااااااااااااااااااااااااااااااااااااااااااااا-->
+		
+		@if( $notrated_men or $notrated_ser )
+		<div class="col-sm-6 col-12">
+			<div class="card">
+				<div class="card-header border-bottom">
+					@if( $notrated_ser )
+					<h4 class="card-title"><i class="bx bx-calendar mr-1"></i>{{__('dashboard.Rate')}} {{__('dashboard.service')}}: "{{$notrated_ser->service->{'name_'.$l} }}" <span class="primary" id="rname"></span></h4>
+					@else
+					<h4 class="card-title"><i class="bx bx-calendar mr-1"></i>{{__('dashboard.Rate mentorship session with')}} : {{$notrated_men->mentor->{'first_name_'.$l} }} {{$notrated_men->mentor->{'last_name_'.$l} }}<span class="primary" id="rname"></span></h4>
+					@endif
+					<div class="heading-elements">
+						<ul class="list-inline mb-0">
+							<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
+						</ul>
+					</div>
+				</div>
+				<div class="card-body">
+					@if( $notrated_ser )
+					<form method="post" action="/dashboard/directory/{{$notrated_ser->id}}/rate" enctype="multipart/form-data" autocomplete="off">
+						@csrf
+						<table class="table ">
+							<thead>
+								<tr>
+									<th>{{__('dashboard.Your request was in')}}</th>
+									<th>{{__('dashboard.Did you get this service?')}}</th>
+									<th>{{__('dashboard.Rate from 1 star "bad" to 5 stars "best"')}}</th>
+									<th>{{__('dashboard.Your opinion important kindly write any notes about this service')}}</th>
+									<th>{{__('dashboard.Submit')}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<input type="hidden" name="rate" value="0" id="rate">
+										{{$notrated_ser->date_time}}
+									</td>
+									<td>
+										<ul class="list-unstyled mb-0">
+											<li class="d-inline-block mr-2 mb-1">
+												<fieldset>
+													<div>
+														<input type="radio" name="done" id="doneyes" checked="">
+														<label for="doneyes">{{__('Yes')}}</label>
+													</div>
+												</fieldset>
+											</li>
+											<li class="d-inline-block mr-2 mb-1">
+												<fieldset>
+													<div>
+														<input type="radio" name="done" id="doneno">
+														<label for="doneno">{{__('No')}}</label>
+													</div>
+												</fieldset>
+											</li>
+										</ul>
+									</td>
+									<td><div class="full-star-ratings" data-rateyo-full-star="true"></div></td>
+									<td>
+										<textarea class="form-control" id="comment" name='comment' rows="4" required placeholder="{{__('dashboard.Write your notes here')}}" ></textarea>
+									</td>
+									<td>
+										<button type="submit" class="btn btn-primary ml-1" >
+											<i class="bx bx-check d-block d-sm-none"></i>
+											<span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
+										</button>	
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</form>
+					@else
+					<form method="post" action="/dashboard/mentorship/rate" enctype="multipart/form-data" autocomplete="off">
+						@csrf
+						<input type="hidden" name="id" value="{{$notrated_men->id}}">
+						<input type="hidden" name="rate" value="0" id="rate">
+						<table class="table ">
+							<thead>
+								<tr>
+									<th style="font-size: 0.6rem">{{__('dashboard.Your session was in')}}</th>
+									<th style="font-size: 0.6rem">{{__('dashboard.Did you attend this session?')}}</th>
+									<th style="font-size: 0.6rem">{{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }}</th>
+									<th style="font-size: 0.6rem">{{ __('dashboard.Your opinion important kindly write any notes about this session') }}</th>
+									<th style="font-size: 0.6rem">{{__('dashboard.Submit')}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										{{$notrated_men->zoom_date}}
+									</td>
+									<td>
+										<ul class="list-unstyled">
+											<li class="d-inline-block ">
+												<fieldset>
+													<div class="radio">
+														<input type="radio" name="done" id="doneyes2" checked="">
+														<label for="doneyes2">{{__('Yes')}}</label>
+													</div>
+												</fieldset>
+											</li>
+											<li class="d-inline-block">
+												<fieldset>
+													<div class="radio">
+														<input type="radio" name="done" id="doneno2">
+														<label for="doneno2">{{__('No')}}</label>
+													</div>
+												</fieldset>
+											</li>
+										</ul>
+									</td>
+									<td><div class="full-star-ratings" data-rateyo-full-star="true"></div></td>
+									<td>
+										<textarea class="form-control" id="comment" name='comment' rows="4" required placeholder="{{ __('dashboard.Write your notes here') }}." ></textarea>
+									</td>
+									<td>
+										<button type="submit" class="btn btn-primary ml-1">
+											<i class="bx bx-check d-block d-sm-none"></i>
+											<span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
+										</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</form>
+					@endif
+				</div>
+			</div>
+		</div>
+		@endif
+		<!-- هناااااااااااااااااااااااااااااااااااااااااااااااا-->
         <!-- / Latest Services -->
 
         <!-- Latest Events -->

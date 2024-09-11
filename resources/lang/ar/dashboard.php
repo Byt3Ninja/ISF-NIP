@@ -51,7 +51,7 @@ return [
     'Rate from 1 star "bad" to 5 stars "best"' => 'قيم من نجمة "الأسوأ" لـ 5 نجوم "الأفضل"',
     'Your opinion important kindly write any notes about this service' => 'رأيك يهمنا برجاء كتابة ملاحظاتك عن هذه الخدمة',
     'Rate mentorship session with' => 'قيم جلسة الإرشاد',
-    'Your session was in' => 'سيدأ الاجتماع في',
+    'Your session was in' => 'بدأ الاجتماع في',
     'Your opinion important kindly write any notes about this session' => 'رأيك يهمنا برجاء كتابة ملاحظاتك عن هذه الجلسة',
     'Write your notes here' => 'أكتب ملاحظاتك هنا',
     'from' => 'من',
