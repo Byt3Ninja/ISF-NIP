@@ -18,9 +18,9 @@
 @stop
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-	<div class="content-overlay"></div>
-	<div class="content-wrapper">
+<div class="content-wrapper">
+	<div class="container-xxl flex-grow-1 container-p-y">
+		<div class="content-overlay"></div>
 		@include('admin.includes.heading')
 		<div class="content-body">
 			<!-- BuilderForm start -->
@@ -36,37 +36,28 @@
 									<div class="row">
 										@if( session()->has('success') )
 											<div class="col-md-12">
-												<div class="alert alert-success alert-dismissible mb-2" role="alert">
-													<button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-													<div class="d-flex align-items-center"> <i class="bx bx-like"></i> <span> {{ __('admin.'. session()->get('success')) }} </span> </div>
+												<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+													<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+													<div class="d-flex align-items-center"> <i class="ti ti-thumb-up me-3 ti-md"></i> <span> {{ __('admin.'. session()->get('success')) }} </span> </div>
 												</div>
 											</div>
 										@endif
 										@if( session()->has('error') )
 											<div class="col-md-12">
-												<div class="alert alert-danger alert-dismissible mb-2" role="alert">
-													<button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-													<div class="d-flex align-items-center"> <i class="bx bx-error"></i> <span>{{ __('admin.'.session()->get('error')) }} </span> </div>
+												<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+													<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+													<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span>{{ __('admin.'.session()->get('error')) }} </span> </div>
 												</div>
 											</div>
 										@endif
 									</div>
 
-									@if(session()->has('msg'))
+									@if( session()->has('msg') )
 									<div class="row">
 										<div class="col-md-12">
-											<div class="alert alert-warning alert-danger mb-2" role="alert">
-												<button type="button" class="close" data-dismiss="alert"
-													aria-label="Close">
-													<span aria-hidden="true">&times;</span>
-												</button>
-												<div class="d-flex align-items-center">
-													<i class="bx bx-error"></i>
-													<span>
-														{{ __('admin.'.session()->get('msg')) }}
-														{{ Session::forget('msg') }}
-													</span>
-												</div>
+											<div class="alert alert-danger mb-2" role="alert">
+												<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+												<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span> {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span> </div>
 											</div>
 										</div>
 									</div>
@@ -75,7 +66,7 @@
 									@if(count($errors) >0)
 									<div class="row">
 										<div class="col-md-12">
-											<div class="alert alert-danger">
+											<div class="alert alert-danger mb-2" role="alert">
 												<ul>
 													@foreach($errors->all() as $error)
 													<li>{{ $error }} </li>
@@ -92,7 +83,7 @@
 											<div class="col-lg-4 col-md-4 col-sm-12">
 												<fieldset class="form-group">
 													<label for="organization_id">{{ __('admin.Organization')}}</label>
-													<select class="custom-select" name="organization_id" id="organization_id" required>
+													<select class="form-control form-select" name="organization_id" id="organization_id" required>
 														@foreach( $organizations as $organization )
 															<option value="{{ $organization->id }}" {{ $question->organization_id == $organization->id ? 'selected' : '' }}>{{ $organization->{'name_' . $l} }}</option>
 														@endforeach
@@ -102,7 +93,7 @@
 											<div class="col-lg-4 col-md-4 col-sm-12">
 												<fieldset class="form-group">
 													<label for="question_group">{{ __('admin.questionGroup')}}</label>
-													<select class="custom-select" name="question_group" id="question_group" required>
+													<select class="form-control form-select" name="question_group" id="question_group" required>
 														<option value="quiz" {{ $question->group == 'quiz' ? 'selected' : '' }}>{{ __('admin.question_type_quiz') }}</option>
 														<option value="survey" {{ $question->group == 'survey' ? 'selected' : '' }}>{{ __('admin.question_type_survey') }}</option>
 													</select>
@@ -111,7 +102,7 @@
 											<div class="col-lg-4 col-md-4 col-sm-12">
 												<fieldset class="form-group">
 													<label for="category_id">{{ __('admin.questionCategory')}}</label>
-													<select class="custom-select" name="category_id" id="category_id" required>
+													<select class="form-control form-select" name="category_id" id="category_id" required>
 														@foreach( $organizations->first()->questionsCategories as $category )
 															<option value="{{ $category['id'] }}" {{ $question->category_id == $category['id'] ? 'selected' : '' }}>{{ $category['title'] }}</option>
 														@endforeach
@@ -127,7 +118,7 @@
 												</fieldset>
 												<fieldset class="form-group">
 													<label for="type">{{ __('admin.question_Type')}}</label>
-													<select class="custom-select" name="type" id="type" required>
+													<select class="form-control form-select" name="type" id="type" required>
 														<option value="mcq" {{ $question->type == 'mcq' ? 'selected' : '' }}>{{ __('admin.type_mcq') }}</option>
 														<option value="tfq" {{ $question->type == 'tfq' ? 'selected' : '' }}>{{ __('admin.type_tfq') }}</option>
 													</select>
@@ -137,7 +128,7 @@
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
 													<label for="difficulty">{{ __('admin.difficultyLevel')}}</label>
-													<select class="custom-select" name="difficulty" id="difficulty" required>
+													<select class="form-control form-select" name="difficulty" id="difficulty" required>
 														<option value="easy" {{ $question->difficulty == 'easy' ? 'selected' : '' }}>{{ __('admin.difficulty_easy') }}</option>
 														<option value="medium" {{ $question->difficulty == 'medium' ? 'selected' : '' }}>{{ __('admin.difficulty_medium') }}</option>
 														<option value="hard" {{ $question->difficulty == 'hard' ? 'selected' : '' }}>{{ __('admin.difficulty_hard') }}</option>
@@ -145,21 +136,21 @@
 												</fieldset>
 												<fieldset id="tfq-block" class="form-group {{ $question->type == 'tfq' ? '' : 'd-none'}}">
 													<label for="correct">{{ __('admin.answerType')}}</label>
-													<select class="custom-select" name="correct" id="correct">
+													<select class="form-control form-select" name="correct" id="correct">
 														<option value="tfq_true" {{ $question->correct == true ? 'selected' : '' }}>{{ __('admin.tfq_statement_true') }}</option>
 														<option value="tfq_false" {{ $question->correct != true ? 'selected' : '' }}>{{ __('admin.tfq_statement_false') }}</option>
 													</select>
 												</fieldset>
 												<fieldset id="mcq-block" class="form-group {{ $question->type == 'mcq' ? '' : 'd-none'}}">
 													<label class="w-100" for="answers">{{ __('admin.answers')}}
-														<button id="addNewAnswer" style="padding: 0px 10px !important;" class="btn btn-xs btn-success float-right"> <i style="padding-top: 5px;" class="fa fa-plus-circle fa-fw fa-sm align-middle"></i> Add Answer</button>
+														<button id="addNewAnswer" style="padding: 0px 10px !important;" class="btn btn-xs btn-success float-right"> <i class="fa fa-plus-circle fa-fw fa-sm align-middle"></i> Add Answer</button>
 													</label>
 													<div class="mt-1" id="quizAnswers">
 														@if( !empty( $question->answers ) )
 														@foreach($question->answers as $key => $answer)
 															<div class="input-group mb-1">
 																<input value="{{ $answer['text'] }}" placeholder="Type the text of the answer" class="form-control" id="quiz_answer_{{ $key }}_text" name="quiz_answer_text[]">
-																<select class="custom-select" id="quiz_answer_{{ $key }}_status" name="quiz_answer_status[]">
+																<select class="form-control form-select" id="quiz_answer_{{ $key }}_status" name="quiz_answer_status[]">
 																	<option value="true" {{ $answer['status'] == true ? 'selected' : '' }}>Correct answer</option>
 																	<option value="false" {{ $answer['status'] == false ? 'selected' : '' }}>Wrong answer</option>
 																</select>
@@ -243,7 +234,7 @@
 			var answer = `
 			<div class="input-group mb-1">
 				<input placeholder="Type the text of the answer" class="form-control" id="quiz_answer_` + count + `_text" name="quiz_answer_text[]">
-				<select class="custom-select" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
+				<select class="form-control form-select" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
 					<option value="true">Correct answer</option>
 					<option value="false">Wrong answer</option>
 				</select>

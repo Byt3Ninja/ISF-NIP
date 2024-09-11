@@ -102,7 +102,8 @@
           <div class="col-12">
             <div class="row">
               <div class="col-md-12">
-                <div class="alert alert-{{ Session::get('class') }} alert-dismissible mb-2" role="alert">
+                <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                       <i class="ti ti-{{ session()->get('class') == 'success' ? 'like' : 'error' }}"></i>
@@ -111,10 +112,6 @@
                         {{ Session::forget('msg') }}
                       </span>
                     </div>
-                    <button type="button" class="" data-dismiss="alert" aria-label="Close"
-                      style="background: transparent; border: none; outline: none; cursor: pointer;">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
                   </div>
                 </div>
               </div>

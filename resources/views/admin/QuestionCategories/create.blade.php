@@ -4,9 +4,9 @@
 @section('subTitle', __('admin.Add new category'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-	<div class="content-overlay"></div>
-	<div class="content-wrapper">
+<div class="content-wrapper">
+	<div class="container-xxl flex-grow-1 container-p-y">
+		<div class="content-overlay"></div>
 		@include('admin.includes.heading')
 		<div class="content-body">
 			<!-- BuilderForm start -->
@@ -19,21 +19,12 @@
 							</div>
 							<div class="card-content">
 								<div class="card-body">
-									@if(session()->has('msg'))
+									@if( session()->has('msg') )
 									<div class="row">
 										<div class="col-md-12">
-											<div class="alert alert-warning alert-danger mb-2" role="alert">
-												<button type="button" class="close" data-dismiss="alert"
-													aria-label="Close">
-													<span aria-hidden="true">&times;</span>
-												</button>
-												<div class="d-flex align-items-center">
-													<i class="bx bx-error"></i>
-													<span>
-														{{ __('admin.'.session()->get('msg')) }}
-														{{ Session::forget('msg') }}
-													</span>
-												</div>
+											<div class="alert alert-danger mb-2" role="alert">
+												<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+												<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span> {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span> </div>
 											</div>
 										</div>
 									</div>
@@ -42,7 +33,7 @@
 									@if(count($errors) >0)
 									<div class="row">
 										<div class="col-md-12">
-											<div class="alert alert-danger">
+											<div class="alert alert-danger mb-2" role="alert">
 												<ul>
 													@foreach($errors->all() as $error)
 													<li>{{ $error }} </li>
@@ -58,7 +49,7 @@
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
 													<label for="organization_id">{{ __('admin.Organization')}}</label>
-													<select class="custom-select" name="organization_id" id="organization_id" required>
+													<select class="form-control form-select" name="organization_id" id="organization_id" required>
 														@foreach( $organizations as $organization )
 															<option value="{{ $organization->id }}">{{ $organization->{'name_' . $l} }}</option>
 														@endforeach

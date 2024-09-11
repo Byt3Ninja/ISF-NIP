@@ -265,11 +265,19 @@ const renderCalendar = events => {
     customButtons: {
       sidebarToggle: {
         text: 'Sidebar'
+      },
+      google: {
+        text: 'Sync With Google Calender',
+        click: function () {window.open(SITEURL + '/dashboard/calendar/login/google', '_Self')}
+      },
+      microsoft: {
+        text: 'Sync With Microsoft Calender',
+        click: function () {window.open(SITEURL + '/dashboard/calendar/login/microsoft', '_Self')}
       }
     },
     headerToolbar: {
       start: 'sidebarToggle, prev,next, title',
-      end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+      end: 'google microsoft dayGridMonth,timeGridWeek,timeGridDay,listMonth'
     },
     direction: direction,
     initialDate: new Date(),

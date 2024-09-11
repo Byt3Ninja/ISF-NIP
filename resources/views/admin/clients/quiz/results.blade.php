@@ -9,9 +9,9 @@
 	</style>
 @endsection
 @section('content')
-	<div class="app-content content">
-		<div class="content-overlay"></div>
-		<div class="content-wrapper">
+	<div class="content-wrapper">
+		<div class="container-xxl flex-grow-1 container-p-y">
+			<div class="content-overlay"></div>
 			<div class="content-header row">
 				<div class="content-header-left col-12 mb-2 mt-1">
 					<div class="row breadcrumbs-top">
@@ -19,7 +19,7 @@
 							<h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.View training content')}}</h5>
 							<div class="breadcrumb-wrapper col-12">
 								<ol class="breadcrumb p-0 mb-0">
-									<li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a></li>
+									<li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home"></i></a></li>
 									<li class="breadcrumb-item"> <a href="/dashboard/training/my"> {{__('admin.My courses')}} </a> </li>
 									<li class="breadcrumb-item"> <a href="/dashboard/training/my/{{ $training->id }}"> {{ $training->title }} </a> </li>
 									<li class="breadcrumb-item"> <a href="/dashboard/training/my/{{ $training->id }}/quiz/{{ $quiz->id }}"> {{ $quiz->title }} </a> </li>
@@ -44,14 +44,14 @@
 												<div class="card my-0">
 													<div class="card-header px-0">
 														<h2 class="mb-0">
-															<button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#element_{{ $key }}_container" aria-expanded="false" aria-controls="contentsContainer">
+															<button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-target="#element_{{ $key }}_container" aria-expanded="false" aria-controls="contentsContainer">
 																{{ $question->question }}
 															</button>
 															<span class="float-right text-sm px-2">
 																@if( $response->status == true )
-																	<i data-toggle="tooltip" data-placement="top" title="{{ __('admin.quizCorrectAnswer') }}" class="bx bxs-check-circle success"></i>
+																	<i data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ __('admin.quizCorrectAnswer') }}" title="{{ __('admin.quizCorrectAnswer') }}" class="bx bxs-check-circle success"></i>
 																@else
-																	<i data-toggle="tooltip" data-placement="top" title="{{ __('admin.quizWrongAnswer') }}" class="bx bxs-x-circle danger"></i>
+																	<i data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ __('admin.quizWrongAnswer') }}" title="{{ __('admin.quizWrongAnswer') }}" class="bx bxs-x-circle danger"></i>
 																@endif
 															</span>
 														</h2>
@@ -122,7 +122,7 @@
 @endsection
 @section('pagescripts')
 	<script type="text/javascript">
-		$(function () { $('[data-toggle="tooltip"]').tooltip() });
+		$(function () { $('[data-bs-toggle="tooltip"]').tooltip() });
 		$(document).on('change', '.quiz-option', function(e) { e.preventDefault(); return false; });
 	</script>
 @endsection

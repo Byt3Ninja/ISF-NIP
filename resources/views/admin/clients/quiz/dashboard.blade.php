@@ -9,9 +9,9 @@
 	</style>
 @endsection
 @section('content')
-	<div class="app-content content">
-		<div class="content-overlay"></div>
-		<div class="content-wrapper">
+	<div class="content-wrapper">
+		<div class="container-xxl flex-grow-1 container-p-y">
+			<div class="content-overlay"></div>
 			<div class="content-header row">
 				<div class="content-header-left col-12 mb-2 mt-1">
 					<div class="row breadcrumbs-top">
@@ -19,7 +19,7 @@
 							<h5 class="content-header-title float-left pr-1 mb-0"> {{ __('settings.view') . ' ' . __('admin.My Quizzes') }}</h5>
 							<div class="breadcrumb-wrapper col-12">
 								<ol class="breadcrumb p-0 mb-0">
-									<li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a></li>
+									<li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home"></i></a></li>
 									<li class="breadcrumb-item active"> {{ __('admin.My Quizzes') }} </li>
 								</ol>
 							</div>
@@ -72,15 +72,15 @@
 														<td>
 															@php $attempts = $quiz->myAttempts; @endphp
 															@if( $attempts->where('score', '>=', $quiz->passing_criteria)->count() >= 1 )
-																<span class="badge badge-success"> {{ __('admin.quizPassed') }} </span>
+																<span class="badge text-bg-success"> {{ __('admin.quizPassed') }} </span>
 															@elseif( $attempts->where('score', '<', $quiz->passing_criteria)->count() >= $quiz->attempts )
-																<span class="badge badge-danger"> {{ __('admin.quizFailed') }} </span>
+																<span class="badge text-bg-danger"> {{ __('admin.quizFailed') }} </span>
 															@elseif( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') )
-																<span class="badge badge-secondary"> {{ __('admin.quizNotStartedYet') }} </span>
+																<span class="badge text-bg-secondary"> {{ __('admin.quizNotStartedYet') }} </span>
 															@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )
-																<span class="badge badge-danger"> {{ __('admin.quizNotTaken') }} </span>
+																<span class="badge text-bg-danger"> {{ __('admin.quizNotTaken') }} </span>
 															@else
-																<span class="badge badge-primary"> {{ __('admin.quizInProgress') }} </span>
+																<span class="badge text-bg-primary"> {{ __('admin.quizInProgress') }} </span>
 															@endif
 														</td>
 														<td> {{ $quiz->time_limit > 60 ? intval($quiz->time_limit / 60) . ' ' . __('admin.hours') . ' ' . ($quiz->time_limit % 60 > 0 ? intval($quiz->time_limit % 60) . ' ' . __('admin.minutes') : '')  : $quiz->time_limit . ' ' . __('admin.minutes') }} </td>

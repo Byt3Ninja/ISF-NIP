@@ -188,12 +188,18 @@
     @endcan
 
     @can('edit_cycles')
-      <li class="{{ Request::is('dashboard/cycles*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="menu-icon tf-icons ti ti-components"></i>
           <div>{{ __('admin.Cycles') }}</div>
         </a>
         <ul class="menu-sub">
+          <li class="{{ Request::is('/dashboard/programlist*') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/programlist" class="menu-link">
+              <span class="menu-item">{{ __('admin.ProgramList') }}</span>
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+            </a>
+          </li>
           <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
             <a href="/dashboard/cycles" class="menu-link">
               <span class="menu-item">{{ __('cycles.steps') }}</span>

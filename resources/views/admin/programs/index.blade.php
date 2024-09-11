@@ -6,9 +6,9 @@
 @stop
 @section('content')
 
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
+<div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="content-overlay"></div>
         <div class="content-header row">
             <div class="content-header-left col-12 mb-2 mt-1">
                 <div class="row breadcrumbs-top">
@@ -16,7 +16,7 @@
                         <h5 class="content-header-title float-left pr-1 mb-0">{{__('admin.Cycles')}}</h5>
                         <div class="breadcrumb-wrapper col-12">
                             <ol class="breadcrumb p-0 mb-0">
-                                <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a></li>
+                                <li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home"></i></a></li>
                                 <li class="breadcrumb-item active">{{__('admin.Cycles`s List')}}</li>
                             </ol>
                         </div>

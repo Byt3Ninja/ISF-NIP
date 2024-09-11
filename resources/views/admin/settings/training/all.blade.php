@@ -29,16 +29,9 @@
 <div class="content-body">
     <section id="multiple-column-form">
         @if(session()->has('message'))
-            <div class="alert alert-{{session()->get('class')}} alert-dismissible mb-2" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <div class="d-flex align-items-center">
-                    <i class="bx bx-like"></i>
-                    <span>
-                                                    {{ __('admin.'.session()->get('message')) }}
-                                                </span>
-                </div>
+            <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="d-flex align-items-center"> <i class="bx bx-like"></i> <span> {{ __('admin.'.session()->get('message')) }} </span> </div>
             </div>
         @endif
     </section>

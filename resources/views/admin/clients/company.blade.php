@@ -33,10 +33,8 @@
                                     @if(session()->has('msg'))
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <div class="alert alert-{{Session::get('class')}} alert-dismissible  mb-2" role="alert">
-                                                <button type="button" class="close" data-dismiss="alert"
-                                                    aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
+                                            <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                 </button>
                                                 <div class="d-flex align-items-center">
                                                     <i class="bx bx-error"></i>

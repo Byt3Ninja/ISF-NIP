@@ -27,6 +27,39 @@
   <div class="content-wrapper">
     <!-- Content -->
 
+    @if( session()->has('success') || session()->has('error') || session()->has('msg') )
+    <div class="container-xxl flex-grow-1 container-p-y">
+      @if( session()->has('success') )
+      <div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <div class="d-flex align-items-center">
+            <i class="ti ti-thumb-up me-3 ti-md"></i>
+            <span> {{ session()->get('success') }} </span>
+          </div>
+      </div>
+      @endif
+
+      @if( session()->has('error') )
+      <div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <div class="d-flex align-items-center">
+            <i class="ti ti-alert-triangle me-3 ti-md"></i>
+            <span> {{ session()->get('error') }} </span>
+          </div>
+      </div>
+      @endif
+
+      @if( session()->has('msg') )
+      <div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <div class="d-flex align-items-center">
+            <i class="ti ti-thumb-up me-3 ti-md"></i>
+            <span> {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span>
+          </div>
+      </div>
+      @endif
+    </div>
+    @endif
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="card app-calendar-wrapper">
         <div class="row g-0">
@@ -201,6 +234,25 @@
   <script>
     // This siteUrl used in app-calendar.js
     var siteUrlFromBlade = "{{ url('/') }}";
+    /* customButtons: {
+      google: {
+          text: 'Sync With Google Calender',
+          click: function () {
+              /// add
+              window.open('{{ route('calender.login.google') }}','_Self')
+              //// end
+          }
+      },
+      microsoft: {
+          text: 'Sync With Microsoft Calender',
+          click: function () {
+              /// add
+              window.open('{{ route('calender.login.microsoft') }}','_Self')
+              //// end
+          }
+      },
+
+  } */
   </script>
   <script src="/vuexy/assets/js/app-calendar.js"></script>
   {{-- <script src="/vuexy/assets/js/app-calendar-events.js"></script> --}}

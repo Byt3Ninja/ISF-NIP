@@ -75,7 +75,7 @@
                       <a class="nav-link" id="Notification-tab" data-bs-toggle="tab" href="#Notification" role="tab" aria-controls="Notification" aria-selected="false">{{__('settings.Push Notification Settings')}}</a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link" id="Meeting-tab" data-bs-toggle="tab" href="#Meeting" role="tab" aria-controls="Meeting" aria-selected="false">{{__('settings.Meeting Setting')}}</a>
+                      <a class="nav-link" id="Meeting-tab" data-bs-toggle="tab" href="#MeetingTab" role="tab" aria-controls="Meeting" aria-selected="false">{{__('settings.Meeting Setting')}}</a>
                   </li>
                   <li class="nav-item">
                       <a class="nav-link" id="SocialMediaLinks-tab" data-bs-toggle="tab" href="#SocialMediaLinks" role="tab" aria-controls="SocialMediaLinks" aria-selected="false">{{__('settings.SocialMediaLinks')}}</a>
@@ -431,7 +431,7 @@
                 <!-- End notification tab -->
 
                 <!-- Meeting tab -->
-                <div class="tab-pane fade" id="Meeting" role="tabpanel" aria-labelledby="Meeting-tab">
+                <div class="tab-pane fade" id="MeetingTab" role="tabpanel" aria-labelledby="Meeting-tab">
                   <form class="form" action= "{{ route('updateMeeting') }}" method="POST"
                     enctype="multipart/form-data">
                     {!! csrf_field() !!}
