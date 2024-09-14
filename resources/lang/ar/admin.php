@@ -591,4 +591,6 @@ return [
 	'quizNotTaken' => 'لم يتم الاختبار',
 	'My Quizzes' => 'إختباراتي',
 	'settings'=>'الاعدادات',
+	'Expertince'=>'الخبرات',
+	'ProfileSummary'=>'ملخص السيرة الذاتية',
 ];

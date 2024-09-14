@@ -32,6 +32,12 @@
                       {{ 
                         $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en
                       }}
+                      @role('Mentor')
+                      <a target="_blank" href="{{ $client->bio->linkedin }}">
+                        <i class="ti ti-brand-linkedin ti-lg"></i>
+                        </a>
+                        @endrole
+                    
                     </h4>
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
@@ -47,6 +53,7 @@
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined April 2021</span>
                       </li>
+                      
                     </ul>
                   </div>
                   <a href="javascript:void(0)" class="btn btn-primary mb-1">
@@ -86,6 +93,25 @@
         </div>
       </div>
       <!--/ Navbar pills -->
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12">
+          <div class="card mb-6">
+            <div class="card-body">
+              <small class="card-text text-uppercase text-muted small">
+          {{__('admin.ProfileSummary')}}
+              </small><br><br>
+          {{ $client->bio->bio }}
+          {{ 
+            $l == 'ar' 
+            ? $client->bio->bio_ar
+            : $client->bio->bio_en 
+            }}
+        </div>
+      </div>
+        </div>
+        
+      </div>
+
 
       <!-- User Profile Content -->
       <div class="row">
@@ -101,7 +127,7 @@
                   <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</span>
                   <span>{{ 
                   $l == 'ar' 
-                  ? $client->first_name_arز . ' ' . $client->last_name_ar 
+                  ? $client->first_name_ar . ' ' . $client->last_name_ar 
                   : $client->first_name_en . ' ' . $client->last_name_en
                   }}</span>
                 </li>
@@ -149,16 +175,7 @@
                   </span>
                   <span>{{ $client->phone }}</span>
                 </li>
-                {{-- @role('Mentor')
-                  <li class="d-flex align-items-center mb-4">
-                    <i class="ti ti-messages ti-lg"></i><span class="fw-medium mx-2">
-                      {{ $l == 'ar' ? 'ليتكدان' : 'linkedin' }}:
-                    </span>
-                    <span>
-                      {{ $client->linkedin }}
-                    </span>
-                  </li>
-                @endrole --}}
+                
 
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-mail ti-lg"></i><span class="fw-medium mx-2">

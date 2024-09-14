@@ -54,15 +54,22 @@
                                                         <tr>
                                                             <td>{{$n+1}}</td>
                                                             <td>
+                                                            
                                                                 <div class="media align-items-center">
                                                                     <a class="media-left mr-50">
                                                                         <img src="{{$session->mentor->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                     </a>
                                                                     <div class="media-body">
+
+                                                                        <a href="{{route('show_mentor_profile', $session->mentor->id)}}">
+
                                                                         <h6 class="media-heading mb-0">{{$session->mentor->{'first_name_'.$l} }} {{$session->mentor->{'last_name_'.$l} }}</h6>
                                                                         <span class="font-small-2">{{$session->mentor->{'title_'.$l} }}</span>
+                                                                    </a>
                                                                     </div>
-                                                                </div>                                                            </td>
+                                                                </div>
+                                                           
+                                                            </td>
                                                             <td>{{$session->zoom_date}} ({{$session->period}}M)</td>
                                                             <td>{{$session->admin_comment??$session->comment}}</td>
 
