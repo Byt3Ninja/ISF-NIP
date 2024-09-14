@@ -4,7 +4,11 @@
 @section('subTitle', __('admin.My Dashboard'))
 
 @section('style')
+<link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/widgets.css">
+	<link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/dashboard-ecommerce.css">
+	<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
+  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/jquery.rateyo.min.css">
 @stop
 
 @section('content')
@@ -83,6 +87,40 @@
             'count' => $nm_count,
         ],
     ];
+
+	$s_latest = \App\Service::orderBy('created_at','DESC')->take(5)->get();
+	$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) {
+		$q->orWhere('user_id',Auth::id())
+		->orWhereNull('isPrivate');
+	})->orderBy('start')->take(5)->get();
+	$s_count = \App\Service::count();
+	$s_r_count = \App\ServicesRequests::where('user_id',Auth::id())->count();
+	$nm_count = \App\Messenger::where('receiver',Auth::id())->whereNull('read')->count();
+	$mentors = \App\CyclesMentors::where('cycle_id', Auth::user()->company->cycle??0)->get();
+	$m_count = count($mentors);
+	/// Next session
+	// $nextsession = \App\MentorshipRequest::where('user_id',Auth::id())->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
+	$days = request()->query('days', 14);
+	
+	$nextSessions = \App\MentorshipRequest::where('user_id', Auth::id())
+    ->where(function ($query) {
+        $query->where('approved', 'Yes')
+              ->orWhereNull('approved');
+    })
+    ->whereBetween('zoom_date', [
+        Carbon\Carbon::now()->startOfDay(), // بداية اليوم الحالي
+        Carbon\Carbon::now()->addDays($days)->endOfDay() // نهاية اليوم الـ 14 القادم
+    ])
+    ->orderBy('zoom_date', 'ASC')
+    ->get();
+	
+	
+	/// Rating
+	$notrated_ser = \App\ServicesRequests::where('user_id',Auth::id())->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
+	$notrated_men = \App\MentorshipRequest::where('user_id',Auth::id())->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
+	/// My sessions
+	if( !empty( Auth::user()->company ) ) { $sessions = \App\TrainingSession::where("step_id", Auth::user()->company->step)->orderBy('datetime','ASC')->take(3)->get(); }
+	else { $sessions = []; }
   @endphp
 
   <!-- Content wrapper -->
@@ -179,9 +217,9 @@
 			<div class="card">
 				<div class="card-header border-bottom">
 					@if( $notrated_ser )
-					<h4 class="card-title"><i class="bx bx-calendar mr-1"></i>{{__('dashboard.Rate')}} {{__('dashboard.service')}}: "{{$notrated_ser->service->{'name_'.$l} }}" <span class="primary" id="rname"></span></h4>
+					<h5 class="card-title"><i class="bx bx-calendar mr-1"></i>{{__('dashboard.Rate')}} {{__('dashboard.service')}}: "{{$notrated_ser->service->{'name_'.$l} }}" <span class="primary" id="rname"></span></h5>
 					@else
-					<h4 class="card-title"><i class="bx bx-calendar mr-1"></i>{{__('dashboard.Rate mentorship session with')}} : {{$notrated_men->mentor->{'first_name_'.$l} }} {{$notrated_men->mentor->{'last_name_'.$l} }}<span class="primary" id="rname"></span></h4>
+					<h5 class="card-title"><i class="bx bx-calendar mr-1"></i>{{__('dashboard.Rate mentorship session with')}} : {{$notrated_men->mentor->{'first_name_'.$l} }} {{$notrated_men->mentor->{'last_name_'.$l} }}<span class="primary" id="rname"></span></h5>
 					@endif
 					<div class="heading-elements">
 						<ul class="list-inline mb-0">
@@ -251,11 +289,11 @@
 						<table class="table ">
 							<thead>
 								<tr>
-									<th style="font-size: 0.6rem">{{__('dashboard.Your session was in')}}</th>
-									<th style="font-size: 0.6rem">{{__('dashboard.Did you attend this session?')}}</th>
-									<th style="font-size: 0.6rem">{{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }}</th>
-									<th style="font-size: 0.6rem">{{ __('dashboard.Your opinion important kindly write any notes about this session') }}</th>
-									<th style="font-size: 0.6rem">{{__('dashboard.Submit')}}</th>
+									<th style="font-size: 0.7rem">{{__('dashboard.Your session was in')}}</th>
+									<th style="font-size: 0.7rem">{{__('dashboard.Did you attend this session?')}}</th>
+									<th style="font-size: 0.7rem">{{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }}</th>
+									<th style="font-size: 0.7rem">{{ __('dashboard.Your opinion important kindly write any notes about this session') }}</th>
+									<th style="font-size: 0.7rem">{{__('dashboard.Submit')}}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -494,7 +532,7 @@
       <!-- My Mentors -->
       @if (Auth::user()->company->approved ?? null && count($mentors))
         <div class="card mt-10">
-          <div class="card-header border-bottom">
+          {{-- <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">
               <i class="ti ti-school ti-24px"></i>
               <span class="mx-2">{{ __('dashboard.Mentors') }}
@@ -510,59 +548,193 @@
                 @endif
               </span>
             </h5>
-          </div>
+          </div> --}}
 
-          <div class="table-responsive">
-            <table class="table" id="mentorstable">
-              <thead class="bg-label-light">
-                <tr>
-                  <th>#</th>
-                  <th>{{ __('dashboard.Name/Title') }}</th>
-                  <th>{{ __('dashboard.Bio') }}</th>
-                  <th>{{ __('dashboard.Specialization') }}</th>
-                  <th>{{ __('dashboard.Linkedin') }}</th>
-                  <th>{{ __('dashboard.Request') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($mentors as $key => $mentor)
-                  <tr>
-                    <td>{{ $key + 1 }}</td>
-                    <td>
-                      <div style="display: flex; align-items: center; width: 200px">
-                        <a style="margin-right: 10px;">
-                          <img src="{{ $mentor->user->image_url }}" alt="avatar" class="rounded-circle"
-                            height="40" width="40">
-                        </a>
-                        <div>
-                          <h6 style="margin-bottom: 0;">{{ $mentor->user->{'first_name_' . $l} }}
-                            {{ $mentor->user->{'last_name_' . $l} }}</h6>
-                          <span style="font-size: small;">{{ $mentor->user->{'title_' . $l} }}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td> {{ $mentor->user->bio->{'bio_' . $l} ?? '-' }} </td>
-                    <td> {{ $mentor->user->bio->{'specialization_' . $l} ?? '-' }} </td>
-                    <td>
-                      @if ($mentor->user->bio->linkedin ?? 0)
-                        <a title="Linkedin URL" target="_blank" href="{{ $mentor->user->bio->linkedin }}"
-                          class="btn btn-icon rounded-circle btn-label-primary"> <i
-                            class="fa-brands fa-linkedin-in"></i></a>
-                      @endif
-                    </td>
-                    <td>
-                      <button
-                        onclick="request({{ $mentor->user_id }},'{{ $mentor->user->{'first_name_' . $l} }} {{ $mentor->user->{'last_name_' . $l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})"
-                        title="Add new request" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-                        <i class="bx bxs-conversation"></i>
-                      </button>
-                    </td>
-                  </tr>
-                @endforeach
-              </tbody>
-            </table>
-          </div>
+          <section>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="card">
+						<div class="card-header border-bottom">
+							<h4 class="card-title align-items-center">
+								<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
+								@if($days!=14)
+								<div onclick="redirectWithDays('14')" class="btn btn-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
+								@else
+								<div onclick="redirectWithDays('14')" class="btn btn-warning" id="forteenDays"> 14 {{__('cycles.days')}}</div>
+								@endif
+								@if($days!=7)
+								<div onclick="redirectWithDays('7')" class="btn btn-success" id="sevenDays"> 7 {{__('cycles.days')}}</div>
+								@else
+								<div onclick="redirectWithDays('7')" class="btn btn-warning" id="sevenDays"> 7 {{__('cycles.days')}}</div>
+								@endif
+								<a href="/dashboard/mentorship/mine"><div class="btn btn-info">{{__('cycles.showAll')}}</div></a>
+								
+							</h4>
+
+							<div class="card-body">
+								<div class="card ">
+									<div class="table-responsive">
+										<table class="table mb-0 sessonsTable" >
+											<thead class="thead-dark">
+											<tr>
+												{{-- <th>{{__('cycles.Company')}}</th> --}}
+												<th>{{__('cycles.User/Title')}}</th>
+												<th>{{__('cycles.Mentor')}}</th>
+												<th>{{__('cycles.Rate/Comment')}}</th>
+												<th>{{__('cycles.Date/Time')}}</th>
+												<th>{{__('cycles.Approved')}}</th>
+												<th>{{__('cycles.Done')}}</th>
+												<th>{{__('cycles.Actions')}}</th>
+											</tr>
+											</thead>
+											<tbody>
+											@foreach($nextSessions as $session)
+												<tr>
+													{{-- <td>
+														<div class="media align-items-center">
+															<a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
+																<img src="{{$session->user->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+															</a>
+															<a href="/dashboard/companyProfile/{{$session->user->company->id}}">
+																<div class="media align-items-center">
+																	{{$session->user->company->{'name_'.$l} }}
+																</div>
+															</a>
+														</div>
+													</td> --}}
+													<td>
+														<div class="media align-items-center">
+															<a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
+																<img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+															</a>
+															<a href="/dashboard/users/{{$session->user_id}}/edit">
+																<div class="media-body">
+																	<h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
+																	<span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
+																</div>
+															</a>
+														</div>
+													</td>
+													<td>
+														<div style="cursor: pointer;" class="chip mr-1" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
+															<div class="chip-body">
+																<div class="avatar">
+																	<img class="img-fluid" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
+																</div>
+														<span class="chip-text">
+													{{$session->mentor->name}}
+														</span>
+															</div>
+														</div>
+													</td>
+													<td>
+														<small>{!!  $session->rate_comment?
+															 str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->rating).
+														'<br>'.$session->rate_comment:$session->comment  !!}</small>
+													</td>
+													<td>
+														{{$session->zoom_date}}
+														<br>({{$session->period}}M)
+													</td>
+													<td>
+														<div class="media align-items-center">
+															{!!  __($session->approved) ??'<span class="warning">'.__('Waiting').'</span>'  !!}
+														</div>
+													</td>
+													<td>
+														{{$session->done?__('Yes'):__('No')}}
+													</td>
+													<td>
+														<a href="{{$session->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>
+													</td>
+												</tr>
+											@endforeach
+					
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							
+
+						</div>
+
+						
+					</div>
+				</div>
+			</div>
+		</section>
+
         </div>
+
+
+		<div class="card mt-10">
+		<section>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="card">
+						<div class="card-header border-bottom">
+							<h4 class="card-title align-items-center">
+								<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.Mentors") }} :
+								
+							</h4>
+
+						</div>
+						<div class="card-body">
+							<div class="card ">
+								<div class="table-responsive">
+									<table class="table" id="mentorstable">
+										<thead class="thead-dark">
+											<tr>
+												<th>#</th>
+												<th>{{__('dashboard.Name/Title')}}</th>
+												<th>{{__('dashboard.Bio')}}</th>
+												<th>{{__('dashboard.Specialization')}}</th>
+												<th>{{__('dashboard.Linkedin')}}</th>
+												<th>{{__('dashboard.Request')}}</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach($mentors as $key=>$mentor)
+												<tr>
+													<td>{{$key+1}}</td>
+													<td>
+														<div class="media align-items-center">
+															<a class="media-left mr-50">
+																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+															</a>
+															<div class="media-body">
+																<h6 class="media-heading mb-0">{{optional($mentor->user)->name }}</h6>
+																<span class="font-small-2">{{optional($mentor->user)->title }}</span>
+															</div>
+														</div>
+													</td>
+													<td> {{optional($mentor->user)->bio->{'bio_'.$l} ?? '-' }} </td>
+													<td> {{optional($mentor->user)->bio->{'specialization_'.$l} ?? '-' }} </td>
+													<td>
+														@if (optional($mentor->user)->bio->linkedin ??0)
+															<a title="Linkedin URL" target="_blank" href="{{optional($mentor->user)->bio->linkedin}}" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx  bxl-linkedin"></i></a>
+														@endif
+													</td>
+													<td>
+														<button onclick="request({{$mentor->user_id}},'{{optional($mentor->user)->{'first_name_'.$l} }} {{optional($mentor->user)->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-light-primary">
+															<i class="bx bxs-conversation"></i>
+														</button>
+													</td>
+												</tr>
+											@endforeach
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	
       @endif
       <!-- / My Mentors -->
     </div>
@@ -579,6 +751,8 @@
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  {{-- <script src="/vuexy/src/js/scripts/extensions/ext-component-ratings.js"></script> --}}
+
 
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
@@ -586,6 +760,8 @@
 
 @section('pagescripts')
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+
+  
 
   <script>
     $(document).ready(function() {
@@ -596,6 +772,125 @@
       });
     });
   </script>
+
+  @if( $notrated_men or $notrated_ser )
+  <script src="/app-assets/vendors/js/extensions/jquery.rateyo.min.js"></script>
+  <script>
+
+function redirectWithDays(showValue) {
+// الحصول على قيم التواريخ
+const forteendays = document.getElementById('forteenDays').value;
+const sevendays = document.getElementById('sevenDays').value;
+
+// التحقق من وجود تواريخ والتحقق من تنسيقها لضمان التوافق
+let url = `/dashboard?days=${showValue}`;
+
+// إعادة التوجيه إلى الرابط المناسب
+window.location.href = url;
+}
+
+
+	  $(function () {
+		  var isRtl = $('html').attr('data-textdirection') === 'rtl';
+		  var fullStar = $('.full-star-ratings');
+		  var instance = fullStar.rateYo({rtl: isRtl});
+		  // Rating onSet Event
+		  if( instance.length ) { instance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $('#rate').val(data.rating); }); } });
+  </script>
+@endif
+
+<script>
+	$(document).ready(function() {
+		$("#mentorstable").DataTable({
+			"responsive": true,
+			"searching": true,
+			"lengthChange": false,
+			"paging": false,
+			"bInfo": false,
+			"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
+			@if( $l == 'ar' )
+			"language": {
+				"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
+				"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
+				"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
+				"sInfo":		 "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+				"sInfoEmpty":	"يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+				"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
+				"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
+				"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+			}
+			@endif
+		});
+		@if ($notrated_men or $notrated_ser)
+		//Open rate popup
+		$("#RequestRate").modal("show");
+		@endif
+	});
+
+	$(document).ready(function() {
+		$(".sessonsTable").DataTable({
+			"responsive": true,
+			"searching": true,
+			"lengthChange": false,
+			"paging": false,
+			"bInfo": false,
+			"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
+			@if( $l == 'ar' )
+			"language": {
+				"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
+				"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
+				"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
+				"sInfo":		 "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+				"sInfoEmpty":	"يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+				"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
+				"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
+				"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+			}
+			@endif
+		});
+		
+	});
+
+	
+	
+	$("#date").datetimepicker({
+		format: 'Y-m-d H:i', onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+		maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
+		timepicker: true
+	});
+
+	function request(id,mentor,organization_id=null,cycle_id=null) {
+		$('#mentorid').val(id);
+		$('#rname').html(mentor);
+		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+		$.ajax({
+			type: "POST", url: "/dashboard/mentors/modify",
+			data: {"id": id, "rtype": 5,},
+			success: function (response) {
+				$('#SendRequest li').remove();
+				$('#name').html(name);
+				if (response.length>0) {
+					$.each(response, function(i, item) {
+						let note = '';
+						let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
+						if (item.notes) {note = item.notes;}
+						switch (item.type)
+						{
+							case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
+							case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
+							case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
+							case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
+							default:
+						}
+					});
+				} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
+				$('#addOrganizationID').val(organization_id);
+				$('#addCycleID').val(cycle_id);
+				$('#SendRequest').modal('show');
+			}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
+		});
+	}
+</script>
 
   <script>
     function modify(type, id, stat) {

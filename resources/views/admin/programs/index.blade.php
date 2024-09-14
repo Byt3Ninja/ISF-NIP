@@ -57,12 +57,17 @@
                          <span class="btn btn-block btn-success align-middle ml-25"><i class="bx bx-star" ></i> {{__('cycles.New')}}</span>
                     </div>
                     
-                <div class="btn btn-success ExportCycle">{{__('cycles.Export')}}</div>
                 </div>
                 <div class="organizations-list-table">
+                    
                     <div class="card">
+                        
                         <div class="card-content">
+                            
                             <div class="card-body">
+                                <div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center" >
+                                    <div class="btn btn-success ExportCycle">{{__('cycles.Export')}}</div>
+                                        </div>
                                 <!-- datatable start -->
                                 <div class="table-responsive">
                                     <table id="users-list-datatable" class="table">
