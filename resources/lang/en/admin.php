@@ -591,4 +591,7 @@ return [
 	'quizNotTaken' => 'Not taken',
 	'My Quizzes' => 'My Quizzes',
 	'settings'=>'Settings',
+	'Expertince'=>'Expertince',
+	'ProfileSummary'=>'Profile Summary',
+	
 ];

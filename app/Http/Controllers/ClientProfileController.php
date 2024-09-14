@@ -5,6 +5,7 @@ use App\Country;
 use App\Expertise;
 use App\Http\Requests\UpdateClientProfileRequest;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
+use App\User;
 use App\UsersBio;
 use Storage;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -129,4 +130,27 @@ class ClientProfileController extends Controller
             abort(500);
         }
     }
+
+    public function showMintor($id){
+
+        $client = User::find($id);
+        // $exp = Expertise::where('parent_id',null)->get();
+        // $expertises = Expertise::where('parent_id',null)->get();
+        
+        $mentors = User::find($id);
+        if ($mentors) {
+            $expertises = $mentors->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
+        } else {
+            // الموجه غير موجود
+            $expertises = [];
+        }
+            return view('admin/clients/Mentorprofile', compact('client','expertises'));
+
+
+    }
+
+
+
+
+
 }
