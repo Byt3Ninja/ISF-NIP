@@ -119,7 +119,7 @@
 	$notrated_ser = \App\ServicesRequests::where('user_id',Auth::id())->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
 	$notrated_men = \App\MentorshipRequest::where('user_id',Auth::id())->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
 	/// My sessions
-	if( !empty( Auth::user()->company ) ) { $sessions = \App\TrainingSession::where("step_id", Auth::user()->company->step)->orderBy('datetime','ASC')->take(3)->get(); }
+	if( !empty( Auth::user()->company ) ) { $sessions = \App\TrainingSession::where("step_id", Auth::user()->company->step)->orderBy('datetime','ASC')->take(1)->get(); }
 	else { $sessions = []; }
   @endphp
 
@@ -699,26 +699,30 @@
 												<tr>
 													<td>{{$key+1}}</td>
 													<td>
+                            
 														<div class="media align-items-center">
 															<a class="media-left mr-50">
 																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 															</a>
+                              <a target="_blank" href="{{route('show_mentor_profile', ($mentor->user)->id)}}">
 															<div class="media-body">
 																<h6 class="media-heading mb-0">{{optional($mentor->user)->name }}</h6>
 																<span class="font-small-2">{{optional($mentor->user)->title }}</span>
 															</div>
+                            </a>
 														</div>
+                          
 													</td>
 													<td> {{optional($mentor->user)->bio->{'bio_'.$l} ?? '-' }} </td>
 													<td> {{optional($mentor->user)->bio->{'specialization_'.$l} ?? '-' }} </td>
 													<td>
 														@if (optional($mentor->user)->bio->linkedin ??0)
-															<a title="Linkedin URL" target="_blank" href="{{optional($mentor->user)->bio->linkedin}}" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx  bxl-linkedin"></i></a>
+															<a title="Linkedin URL" target="_blank" href="{{optional($mentor->user)->bio->linkedin}}" class="btn btn-icon rounded-circle btn-primary"> <i class="fa-brands fa-linkedin-in"></i></a>
 														@endif
 													</td>
 													<td>
-														<button onclick="request({{$mentor->user_id}},'{{optional($mentor->user)->{'first_name_'.$l} }} {{optional($mentor->user)->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-															<i class="bx bxs-conversation"></i>
+														<button onclick="request({{$mentor->user_id}},'{{optional($mentor->user)->{'first_name_'.$l} }} {{optional($mentor->user)->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-primary">
+															<i class="fa fa-plus"></i>
 														</button>
 													</td>
 												</tr>
@@ -739,7 +743,128 @@
       <!-- / My Mentors -->
     </div>
   </div>
+
+  <!--  Edit SP Modal -->
+  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="text-center mb-6">
+                    <h4 class="mb-2">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
+                </div>
+                <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+  
+                  <div class="modal-body">
+                    @csrf
+                    <input type="hidden" name="mentorid" value="0" id="mentorid">
+                    <input type="hidden" name="organization_id" id="addOrganizationID">
+                    <input type="hidden" name="cycle_id" id="addCycleID">
+                    <div>
+                      <h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
+                      <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
+                    </div>
+                    <hr>
+                    <div class="form-group" id="showdates">
+                      <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
+                      <input class="date width-250 form-control" type="text" id="date" name="date" value="" required onkeydown="return false">
+                    </div>
+                    <div class="form-group">
+                      <label>{{__('dashboard.Meeting duration')}}:</label>
+                      <select name="period" class="select form-control width-150">
+                        <option value="30">30 {{__('dashboard.Minutes')}}</option>
+                        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
+                        <option value="120">2 {{__('dashboard.Hours')}}</option>
+                        <option value="180">3 {{__('dashboard.Hours')}}</option>
+                        <option value="240">4 {{__('dashboard.Hours')}}</option>
+                        <option value="300">5 {{__('dashboard.Hours')}}</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="basicInputFile">{{__('dashboard.Send file with your request')}}</label>
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+                        <label class="custom-file-label" for="inputGroupFile01">{{__('dashboard.Choose file')}}</label>
+                      </div>
+                    </div>
+                    <label>{{__('dashboard.Add note')}}:</label>
+                    <div class="form-group">
+                      <textarea class="form-control" id="notes" name='notes' rows="4" placeholder="{{__('dashboard.Write your note here')}}" ></textarea>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary ml-1" >
+                      <i class="bx bx-check d-block d-sm-none"></i>
+                      <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
+                    </button>
+                  </div>
+                </form>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--/ Edit SP Modal -->
   <!-- / Content wrapper -->
+  {{-- <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+      <div class="modal-content">
+        <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+  
+          <div class="modal-header">
+            <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <i class="bx bx-x"></i> </button>
+          </div>
+          <div class="modal-body">
+            @csrf
+            <input type="hidden" name="mentorid" value="0" id="mentorid">
+            <input type="hidden" name="organization_id" id="addOrganizationID">
+            <input type="hidden" name="cycle_id" id="addCycleID">
+            <div>
+              <h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
+              <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
+            </div>
+            <hr>
+            <div class="form-group" id="showdates">
+              <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
+              <input class="date width-250 form-control" type="text" id="date" name="date" value="" required onkeydown="return false">
+            </div>
+            <div class="form-group">
+              <label>{{__('dashboard.Meeting duration')}}:</label>
+              <select name="period" class="select form-control width-150">
+                <option value="30">30 {{__('dashboard.Minutes')}}</option>
+                <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
+                <option value="120">2 {{__('dashboard.Hours')}}</option>
+                <option value="180">3 {{__('dashboard.Hours')}}</option>
+                <option value="240">4 {{__('dashboard.Hours')}}</option>
+                <option value="300">5 {{__('dashboard.Hours')}}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="basicInputFile">{{__('dashboard.Send file with your request')}}</label>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+                <label class="custom-file-label" for="inputGroupFile01">{{__('dashboard.Choose file')}}</label>
+              </div>
+            </div>
+            <label>{{__('dashboard.Add note')}}:</label>
+            <div class="form-group">
+              <textarea class="form-control" id="notes" name='notes' rows="4" placeholder="{{__('dashboard.Write your note here')}}" ></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary ml-1" >
+              <i class="bx bx-check d-block d-sm-none"></i>
+              <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div> --}}
+  
 @stop
 
 @section('scripts')
