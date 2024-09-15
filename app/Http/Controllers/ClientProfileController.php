@@ -15,6 +15,12 @@ use Auth;
 use Log;
 use Exception;
 use Session;
+use App\CyclesMentors;
+use App\Schedule;
+use App\MentorshipRequest;
+
+
+
 
 class ClientProfileController extends Controller
 {
@@ -48,8 +54,9 @@ class ClientProfileController extends Controller
 
     public function show(){
       $client = Auth::user();
+      $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
 
-      return view('admin/clients/profile', compact('client'));
+      return view('admin/clients/profile', compact('client','mentors'));
     }
 
     /**
@@ -144,7 +151,19 @@ class ClientProfileController extends Controller
             // الموجه غير موجود
             $expertises = [];
         }
-            return view('admin/clients/Mentorprofile', compact('client','expertises'));
+        $mentors = CyclesMentors::where('user_id', $id ?? 0)->get();
+
+        $order = CyclesMentors::where('cycle_id', Auth::user()->company->cycle ?? 0)->where('user_id', $id ?? 0)->first();
+
+
+        $my = Schedule::where('active',1)->where('user_id', $id)->get();
+        $sessions = MentorshipRequest::where('mentor_id',$id)->where('zoom_date','>=',date("Y-m-d 00:00:00"))->where('approved','Yes')
+            ->get(['zoom_date as dfrom','period AS tfrom',DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
+        $my = $my->merge($sessions);
+        
+
+
+            return view('admin/clients/Mentorprofile', compact('client','expertises', 'mentors', 'order', 'my'));
 
 
     }

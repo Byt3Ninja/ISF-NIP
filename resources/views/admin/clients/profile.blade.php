@@ -73,30 +73,36 @@
           <div class="nav-align-top">
             <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-2 gap-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" href="javascript:void(0);"><i class="ti-sm ti ti-user-check me-1_5"></i>
-                  Profile
+                <a class="nav-link active" id="Profile-tab" data-bs-toggle="tab" href="#Profile" role="tab" aria-controls="Profile" aria-selected="false">
+                  <i class="ti-sm ti ti-user-check me-1_5"></i>
+                  {{__('admin.Profile')}}
                 </a>
-              </li>
+            </li>
+
               <li class="nav-item">
-                <a class="nav-link" href="pages-profile-teams.html"><i class="ti-sm ti ti-users me-1_5"></i> Teams</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="pages-profile-projects.html"><i class="ti-sm ti ti-layout-grid me-1_5"></i>
-                  Projects</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="pages-profile-connections.html"><i class="ti-sm ti ti-link me-1_5"></i>
-                  Connections</a>
-              </li>
+                <a class="nav-link" id="Programms-tab" data-bs-toggle="tab" href="#Programms" role="tab" aria-controls="Programms" aria-selected="false">
+                  <i class="ti-sm ti ti-layout-grid me-1_5"></i>
+                  {{__('admin.Programms')}}
+                </a>
+            </li>
+
+             
+             
             </ul>
           </div>
         </div>
       </div>
+      <!-- Start Tabs Data -->
+      <div class="tab-content" id="settingsTabsContent">
+        <!-- general settings tab -->
+        <div class="tab-pane fade show active" id="Profile" role="tabpanel" aria-labelledby="Profile-tab">
       <!--/ Navbar pills -->
+      @role('Mentor')
       <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12">
           <div class="card mb-6">
             <div class="card-body">
+              
               <small class="card-text text-uppercase text-muted small">
           {{__('admin.ProfileSummary')}}
               </small><br><br>
@@ -106,12 +112,11 @@
             ? $client->bio->bio_ar
             : $client->bio->bio_en 
             }}
+           
         </div>
+      
       </div>
-        </div>
-        
-      </div>
-
+      @endrole
 
       <!-- User Profile Content -->
       <div class="row">
@@ -184,14 +189,20 @@
                   <span>{{ $client->email }}</span>
                 </li>
               </ul>
-              <small class="card-text text-uppercase text-muted small">Teams</small>
+              <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
+                @foreach ($mentors as $cycleOrg) 
+                @php
+                  $Organizations = \App\Organization::where('id', $cycleOrg->cycle->organization_id ?? 0)->get();
+                  @endphp
+                @foreach ($Organizations as $org) 
                 <li class="d-flex flex-wrap mb-4">
-                  <span class="fw-medium me-2">Backend Developer</span><span>(126 Members)</span>
+
+                  - <span class="fw-medium me-2">{{ $org->{'name_' . $l} }}</span>
+
                 </li>
-                <li class="d-flex flex-wrap">
-                  <span class="fw-medium me-2">React Developer</span><span>(98 Members)</span>
-                </li>
+                @endforeach
+                @endforeach
               </ul>
             </div>
           </div>
@@ -218,336 +229,13 @@
           </div>
           <!--/ Profile Overview -->
         </div>
-        <div class="col-xl-8 col-lg-7 col-md-7">
-          <!-- Activity Timeline -->
-          <div class="card card-action mb-6">
-            <div class="card-header align-items-center">
-              <h5 class="card-action-title mb-0">
-                <i class="ti ti-chart-bar ti-lg text-body me-4"></i>Activity Timeline
-              </h5>
-            </div>
-            <div class="card-body pt-3">
-              <ul class="timeline mb-0">
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-primary"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">12 Invoices have been paid</h6>
-                      <small class="text-muted">12 min ago</small>
-                    </div>
-                    <p class="mb-2">Invoices have been paid to the company</p>
-                    <div class="d-flex align-items-center mb-2">
-                      <div class="badge bg-lighter rounded d-flex align-items-center">
-                        <img src="/vuexy/assets//img/icons/misc/pdf.png" alt="img" width="15"
-                          class="me-2" />
-                        <span class="h6 mb-0 text-body">invoices.pdf</span>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-success"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">Client Meeting</h6>
-                      <small class="text-muted">45 min ago</small>
-                    </div>
-                    <p class="mb-2">Project meeting with john @10:15am</p>
-                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
-                      <div class="d-flex flex-wrap align-items-center mb-50">
-                        <div class="avatar avatar-sm me-3">
-                          <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div>
-                          <p class="mb-0 small fw-medium">Lester McCarthy (Client)</p>
-                          <small>CEO of Pixinvent</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-info"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">Create a new project for client</h6>
-                      <small class="text-muted">2 Day Ago</small>
-                    </div>
-                    <p class="mb-2">6 team members in a project</p>
-                    <ul class="list-group list-group-flush">
-                      <li
-                        class="list-group-item d-flex justify-content-between align-items-center flex-wrap border-top-0 p-0">
-                        <div class="d-flex flex-wrap align-items-center">
-                          <ul class="list-unstyled users-list d-flex align-items-center avatar-group m-0 me-2">
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Vinnie Mostowy" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/1.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Allen Rieske" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/4.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Julee Rossignol" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/2.png" alt="Avatar" />
-                            </li>
-                            <li class="avatar">
-                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip"
-                                data-bs-placement="bottom" title="3 more">+3</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!--/ Activity Timeline -->
-          <div class="row">
-            <!-- Connections -->
-            <div class="col-lg-12 col-xl-6">
-              <div class="card card-action mb-6">
-                <div class="card-header align-items-center">
-                  <h5 class="card-action-title mb-0">Connections</h5>
-                  <div class="card-action-element">
-                    <div class="dropdown">
-                      <button type="button"
-                        class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow p-0 text-muted"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots-vertical ti-md text-muted"></i>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="javascript:void(0);">Share connections</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
-                        <li>
-                          <hr class="dropdown-divider" />
-                        </li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <ul class="list-unstyled mb-0">
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Cecilia Payne</h6>
-                            <small>45 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/3.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Curtis Fletcher</h6>
-                            <small>1.32k Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-primary btn-icon"><i class="ti ti-user-x ti-md"></i></button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/10.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Alice Stone</h6>
-                            <small>125 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-primary btn-icon"><i class="ti ti-user-x ti-md"></i></button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Darrell Barnes</h6>
-                            <small>456 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
 
-                    <li class="mb-6">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/12.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Eugenia Moore</h6>
-                            <small>1.2k Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="text-center">
-                      <a href="javascript:;">View all connections</a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <!--/ Connections -->
-            <!-- Teams -->
-            <div class="col-lg-12 col-xl-6">
-              <div class="card card-action mb-6">
-                <div class="card-header align-items-center">
-                  <h5 class="card-action-title mb-0">Teams</h5>
-                  <div class="card-action-element">
-                    <div class="dropdown">
-                      <button type="button" class="btn btn-icon btn-text-secondary dropdown-toggle hide-arrow p-0"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots-vertical text-muted"></i>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="javascript:void(0);">Share teams</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
-                        <li>
-                          <hr class="dropdown-divider" />
-                        </li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <ul class="list-unstyled mb-0">
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/react-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">React Developers</h6>
-                            <small>72 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-danger">Developer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/support-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Support Team</h6>
-                            <small>122 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-primary">Support</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/figma-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">UI Designers</h6>
-                            <small>7 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-info">Designer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/vue-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Vue.js Developers</h6>
-                            <small>289 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-danger">Developer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-6">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/twitter-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-w">
-                            <h6 class="mb-0">Digital Marketing</h6>
-                            <small>24 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-secondary">Marketing</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="text-center">
-                      <a href="javascript:;">View all teams</a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <!--/ Teams -->
-          </div>
+        <div class="col-xl-8 col-lg-7 col-md-7">
+          
           <!-- Projects table -->
           <div class="card mb-4">
             <div class="card-datatable table-responsive">
-              <table class="datatables-projects table border-top">
+              <table class="zero-configuration table border-top">
                 <thead>
                   <tr>
                     <th></th>
@@ -558,6 +246,17 @@
                     <th class="w-px-200">Progress</th>
                     <th>Action</th>
                   </tr>
+                  <body>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="w-px-200"></td>
+                        <td></td>
+                      </tr>
+                  </body>
                 </thead>
               </table>
             </div>
@@ -567,8 +266,62 @@
       </div>
       <!--/ User Profile Content -->
     </div>
-    <!-- / Content -->
+  </div>
+</div>
 
+<!-- Programms tab -->
+<div class="tab-pane fade" id="Programms" role="tabpanel" aria-labelledby="Programms-tab">
+
+  <div class="row">
+    <div class="col-xl-12 col-lg-12 col-md-12">
+      <div class="card mb-6">
+        <div class="card-body">
+          
+          <small class="card-text text-uppercase text-muted small">
+      {{__('admin.Programms')}}
+          </small>
+          <br><br>
+          
+           
+          <table class="table zero-configuration">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>{{__('admin.Title')}}</th>
+                <th>{{__('admin.Description')}}</th>
+                <th>{{__('admin.Start')}}</th>
+                <th>{{__('admin.End')}}</th>
+            </tr>
+            </thead>
+            <tbody>
+              @foreach ($mentors as $n=>$mentor) 
+              <tr>
+                <td>{{$n+1}}</td>
+                <td>{{$mentor->cycle->title}}</td>
+                <td>{{$mentor->cycle->description}}</td>
+                <td>{{$mentor->cycle->start}}</td>
+                <td>{{$mentor->cycle->end}}</td>
+              </tr>
+
+          @endforeach
+        </tbody>
+      </table>
+
+
+    </div>
+  
+  </div>
+  
+
+</div>
+<!-- Programms tab -->
+
+
+
+    </div>
+  </div>
+    <!-- / Content -->
+ 
     <div class="content-backdrop fade"></div>
   </div>
   <!-- Content wrapper -->
@@ -580,6 +333,35 @@
 
   <script>
     $(document).ready(function() {
+
+      $('.zero-configuration').DataTable({
+                    "language": {
+                        "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
+                        "sLoadingRecords": "جارٍ التحميل...",
+                        "sProcessing":   "جارٍ التحميل...",
+                        "sLengthMenu":   "أظهر _MENU_ مدخلات",
+                        "sZeroRecords":  "لم يعثر على أية سجلات",
+                        "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                        "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل",
+                        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                        "sInfoPostFix":  "",
+                        "sSearch":       "ابحث:",
+                        "sUrl":          "",
+                        "oPaginate": {
+                            "sFirst":    "الأول",
+                            "sPrevious": "السابق",
+                            "sNext":     "التالي",
+                            "sLast":     "الأخير"
+                        },
+                        "oAria": {
+                            "sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً",
+                            "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+                        }
+                    }
+                } );
+
+
+
       getStates($('#country_id').val());
       $('#country_id').change(function() {
         getStates($(this).val());

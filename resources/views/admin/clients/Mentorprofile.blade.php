@@ -32,6 +32,9 @@
                       {{ 
                         $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en
                       }}
+                      <a target="_blank" href="{{ $client->bio->linkedin }}">
+                        <i class="ti ti-brand-linkedin ti-lg"></i>
+                        </a>
                     </h4>
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
@@ -49,9 +52,16 @@
                       </li>
                     </ul>
                   </div>
-                  <a href="javascript:void(0)" class="btn btn-primary mb-1">
-                    <i class="ti ti-user-check ti-xs me-2"></i>Connected
+                  <a href="javascript:void(0)" class="btn btn-primary mb-1 disabled">
+                    <i class="ti ti-user-check ti-xs me-2"></i>Follow
                   </a>
+                  <button onclick="request({{$order->user_id}},'{{optional($order->user)->{'first_name_'.$l} }} {{optional($order->user)->{'last_name_'.$l} }}', {{ $order->cycle->organization_id }},{{ $order->cycle_id }})" title="Add new request" type="button" class="btn btn-primary mb-1">
+                    {{-- <i class="fa fa-plus"></i>  --}}
+                    {{__('admin.OrderSession')}}
+                </button>
+ 
+                  
+
                 </div>
               </div>
             </div>
@@ -66,27 +76,55 @@
           <div class="nav-align-top">
             <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-2 gap-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" href="javascript:void(0);"><i class="ti-sm ti ti-user-check me-1_5"></i>
-                  Profile
+                <a class="nav-link active" id="Profile-tab" data-bs-toggle="tab" href="#Profile" role="tab" aria-controls="Profile" aria-selected="false">
+                  <i class="ti-sm ti ti-user-check me-1_5"></i>
+                  {{__('admin.Profile')}}
                 </a>
-              </li>
+            </li>
+
               <li class="nav-item">
-                <a class="nav-link" href="pages-profile-teams.html"><i class="ti-sm ti ti-users me-1_5"></i> Teams</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="pages-profile-projects.html"><i class="ti-sm ti ti-layout-grid me-1_5"></i>
-                  Projects</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="pages-profile-connections.html"><i class="ti-sm ti ti-link me-1_5"></i>
-                  Connections</a>
-              </li>
+                <a class="nav-link" id="Programms-tab" data-bs-toggle="tab" href="#Programms" role="tab" aria-controls="Programms" aria-selected="false">
+                  <i class="ti-sm ti ti-layout-grid me-1_5"></i>
+                  {{__('admin.Programms')}}
+                </a>
+            </li>
+
+             
+             
             </ul>
           </div>
         </div>
       </div>
+
+
+      <!-- Start Tabs Data -->
+      <div class="tab-content" id="settingsTabsContent">
+        <!-- general settings tab -->
+        <div class="tab-pane fade show active" id="Profile" role="tabpanel" aria-labelledby="Profile-tab">
       <!--/ Navbar pills -->
-      
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12">
+          <div class="card mb-6">
+            <div class="card-body">
+              
+              <small class="card-text text-uppercase text-muted small">
+          {{__('admin.ProfileSummary')}}
+              </small><br><br>
+          {{ $client->bio->bio }}
+          {{ 
+            $l == 'ar' 
+            ? $client->bio->bio_ar
+            : $client->bio->bio_en 
+            }}
+           
+        </div>
+      </div>
+        </div>
+        
+      </div>
+   
+
+
       <!-- User Profile Content -->
       <div class="row">
         <div class="col-xl-4 col-lg-5 col-md-5">
@@ -101,7 +139,7 @@
                   <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</span>
                   <span>{{ 
                   $l == 'ar' 
-                  ? $client->first_name_ar. ' ' . $client->last_name_ar 
+                  ? $client->first_name_ar . ' ' . $client->last_name_ar 
                   : $client->first_name_en . ' ' . $client->last_name_en
                   }}</span>
                 </li>
@@ -149,16 +187,7 @@
                   </span>
                   <span>{{ $client->phone }}</span>
                 </li>
-                {{-- @role('Mentor')
-                  <li class="d-flex align-items-center mb-4">
-                    <i class="ti ti-messages ti-lg"></i><span class="fw-medium mx-2">
-                      {{ $l == 'ar' ? 'ليتكدان' : 'linkedin' }}:
-                    </span>
-                    <span>
-                      {{ $client->linkedin }}
-                    </span>
-                  </li>
-                @endrole --}}
+                
 
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-mail ti-lg"></i><span class="fw-medium mx-2">
@@ -167,36 +196,24 @@
                   <span>{{ $client->email }}</span>
                 </li>
               </ul>
-              <small class="card-text text-uppercase text-muted small">Teams</small>
+              <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
+                @foreach ($mentors as $cycleOrg) 
+                @php
+                  $Organizations = \App\Organization::where('id', $cycleOrg->cycle->organization_id ?? 0)->get();
+                  @endphp
+                @foreach ($Organizations as $org) 
                 <li class="d-flex flex-wrap mb-4">
-                  <span class="fw-medium me-2">Backend Developer</span><span>(126 Members)</span>
+
+                  - <span class="fw-medium me-2">{{ $org->{'name_' . $l} }}</span>
+
                 </li>
-                <li class="d-flex flex-wrap">
-                  <span class="fw-medium me-2">React Developer</span><span>(98 Members)</span>
-                </li>
+                @endforeach
+                @endforeach
               </ul>
             </div>
           </div>
           <!--/ About User -->
-          <!-- Profile Overview -->
-          <div class="card mb-6">
-            <div class="card-body">
-              <small class="card-text text-uppercase text-muted small">{{__('admin.Expertince')}}</small>
-              <ul class="list-unstyled mb-0 mt-3 pt-1">
-                @foreach($expertises as $experince)
-
-
-                <li class="d-flex align-items-end mb-4">
-                  <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">{{$experince->title}}</span>
-                  {{-- <span>13.5k</span> --}}
-                </li>
-                @endforeach
-                
-              </ul>
-            </div>
-          </div>
-          <!--/ Profile Overview -->
           <!-- Profile Overview -->
           <div class="card mb-6">
             <div class="card-body">
@@ -219,336 +236,13 @@
           </div>
           <!--/ Profile Overview -->
         </div>
-        <div class="col-xl-8 col-lg-7 col-md-7">
-          <!-- Activity Timeline -->
-          <div class="card card-action mb-6">
-            <div class="card-header align-items-center">
-              <h5 class="card-action-title mb-0">
-                <i class="ti ti-chart-bar ti-lg text-body me-4"></i>Activity Timeline
-              </h5>
-            </div>
-            <div class="card-body pt-3">
-              <ul class="timeline mb-0">
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-primary"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">12 Invoices have been paid</h6>
-                      <small class="text-muted">12 min ago</small>
-                    </div>
-                    <p class="mb-2">Invoices have been paid to the company</p>
-                    <div class="d-flex align-items-center mb-2">
-                      <div class="badge bg-lighter rounded d-flex align-items-center">
-                        <img src="/vuexy/assets//img/icons/misc/pdf.png" alt="img" width="15"
-                          class="me-2" />
-                        <span class="h6 mb-0 text-body">invoices.pdf</span>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-success"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">Client Meeting</h6>
-                      <small class="text-muted">45 min ago</small>
-                    </div>
-                    <p class="mb-2">Project meeting with john @10:15am</p>
-                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
-                      <div class="d-flex flex-wrap align-items-center mb-50">
-                        <div class="avatar avatar-sm me-3">
-                          <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div>
-                          <p class="mb-0 small fw-medium">Lester McCarthy (Client)</p>
-                          <small>CEO of Pixinvent</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-info"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">Create a new project for client</h6>
-                      <small class="text-muted">2 Day Ago</small>
-                    </div>
-                    <p class="mb-2">6 team members in a project</p>
-                    <ul class="list-group list-group-flush">
-                      <li
-                        class="list-group-item d-flex justify-content-between align-items-center flex-wrap border-top-0 p-0">
-                        <div class="d-flex flex-wrap align-items-center">
-                          <ul class="list-unstyled users-list d-flex align-items-center avatar-group m-0 me-2">
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Vinnie Mostowy" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/1.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Allen Rieske" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/4.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Julee Rossignol" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/2.png" alt="Avatar" />
-                            </li>
-                            <li class="avatar">
-                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip"
-                                data-bs-placement="bottom" title="3 more">+3</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!--/ Activity Timeline -->
-          <div class="row">
-            <!-- Connections -->
-            <div class="col-lg-12 col-xl-6">
-              <div class="card card-action mb-6">
-                <div class="card-header align-items-center">
-                  <h5 class="card-action-title mb-0">Connections</h5>
-                  <div class="card-action-element">
-                    <div class="dropdown">
-                      <button type="button"
-                        class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow p-0 text-muted"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots-vertical ti-md text-muted"></i>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="javascript:void(0);">Share connections</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
-                        <li>
-                          <hr class="dropdown-divider" />
-                        </li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <ul class="list-unstyled mb-0">
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Cecilia Payne</h6>
-                            <small>45 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/3.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Curtis Fletcher</h6>
-                            <small>1.32k Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-primary btn-icon"><i class="ti ti-user-x ti-md"></i></button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/10.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Alice Stone</h6>
-                            <small>125 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-primary btn-icon"><i class="ti ti-user-x ti-md"></i></button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Darrell Barnes</h6>
-                            <small>456 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
 
-                    <li class="mb-6">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/12.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Eugenia Moore</h6>
-                            <small>1.2k Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="text-center">
-                      <a href="javascript:;">View all connections</a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <!--/ Connections -->
-            <!-- Teams -->
-            <div class="col-lg-12 col-xl-6">
-              <div class="card card-action mb-6">
-                <div class="card-header align-items-center">
-                  <h5 class="card-action-title mb-0">Teams</h5>
-                  <div class="card-action-element">
-                    <div class="dropdown">
-                      <button type="button" class="btn btn-icon btn-text-secondary dropdown-toggle hide-arrow p-0"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots-vertical text-muted"></i>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="javascript:void(0);">Share teams</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
-                        <li>
-                          <hr class="dropdown-divider" />
-                        </li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <ul class="list-unstyled mb-0">
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/react-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">React Developers</h6>
-                            <small>72 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-danger">Developer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/support-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Support Team</h6>
-                            <small>122 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-primary">Support</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/figma-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">UI Designers</h6>
-                            <small>7 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-info">Designer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/vue-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Vue.js Developers</h6>
-                            <small>289 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-danger">Developer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-6">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/twitter-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-w">
-                            <h6 class="mb-0">Digital Marketing</h6>
-                            <small>24 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-secondary">Marketing</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="text-center">
-                      <a href="javascript:;">View all teams</a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <!--/ Teams -->
-          </div>
+        <div class="col-xl-8 col-lg-7 col-md-7">
+          
           <!-- Projects table -->
           <div class="card mb-4">
             <div class="card-datatable table-responsive">
-              <table class="datatables-projects table border-top">
+              <table class="zero-configuration table border-top">
                 <thead>
                   <tr>
                     <th></th>
@@ -559,6 +253,17 @@
                     <th class="w-px-200">Progress</th>
                     <th>Action</th>
                   </tr>
+                  <body>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="w-px-200"></td>
+                        <td></td>
+                      </tr>
+                  </body>
                 </thead>
               </table>
             </div>
@@ -567,12 +272,128 @@
         </div>
       </div>
       <!--/ User Profile Content -->
+
+    </div>
+</div>
+
+
+<!-- Programms tab -->
+<div class="tab-pane fade" id="Programms" role="tabpanel" aria-labelledby="Programms-tab">
+
+    <div class="row">
+      <div class="col-xl-12 col-lg-12 col-md-12">
+        <div class="card mb-6">
+          <div class="card-body">
+            
+            <small class="card-text text-uppercase text-muted small">
+        {{__('admin.Programms')}}
+            </small>
+            <br><br>
+            
+             
+            <table class="table zero-configuration">
+              <thead>
+              <tr>
+                  <th>#</th>
+                  <th>{{__('admin.Title')}}</th>
+                  <th>{{__('admin.Description')}}</th>
+                  <th>{{__('admin.Start')}}</th>
+                  <th>{{__('admin.End')}}</th>
+              </tr>
+              </thead>
+              <tbody>
+                @foreach ($mentors as $n=>$mentor) 
+                <tr>
+                  <td>{{$n+1}}</td>
+                  <td>{{$mentor->cycle->title}}</td>
+                  <td>{{$mentor->cycle->description}}</td>
+                  <td>{{$mentor->cycle->start}}</td>
+                  <td>{{$mentor->cycle->end}}</td>
+                </tr>
+  
+            @endforeach
+          </tbody>
+        </table>
+  
+  
+      </div>
+    
+    </div>
+    
+  
+  </div>
+  <!-- Programms tab -->
+
     </div>
     <!-- / Content -->
 
-    <div class="content-backdrop fade"></div>
+    {{-- <div class="content-backdrop fade"></div> --}}
   </div>
   <!-- Content wrapper -->
+
+  <!--  Edit SP Modal -->
+  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="text-center mb-6">
+                    <h4 class="mb-2">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
+                </div>
+                <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+  
+                  <div class="modal-body">
+                    @csrf
+                    <input type="hidden" name="mentorid" value="0" id="mentorid">
+                    <input type="hidden" name="organization_id" id="addOrganizationID">
+                    <input type="hidden" name="cycle_id" id="addCycleID">
+                    <div>
+                      <h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
+                      <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
+                    </div>
+                    <hr>
+                    <div class="form-group" id="showdates">
+                      <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
+                      <input class="date width-250 form-control" type="text" id="date" name="date" value="" required onkeydown="return false">
+                    </div>
+                    <div class="form-group">
+                      <label>{{__('dashboard.Meeting duration')}}:</label>
+                      <select name="period" class="select form-control width-150">
+                        <option value="30">30 {{__('dashboard.Minutes')}}</option>
+                        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
+                        <option value="120">2 {{__('dashboard.Hours')}}</option>
+                        <option value="180">3 {{__('dashboard.Hours')}}</option>
+                        <option value="240">4 {{__('dashboard.Hours')}}</option>
+                        <option value="300">5 {{__('dashboard.Hours')}}</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="basicInputFile">{{__('dashboard.Send file with your request')}}</label>
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+                        <label class="custom-file-label" for="inputGroupFile01">{{__('dashboard.Choose file')}}</label>
+                      </div>
+                    </div>
+                    <label>{{__('dashboard.Add note')}}:</label>
+                    <div class="form-group">
+                      <textarea class="form-control" id="notes" name='notes' rows="4" placeholder="{{__('dashboard.Write your note here')}}" ></textarea>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary ml-1" >
+                      <i class="bx bx-check d-block d-sm-none"></i>
+                      <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
+                    </button>
+                  </div>
+                </form>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--/ Edit SP Modal -->
 @stop
 
 <!-- Page JS -->
@@ -580,7 +401,69 @@
   <script src="/vuexy/assets/js/pages-profile.js"></script>
 
   <script>
+function request(id,mentor,organization_id=null,cycle_id=null) {
+		$('#mentorid').val(id);
+		$('#rname').html(mentor);
+		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+		$.ajax({
+			type: "POST", url: "/dashboard/mentors/modify",
+			data: {"id": id, "rtype": 5,},
+			success: function (response) {
+				$('#SendRequest li').remove();
+				$('#name').html(name);
+				if (response.length>0) {
+					$.each(response, function(i, item) {
+						let note = '';
+						let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
+						if (item.notes) {note = item.notes;}
+						switch (item.type)
+						{
+							case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
+							case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
+							case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
+							case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
+							default:
+						}
+					});
+				} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
+				$('#addOrganizationID').val(organization_id);
+				$('#addCycleID').val(cycle_id);
+				$('#SendRequest').modal('show');
+			}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
+		});
+	}
+
+
     $(document).ready(function() {
+
+        $('.zero-configuration').DataTable({
+                    "language": {
+                        "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
+                        "sLoadingRecords": "جارٍ التحميل...",
+                        "sProcessing":   "جارٍ التحميل...",
+                        "sLengthMenu":   "أظهر _MENU_ مدخلات",
+                        "sZeroRecords":  "لم يعثر على أية سجلات",
+                        "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                        "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل",
+                        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                        "sInfoPostFix":  "",
+                        "sSearch":       "ابحث:",
+                        "sUrl":          "",
+                        "oPaginate": {
+                            "sFirst":    "الأول",
+                            "sPrevious": "السابق",
+                            "sNext":     "التالي",
+                            "sLast":     "الأخير"
+                        },
+                        "oAria": {
+                            "sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً",
+                            "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+                        }
+                    }
+                } );
+
+
+
       getStates($('#country_id').val());
       $('#country_id').change(function() {
         getStates($(this).val());

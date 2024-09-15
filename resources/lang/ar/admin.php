@@ -593,4 +593,7 @@ return [
 	'settings'=>'الاعدادات',
 	'Expertince'=>'الخبرات',
 	'ProfileSummary'=>'ملخص السيرة الذاتية',
+	'Programms'=>'البرامج',
+	'Orgnizations'=>'الشركات',
+	'OrderSession'=>'طلب جلسة ارشاد',
 ];

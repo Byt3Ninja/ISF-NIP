@@ -593,5 +593,8 @@ return [
 	'settings'=>'Settings',
 	'Expertince'=>'Expertince',
 	'ProfileSummary'=>'Profile Summary',
+	'Programms'=>'Programms',
+	'Orgnizations'=>'Orgnizations',
+	'OrderSession'=>'Request Mentor Ship',
 	
 ];
