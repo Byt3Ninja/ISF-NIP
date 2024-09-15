@@ -245,25 +245,51 @@
               <table class="zero-configuration table border-top">
                 <thead>
                   <tr>
-                    <th></th>
-                    <th></th>
-                    <th>Project</th>
-                    <th>Leader</th>
-                    <th>Team</th>
-                    <th class="w-px-200">Progress</th>
-                    <th>Action</th>
+                    <th class="text-center">{{__('cycles.User/Title')}}</th>
+                                                <th class="text-center">{{__('cycles.Company')}}</th>
+                                                <th class="text-center">{{__('mentor.mentorshipTasks.title')}}</th>
+                                                <th class="text-center">{{__('cycles.Done')}}</th>
                   </tr>
-                  <body>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td class="w-px-200"></td>
-                        <td></td>
-                      </tr>
-                  </body>
+                  <tbody>
+                    @foreach($mentorshipTasks as $task)
+                                                <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
+                                                    <td class="text-center">
+                                                        <div class="media align-items-center">
+                                                            <a class="media-left mr-50" href="/dashboard/users/{{$task->user_id}}/edit">
+                                                                <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                            </a>
+                                                            <a href="/dashboard/users/{{$task->user_id}}/edit">
+                                                                <div class="media-body">
+                                                                    <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
+                                                                    <span class="font-small-2">{{$task->user->title}}</span>
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                    
+                                                    <td class="text-center">
+                                                        <div class="media align-items-center">
+                                                            <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
+                                                                <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                            </a>
+                                                            <a href="/dashboard/companyProfile/{{$task->company->id}}">
+                                                                <div class="media align-items-center">
+                                                                    {{$task->company->name }}
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                    
+                                                    <td class="text-center">
+                                                        {{ $task->title??"-----" }}
+                                                    </td>
+                                                    <td class="text-center">
+                                                     {{ $task->status =='pending'?__('Uncompleted'):__('Completed') }}
+                                                    </td>
+                                                    
+                                                </tr>
+                                            @endforeach
+                  </tbody>
                 </thead>
               </table>
             </div>
