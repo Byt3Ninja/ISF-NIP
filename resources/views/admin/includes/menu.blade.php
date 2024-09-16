@@ -491,7 +491,7 @@
         </a>
       </li>
     @endcan
-
+    @if (auth()->user()->hasRole('Admin'))
     @can('view_report')
       <li class="{{ Request::is('reports*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="/dashboard/settings">
@@ -500,6 +500,7 @@
         </a>
       </li>
     @endcan
+    @endif
     {{--  @can('edit_settings')
         <li class="{{Request::is('dashboard/settings')?'active':''}} nav-item">
             <a href="/dashboard/settings">
