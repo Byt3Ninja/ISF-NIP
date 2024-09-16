@@ -102,12 +102,12 @@
                                 <td>{{$content->created_at}}</td>
                                 <td>{{ optional($content->user)->{'first_name_'.$l} }} {{ optional($content->user)->{'last_name_'.$l} }}</td>
                                 <td>
-                                    <a title="Edit" href="/dashboard/training/editcontent/{{$content->id}}" class="btn btn-icon btn-label-info rounded-circle waves-effect">
+                                    <a title="Edit" href="/dashboard/training/editcontent/{{$content->id}}" class="btn btn-icon btn-label-info rounded-circle">
                                         <i class="ti ti-edit"></i></a>
-                                    <button title="Delete" onclick="deleteme({{$content->id}},0)" type="button" class="btn btn-icon btn-label-info rounded-circle waves-effect">
-                                        <i class="bti ti-trash"></i></button>
-                                    <a title="Edit" href="/dashboard/training/viewcontent/{{$content->id}}" class="btn btn-icon btn-label-info rounded-circle waves-effect">
-                                        <i class="ti ti-view"></i></a>
+                                    <button title="Delete" onclick="deleteme({{$content->id}},0)" type="button" class="btn btn-icon btn-label-info rounded-circle">
+                                        <i class="ti ti-trash"></i></button>
+                                    <a title="Edit" href="/dashboard/training/viewcontent/{{$content->id}}" class="btn btn-icon btn-label-info rounded-circle">
+                                        <i class="ti ti-hand-finger"></i></a>
                                 </td>
                             </tr>
                 @endforeach
