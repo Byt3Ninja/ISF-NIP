@@ -1,7 +1,16 @@
 @extends('layouts.admin')
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
+  <style>
+    @media screen and (max-width: 768px) {
+      #mob {
+        margin-top: 10px;
+        justify-content: flex-start;
+      }
+    }
+  </style>
 @stop
+
 @section('content')
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
@@ -52,7 +61,7 @@
                       @endforeach
                     </select>
 
-                    <div class="input-group-append mx-2">
+                    <div class="input-group-append mx-2" id="mob">
                       <button class="btn btn-label-secondary"
                         onclick="window.location.href='/dashboard/cycles/{{ $id }}'">
                         <i class="ti ti-circles"></i> <span
