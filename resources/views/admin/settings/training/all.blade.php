@@ -98,7 +98,7 @@
                     @foreach($contents as $content)
                             <tr>
                                 <td>{{$content->arr}}</td>
-                                <td><a title="view" href="/dashboard/training/viewcontent/{{$content->id}}"<i {{$content->title}}</i> </a></td>
+                                <td><a title="view" href="/dashboard/training/viewcontent/{{$content->id}}"> {{$content->title}} </a></td>
                                 <td>{{$content->created_at}}</td>
                                 <td>{{ optional($content->user)->{'first_name_'.$l} }} {{ optional($content->user)->{'last_name_'.$l} }}</td>
                                 <td>
