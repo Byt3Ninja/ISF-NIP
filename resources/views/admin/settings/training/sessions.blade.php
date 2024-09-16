@@ -101,11 +101,11 @@
                                     @if ($session->type=='sessions')
                                     {{__('cycles.Duration')}}:  {{$session->duration}} {{__('cycles.Minutes')}} :
                                 <a href="{{$session->start_url}}" target="_blank">
-                                        <button title="Start Meeting" type="button" class="btn btn-icon rounded-circle btn-light-success">
-                                            <i class="bx bx-slider-alt"></i></button></a> |
+                                        <button title="Start Meeting" type="button" class="btn btn-icon btn-label-success rounded-circle waves-effect">
+                                            <i class="ti ti-brand-zoom"></i></button></a> |
                                 <a href="{{$session->join_url}}" target="_blank">
-                                        <button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-                                            <i class="bx bx-user"></i></button></a>
+                                        <button title="Join only" type="button" class="btn btn-icon btn-label-info rounded-circle waves-effect">
+                                            <i class="ti ti-user"></i></button></a>
                                     @elseif ($session->type=='offline')
                                         <b>{{__('cycles.trainer name')}}:</b> {{$session->trainer_name}}<br><b>{{__('cycles.training location')}}:</b> {{$session->location}} <br>
                                     @else
@@ -113,10 +113,10 @@
                                     @endif
 
                                 </td>
-                                <td> <button title="Edit" onclick="editme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-                                        <i class="bx bx-edit"></i></button>&nbsp;
-                                    <button title="Delete" onclick="deleteme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-danger">
-                                        <i class="bx bx-trash"></i></button>
+                                <td> <button title="Edit" onclick="editme({{$session->id}})" type="button" class="btn btn-icon btn-label-info rounded-circle waves-effect">
+                                        <i class="ti ti-edit"></i></button>&nbsp;
+                                    <button title="Delete" onclick="deleteme({{$session->id}})" type="button" class="btn btn-label-danger btn-icon rounded-circle waves-effect">
+                                        <i class="ti ti-trash"></i></button>
 
                                 </td>
                             </tr>

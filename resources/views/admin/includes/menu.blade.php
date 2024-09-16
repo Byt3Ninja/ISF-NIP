@@ -325,9 +325,12 @@
       <!-- End Questions Nav Item -->
 
       <li class="{{ Request::is('*training*', '*quizzes*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle"><i class="menu-livicon" data-icon="info-alt"></i>
+        <a class="menu-link menu-toggle">
+          {{-- <i class="menu-livicon" data-icon="info-alt"></i> --}}
+          <i class="ti ti-presentation me-3 ti-md"></i>
           <div>{{ __('admin.Training') }}</div>
         </a>
+        
         <ul class="menu-sub">
           <li class="{{ Request::is('dashboard/training/sessions*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/training/sessions">
