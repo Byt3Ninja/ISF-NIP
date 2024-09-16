@@ -596,5 +596,6 @@ return [
 	'Programms'=>'Programms',
 	'Orgnizations'=>'Orgnizations',
 	'OrderSession'=>'Request Mentor Ship',
+	'free'=>' Free ',
 	
 ];

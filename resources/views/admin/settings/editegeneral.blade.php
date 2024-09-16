@@ -80,6 +80,11 @@
                   <li class="nav-item">
                       <a class="nav-link" id="SocialMediaLinks-tab" data-bs-toggle="tab" href="#SocialMediaLinks" role="tab" aria-controls="SocialMediaLinks" aria-selected="false">{{__('settings.SocialMediaLinks')}}</a>
                   </li>
+
+                  <li class="nav-item">
+                    <a class="nav-link" id="Login-tab" data-bs-toggle="tab" href="#SocialMediaLogin" role="tab" aria-controls="SocialMediaLogin" aria-selected="false">{{__('settings.SocialMediaLogin')}}</a>
+                </li>
+
               </ul>
               <!-- اعدادات الـ Tabs End -->
 
@@ -449,7 +454,6 @@
                             <fieldset class="form-label-group">
                               <select class="form-control Meeting" id="Meeting" name="Meeting" required>
                                 <option value="0">{{ __('settings.Choose') }}</option>
-                                <option value="Google" {{ $Title->Meeting == 'Google' ? 'selected' : '' }}>Google</option>
                                 <option value="Teams" {{ $Title->Meeting == 'Teams' ? 'selected' : '' }}>Teams</option>
                                 <option value="Zoom" {{ $Title->Meeting == 'Zoom' ? 'selected' : '' }}>Zoom</option>
                               </select>
@@ -457,32 +461,7 @@
 
                           </div>
 
-                          <div class="GOOGLE_CLIENT_ID" @if ($Title->Meeting != 'Google') style="display: none;" @endif>
-
-                            <div class="col-md-12 col-12">
-                              <div class="form-label-group">
-                                <label class="form-label" for="GOOGLE_CLIENT_ID">{{ __('settings.GOOGLE_CLIENT_ID') }}</label>
-                                <input id="GOOGLE_CLIENT_ID" type="text" class="form-control"
-                                  value="{{ $Title->GOOGLE_CLIENT_ID }}" name="GOOGLE_CLIENT_ID">
-                              </div>
-                            </div>
-                            <div class="col-md-12 col-12">
-                              <div class="form-label-group">
-                                <label class="form-label" for="GOOGLE_CLIENT_SECRET">{{ __('settings.GOOGLE_CLIENT_SECRET') }}</label>
-                                <input type="text" class="form-control" value="{{ $Title->GOOGLE_CLIENT_SECRET }}"
-                                  name="GOOGLE_CLIENT_SECRET" id="GOOGLE_CLIENT_SECRET">
-                              </div>
-                            </div>
-
-                            <div class="col-md-12 col-12">
-                              <div class="form-label-group">
-                                <label class="form-label" for="GOOGLE_REDIRECT">{{ __('settings.GOOGLE_REDIRECT') }}</label>
-                                <input type="text" class="form-control" value="{{ $Title->GOOGLE_REDIRECT }}"
-                                  name="GOOGLE_REDIRECT" id="GOOGLE_REDIRECT">
-                              </div>
-                            </div>
-
-                          </div>
+                          
 
 
                           <div class="MICROSOFT_CLIENT" @if ($Title->Meeting != 'Teams') style="display: none;" @endif>
@@ -607,6 +586,57 @@
                   </form>
                 </div>
                 <!-- End social media links tab -->
+
+                 <!-- Social media links tab -->
+                 <div class="tab-pane fade" id="SocialMediaLogin" role="tabpanel" aria-labelledby="Login-tab">
+                  <form class="form" action= "{{ route('updateSMLogin') }}"
+                    method="POST" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    @method('PUT')
+                    <input type="hidden" name="id" value="{{ $Title->id }}">
+                    <div class="card">
+                      <div class="card-header">
+                        <h5 class="card-title">{{ __('settings.SocialMediaLogin') }}</h5>
+                      </div>
+                      <div class="card-content">
+                        <div class="card-body">
+                          
+                        
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="GOOGLE_CLIENT_ID">{{ __('settings.GOOGLE_CLIENT_ID') }}</label>
+                                <input id="GOOGLE_CLIENT_ID" type="text" class="form-control"
+                                  value="{{ $Title->GOOGLE_CLIENT_ID }}" name="GOOGLE_CLIENT_ID">
+                              </div>
+                            </div>
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="GOOGLE_CLIENT_SECRET">{{ __('settings.GOOGLE_CLIENT_SECRET') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->GOOGLE_CLIENT_SECRET }}"
+                                  name="GOOGLE_CLIENT_SECRET" id="GOOGLE_CLIENT_SECRET">
+                              </div>
+                            </div>
+
+                            <div class="col-md-12 col-12">
+                              <div class="form-label-group">
+                                <label class="form-label" for="GOOGLE_REDIRECT">{{ __('settings.GOOGLE_REDIRECT') }}</label>
+                                <input type="text" class="form-control" value="{{ $Title->GOOGLE_REDIRECT }}"
+                                  name="GOOGLE_REDIRECT" id="GOOGLE_REDIRECT">
+                              </div>
+                            </div>
+
+
+
+                          <div class="col-12 d-flex justify-content-end mt-6">
+                            <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <!-- End social media links tab -->
+
               </div>
               <!-- End Tabs Data -->
 
