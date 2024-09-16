@@ -597,5 +597,7 @@ return [
 	'Orgnizations'=>'Orgnizations',
 	'OrderSession'=>'Request Mentor Ship',
 	'free'=>' Free ',
+	'Trainer'=>'Trainer',
+	'organizationManager'=>'Organization Manager',
 	
 ];

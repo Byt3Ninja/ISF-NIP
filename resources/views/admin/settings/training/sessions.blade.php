@@ -56,7 +56,7 @@
                                 @endforeach
                             </select>
                             <div class="input-group-append">
-                                <button type="button" class="btn btn-primary block" data-toggle="modal" data-target="#addsession">
+                                <button   data-bs-toggle="modal" data-bs-target="#addsession" type="button" class="btn btn-primary block">
                                     <i class="bx bx-plus-circle"></i> <span class="align-middle ml-25">{{__('cycles.Add new training')}}</span>
                                 </button>
                               <a class="btn btn-success" href="/dashboard/cycles/{{$ccycle}}">
@@ -101,11 +101,11 @@
                                     @if ($session->type=='sessions')
                                     {{__('cycles.Duration')}}:  {{$session->duration}} {{__('cycles.Minutes')}} :
                                 <a href="{{$session->start_url}}" target="_blank">
-                                        <button title="Start Meeting" type="button" class="btn btn-icon rounded-circle btn-light-success">
-                                            <i class="bx bx-slider-alt"></i></button></a> |
+                                        <button title="Start Meeting" type="button" class="btn btn-icon btn-label-success rounded-circle waves-effect">
+                                            <i class="ti ti-brand-zoom"></i></button></a> |
                                 <a href="{{$session->join_url}}" target="_blank">
-                                        <button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-                                            <i class="bx bx-user"></i></button></a>
+                                        <button title="Join only" type="button" class="btn btn-icon btn-label-info rounded-circle waves-effect">
+                                            <i class="ti ti-user"></i></button></a>
                                     @elseif ($session->type=='offline')
                                         <b>{{__('cycles.trainer name')}}:</b> {{$session->trainer_name}}<br><b>{{__('cycles.training location')}}:</b> {{$session->location}} <br>
                                     @else
@@ -113,10 +113,10 @@
                                     @endif
 
                                 </td>
-                                <td> <button title="Edit" onclick="editme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-primary">
-                                        <i class="bx bx-edit"></i></button>&nbsp;
-                                    <button title="Delete" onclick="deleteme({{$session->id}})" type="button" class="btn btn-icon rounded-circle btn-light-danger">
-                                        <i class="bx bx-trash"></i></button>
+                                <td> <button title="Edit" onclick="editme({{$session->id}})" type="button" class="btn btn-icon btn-label-info rounded-circle waves-effect">
+                                        <i class="ti ti-edit"></i></button>&nbsp;
+                                    <button title="Delete" onclick="deleteme({{$session->id}})" type="button" class="btn btn-label-danger btn-icon rounded-circle waves-effect">
+                                        <i class="ti ti-trash"></i></button>
 
                                 </td>
                             </tr>
@@ -149,6 +149,103 @@
             </div>
         </div>
     </div>
+
+
+    
+
+    <!-- Edit Customer Modal -->
+    {{-- <div class="modal fade" id="addsession" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="text-center mb-6">
+                        <h4 class="mb-2">{{__('cycles.Add new training session')}} </h4>
+                        <p>يمكنك من هنا التعديل امر الشغل</p>
+                    </div>
+
+                    <form method="post" action="/dashboard/training/addsession" enctype="multipart/form-data" autocomplete="off">
+                        @csrf
+                        <input type="hidden" name="step_id" value="{{$id}}" id="id">
+                      <div class="form-group" id="ctype">
+                          <label>{{__('cycles.Type')}}:</label>
+                          <select name="type" class="select form-control" required onchange="tchange(this.options[this.selectedIndex].value)">
+                              <option value="online">{{__('cycles.online')}}</option>
+                              <option value="sessions">{{__('cycles.sessions')}}</option>
+                              <option value="offline">{{__('cycles.offline')}}</option>
+                          </select>
+                      </div>
+                      <div class="form-group" id="online">
+                          <label>{{__('cycles.select online')}}:</label>
+                          <select name="online" class="select form-control" required id="conline">
+                              @if (!$online)
+                                  <option>{{__('cycles.No saved training courses')}}</option>
+                              @endif
+                              @foreach($online as $tr)
+                                  <option value="{{$tr->id}}">{{$tr->title}}</option>
+                              @endforeach
+                          </select>
+                      </div>
+                      <label>{{__('cycles.Session Title')}}</label>
+                      <div class="form-group">
+                          <input id="title" name="title" type="text" placeholder="{{__('cycles.Session Title')}}" class="form-control" required>
+                      </div>
+                      <label>{{__('cycles.Add a description')}}:</label>
+                      <div class="form-group">
+                              <textarea class="form-control" id="dsc" name='dsc' rows="2"
+                                        placeholder="{{__('cycles.Write your description here')}}." ></textarea>
+                      </div>
+                          <div class="form-group">
+                              <label>{{__('cycles.Date/Time')}}</label>
+                              <input id="datetime" name="datetime" type="text" placeholder="{{__('cycles.Date/Time')}}" class="form-control" required>
+                          </div>
+                      <div class="form-group" style="display: none;" id="enddatetime">
+                          <label>{{__('cycles.End')}}</label>
+                          <input id="enddate" name="enddatetime" type="text" placeholder="{{__('cycles.Date/Time')}}" class="form-control" >
+                      </div>
+                      <div class="form-group" style="display: none;" id="sessions">
+                          <label>{{__('cycles.Session duration')}}:</label>
+                          <select name="duration" class="select form-control" required>
+                              <option value="30">30 {{__('cycles.Minutes')}}</option>
+                              <option value="60" selected>1 {{__('cycles.Hour')}}</option>
+                              <option value="120">2 {{__('cycles.Hours')}}</option>
+                              <option value="180">3 {{__('cycles.Hours')}}</option>
+                              <option value="240">4 {{__('cycles.Hours')}}</option>
+                              <option value="300">5 {{__('cycles.Hours')}}</option>
+                          </select>
+                      </div>
+                      <div class="form-group" id="trainer" style="display: none;">
+                          <label>{{__('cycles.trainer name')}}</label>
+                          <input name="trainer_name" type="text" placeholder="{{__('cycles.trainer name')}}" class="form-control" >
+                      </div>
+                      <div class="form-group" id="trainer_email" style="display: none;">
+                          <label>{{__('cycles.trainer email')}}</label>
+                          <input name="trainer_email" type="text" placeholder="{{__('cycles.trainer email')}}" class="form-control" >
+                      </div>
+                      <div class="form-group" id="location" style="display: none;">
+                          <label>{{__('cycles.training location')}}</label>
+                          <input name="location" type="text" placeholder="{{__('cycles.training location')}}" class="form-control" >
+                      </div>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="submit" class="btn btn-primary ml-1" >
+                          <i class="bx bx-check d-block d-sm-none"></i>
+                          <span class="d-none d-sm-block">{{__('cycles.Submit')}}</span>
+                      </button>
+                    </form>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div> --}}
+    <!--/ Edit JO Modal -->
+
+
+
+
+
     <!-- END: Content-->
 <div class="modal fade text-left" id="addsession" tabindex="-1" role="dialog" aria-labelledby="addsession" aria-hidden="true">
     <div class="modal-dialog">
@@ -233,6 +330,9 @@
         </div>
     </div>
 </div>
+
+
+
 
 
 <div class="modal fade text-left" id="editsession" tabindex="-1" role="dialog" aria-labelledby="editsession" aria-hidden="true">

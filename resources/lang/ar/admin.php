@@ -597,4 +597,6 @@ return [
 	'Orgnizations'=>'الشركات',
 	'OrderSession'=>'طلب جلسة ارشاد',
 	'free'=>' مجاناً ',
+	'Trainer'=>'مدرب',
+	'organizationManager'=>'مدير مؤسسه',
 ];
