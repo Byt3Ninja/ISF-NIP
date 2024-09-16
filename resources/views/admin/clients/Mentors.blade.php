@@ -45,7 +45,7 @@
      
 
       <!-- My Mentors -->
-      @if (Auth::user()->company->approved ?? null && count($mentors))
+
         
 
 
@@ -131,7 +131,7 @@ $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
 	</div>
 
 	
-      @endif
+
       <!-- / My Mentors -->
     </div>
   </div>
