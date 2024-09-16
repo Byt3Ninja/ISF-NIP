@@ -45,10 +45,13 @@
                           {{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
                         </span>
                       </li>
+                      @if ($client->city ??0)
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-map-pin ti-lg"></i><span
-                          class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
+                        <i class="ti ti-map-pin ti-lg"></i><span class="fw-medium">
+                          {{ $client->city->{'name_' . $l} }}
+                        </span>
                       </li>
+                      @endif
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined April 2021</span>
                       </li>
@@ -144,11 +147,13 @@
               <ul class="list-unstyled my-3 py-1">
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</span>
+                  
                   <span>{{ 
                   $l == 'ar' 
                   ? $client->first_name_ar . ' ' . $client->last_name_ar 
                   : $client->first_name_en . ' ' . $client->last_name_en
                   }}</span>
+
                 </li>
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-check ti-lg"></i><span class="fw-medium mx-2">
@@ -168,9 +173,11 @@
                   <i class="ti ti-flag ti-lg"></i><span class="fw-medium mx-2">
                     {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
                   </span>
+                  @if ($client->city ??0)
                   <span>
                     {{ $client->country->{'name_' . $l} }}
                   </span>
+                  @endif
                 </li>
                 <li class="d-flex align-items-center mb-2">
                   <i class="ti ti-language ti-lg"></i><span class="fw-medium mx-2">

@@ -111,9 +111,11 @@ $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
 														@endif
 													</td>
 													<td>
+                            @if ($getid->user ??0)
 														<button onclick="request({{ $mentor->id}},'{{optional($getid->user)->{'first_name_'.$l} }} {{optional($getid->user)->{'last_name_'.$l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-primary">
 															<i class="fa fa-plus"></i>
 														</button>
+                            @endif
 													</td>
 												</tr>
 											@endforeach
