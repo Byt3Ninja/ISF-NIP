@@ -104,9 +104,9 @@
                                 <td>
                                     <a title="Edit" href="/dashboard/training/editcontent/{{$content->id}}" class="btn btn-icon btn-label-info rounded-circle">
                                         <i class="ti ti-edit"></i></a>
-                                    <button title="Delete" onclick="deleteme({{$content->id}},0)" type="button" class="btn btn-icon btn-label-info rounded-circle">
+                                    <button title="Delete" onclick="deleteme({{$content->id}},0)" type="button" class="btn btn-label-danger btn-icon rounded-circle">
                                         <i class="ti ti-trash"></i></button>
-                                    <a title="Edit" href="/dashboard/training/viewcontent/{{$content->id}}" class="btn btn-icon btn-label-info rounded-circle">
+                                    <a title="Edit" href="/dashboard/training/viewcontent/{{$content->id}}" class="btn btn-icon btn-label-primary rounded-circle">
                                         <i class="ti ti-hand-finger"></i></a>
                                 </td>
                             </tr>
