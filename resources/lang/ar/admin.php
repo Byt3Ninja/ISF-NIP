@@ -596,4 +596,5 @@ return [
 	'Programms'=>'البرامج',
 	'Orgnizations'=>'الشركات',
 	'OrderSession'=>'طلب جلسة ارشاد',
+	'free'=>' مجاناً ',
 ];

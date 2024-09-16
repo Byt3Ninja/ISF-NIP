@@ -259,21 +259,15 @@ alert(messages.exportSuccess);
 $(document).on('change', '.Meeting', function(){
     var meeting = $(this).val();
 
-    if(meeting == 'Google'){
-$('.GOOGLE_CLIENT_ID').show();
-$('.MICROSOFT_CLIENT').hide();
-$('.ZOOM_CLIENT').hide();
+   if(meeting == 'Teams'){
 
-
-    }else if(meeting == 'Teams'){
-
-        $('.GOOGLE_CLIENT_ID').hide();
+        
         $('.MICROSOFT_CLIENT').show();
         $('.ZOOM_CLIENT').hide();
 
     }else if(meeting == 'Zoom'){
 
-        $('.GOOGLE_CLIENT_ID').hide();
+       
         $('.MICROSOFT_CLIENT').hide();
         $('.ZOOM_CLIENT').show();
 

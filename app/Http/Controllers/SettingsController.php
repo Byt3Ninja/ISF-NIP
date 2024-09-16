@@ -480,9 +480,6 @@ public function update_settingsMeeting(Request $request){
       
     $id = $request->input('id');
     $Meeting = $request->input('Meeting');
-    $GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
-    $GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
-    $GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
     $MICROSOFT_CLIENT_ID = $request->input('MICROSOFT_CLIENT_ID');
     $MICROSOFT_CLIENT_SECRET_VALUE = $request->input('MICROSOFT_CLIENT_SECRET_VALUE');
     $MICROSOFT_TENANT_ID = $request->input('MICROSOFT_TENANT_ID');
@@ -496,13 +493,7 @@ public function update_settingsMeeting(Request $request){
 
     $updateSittings = Settings::where('id', $id)->first();
     $updateSittings->Meeting = $Meeting;
-    if($Meeting == 'Google'){
-        
-        $updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
-        $updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
-        $updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
-        $updateSittings->save();
-    }
+    
     if($Meeting == 'Teams'){
         $updateSittings->MICROSOFT_CLIENT_ID = $MICROSOFT_CLIENT_ID;
         $updateSittings->MICROSOFT_CLIENT_SECRET_VALUE = $MICROSOFT_CLIENT_SECRET_VALUE;
@@ -524,7 +515,23 @@ public function update_settingsMeeting(Request $request){
 }
 
 
+public function update_settingsLogin(Request $request){
+      
+    $id = $request->input('id');
+    $GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
+    $GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
+    $GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
+    
+    $updateSittings = Settings::where('id', $id)->first();
+        
+        $updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
+        $updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
+        $updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
+        $updateSittings->save();
 
+
+    return redirect()->back()->with('message', 'StoredSuccessfully');
+}
 
 
 

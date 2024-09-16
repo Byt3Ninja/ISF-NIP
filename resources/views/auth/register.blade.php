@@ -114,6 +114,11 @@
             <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
             <p class="mb-6">{{ $formSubHeading }}</p>
 
+
+
+            
+
+
             <div>
               @if (count($errors) > 0)
                 <div class="alert alert-danger">
@@ -128,6 +133,43 @@
 
             <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('register') }}">
               @csrf
+
+                                                    <div class="row">
+
+                                                      <div class="col-md mb-md-0 mb-5">
+                                                        <div class="form-check custom-option custom-option-basic checked">
+                                                          <label class="form-check-label custom-option-content" for="role1">
+                                                            <input name="role" class="form-check-input" type="radio" value="Mentor" id="role1">
+                                                            <span class="custom-option-header">
+                                                              <span class="h6 mb-0">{{__('admin.Mentor')}}</span>
+                                                              <small class="text-muted">{{__('admin.free')}}</small>
+                                                            </span>
+                                                            {{-- <span class="custom-option-body">
+                                                              <small>Get 1 project with 1 teams members.</small>
+                                                            </span> --}}
+                                                          </label>
+                                                        </div>
+                                                      </div>
+
+                                                      <div class="col-md">
+                                                        <div class="form-check custom-option custom-option-basic">
+                                                          <label class="form-check-label custom-option-content" for="role2">
+                                                            <input name="role" class="form-check-input" type="radio" value="Registered" id="role2" checked="">
+                                                            <span class="custom-option-header">
+                                                              <span class="h6 mb-0">{{__('admin.user')}}</span>
+                                                              <small class="text-muted">{{__('admin.free')}}</small>
+                                                            </span>
+                                                            {{-- <span class="custom-option-body">
+                                                              <small>Get 5 projects with 5 team members.</small>
+                                                            </span> --}}
+                                                          </label>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+
+
+
+
               <div class="mb-6">
                 <label for="username" class="form-label">{{$firstName }}</label>
                 <input value="{{ old('first_name_en') }}" name="first_name_en" type="text"

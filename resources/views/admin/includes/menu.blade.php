@@ -107,6 +107,14 @@
         </a>
       </li>
     @endif
+    @if (!Auth::user()->hasanyRole('Mentor|Judger|Startup'))
+      <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a href="/dashboard/show/Mentors"
+          class="menu-link">
+          <i class="ti ti-users ti-md me-2 me-lg-4 ti-lg"></i>
+          <div>{{ __('admin.Mentors') }}</div>
+        </a>
+      </li>
+    @endif
     @role('Mentor')
       <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
         <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">

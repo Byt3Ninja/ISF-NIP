@@ -248,5 +248,7 @@ return [
     'days'=>'Days',
     'export_willsuccess'=>'Export process started. You will receive an email with the download attached.',
     'export_Notsuccess'=>'There is no data to export from the table.',
+    'ProgramCount'=>'Program Counter ',
+    'NA'=>' No Data Avilable ',
 ];
 

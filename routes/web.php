@@ -118,6 +118,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::put('settings/UpdateMail', 'SettingsController@update_settingsmail')->name('updateMail');
     Route::put('settings/UpdatePush', 'SettingsController@update_settingspush')->name('updatePush');
     Route::put('settings/UpdateMeeting', 'SettingsController@update_settingsMeeting')->name('updateMeeting');
+    Route::put('settings/UpdateLogin', 'SettingsController@update_settingsLogin')->name('updateSMLogin');
 
 	//services categories Manager routes
 	Route::resource('serviceCategories', 'ServiceCategoryController');
@@ -144,7 +145,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
 	Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
 	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
-    Route::get('/show/MentorProfile/{id}', 'ClientProfileController@showMintor')->name('show_mentor_profile');
+    Route::get('/show/MentorProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
+    Route::get('/show/Mentors', 'ClientProfileController@showMintors');
 
 
 

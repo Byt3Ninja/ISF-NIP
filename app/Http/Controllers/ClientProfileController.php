@@ -138,7 +138,7 @@ class ClientProfileController extends Controller
         }
     }
 
-    public function showMintor($id){
+    public function showMintorprofile($id){
 
         $client = User::find($id);
         // $exp = Expertise::where('parent_id',null)->get();
@@ -153,6 +153,8 @@ class ClientProfileController extends Controller
         }
         $mentors = CyclesMentors::where('user_id', $id ?? 0)->get();
 
+
+
         $order = CyclesMentors::where('cycle_id', Auth::user()->company->cycle ?? 0)->where('user_id', $id ?? 0)->first();
 
         
@@ -164,7 +166,17 @@ class ClientProfileController extends Controller
 
     }
 
+    public function showMintors(){
 
+      
+        $mentors = User::role('mentor')->get();
+        
+       
+
+            return view('admin/clients/Mentors', compact('mentors'));
+
+
+    }
 
 
 

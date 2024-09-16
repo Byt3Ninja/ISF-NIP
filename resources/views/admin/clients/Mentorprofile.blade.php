@@ -32,9 +32,11 @@
                       {{ 
                         $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en
                       }}
+                      @if(!empty($client->bio->linkedin))
                       <a target="_blank" href="{{ $client->bio->linkedin }}">
                         <i class="ti ti-brand-linkedin ti-lg"></i>
                         </a>
+                        @endif
                     </h4>
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
@@ -55,11 +57,12 @@
                   <a href="javascript:void(0)" class="btn btn-primary mb-1 disabled">
                     <i class="ti ti-user-check ti-xs me-2"></i>Follow
                   </a>
+                  @if(!empty($order))
                   <button onclick="request({{$order->user_id}},'{{optional($order->user)->{'first_name_'.$l} }} {{optional($order->user)->{'last_name_'.$l} }}', {{ $order->cycle->organization_id }},{{ $order->cycle_id }})" title="Add new request" type="button" class="btn btn-primary mb-1">
                     {{-- <i class="fa fa-plus"></i>  --}}
                     {{__('admin.OrderSession')}}
                 </button>
- 
+ @endif
                   
 
                 </div>
@@ -106,17 +109,21 @@
         <div class="col-xl-12 col-lg-12 col-md-12">
           <div class="card mb-6">
             <div class="card-body">
-              
+             
               <small class="card-text text-uppercase text-muted small">
+                
           {{__('admin.ProfileSummary')}}
               </small><br><br>
+              @if(!empty($client->bio->bio_ar))
           {{ $client->bio->bio }}
           {{ 
             $l == 'ar' 
             ? $client->bio->bio_ar
             : $client->bio->bio_en 
             }}
-           
+            @else
+            {{__('cycles.NA')}}
+           @endif
         </div>
       </div>
         </div>
