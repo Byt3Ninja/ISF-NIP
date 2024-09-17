@@ -249,6 +249,24 @@ return [
     'export_willsuccess'=>'Export process started. You will receive an email with the download attached.',
     'export_Notsuccess'=>'There is no data to export from the table.',
     'ProgramCount'=>'Program Counter ',
-    'NA'=>' No Data Avilable ',
+    'Course Name'=>'Course Name',
+    'Code'=>' Code ',
+    'CoursCategories'=>' Categories ',
+    'Tags'=>' Tags ',
+    'CoursLevel'=>' Cours Level ',
+    'Quizs'=>' Quiz ',
+    'Instractor'=>' Instractor ',
+    'CoursStart'=>' Cours Start ',
+    'CoursEnd'=>' Cours End ',
+    'Draft'=>' Draft ',
+    'Published'=>' Published ',
+    'SaveProgram'=>' Save a Program ',
+    'Cancel'=>' Cancel ',
+    'PublishProgram'=>' Publish a Program ',
+    'Code'=>' Code ',
+    'Code'=>' Code ',
+
+
+
 ];
 

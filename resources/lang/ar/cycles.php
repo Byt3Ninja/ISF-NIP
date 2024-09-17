@@ -247,6 +247,28 @@ return [
     'export_willsuccess'=>' بدأت عملية التصدير. ستتلقى بريدًا إلكترونيًا يحتوي على الملف المرفق بالتنزيل ',
     'export_Notsuccess'=>' لا يوجد بيانات لإستخراجها من الجدول ',
     'ProgramCount'=>'عدد البرامج',
-    'NA'=>'لا يوجد بيانات متوفرة',
+    'Course Name'=>' اسم الكورس ',
+    'Code'=>' الكود ',
+    'CoursCategories'=>' القسم ',
+    'Tags'=>' الوسم ',
+    'CoursLevel'=>' مستوى الكورس ',
+    'Quizs'=>' الاسئلة ',
+    'Instractor'=>' المُحاضر ',
+    'CoursStart'=>' تاريخ البداية ',
+    'CoursEnd'=>' تاريخ الانتهاء ',
+    'Draft'=>' حفظ ',
+    'Published'=>' نشر ',
+    'SaveProgram'=>' حفظ البرنامج ',
+    'Cancel'=>' ألغاء ',
+    'PublishProgram'=>' نشر البرنامج ',
+
+
+
+
+
+
+
+
+
     ];
 

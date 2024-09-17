@@ -80,6 +80,8 @@
             @if (isset($course))
             <a class="btn btn-primary glow" href="/dashboard/training/addcontent/{{$id}}" >{{__('cycles.Add new content')}}</a>
                 @endif
+
+                <a class="btn btn-info glow" href="{{route('training.create')}}" >{{__('cycles.Add new content')}}</a>
         </div>
             <div class="card-body">
             <div class="card-text">
