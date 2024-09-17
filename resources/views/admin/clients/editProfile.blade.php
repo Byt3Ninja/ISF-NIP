@@ -169,11 +169,7 @@
                       id="title_en" style="direction: ltr;" placeholder="{{ __('admin.JobTitleEn') }}" required
                       autocomplete="title_en">
                   </div>
-                  <div class="mb-4 col-md-6">
-                    <label for="organization" class="form-label">Organization</label>
-                    <input type="text" class="form-control" id="organization" name="organization"
-                      value="Pixinvent" />
-                  </div>
+                  
                   <div class="mb-4 col-md-6">
                     <label for="phone" class="form-label">{{ __('admin.Phone') }}</label>
                     <div class="input-group">

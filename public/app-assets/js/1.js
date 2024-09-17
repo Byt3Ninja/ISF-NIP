@@ -273,14 +273,19 @@ $(document).on('change', '.Meeting', function(){
 
     }
 
-
-
-
 });
 
 
 
-  
+$(document).on('change', '.roleshow', function(){
+    var role = $(this).val();
+   
+   if(role == 'Mentor'){
+        $('.ShowInputMentor').show();
+    }else{
+        $('.ShowInputMentor').hide();
+    }
+});
 
 
 

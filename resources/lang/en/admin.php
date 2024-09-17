@@ -599,5 +599,8 @@ return [
 	'free'=>' Free ',
 	'Trainer'=>'Trainer',
 	'organizationManager'=>'Organization Manager',
+	'Founder'=>'Founder',
+	'Industry Expertise'=>'Industry Expertise',
+	'userbio'=> 'Bio',
 	
 ];
