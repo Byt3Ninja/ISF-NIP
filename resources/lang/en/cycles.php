@@ -133,6 +133,7 @@ return [
     'Training courses' => 'Training courses',
     'Select course' => 'Select course',
     'Add new content' => 'Add new content',
+    'Add new Training' => 'Add new Training',
     'Created at' => 'Created at',
     'Added By' => 'Added By',
     'Edit/Delete' => 'Edit/Delete',
@@ -263,8 +264,9 @@ return [
     'SaveProgram'=>' Save a Program ',
     'Cancel'=>' Cancel ',
     'PublishProgram'=>' Publish a Program ',
-    'Code'=>' Code ',
-    'Code'=>' Code ',
+    'Beginner'=>' Beginner ',
+    'Intermediate'=>' Intermediate ',
+    'Advanced'=>' Advanced ',
 
 
 

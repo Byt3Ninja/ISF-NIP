@@ -111,22 +111,33 @@
 
                             <div class="col-md-7 mb-6">
                                 <label class="form-label">{{__('cycles.CoursLevel')}}</label>
-                                    <select  class="form-select" name="CoursLevel" multiple="" >
-                                    <option value="AK">Alaska</option>
+                                    <select  class="form-select" name="CoursLevel"  >
+                                    <option value="Beginner">{{__('cycles.Beginner')}}</option>
+                                    <option value="Intermediate">{{__('cycles.Intermediate')}}</option>
+                                    <option value="Advanced">{{__('cycles.Advanced')}}</option>
                                 </select>
                             </div>
+
+
 
                             <div class="col-md-7 mb-6">
                                 <label class="form-label">{{__('cycles.Quizs')}}</label>
-                                    <select  class="form-select" name="Quizs" multiple="" >
-                                    <option value="AK">Alaska</option>
+                                    <select  class="form-select" name="Quizs" >
+                                        @foreach ($Quizzes as $Quizz)
+                                    <option value="{{$Quizz->id}}">{{$Quizz->title}}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
+
+
+
                             <div class="col-md-7 mb-6">
                                 <label class="form-label">{{__('cycles.Instractor')}}</label>
-                                    <select  class="form-select" name="Instractor" multiple="" >
-                                    <option value="AK">Alaska</option>
+                                    <select  class="form-select" name="Instractor" >
+                                        @foreach ($instructors as $instructor)
+                                        <option value="{{$instructor->id}}">{{$instructor->first_name_ar ." ". $instructor->last_name_ar }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 

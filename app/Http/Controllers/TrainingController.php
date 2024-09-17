@@ -697,7 +697,13 @@ class TrainingController extends Controller
         $randomNumber = sprintf('%06d', rand(0, 999999));
 
         $expertises = Expertise::where('parent_id',null)->get();
-        return view('admin/settings/training/newCours', compact('randomNumber','expertises','client'));
+        $Quizzes = Quizzes::all();
+
+        $instructors = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Trainer');
+        })->get();
+
+        return view('admin/settings/training/newCours', compact('randomNumber','expertises','client','Quizzes', 'instructors'));
     }
 
 

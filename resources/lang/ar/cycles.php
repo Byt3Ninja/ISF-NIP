@@ -131,6 +131,7 @@ return [
     'Training courses' => 'البرامج التدريبية',
     'Select course' => 'إختيار كورس',
     'Add new content' => 'إضافة محتوى جديد',
+    'Add new Training' => 'إضافة تدريب جديد',
     'Created at' => 'أنشئ بتاريخ',
     'Added By' => 'إضيف بواسطة',
     'Edit/Delete' => 'تحرير/ حذف',
@@ -260,6 +261,9 @@ return [
     'Published'=>' نشر ',
     'SaveProgram'=>' حفظ البرنامج ',
     'Cancel'=>' ألغاء ',
+    'Beginner'=>' مبتداء ',
+    'Intermediate'=>' متوسط ',
+    'Advanced'=>' متقدم ',
     'PublishProgram'=>' نشر البرنامج ',
 
 
