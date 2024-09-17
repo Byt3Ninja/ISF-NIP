@@ -599,4 +599,7 @@ return [
 	'free'=>' مجاناً ',
 	'Trainer'=>'مدرب',
 	'organizationManager'=>'مدير مؤسسه',
+	'Founder'=>'مؤسس',
+	'Industry Expertise'=>'الخبرات',
+	'userbio'=> 'السيرة الذاتية',
 ];

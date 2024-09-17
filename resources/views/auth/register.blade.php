@@ -43,15 +43,27 @@
 
   <!-- Vendors CSS -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
-
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
-  <!-- Vendor -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  
+  <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css">
+  <link rel="stylesheet" href="/app-assets/plugins/alertify/css/alertify.min.css">
+  <link rel="stylesheet" href="/app-assets/plugins/alertify/css/themes/bootstrap.min.css">
 
   <!-- Page CSS -->
-  <!-- Page -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
+
+  <style>
+    .codeInputContainer {
+      width: 135px;
+    }
+  </style>
 
   <!-- Helpers -->
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
@@ -65,6 +77,7 @@
 </head>
 <!-- END: Head-->
 <!-- BEGIN: Body-->
+
 
 <body>
   @php
@@ -134,38 +147,38 @@
             <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('register') }}">
               @csrf
 
-                                                    <div class="row">
-
-                                                      <div class="col-md mb-md-0 mb-5">
-                                                        <div class="form-check custom-option custom-option-basic checked">
-                                                          <label class="form-check-label custom-option-content" for="role1">
-                                                            <input name="role" class="form-check-input" type="radio" value="Mentor" id="role1">
-                                                            <span class="custom-option-header">
-                                                              <span class="h6 mb-0">{{__('admin.Mentor')}}</span>
-                                                              <small class="text-muted">{{__('admin.free')}}</small>
-                                                            </span>
-                                                            {{-- <span class="custom-option-body">
-                                                              <small>Get 1 project with 1 teams members.</small>
-                                                            </span> --}}
-                                                          </label>
+                                                    
+                                                    <div class="card-body">
+                                                      <div class="row">
+                                                        <div class="col-md mb-md-0 mb-5">
+                                                          <div class="form-check custom-option custom-option-icon checked">
+                                                            <label class="form-check-label custom-option-content" for="role1">
+                                                              <span class="custom-option-body">
+                                                                <i class="ti ti-rocket"></i>
+                                                                <span class="custom-option-title">{{__('admin.Mentor')}}</span>
+                                                                <small></small>
+                                                              </span>
+                                                              <input name="role" class="form-check-input roleshow" type="radio" value="Mentor" id="role1">
+                                                            </label>
+                                                          </div>
                                                         </div>
-                                                      </div>
-
-                                                      <div class="col-md">
-                                                        <div class="form-check custom-option custom-option-basic">
-                                                          <label class="form-check-label custom-option-content" for="role2">
-                                                            <input name="role" class="form-check-input" type="radio" value="Registered" id="role2" checked="">
-                                                            <span class="custom-option-header">
-                                                              <span class="h6 mb-0">{{__('admin.user')}}</span>
-                                                              <small class="text-muted">{{__('admin.free')}}</small>
-                                                            </span>
-                                                            {{-- <span class="custom-option-body">
-                                                              <small>Get 5 projects with 5 team members.</small>
-                                                            </span> --}}
-                                                          </label>
+                                                        <div class="col-md mb-md-0 mb-5">
+                                                          <div class="form-check custom-option custom-option-icon">
+                                                            <label class="form-check-label custom-option-content" for="role2">
+                                                              <span class="custom-option-body">
+                                                                <i class="ti ti-star"></i>
+                                                                <span class="custom-option-title"> {{__('admin.Founder')}} </span>
+                                                                <small></small>
+                                                              </span>
+                                                              <input name="role" class="form-check-input roleshow" type="radio" value="Registered" id="role2" checked="">
+                                                            </label>
+                                                          </div>
                                                         </div>
+                                                        
                                                       </div>
                                                     </div>
+
+                                                    <br><br>
 
 
 
@@ -215,26 +228,8 @@
               <div class="mb-6">
                 <label class="form-label" for="phone">{{ __('auth.Phone') }}</label>
                 <div class="input-group">
-                  <div style="width: 125px">
-                    <select class="form-select" name="country_code" id="country_code" required>
-                      <option value="+20">+20 (EG)</option>
-                      <option value="+212">+212 (MA)</option>
-                      <option value="+213">+213 (DZ)</option>
-                      <option value="+216">+216 (TN)</option>
-                      <option value="+218">+218 (LY)</option>
-                      <option value="+973">+973 (BH)</option>
-                      <option value="+965">+965 (KW)</option>
-                      <option value="+968">+968 (OM)</option>
-                      <option value="+974">+974 (QA)</option>
-                      <option value="+966">+966 (KSA)</option>
-                      <option value="+971">+971 (AE)</option>
-                      <option value="+962">+962 (JO)</option>
-                      <option value="+964">+964 (IQ)</option>
-                      <option value="+963">+963 (SY)</option>
-                      <option value="+961">+961 (LB)</option>
-                      <option value="+970">+970 (PS)</option>
-                      <option value="+249">+249 (SD)</option>
-                      <option value="+967">+967 (YE)</option>
+                  <div class="codeInputContainer">
+                    <select id="country_code" name="country_code" class="form-select select2" required>
                     </select>
                   </div>
                   <input type="text" class="form-control mx-2 rounded" id="phone"
@@ -242,6 +237,7 @@
                       required autocomplete="phone" />
                 </div>
               </div>
+
 
               <div class="form-group mb-3">
                 <label class="form-label mb-3" for="country">{{ $gender }}</label>
@@ -264,6 +260,60 @@
                   </li>
                 </ul>
               </div>
+
+
+<div class="ShowInputMentor" style="display: none;">
+              <div class="mb-6">
+                <label for="username" class="form-label">{{ __('admin.JobTitleEn') }}</label>
+                <input value="{{ old('Title') }}" name="title_en" type="text"
+                class="form-control" id="Title"
+                placeholder="{{ __('admin.JobTitleEn') }}"
+                autocomplete="title_en" />
+              </div>
+
+
+              
+
+              <div class="md-6">
+                <div class="form-label-group">
+                  <h6 for="Expertise">{{ __('admin.Industry Expertise') }}</h6>
+                  <div class="form-group">
+                    <select name="Expertise[]" class="select2 form-control" multiple="multiple"
+                      id="Expertise">
+                      @php
+$expertises = App\Expertise::all();
+                    @endphp
+                      @foreach ($expertises as $expertise_group)
+                        <optgroup label="{{ $expertise_group->title }}">
+                          @foreach ($expertise_group->children as $expertise)
+                            <option value="{{ $expertise->id }}" > {{ $expertise->title }} </option>
+                          @endforeach
+                        </optgroup>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <br>
+              <div class="mb-6">
+                <label for="userbio" class="form-label">{{ __('admin.userbio') }}</label>
+                <textarea name="userbio" type="text"
+                class="form-control" id="userbio"
+                placeholder="{{ __('admin.userbio') }}"
+                autocomplete="userbio" >{{ old('userbio') }}</textarea>
+               
+              </div>
+
+              <div class="mb-6">
+                <label for="Linkedin" class="form-label">{{ __('admin.Linkedin') }}</label>
+                <input value="{{ old('Linkedin') }}" name="Linkedin" type="text"
+                class="form-control" id="Linkedin"
+                placeholder="{{ __('admin.Linkedin') }}"
+                autocomplete="Linkedin" />
+              </div>
+
+            </div>
 
               {{-- <div class="my-8">
                 <div class="form-check mb-0 ms-2">
@@ -302,25 +352,30 @@
 
   <!-- / Content -->
 
-  <!-- Core JS -->
-  <!-- build:js assets/vendor/js/core.js -->
+ <!-- Core JS -->
+    <!-- build:js assets/vendor/js/core.js -->
 
-  <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
-  <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
-  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
-  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
-  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-  <script src="/vuexy/assets/vendor/js/menu.js"></script>
+    <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
+    <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+    <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+    <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
+    <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+    <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+    <script src="/vuexy/assets/vendor/js/menu.js"></script>
+    <script src="/app-assets/js/1.js"></script>
+    <!-- endbuild -->
 
-  <!-- endbuild -->
+    <!-- Vendors JS -->
+    <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+    <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+    <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+    <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+    <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
+    <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+    <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 
-  <!-- Vendors JS -->
-  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
@@ -332,6 +387,28 @@
 
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-auth.js"></script>
+  <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+
+    <!-- Get countries and phone codes -->
+    <script>
+      fetch('https://restcountries.com/v3.1/all')
+      .then(response => response.json())
+      .then(data => {
+          const select = document.getElementById('country_code');
+          data.forEach(country => {
+              const option = document.createElement('option');
+              const countryCode = `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
+              option.value = countryCode;
+              option.text = `${countryCode} (${country.cca2})`;
+              option.style.fontSize = '12px';
+              if (country.cca2 === 'EG') {
+                  option.selected = true;
+              }
+              select.appendChild(option);
+          });
+      });
+    </script>
+
 </body>
 
 </html>
