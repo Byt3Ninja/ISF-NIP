@@ -4,6 +4,20 @@
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css">
   <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css">
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+
+  <style>
+    #mob {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    @media screen and (max-width: 768px) {
+      #mob {
+        margin-top: 10px;
+        justify-content: flex-start;
+      }
+    }
+  </style>
 @stop
 
 @section('content')
@@ -38,7 +52,7 @@
                   </div>
                   <div class="card-body">
                     <label class="form-label">{{ __('cycles.Select cycle from list') }}</label>
-                    <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+                    <div class="d-flex flex-column flex-md-row justify-content-between" style="width: 100%;">
                       <div style="width: 65%;">
                         <select id="ccycle" class="select2 form-control"
                           onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value,'_self');">
@@ -51,7 +65,7 @@
                           @endforeach
                         </select>
                       </div>
-                      <div style="width: auto;" class="d-flex justify-content-end">
+                      <div style="width: auto;" id="mob">
                         <div class="input-group-append">
                           <button class="btn btn-label-warning btn-sm py-2"
                             onclick="window.location.href='/dashboard/cycles/{{ $id }}/registered'">
@@ -75,7 +89,7 @@
                     </div>
                     <br />
                     <label class="form-label">{{ __('cycles.Add cycle steps') }}</label>
-                    <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+                    <div class="d-flex flex-column flex-md-row justify-content-between" style="width: 100%;">
                       <div style="width: 80%;">
                         <select class="select2 form-control" id="StepSelect">
                           <option value="1">{{ __('cycles.Custom Form') }}</option>
@@ -85,7 +99,7 @@
                           <option value="5">{{ __('cycles.Final evaluation') }}</option>
                         </select>
                       </div>
-                      <span class="input-group-append" class="d-flex justify-content-end">
+                      <span class="input-group-append"id="mob">
                         <button class="btn btn-label-primary" onclick="DoChange(4)">
                           <i class="ti ti-plus"></i>
                           <span class="mx-2">{{ __('cycles.Add New step') }}</span>
@@ -116,47 +130,51 @@
                       <ul class="list-group" id="basic-list-group">
                         @foreach ($steps as $step)
                           <li class="list-group-item">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-between" style="flex-wrap: wrap; width: 100%;">
                               {{-- <i class="ti ti-plus ti-28px"></i> --}}
                               {{-- <i class="livicon-evo mr-2"
                                 data-options="name: {{ $svgs[$step->stype - 1] }}.svg; size: 50px; style: original;">
                               </i> --}}
-                              <div class="bg-label-secondary rounded d-flex justify-content-center align-items-center"
-                                style="width: 50px; height: 50px;">
 
-                                @if ($step->title === 'Application Test')
-                                  <i class="ti ti-notes ti-28px"></i>
-                                @elseif($step->title === 'Rehearsals')
-                                  <i class="ti ti-notes ti-28px"></i>
-                                @elseif($step->title === 'Ideation Bootcamp')
-                                  <i class="ti ti-notes ti-28px"></i>
-                                @elseif($step->title === 'Final Evaluation')
-                                  <i class="ti ti-notes ti-28px"></i>
-                                @elseif($step->title === 'Business Planning Bootcamp')
-                                  <i class="ti ti-notes ti-28px"></i>
-                                @elseif($step->title === 'Audit')
-                                  <i class="ti ti-notes ti-28px"></i>
-                                @else
-                                  <i class="ti ti-notes ti-28px"></i>
-                                @endif
-                              </div>
+                              <div class="d-flex align-items-center">
 
-                              <div class="d-flex justify-content-between align-items-center mx-6" style="width: 100%">
-                                <div>
-                                  <h5 class="mt-0">
-                                    <span id="{{ $step->id }}-step"
-                                      class="carr">{{ $step->arr }}</span>-&nbsp;{{ $step->title }}
-                                    @if ($step->stype == 1 && !empty($step->form))
-                                      <small>( {{ __('cycles.Custom Form') }} &nbsp;-&nbsp; {{ $step->form->form_name }}
-                                        )</small>
-                                    @endif
-                                  </h5>
-                                  {{ __('cycles.Start From') }}
-                                  {{ !empty($step->from) ? $step->from->format('d-m') : '-' }}, {{ __('cycles.to') }}
-                                  {{ !empty($step->to) ? $step->to->format('d-m-Y') : '-' }}
+                                <div class="bg-label-secondary rounded d-flex justify-content-center align-items-center"
+                                  style="width: 50px; height: 50px;">
+  
+                                  @if ($step->title === 'Application Test')
+                                    <i class="ti ti-notes ti-28px"></i>
+                                  @elseif($step->title === 'Rehearsals')
+                                    <i class="ti ti-notes ti-28px"></i>
+                                  @elseif($step->title === 'Ideation Bootcamp')
+                                    <i class="ti ti-notes ti-28px"></i>
+                                  @elseif($step->title === 'Final Evaluation')
+                                    <i class="ti ti-notes ti-28px"></i>
+                                  @elseif($step->title === 'Business Planning Bootcamp')
+                                    <i class="ti ti-notes ti-28px"></i>
+                                  @elseif($step->title === 'Audit')
+                                    <i class="ti ti-notes ti-28px"></i>
+                                  @else
+                                    <i class="ti ti-notes ti-28px"></i>
+                                  @endif
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mx-6" style="width: 100%">
+                                  <div>
+                                    <h5 class="mt-0">
+                                      <span id="{{ $step->id }}-step"
+                                        class="carr">{{ $step->arr }}</span>-&nbsp;{{ $step->title }}
+                                      @if ($step->stype == 1 && !empty($step->form))
+                                        <small>( {{ __('cycles.Custom Form') }} &nbsp;-&nbsp; {{ $step->form->form_name }}
+                                          )</small>
+                                      @endif
+                                    </h5>
+                                    {{ __('cycles.Start From') }}
+                                    {{ !empty($step->from) ? $step->from->format('d-m') : '-' }}, {{ __('cycles.to') }}
+                                    {{ !empty($step->to) ? $step->to->format('d-m-Y') : '-' }}
+                                  </div>
                                 </div>
                               </div>
-                              <div class="d-flex align-items-center">
+
+                              <div class="d-flex align-items-center" id="mob">
                                 <a href="javascript:void(0)" onclick="ModifyStep(1,{{ $step->id }})"
                                   id="{{ $step->id }}" title="{{ __('cycles.Edit Title and dates') }}">
                                   <span class="btn btn-icon btn-label-info rounded-circle">

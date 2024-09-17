@@ -100,16 +100,16 @@
                     @foreach($contents as $content)
                             <tr>
                                 <td>{{$content->arr}}</td>
-                                <td>{{$content->title}}</td>
+                                <td><a title="view" href="/dashboard/training/viewcontent/{{$content->id}}"> {{$content->title}} </a></td>
                                 <td>{{$content->created_at}}</td>
                                 <td>{{ optional($content->user)->{'first_name_'.$l} }} {{ optional($content->user)->{'last_name_'.$l} }}</td>
                                 <td>
-                                    <a title="Edit" href="/dashboard/training/editcontent/{{$content->id}}" class="btn btn-icon rounded-circle btn-light-success">
-                                        <i class="bx bx-edit"></i></a>
-                                    <button title="Delete" onclick="deleteme({{$content->id}},0)" type="button" class="btn btn-icon rounded-circle btn-light-danger">
-                                        <i class="bx bx-trash"></i></button>
-                                    <a title="Edit" href="/dashboard/training/viewcontent/{{$content->id}}" class="btn btn-icon rounded-circle btn-light-primary">
-                                        <i class="bx bx-show"></i></a>
+                                    <a title="Edit" href="/dashboard/training/editcontent/{{$content->id}}" class="btn btn-icon btn-label-info rounded-circle">
+                                        <i class="ti ti-edit"></i></a>
+                                    <button title="Delete" onclick="deleteme({{$content->id}},0)" type="button" class="btn btn-label-danger btn-icon rounded-circle">
+                                        <i class="ti ti-trash"></i></button>
+                                    <a title="Edit" href="/dashboard/training/viewcontent/{{$content->id}}" class="btn btn-icon btn-label-primary rounded-circle">
+                                        <i class="ti ti-hand-finger"></i></a>
                                 </td>
                             </tr>
                 @endforeach
