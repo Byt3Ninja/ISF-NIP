@@ -16,6 +16,12 @@
     .content-section.active {
       display: block;
     }
+
+    .codeInputContainer {
+      width: 135px;
+      margin-left: {{$l == 'ar' ? '10px' : 0}};
+      margin-right: {{$l == 'en' ? '10px' : 0}};
+    }
   </style>
 @stop
 
@@ -57,7 +63,8 @@
                 @if (session()->has('msg'))
                   <div class="row">
                     <div class="col-md-12">
-                      <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+                      <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
+                        role="alert">
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         <div class="d-flex justify-content-between align-items-center">
                           <div class="d-flex align-items-center">
@@ -99,7 +106,7 @@
                       <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
                         <span class="d-none d-sm-block">Upload new photo</span>
                         <i class="ti ti-upload d-block d-sm-none"></i>
-                        <input hidden type="file" name="img_url" class="account-file-input" id="upload" 
+                        <input hidden type="file" name="img_url" class="account-file-input" id="upload"
                           accept="image/*" />
                       </label>
                       <button type="button" class="btn btn-label-secondary account-image-reset mb-4">
@@ -169,9 +176,15 @@
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="phone" class="form-label">{{ __('admin.Phone') }}</label>
-                    <input type="text" class="form-control" id="phone" style="direction: ltr;"
-                      placeholder="{{ __('admin.Phone') }}" value="{{ $client->phone }}" name="phone" required
-                      autocomplete="new-phone" />
+                    <div class="input-group">
+                      <div class="codeInputContainer">
+                        <select id="country_code" name="country_code" class="form-select select2" required>
+                        </select>
+                      </div>
+                      <input type="text" class="form-control" id="phone" style="direction: ltr;"
+                        placeholder="{{ __('admin.Phone') }}" value="{{ $client->phone }}" name="phone" required
+                        autocomplete="new-phone" />
+                    </div>
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="address" class="form-label">Address</label>
@@ -525,8 +538,27 @@
   <!-- Content wrapper -->
 @stop
 
-
 @section('scripts')
+  <!-- Get countries and phone codes -->
+  <script>
+    fetch('https://restcountries.com/v3.1/all')
+    .then(response => response.json())
+    .then(data => {
+        const select = document.getElementById('country_code');
+        data.forEach(country => {
+            const option = document.createElement('option');
+            const countryCode = `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
+            option.value = countryCode;
+            option.text = `${countryCode} (${country.cca2})`;
+            option.style.fontSize = '12px';
+            if (country.cca2 === 'EG') {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+    });
+  </script>
+
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -704,22 +736,22 @@
               break;
           } @endif
 
-                                                          $('.entrepreneurial_experience').change(function() {
-                                                            var value = $(this).val();
-                                                            switch (value) {
-                                                              case '1':
-                                                                $('#entrepreneurial_experience_brief').show();
-                                                                break;
-                                                              case '0':
-                                                                $('#entrepreneurial_experience_brief').hide();
-                                                                break;
-                                                              default:
-                                                                $('#entrepreneurial_experience_brief').hide();
-                                                                break;
-                                                            }
+                                                            $('.entrepreneurial_experience').change(function() {
+                                                              var value = $(this).val();
+                                                              switch (value) {
+                                                                case '1':
+                                                                  $('#entrepreneurial_experience_brief').show();
+                                                                  break;
+                                                                case '0':
+                                                                  $('#entrepreneurial_experience_brief').hide();
+                                                                  break;
+                                                                default:
+                                                                  $('#entrepreneurial_experience_brief').hide();
+                                                                  break;
+                                                              }
+                                                            });
                                                           });
-                                                        });
-                                                      </script>
+                                                        </script>
   @endrole
 
 @stop
