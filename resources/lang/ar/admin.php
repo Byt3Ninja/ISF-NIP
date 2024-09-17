@@ -296,7 +296,7 @@ return [
 	'Cycle' =>'البرنامج الحالية',
 	'Cycle informations' =>'بيانات البرنامج',
 	'Number of employees' =>'عدد موظفي الشركة',
-	'founder' =>'المؤسس',
+	'founder' =>'انا مؤسس',
 	'investors' =>'المستثمرون',
 	'raised_fund' =>'رأس المال',
 	'Stage' =>'المرحلة الحالية',
