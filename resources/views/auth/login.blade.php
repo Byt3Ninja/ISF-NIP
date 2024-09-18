@@ -53,6 +53,14 @@
   <!-- Page -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
+  <style>
+    #switcher-container {
+      position: absolute;
+      top: 1rem;
+      width: 100px;
+    }
+  </style>
+
   <!-- Helpers -->
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
   <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
@@ -112,7 +120,69 @@
       <!-- /Left Text -->
 
       <!-- Login -->
-      <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
+      <div class="col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
+        <!-- Toggle theme and language -->
+        <nav 
+          class="container-xxl navbar navbar-expand-xl align-items-center"
+          style="{{ $l == 'ar' ? 'left: 3rem' : 'right: 3rem' }}"
+          id="switcher-container"
+        >
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <!-- Language -->
+              <li class="nav-item dropdown-language dropdown">
+                <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+                  href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <i class="ti ti-language rounded-circle ti-md"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li class="dropdown dropdown-language nav-item">
+                    @if ($l == 'ar')
+                      <a class="dropdown-item" href="/lang/en">
+                        <i class="flag-icon flag-icon-us"></i>
+                        <span class="selected-language">English</span>
+                      </a>
+                    @else
+                      <a class="dropdown-item" href="/lang/ar">
+                        <i class="flag-icon flag-icon-sa"></i>
+                        <span class="selected-language">عربي</span>
+                      </a>
+                    @endif
+                  </li>
+                </ul>
+              </li>
+              <!--/ Language -->
+
+              <!-- Style Switcher -->
+              <li class="nav-item dropdown-style-switcher dropdown">
+                <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow"
+                  href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <i class="ti ti-md"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+                      <span class="align-middle"><i class="ti ti-sun ti-md me-3"></i>Light</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+                      <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
+                      <span class="align-middle"><i class="ti ti-device-desktop-analytics ti-md me-3"></i>System</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <!-- / Style Switcher-->
+            </ul>
+          </div>
+        </nav>
+        <!-- Toggle theme and language -->
+
         <div class="w-px-400 mx-auto mt-12 pt-5">
           <h4 class="mb-1">{{ $formHeading }}</h4>
           <p class="mb-6">{{ $formSubHeading }}</p>
