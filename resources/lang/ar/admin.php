@@ -606,4 +606,7 @@ return [
 	'all Tags'=>'كافة الاوسام ',
 	'Add new Tags'=>'اضافة وسم جديد',
 	'Reset' => 'افراغ',
+	'Course Deleted'=> 'تم المسح بنجاح',
+	'CountProgram'=>'عدد البرامج',
+	'Enroll'=>'تسجيل'
 ];

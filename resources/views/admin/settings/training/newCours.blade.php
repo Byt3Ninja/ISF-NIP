@@ -194,7 +194,7 @@
                                   </div>
 
 
-
+                                  <hr> <br>
                 <div class="modal-footer">
                 <div class="col-md-3">
 
@@ -203,18 +203,8 @@
                         <span class="d-none d-sm-block">{{__('cycles.SaveProgram')}}</span>
                     </button>
                 </div>
-                <div class="col-md-3">
-                    <button type="button" class="btn btn-info ml-1" >
-                        <i class="bx bx-check d-block d-sm-none"></i>
-                        <span class="d-none d-sm-block">{{__('cycles.Cancel')}}</span>
-                    </button>
-                </div>
-                <div class="col-md-3">
-                    <button type="button" class="btn btn-success ml-1" >
-                        <i class="bx bx-check d-block d-sm-none"></i>
-                        <span class="d-none d-sm-block">{{__('cycles.PublishProgram')}}</span>
-                    </button>
-                </div>
+                
+                
                 </div>
             </form>
 

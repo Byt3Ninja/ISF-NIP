@@ -31,7 +31,11 @@
         @if(session()->has('message'))
             <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                <div class="d-flex align-items-center"> <i class="bx bx-like"></i> <span> {{ __('admin.'.session()->get('message')) }} </span> </div>
+                <div class="d-flex align-items-center"> <i class="bx bx-like"></i> 
+                    <span> {{ __('admin.'.session()->get('message')) }} </span> 
+                    
+                
+                </div>
             </div>
         @endif
     </section>
@@ -51,11 +55,10 @@
     <div class="col-xl-12 col-md-12 col-sm-12">
     <div class="card">
         <div class="card-header">
-            @if (isset($course))
-            <a class="btn btn-primary glow" href="/dashboard/training/addcontent/{{$id}}" >{{__('cycles.Add new content')}}</a>
-                @endif
-
+            
+                @if(Auth::user()->hasanyRole('organizationManager|Mentor|Admin'))
                 <a class="btn btn-info glow" href="{{route('training.create')}}" >{{__('cycles.Add new Training')}}</a>
+                @endif
         </div>
             <div class="card-body">
             <div class="card-text">
@@ -70,6 +73,7 @@
                             <th>{{__('admin.quizStatus')}}</th>
                             <th>{{__('cycles.Tags')}}</th>
                             <th>{{__('admin.Categories')}}</th>
+                            <th>{{__('admin.CountProgram')}}</th>
                             <th>{{__('cycles.Edit/Delete')}}</th>
                         </tr>
                         </thead>
@@ -83,10 +87,15 @@
                                $Categories = $trainingCategories->categories;
                                $StatusDraft = $l == 'ar' ? 'محفوظة' : 'Draft';
                                $Statuspublished = $l == 'ar' ? 'تم النشر' : 'Published';
+
+                               $contents = App\TrainingContent::where('training_id',$course->id)->orderBy('arr','ASC')->get();
+
+        $count_content = $contents->count();
+
                             @endphp
                             <tr>
                                 <td>{{$course->arr}}</td>
-                                <td><a title="view" href="/dashboard/training/EditTR/{{$course->id}}"> {{$course->title}} </a></td>
+                                <td><a title="view" href="/dashboard/training/viewCourse/{{$course->id}}"> {{$course->title}} </a></td>
                                 <td>{{$course->created_at}}</td>
                                 <td>{{ optional($course->user)->{'first_name_'.$l} }} {{ optional($course->user)->{'last_name_'.$l} }}</td>
                                 <td>
@@ -103,12 +112,14 @@
                                    {{$Cat->title." - ";}}
                                    @endforeach 
                                 </td>
+                                <th>{{ $count_content }}</th>
+@if(Auth::user()->hasanyRole('organizationManager|Mentor|Admin'))
                                 <td>
-                                    <a title="Edit" href="/dashboard/training/editcontent/{{$course->id}}" class="btn btn-icon btn-label-info rounded-circle">
+                                    <a title="Edit" href="/dashboard/training/EditTR/{{$course->id}}" class="btn btn-icon btn-label-info rounded-circle">
                                         <i class="ti ti-edit"></i></a>
-
+                                        
                                         @if (isset($course))
-                                        <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle" onclick="deleteme({{$course->$id??0}},1)">
+                                        <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle" onclick="deleteme({{$course->id??0}},1)">
                                             <span class="align-middle ml-25">
                                                 <i class="ti ti-trash"></i>
                                             </span>
@@ -116,9 +127,17 @@
                                          @endif
 
 
-                                    <a title="Show" href="/dashboard/training/viewcontent/{{$course->id}}" class="btn btn-icon btn-label-primary rounded-circle">
-                                        <i class="ti ti-hand-finger"></i></a>
+                                    <a title="Show" href="/dashboard/training/viewCourse/{{$course->id}}" class="btn btn-icon btn-label-primary rounded-circle">
+                                        <i class="ti ti-eye"></i></a>
                                 </td>
+@else
+<td>
+    
+    <a title="Show" href="/dashboard/training/viewCourse/{{$course->id}}" class="btn btn-label-primary">{{__('admin.Enroll')}}</a>
+</td>
+
+
+@endif
                             </tr>
                 @endforeach
 

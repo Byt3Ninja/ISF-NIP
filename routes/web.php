@@ -281,7 +281,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}','TrainingController@myQuizResponses')->name('quiz.response');
     Route::post('training/my/{id}/quiz/{quiz_id}','TrainingController@doQuiz')->name('quiz.start');
     Route::get('training/EditTR/{id}','TrainingController@editTR');
-
+    Route::get('training/viewCourse/{id}','TrainingController@showCourse');
 
 
     Route::get('training/results/{id?}','TrainingController@results');
