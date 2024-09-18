@@ -62,11 +62,17 @@
     .codeInputContainer {
       width: 135px;
     }
+
+    #switcher-container {
+      position: absolute;
+      top: 1rem;
+      width: 100px;
+    }
   </style>
 
-  <!-- Helpers -->
-  <script src="/vuexy/assets/vendor/js/helpers.js"></script>
-  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!-- Helpers -->
+    <script src="/vuexy/assets/vendor/js/helpers.js"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
 
     <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
     <script src="/vuexy/assets/vendor/js/template-customizer.js"></script>
@@ -110,77 +116,129 @@
               loading="lazy"
             />
 
-          <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-register-cover"
-            class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png"
-            data-app-dark-img="illustrations/bg-shape-image-dark.png" 
-            loading="lazy"
-          />
+            <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-register-cover"
+              class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png"
+              data-app-dark-img="illustrations/bg-shape-image-dark.png" 
+              loading="lazy"
+            />
+          </div>
         </div>
-      </div>
-      <!-- /Left Text -->
+        <!-- /Left Text -->
 
-      <!-- Register -->
-      @if (App\Settings::findOrFail(1)->set_order)
-        <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
-          <div class="w-px-400 mx-auto mt-12 pt-5">
-            <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
-            <p class="mb-6">{{ $formSubHeading }}</p>
+        <!-- Register -->
+        @if (App\Settings::findOrFail(1)->set_order)
+          <div class="col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
+            <!-- Toggle theme and language -->
+            <nav 
+              class="container-xxl navbar navbar-expand-xl align-items-center"
+              style="{{ $l == 'ar' ? 'left: 3rem' : 'right: 3rem' }}"
+              id="switcher-container"
+            >
+              <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+                <ul class="navbar-nav flex-row align-items-center ms-auto">
+                  <!-- Language -->
+                  <li class="nav-item dropdown-language dropdown">
+                    <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+                      href="javascript:void(0);" data-bs-toggle="dropdown">
+                      <i class="ti ti-language rounded-circle ti-md"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li class="dropdown dropdown-language nav-item">
+                        @if ($l == 'ar')
+                          <a class="dropdown-item" href="/lang/en">
+                            <i class="flag-icon flag-icon-us"></i>
+                            <span class="selected-language">English</span>
+                          </a>
+                        @else
+                          <a class="dropdown-item" href="/lang/ar">
+                            <i class="flag-icon flag-icon-sa"></i>
+                            <span class="selected-language">عربي</span>
+                          </a>
+                        @endif
+                      </li>
+                    </ul>
+                  </li>
+                  <!--/ Language -->
 
+                  <!-- Style Switcher -->
+                  <li class="nav-item dropdown-style-switcher dropdown">
+                    <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow"
+                      href="javascript:void(0);" data-bs-toggle="dropdown">
+                      <i class="ti ti-md"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+                          <span class="align-middle"><i class="ti ti-sun ti-md me-3"></i>Light</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+                          <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
+                          <span class="align-middle"><i class="ti ti-device-desktop-analytics ti-md me-3"></i>System</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <!-- / Style Switcher-->
+                </ul>
+              </div>
+            </nav>
+            <!-- Toggle theme and language -->
 
+            <div class="w-px-400 mx-auto mt-12 pt-5">
+              <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
+              <p class="mb-6">{{ $formSubHeading }}</p>
 
-            
-
-
-            <div>
-              @if (count($errors) > 0)
-                <div class="alert alert-danger">
-                  <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                  </ul>
-                </div>
-              @endif
-            </div>
+              <div>
+                @if (count($errors) > 0)
+                  <div class="alert alert-danger">
+                    <ul>
+                      @foreach ($errors->all() as $error)
+                          <li>{{ $error }}</li>
+                      @endforeach
+                    </ul>
+                  </div>
+                @endif
+              </div>
 
             <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('register') }}">
               @csrf
 
-                                                    
-                                                    <div class="card-body">
-                                                      <div class="row">
-                                                        <div class="col-md mb-md-0 mb-5">
-                                                          <div class="form-check custom-option custom-option-icon checked">
-                                                            <label class="form-check-label custom-option-content" for="role1">
-                                                              <span class="custom-option-body">
-                                                                <i class="ti ti-rocket"></i>
-                                                                <span class="custom-option-title">{{__('admin.Mentor')}}</span>
-                                                                <small></small>
-                                                              </span>
-                                                              <input name="role" class="form-check-input roleshow" type="radio" value="Mentor" id="role1">
-                                                            </label>
-                                                          </div>
-                                                        </div>
-                                                        <div class="col-md mb-md-0 mb-5">
-                                                          <div class="form-check custom-option custom-option-icon">
-                                                            <label class="form-check-label custom-option-content" for="role2">
-                                                              <span class="custom-option-body">
-                                                                <i class="ti ti-star"></i>
-                                                                <span class="custom-option-title"> {{__('admin.Founder')}} </span>
-                                                                <small></small>
-                                                              </span>
-                                                              <input name="role" class="form-check-input roleshow" type="radio" value="Registered" id="role2" checked="">
-                                                            </label>
-                                                          </div>
-                                                        </div>
-                                                        
-                                                      </div>
-                                                    </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md mb-md-0 mb-5">
+                    <div class="form-check custom-option custom-option-icon checked">
+                      <label class="form-check-label custom-option-content" for="role1">
+                        <span class="custom-option-body">
+                          <i class="ti ti-rocket"></i>
+                          <span class="custom-option-title">{{__('admin.Mentor')}}</span>
+                          <small></small>
+                        </span>
+                        <input name="role" class="form-check-input roleshow" type="radio" value="Mentor" id="role1">
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md mb-md-0 mb-5">
+                    <div class="form-check custom-option custom-option-icon">
+                      <label class="form-check-label custom-option-content" for="role2">
+                        <span class="custom-option-body">
+                          <i class="ti ti-star"></i>
+                          <span class="custom-option-title"> {{__('admin.Founder')}} </span>
+                          <small></small>
+                        </span>
+                        <input name="role" class="form-check-input roleshow" type="radio" value="Registered" id="role2" checked="">
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                                                    <br><br>
-
-
-
+              <br><br>
 
               <div class="mb-6">
                 <label for="username" class="form-label">{{$firstName }}</label>
@@ -237,7 +295,6 @@
                 </div>
               </div>
 
-
               <div class="form-group mb-3">
                 <label class="form-label mb-3" for="country">{{ $gender }}</label>
                 <ul class="list-unstyled mb-0">
@@ -260,59 +317,53 @@
                 </ul>
               </div>
 
+              <div class="ShowInputMentor" style="display: none;">
+                <div class="mb-6">
+                  <label for="username" class="form-label">{{ __('admin.JobTitleEn') }}</label>
+                  <input value="{{ old('Title') }}" name="title_en" type="text"
+                  class="form-control" id="Title"
+                  placeholder="{{ __('admin.JobTitleEn') }}"
+                  autocomplete="title_en" />
+                </div>
 
-<div class="ShowInputMentor" style="display: none;">
-              <div class="mb-6">
-                <label for="username" class="form-label">{{ __('admin.JobTitleEn') }}</label>
-                <input value="{{ old('Title') }}" name="title_en" type="text"
-                class="form-control" id="Title"
-                placeholder="{{ __('admin.JobTitleEn') }}"
-                autocomplete="title_en" />
-              </div>
-
-
-              
-
-              <div class="md-6">
-                <div class="form-label-group">
-                  <h6 for="Expertise">{{ __('admin.Industry Expertise') }}</h6>
-                  <div class="form-group">
-                    <select name="Expertise[]" class="select2 form-control" multiple="multiple"
-                      id="Expertise">
-                      @php
-$expertises = App\Expertise::all();
-                    @endphp
-                      @foreach ($expertises as $expertise_group)
-                        <optgroup label="{{ $expertise_group->title }}">
-                          @foreach ($expertise_group->children as $expertise)
-                            <option value="{{ $expertise->id }}" > {{ $expertise->title }} </option>
-                          @endforeach
-                        </optgroup>
-                      @endforeach
-                    </select>
+                <div class="md-6">
+                  <div class="form-label-group">
+                    <h6 for="Expertise">{{ __('admin.Industry Expertise') }}</h6>
+                    <div class="form-group">
+                      <select name="Expertise[]" class="select2 form-control" multiple="multiple"
+                        id="Expertise">
+                        @php
+                          $expertises = App\Expertise::all();
+                        @endphp
+                        @foreach ($expertises as $expertise_group)
+                          <optgroup label="{{ $expertise_group->title }}">
+                            @foreach ($expertise_group->children as $expertise)
+                              <option value="{{ $expertise->id }}" > {{ $expertise->title }} </option>
+                            @endforeach
+                          </optgroup>
+                        @endforeach
+                      </select>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <br>
-              <div class="mb-6">
-                <label for="userbio" class="form-label">{{ __('admin.userbio') }}</label>
-                <textarea name="userbio" type="text"
-                class="form-control" id="userbio"
-                placeholder="{{ __('admin.userbio') }}"
-                autocomplete="userbio" >{{ old('userbio') }}</textarea>
-               
-              </div>
+                <br>
+                <div class="mb-6">
+                  <label for="userbio" class="form-label">{{ __('admin.userbio') }}</label>
+                  <textarea name="userbio" type="text"
+                  class="form-control" id="userbio"
+                  placeholder="{{ __('admin.userbio') }}"
+                  autocomplete="userbio" >{{ old('userbio') }}</textarea>
+                </div>
 
-              <div class="mb-6">
-                <label for="Linkedin" class="form-label">{{ __('admin.Linkedin') }}</label>
-                <input value="{{ old('Linkedin') }}" name="Linkedin" type="text"
-                class="form-control" id="Linkedin"
-                placeholder="{{ __('admin.Linkedin') }}"
-                autocomplete="Linkedin" />
+                <div class="mb-6">
+                  <label for="Linkedin" class="form-label">{{ __('admin.Linkedin') }}</label>
+                  <input value="{{ old('Linkedin') }}" name="Linkedin" type="text"
+                  class="form-control" id="Linkedin"
+                  placeholder="{{ __('admin.Linkedin') }}"
+                  autocomplete="Linkedin" />
+                </div>
               </div>
-
-            </div>
 
               {{-- <div class="my-8">
                 <div class="form-check mb-0 ms-2">
@@ -412,25 +463,4 @@ $expertises = App\Expertise::all();
     </script>
 
 </body>
-
-    <!-- Get countries and phone codes -->
-    <script>
-      fetch('https://restcountries.com/v3.1/all')
-      .then(response => response.json())
-      .then(data => {
-          const select = document.getElementById('country_code');
-          data.forEach(country => {
-              const option = document.createElement('option');
-              const countryCode = `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
-              option.value = countryCode;
-              option.text = `${countryCode} (${country.cca2})`;
-              option.style.fontSize = '12px';
-              if (country.cca2 === 'EG') {
-                  option.selected = true;
-              }
-              select.appendChild(option);
-          });
-      });
-    </script>
-  </body>
 </html>
