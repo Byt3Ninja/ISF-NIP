@@ -132,7 +132,7 @@ return [
 	'Provider' => 'Provider',
 	'Seeker' => 'Seeker',
 	'Individual' => 'Individual',
-	'Mentor' => 'Mentor',
+	'Mentor' => 'Im Mentor',
 	'NotActive' => 'Not Active',
 	'Administrator' => 'Administrator',
 	'SelMulti' => 'You can select multiple types, or leave it blank to download all types',
@@ -297,7 +297,7 @@ return [
 	'Cycle' => 'Cycle',
 	'Cycle informations' => 'Cycle information',
 	'Number of employees' => 'Number of employees',
-	'founder' => 'Founder',
+	'founder' => 'Im Founder',
 	'investors' => 'Investors',
 	'raised_fund' => 'Raised fund',
 	'Stage' => 'Current Stage',
@@ -599,5 +599,8 @@ return [
 	'free'=>' Free ',
 	'Trainer'=>'Trainer',
 	'organizationManager'=>'Organization Manager',
+	'Founder'=>'Founder',
+	'Industry Expertise'=>'Industry Expertise',
+	'userbio'=> 'Bio',
 	
 ];

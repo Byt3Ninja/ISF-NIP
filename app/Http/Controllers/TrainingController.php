@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Expertise;
 use App\Factories\OnlineMeetingFactory;
 use App\Jobs\ExportTresultData;
 use App\Notifications\ChangeCycle;
@@ -25,6 +26,10 @@ use Storage;
 use Carbon\Carbon;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Traits\ZoomMeetingTrait;
+use Illuminate\Support\Str;
+
+
+
 
 class TrainingController extends Controller
 {
@@ -679,4 +684,41 @@ class TrainingController extends Controller
             return response()->json(['state' => 'failed'], 500);
         }
     }
+
+    public function create($id=0) {
+        $this->preProcessingCheck('edit_cycles');
+        $courses = Training::orderBy('created_at','DESC')->get();
+        if ($id==0 && count($courses)) {
+            $id = $courses->pluck('id')[0];
+        }
+        $contents = TrainingContent::where('training_id',$id)->orderBy('arr','ASC')->get();
+
+        $client = Auth::user();
+        $randomNumber = sprintf('%06d', rand(0, 999999));
+
+        $expertises = Expertise::where('parent_id',null)->get();
+        $Quizzes = Quizzes::all();
+
+        $instructors = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Trainer');
+        })->get();
+
+        return view('admin/settings/training/newCours', compact('randomNumber','expertises','client','Quizzes', 'instructors'));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
