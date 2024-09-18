@@ -606,6 +606,9 @@ return [
 	'all Tags'=>'all Tags',
 	'Add new Tags'=>'Add New Tags',
 	'Reset' => 'Reset',
+	'Course Deleted'=> 'Course Deleted',
+	'CountProgram'=>'Program Count',
+	'Enroll'=>'Enroll'
 
 	
 ];

@@ -165,8 +165,13 @@ class TrainingController extends Controller
             'training_id' => $training->id
         ];
     }
+
+    DB::table('categories_training')
+    ->where('training_id', $training->id)
+    ->delete();
     // إدراج الخبرات دفعة واحدة
     DB::table('categories_training')->insert($expertises);
+    
 
     $tags = [];
 foreach ($request->Tags as $tagName) {
@@ -182,7 +187,9 @@ $tags[] = [
     'training_id' => $training->id
 ];
 }
-
+DB::table('tag_training')
+    ->where('training_id', $training->id)
+    ->delete();
 // إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
 DB::table('tag_training')->insert($tags);
 
@@ -212,8 +219,14 @@ DB::table('tag_training')->insert($tags);
                 'training_id' => $training->id
             ];
         }
+
+        DB::table('categories_training')
+    ->where('training_id', $training->id)
+    ->delete();
+
         // إدراج الخبرات دفعة واحدة
         DB::table('categories_training')->insert($expertises);
+       
 
         $tags = [];
 foreach ($request->Tags as $tagName) {
@@ -230,13 +243,16 @@ foreach ($request->Tags as $tagName) {
     ];
 }
 
+DB::table('tag_training')
+    ->where('training_id', $training->id)
+    ->delete();
 // إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
 DB::table('tag_training')->insert($tags);
 
 
         }
 
-        return back()->with(['class'=>'success','message'=>'Saved']);
+        return redirect('/dashboard/training/all/')->with(['class'=>'success','message'=>'Saved']);
     }
 
     public function delete($id, Request $request){
@@ -244,6 +260,8 @@ DB::table('tag_training')->insert($tags);
         if ($request) {
          Training::where('id',$id)->delete();
          TrainingContent::where('training_id',$id)->delete();
+         DB::table('tag_training')->where('training_id', $id)->delete();
+         DB::table('categories_training')->where('training_id', $id)->delete();
          return response()->json(['state' => 'success']);
             } else {
          return response()->json(['state' => 'failed'], 500);
@@ -825,19 +843,30 @@ DB::table('tag_training')->insert($tags);
         return view('admin/settings/training/editCours', compact('course','id','contents','expertises','Quizzes','instructors','tags'));
     }
 
-    // public function show($id) {
-    //     $this->preProcessingCheck('edit_cycles');
-    //     $courses = Training::where('id', $id)->orderBy('created_at','DESC')->get();
-    //     if ($id==0 && count($courses)) {
-    //         $id = $courses->pluck('id')[0];
-    //     }
-    //     $contents = TrainingContent::where('training_id',$id)->orderBy('arr','ASC')->get();
+    public function showCourse($id) {
+        $this->preProcessingCheck('edit_cycles');
+        $course = Training::where('id', $id)->orderBy('created_at','DESC')->first();
+        if ($id==0 && count($courses)) {
+            $id = $courses->pluck('id')[0];
+        }
+        $contents = TrainingContent::where('training_id',$id)->orderBy('arr','ASC')->get();
+
+        $expertises = Expertise::where('parent_id',null)->get();
+        $Quizzes = Quizzes::all();
+        
+
+        $instructors = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Trainer');
+        })->get();
+        $training = Training::find($id);
+
+        $tags = $training->tags; 
 
         
         
 
-    //     return view('admin/settings/training/all', compact('courses','id','contents'));
-    // }
+        return view('admin/settings/training/viewCourse', compact('course','id','contents','expertises','Quizzes','instructors','tags'));
+    }
 
 
 

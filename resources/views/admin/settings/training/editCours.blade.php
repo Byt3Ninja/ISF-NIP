@@ -60,6 +60,8 @@
 <form method="post" action="/dashboard/training/store" enctype="multipart/form-data">
                 
                     @csrf
+
+                    <input type="hidden" name="id" value="{{$course->id}}" id="id">
                     <div class="col-md-7">
                     <div class="form-group">
                         <label>{{__('cycles.Image')}}</label>

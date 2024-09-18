@@ -69,6 +69,7 @@ class CyclesController extends Controller
     }
     public function index($id=0)
     {
+        
         $this->preProcessingCheck('edit_cycles');
 
         $organization_id=auth()->user()->organization_id;
@@ -86,6 +87,7 @@ class CyclesController extends Controller
             } else { $steps = Step::where('cycle_id', $id)->orderBy('arr')->get(); }
         }
         $svgs = ['notebook','search','idea','comments','trophy'];
+        
         return view('admin.settings.cycles.index',compact('cycles','steps','id','svgs'));
     }
 
@@ -303,6 +305,8 @@ class CyclesController extends Controller
 
     function view ($c,Request $request)
     {
+        
+        
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);}
         if (!Auth::user()->company) {return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);}
