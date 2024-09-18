@@ -4,9 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 class Training extends Model
 {
-    protected $fillable = ['organization_id', 'type', 'image', 'title', 'dsc', 'user_id',];
+    protected $fillable = ['organization_id', 'type', 'image', 'title', 'dsc', 'user_id', 'code', 'CoursLevel', 'Quizs', 'Instractor', 'start_date', 'end_date', 'Status',];
+    
 
     public function user() { return $this->belongsTo(User::class); }
 
@@ -18,6 +20,16 @@ class Training extends Model
     public function done()
     {
         return $this->hasMany(TrainingCompleted::class, 'course_id');
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Expertise::class, 'categories_training','training_id', 'categories_id');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tags::class, 'tag_training','training_id', 'tag_id');
     }
 
     public function progress()

@@ -602,5 +602,10 @@ return [
 	'Founder'=>'Founder',
 	'Industry Expertise'=>'Industry Expertise',
 	'userbio'=> 'Bio',
+	'Tags'=>'Tags',
+	'all Tags'=>'all Tags',
+	'Add new Tags'=>'Add New Tags',
+	'Reset' => 'Reset',
+
 	
 ];
