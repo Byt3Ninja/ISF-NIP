@@ -64,9 +64,9 @@
     }
   </style>
 
-  <!-- Helpers -->
-  <script src="/vuexy/assets/vendor/js/helpers.js"></script>
-  <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!-- Helpers -->
+    <script src="/vuexy/assets/vendor/js/helpers.js"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
 
     <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
     <script src="/vuexy/assets/vendor/js/template-customizer.js"></script>
@@ -110,77 +110,67 @@
               loading="lazy"
             />
 
-          <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-register-cover"
-            class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png"
-            data-app-dark-img="illustrations/bg-shape-image-dark.png" 
-            loading="lazy"
-          />
+            <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-register-cover"
+              class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png"
+              data-app-dark-img="illustrations/bg-shape-image-dark.png" 
+              loading="lazy"
+            />
+          </div>
         </div>
-      </div>
-      <!-- /Left Text -->
+        <!-- /Left Text -->
 
-      <!-- Register -->
-      @if (App\Settings::findOrFail(1)->set_order)
-        <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
-          <div class="w-px-400 mx-auto mt-12 pt-5">
-            <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
-            <p class="mb-6">{{ $formSubHeading }}</p>
+        <!-- Register -->
+        @if (App\Settings::findOrFail(1)->set_order)
+          <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
+            <div class="w-px-400 mx-auto mt-12 pt-5">
+              <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
+              <p class="mb-6">{{ $formSubHeading }}</p>
 
-
-
-            
-
-
-            <div>
-              @if (count($errors) > 0)
-                <div class="alert alert-danger">
-                  <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                  </ul>
-                </div>
-              @endif
-            </div>
+              <div>
+                @if (count($errors) > 0)
+                  <div class="alert alert-danger">
+                    <ul>
+                      @foreach ($errors->all() as $error)
+                          <li>{{ $error }}</li>
+                      @endforeach
+                    </ul>
+                  </div>
+                @endif
+              </div>
 
             <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('register') }}">
               @csrf
 
-                                                    
-                                                    <div class="card-body">
-                                                      <div class="row">
-                                                        <div class="col-md mb-md-0 mb-5">
-                                                          <div class="form-check custom-option custom-option-icon checked">
-                                                            <label class="form-check-label custom-option-content" for="role1">
-                                                              <span class="custom-option-body">
-                                                                <i class="ti ti-rocket"></i>
-                                                                <span class="custom-option-title">{{__('admin.Mentor')}}</span>
-                                                                <small></small>
-                                                              </span>
-                                                              <input name="role" class="form-check-input roleshow" type="radio" value="Mentor" id="role1">
-                                                            </label>
-                                                          </div>
-                                                        </div>
-                                                        <div class="col-md mb-md-0 mb-5">
-                                                          <div class="form-check custom-option custom-option-icon">
-                                                            <label class="form-check-label custom-option-content" for="role2">
-                                                              <span class="custom-option-body">
-                                                                <i class="ti ti-star"></i>
-                                                                <span class="custom-option-title"> {{__('admin.Founder')}} </span>
-                                                                <small></small>
-                                                              </span>
-                                                              <input name="role" class="form-check-input roleshow" type="radio" value="Registered" id="role2" checked="">
-                                                            </label>
-                                                          </div>
-                                                        </div>
-                                                        
-                                                      </div>
-                                                    </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md mb-md-0 mb-5">
+                    <div class="form-check custom-option custom-option-icon checked">
+                      <label class="form-check-label custom-option-content" for="role1">
+                        <span class="custom-option-body">
+                          <i class="ti ti-rocket"></i>
+                          <span class="custom-option-title">{{__('admin.Mentor')}}</span>
+                          <small></small>
+                        </span>
+                        <input name="role" class="form-check-input roleshow" type="radio" value="Mentor" id="role1">
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md mb-md-0 mb-5">
+                    <div class="form-check custom-option custom-option-icon">
+                      <label class="form-check-label custom-option-content" for="role2">
+                        <span class="custom-option-body">
+                          <i class="ti ti-star"></i>
+                          <span class="custom-option-title"> {{__('admin.Founder')}} </span>
+                          <small></small>
+                        </span>
+                        <input name="role" class="form-check-input roleshow" type="radio" value="Registered" id="role2" checked="">
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                                                    <br><br>
-
-
-
+              <br><br>
 
               <div class="mb-6">
                 <label for="username" class="form-label">{{$firstName }}</label>
@@ -237,7 +227,6 @@
                 </div>
               </div>
 
-
               <div class="form-group mb-3">
                 <label class="form-label mb-3" for="country">{{ $gender }}</label>
                 <ul class="list-unstyled mb-0">
@@ -260,59 +249,53 @@
                 </ul>
               </div>
 
+              <div class="ShowInputMentor" style="display: none;">
+                <div class="mb-6">
+                  <label for="username" class="form-label">{{ __('admin.JobTitleEn') }}</label>
+                  <input value="{{ old('Title') }}" name="title_en" type="text"
+                  class="form-control" id="Title"
+                  placeholder="{{ __('admin.JobTitleEn') }}"
+                  autocomplete="title_en" />
+                </div>
 
-<div class="ShowInputMentor" style="display: none;">
-              <div class="mb-6">
-                <label for="username" class="form-label">{{ __('admin.JobTitleEn') }}</label>
-                <input value="{{ old('Title') }}" name="title_en" type="text"
-                class="form-control" id="Title"
-                placeholder="{{ __('admin.JobTitleEn') }}"
-                autocomplete="title_en" />
-              </div>
-
-
-              
-
-              <div class="md-6">
-                <div class="form-label-group">
-                  <h6 for="Expertise">{{ __('admin.Industry Expertise') }}</h6>
-                  <div class="form-group">
-                    <select name="Expertise[]" class="select2 form-control" multiple="multiple"
-                      id="Expertise">
-                      @php
-$expertises = App\Expertise::all();
-                    @endphp
-                      @foreach ($expertises as $expertise_group)
-                        <optgroup label="{{ $expertise_group->title }}">
-                          @foreach ($expertise_group->children as $expertise)
-                            <option value="{{ $expertise->id }}" > {{ $expertise->title }} </option>
-                          @endforeach
-                        </optgroup>
-                      @endforeach
-                    </select>
+                <div class="md-6">
+                  <div class="form-label-group">
+                    <h6 for="Expertise">{{ __('admin.Industry Expertise') }}</h6>
+                    <div class="form-group">
+                      <select name="Expertise[]" class="select2 form-control" multiple="multiple"
+                        id="Expertise">
+                        @php
+                          $expertises = App\Expertise::all();
+                        @endphp
+                        @foreach ($expertises as $expertise_group)
+                          <optgroup label="{{ $expertise_group->title }}">
+                            @foreach ($expertise_group->children as $expertise)
+                              <option value="{{ $expertise->id }}" > {{ $expertise->title }} </option>
+                            @endforeach
+                          </optgroup>
+                        @endforeach
+                      </select>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <br>
-              <div class="mb-6">
-                <label for="userbio" class="form-label">{{ __('admin.userbio') }}</label>
-                <textarea name="userbio" type="text"
-                class="form-control" id="userbio"
-                placeholder="{{ __('admin.userbio') }}"
-                autocomplete="userbio" >{{ old('userbio') }}</textarea>
-               
-              </div>
+                <br>
+                <div class="mb-6">
+                  <label for="userbio" class="form-label">{{ __('admin.userbio') }}</label>
+                  <textarea name="userbio" type="text"
+                  class="form-control" id="userbio"
+                  placeholder="{{ __('admin.userbio') }}"
+                  autocomplete="userbio" >{{ old('userbio') }}</textarea>
+                </div>
 
-              <div class="mb-6">
-                <label for="Linkedin" class="form-label">{{ __('admin.Linkedin') }}</label>
-                <input value="{{ old('Linkedin') }}" name="Linkedin" type="text"
-                class="form-control" id="Linkedin"
-                placeholder="{{ __('admin.Linkedin') }}"
-                autocomplete="Linkedin" />
+                <div class="mb-6">
+                  <label for="Linkedin" class="form-label">{{ __('admin.Linkedin') }}</label>
+                  <input value="{{ old('Linkedin') }}" name="Linkedin" type="text"
+                  class="form-control" id="Linkedin"
+                  placeholder="{{ __('admin.Linkedin') }}"
+                  autocomplete="Linkedin" />
+                </div>
               </div>
-
-            </div>
 
               {{-- <div class="my-8">
                 <div class="form-check mb-0 ms-2">
@@ -344,136 +327,6 @@ $expertises = App\Expertise::all();
             </div>
           </div>
         </div>
-        <!-- /Left Text -->
-
-        <!-- Register -->
-        @if (App\Settings::findOrFail(1)->set_order)
-          <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
-            <div class="w-px-400 mx-auto mt-12 pt-5">
-              <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
-              <p class="mb-6">{{ $formSubHeading }}</p>
-
-              <div>
-                @if (count($errors) > 0)
-                  <div class="alert alert-danger">
-                    <ul>
-                      @foreach ($errors->all() as $error)
-                          <li>{{ $error }}</li>
-                      @endforeach
-                    </ul>
-                  </div>
-                @endif
-              </div>
-
-              <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('register') }}">
-                @csrf
-                <div class="mb-6">
-                  <label for="username" class="form-label">{{$firstName }}</label>
-                  <input value="{{ old('first_name_en') }}" name="first_name_en" type="text"
-                  class="form-control" id="first_name_en"
-                  placeholder="{{ __('auth.First English Name') }}" required
-                  autocomplete="first_name_en" autofocus />
-                </div>
-                <div class="mb-6">
-                  <label for="username" class="form-label">{{ $secondName }}</label>
-                  <input value="{{ old('last_name_en') }}" name="last_name_en" type="text"
-                  class="form-control" id="last_name_en"
-                  placeholder="{{ __('auth.Last English Name') }}" required
-                  autocomplete="last_name_en" />
-                </div>
-                <div class="mb-6">
-                  <label for="email" class="form-label">{{ __('auth.E-Mail') }}</label>
-                  <input value="{{ old('email') }}" name="email" type="email"
-                  class="form-control" 
-                  placeholder="{{ __('auth.E-Mail') }}" required
-                  autocomplete="email" />
-                </div>
-                <div class="mb-6 form-password-toggle">
-                  <label class="form-label" for="password">{{ __('auth.Password') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input type="password" class="form-control" id="password"
-                      placeholder="{{ __('auth.Password') }}" name="password"
-                      required autocomplete="password"
-                      aria-describedby="password" />
-                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-                  </div>
-                </div>
-                <div class="mb-6 form-password-toggle">
-                  <label class="form-label" for="password">{{ __('auth.Confirm') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input type="password" class="form-control" id="confirm-password"
-                      placeholder="{{ __('auth.Password') }}" name="password_confirmation"
-                      required autocomplete="new-password"
-                      aria-describedby="password" />
-                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-                  </div>
-                </div>
-
-                <div class="mb-6">
-                  <label class="form-label" for="phone">{{ __('auth.Phone') }}</label>
-                  <div class="input-group">
-                    <div class="codeInputContainer">
-                      <select id="country_code" name="country_code" class="form-select select2" required>
-                      </select>
-                    </div>
-                    <input type="text" class="form-control mx-2 rounded" id="phone"
-                        placeholder="{{ __('auth.Phone') }}" value="{{ old('phone') }}" name="phone"
-                        required autocomplete="phone" />
-                  </div>
-                </div>
-
-                <div class="form-group mb-3">
-                  <label class="form-label mb-3" for="country">{{ $gender }}</label>
-                  <ul class="list-unstyled mb-0">
-                    <li class="d-inline-block mx-2 mb-1">
-                      <fieldset>
-                          <div class="radio">
-                              <input type="radio" name="gender" value="Male" id="rad1" checked="">
-                              <label for="rad1">{{__('Male')}}</label>
-                          </div>
-                      </fieldset>
-                    </li>
-                    <li class="d-inline-block mx-2 mb-1">
-                      <fieldset>
-                          <div class="radio">
-                              <input type="radio" name="gender" value="Female" id="rad2">
-                              <label for="rad2">{{__('Female')}}</label>
-                          </div>
-                      </fieldset>
-                    </li>
-                  </ul>
-                </div>
-
-                {{-- <div class="my-8">
-                  <div class="form-check mb-0 ms-2">
-                    <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
-                    <label class="form-check-label" for="terms-conditions">
-                      I agree to
-                      <a href="javascript:void(0);">privacy policy & terms</a>
-                    </label>
-                  </div>
-                </div> --}}
-                <button class="btn btn-primary d-grid w-100"> {{ __('auth.Register') }}</button>
-              </form>
-
-              <p class="text-center">
-                <span>{{__('Already have account')}}{{$l == 'ar' ? '؟' : '?'}}</span>
-                <a href="/login">
-                  <span>{{__('Login')}}</span>
-                </a>
-              </p>
-
-              <div class="divider my-6">
-                <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
-              </div>
-
-              <div class="container mt-5">
-                <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
-                  <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
-                </a>
-              </div>
-            </div>
-          </div>
         @endif
         <!-- /Register -->
       </div>
@@ -539,25 +392,4 @@ $expertises = App\Expertise::all();
     </script>
 
 </body>
-
-    <!-- Get countries and phone codes -->
-    <script>
-      fetch('https://restcountries.com/v3.1/all')
-      .then(response => response.json())
-      .then(data => {
-          const select = document.getElementById('country_code');
-          data.forEach(country => {
-              const option = document.createElement('option');
-              const countryCode = `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
-              option.value = countryCode;
-              option.text = `${countryCode} (${country.cca2})`;
-              option.style.fontSize = '12px';
-              if (country.cca2 === 'EG') {
-                  option.selected = true;
-              }
-              select.appendChild(option);
-          });
-      });
-    </script>
-  </body>
 </html>

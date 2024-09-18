@@ -18,7 +18,7 @@ class OnlineMeetingFactory
             case 'Teams':
                 return new TeamsService();
             default:
-                throw new \Exception("Unsupported online meeting service: $service");
+              throw new \Exception("Unsupported online meeting service: $service");
         }
     }
 }

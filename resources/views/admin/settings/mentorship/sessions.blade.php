@@ -1,6 +1,24 @@
 @extends('layouts.admin')
 
+
 @section('style')
+  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+  <style>
+    #mob-extract-button {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    @media screen and (max-width: 768px) {
+      #mob {
+        margin-top: 10px;
+      }
+      #mob-extract-button {
+        justify-content: flex-start;
+        width: 100%;
+      }
+    }
+  </style>
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <style>
     #mob-extract-button {
