@@ -239,7 +239,7 @@
                               @if (!$session->approved)
                                 <button title="Approve" onclick="approve({{ $session->id }},'Yes')" type="button"
                                   class="btn btn-icon rounded-circle btn-label-success">
-                                  <i class="ti ti-check-square"></i></button>
+                                  <i class="ti ti-check"></i></button>
                                 <button title="Dispprove" onclick="approve({{ $session->id }}, 'No')" type="button"
                                   class="btn btn-icon rounded-circle btn-light-danger">
                                   <i class="ti ti-x-square"></i></button>
@@ -247,7 +247,7 @@
                               @if ($session->join_url)
                                 <a href="{{ $session->start_url }}" target="_blank">
                                   <button title="Start Meeting" type="button"
-                                    class="btn btn-icon rounded-circle btn-label-success">
+                                    class="btn btn-icon rounded-circle btn-label-secondary">
                                     <i class="ti ti-device-computer-camera"></i></button></a>
                                 <a href="{{ $session->join_url }}" target="_blank">
                                   <button title="Join only" type="button"
