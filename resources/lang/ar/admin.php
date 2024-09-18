@@ -602,4 +602,8 @@ return [
 	'Founder'=>'مؤسس',
 	'Industry Expertise'=>'الخبرات',
 	'userbio'=> 'السيرة الذاتية',
+	'Tags'=>'الاوسام',
+	'all Tags'=>'كافة الاوسام ',
+	'Add new Tags'=>'اضافة وسم جديد',
+	'Reset' => 'افراغ',
 ];

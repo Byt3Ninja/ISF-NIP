@@ -27,8 +27,8 @@ use Carbon\Carbon;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Traits\ZoomMeetingTrait;
 use Illuminate\Support\Str;
-
-
+use Illuminate\Support\Facades\DB;
+use App\Tags;
 
 
 class TrainingController extends Controller
@@ -125,6 +125,10 @@ class TrainingController extends Controller
             $id = $courses->pluck('id')[0];
         }
         $contents = TrainingContent::where('training_id',$id)->orderBy('arr','ASC')->get();
+
+        
+        
+
         return view('admin/settings/training/all', compact('courses','id','contents'));
     }
     public function edit($id) {
@@ -138,10 +142,100 @@ class TrainingController extends Controller
             $img_url = $request->file('image');
             $img_url = $img_url->store('training', ['disk' => 'public_uploads']);
             Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 350, function($con) {$con->aspectRatio();})->save();
-            Training::updateOrCreate(['id'=>$request->id],['title'=>$request->title,'dsc'=>$request->dsc,'user_id'=>Auth::id(),'image'=>$img_url]);
+            
+            $training = Training::updateOrCreate(['id'=>$request->id],[
+        'title'=>$request->title,
+        'dsc'=>$request->dsc,
+        'code'=>$request->code,
+        'CoursLevel'=>$request->CoursLevel,
+        'Quizs'=>$request->Quizs,
+        'Instractor'=>$request->Instractor,
+        'start_date'=>$request->start_date,
+        'end_date'=>$request->end_date,
+        'Status'=>$request->Status,
+        'user_id'=>Auth::id(),
+        'image'=>$img_url
+        ]
+    );
+
+    $expertises = [];
+    foreach ($request->CoursCategories as $expertiseId) {
+        $expertises[] = [
+            'categories_id' => $expertiseId,
+            'training_id' => $training->id
+        ];
+    }
+    // إدراج الخبرات دفعة واحدة
+    DB::table('categories_training')->insert($expertises);
+
+    $tags = [];
+foreach ($request->Tags as $tagName) {
+// تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
+$tag = Tags::where('name', $tagName)->first();
+// إذا لم يكن موجودًا، قم بإنشائه
+if (!$tag) {
+    $tag = Tags::create(['name' => $tagName]);
+}
+// قم بإضافة الـ tag_id و training_id إلى القائمة لإدراجها في الجدول الوسيط
+$tags[] = [
+    'tag_id' => $tag->id,
+    'training_id' => $training->id
+];
+}
+
+// إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
+DB::table('tag_training')->insert($tags);
+
         } else {
-            Training::updateOrCreate(['id'=>$request->id],['title'=>$request->title,'dsc'=>$request->dsc,'user_id'=>Auth::id()]);
+
+            
+    $training = Training::updateOrCreate(
+        ['id'=>$request->id],
+        [
+        'title'=>$request->title,
+        'dsc'=>$request->dsc,
+        'code'=>$request->code,
+        'CoursLevel'=>$request->CoursLevel,
+        'Quizs'=>$request->Quizs,
+        'Instractor'=>$request->Instractor,
+        'start_date'=>$request->start_date,
+        'end_date'=>$request->end_date,
+        'Status'=>$request->Status,
+        'user_id'=>Auth::id()
+    
+    ]
+);
+    $expertises = [];
+        foreach ($request->CoursCategories as $expertiseId) {
+            $expertises[] = [
+                'categories_id' => $expertiseId,
+                'training_id' => $training->id
+            ];
         }
+        // إدراج الخبرات دفعة واحدة
+        DB::table('categories_training')->insert($expertises);
+
+        $tags = [];
+foreach ($request->Tags as $tagName) {
+    // تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
+    $tag = Tags::where('name', $tagName)->first();
+    // إذا لم يكن موجودًا، قم بإنشائه
+    if (!$tag) {
+        $tag = Tags::create(['name' => $tagName]);
+    }
+    // قم بإضافة الـ tag_id و training_id إلى القائمة لإدراجها في الجدول الوسيط
+    $tags[] = [
+        'tag_id' => $tag->id,
+        'training_id' => $training->id
+    ];
+}
+
+// إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
+DB::table('tag_training')->insert($tags);
+
+
+        }
+
         return back()->with(['class'=>'success','message'=>'Saved']);
     }
 
@@ -707,7 +801,43 @@ class TrainingController extends Controller
     }
 
 
+    public function editTR($id) {
+        $this->preProcessingCheck('edit_cycles');
+        $course = Training::where('id', $id)->orderBy('created_at','DESC')->first();
+        if ($id==0 && count($courses)) {
+            $id = $courses->pluck('id')[0];
+        }
+        $contents = TrainingContent::where('training_id',$id)->orderBy('arr','ASC')->get();
 
+        $expertises = Expertise::where('parent_id',null)->get();
+        $Quizzes = Quizzes::all();
+        
+
+        $instructors = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Trainer');
+        })->get();
+        $training = Training::find($id);
+
+        $tags = $training->tags; 
+
+        
+
+        return view('admin/settings/training/editCours', compact('course','id','contents','expertises','Quizzes','instructors','tags'));
+    }
+
+    // public function show($id) {
+    //     $this->preProcessingCheck('edit_cycles');
+    //     $courses = Training::where('id', $id)->orderBy('created_at','DESC')->get();
+    //     if ($id==0 && count($courses)) {
+    //         $id = $courses->pluck('id')[0];
+    //     }
+    //     $contents = TrainingContent::where('training_id',$id)->orderBy('arr','ASC')->get();
+
+        
+        
+
+    //     return view('admin/settings/training/all', compact('courses','id','contents'));
+    // }
 
 
 

@@ -40,6 +40,8 @@
       </a>
     </li>
 
+    
+
     @if (auth()->user()->HaveCompany == 1)
       <li class="{{ Request::is('*myCompany') ? 'active' : '' }} menu-item">
         <a href="{{ route('my_company') }}" class="menu-link">
@@ -182,6 +184,13 @@
         <a href="{{ route('organizations.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-settings"></i>
           <div>{{ __('admin.Manage Organizations') }}</div>
+        </a>
+      </li>
+
+      <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Tags.index') }}" class="menu-link">
+          <i class="ti ti-user me-3 ti-md"></i>
+          <div>{{ __('admin.Tags') }}</div>
         </a>
       </li>
     @endif

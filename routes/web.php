@@ -148,6 +148,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/show/MentorProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors');
 
+    Route::resource('Tags', 'TagsController');
+
 
 
 	//Client's company
@@ -278,6 +280,9 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('training/my/{id}/quiz/{quiz_id}','TrainingController@myQuiz')->name('quiz.overview');
     Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}','TrainingController@myQuizResponses')->name('quiz.response');
     Route::post('training/my/{id}/quiz/{quiz_id}','TrainingController@doQuiz')->name('quiz.start');
+    Route::get('training/EditTR/{id}','TrainingController@editTR');
+
+
 
     Route::get('training/results/{id?}','TrainingController@results');
     Route::get('training/sessions/{id?}','TrainingController@sessions');

@@ -395,6 +395,9 @@
             </div>
           </div>
         </div>
+        <!-- /Left Text -->
+
+       
         @endif
         <!-- /Register -->
       </div>

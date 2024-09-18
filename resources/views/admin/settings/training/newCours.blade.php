@@ -2,6 +2,8 @@
 @section('style')
     <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
     <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+    
+    <link rel="stylesheet" href="/vuexy/libs/tagify/tagify.css" />
 @stop
 @section('content')
 
@@ -103,11 +105,16 @@
   </div>
 
                             
-                            <div class="col-md-7 mb-6">
-                                <label for="TagifyBasic" class="form-label">{{__('cycles.Tags')}}</label>
-                                <tags class="tagify form-control" tabindex="-1">
-                                <input id="TagifyBasic" class="form-control" name="Tags" value="Tag1, Tag2, Tag3" tabindex="-1">
-                              </div>
+                        
+                              <div class="col-md-7 mb-6">
+                          <label for="TagifyBasic" class="form-label">{{__('cycles.Tags')}}</label>
+                          <input
+                            id="TagifyBasic"
+                            name="Tags[]"
+                            class="form-control"
+                            placeholder="select technologies"
+                            value="css, html, javascript" />
+                        </div>
 
                             <div class="col-md-7 mb-6">
                                 <label class="form-label">{{__('cycles.CoursLevel')}}</label>
@@ -143,20 +150,20 @@
 
                             <div class="col-md-7 col-12 mb-6">
                                 <label for="flatpickr-date" class="form-label">{{__('cycles.CoursStart')}}</label>
-                                <input type="text" class="form-control flatpickr-input active" placeholder="YYYY-MM-DD" >
+                                <input type="text" class="form-control flatpickr-input active" name="start_date" placeholder="YYYY-MM-DD" >
                               </div>
 
 
                               <div class="col-md-7 col-12 mb-6">
                                 <label for="flatpickr-date" class="form-label">{{__('cycles.CoursEnd')}}</label>
-                                <input type="text" class="form-control flatpickr-input active" placeholder="YYYY-MM-DD" id="flatpickr-date" readonly="readonly">
+                                <input type="text" class="form-control flatpickr-input active" name="end_date" placeholder="YYYY-MM-DD" id="flatpickr-date">
                               </div>
 
                               <div class="row">
                                 <div class="col-md mb-md-0 mb-5">
                                   <div class="form-check custom-option custom-option-basic checked">
                                     <label class="form-check-label custom-option-content" for="customRadioTemp1">
-                                      <input name="customRadioTemp" class="form-check-input" type="radio" value="" id="customRadioTemp1" checked="">
+                                      <input name="Status" class="form-check-input" type="radio" value="0" id="customRadioTemp1" checked="">
                                       <span class="custom-option-header">
                                         <span class="h6 mb-0">{{__('cycles.Draft')}}</span>
                                       </span>
@@ -167,7 +174,7 @@
                                 <div class="col-md">
                                   <div class="form-check custom-option custom-option-basic">
                                     <label class="form-check-label custom-option-content" for="customRadioTemp2">
-                                      <input name="customRadioTemp" class="form-check-input" type="radio" value="" id="customRadioTemp2">
+                                      <input name="Status" class="form-check-input" type="radio" value="1" id="customRadioTemp2">
                                       <span class="custom-option-header">
                                         <span class="h6 mb-0">{{__('cycles.Published')}}</span>
                                       </span>
@@ -203,7 +210,7 @@
                     </button>
                 </div>
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-success ml-1" >
+                    <button type="button" class="btn btn-success ml-1" >
                         <i class="bx bx-check d-block d-sm-none"></i>
                         <span class="d-none d-sm-block">{{__('cycles.PublishProgram')}}</span>
                     </button>
@@ -225,49 +232,7 @@
         </div>
     </div>
     <!-- END: Content-->
-<div class="modal fade text-left" id="edittraining" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-        <div class="modal-content">
-            <form method="post" action="/dashboard/training/store" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h4 class="modal-title">{{__('cycles.Modify training course')}} </h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <i class="bx bx-x"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    @csrf
-                  	<input type="hidden" name="id" value="" id="id">
-                    <div style="text-align: center;" class="form-group" id="showimage">
-                    </div>
-                    <label>{{__('cycles.Course Title')}}</label>
-                    <div class="form-group">
-                        <input id="title" name="title" type="text" placeholder="Title" class="form-control" required>
-                    </div>
-                    <label>{{__('cycles.Add a description')}}:</label>
-                    <div class="form-group">
-                            <textarea class="form-control" id="dsc" name='dsc' rows="4"
-                                      placeholder="{{__('cycles.Write your description here')}}." ></textarea>
-                    </div>
-                        <div class="form-group">
-                            <label>{{__('cycles.Image')}}</label>
-                            <div class="custom-file">
-                                <input type="file" class="form-control" name="image" id="image" accept='image/*'>
-                                <label class="custom-file-label" for="image">{{__('cycles.Browse')}}</label>
-                            </div>
-                        </div>
 
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary ml-1" >
-                        <i class="bx bx-check d-block d-sm-none"></i>
-                        <span class="d-none d-sm-block">{{__('Submit')}}</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 @stop
 @section('scripts')
@@ -282,6 +247,7 @@
 
 <!-- Page JS -->
 <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+<script src="/vuexy/assets/js/forms-tagify.js"></script>
 @stop
 @section('pagescripts')
     <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
