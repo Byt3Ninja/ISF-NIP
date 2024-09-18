@@ -259,7 +259,7 @@
                                   class="btn btn-icon rounded-circle btn-label-success">
                                   <i class="ti ti-check"></i></button>
                                 <button title="Dispprove" onclick="approve({{ $session->id }}, 'No')" type="button"
-                                  class="btn btn-icon rounded-circle btn-light-danger">
+                                  class="btn btn-icon rounded-circle btn-label-danger">
                                   <i class="ti ti-x"></i></button>
                               @endif
                               @if ($session->join_url)
