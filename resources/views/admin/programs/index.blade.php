@@ -103,7 +103,7 @@
                                                     {{__('cycles.NA')}}
                                                 @else
                                                 <!-- Where to Redirect OR Take Copied ? -->
-                                                <a target="_blank" href="cycles/{{ $cycle->private }}">اضغط هنا</a>
+                                                <a target="_blank" href="cycles/view/{{ $cycle->private }}">اضغط هنا</a>
                                                 @endif
                                             </td>
                                             <td style="font-size: small;"><a target="_blank" href="/dashboard/cycles/{{$cycle->id}}/registered">
