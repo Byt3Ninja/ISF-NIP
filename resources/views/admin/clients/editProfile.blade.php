@@ -237,46 +237,46 @@
 
                   <div class="mb-4 col-md-6">
                     <label for="language" class="form-label">Language</label>
-                    <select id="language" class="select2 form-select">
+                    <select id="language" name="language" class="select2 form-select">
                       <option value="">Select Language</option>
-                      <option value="en">English</option>
-                      <option value="fr">French</option>
-                      <option value="de">German</option>
-                      <option value="pt">Portuguese</option>
+                      <option value="en" {{ $client->language == 'en' ? 'selected' : '' }} >English</option>
+                      <option value="fr" {{ $client->language == 'fr' ? 'selected' : '' }} >French</option>
+                      <option value="de" {{ $client->language == 'de' ? 'selected' : '' }} >German</option>
+                      <option value="pt" {{ $client->language == 'pt' ? 'selected' : '' }} >Portuguese</option>
                     </select>
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="timeZones" class="form-label">Timezone</label>
-                    <select id="timeZones" class="select2 form-select">
+                    <select id="timeZones" name="timezone" class="select2 form-select">
                       <option value="">Select Timezone</option>
-                      <option value="-12">(GMT-12:00) International Date Line West</option>
-                      <option value="-11">(GMT-11:00) Midway Island, Samoa</option>
-                      <option value="-10">(GMT-10:00) Hawaii</option>
-                      <option value="-9">(GMT-09:00) Alaska</option>
-                      <option value="-8">(GMT-08:00) Pacific Time (US & Canada)</option>
-                      <option value="-8">(GMT-08:00) Tijuana, Baja California</option>
-                      <option value="-7">(GMT-07:00) Arizona</option>
-                      <option value="-7">(GMT-07:00) Chihuahua, La Paz, Mazatlan</option>
-                      <option value="-7">(GMT-07:00) Mountain Time (US & Canada)</option>
-                      <option value="-6">(GMT-06:00) Central America</option>
-                      <option value="-6">(GMT-06:00) Central Time (US & Canada)</option>
-                      <option value="-6">(GMT-06:00) Guadalajara, Mexico City, Monterrey</option>
-                      <option value="-6">(GMT-06:00) Saskatchewan</option>
-                      <option value="-5">(GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>
-                      <option value="-5">(GMT-05:00) Eastern Time (US & Canada)</option>
-                      <option value="-5">(GMT-05:00) Indiana (East)</option>
-                      <option value="-4">(GMT-04:00) Atlantic Time (Canada)</option>
-                      <option value="-4">(GMT-04:00) Caracas, La Paz</option>
+                      <option value="-12" {{ $client->timezone == '-12' ? 'selected' : '' }} >(GMT-12:00) International Date Line West</option>
+                      <option value="-11" {{ $client->timezone == '-11' ? 'selected' : '' }}>(GMT-11:00) Midway Island, Samoa</option>
+                      <option value="-10" {{ $client->timezone == '-10' ? 'selected' : '' }}>(GMT-10:00) Hawaii</option>
+                      <option value="-9" {{ $client->timezone == '-9' ? 'selected' : '' }}>(GMT-09:00) Alaska</option>
+                      <option value="-8" {{ $client->timezone == '-8' ? 'selected' : '' }}>(GMT-08:00) Pacific Time (US & Canada)</option>
+                      <option value="-8" {{ $client->timezone == '-8' ? 'selected' : '' }}>(GMT-08:00) Tijuana, Baja California</option>
+                      <option value="-7" {{ $client->timezone == '-7' ? 'selected' : '' }}>(GMT-07:00) Arizona</option>
+                      <option value="-7" {{ $client->timezone == '-7' ? 'selected' : '' }}>(GMT-07:00) Chihuahua, La Paz, Mazatlan</option>
+                      <option value="-7" {{ $client->timezone == '-7' ? 'selected' : '' }}>(GMT-07:00) Mountain Time (US & Canada)</option>
+                      <option value="-6" {{ $client->timezone == '-6' ? 'selected' : '' }}>(GMT-06:00) Central America</option>
+                      <option value="-6" {{ $client->timezone == '-6' ? 'selected' : '' }}>(GMT-06:00) Central Time (US & Canada)</option>
+                      <option value="-6" {{ $client->timezone == '-6' ? 'selected' : '' }}>(GMT-06:00) Guadalajara, Mexico City, Monterrey</option>
+                      <option value="-6" {{ $client->timezone == '-6' ? 'selected' : '' }}>(GMT-06:00) Saskatchewan</option>
+                      <option value="-5" {{ $client->timezone == '-5' ? 'selected' : '' }}>(GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>
+                      <option value="-5" {{ $client->timezone == '-5' ? 'selected' : '' }}>(GMT-05:00) Eastern Time (US & Canada)</option>
+                      <option value="-5" {{ $client->timezone == '-5' ? 'selected' : '' }}>(GMT-05:00) Indiana (East)</option>
+                      <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Atlantic Time (Canada)</option>
+                      <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Caracas, La Paz</option>
                     </select>
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="currency" class="form-label">Currency</label>
-                    <select id="currency" class="select2 form-select">
+                    <select id="currency" name="currency" class="select2 form-select">
                       <option value="">Select Currency</option>
-                      <option value="usd">USD</option>
-                      <option value="euro">Euro</option>
-                      <option value="pound">Pound</option>
-                      <option value="bitcoin">Bitcoin</option>
+                      <option value="$" {{ $client->currency == '$' ? 'selected' : '' }} >USD</option>
+                      <option value="euro" {{ $client->currency == 'euro' ? 'selected' : '' }} >Euro</option>
+                      <option value="pound" {{ $client->currency == 'pound' ? 'selected' : '' }} >Pound</option>
+                      <option value="bitcoin" {{ $client->currency == 'bitcoin' ? 'selected' : '' }} >Bitcoin</option>
                     </select>
                   </div>
 
