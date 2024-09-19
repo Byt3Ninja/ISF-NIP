@@ -471,16 +471,78 @@
             </table>
           </div>
         </div>
+        @else
+				<section class="mt-10">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="card">
+								<div class="card-header border-bottom">
+									<h4 class="card-title d-flex align-items-center">
+										<i class="ti ti-clipboard-list ti-28px"></i>
+                    <span class="mx-2">{{__('dashboard.IncubationList')}}</span>
+                  </h4>
+								</div>
+								<div class="card-body">
+									@php( $workingcycles = App\Cycle::whereNull('private')->whereRaw('? between start and end', [now()->format('Y-m-d')])->get() )
+									@if (count($workingcycles)>0)
+										@foreach($workingcycles as $cycle)
+											<div class="border-bottom">
+												<div class="card-header">
+													<h4 class="primary"><i class="bx bxs-bell"></i>  {{$cycle->title}}</h4>
+													<div class="d-flex align-items-center mt-2">
+														<div class="media-left">
+															<img src="{{$cycle->organization->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+														</div>
+														<div class="mx-2">
+															{{$cycle->organization->name }}
+														</div>
+													</div>
+												</div>
+												<div class="card-body bg-rgba-light">
+													<p class="card-text">
+														{{$cycle->description}}
+													</p>
+                          <div class="d-flex align-items-center justify-content-between" style="width:100%">
+                            <small class="text-muted" style="text-transform: capitalize">
+                              {{__('dashboard.start from')}} {{$cycle->start->format('d-m-Y')}}
+                            </small>
+                            <a href="/dashboard/cycles/view/{{$cycle->id}}" class="btn btn-primary">
+                              <span class="mx-2">{{__('dashboard.Join')}}</span>
+                              <i class="ti ti-arrows-join"></i>
+                            </a>
+                          </div>
+												</div>
+											</div>
+										@endforeach
+									@else
+										<div>
+										<h5 class="m-75 p-75">
+											<div class="avatar bg-rgba-warning m-0 mr-75">
+												<div class="avatar-content">
+													<i class="bx bx-stats text-warning"></i>
+												</div>
+											</div>  {{__('dashboard.No Cycles started yet')}}...
+										</h5>
+										</div>
+									@endif
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
       @endif
       <!-- / My Progress -->
 
       <!-- My last training -->
       @if (count($sessions) > 0)
-        <div class="card">
+        <div class="card mt-10">
           <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">
-              <i class='bx bxs-megaphone font-medium-4 mr-1'></i>{{ __('dashboard.My Latest training') }} ::
-              <a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
+              <i class="ti ti-clipboard-list ti-28px"></i>
+              <span class="mx-2">
+                {{ __('dashboard.My Latest training') }} ::
+                <a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
+              </span>
             </h5>
           </div>
           <div class="table-responsive">
@@ -675,8 +737,8 @@
 					<div class="card">
 						<div class="card-header border-bottom">
 							<h4 class="card-title align-items-center">
-								<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.Mentors") }} :
-								
+                <i class="ti ti-school ti-28px"></i>
+                <span class="mx-2">{{ __("dashboard.Mentors") }}</span>
 							</h4>
 
 						</div>
