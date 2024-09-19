@@ -209,7 +209,7 @@
                                 </a>&nbsp;
                                 <a href="/dashboard/{{ $link }}" id="{{ $step->id }}">
                                   <span class="btn btn-icon btn-label-primary rounded-circle">
-                                    <i class="ti ti-hand-finger" title="{{ __('cycles.view step results') }}">
+                                    <i class="ti ti-eye" title="{{ __('cycles.view step results') }}">
                                     </i>
                                   </span>
                                 </a>

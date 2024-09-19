@@ -56,7 +56,7 @@
                               <td>
                                 <a title="View" target="_blank" href="/dashboard/documentation/{{ $doc->id }}"
                                   class="btn btn-icon rounded-circle btn-label-primary">
-                                  <i class="ti ti-hand-finger"></i>
+                                  <i class="ti ti-eye"></i>
                                 </a>
                                 @can('manage_documentation')
                                   <a title="Edit" href="{{ route('documentation.edit', ['documentation' => $doc->id]) }}"
