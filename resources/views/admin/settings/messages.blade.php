@@ -105,7 +105,7 @@
                             <button type="button" id="msg" onclick="OpenModal({{ $getmsg->id }});"
                               class="btn btn-icon btn-label-info rounded-circle mx-4" data-bs-toggle="modal"
                               data-bs-target="#MessageModal">
-                              <i class="ti ti-hand-finger"></i>
+                              <i class="ti ti-eye"></i>
                             </button>
 
                             <a onclick="return confirm('{{ __('Are you sure?') }}');"
