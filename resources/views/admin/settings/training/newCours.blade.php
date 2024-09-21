@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="/vuexy/libs/tagify/tagify.css" />
 
   <style>
+    .custom-container {
+      padding: 0 2rem 0 8rem;
+    }
+
     input[type="file"] {
       display: none;
     }
@@ -18,7 +22,6 @@
 
     #browse-button {
       position: absolute;
-      right: 0;
       top: 0;
     }
 
@@ -27,13 +30,38 @@
       height: 35px;
       width: 150px;
       font-size: 14px;
+      background-color: white;
+    }
+
+    #levelButton:hover {
+      background-color: #e9e7fd;
+    }
+
+    #statusButton {
+      background-color: white;
+    }
+
+    #statusButton:hover {
+      background-color: #e9e7fd;
+    }
+
+    #dateInputContainer {
+      position: relative;
+    }
+
+    #dateInputContainer img {
+      position: absolute;
+      top: 2rem;
     }
 
     @media screen and (max-width: 768px) {
+      .custom-container {
+        padding: 0;
+      }
       #levelButton {
         width: 90px;
         height: 30px;
-        font-size: 11px;
+        font-size: 12px;
         text-wrap: nowrap;
       }
     }
@@ -69,9 +97,9 @@
 
         <section class="row">
           <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card">
+            <div class="card custom-container">
               <div class="card-header border-bottom border-light" style="height: 70px;">
-                <h5 class="card-title">{{ $title }}</h5>
+                <h4 class="card-title">{{ $title }}</h4>
               </div>
               <div class="card-body">
                 <div class="py-4">
@@ -79,25 +107,27 @@
                   <form method="post" action="/dashboard/training/store" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group mb-3">
-                      <span class="form-label">{{ __('cycles.Image') }}</span>
+                      <span class="form-label fs-6">{{ __('cycles.Image') }}</span>
                       <label 
                         for="file-upload" 
                         class="form-control mt-2 border-light light-input-shadow"
                         style="position: relative;"
                       >
-                        <span id="file-name" class="text-muted fs-sm">Browse</span>
+                        <span id="file-name" class="text-muted fs-sm">
+                          {{ $l == 'en' ? 'Browse' : 'تصفح' }}
+                        </span>
                         <div 
                           id="browse-button"
                           class="btn btn-label-primary border-primary"
-                          style="width: 80px; font-size: 14px;" 
+                          style="width: 80px; font-size: 14px; {{$l == 'ar' ? 'left: 0;' : 'right: 0;'}}" 
                         >
-                          Browse
+                          {{ $l == 'en' ? 'Browse' : 'تصفح' }}
                         </div>
                       </label>
                       <input type="file" name="image" id="file-upload" accept='image/*' />
                     </div>
                     <div class="form-group mb-3">
-                      <label class="form-label">{{ __('cycles.Course Name') }}</label>
+                      <label class="form-label fs-6">{{ __('cycles.Course Name') }}</label>
                       <input 
                         id="title" 
                         name="title" 
@@ -108,7 +138,7 @@
                       />
                     </div>
                     <div class="form-group mb-3">
-                      <label class="form-label">
+                      <label class="form-label fs-6">
                         {{ __('cycles.Code') }} 
                         <span class="text-secondary">
                           {{ $l == 'en' ? ' ( Auto-generated )' : ' (تلقائي)' }}
@@ -124,7 +154,7 @@
                       />
                     </div>
                     <div class="form-group mb-3">
-                      <label class="form-label" for="CoursCategories">
+                      <label class="form-label fs-6" for="CoursCategories">
                         {{ __('cycles.CoursCategories') }}
                       </label>
                       <select 
@@ -151,7 +181,7 @@
                       </select>
                     </div>
                     <div class="form-group mb-3">
-                      <label for="TagifyBasic" class="form-label">{{ __('cycles.Tags') }}</label>
+                      <label for="TagifyBasic" class="form-label fs-6">{{ __('cycles.Tags') }}</label>
                       <select 
                         id="TagifyBasic" 
                         name="Tags[]" 
@@ -164,7 +194,7 @@
                       </select>
                     </div>
                     <div class="form-group mb-3">
-                      <label class="form-label">{{ __('cycles.CoursLevel') }}</label>
+                      <label class="form-label fs-6">{{ __('cycles.CoursLevel') }}</label>
                       <div 
                         style="height: 45px; width: fit-content; background-color: #F5F3FF; padding: 0 0.5rem;" 
                         class="row align-items-center rounded-pill"
@@ -172,21 +202,21 @@
                         <button
                           type="button"
                           id="levelButton"
-                          class="bg-white rounded-pill border-none text-primary fw-bold"
+                          class="rounded-pill border-none text-primary fw-bold"
                         >
                           {{ __('cycles.Beginner') }}
                         </button>
                         <button
                           type="button"
                           id="levelButton"
-                          class="bg-white rounded-pill border-none text-primary fw-bold mx-1"
+                          class="rounded-pill border-none text-primary fw-bold mx-1"
                         >
                           {{ __('cycles.Intermediate') }}
                         </button>
                         <button
                           type="button"
                           id="levelButton"
-                          class="bg-white rounded-pill border-none text-primary fw-bold"
+                          class="rounded-pill border-none text-primary fw-bold"
                         >
                           {{ __('cycles.Advanced') }}
                         </button>
@@ -195,7 +225,7 @@
 
                     {{-- @if(count($Quizzes && $Quizzes > 0))
                       <div class="form-group mb-3">
-                        <label class="form-label">{{__('cycles.Quizs')}}</label>
+                        <label class="form-label fs-6">{{__('cycles.Quizs')}}</label>
                           <select  class="select2 form-select" name="Quizs" >
                             @foreach ($Quizzes as $Quizz)
                             <option value="{{$Quizz->id}}">{{$Quizz->title}}</option>
@@ -205,10 +235,10 @@
                     @endif --}}
 
                     <div class="form-group mb-3">
-                      <label class="form-label">
+                      <label class="form-label fs-6">
                         {{ __('cycles.Instractor') }}
                         <span class="text-secondary">
-                          {{ $l == 'en' ? 'Choode one or more' : 'اختر واحد أو أكثر' }}
+                          {{ $l == 'en' ? '(Choode one or more)' : '(اختر واحد أو أكثر)' }}
                         </span>
                       </label>
                       <select class="select2 form-select" name="Instractor">
@@ -223,40 +253,65 @@
                       </select>
                     </div>
 
-                    <div class="col-md-7 col-12 mb-6">
-                      <label for="flatpickr-date" class="form-label">{{ __('cycles.CoursStart') }}</label>
-                      <input type="text" class="form-control flatpickr-input active" name="start_date"
-                        placeholder="YYYY-MM-DD">
+                    <div classs="form-group">
+                      <h6 class="fw-bold" style="font-size: 14;">{{ $l == 'en' ? 'History' : 'التاريخ'}}</h6>
+                      <div class="d-flex align-items-center">
+                        <div id="dateInputContainer" class="col-md-3">
+                          <label for="start_date" class="form-label fs-6">{{ __('cycles.CoursStart') }}</label>
+                          <input 
+                            type="text" 
+                            class="datewithouttime form-control"
+                            id="start_date"
+                            value="{{ request('start_date') }}"
+                            name="start_date" 
+                            placeholder="YYYY-MM-DD"
+                          />
+                          <img 
+                            src="/icons/calendar-time.svg" 
+                            alt="calendar icon"
+                            style="
+                            {{ $l == 'ar' ? 'left: 10px;' : 'right: 10px;' }}"
+                          />
+                        </div>
+                        <div id="dateInputContainer" class="col-md-3 mx-2">
+                          <label for="end_date" class="form-label fs-6">{{ __('cycles.CoursEnd') }}</label>
+                          <input 
+                            type="text" 
+                            class="datewithouttime form-control" id="end_date"
+                            value="{{ request('end_date') }}" 
+                            name="end_date" 
+                            placeholder="YYYY-MM-DD"
+                          />
+                          <img 
+                            src="/icons/calendar-time.svg" 
+                            alt="calendar icon"
+                            style="
+                            {{ $l == 'ar' ? 'left: 10px;' : 'right: 10px;' }}" 
+                          />
+                        </div>
+                      </div>
                     </div>
-
-
-                    <div class="col-md-7 col-12 mb-6">
-                      <label for="flatpickr-date" class="form-label">{{ __('cycles.CoursEnd') }}</label>
-                      <input type="text" class="form-control flatpickr-input active" name="end_date"
-                        placeholder="YYYY-MM-DD" id="flatpickr-date">
-                    </div>
-
-                    <div class="form-group mb-3">
-                      <label class="form-label">{{ $visibilityStatus }}</label>
+                    <div class="form-group mb-3 mt-4">
+                      <label class="form-label fs-6">{{ $visibilityStatus }}</label>
                       <div 
                         style="height: 45px; width: fit-content; background-color: #F5F3FF; padding: 0 0.5rem;" 
                         class="row align-items-center rounded-pill"
                       >
                         <button
+                          id="statusButton"
                           type="button"
-                          {{-- id="levelButton" --}}
-                          style="width: 140px; height: 30px; font-size: 14px;"
-                          class="bg-white rounded-pill border-none text-primary fw-bold mx-1"
+                          style="width: 140px; height: 30px; font-size: 12px;"
+                          class="rounded-pill border-none text-primary fw-bold mx-1"
                         >
-                          {{ __('cycles.Intermediate') }}
+                          {{ __('cycles.Draft') }}
                         </button>
                         <button
+                          id="statusButton"
                           type="button"
-                          {{-- id="levelButton" --}}
-                          style="width: 140px; height: 30px; font-size: 14px;"
-                          class="bg-white rounded-pill border-none text-primary fw-bold"
+                          style="width: 140px; height: 30px; font-size: 12px;"
+                          class="rounded-pill border-none text-primary fw-bold"
                         >
-                          {{ __('cycles.Advanced') }}
+                          {{ __('cycles.Published') }}
                         </button>
                       </div>
                     </div>
@@ -287,7 +342,7 @@
                       </div>
                     </div> --}}
                     <div class="form-group mb-3">
-                      <label class="form-label">{{ __('cycles.Add a description') }}</label>
+                      <label class="form-label fs-6">{{ __('cycles.Add a description') }}</label>
                       <textarea 
                         class="form-control border-light light-input-shadow" 
                         id="dsc" 
@@ -300,14 +355,27 @@
                     </div>
 
                     <hr> <br>
-                    <div class="modal-footer">
-                      <div class="col-md-3">
-
-                        <button type="submit" class="btn btn-primary ml-1">
-                          <i class="bx bx-check d-block d-sm-none"></i>
-                          <span class="d-none d-sm-block">{{ __('cycles.SaveProgram') }}</span>
-                        </button>
-                      </div>
+                    <div class="d-flex align-items-center">
+                      <button 
+                        type="submit" 
+                        class="btn btn-primary rounded-pill fw-bold"
+                        style="font-size: 14px;"
+                      >
+                        <i class="ti ti-world"></i>
+                        <span class="mx-1">
+                          {{ $l == 'en' ? 'Publish Program' : 'نشر البرنامج' }}
+                        </span>
+                      </button>
+                      <button 
+                        type="button" 
+                        class="btn btn-outline-primary rounded-pill mx-3 fw-bold"
+                        style="font-size: 14px;"
+                      >
+                        <i class="ti ti-database"></i>
+                        <span class="mx-1">
+                          {{ $l == 'en' ? 'Save Program' : 'حفظ البرنامج' }}
+                        </span>
+                      </button>
                     </div>
                   </form>
                   <!-- Add Course Form -->
@@ -324,6 +392,8 @@
 
 @section('scripts')
   <script>
+    $lang = '{{ $l }}';
+
     // Access uploaded files from the file input
     const fileInput = document.querySelector('#file-upload');
     const label = document.querySelector('#file-name');
@@ -335,7 +405,7 @@
         // console.log('fileName', fileName)
         label.innerText = fileName;
       } else {
-        label.innerText = 'Browse';
+        label.innerText = $lang === 'en' ? 'Browse' : 'تصفح';
       }
     });
   </script>
@@ -360,23 +430,59 @@
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
 
   <script>
+    const statusButton = document.querySelectorAll('#statusButton');
+    const levelButton = document.querySelectorAll('#levelButton');
+
+    statusButton.forEach((button) => {
+      button.addEventListener('click', () => {
+        statusButton.forEach((btn) => {
+          btn.classList.remove('bg-primary', 'text-white');
+          btn.classList.add('bg-white', 'text-primary');
+        });
+        button.classList.remove('bg-white', 'text-primary');
+        button.classList.add('bg-primary', 'text-white');
+      });
+    });
+
+    levelButton.forEach((button) => {
+      button.addEventListener('click', () => {
+        levelButton.forEach((btn) => {
+          btn.classList.remove('bg-primary', 'text-white');
+          btn.classList.add('bg-white', 'text-primary');
+        });
+        button.classList.remove('bg-white', 'text-primary');
+        button.classList.add('bg-primary', 'text-white');
+      });
+    });
+  </script>
+
+  <script>
   $(document).ready(function() {
     $('#userstable').DataTable({
-        "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
-        "columnDefs": [
-            {"orderable": false, "targets":  [4]},
-        ],
-        @if ($l == 'ar')
-        "language": {
-            "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-            "sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
-            "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix":  "", "sSearch":       "ابحث:", "sUrl":          "",
-            "oPaginate": {"sFirst":    "الأول", "sPrevious": "السابق", "sNext":     "التالي", "sLast":     "الأخير"},
-            "oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}} @endif
-            });
-        });
-    </script>
+      "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
+      "columnDefs": [
+          {"orderable": false, "targets":  [4]},
+      ],
+      @if ($l == 'ar')
+      "language": {
+          "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
+          "sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
+          "sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
+          "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+          "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+          "sInfoPostFix":  "", "sSearch":       "ابحث:", "sUrl":          "",
+          "oPaginate": {"sFirst":    "الأول", "sPrevious": "السابق", "sNext":     "التالي", "sLast":     "الأخير"},
+          "oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}} @endif
+          });
+      });
+
+      // Date Time Picker
+      $('.date').datetimepicker({
+        timepicker: true,
+        format: 'Y-m-d H:i'
+      });
+      $('.datewithouttime').datetimepicker({
+        format: 'Y-m-d'
+      });
+  </script>
 @stop

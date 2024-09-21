@@ -110,12 +110,14 @@
       <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
         <ul class="navbar-nav flex-row align-items-center ms-auto">
           <!-- Language -->
-          <li class="nav-item dropdown-language dropdown">
+          <li class="nav-item dropdown-language dropdown" style="position: relative;">
             <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
               href="javascript:void(0);" data-bs-toggle="dropdown">
               <i class="ti ti-language rounded-circle ti-md"></i>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end">
+            <ul class="dropdown-menu dropdown-menu-end" 
+              style="position: absolute; left: {{$l == 'ar' ? '2rem' : '-8rem'}}; top: 2rem;"
+            >
               <li class="dropdown dropdown-language nav-item">
                 @if ($l == 'ar')
                   <a class="dropdown-item" href="/lang/en">
@@ -134,12 +136,14 @@
           <!--/ Language -->
 
           <!-- Style Switcher -->
-          <li class="nav-item dropdown-style-switcher dropdown">
+          <li class="nav-item dropdown-style-switcher dropdown" style="position: relative;">
             <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow"
               href="javascript:void(0);" data-bs-toggle="dropdown">
               <i class="ti ti-md"></i>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+            <ul class="dropdown-menu dropdown-menu-end dropdown-styles" 
+              style="position: absolute; left: {{$l == 'ar' ? '2rem' : '-8rem'}}; top: 2rem; width: 150px;"
+            >
               <li>
                 <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
                   <span class="align-middle"><i class="ti ti-sun ti-md me-3"></i>Light</span>
