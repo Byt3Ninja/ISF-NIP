@@ -287,10 +287,22 @@ $(document).on('change', '.roleshow', function(){
     }
 });
 
+$(document).on('click', '.Val0', function(){
+    var role = $('.getVal').val('0');
+});
+$(document).on('click', '.Val1', function(){
+    var role = $('.getVal').val('1');
+});
 
-
-
-
+$(document).on('click', '.vallevel0', function(){
+    var role = $('.getValLevel').val('Beginner');
+});
+$(document).on('click', '.vallevel1', function(){
+    var role = $('.getValLevel').val('Intermediate');
+});
+$(document).on('click', '.vallevel2', function(){
+    var role = $('.getValLevel').val('Advanced');
+});
 
 
 
