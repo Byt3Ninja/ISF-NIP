@@ -188,9 +188,9 @@
                         class="select2 form-control"
                         multiple="multiple"
                       >
-                        <option value="css" selected>css</option>
-                        <option value="html" selected>html</option>
-                        <option value="javascript" selected>javascript</option>
+                      @foreach ($Tags as $Tag)
+                        <option value="{{ $Tag->id }}" >{{ $Tag->name }}</option>
+                        @endforeach
                       </select>
                     </div>
                     <div class="form-group mb-3">
