@@ -188,9 +188,9 @@
                         class="select2 form-control"
                         multiple="multiple"
                       >
-                        <option value="css" selected>css</option>
-                        <option value="html" selected>html</option>
-                        <option value="javascript" selected>javascript</option>
+                      @foreach ($Tags as $Tag)
+                        <option value="{{ $Tag->id }}" >{{ $Tag->name }}</option>
+                        @endforeach
                       </select>
                     </div>
                     <div class="form-group mb-3">
@@ -202,27 +202,27 @@
                         <button
                           type="button"
                           id="levelButton"
-                          class="rounded-pill border-none text-primary fw-bold"
+                          class="rounded-pill border-none vallevel0 text-primary fw-bold"
                         >
                           {{ __('cycles.Beginner') }}
                         </button>
                         <button
                           type="button"
                           id="levelButton"
-                          class="rounded-pill border-none text-primary fw-bold mx-1"
+                          class="rounded-pill border-none vallevel1 text-primary fw-bold mx-1"
                         >
                           {{ __('cycles.Intermediate') }}
                         </button>
                         <button
                           type="button"
                           id="levelButton"
-                          class="rounded-pill border-none text-primary fw-bold"
+                          class="rounded-pill border-none vallevel2 text-primary fw-bold"
                         >
                           {{ __('cycles.Advanced') }}
                         </button>
                       </div>
                     </div>
-
+                    <input class="getValLevel" name="CoursLevel" type="hidden" >
                     {{-- @if(count($Quizzes && $Quizzes > 0))
                       <div class="form-group mb-3">
                         <label class="form-label fs-6">{{__('cycles.Quizs')}}</label>
@@ -301,7 +301,7 @@
                           id="statusButton"
                           type="button"
                           style="width: 140px; height: 30px; font-size: 12px;"
-                          class="rounded-pill border-none text-primary fw-bold mx-1"
+                          class="rounded-pill border-none Val0 text-primary fw-bold mx-1"
                         >
                           {{ __('cycles.Draft') }}
                         </button>
@@ -309,10 +309,11 @@
                           id="statusButton"
                           type="button"
                           style="width: 140px; height: 30px; font-size: 12px;"
-                          class="rounded-pill border-none text-primary fw-bold"
+                          class="rounded-pill border-none Val1 text-primary fw-bold"
                         >
                           {{ __('cycles.Published') }}
                         </button>
+                       
                       </div>
                     </div>
 
@@ -341,6 +342,7 @@
                         </div>
                       </div>
                     </div> --}}
+                    <input class="getVal" name="Status" type="hidden" >
                     <div class="form-group mb-3">
                       <label class="form-label fs-6">{{ __('cycles.Add a description') }}</label>
                       <textarea 
