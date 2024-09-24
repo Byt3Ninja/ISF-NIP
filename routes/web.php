@@ -145,7 +145,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
 	Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
 	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
-    Route::get('/show/MentorProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
+    Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors');
 
     Route::resource('Tags', 'TagsController');

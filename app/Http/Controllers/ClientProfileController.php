@@ -185,7 +185,7 @@ class ClientProfileController extends Controller
         $mentorshipTasks = MentorshipTask::where('mentor_id',$id)->where('status','pending')->get();
        
 
-            return view('admin/clients/Mentorprofile', compact('client',
+            return view('admin/clients/UserProfile', compact('client',
             'expertises',
             'mentors',
             'order',

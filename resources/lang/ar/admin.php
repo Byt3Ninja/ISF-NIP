@@ -609,5 +609,9 @@ return [
 	'Reset' => 'افراغ',
 	'Course Deleted'=> 'تم المسح بنجاح',
 	'CountProgram'=>'عدد البرامج',
-	'Enroll'=>'تسجيل'
+	'Enroll'=>'تسجيل',
+	'rating'=>'التقييم',
+	'New Program'=>'برنامج جديد',
+	'Responsible'=>'المسؤول',
+	'Duration'=>'الفترة',
 ];
