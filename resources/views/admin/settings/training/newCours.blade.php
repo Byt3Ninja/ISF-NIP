@@ -248,7 +248,7 @@
                       </div>
                     </div>
                     <input class="getValLevel" name="CoursLevel" type="hidden" >
-                    @if(count($Quizzes && $Quizzes > 0))
+                    
                       <div class="form-group mb-3">
                         <label class="form-label fs-6">{{__('cycles.Quizs')}}</label>
                           <select  class="select2 form-select" name="Quizs" >
@@ -257,7 +257,7 @@
                             @endforeach
                         </select>
                       </div>
-                    @endif
+                   
 
                     <div class="form-group mb-3">
                       <label class="form-label fs-6">
@@ -419,6 +419,7 @@
 
 @section('scripts')
   <script>
+    
     $lang = '{{ $l }}';
 
     // Access uploaded files from the file input
@@ -460,6 +461,10 @@
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
 
   <script>
+    
+     
+     
+
     const statusButton = document.querySelectorAll('#statusButton');
     const levelButton = document.querySelectorAll('#levelButton');
 
@@ -487,6 +492,16 @@
 
     const TagifyCustomInlineSuggestionEl = document.querySelector('#TagifyCustomInlineSuggestion');
 
+   
+
+    // const tags = '{{$tags}}';
+
+   // const tagsWhiteList =  tags.map((tag) => tag.name);
+
+    // const whitelist = tagsWhiteList;
+
+    // console.log('tags', tags);
+    
     const whitelist = [
       'A# .NET',
       'A# (Axiom)',

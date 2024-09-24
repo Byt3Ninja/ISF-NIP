@@ -82,14 +82,14 @@
               <!-- Add New Program Button -->
               <button
                 class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;">
-                  <span class="mx-2">New Program</span>
+                  <span class="mx-2">{{__('admin.New Program')}}</span>
                   <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
               </button>
               <button 
                 class="btn btn-primary d-none d-md-inline-block"
                 style="border-radius: 15px; text-wrap: nowrap;"
               >
-                <span class="mx-2">New Program</span>
+                <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
               </button>
             </div>
@@ -138,7 +138,7 @@
               <h6 class="text-center text-secondary">Create a program for the success of companies</h6>
               <!-- Add New Program Button -->
               <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;">
-                <span class="mx-2">New Program</span>
+                <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
               </button>
             </div>
@@ -150,9 +150,26 @@
                     $totalSteps = app(\App\Step::class)
                         ->where('cycle_id', '=', $cycle->id)
                         ->count();
+
+                        $totalStepsFinish = app(\App\Step::class)
+                        ->where('to', '>', Carbon\Carbon::now())
+                        ->where('cycle_id', '=', $cycle->id)
+                        ->count();
+
+
                     $totalcompany = app(\App\Company::class)
                         ->where('cycle', '=', $cycle->id)
                         ->count();
+                  @endphp
+                  @php
+                            
+                  // $orgid = App/Organization::where('user_id','=', auth()->user()->id)->first();
+                  $orgid = App\Organization::where('id','=', $cycle->organization_id)->get();
+                  foreach ($orgid as  $org) {
+                    $mentortotal = App\User::where('id','=',$org->user_id)->get();
+                    $mentor_Count = $mentortotal->count();
+                  }
+                 
                   @endphp
                   <div class="card-body">
                     <div 
@@ -191,18 +208,21 @@
                         </div>  
                         <!-- / Program Title -->
                         <!-- Company Name -->
+                        @if(!empty($cycle->private))
                         <a 
                           href="/dashboard/cycles/{{ $cycle->id }}/registered"
                           class="d-flex justify-content-between"
+                          target="_blank"
                         >
                           <p class="fs-6 mb-2">
                             {{ $l == 'ar' ? $cycle->organization->name_ar : $cycle->organization->name_en }}
                           </p>
                           <div class="d-flex align-items-center">
-                            <span style="font-size: 12px;" class="fw-medium mx-1 menu-item">Private Link:</span>
+                            <span style="font-size: 12px;" class="fw-medium mx-1 menu-item">{{__('cycles.Private Link')}}:</span>
                             <i class="ti ti-rosette-discount-check text-success"></i>
                           </div>
                         </a>
+                        @endif
                         <!-- / Company Name -->
                         <!-- Count Row -->
                         <div class="row">
@@ -211,25 +231,30 @@
                               <div class="bg-label-primary p-2 d-flex align-items-center justify-content-center rounded mx-1">
                                 <i class="ti ti-building-skyscraper ti-24px"></i>
                               </div>
+                              <a target="_blank" href="/dashboard/cycles/{{$cycle->id}}/registered">
                               <div class="my-auto d-flex">
-                                <p class="fw-medium fs-6 my-auto">Startups</p>
+                                <p class="fw-medium fs-6 my-auto">{{__('admin.Company')}}</p>
                                 <span class="badge bg-light rounded-pill text-secondary mx-2 fw-bold">
                                   {{ $totalcompany }}
                                 </span>
                               </div>
+                              </a>
                             </div>
                           </div>
                           <div  style="width: fit-content">
                             <div class="d-flex align-items-center g-1" style="height: 55px;">
+                              
                               <div class="bg-label-info p-2 d-flex align-items-center justify-content-center rounded mx-1">
                                 <i class="ti ti-stack-2 ti-24px"></i>
                               </div>
+                              <a target="_blank" href="/dashboard/cycles/{{$cycle->id}}">
                               <div class="my-auto d-flex">
-                                <p class="fw-medium fs-6 my-auto">Steps</p>
+                                <p class="fw-medium fs-6 my-auto">{{__('cycles.steps')}}</p>
                                 <span class="badge bg-light rounded-pill text-secondary mx-2 fw-bold">
                                   {{ $totalSteps }}
                                 </span>
                               </div>
+                              </a>
                             </div>
                           </div>
                           <div  style="width: fit-content">
@@ -238,8 +263,8 @@
                                 <i class="ti ti-user ti-24px"></i>
                               </div>
                               <div class="my-auto d-flex">
-                                <p class="fw-medium fs-6 my-auto">Mentors</p>
-                                <span class="badge bg-light rounded-pill text-secondary mx-2 fw-bold">5</span>
+                                <p class="fw-medium fs-6 my-auto">{{__('cycles.Mentors')}}</p>
+                                <span class="badge bg-light rounded-pill text-secondary mx-2 fw-bold">{{$mentor_Count}}</span>
                               </div>
                             </div>
                           </div>
@@ -249,7 +274,7 @@
                                 <i class="ti ti-stack-2 ti-24px"></i>
                               </div>
                               <div class="my-auto d-flex">
-                                <p class="fw-medium fs-6 my-auto">Evaluation</p>
+                                <p class="fw-medium fs-6 my-auto">{{__('admin.rating')}}</p>
                                 <span class="badge bg-light rounded-pill text-secondary mx-2 fw-bold">5</span>
                               </div>
                             </div>
@@ -264,63 +289,85 @@
                           <div class="d-flex flex-column">
                             <div class="d-flex align-items-center mb-2">
                               <i class="ti ti-user-circle text-primary ti-24px"></i>
-                              <span class="fs-6 fw-bold mx-2">Responsible</span>
+                              <span class="fs-6 fw-bold mx-2">{{__('admin.Responsible')}}</span>
                             </div>
+                            
+                            @foreach($mentortotal as $mentor)
                             <div class="d-flex flex-wrap align-items-center px-4" style="width: 100%">
-                              @foreach([1, 2, 3, 4, 5, 6, 7] as $mentor)
-                                <button class="btn btn-sm btn-outline-primary rounded-pill" style="margin: 2px;">
-                                  <img src="/icons/avatar.svg" width="20" height="20" class="rounded-circle" />
-                                  <span class="mx-1">Kareem Khaled</span>
-                                </button>
-                              @endforeach
+                              
+                                <a class="btn btn-sm btn-outline-primary rounded-pill"
+                                 style="margin: 2px;" 
+                                 target="_blank"
+                                 href="{{route('show_mentor_profile', $mentor->id)}}"
+                                >
+                                @if(!empty($mentor->image_url))
+                                  <img src="{{$mentor->image_url}}" width="20" height="20" class="rounded-circle" />
+@else
+<img src="/icons/avatar.svg" width="20" height="20" class="rounded-circle" />
+@endif
+                                  <span class="mx-1">{{$mentor->name}}</span>
+                                </a>
+                             
                             </div>
+                            @endforeach
                           </div>
                           <div class="d-none d-md-flex flex-column" style="margin-bottom: -60px;">
-                            <span class="fs-6 fw-bold mx-2 mb-2">Duration</span>
+                            <span class="fs-6 fw-bold mx-2 mb-2">{{__('admin.Duration')}}</span>
                             <div 
                               class="px-1 py-2 d-flex mb-2"
                               style="background-color: #d9edee; border-radius: 15px;"
                             >
                               <i class="ti ti-calendar-clock ti-28px;" style="color: blue;"></i>
-                              <span class="fw-bold text-black mx-2">{{ $cycle->start }}</span>
+                              <span class="fw-bold text-black mx-2">{{ $cycle->start->format('Y-m-d') }}</span>
                             </div>
                             <div 
                               class="px-1 py-2 d-flex"
                               style="background-color: #d9edee; border-radius: 15px;"
                             >
                               <i class="ti ti-calendar-clock ti-28px;" style="color: blue;"></i>
-                              <span class="fw-bold text-black mx-2">{{ $cycle->end }}</span>
+                              <span class="fw-bold text-black mx-2">{{ $cycle->end->format('Y-m-d') }}</span>
                             </div>
                           </div>
                         </div>
                         <!-- / Mentors Row -->
                         <!-- Program Description -->
+                       
                         <div class="d-flex flex-column">
                           <div class="d-flex align-items-center my-2">
                             <i class="ti ti-message text-primary ti-24px"></i>
-                            <span class="fs-6 fw-bold mx-2">Description</span>
+                            <span class="fs-6 fw-bold mx-2">{{__('admin.Description')}}</span>
                           </div>
                           <div class="d-flex flex-wrap align-items-center px-4" style="width: 85%;">
                             <p class="text-secondary">
-                              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolore, harum animi sint amet neque quam iusto accusamus corporis, impedit odit a ipsam eveniet sit nisi non dolores. Tempore, quibusdam accusamus.
+                              @if(!empty($cycle->description))
+                              {{ $cycle->description }}
+                              @else
+{{__('cycles.NA')}}
+                              @endif
                             </p>
                           </div>
                         </div>
                         <!-- / Program Description -->
                         <!-- Progress Bar -->
-                        <di class="d-flex align-items-center">
-                          <span class="fw-bold mx-1">89%</span>
+                        @php
+    // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
+    $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
+@endphp
+
+
+                        <div class="d-flex align-items-center">
+                          <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
                           <div style="width: 100%; height: 7px;" class="progress rounded-pill">
                             <div 
                               class="progress-bar bg-primary" 
                               role="progressbar" 
-                              style="width: 25%;" 
-                              aria-valuenow="25" 
+                              style="width: {{ number_format($presSteps, 2) }}%;" 
+                              aria-valuenow="{{ number_format($presSteps, 2) }}" 
                               aria-valuemin="0" 
                               aria-valuemax="100"
                             ></div>
                           </div>
-                          <span class="fw-bold mx-1">1/B</span>
+                          <span class="fw-bold mx-1">{{$totalSteps}}/{{$totalStepsFinish}}</span>
                           <div class="mx-2 position-relative">
                             <div class="dropdown"></div>
                              <button

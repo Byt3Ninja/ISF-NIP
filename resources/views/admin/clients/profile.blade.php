@@ -173,8 +173,9 @@
 @endif
 
 <!-- / Count cards -->
-      @endrole
 <br><br>
+      @endrole
+
       
       <!-- User Profile Content -->
       <div class="row">
