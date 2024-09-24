@@ -1,14 +1,22 @@
 @extends('layouts.admin')
 
 @section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-
-  <link rel="stylesheet" href="/vuexy/libs/tagify/tagify.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
 
   <style>
-    .custom-container {
-      padding: 0 2rem 0 8rem;
+   .custom-container-ar {
+    padding-left: 8rem;
+    padding-right: 2rem;
+    }
+
+    .custom-container-en {
+      padding-left: 2rem;
+      padding-right: 8rem;
     }
 
     input[type="file"] {
@@ -58,6 +66,13 @@
       .custom-container {
         padding: 0;
       }
+
+      .custom-container-ar,
+      .custom-container-en
+       {
+        padding: 0;
+      }
+
       #levelButton {
         width: 90px;
         height: 30px;
@@ -97,7 +112,7 @@
 
         <section class="row">
           <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card custom-container">
+            <div class="card {{ $l == 'ar' ? 'custom-container-ar' : 'custom-container-en' }}">
               <div class="card-header border-bottom border-light" style="height: 70px;">
                 <h4 class="card-title">{{ $title }}</h4>
               </div>
@@ -180,7 +195,17 @@
                         @endforeach
                       </select>
                     </div>
-                    <div class="form-group mb-3">
+                     <!-- Custom Suggestions: Inline -->
+                     <div class="col-md-6 mb-6">
+                      <label for="TagifyCustomInlineSuggestion" class="form-label">Custom Inline Suggestions</label>
+                      <input
+                        id="TagifyCustomInlineSuggestion"
+                        name="TagifyCustomInlineSuggestion"
+                        class="form-control"
+                        placeholder="select technologies"
+                        value="css, html, javascript" />
+                    </div>
+                    {{-- <div class="form-group mb-3">
                       <label for="TagifyBasic" class="form-label fs-6">{{ __('cycles.Tags') }}</label>
                       <select 
                         id="TagifyBasic" 
@@ -192,7 +217,7 @@
                         <option value="{{ $Tag->id }}" >{{ $Tag->name }}</option>
                         @endforeach
                       </select>
-                    </div>
+                    </div> --}}
                     <div class="form-group mb-3">
                       <label class="form-label fs-6">{{ __('cycles.CoursLevel') }}</label>
                       <div 
@@ -223,7 +248,7 @@
                       </div>
                     </div>
                     <input class="getValLevel" name="CoursLevel" type="hidden" >
-                    {{-- @if(count($Quizzes && $Quizzes > 0))
+                    @if(count($Quizzes && $Quizzes > 0))
                       <div class="form-group mb-3">
                         <label class="form-label fs-6">{{__('cycles.Quizs')}}</label>
                           <select  class="select2 form-select" name="Quizs" >
@@ -232,13 +257,13 @@
                             @endforeach
                         </select>
                       </div>
-                    @endif --}}
+                    @endif
 
                     <div class="form-group mb-3">
                       <label class="form-label fs-6">
                         {{ __('cycles.Instractor') }}
                         <span class="text-secondary">
-                          {{ $l == 'en' ? '(Choode one or more)' : '(اختر واحد أو أكثر)' }}
+                          {{ $l == 'en' ? '(Choose one or more)' : '(اختر واحد أو أكثر)' }}
                         </span>
                       </label>
                       <select class="select2 form-select" name="Instractor">
@@ -414,21 +439,24 @@
 
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bloodhound/bloodhound.js"></script>
+
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-
-  <!-- Page JS -->
-  <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
-  <script src="/vuexy/assets/js/forms-tagify.js"></script>
 @stop
 
 @section('pagescripts')
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
+  <!-- Page JS -->
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
+  <script src="/vuexy/assets/js/forms-typeahead.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
 
   <script>
@@ -455,6 +483,27 @@
         button.classList.remove('bg-white', 'text-primary');
         button.classList.add('bg-primary', 'text-white');
       });
+    });
+
+    const TagifyCustomInlineSuggestionEl = document.querySelector('#TagifyCustomInlineSuggestion');
+
+    const whitelist = [
+      'A# .NET',
+      'A# (Axiom)',
+      'A-0 System',
+      'A+',
+    ];
+
+    // Inline
+    let TagifyCustomInlineSuggestion = new Tagify(TagifyCustomInlineSuggestionEl, {
+      whitelist: whitelist,
+      maxTags: 10,
+      dropdown: {
+        maxItems: 20,
+        classname: 'tags-inline',
+        enabled: 0,
+        closeOnSelect: false
+      }
     });
   </script>
 
