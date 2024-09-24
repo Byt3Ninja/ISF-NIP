@@ -152,6 +152,7 @@ return [
 	'Sector' => 'القطاع',
 	'Industrial' => 'الصناعي',
 	'Google Analytics Code' => 'كود إحصاءات جوجل',
+	'Mentorship Avr Rating' => ' متوسط التقييم ',
 	'Enable accounts auto activation' => 'تفعيل الحسابات تلقائياً',
 	'DownEditDelete' => 'تحميل | تحرير | حذف',
 	'Title' => 'العنوان',

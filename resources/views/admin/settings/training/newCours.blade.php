@@ -200,7 +200,7 @@
                       <label for="TagifyCustomInlineSuggestion" class="form-label">Custom Inline Suggestions</label>
                       <input
                         id="TagifyCustomInlineSuggestion"
-                        name="TagifyCustomInlineSuggestion"
+                        name="Tags[]"
                         class="form-control"
                         placeholder="select technologies"
                         value="css, html, javascript" />

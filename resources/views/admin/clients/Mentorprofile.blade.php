@@ -53,10 +53,12 @@
                       </li>
                       @endif
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined April 2021</span>
+                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined {{ $client->created_at->format('M-Y') }}</span>
                       </li>
                     </ul>
                   </div>
+
+                  <div>
                   <a href="javascript:void(0)" class="btn btn-primary mb-1 disabled">
                     <i class="ti ti-user-check ti-xs me-2"></i>Follow
                   </a>
@@ -65,8 +67,8 @@
                     {{-- <i class="fa fa-plus"></i>  --}}
                     {{__('admin.OrderSession')}}
                 </button>
- @endif
-                  
+ @endif              
+</div>
 
                 </div>
               </div>
@@ -130,10 +132,64 @@
         </div>
       </div>
         </div>
+        <!-- Count cards -->
+ @hasanyrole('Admin|organizationManager')
+        
+        <a href="" class="col-lg-3 col-sm-6">
+          <div class="card card-border-shadow-primary h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-center align-items-center mb-2">
+                <div class="avatar me-4">
+                  <span class="avatar-initial rounded bg-label-primary">
+                    <i class="ti-brand-my-oppo text-primary ti-28px"></i>
+                  </span>
+                </div>
+                  <h4 class="mb-0 text-center">{{ $mentrequests_count }}</h4>
+              </div>
+              <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
+            </div>
+          </div>
+        </a>
+
+
+        <a href="" class="col-lg-3 col-sm-6">
+          <div class="card card-border-shadow-primary h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-center align-items-center mb-2">
+                <div class="avatar me-4">
+                  <span class="avatar-initial rounded bg-label-primary">
+                    <i class="ti-calendar-event text-primary ti-28px"></i>
+                  </span>
+                </div>
+                  <h4 class="mb-0 text-center">{{ $mentrequests_period }}</h4>
+              </div>
+              <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
+            </div>
+          </div>
+        </a>
+
+
+        <a href="" class="col-lg-3 col-sm-6">
+          <div class="card card-border-shadow-primary h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-center align-items-center mb-2">
+                <div class="avatar me-4">
+                  <span class="avatar-initial rounded bg-label-primary">
+                    <i class="ti-calendar-event text-primary ti-28px"></i>
+                  </span>
+                </div>
+                  <h4 class="mb-0 text-center">{{ number_format($average_rating ?? 0, 1) }}</h4>
+              </div>
+              <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
+            </div>
+          </div>
+        </a>
+        @endhasanyrole
+    <!-- / Count cards -->
         
       </div>
    
-
+<br>
 
       <!-- User Profile Content -->
       <div class="row">
@@ -312,6 +368,9 @@
         </div>
       </div>
       <!--/ User Profile Content -->
+
+       
+
 
     </div>
 </div>

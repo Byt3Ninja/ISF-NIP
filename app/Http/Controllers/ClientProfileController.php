@@ -56,7 +56,19 @@ class ClientProfileController extends Controller
 
       $mentorshipTasks = MentorshipTask::where('mentor_id',Auth::user()->id)->where('status','pending')->get();
 
-      return view('admin/clients/profile', compact('client','mentors','mentorshipTasks'));
+      $mentrequests =  MentorshipRequest::where('mentor_id', Auth::user()->id);
+
+        $mentrequests_count = $mentrequests->count();
+        $mentrequests_period = $mentrequests->sum('period')/60;
+
+
+        $average_rating = MentorshipRequest::where('mentor_id', Auth::user()->id)
+    ->where('approved', 'Yes')
+    ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
+    ->avg('rating'); 
+
+
+      return view('admin/clients/profile', compact('client','mentors','mentorshipTasks','mentrequests_count','mentrequests_period','average_rating'));
     }
 
     /**
@@ -143,7 +155,19 @@ class ClientProfileController extends Controller
         $client = User::find($id);
         // $exp = Expertise::where('parent_id',null)->get();
         // $expertises = Expertise::where('parent_id',null)->get();
-        
+        $mentrequests =  MentorshipRequest::where('mentor_id', $id);
+
+        $mentrequests_count = $mentrequests->count();
+        $mentrequests_period = $mentrequests->sum('period')/60;
+
+
+        $average_rating = MentorshipRequest::where('mentor_id', $id)
+    ->where('approved', 'Yes')
+    ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
+    ->avg('rating'); 
+
+
+         
         $mentors = User::find($id);
         if ($mentors) {
             $expertises = $mentors->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
@@ -161,7 +185,14 @@ class ClientProfileController extends Controller
         $mentorshipTasks = MentorshipTask::where('mentor_id',$id)->where('status','pending')->get();
        
 
-            return view('admin/clients/Mentorprofile', compact('client','expertises', 'mentors', 'order', 'mentorshipTasks'));
+            return view('admin/clients/Mentorprofile', compact('client',
+            'expertises',
+            'mentors',
+            'order',
+            'mentorshipTasks',
+            'mentrequests_count',
+            'mentrequests_period',
+            'average_rating'));
 
 
     }
