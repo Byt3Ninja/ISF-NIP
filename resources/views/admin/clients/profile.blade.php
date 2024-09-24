@@ -51,7 +51,7 @@
                           class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined April 2021</span>
+                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined {{ $client->created_at->format('M-Y') }}</span>
                       </li>
                       
                     </ul>
@@ -114,10 +114,68 @@
             }}
            
         </div>
-      
+    
       </div>
-      @endrole
+      <!-- Count cards -->
 
+ @if (auth()->user()->id == $client->id)
+ <div class="col-lg-3 col-sm-6" style="display: inline-block">
+ <a href="" class="col-lg-3 col-sm-6">
+   <div class="card card-border-shadow-primary h-100">
+     <div class="card-body">
+       <div class="d-flex justify-content-center align-items-center mb-2">
+         <div class="avatar me-4">
+           <span class="avatar-initial rounded bg-label-primary">
+             <i class="ti-brand-my-oppo text-primary ti-28px"></i>
+           </span>
+         </div>
+           <h4 class="mb-0 text-center">{{ $mentrequests_count }}</h4>
+       </div>
+       <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
+     </div>
+   </div>
+ </a>
+</div>
+<div class="col-lg-3 col-sm-6" style="display: inline-block">
+ <a href="" class="col-lg-3 col-sm-6">
+   <div class="card card-border-shadow-primary h-100">
+     <div class="card-body">
+       <div class="d-flex justify-content-center align-items-center mb-2">
+         <div class="avatar me-4">
+           <span class="avatar-initial rounded bg-label-primary">
+             <i class="ti-calendar-event text-primary ti-28px"></i>
+           </span>
+         </div>
+           <h4 class="mb-0 text-center">{{ $mentrequests_period }}</h4>
+       </div>
+       <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
+     </div>
+   </div>
+ </a>
+</div>
+<div class="col-lg-3 col-sm-6" style="display: inline-block">
+ <a href="" class="col-lg-3 col-sm-6">
+   <div class="card card-border-shadow-primary h-100">
+     <div class="card-body">
+       <div class="d-flex justify-content-center align-items-center mb-2">
+         <div class="avatar me-4">
+           <span class="avatar-initial rounded bg-label-primary">
+             <i class="ti-calendar-event text-primary ti-28px"></i>
+           </span>
+         </div>
+           <h4 class="mb-0 text-center">{{ number_format($average_rating ?? 0, 1) }}</h4>
+       </div>
+       <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
+     </div>
+   </div>
+ </a>
+</div>
+@endif
+
+<!-- / Count cards -->
+      @endrole
+<br><br>
+      
       <!-- User Profile Content -->
       <div class="row">
         <div class="col-xl-4 col-lg-5 col-md-5">

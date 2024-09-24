@@ -608,7 +608,8 @@ return [
 	'Reset' => 'Reset',
 	'Course Deleted'=> 'Course Deleted',
 	'CountProgram'=>'Program Count',
-	'Enroll'=>'Enroll'
+	'Enroll'=>'Enroll',
+	'Mentorship Avr Rating' => ' Mentorship Avrage Rating ',
 
 	
 ];
