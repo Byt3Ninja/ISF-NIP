@@ -184,12 +184,13 @@
             </div>
           </div>
         </a>
+        <br>
         @endhasanyrole
     <!-- / Count cards -->
         
       </div>
    
-<br>
+
 
       <!-- User Profile Content -->
       <div class="row">
