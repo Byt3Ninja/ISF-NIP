@@ -53,10 +53,12 @@
                       </li>
                       @endif
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined April 2021</span>
+                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined at {{ $client->created_at->format('Y-M-d') }}</span>
                       </li>
                     </ul>
                   </div>
+                  
+                  <div>
                   <a href="javascript:void(0)" class="btn btn-primary mb-1 disabled">
                     <i class="ti ti-user-check ti-xs me-2"></i>Follow
                   </a>
@@ -65,8 +67,8 @@
                     {{-- <i class="fa fa-plus"></i>  --}}
                     {{__('admin.OrderSession')}}
                 </button>
- @endif
-                  
+ @endif              
+</div>
 
                 </div>
               </div>
