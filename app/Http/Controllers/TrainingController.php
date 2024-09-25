@@ -812,14 +812,12 @@ DB::table('tag_training')->insert($tags);
         $Quizzes = Quizzes::all();
 
         $Tags = Tags::all();
-        foreach($Tags as $tagg){
-        $tags = $tagg->name;
-        }
+        
         $instructors = User::whereHas('roles', function ($query) {
-            $query->where('name', 'Trainer');
+            $query->where('name', 'Mentor');
         })->get();
 
-        return view('admin/settings/training/newCours', compact('randomNumber','tags','expertises','client','Quizzes', 'instructors'));
+        return view('admin/settings/training/newCours', compact('randomNumber','Tags','expertises','client','Quizzes', 'instructors'));
     }
 
 
