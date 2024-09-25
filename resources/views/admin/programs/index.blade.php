@@ -57,10 +57,13 @@
             </div>
             <div class="d-flex align-items-center">
               <!-- Filter -->
+              <form method="GET" action="{{ route('programlist.index') }}">
               <div class="d-flex align-items-center mx-2">
+                <div style="display: flex; align-items: center;">
                 <button
                   class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
                   style="border-radius: 17px; width: 40px; height: 40px;"
+                   type="submit"
                 >
                   <i class="ti ti-filter text-white ti-24px"></i>
                 </button>
@@ -70,21 +73,28 @@
                 <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
                   <i class="ti ti-search text-primary ti-24px"></i>
                 </div>
+
                 <input
                   class="form-control search border rounded mx-1 bg-transparent text-primary px-10"
                   style="width: 366px;"
                   id="search-table" placeholder="Search"
+                  name="search"
+                  value="{{ request('search') }}" 
                 />
               </div>
+            </div>
+            </form>
+
               <!-- Add New Program Button -->
               <button
-                class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;">
+                class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;" onclick="DoChange(2)">
                   <span class="mx-2">{{__('admin.New Program')}}</span>
                   <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
               </button>
               <button 
                 class="btn btn-primary d-none d-md-inline-block"
                 style="border-radius: 15px; text-wrap: nowrap;"
+                 onclick="DoChange(2)"
               >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
@@ -207,7 +217,7 @@
                         <!-- Company Name -->
                         @if(!empty($cycle->private))
                         <a 
-                          href="/dashboard/cycles/{{ $cycle->id }}/registered"
+                          href="cycles/view/{{ $cycle->private }}"
                           class="d-flex justify-content-between"
                           target="_blank"
                         >

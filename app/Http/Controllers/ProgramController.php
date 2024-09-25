@@ -26,15 +26,28 @@ class ProgramController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        if( Auth()->user()->hasRole('Admin') ) { $cycles = Cycle::all(); }
-        else
-        {
-            $Organization = Organization::where('user_id','=', auth()->user()->id)->first();
-            if( !empty( $Organization ) ) { $cycles = Cycle::where('organization_id','=', $Organization->id)->get(); }
-            else { $cycles = Cycle::where('id', '=', 0)->get(); }
+        $search = $request->input('search'); // التحقق من وجود البحث في الطلب
+
+    if (Auth()->user()->hasRole('Admin')) {
+        // إذا كان المستخدم Admin
+        $cycles = Cycle::when($search, function ($query, $search) {
+            return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+        })->get();
+    } else {
+        // إذا كان المستخدم ليس Admin
+        $Organization = Organization::where('user_id', auth()->user()->id)->first();
+
+        if (!empty($Organization)) {
+            $cycles = Cycle::where('organization_id', $Organization->id)
+                ->when($search, function ($query, $search) {
+                    return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+                })->get();
+        } else {
+            $cycles = Cycle::where('id', 0)->get(); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
         }
+    }
         return view('admin.programs.index', compact('cycles'));
     }
 
