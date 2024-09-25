@@ -4,9 +4,9 @@
 @section('subTitle', __('admin.My Dashboard'))
 
 @section('style')
-<link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/widgets.css">
-	<link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/dashboard-ecommerce.css">
-	<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+  <link rel="stylesheet" type="text/css" href="/app-assets/css{{ $l == 'ar' ? '-rtl' : '' }}/pages/widgets.css">
+  <link rel="stylesheet" type="text/css" href="/app-assets/css{{ $l == 'ar' ? '-rtl' : '' }}/pages/dashboard-ecommerce.css">
+  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/jquery.rateyo.min.css">
 @stop
@@ -16,8 +16,6 @@
     {!! redirect()->route('my_profile')->with(['msg' => 'FailedStore', 'class' => 'danger']) !!}
   @endif
 
-  
-
   <!-- Content wrapper -->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -25,10 +23,11 @@
         @if (session()->has('msg'))
           <div class="row">
             <div class="col-md-12">
-              <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+              <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
+                role="alert">
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <div class="d-flex align-items-center">
-                  <i class="bx bx-error"></i>
+                  <i class="ti ti-error"></i>
                   <span> {{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }} </span>
                 </div>
               </div>
@@ -36,170 +35,162 @@
           </div>
         @endif
       </div>
-      
-
-     
-
-     
-
-     
 
       <!-- My Mentors -->
 
-        
-
-
-		<div class="card mt-10">
-		<section>
-			<div class="row">
-				<div class="col-md-12">
-					<div class="card">
-						<div class="card-header border-bottom">
-							<h4 class="card-title align-items-center">
-								<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.Mentors") }} :
-								
-							</h4>
-
-						</div>
-						<div class="card-body">
-							<div class="card ">
-								<div class="table-responsive">
-									<table class="table" id="mentorstable">
-										<thead class="thead-dark">
-											<tr>
-												<th>#</th>
-												<th>{{__('dashboard.Name/Title')}}</th>
-												<th>{{__('dashboard.Bio')}}</th>
-												<th>{{__('dashboard.Specialization')}}</th>
-                                                <th>{{__('cycles.ProgramCount')}}</th>
-												<th>{{__('dashboard.Linkedin')}}</th>
-												<th>{{__('dashboard.Request')}}</th>
-											</tr>
-										</thead>
-										<tbody>
-											@foreach($mentors as $key=>$mentor)
-                                            @php
-$getcount = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->get();
-$m_count = count($getcount);
-$getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
-                                            @endphp
-												<tr>
-													<td>{{$key+1}}</td>
-													<td>
-                            
-														<div class="media align-items-center">
-															<a class="media-left mr-50">
-																<img src="{{ $mentor->image_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
-															</a>
-                              <a target="_blank" href="{{route('show_mentor_profile', $mentor->id)}}">
-															<div class="media-body">
-																<h6 class="media-heading mb-0">{{$mentor->name }}</h6>
-																<span class="font-small-2">{{$mentor->title }}</span>
-															</div>
-                            </a>
-														</div>
-                          
-													</td>
-													<td> {{$mentor->bio->{'bio_'.$l} ?? '-' }} </td>
-													<td> {{$mentor->bio->{'specialization_'.$l} ?? '-' }} </td>
-
-                                                    <td> {{$m_count }} </td>
-
-													<td>
-														@if ($mentor->bio->linkedin ??0)
-															<a title="Linkedin URL" target="_blank" href="{{$mentor->bio->linkedin}}" class="btn btn-icon rounded-circle btn-primary"> <i class="fa-brands fa-linkedin-in"></i></a>
-														@endif
-													</td>
-													<td>
-                            @if ($getid->user ??0)
-														<button onclick="request({{ $mentor->id}},'{{optional($getid->user)->{'first_name_'.$l} }} {{optional($getid->user)->{'last_name_'.$l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-primary">
-															<i class="fa fa-plus"></i>
-														</button>
-                            @endif
-													</td>
-												</tr>
-											@endforeach
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-	</div>
-
-	
-
+      <section>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="">
+              <div class="card-header mb-4">
+                <h3 class="card-title align-items-center">
+                  {{ __('dashboard.Mentors') }}
+                </h3>
+              </div>
+              <div class="card-body">
+                <div class="card" style="border-radius: 20px;">
+                  <div class="table-responsive">
+                    <table class="table" id="mentorstable">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th class="text-nowrap text-center">{{ __('dashboard.Name/Title') }}</th>
+                          <th class="text-nowrap text-center">{{ __('dashboard.Bio') }}</th>
+                          <th class="text-nowrap text-center">{{ __('dashboard.Specialization') }}</th>
+                          <th class="text-nowrap text-center">{{ __('cycles.ProgramCount') }}</th>
+                          <th class="text-nowrap text-center">{{ __('dashboard.Linkedin') }}</th>
+                          <th class="text-nowrap text-center">{{ __('dashboard.Request') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach ($mentors as $key => $mentor)
+                          @php
+                            $getcount = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->get();
+                            $m_count = count($getcount);
+                            $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
+                          @endphp
+                          <tr>
+                            <td>{{ $key + 1 }}</td>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <a class="media-left">
+                                  <img src="{{ $mentor->image_url }}" alt="avatar" class="rounded-circle"
+                                    height="40" width="40">
+                                </a>
+                                <a target="_blank" href="{{ route('show_mentor_profile', $mentor->id) }}">
+                                  <div class="mx-2">
+                                    <h6 class="media-heading mb-0">{{ $mentor->name }}</h6>
+                                    <span class="font-small-2">{{ $mentor->title }}</span>
+                                  </div>
+                                </a>
+                              </div>
+                            </td>
+                            <td> {{ $mentor->bio->{'bio_' . $l} ?? '-' }} </td>
+                            <td> {{ $mentor->bio->{'specialization_' . $l} ?? '-' }} </td>
+                            <td class="text-center"> {{ $m_count }} </td>
+                            <td>
+                              @if ($mentor->bio->linkedin ?? 0)
+                                <a title="Linkedin URL" target="_blank" href="{{ $mentor->bio->linkedin }}"
+                                  class="btn btn-icon rounded-circle btn-label-primary"> <i
+                                    class="fa-brands fa-linkedin-in"></i></a>
+                              @endif
+                            </td>
+                            <td>
+                              @if ($getid->user ?? 0)
+                                <button
+                                  onclick="request({{ $mentor->id }},'{{ optional($getid->user)->{'first_name_' . $l} }} {{ optional($getid->user)->{'last_name_' . $l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})"
+                                  title="Add new request" type="button" class="btn btn-icon rounded-circle btn-label-secondary">
+                                  <i class="ti ti-plus"></i>
+                                </button>
+                              @endif
+                            </td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       <!-- / My Mentors -->
     </div>
   </div>
 
   <!--  Edit SP Modal -->
-  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
+  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-        <div class="modal-content">
+      <div class="modal-content">
+        <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="text-center mb-6">
+            <h4 class="mb-2">{{ __('dashboard.Add mentorship session with') }} <span class="primary"
+                id="rname"></span></h4>
+          </div>
+          <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+
             <div class="modal-body">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                <div class="text-center mb-6">
-                    <h4 class="mb-2">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
+              @csrf
+              <input type="hidden" name="mentorid" value="0" id="mentorid">
+              <input type="hidden" name="organization_id" id="addOrganizationID">
+              <input type="hidden" name="cycle_id" id="addCycleID">
+              <div>
+                <h5 class="text-primary"><i class="ti ti-time text-secondary"></i> {{ __('dashboard.Mentor schedule') }}
+                </h5>
+                <span class="d-block bg-info p-1 white">
+                  <ul class="mb-0" id="schedule"></ul>
+                </span>
+              </div>
+              <hr>
+              <div class="form-group" id="showdates">
+                <label>{{ __('dashboard.Start meeting Date/ Time') }}:</label>
+                <input class="date width-250 form-control" type="text" id="date" name="date" value=""
+                  required onkeydown="return false">
+              </div>
+              <div class="form-group">
+                <label>{{ __('dashboard.Meeting duration') }}:</label>
+                <select name="period" class="select form-control width-150">
+                  <option value="30">30 {{ __('dashboard.Minutes') }}</option>
+                  <option value="60" selected>1 {{ __('dashboard.Hour') }}</option>
+                  <option value="120">2 {{ __('dashboard.Hours') }}</option>
+                  <option value="180">3 {{ __('dashboard.Hours') }}</option>
+                  <option value="240">4 {{ __('dashboard.Hours') }}</option>
+                  <option value="300">5 {{ __('dashboard.Hours') }}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="basicInputFile">{{ __('dashboard.Send file with your request') }}</label>
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url"
+                    accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+                  <label class="custom-file-label" for="inputGroupFile01">{{ __('dashboard.Choose file') }}</label>
                 </div>
-                <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
-  
-                  <div class="modal-body">
-                    @csrf
-                    <input type="hidden" name="mentorid" value="0" id="mentorid">
-                    <input type="hidden" name="organization_id" id="addOrganizationID">
-                    <input type="hidden" name="cycle_id" id="addCycleID">
-                    <div>
-                      <h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
-                      <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
-                    </div>
-                    <hr>
-                    <div class="form-group" id="showdates">
-                      <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
-                      <input class="date width-250 form-control" type="text" id="date" name="date" value="" required onkeydown="return false">
-                    </div>
-                    <div class="form-group">
-                      <label>{{__('dashboard.Meeting duration')}}:</label>
-                      <select name="period" class="select form-control width-150">
-                        <option value="30">30 {{__('dashboard.Minutes')}}</option>
-                        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
-                        <option value="120">2 {{__('dashboard.Hours')}}</option>
-                        <option value="180">3 {{__('dashboard.Hours')}}</option>
-                        <option value="240">4 {{__('dashboard.Hours')}}</option>
-                        <option value="300">5 {{__('dashboard.Hours')}}</option>
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label for="basicInputFile">{{__('dashboard.Send file with your request')}}</label>
-                      <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
-                        <label class="custom-file-label" for="inputGroupFile01">{{__('dashboard.Choose file')}}</label>
-                      </div>
-                    </div>
-                    <label>{{__('dashboard.Add note')}}:</label>
-                    <div class="form-group">
-                      <textarea class="form-control" id="notes" name='notes' rows="4" placeholder="{{__('dashboard.Write your note here')}}" ></textarea>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary ml-1" >
-                      <i class="bx bx-check d-block d-sm-none"></i>
-                      <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
-                    </button>
-                  </div>
-                </form>
-
-
-
+              </div>
+              <label>{{ __('dashboard.Add note') }}:</label>
+              <div class="form-group">
+                <textarea class="form-control" id="notes" name='notes' rows="4"
+                  placeholder="{{ __('dashboard.Write your note here') }}"></textarea>
+              </div>
             </div>
-        </div>
-    </div>
-</div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary ml-1">
+                <i class="ti ti-check d-block d-sm-none"></i>
+                <span class="d-none d-sm-block">{{ __('dashboard.Submit') }}</span>
+              </button>
+            </div>
+          </form>
 
-  
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 @stop
 
 @section('scripts')
@@ -243,7 +234,7 @@ $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
 			"paging": false,
 			"bInfo": false,
 			"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
-			@if( $l == 'ar' )
+			@if ($l == 'ar')
 			"language": {
 				"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
 				"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
@@ -267,7 +258,7 @@ $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
 			"paging": false,
 			"bInfo": false,
 			"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
-			@if( $l == 'ar' )
+			@if ($l == 'ar')
 			"language": {
 				"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
 				"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
@@ -277,52 +268,58 @@ $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
 				"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
 				"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
 				"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
-			}
-			@endif
-		});
-		
-	});
+			} @endif
+  		});
+  		
+  	});
 
-	
-	
-	$("#date").datetimepicker({
-		format: 'Y-m-d H:i', onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
-		maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
-		timepicker: true
-	});
-
-	function request(id,mentor,organization_id=null,cycle_id=null) {
-		$('#mentorid').val(id);
-		$('#rname').html(mentor);
-		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
-		$.ajax({
-			type: "POST", url: "/dashboard/mentors/modify",
-			data: {"id": id, "rtype": 5,},
-			success: function (response) {
-				$('#SendRequest li').remove();
-				$('#name').html(name);
-				if (response.length>0) {
-					$.each(response, function(i, item) {
-						let note = '';
-						let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
-						if (item.notes) {note = item.notes;}
-						switch (item.type)
-						{
-							case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
-							case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
-							case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
-							case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
-							default:
-						}
-					});
-				} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
-				$('#addOrganizationID').val(organization_id);
-				$('#addCycleID').val(cycle_id);
-				$('#SendRequest').modal('show');
-			}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
-		});
-	}
-</script>
+  	
+  	
+  	$(" #date").datetimepicker({ format: 'Y-m-d H:i' , onGenerate: function( ct ) {
+    jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+    maxDate: '{{ date('Y/m/d', strtotime('-1 days')) }}' , timepicker: true }); function
+    request(id,mentor,organization_id=null,cycle_id=null) { $('#mentorid').val(id); $('#rname').html(mentor);
+    $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token" ]').attr('content')}}); $.ajax({ type: "POST" ,
+    url: "/dashboard/mentors/modify" , data: {"id": id, "rtype" : 5,}, success: function (response) { $('#SendRequest
+    li').remove(); $('#name').html(name); if (response.length>
+    0) {
+      $.each(response, function(i, item) {
+        let note = '';
+        let time = item.tfrom + " {{ __('dashboard.to') }} " + item.tto;
+        if (item.notes) {
+          note = item.notes;
+        }
+        switch (item.type) {
+          case 'OneDay':
+            $('<li>').html("<b>" + item.dfrom + "</b> (" + time + ").").appendTo('#schedule');
+            break;
+          case 'Weekly':
+            $('<li>').html("<b> {{ __('dashboard.Weekly') }} </b>(" + item.days + ") - (" + time + ").").appendTo(
+              '#schedule');
+            break;
+          case 'WorkingDays':
+            $('<li>').html("<b>{{ __('dashboard.All working days') }} </b>(" + time + ").").appendTo('#schedule');
+            break;
+          case 'Period':
+            $('<li>').html("<b> {{ __('dashboard.from') }} " + item.dfrom + " {{ __('dashboard.to') }} " + item
+              .dto + " </b> (" + time + ").").appendTo('#schedule');
+            break;
+          default:
+        }
+      });
+    } else {
+      $('<li>').html("{{ __('dashboard.No records saved') }}.</li>").appendTo('#schedule');
+    }
+    $('#addOrganizationID').val(organization_id);
+    $('#addCycleID').val(cycle_id);
+    $('#SendRequest').modal('show');
+    }, error: function(error) {
+    console.log(error);
+    alert("Error Occurred, Try again!");
+    }
+    });
+    }
+  </script>
 
   <script>
     function modify(type, id, stat) {
