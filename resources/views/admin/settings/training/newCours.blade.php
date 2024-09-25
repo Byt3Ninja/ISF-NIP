@@ -197,13 +197,13 @@
                     </div>
                      <!-- Custom Suggestions: Inline -->
                      <div class="col-md-6 mb-6">
-                      <label for="TagifyCustomInlineSuggestion" class="form-label">Custom Inline Suggestions</label>
+                      <label for="TagifyCustomInlineSuggestion" class="form-label">{{ __('cycles.Tags') }}</label>
                       <input
                         id="TagifyCustomInlineSuggestion"
                         name="Tags[]"
-                        class="form-control"
+                        class="form-control TagsCreateKey"
                         placeholder="select technologies"
-                        value="css, html, javascript" />
+                        value="" />
                     </div>
                     {{-- <div class="form-group mb-3">
                       <label for="TagifyBasic" class="form-label fs-6">{{ __('cycles.Tags') }}</label>
@@ -393,16 +393,7 @@
                           {{ $l == 'en' ? 'Publish Program' : 'نشر البرنامج' }}
                         </span>
                       </button>
-                      <button 
-                        type="button" 
-                        class="btn btn-outline-primary rounded-pill mx-3 fw-bold"
-                        style="font-size: 14px;"
-                      >
-                        <i class="ti ti-database"></i>
-                        <span class="mx-1">
-                          {{ $l == 'en' ? 'Save Program' : 'حفظ البرنامج' }}
-                        </span>
-                      </button>
+                     
                     </div>
                   </form>
                   <!-- Add Course Form -->
@@ -461,8 +452,6 @@
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
 
   <script>
-    
-     
      
 
     const statusButton = document.querySelectorAll('#statusButton');
@@ -491,23 +480,14 @@
     });
 
     const TagifyCustomInlineSuggestionEl = document.querySelector('#TagifyCustomInlineSuggestion');
-
-   
-
-    // const tags = '{{$tags}}';
-
-   // const tagsWhiteList =  tags.map((tag) => tag.name);
-
-    // const whitelist = tagsWhiteList;
-
-    // console.log('tags', tags);
-    
-    const whitelist = [
-      'A# .NET',
-      'A# (Axiom)',
-      'A-0 System',
-      'A+',
-    ];
+    TagifyCustomInlineSuggestionEl.addEventListener('keyup', function(event) {
+        if (event.key === "Enter") {
+            var gettag = this.value;  // جلب القيمة
+            alert(gettag);  // عرض القيمة
+        }
+    });
+  
+    const whitelist = @json($Tags->pluck('name')->toArray());
 
     // Inline
     let TagifyCustomInlineSuggestion = new Tagify(TagifyCustomInlineSuggestionEl, {
