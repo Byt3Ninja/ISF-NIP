@@ -111,7 +111,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel">{{ trans('laravel-filemanager::lfm.title-upload') }}</h4>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aia-hidden="true">&times;</span></button>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aia-hidden="true">&times;</span></button>
         </div>
         <div class="modal-body">
           <form action="{{ route('unisharp.lfm.upload') }}" role='form' id='uploadForm' name='uploadForm' method='post' enctype='multipart/form-data' class="dropzone">
@@ -128,7 +128,7 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
+          <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
         </div>
       </div>
     </div>
@@ -139,8 +139,8 @@
       <div class="modal-content">
         <div class="modal-body"></div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
-          <button type="button" class="btn btn-primary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-confirm') }}</button>
+          <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
+          <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-confirm') }}</button>
         </div>
       </div>
     </div>
@@ -156,8 +156,8 @@
           <input type="text" class="form-control">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
-          <button type="button" class="btn btn-primary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-confirm') }}</button>
+          <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>
+          <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-confirm') }}</button>
         </div>
       </div>
     </div>

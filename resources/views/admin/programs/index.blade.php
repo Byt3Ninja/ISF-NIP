@@ -18,9 +18,6 @@
 @stop
 
 @section('content')
-  {{-- 
-<li class="breadcrumb-item active">{{__('admin.Cycles`s List')}}</li> --}}
-
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
@@ -40,7 +37,7 @@
         <h3 class="content-header-title">{{__('admin.Cycles')}}</h3>
       </div>
 
-      <div class="card mb-6">
+      <div class="card mb-6" style="border-radius: 20px;">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
             <div class="d-flex">
@@ -145,7 +142,7 @@
           @else
             <section>
               @foreach ($cycles as $cycle)
-                <div class="card mb-4" style="border-radius: 30px;">
+                <div style="border-radius: 30px;">
                   @php
                     $totalSteps = app(\App\Step::class)
                         ->where('cycle_id', '=', $cycle->id)
@@ -171,9 +168,9 @@
                   }
                  
                   @endphp
-                  <div class="card-body">
+                  <div class="card mb-6" style="border-radius: 20px;">
                     <div 
-                      class="d-flex program-card"
+                      class="d-flex program-card card-body"
                     >
                       <div 
                         style="width: fit-content; 
@@ -181,8 +178,8 @@
                       >
                         <div 
                           class="border border-light align-items-center
-                          justify-content-center d-none d-md-flex"
-                          style="width: 180px; height: 368px; object-fit: cover; border-radius: 20px;"
+                          justify-content-center d-none d-md-flex h-100"
+                          style="width: 180px; object-fit: cover; border-radius: 20px;"
                         >
                           <img 
                             src="{{$cycle->organization->image_url}}"
@@ -192,10 +189,10 @@
                           />
                         </div>
                       </div>
-                      <div class="d-flex flex-column" style="flex: 1;">
+                      <div class="d-flex flex-column justify-content-between" style="flex: 1;">
                         <!-- Program Title -->
                         <div class="d-flex justify-content-between">
-                          <p class="text-primary fs-5" style="font-weight: 600;">
+                          <p class="text-primary fs-5 fw-bold">
                             {{ $cycle->title }}
                           </p>
                           <div 
@@ -214,7 +211,7 @@
                           class="d-flex justify-content-between"
                           target="_blank"
                         >
-                          <p class="fs-6 mb-2">
+                          <p class="fs-6 mb-2 card-title">
                             {{ $l == 'ar' ? $cycle->organization->name_ar : $cycle->organization->name_en }}
                           </p>
                           <div class="d-flex align-items-center">
@@ -283,8 +280,7 @@
                         <!-- / Count Row -->
                         <!-- Mentors Row -->
                         <div 
-                          style="flex: 1; width: 100%" 
-                          class="d-flex justify-content-between align-items-end"
+                          class="d-flex justify-content-between align-items-end w-100 mb-2"
                         >
                           <div class="d-flex flex-column">
                             <div class="d-flex align-items-center mb-2">
@@ -511,7 +507,7 @@
             <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Cycle data') }}
             </h4>
 
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
               <i class="bx bx-x ti-24px"></i>
             </button>
           </div>
@@ -559,7 +555,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+            <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
               <i class="bx bx-x d-block d-sm-none ti-24px"></i>
               <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
             </button>

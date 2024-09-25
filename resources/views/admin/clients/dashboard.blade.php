@@ -877,7 +877,7 @@
   
           <div class="modal-header">
             <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <i class="bx bx-x"></i> </button>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <i class="bx bx-x"></i> </button>
           </div>
           <div class="modal-body">
             @csrf

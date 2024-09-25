@@ -120,7 +120,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h4 class="modal-title" id="myModalLabel33">{{__('messages.SendMessageTo')}} <span id="uname"></span></h4>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 						<i class="bx bx-x"></i>
 					</button>
 				</div>
@@ -140,7 +140,7 @@
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+						<button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
 							<i class="bx bx-x d-block d-sm-none"></i>
 							<span class="d-none d-sm-block">{{__('messages.Close')}}</span>
 						</button>
@@ -160,7 +160,7 @@
 		  <div class="modal-content">
 			  <div class="modal-header">
 				  <h4 class="modal-title" id="myModalLabel33">{{__('cycles.Response to')}} <span id="rname"></span></h4>
-				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 					  <i class="bx bx-x"></i>
 				  </button>
 			  </div>
@@ -174,7 +174,7 @@
 					  </div>
 				  </div>
 				  <div class="modal-footer">
-					  <button type="button" class="btn btn-success" data-dismiss="modal" onclick="approve('Yes')">
+					  <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="approve('Yes')">
 						  <i class="bx bx-x d-block d-sm-none"></i>
 						  <span class="d-none d-sm-block">{{__('cycles.Approve')}}</span>
 					  </button>

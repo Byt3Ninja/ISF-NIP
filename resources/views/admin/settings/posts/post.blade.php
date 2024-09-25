@@ -90,7 +90,7 @@
 
 									<!-- Modal -->
               <div class="modal fade" id="PhotoModal{{$post->id}}" tabindex="-1" role="dialog" aria-labelledby="Photo" aria-hidden="true"><div class="modal-dialog modal-dialog-centered">
-              <div data-dismiss="modal" class="modal-content">
+              <div data-bs-dismiss="modal" class="modal-content">
 			<img src="/images/blog/{{$post->image}}" width="600" /></div></div></div></div>
 <!-- END: Modal-->
 

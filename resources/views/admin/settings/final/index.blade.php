@@ -255,7 +255,7 @@
                 {!! csrf_field() !!}
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel33">{{__('cycles.Modify current screening')}}</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <i class="bx bx-x"></i>
                     </button>
                 </div>
@@ -281,7 +281,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
                         <i class="bx bx-x d-block d-sm-none"></i>
                         <span class="d-none d-sm-block">{{__('cycles.Close')}}</span>
                     </button>
@@ -301,7 +301,7 @@
             <form method="post" action="/dashboard/final/addzoom" enctype="multipart/form-data" autocomplete="off">
                 <div class="modal-header bg-primary">
                     <h4 class="modal-title white">{{__('cycles.Add new zoom session')}}</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <i class="bx bx-x"></i>
                     </button>
                 </div>
@@ -342,7 +342,7 @@
             <form method="post" action="/dashboard/final/editZoom" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h4 class="modal-title">{{__('cycles.Modify Final Screen')}} </h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <i class="bx bx-x"></i>
                     </button>
                 </div>
