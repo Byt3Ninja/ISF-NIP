@@ -614,4 +614,9 @@ return [
 	'New Program'=>'برنامج جديد',
 	'Responsible'=>'المسؤول',
 	'Duration'=>'الفترة',
+	'Tags Name'=>'اسم الوسم',
+	'Cancel'=>'الغاء',
+	'Tags Created By'=>'تم الانشاء بواسطة',
+	'Tags Created At'=>'تم الانشاء بتاريخ',
+	'Show'=>'مشاهدة',
 ];

@@ -29,13 +29,12 @@
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
               <div class="card-header">
-                <a 
+                <button 
                   class="btn btn-primary" 
-                  href="{{ route('Tags.create') }}"
-                >
+                  data-bs-toggle="modal" data-bs-target="#CreateTags">
                   {{ __('admin.Add new Tags') }}
                   <i class="ti ti-plus mx-2"></i>
-                </a>
+                </button>
               </div>
               <div class="card-body">
                 <div class="card-text">
@@ -44,21 +43,143 @@
                       <thead class="thead-dark">
                         <tr>
                           <th>#</th>
-                          <th>{{ __('cycles.Title') }}</th>
+                          <th>{{ __('cycles.Name') }}</th>
                           <th>{{ __('cycles.Created at') }}</th>
-                          <th>{{ __('cycles.Added By') }}</th>
                           <th>{{ __('cycles.Edit/Delete') }}</th>
                         </tr>
                       </thead>
                       <tbody>
+                        @php
+                        $c=1;
+                        @endphp
+                       
+                        @foreach ($tags as $tag)
+                        
                         <tr>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                        </tr>
+                          <td>{{$c++}}</td>
+                          <td>{{$tag->name}}</td>
+                          <td>{{$tag->created_at}}</td>
+                          <td>
+                            <div class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ShowTags{{ $tag->id }}" >{{__('admin.Show')}}</div>
+                            <div class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#EditTags{{ $tag->id }}">{{__('admin.Edit')}}</div>
+                            <form action="{{ route('Tags.destroy', $tag->id) }}" method="POST" style="display: inline-block;">
+                              @csrf
+                              @method('DELETE')
+                              <button class="btn btn-danger" type="submit" onclick="return confirm('Are you sure you want to delete this post?')">{{__('admin.Delete')}}</button>
+                          </form>
 
+                          </td>
+                        </tr>
+                        <!-- Edit Customer Modal -->
+                        <div class="modal fade" id="EditTags{{ $tag->id }}" tabindex="-1" aria-hidden="true">
+                          <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+                              <div class="modal-content">
+                                  <div class="modal-body">
+                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      <div class="text-center mb-6">
+                                          <h4 class="mb-2">{{__('admin.Edit')}} ({{$tag->name}})</h4>
+                                      </div>
+
+                                      <form class="add-new-user pt-0" action="{{ route('Tags.update', $tag->id) }}" method="POST">
+                                          @csrf
+                                          @method('PUT')
+
+                                          <div class="ecommerce-customer-add-basic mb-4" >
+
+                                              <div class="col-md-12">
+
+                                                  <div class="mb-6 width49">
+                                                      <div>
+                                                          <label for="labor_name" class="form-label" >{{__('admin.Tags Name')}}</label>
+                                                      </div>
+                                                      <input
+                                                          id="labor_name"
+                                                          class="form-control @error('tags_name') is-invalid @enderror"
+                                                          type="text"
+                                                          name="tags_name"
+                                                          autocomplete="off"
+                                                          value="{{$tag->name}}"
+                                                      />
+                                                  </div>
+                                              </div>
+                                          </div>
+
+                                          <div class="text-center">
+                                              <button type="submit" class="btn btn-primary me-3 data-submit">{{__('admin.submit')}}</button>
+                                              <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
+                                          </div>
+                                      </form>
+
+
+
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      <!--/ Edit JO Modal -->
+<!-- Show Customer Modal -->
+<div class="modal fade" id="ShowTags{{ $tag->id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+      <div class="modal-content" dir="ltr">
+          <div class="modal-body">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <div class="text-center mb-6">
+                  <h4 class="mb-2">{{__('admin.Show')}} ({{$tag->name}})</h4>
+              </div>
+
+
+              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                  <div class="d-flex gap-4 align-items-center">
+                      <h6 class="m-0">{{ $tag->name }}</h6>
+                  </div>
+                  <p class="m-0 d-none d-sm-block">{{__('admin.Tags Name')}}</p>
+              </div>
+
+
+
+              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                <div class="d-flex gap-4 align-items-center">
+                    <h6 class="m-0"> @foreach ($tag->trainings as $training) 
+                      <a title="view" href="/dashboard/training/viewCourse/{{$training->id}}"> 
+                      {{ $training->title ." - " }}
+                    </a>
+                 @endforeach</h6>
+                </div>
+                <p class="m-0 d-none d-sm-block">{{__('admin.Training')}}</p>
+            </div>
+
+             
+
+             
+
+              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                  <div class="d-flex gap-4 align-items-center">
+                    @if ($tag->user)
+                    <h6 class="m-0">{{ $tag->user->name }}</h6>
+                    @else
+                    <h6 class="m-0">{{ __('cycles.NA') }}</h6>  <!-- أو أي نص آخر مناسب -->
+                    @endif
+                  </div>
+                  <p class="m-0 d-none d-sm-block">{{__('admin.Tags Created By')}}</p>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                  <div class="d-flex gap-4 align-items-center">
+                      <h6 class="m-0">{{ $tag->created_at}}</h6>
+                  </div>
+                  <p class="m-0 d-none d-sm-block">{{__('admin.Tags Created At')}}</p>
+              </div>
+
+          </div>
+      </div>
+  </div>
+</div>
+<!--/ Show Customer Modal -->
+
+
+
+
+                        @endforeach
 
                       </tbody>
                     </table>
@@ -70,7 +191,51 @@
           </div>
         </section>
 
+ <!-- Create JobOrder Modal -->
+ <div class="modal fade" id="CreateTags" tabindex="-1" aria-hidden="true" dir="rtl">
+  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+      <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <div class="text-center mb-6">
+                  <h4 class="mb-2">{{__('admin.Tags')}}</h4>
+              </div>
 
+              <form method="POST" action="{{route('Tags.store')}}" class="pt-0" >
+                  @csrf
+
+                  <div class="ecommerce-customer-add-basic mb-4" >
+
+                      <div class="col-md-12">
+
+                          <div class="mb-6 width49">
+                              <div>
+                                  <label for="tags_name" class="form-label" >{{__('admin.Tags Name')}}</label>
+                              </div>
+                              <input
+                                  id="tags_name"
+                                  class="form-control"
+                                  type="text"
+                                  name="tags_name"
+                                  autocomplete="off" />
+                          </div>
+
+                      </div>
+                  </div>
+
+
+
+                  <div>
+                      <button type="submit" class="btn btn-primary me-sm-4 data-submit">{{__('admin.submit')}}</button>
+                      <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
+                  </div>
+              </form>
+
+          </div>
+      </div>
+  </div>
+</div>
+<!--/ Create JobOrder Modal -->
 
 
       </div>
@@ -102,7 +267,7 @@
             $('#userstable').DataTable({
                 "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
                 "columnDefs": [
-                    {"orderable": false, "targets":  [4]},
+                    {"orderable": false, "targets":  [3]},
                 ],
                 @if ($l == 'ar')
                 "language": {

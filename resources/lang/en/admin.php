@@ -614,6 +614,10 @@ return [
 	'rating'=>'Rating',
 	'Responsible'=>'Responsible',
 	'Duration'=>'Duration',
-
+	'Tags Name'=>'Tags Name',
+	'Cancel'=>'Cancel',
+	'Tags Created By'=>'Created By',
+	'Tags Created At'=>'Created At',
+	'Show'=>'Show',
 	
 ];
