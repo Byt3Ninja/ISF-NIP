@@ -2190,7 +2190,7 @@ module.exports = {
   var DATA_API_KEY = '.data-api';
   var JQUERY_NO_CONFLICT = $.fn[NAME];
   var Selector = {
-    DISMISS: '[data-dismiss="alert"]'
+    DISMISS: '[data-bs-dismiss="alert"]'
   };
   var Event = {
     CLOSE: "close" + EVENT_KEY,

@@ -9,35 +9,23 @@
 	<div class="content-wrapper">
 		<div class="container-xxl flex-grow-1 container-p-y">
 			<div class="content-overlay"></div>
-			<div class="content-header row">
-				<div class="content-header-left col-12 mb-2 mt-1">
-					<div class="row breadcrumbs-top">
-						<div class="col-12">
-							<h5 class="content-header-title float-left pr-1 mb-0">{{__('admin.quizzes')}}</h5>
-							<div class="breadcrumb-wrapper col-12">
-								<ol class="breadcrumb p-0 mb-0">
-									<li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home"></i></a></li>
-									<li class="breadcrumb-item active">{{__('admin.quizzes List')}}</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-				</div>
+			<div class="content-header">
+        <h4 class="content-title">{{__('admin.quizzes')}}</h4>
 			</div>
 			<div class="content-header row">
 				@if( session()->has('success') )
 					<div class="col-md-12">
 						<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+              {{ __('admin.'. session()->get('success')) }} 
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-							<div class="d-flex align-items-center"> <i class="ti ti-thumb-up me-3 ti-md"></i> <span> {{ __('admin.'. session()->get('success')) }} </span> </div>
 						</div>
 					</div>
 				@endif
 				@if( session()->has('error') )
 					<div class="col-md-12">
 						<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+              {{ __('admin.'.session()->get('error')) }}
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-							<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span>{{ __('admin.'.session()->get('error')) }} </span> </div>
 						</div>
 					</div>
 				@endif
@@ -45,15 +33,21 @@
 
 			<div class="content-body">
 				<section class="organizations-list-wrapper">
-					<div class="row pb-1">
-						<div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
-							<a href="{{ route('quizzes.create') }}" class="btn btn-block btn-success"> {{ __('admin.Add New')}} </a>
-						</div>
-					</div>
-					<div class="organizations-list-table">
-						<div class="card">
-							<div class="card-content">
-								<div class="card-body">
+          <div class="organizations-list-table">
+            <div class="card">
+              <div class="card-content">
+                <div class="card-body">
+                  <div class="row pb-1">
+                    <div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
+                      <a 
+                        href="{{ route('quizzes.create') }}"
+                       class="btn btn-block btn-primary"
+                      > 
+                        <i class="ti ti-plus me-1"></i>
+                       {{ __('admin.Add New')}}
+                      </a>
+                    </div>
+                  </div>
 									<!-- datatable start -->
 									<div class="table-responsive">
 										<table id="organizations-list-datatable" class="table">

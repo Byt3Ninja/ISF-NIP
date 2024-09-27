@@ -27,7 +27,7 @@
                 <section id="multiple-column-form">
                     @if(session()->has('message'))
                         <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                             <div class="d-flex align-items-center">
@@ -41,7 +41,7 @@
 
                     @if(session()->has('message2')|| !empty($errors->all()))
                         <div class="alert alert-danger alert-dismissible mb-2" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                             <div class="d-flex align-items-center">

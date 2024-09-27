@@ -17,7 +17,10 @@
             <div class="col-12">
               <div class="card">
                 <div class="card-header">
-                  <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">{{ __('admin.Add New') }}</a>
+                  <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">
+                    <i class="ti ti-plus me-1"></i>
+                    {{ __('admin.Add New') }}
+                  </a>
                 </div>
                 <div class="card-content">
                   <div class="card-body card-dashboard">
