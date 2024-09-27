@@ -2214,7 +2214,7 @@ render._withStripped = true;
   var EVENT_CLOSE = "close" + EVENT_KEY$a;
   var EVENT_CLOSED = "closed" + EVENT_KEY$a;
   var EVENT_CLICK_DATA_API$6 = "click" + EVENT_KEY$a + DATA_API_KEY$7;
-  var SELECTOR_DISMISS = '[data-dismiss="alert"]';
+  var SELECTOR_DISMISS = '[data-bs-dismiss="alert"]';
   /**
    * Class definition
    */
