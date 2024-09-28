@@ -202,6 +202,21 @@
                                                         @endforeach
                                                     </select>
                                                 </fieldset>
+
+
+                                                <div class="col-md-12 col-12">
+                                                    <label for="houre_rate" class="form-label">{{ __('admin.HouresRate') }}</label>
+                                                    <div class="form-group">
+                                                      <input value="{{ $user->houre_rate }}" name="houre_rate"
+                                                        type="text" class="form-control" id="houre_rate"
+                                                        placeholder="{{ __('admin.HouresRate') }}"
+                                                        autocomplete="HouresRate">
+            
+                                                    </div>
+                                                  </div>
+
+
+
                                                 <fieldset class="form-group">
                                                     <label for="basicInput">{{ __('admin.HaveCompany')}}</label>
                                                     @if ($user->company)
