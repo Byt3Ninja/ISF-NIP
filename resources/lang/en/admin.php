@@ -381,6 +381,7 @@ return [
 	'Session added successfully'=> 'Session added successfully',
 	'Can\'t add training you must add new training course first'=> 'Can\'t add training you must add new training course first',
 	'Can\'t create zoom meeting, API error'=> 'Can\'t create zoom meeting, API error',
+	'meeting_error'=>'Error, can\'t create online meeting. Please Review your configuration',
 	'Request successfully added'=> 'Request successfully added',
 	'Error, can\'t add request'=> 'Error, can\'t add request',
 	'New mentorship request from'=> 'New mentorship request from',

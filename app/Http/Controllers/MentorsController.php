@@ -123,7 +123,7 @@ class MentorsController extends Controller
                 
                 $onlineMeeting = $this->meetingService->createMeeting($data);
                 
-                if (!$onlineMeeting['success']) {return back()->with(['message2' => "Error, can't create online meeting."]);}
+                if (!$onlineMeeting['success']) {return back()->with(['message2' => "meeting_error"]);}
 
                 $dateFormat = new \DateTime($date);
                 MentorshipRequest::create([
