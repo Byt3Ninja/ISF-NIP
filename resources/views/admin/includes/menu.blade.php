@@ -193,6 +193,8 @@
           <div>{{ __('admin.Tags') }}</div>
         </a>
       </li>
+
+      
     @endif
 
     @can('edit_forms')
@@ -231,6 +233,41 @@
           </li>
         </ul>
       </li>
+
+
+<!-- Start Time Sheets -->
+<li class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/Category*') ? 'sidebar-group-active open' : '' }} menu-item">
+  <a class="menu-link menu-toggle">
+    <i class="menu-icon tf-icons ti ti-components"></i>
+    <div>{{ __('admin.TimeSheet') }}</div>
+  </a>
+  <ul class="menu-sub">
+    <li class="{{ Request::is('*TimeSheet') ? 'active' : '' }} menu-item">
+      <a href="{{ route('TimeSheet.index') }}" class="menu-link">
+        <span class="menu-item">{{ __('admin.TimeSheet') }}</span>
+        <i class="bx bx-message"></i>
+      </a>
+    </li>
+    <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
+      <a href="{{ route('show_finance_time_sheet') }}" class="menu-link">
+        <span class="menu-item">{{ __('admin.Financial Report') }}</span>
+        <i class="bx bx-message"></i>
+      </a>
+    </li>
+    <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
+      <a href="{{ route('Category.index') }}" class="menu-link">
+        <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+        <span class="menu-item"> {{ __('admin.Category') }}</span>
+      </a>
+    </li>
+  </ul>
+</li>
+
+<!-- End Time Sheets -->
+
+
+
+
 
       <li class="{{ Request::is('dashboard/screening*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
