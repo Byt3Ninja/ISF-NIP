@@ -23,6 +23,7 @@
               <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
                 <img src="{{ $client->image_url }}" alt="user image" class="d-block ms-0 ms-sm-6 rounded user-profile-img"
                   style="height: 130px" />
+                  
               </div>
               <div class="flex-grow-1 mt-3 mt-lg-5">
                 <div
@@ -32,12 +33,27 @@
                       {{ 
                         $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en
                       }}
+                      
                       @if(!empty($client->bio->linkedin))
                       <a target="_blank" href="{{ $client->bio->linkedin }}">
                         <i class="ti ti-brand-linkedin ti-lg"></i>
                         </a>
                         @endif
+                        @php
+    // جلب الأدوار كمجموعة
+    $roles = $client->getRoleNames();
+
+    // ترجمة الأدوار وإزالة الأقواس والدبل كوت
+    $translatedRoles = $roles->map(function ($role) {
+        return __('admin.' . strtolower($role)); // ترجمة الدور
+    })->implode(', '); // دمج الأدوار في سلسلة واحدة
+
+    // إزالة أي أقواس أو دبل كوت
+    $cleanedRoles = str_replace(['[', ']', '"'], '', $translatedRoles);
+@endphp
+                        <br><h5 class="fw-medium"><i class="ti ti-user ti-lg"></i> {{ $cleanedRoles }} </h5>
                     </h4>
+                    
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
                       <li class="list-inline-item d-flex gap-2 align-items-center">
@@ -60,7 +76,7 @@
 
                   <div>
                   <a href="javascript:void(0)" class="btn btn-primary mb-1 disabled">
-                    <i class="ti ti-user-check ti-xs me-2"></i>Follow
+                    <i class="ti ti-user-check ti-xs me-2"></i>{{ __('admin.Follow') }}
                   </a>
                   @if(!empty($order))
                   <button onclick="request({{$order->user_id}},'{{optional($order->user)->{'first_name_'.$l} }} {{optional($order->user)->{'last_name_'.$l} }}', {{ $order->cycle->organization_id }},{{ $order->cycle_id }})" title="Add new request" type="button" class="btn btn-primary mb-1">
@@ -189,7 +205,7 @@
     <!-- / Count cards -->
         
       </div>
-   
+      <br>
 
 
       <!-- User Profile Content -->
@@ -267,7 +283,7 @@
                   <span>{{ $client->email }}</span>
                 </li>
               </ul>
-              <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
+              {{-- <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
                 @foreach ($mentors as $cycleOrg) 
                 @php
@@ -281,12 +297,26 @@
                 </li>
                 @endforeach
                 @endforeach
+              </ul> --}}
+
+               <small class="card-text text-uppercase text-muted small">{{__('admin.Cycles')}}</small>
+              <ul class="list-unstyled mb-0 mt-3 pt-1">
+                @foreach ($mentors as $mentor) 
+                
+                <li class="d-flex flex-wrap mb-4">
+
+                  - <span class="fw-medium me-2">{{$mentor->cycle->title}}</span>
+
+                </li>
+             
+               
+                @endforeach
               </ul>
             </div>
           </div>
           <!--/ About User -->
           <!-- Profile Overview -->
-          <div class="card mb-6">
+          {{-- <div class="card mb-6">
             <div class="card-body">
               <small class="card-text text-uppercase text-muted small">Overview</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
@@ -304,7 +334,7 @@
                 </li>
               </ul>
             </div>
-          </div>
+          </div> --}}
           <!--/ Profile Overview -->
         </div>
 

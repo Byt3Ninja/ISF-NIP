@@ -646,4 +646,7 @@ return [
 	'lessthanOREqual'=>' اصغر من او يساوى  ',
 	'MorethanOREqual'=>' اكبر من او يساوى  ',
 	'Joined'=>'تاريخ الانضمام',
+	'Follow'=>'متابعة ',
+	'mentor'=>'مرشد ',
+	'registered'=>' مؤسس ',
 ];

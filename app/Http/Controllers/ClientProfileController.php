@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Country;
+use App\Cycle;
 use App\Expertise;
 use App\Http\Requests\UpdateClientProfileRequest;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
@@ -52,10 +53,20 @@ class ClientProfileController extends Controller
 
     public function show(){
       $client = Auth::user();
-      $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
+      $mentors = CyclesMentors::where('user_id',  Auth::user()->id ?? 0)->get();
 
+      if($client->hasRole('Admin')){
       $mentorshipTasks = MentorshipTask::where('mentor_id',Auth::user()->id)->where('status','pending')->get();
+      }else{
 
+      
+        if ($client && $client->company) {
+            $companyId = $client->company->id;
+            $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
+            
+        } 
+    }
+      
       $mentrequests =  MentorshipRequest::where('mentor_id', Auth::user()->id);
 
         $mentrequests_count = $mentrequests->count();
@@ -66,7 +77,7 @@ class ClientProfileController extends Controller
     ->where('approved', 'Yes')
     ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
     ->avg('rating'); 
-
+   
 
       return view('admin/clients/profile', compact('client','mentors','mentorshipTasks','mentrequests_count','mentrequests_period','average_rating'));
     }
