@@ -381,6 +381,7 @@ return [
 	'Session added successfully'=>'تم إضافة التدريب بنجاح',
 	'Can\'t add training you must add new training course first'=>'لا يمكن إضافة التدريب بدون إضافة محتوى جديد',
 	'Can\'t create zoom meeting, API error'=>'حدث خطأ، لا يمكن إضافة اجتماع زووم',
+	'meeting_error'=>' حدث خطأ، لا يمكن إضافة اجتماع يرجى مراجعة الاعدادات',
 	'Request successfully added'=>'تم إضافة طلبك بنجاح',
 	'Error, can\'t add request'=>'خطأ، لا يمكن إضافة الطلب',
 	'New mentorship request from'=>'طلب جلسة إرشاد جديد من',
@@ -644,4 +645,8 @@ return [
 	'lessthan'=>' اصغر من  ',
 	'lessthanOREqual'=>' اصغر من او يساوى  ',
 	'MorethanOREqual'=>' اكبر من او يساوى  ',
+	'Joined'=>'تاريخ الانضمام',
+	'Follow'=>'متابعة ',
+	'mentor'=>'مرشد ',
+	'registered'=>' مؤسس ',
 ];

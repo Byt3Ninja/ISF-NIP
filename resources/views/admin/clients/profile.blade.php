@@ -37,7 +37,19 @@
                         <i class="ti ti-brand-linkedin ti-lg"></i>
                         </a>
                         @endrole
+                        @php
+                        // جلب الأدوار كمجموعة
+                        $roles = $client->getRoleNames();
                     
+                        // ترجمة الأدوار وإزالة الأقواس والدبل كوت
+                        $translatedRoles = $roles->map(function ($role) {
+                            return __('admin.' . strtolower($role)); // ترجمة الدور
+                        })->implode(', '); // دمج الأدوار في سلسلة واحدة
+                    
+                        // إزالة أي أقواس أو دبل كوت
+                        $cleanedRoles = str_replace(['[', ']', '"'], '', $translatedRoles);
+                    @endphp
+                                            <br><h5 class="fw-medium"><i class="ti ti-user ti-lg"></i> {{ $cleanedRoles }} </h5>
                     </h4>
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
@@ -51,14 +63,14 @@
                           class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined {{ $client->created_at->format('M-Y') }}</span>
+                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> {{ __('admin.Joined') }} {{ $client->created_at->locale($l)->translatedFormat('M-Y') }}</span>
                       </li>
                       
                     </ul>
                   </div>
-                  <a href="javascript:void(0)" class="btn btn-primary mb-1">
+                  {{-- <a href="javascript:void(0)" class="btn btn-primary mb-1">
                     <i class="ti ti-user-check ti-xs me-2"></i>Connected
-                  </a>
+                  </a> --}}
                 </div>
               </div>
             </div>
@@ -219,10 +231,7 @@
                 </li>
                 <li class="d-flex align-items-center mb-2">
                   <i class="ti ti-language ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar'
-                        ? 'اللغات:'
-                        : '
-                                        Languages:' }}
+                    {{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}
                   </span>
                   <span>
                     {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
@@ -248,7 +257,8 @@
                   <span>{{ $client->email }}</span>
                 </li>
               </ul>
-              <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
+
+              {{-- <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
                 @foreach ($mentors as $cycleOrg) 
                 @php
@@ -262,12 +272,12 @@
                 </li>
                 @endforeach
                 @endforeach
-              </ul>
+              </ul> --}}
             </div>
           </div>
           <!--/ About User -->
           <!-- Profile Overview -->
-          <div class="card mb-6">
+          {{-- <div class="card mb-6">
             <div class="card-body">
               <small class="card-text text-uppercase text-muted small">Overview</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
@@ -285,7 +295,7 @@
                 </li>
               </ul>
             </div>
-          </div>
+          </div> --}}
           <!--/ Profile Overview -->
         </div>
 
@@ -303,7 +313,7 @@
                                                 <th class="text-center">{{__('cycles.Done')}}</th>
                   </tr>
 
-                  @role('Mentor')
+                  
                   <tbody>
                     @foreach($mentorshipTasks as $task)
                                                 <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
@@ -344,7 +354,7 @@
                                                 </tr>
                                             @endforeach
                   </tbody>
-@endrole
+
 
                 </thead>
               </table>
@@ -355,8 +365,7 @@
       </div>
       <!--/ User Profile Content -->
     </div>
-  </div>
-</div>
+  
 
 <!-- Programms tab -->
 <div class="tab-pane fade" id="Programms" role="tabpanel" aria-labelledby="Programms-tab">
@@ -375,7 +384,6 @@
           <table class="table zero-configuration">
             <thead>
             <tr>
-                <th>#</th>
                 <th>{{__('admin.Title')}}</th>
                 <th>{{__('admin.Description')}}</th>
                 <th>{{__('admin.Start')}}</th>
@@ -383,16 +391,12 @@
             </tr>
             </thead>
             <tbody>
-              @foreach ($mentors as $n=>$mentor) 
               <tr>
-                <td>{{$n+1}}</td>
-                <td>{{$mentor->cycle->title}}</td>
-                <td>{{$mentor->cycle->description}}</td>
-                <td>{{$mentor->cycle->start}}</td>
-                <td>{{$mentor->cycle->end}}</td>
+                <td>{{ Auth::user()->company->cycledata->title }}</td>
+                <td>{{ Auth::user()->company->cycledata->description }}</td>
+                <td>{{ Auth::user()->company->cycledata->start }}</td>
+                <td>{{ Auth::user()->company->cycledata->end }}</td>
               </tr>
-
-          @endforeach
         </tbody>
       </table>
 
@@ -403,6 +407,9 @@
   
 
 </div>
+</div>
+</div>
+
 <!-- Programms tab -->
 
 
@@ -412,6 +419,7 @@
     <!-- / Content -->
  
     <div class="content-backdrop fade"></div>
+  
   </div>
   <!-- Content wrapper -->
 @stop
