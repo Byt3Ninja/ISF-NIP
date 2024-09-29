@@ -37,7 +37,7 @@
 
                   <div class="mb-6 width49">
                     <label for="start_date">{{ __('admin.Number') }}</label>
-                    <input type="text" id="hours" name="hours" value="{{ request('hours') }}" class="form-control">
+                    <input type="text" id="hours" name="hours" value="{{ request('hours') }}" class="hours form-control">
                 </div>
             
                 <div class="mb-6 width49">
@@ -45,7 +45,7 @@
                       {{ __('admin.Condition') }}
                       
                     </label>
-                    <select class=" form-select" name="condition">
+                    <select class=" form-select condition" name="condition">
                       <option value="" disabled selected>
                         {{ $l == 'en' ? 'Choose condition ' : ' اختر شرط ' }}
                       </option>
@@ -66,7 +66,7 @@
                         <label class="form-label fs-6">
                           {{ __('admin.Program') }}
                         </label>
-                        <select class=" form-select" name="cycle_name">
+                        <select class="cycle_name form-select" name="cycle_name">
                           <option value="" disabled selected>
                             {{ $l == 'en' ? 'Choose program' : 'اختر البرنامج' }}
                           </option>
@@ -86,7 +86,7 @@
                                               {{ __('admin.Users') }}
                                               
                                             </label>
-                                            <select class=" form-select" name="user_id">
+                                            <select class="user_id form-select" name="user_id">
                                               <option value="" disabled selected>
                                                 {{ $l == 'en' ? 'Choose User' : 'اختر المستخدم' }}
                                               </option>
@@ -104,7 +104,7 @@
                                               {{ __('admin.Orgnizations') }}
                                               
                                             </label>
-                                            <select class=" form-select" name="org_id">
+                                            <select class="org_id form-select" name="org_id">
                                               <option value="" disabled selected>
                                                 {{ $l == 'en' ? 'Choose Orgnizations' : 'اختر المؤسسة' }}
                                               </option>
@@ -119,8 +119,11 @@
               
                   <button type="submit" class="btn btn-primary">{{ __('admin.Search') }}</button>
               </form>
-
-
+<br><br><br>
+ <div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
+                      <div class="btn btn-success ExportFinanceTS">{{ __('cycles.Export') }}</div>
+                    </div> 
+                    
                 <div class="card-text">
                   <div class="table-responsive">
                     <table class="table mb-0" id="userstable">
@@ -258,6 +261,11 @@
       $('.datewithouttime').datetimepicker({
         format: 'Y-m-d'
       });
+
+
+      const messages = {
+      exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+    };
 
         </script>
 @stop

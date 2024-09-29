@@ -100,6 +100,36 @@ $(document).ready(function () {
 
     });
 
+   
+
+    $(document).on('click', '.ExportFinanceTS', function() {
+        var hours = $('.hours').val();
+        var condition = $('.condition').val();
+        var cycle_name = $('.cycle_name').val();
+        var user_id = $('.user_id').val();
+        var org_id = $('.org_id').val();
+        alert(messages.exportSuccess);
+        $.ajax({
+            url: `/dashboard/export-FinanceTS`,
+            type: 'GET',
+            data:{hours:hours,
+                condition:condition,
+                cycle_name:cycle_name,
+                user_id:user_id,
+                org_id:org_id
+            },
+            success: function(response) {
+                
+                //  alert(response.message);
+            },
+            error: function(error) {
+                console.error('Error:', error);
+
+            }
+        });
+
+    });
+
 
     $(document).on('click', '.ExportExcelScreesRes', function() {
         var step = $('.stepsExcel').val();

@@ -8,6 +8,7 @@ use App\TimeSheet;
 use App\Category;
 use App\User;
 use Illuminate\Http\Request;
+use App\Jobs\ExportFTSData;
 
 class TimeSheetController extends Controller
 {
@@ -233,4 +234,33 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
 
     return view('admin.TimeSheets.finance', compact('timeSheets', 'orgnization', 'categories', 'users', 'cycles', 'groupedTimeSheets'));
 }
+
+public function exportFTS(Request $request)
+    {
+        $Tsheet = [
+            'hours' => $request->input('hours'),
+            'condition' => $request->input('condition'),
+            'cycle_name' => $request->input('cycle_name'),
+            'user_id' => $request->input('user_id'),
+            'org_id' => $request->input(key: 'org_id'),
+            'userEmail' => auth()->user()->email
+        ];
+        // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
+        ExportFTSData::dispatch($Tsheet);
+
+        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
