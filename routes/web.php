@@ -152,7 +152,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::resource('TimeSheet', 'TimeSheetController');
     Route::resource('Category', 'CatigoriesController'); // category in TimeSheet Folder
     Route::get('/show/FinanceTimeSheet', 'TimeSheetController@Finance')->name('show_finance_time_sheet');
-
+    Route::get('/export-FinanceTS', 'TimeSheetController@exportFTS')->name('exportFTS');
 
 	//Client's company
     Route::resource('organizations', 'organizationsController');

@@ -37,7 +37,7 @@
 
                   <div class="mb-6 width49">
                     <label for="start_date">{{ __('admin.Number') }}</label>
-                    <input type="text" id="hours" name="hours" value="{{ request('hours') }}" class="form-control">
+                    <input type="text" id="hours" name="hours" value="{{ request('hours') }}" class="hours form-control">
                 </div>
             
                 <div class="mb-6 width49">
@@ -45,7 +45,7 @@
                       {{ __('admin.Condition') }}
                       
                     </label>
-                    <select class=" form-select" name="condition">
+                    <select class=" form-select condition" name="condition">
                       <option value="" disabled selected>
                         {{ $l == 'en' ? 'Choose condition ' : ' اختر شرط ' }}
                       </option>
@@ -65,9 +65,8 @@
                       <div class="mb-6 width49">
                         <label class="form-label fs-6">
                           {{ __('admin.Program') }}
-                          
                         </label>
-                        <select class=" form-select" name="cycle_name">
+                        <select class="cycle_name form-select" name="cycle_name">
                           <option value="" disabled selected>
                             {{ $l == 'en' ? 'Choose program' : 'اختر البرنامج' }}
                           </option>
@@ -79,12 +78,52 @@
                           @endforeach
                         </select>
                       </div>
+
+                      
+                      @hasanyrole('Admin|organizationManager|manager')
+                                          <div class="mb-6 width49">
+                                            <label class="form-label fs-6">
+                                              {{ __('admin.Users') }}
+                                              
+                                            </label>
+                                            <select class="user_id form-select" name="user_id">
+                                              <option value="" disabled selected>
+                                                {{ $l == 'en' ? 'Choose User' : 'اختر المستخدم' }}
+                                              </option>
+                                              <option value="">{{ __('admin.SelectAll') }}</option>
+                                              @foreach ($users as $user)
+                                                <option value="{{ $user->id }}" {{ $user->id == request('user_id') ? "selected" : "" }} >{{ $user->{'first_name_'. $l} ." ". $user->{'last_name_'. $l} }}</option>
+                                              @endforeach
+                                            </select>
+                                          </div>
+                        @endhasanyrole
+
+                        @hasanyrole('Admin')
+                                          <div class="mb-6 width49">
+                                            <label class="form-label fs-6">
+                                              {{ __('admin.Orgnizations') }}
+                                              
+                                            </label>
+                                            <select class="org_id form-select" name="org_id">
+                                              <option value="" disabled selected>
+                                                {{ $l == 'en' ? 'Choose Orgnizations' : 'اختر المؤسسة' }}
+                                              </option>
+                                              <option value="">{{ __('admin.SelectAll') }}</option>
+                                              @foreach ($orgnization as $org)
+                                                <option value="{{ $org->id }}" {{ $org->id == request('org_id') ? "selected" : "" }} >{{ $org->{'name_'. $l} }}</option>
+                                              @endforeach
+                                            </select>
+                                          </div>
+                        @endhasanyrole
                   
               
-                  <button type="submit" class="btn btn-primary">Search</button>
+                  <button type="submit" class="btn btn-primary">{{ __('admin.Search') }}</button>
               </form>
-
-
+<br><br><br>
+ <div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
+                      <div class="btn btn-success ExportFinanceTS">{{ __('cycles.Export') }}</div>
+                    </div> 
+                    
                 <div class="card-text">
                   <div class="table-responsive">
                     <table class="table mb-0" id="userstable">
@@ -222,6 +261,11 @@
       $('.datewithouttime').datetimepicker({
         format: 'Y-m-d'
       });
+
+
+      const messages = {
+      exportSuccess: "{{ __('cycles.export_willsuccess') }}",
+    };
 
         </script>
 @stop

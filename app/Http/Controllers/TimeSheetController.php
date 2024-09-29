@@ -8,6 +8,7 @@ use App\TimeSheet;
 use App\Category;
 use App\User;
 use Illuminate\Http\Request;
+use App\Jobs\ExportFTSData;
 
 class TimeSheetController extends Controller
 {
@@ -172,11 +173,13 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
     public function Finance(Request $request)
 {
     $timeSheets = collect(); // إنشاء مجموعة فارغة
+    $orgnization = collect(); // إنشاء مجموعة فارغة للمؤسسات
 
     if (auth()->user()->hasRole('Admin')) {
         $users = User::all();
         $timeSheets = TimeSheet::all();
         $cycles = Cycle::all();
+        $orgnization = Organization::all(); // جلب جميع المؤسسات
     } else {
         $timeSheets = TimeSheet::where('user_id', auth()->user()->id)->get(); // جلب الساعات للمستخدم الحالي
         
@@ -185,21 +188,33 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
             if ($organization) {
                 $cycles = Cycle::where('organization_id', $organization->id)->get();
                 $users = User::where('organization_id', $organization->id)->role(['manager', 'coordinator'])->get();
+                $orgnization = Organization::where('id', $organization->id)->get(); // جلب المؤسسة المرتبطة
             }
         } elseif (auth()->user()->hasRole('manager')) {
             $organization = Organization::where('user_id', auth()->user()->id)->first();
             if ($organization) {
                 $cycles = Cycle::where('organization_id', $organization->id)->get();
                 $users = User::where('organization_id', $organization->id)->role('coordinator')->get();
+                $orgnization = Organization::where('id', $organization->id)->get(); // جلب المؤسسة المرتبطة
             }
         } elseif (auth()->user()->hasRole('coordinator')) {
             $users = collect(); // إرجاع مجموعة فارغة
         }
     }
 
-    // فلترة حسب التاريخ إذا تم إدخاله في النموذج
-    if ($request->has('start_date') && $request->has('end_date') && $request->start_date != null && $request->end_date != null) {
-        $timeSheets = $timeSheets->whereBetween('date', [$request->input('start_date'), $request->input('end_date')]);
+    // فلترة حسب user_id إذا تم إدخاله في النموذج
+    if ($request->has('user_id') && $request->user_id != null) {
+        $timeSheets = $timeSheets->filter(function($timesheet) use ($request) {
+            return $timesheet->user_id == $request->input('user_id');
+        });
+    }
+
+    // فلترة حسب org_id (المؤسسة) إذا تم إدخاله في النموذج
+    if ($request->has('org_id') && $request->org_id != null) {
+        $userOrg = User::where('organization_id', $request->org_id)->pluck('id'); // جلب IDs للمستخدمين في المؤسسة
+        $timeSheets = $timeSheets->filter(function($timesheet) use ($userOrg) {
+            return $userOrg->contains($timesheet->user_id); // التحقق من أن user_id موجود ضمن المستخدمين في المؤسسة
+        });
     }
 
     // فلترة حسب اسم الدورة إذا تم إدخاله في النموذج
@@ -217,8 +232,35 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
         ];
     });
 
+    return view('admin.TimeSheets.finance', compact('timeSheets', 'orgnization', 'categories', 'users', 'cycles', 'groupedTimeSheets'));
+}
 
-    
-            return view('admin.TimeSheets.finance', compact('timeSheets','categories','users','cycles','groupedTimeSheets'));
+public function exportFTS(Request $request)
+    {
+        $Tsheet = [
+            'hours' => $request->input('hours'),
+            'condition' => $request->input('condition'),
+            'cycle_name' => $request->input('cycle_name'),
+            'user_id' => $request->input('user_id'),
+            'org_id' => $request->input(key: 'org_id'),
+            'userEmail' => auth()->user()->email
+        ];
+        // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
+        ExportFTSData::dispatch($Tsheet);
+
+        return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
