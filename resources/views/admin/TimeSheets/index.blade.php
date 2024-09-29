@@ -74,7 +74,7 @@
                       </div>
                   
               
-                  <button type="submit" class="btn btn-primary">Search</button>
+                  <button type="submit" class="btn btn-primary">{{ __('admin.Search') }}</button>
               </form>
 
 

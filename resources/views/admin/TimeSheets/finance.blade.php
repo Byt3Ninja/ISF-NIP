@@ -65,7 +65,6 @@
                       <div class="mb-6 width49">
                         <label class="form-label fs-6">
                           {{ __('admin.Program') }}
-                          
                         </label>
                         <select class=" form-select" name="cycle_name">
                           <option value="" disabled selected>
@@ -79,9 +78,46 @@
                           @endforeach
                         </select>
                       </div>
+
+                      
+                      @hasanyrole('Admin|organizationManager|manager')
+                                          <div class="mb-6 width49">
+                                            <label class="form-label fs-6">
+                                              {{ __('admin.Users') }}
+                                              
+                                            </label>
+                                            <select class=" form-select" name="user_id">
+                                              <option value="" disabled selected>
+                                                {{ $l == 'en' ? 'Choose User' : 'اختر المستخدم' }}
+                                              </option>
+                                              <option value="">{{ __('admin.SelectAll') }}</option>
+                                              @foreach ($users as $user)
+                                                <option value="{{ $user->id }}" {{ $user->id == request('user_id') ? "selected" : "" }} >{{ $user->{'first_name_'. $l} ." ". $user->{'last_name_'. $l} }}</option>
+                                              @endforeach
+                                            </select>
+                                          </div>
+                        @endhasanyrole
+
+                        @hasanyrole('Admin')
+                                          <div class="mb-6 width49">
+                                            <label class="form-label fs-6">
+                                              {{ __('admin.Orgnizations') }}
+                                              
+                                            </label>
+                                            <select class=" form-select" name="org_id">
+                                              <option value="" disabled selected>
+                                                {{ $l == 'en' ? 'Choose Orgnizations' : 'اختر المؤسسة' }}
+                                              </option>
+                                              <option value="">{{ __('admin.SelectAll') }}</option>
+                                              @foreach ($orgnization as $org)
+                                                <option value="{{ $org->id }}" {{ $org->id == request('org_id') ? "selected" : "" }} >{{ $org->{'name_'. $l} }}</option>
+                                              @endforeach
+                                            </select>
+                                          </div>
+                        @endhasanyrole
                   
               
-                  <button type="submit" class="btn btn-primary">Search</button>
+                  <button type="submit" class="btn btn-primary">{{ __('admin.Search') }}</button>
               </form>
 
 
