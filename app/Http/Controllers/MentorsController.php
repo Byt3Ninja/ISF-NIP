@@ -24,7 +24,7 @@ class MentorsController extends Controller
     protected $meetingService;
     public function __construct()
     {
-        // $this->meetingService =  OnlineMeetingFactory::create();
+         $this->meetingService =  OnlineMeetingFactory::create();
     }
   
 
@@ -118,8 +118,11 @@ class MentorsController extends Controller
                 $date = ltrim($key);
 
                 $topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
+                
                 $data = ['topic'=>$topic, "start_time"=>$date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
+                
                 $onlineMeeting = $this->meetingService->createMeeting($data);
+                
                 if (!$onlineMeeting['success']) {return back()->with(['message2' => "Error, can't create online meeting."]);}
 
                 $dateFormat = new \DateTime($date);
