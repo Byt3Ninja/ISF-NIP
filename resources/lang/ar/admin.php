@@ -645,4 +645,5 @@ return [
 	'lessthan'=>' اصغر من  ',
 	'lessthanOREqual'=>' اصغر من او يساوى  ',
 	'MorethanOREqual'=>' اكبر من او يساوى  ',
+	'Joined'=>'تاريخ الانضمام',
 ];

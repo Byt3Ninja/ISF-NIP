@@ -645,5 +645,6 @@ return [
 	'lessthan'=>'less than ',
 	'lessthanOREqual'=>' less than OR Equal ',
 	'MorethanOREqual'=>' More than OR Equal ',
+	'Joined'=>'Joined At ',
 	
 ];

@@ -51,7 +51,7 @@
                           class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined {{ $client->created_at->format('M-Y') }}</span>
+                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> {{ __('admin.Joined') }} {{ $client->created_at->locale($l)->translatedFormat('M-Y') }}</span>
                       </li>
                       
                     </ul>
