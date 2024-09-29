@@ -246,7 +246,7 @@
               </span>
             </a>
           </li>
-          <li>
+          {{-- <li>
             <a class="dropdown-item" href="pages-account-settings-billing.html">
               <span class="d-flex align-items-center align-middle">
                 <i class="flex-shrink-0 ti ti-file-dollar me-3 ti-md"></i><span
@@ -254,15 +254,15 @@
                 <span class="flex-shrink-0 badge bg-danger d-flex align-items-center justify-content-center">4</span>
               </span>
             </a>
-          </li>
-          <li>
+          </li> --}}
+          {{-- <li>
             <div class="dropdown-divider my-1 mx-n2"></div>
           </li>
           <li>
             <a class="dropdown-item" href="pages-pricing.html">
               <i class="ti ti-currency-dollar me-3 ti-md"></i><span class="align-middle">Pricing</span>
             </a>
-          </li>
+          </li> --}}
           <li>
             <a class="dropdown-item" href="/dashboard/documentation">
               <i class="ti ti-question-mark me-3 ti-md"></i><span class="align-middle">FAQ</span>
