@@ -189,13 +189,12 @@
                         <div 
                           class="border border-light align-items-center
                           justify-content-center d-none d-md-flex h-100"
-                          style="width: 180px; object-fit: cover; border-radius: 20px;"
+                          style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
                         >
                           <img 
                             src="{{$cycle->organization->image_url}}"
                             alt="Logo"
-                            width="100"
-                            height="100"
+                            style="width: 100%; height: 100%; object-fit: contain;"
                           />
                         </div>
                       </div>
