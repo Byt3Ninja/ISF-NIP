@@ -147,7 +147,7 @@
 
 @section('scripts')
   <script>
-    document.body.classList.add("menu-collapsed");
+    // document.body.classList.add("menu-collapsed");
 
     function showForm(set, id, title, organization_id) {
 

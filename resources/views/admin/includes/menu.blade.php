@@ -189,7 +189,7 @@
 
       <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
         <a href="{{ route('Tags.index') }}" class="menu-link">
-          <i class="ti ti-user me-3 ti-md"></i>
+          <i class="ti ti-flag me-3 ti-md"></i>
           <div>{{ __('admin.Tags') }}</div>
         </a>
       </li>
@@ -238,7 +238,7 @@
 <!-- Start Time Sheets -->
 <li class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/Category*') ? 'sidebar-group-active open' : '' }} menu-item">
   <a class="menu-link menu-toggle">
-    <i class="menu-icon tf-icons ti ti-components"></i>
+    <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
     <div>{{ __('admin.TimeSheet') }}</div>
   </a>
   <ul class="menu-sub">
