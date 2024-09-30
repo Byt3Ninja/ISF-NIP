@@ -649,4 +649,5 @@ return [
 	'Follow'=>'متابعة ',
 	'mentor'=>'مرشد ',
 	'registered'=>' مؤسس ',
+	'admin'=>' مسؤل ',
 ];
