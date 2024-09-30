@@ -109,7 +109,7 @@
         </a>
       </li>
     @endif
-    @if (!Auth::user()->hasanyRole('Mentor|Judger|Startup'))
+    @if (Auth::user()->hasanyRole('Mentor|Judger|Startup|Admin'))
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a href="/dashboard/show/Mentors"
           class="menu-link">
           <i class="ti ti-users ti-md me-2 me-lg-4 ti-lg"></i>
