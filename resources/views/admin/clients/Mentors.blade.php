@@ -98,11 +98,16 @@
                             </td>
                             <td>
                               @if ($getid->user ?? 0)
-                                <button
-                                  onclick="request({{ $mentor->id }},'{{ optional($getid->user)->{'first_name_' . $l} }} {{ optional($getid->user)->{'last_name_' . $l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})"
-                                  title="Add new request" type="button" class="btn btn-icon rounded-circle btn-label-secondary">
+                                <button 
+                                  type="button" 
+                                  class="btn btn-icon rounded-circle btn-label-primary"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#SendRequest"
+                                  title="Add new request" 
+                                  onclick="request({{ $mentor->id}},'{{optional($getid->user)->{'first_name_'.$l} }} {{optional($getid->user)->{'last_name_'.$l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})"
+                                >
                                   <i class="ti ti-plus"></i>
-                                </button>
+                              </button>
                               @endif
                             </td>
                           </tr>
@@ -121,38 +126,46 @@
   </div>
 
   <!--  Edit SP Modal -->
-  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+  <div class="modal fade" id="SendRequest" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <div class="modal-body">
+        <div class="modal-header">
+          <h4 class="modal-title">
+            {{ __('dashboard.Add mentorship session with') }} 
+          </h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          <div class="text-center mb-6">
-            <h4 class="mb-2">{{ __('dashboard.Add mentorship session with') }} <span class="primary"
-                id="rname"></span></h4>
-          </div>
+        </div>
+        <div class="modal-body">
           <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
-
             <div class="modal-body">
               @csrf
               <input type="hidden" name="mentorid" value="0" id="mentorid">
               <input type="hidden" name="organization_id" id="addOrganizationID">
               <input type="hidden" name="cycle_id" id="addCycleID">
-              <div>
-                <h5 class="text-primary"><i class="ti ti-time text-secondary"></i> {{ __('dashboard.Mentor schedule') }}
-                </h5>
-                <span class="d-block bg-info p-1 white">
-                  <ul class="mb-0" id="schedule"></ul>
-                </span>
+              <div class="border-bottom mb-4 pb-2">
+                <h5 class="modal-title">{{ __('dashboard.Mentor schedule') }}</h5>
               </div>
-              <hr>
-              <div class="form-group" id="showdates">
-                <label>{{ __('dashboard.Start meeting Date/ Time') }}:</label>
-                <input class="date width-250 form-control" type="text" id="date" name="date" value=""
-                  required onkeydown="return false">
+              <div class="form-group mb-3" id="showdates">
+                <label class="fs-6 mb-2">{{ __('dashboard.Start meeting Date/ Time') }}:</label>
+                <div class="position-relative">
+                  <input 
+                    id="date" 
+                    name="date" 
+                    type="text" 
+                    class="date width-250 form-control pr-5" 
+                    placeholder="{{ __('dashboard.Start meeting Date/ Time') }}"
+                    value="" 
+                    required 
+                    onkeydown="return false"
+                  />
+                  <i 
+                    class="ti ti-calendar position-absolute" 
+                    style="{{ $l == 'ar' ? 'left: 10px;' : 'right: 10px;' }} top: 50%; transform: translateY(-50%);">
+                  </i>
+                </div>
               </div>
-              <div class="form-group">
-                <label>{{ __('dashboard.Meeting duration') }}:</label>
+              <div class="form-group mb-3">
+                <label class="fs-6 mb-2">{{ __('dashboard.Meeting duration') }}:</label>
                 <select name="period" class="select form-control width-150">
                   <option value="30">30 {{ __('dashboard.Minutes') }}</option>
                   <option value="60" selected>1 {{ __('dashboard.Hour') }}</option>
@@ -162,39 +175,35 @@
                   <option value="300">5 {{ __('dashboard.Hours') }}</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label for="basicInputFile">{{ __('dashboard.Send file with your request') }}</label>
+              <div class="form-group mb-3">
+                <label class="fs-6 mb-2" for="basicInputFile">{{ __('dashboard.Send file with your request') }}</label>
                 <div class="custom-file">
                   <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url"
                     accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
-                  <label class="custom-file-label" for="inputGroupFile01">{{ __('dashboard.Choose file') }}</label>
+                  {{-- <label class="custom-file-label" for="inputGroupFile01">{{ __('dashboard.Choose file') }}</label> --}}
                 </div>
               </div>
-              <label>{{ __('dashboard.Add note') }}:</label>
-              <div class="form-group">
+              <label class="fs-6 mb-2">{{ __('dashboard.Add note') }}:</label>
+              <div class="form-group mb-3">
                 <textarea class="form-control" id="notes" name='notes' rows="4"
                   placeholder="{{ __('dashboard.Write your note here') }}"></textarea>
               </div>
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary ml-1">
-                <i class="ti ti-check d-block d-sm-none"></i>
-                <span class="d-none d-sm-block">{{ __('dashboard.Submit') }}</span>
+                {{ __('dashboard.Submit') }}
               </button>
             </div>
           </form>
-
-
-
         </div>
       </div>
     </div>
   </div>
-
-
+  <!-- / Edit SP Modal -->
 @stop
 
 @section('scripts')
+  <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -204,16 +213,11 @@
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   {{-- <script src="/vuexy/src/js/scripts/extensions/ext-component-ratings.js"></script> --}}
-
-
+@stop
+  
+@section('pagescripts')
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
-@stop
-
-@section('pagescripts')
-  <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-
-  
 
   <script>
     $(document).ready(function() {
@@ -225,103 +229,145 @@
     });
   </script>
 
+  <script>
+    $(document).ready(function() {
+        $("#mentorstable").DataTable({
+            "responsive": true,
+            "searching": true,
+            "lengthChange": false,
+            "paging": false,
+            "bInfo": false,
+            "columnDefs": [{"orderable": false, "targets": [3]}],
+            @if ($l == 'ar')
+            "language": {
+                "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+                "sLoadingRecords": "جارٍ التحميل...",
+                "sProcessing": "جارٍ التحميل...",
+                "sLengthMenu": "أظهر _MENU_ مدخلات",
+                "sZeroRecords": "لم يعثر على أية سجلات",
+                "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+                "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                "sInfoPostFix": "",
+                "sSearch": "ابحث:",
+                "sUrl": "",
+                "oPaginate": {
+                    "sFirst": "الأول",
+                    "sPrevious": "السابق",
+                    "sNext": "التالي",
+                    "sLast": "الأخير"
+                },
+                "oAria": {
+                    "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+                    "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+                }
+            }
+            @endif
+        });
 
-<script>
-	$(document).ready(function() {
-		$("#mentorstable").DataTable({
-			"responsive": true,
-			"searching": true,
-			"lengthChange": false,
-			"paging": false,
-			"bInfo": false,
-			"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
-			@if ($l == 'ar')
-			"language": {
-				"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
-				"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-				"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
-				"sInfo":		 "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-				"sInfoEmpty":	"يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-				"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
-				"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
-				"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
-			}
-			@endif
-		});
-		
-	});
+        $(".sessonsTable").DataTable({
+            "responsive": true,
+            "searching": true,
+            "lengthChange": false,
+            "paging": false,
+            "bInfo": false,
+            "columnDefs": [{"orderable": false, "targets": [3]}],
+            @if ($l == 'ar')
+            "language": {
+                "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+                "sLoadingRecords": "جارٍ التحميل...",
+                "sProcessing": "جارٍ التحميل...",
+                "sLengthMenu": "أظهر _MENU_ مدخلات",
+                "sZeroRecords": "لم يعثر على أية سجلات",
+                "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+                "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                "sInfoPostFix": "",
+                "sSearch": "ابحث:",
+                "sUrl": "",
+                "oPaginate": {
+                    "sFirst": "الأول",
+                    "sPrevious": "السابق",
+                    "sNext": "التالي",
+                    "sLast": "الأخير"
+                },
+                "oAria": {
+                    "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+                    "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+                }
+            }
+            @endif
+        });
 
-	$(document).ready(function() {
-		$(".sessonsTable").DataTable({
-			"responsive": true,
-			"searching": true,
-			"lengthChange": false,
-			"paging": false,
-			"bInfo": false,
-			"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
-			@if ($l == 'ar')
-			"language": {
-				"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
-				"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-				"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
-				"sInfo":		 "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-				"sInfoEmpty":	"يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-				"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
-				"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
-				"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
-			} @endif
-  		});
-  		
-  	});
+        $("#date").datetimepicker({
+            format: 'Y-m-d H:i',
+            onGenerate: function(ct) {
+                jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled');
+            },
+            maxDate: '{{ date('Y/m/d', strtotime('-1 days')) }}',
+            timepicker: true
+        });
 
-  	
-  	
-  	$(" #date").datetimepicker({ format: 'Y-m-d H:i' , onGenerate: function( ct ) {
-    jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
-    maxDate: '{{ date('Y/m/d', strtotime('-1 days')) }}' , timepicker: true }); function
-    request(id,mentor,organization_id=null,cycle_id=null) { $('#mentorid').val(id); $('#rname').html(mentor);
-    $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token" ]').attr('content')}}); $.ajax({ type: "POST" ,
-    url: "/dashboard/mentors/modify" , data: {"id": id, "rtype" : 5,}, success: function (response) { $('#SendRequest
-    li').remove(); $('#name').html(name); if (response.length>
-    0) {
-      $.each(response, function(i, item) {
-        let note = '';
-        let time = item.tfrom + " {{ __('dashboard.to') }} " + item.tto;
-        if (item.notes) {
-          note = item.notes;
+        function request(id, mentor, organization_id = null, cycle_id = null) {
+            const modal = $('#SendRequest');
+
+            modal.style.display = "block";
+
+            $('#mentorid').val(id);
+            $('#rname').html(mentor);
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: "POST",
+                url: "/dashboard/mentors/modify",
+                data: {
+                    "id": id,
+                    "rtype": 5
+                },
+                success: function(response) {
+                    $('#SendRequest li').remove();
+                    $('#name').html(name);
+                    if (response.length > 0) {
+                        $.each(response, function(i, item) {
+                            let note = '';
+                            let time = item.tfrom + " {{ __('dashboard.to') }} " + item.tto;
+                            if (item.notes) {
+                                note = item.notes;
+                            }
+                            switch (item.type) {
+                                case 'OneDay':
+                                    $('<li>').html("<b>" + item.dfrom + "</b> (" + time + ").").appendTo('#schedule');
+                                    break;
+                                case 'Weekly':
+                                    $('<li>').html("<b> {{ __('dashboard.Weekly') }} </b>(" + item.days + ") - (" + time + ").").appendTo('#schedule');
+                                    break;
+                                case 'WorkingDays':
+                                    $('<li>').html("<b>{{ __('dashboard.All working days') }} </b>(" + time + ").").appendTo('#schedule');
+                                    break;
+                                case 'Period':
+                                    $('<li>').html("<b> {{ __('dashboard.from') }} " + item.dfrom + " {{ __('dashboard.to') }} " + item.dto + " </b> (" + time + ").").appendTo('#schedule');
+                                    break;
+                                default:
+                            }
+                        });
+                    } else {
+                        $('<li>').html("{{ __('dashboard.No records saved') }}.</li>").appendTo('#schedule');
+                    }
+                    $('#addOrganizationID').val(organization_id);
+                    $('#addCycleID').val(cycle_id);
+                    $('#SendRequest').modal('show');
+                },
+                error: function(error) {
+                    console.log(error);
+                    alert("Error Occurred, Try again!");
+                }
+            });
         }
-        switch (item.type) {
-          case 'OneDay':
-            $('<li>').html("<b>" + item.dfrom + "</b> (" + time + ").").appendTo('#schedule');
-            break;
-          case 'Weekly':
-            $('<li>').html("<b> {{ __('dashboard.Weekly') }} </b>(" + item.days + ") - (" + time + ").").appendTo(
-              '#schedule');
-            break;
-          case 'WorkingDays':
-            $('<li>').html("<b>{{ __('dashboard.All working days') }} </b>(" + time + ").").appendTo('#schedule');
-            break;
-          case 'Period':
-            $('<li>').html("<b> {{ __('dashboard.from') }} " + item.dfrom + " {{ __('dashboard.to') }} " + item
-              .dto + " </b> (" + time + ").").appendTo('#schedule');
-            break;
-          default:
-        }
-      });
-    } else {
-      $('<li>').html("{{ __('dashboard.No records saved') }}.</li>").appendTo('#schedule');
-    }
-    $('#addOrganizationID').val(organization_id);
-    $('#addCycleID').val(cycle_id);
-    $('#SendRequest').modal('show');
-    }, error: function(error) {
-    console.log(error);
-    alert("Error Occurred, Try again!");
-    }
     });
-    }
   </script>
-
   <script>
     function modify(type, id, stat) {
       $.ajaxSetup({

@@ -186,18 +186,17 @@
                         style="width: fit-content; 
                         {{ $l == 'ar' ? 'margin-left: 20px;' : 'margin-right: 20px' }}"
                       >
-                        <div 
-                          class="border border-light align-items-center
-                          justify-content-center d-none d-md-flex h-100"
-                          style="width: 180px; object-fit: cover; border-radius: 20px;"
-                        >
-                          <img 
+                      <div 
+                        class="border border-light align-items-center justify-content-center d-none d-md-flex h-100"
+                        style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
+                      >
+                        <img 
                             src="{{$cycle->organization->image_url}}"
                             alt="Logo"
-                            width="100"
-                            height="100"
-                          />
-                        </div>
+                            class="img-fluid"
+                            style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                        />
+                      </div>
                       </div>
                       <div class="d-flex flex-column justify-content-between" style="flex: 1;">
                         <!-- Program Title -->

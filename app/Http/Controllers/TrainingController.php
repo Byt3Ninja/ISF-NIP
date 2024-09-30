@@ -42,7 +42,7 @@ class TrainingController extends Controller
     protected $meetingService;
     public function __construct()
     {
-        $this->meetingService =  OnlineMeetingFactory::create();
+        // $this->meetingService =  OnlineMeetingFactory::create();
     }
 
 
