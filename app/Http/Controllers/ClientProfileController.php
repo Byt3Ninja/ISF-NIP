@@ -64,7 +64,9 @@ class ClientProfileController extends Controller
             $companyId = $client->company->id;
             $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
             
-        } 
+        }else{
+            $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->get();
+        }
     }
       
       $mentrequests =  MentorshipRequest::where('mentor_id', Auth::user()->id);
