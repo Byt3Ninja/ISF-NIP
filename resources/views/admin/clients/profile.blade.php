@@ -183,7 +183,7 @@
  </a>
 </div>
 @endif
-
+</div>
 <!-- / Count cards -->
 <br><br>
       @endrole
@@ -365,7 +365,7 @@
       </div>
       <!--/ User Profile Content -->
     </div>
-  
+  </div>
 
 <!-- Programms tab -->
 <div class="tab-pane fade" id="Programms" role="tabpanel" aria-labelledby="Programms-tab">
@@ -398,6 +398,15 @@
                 <td>{{ Auth::user()->company->cycledata->start }}</td>
                 <td>{{ Auth::user()->company->cycledata->end }}</td>
               </tr>
+              @else
+              @foreach ($mentorshipTasks as $item)
+              <tr>
+                <td>{{ $item->title }}</td>
+                <td>{{ $item->description }}</td>
+                <td>{{ $item->start }}</td>
+                <td>{{ $item->end }}</td>
+              </tr>
+              @endforeach
               @endif
         </tbody>
       </table>
@@ -410,7 +419,7 @@
 
 </div>
 </div>
-</div>
+
 
 <!-- Programms tab -->
 
