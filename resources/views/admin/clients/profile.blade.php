@@ -391,12 +391,14 @@
             </tr>
             </thead>
             <tbody>
+              @if (!@empty(Auth::user()->company->cycledata->title))
               <tr>
                 <td>{{ Auth::user()->company->cycledata->title }}</td>
                 <td>{{ Auth::user()->company->cycledata->description }}</td>
                 <td>{{ Auth::user()->company->cycledata->start }}</td>
                 <td>{{ Auth::user()->company->cycledata->end }}</td>
               </tr>
+              @endif
         </tbody>
       </table>
 

@@ -649,5 +649,6 @@ return [
 	'Follow'=>'Follow',
 	'mentor'=>'Mentor ',
 	'registered'=>' Founder ',
+	'admin'=>' Admin ',
 	
 ];
