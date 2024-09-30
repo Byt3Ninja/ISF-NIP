@@ -165,7 +165,9 @@ class ClientProfileController extends Controller
 
     public function showMintorprofile($id){
 
+        
         $client = User::find($id);
+        if(!empty($client)){
         // $exp = Expertise::where('parent_id',null)->get();
         // $expertises = Expertise::where('parent_id',null)->get();
         $mentrequests =  MentorshipRequest::where('mentor_id', $id);
@@ -207,7 +209,9 @@ class ClientProfileController extends Controller
             'mentrequests_period',
             'average_rating'));
 
-
+    }else{
+        return redirect()->route('my_profile')->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
+    }
     }
 
     public function showMintors(){
