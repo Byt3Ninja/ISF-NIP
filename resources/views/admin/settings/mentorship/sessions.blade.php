@@ -556,7 +556,7 @@
     }
 
     function approve(id, stat) {
-       alert('Please Wait ! Sending Request ?')
+       alert('{{ __('admin.sending_request') }}')
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
