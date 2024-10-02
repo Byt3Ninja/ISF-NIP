@@ -1,36 +1,50 @@
 @php
   $name = 'name_' . $l;
 @endphp
-@extends('layouts.admin')
-@section('style')
-  <link rel="stylesheet" href="/tabs/dist/jquery.tabs.css">
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/forms/select/select2.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 
-@stop
+@extends('layouts.admin')
+
 @section('title', __('admin.My company'))
 @section('subTitle', __('admin.Edit the Company information'))
-@section('content')
+
+@section('style')
+  <link rel="stylesheet" href="/tabs/dist/jquery.tabs.css">
+  {{-- <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/forms/select/select2.min.css"> --}}
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <style>
     .form-label-group>label {
       display: contents !important;
     }
   </style>
+@stop
+
+@section('content')
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
       {{-- @include('admin.includes.heading') --}}
       <div class="content-body">
-
+        <h4 class="content-title">{{ __('admin.Edit the Company information') }}</h4>
         <!-- BuilderForm start -->
         <section id="basic-input">
           <div class="row">
             <div class="col-md-12">
               <div class="card">
                 <div class="card-header">
-                  <h4 class="card-title">{{ __('admin.Edit the Company information') }}</h4>
+                  <div class="d-flex align-items-center">
+                    <button id="infoButton" class="btn btn-primary">
+                      {{ __('admin.company Information') }}
+                    </button>
+                    {{-- <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div> --}}
+                    {{-- <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div> --}}
+                    {{-- <div class="jq-tab-title" data-tab="4"><i class="bx bxs-slideshow"></i> {{ __('admin.about') }}</div> --}}
+                    <button id="contactButton" class="btn btn-label-secondary mx-3">
+                      {{ __('admin.social & contact') }}
+                    </button>
+                  </div>
                 </div>
                 <div class="card-content">
                   <div class="card-body">
@@ -38,17 +52,13 @@
                       <div class="row">
                         <div class="col-md-12">
                           <div
-                            class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
-                            role="alert">
+                            class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible"
+                            role="alert"
+                          >
+                            {{ __('admin.' . session()->get('msg')) }}
+                            {{ Session::forget('msg') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </button>
-                            <div class="d-flex align-items-center">
-                              <i class="bx bx-error"></i>
-                              <span>
-                                {{ __('admin.' . session()->get('msg')) }}
-                                {{ Session::forget('msg') }}
-                              </span>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -68,298 +78,360 @@
                       </div>
                     @endif
 
+                    <form id="infoForm" method="post" action="{{ route('update_my_company') }}"
+                      enctype="multipart/form-data">
+                      {!! csrf_field() !!}
+                      <div class="row">
+                        <div class="col-md-12 col-12 mb-3">
+                          @if (isset($client->company->logo))
+                            <img 
+                              id="company-logo" 
+                              src="{{ $client->company->logo_url }}" 
+                              alt="Company logo" 
+                              style="width: 130px; height: 100px; border-radius: 10px;"
+                              class="mb-2"
+                            />
+                          @endif
+                          <div class="custom-file mb-3" style="width: 300px;">
+                            <label class="fs-6 mb-2">{{ __('admin.Logo') }}</label>
+                            <input 
+                              type="file" 
+                              class="form-control"
+                              id="img_url" 
+                              name="img_url"
+                              accept="image/*" 
+                              aria-describedby="inputGroupFileAddon00"
+                            />
+                            {{-- <label for="img_url" class="custom-file-label">
+                              {{ __('admin.Select image file') }}
+                            </label> --}}
+                          </div>
+                        </div>
+                       <div class="mb-3 row">
+                        <div class="col-md-6 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="name_en">{{ __('admin.English Name') }} *</label>
+                            <input style="direction: ltr"
+                              value="{{ $client->company ? $client->company->name_en : old('name_en') }}" name="name_en"
+                              type="text" class="form-control mt-2" id="name_en"
+                              placeholder="{{ __('admin.English Name') }} *" required autocomplete="name_en" />
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="name_ar">{{ __('admin.Arabic Name') }} *</label>
+                            <input style="direction: rtl;"
+                              value="{{ $client->company ? $client->company->name_ar : old('name_ar') }}" name="name_ar"
+                              type="text" class="form-control mt-2" id="name_ar"
+                              placeholder="{{ __('admin.Arabic Name') }} *" required autocomplete="name_ar" />
+                          </div>
+                        </div>
+                       </div>
+
+                        @php
+                          if ($client->company) {
+                              $stateID = optional($client->company)->state_id;
+                          } else {
+                              $stateID = 0;
+                          }
+                        @endphp
+                        <div class="col-md-4 col-12 mb-3">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="state_id">{{ __('admin.Country') }}</label>
+
+                            <select class="form-control select2" required id="country_id" name='country_id'>
+                              <option value="">{{ __('admin.Country') }}</option>
+                              @foreach ($countries as $country)
+                                <option value="{{ $country->id }}"
+                                  {{ $country->id == $client->country_id ? 'selected' : '' }}>
+                                  {{ $country->{'name_' . $l} }}</option>
+                              @endforeach
+                            </select>
+
+                          </div>
+                        </div>
+                        <div class="col-md-4 col-12 mb-3">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="state_id">{{ __('admin.State') }} *</label>
+                            <select class="form-control select2" required id="state_id" name='state_id'>
+                              <option value="">{{ __('admin.State') }}</option>
+                              @foreach ($states as $state)
+                                <option value="{{ $state->id }}" {{ $state->id == $stateID ? 'selected' : '' }}>
+                                  {{ $state->$name }}</option>
+                              @endforeach
+                            </select>
+                          </div>
+                        </div>
+                        <div class="col-md-4 col-12 mb-3">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="city_id">{{ __('admin.City') }} *</label>
+                            <select class="form-control select2" required id="city_id" name='city_id'>
+                              <option value="">{{ __('admin.City') }} </option>
+                              @if (isset($client->company) && $client->company->city_id != null)
+                                <option value="{{ $client->company->city_id }}" selected>
+                                  {{ $client->company->city->{$name} }}</option>
+                              @endif
+                            </select>
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mb-3">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="sector">{{ __('admin.Sector') }} *</label>
+                            <select id="selectsector" class="form-control mt-2" required
+                              onchange="ssector(this.options[this.selectedIndex].value)" name='sector'>
+                              @foreach ($sectors as $sector_group)
+                                <optgroup label="{{ $sector_group->name }}">
+                                  @foreach ($sector_group->children as $sector)
+                                    <option value="{{ $sector->name_en }}">{{ $sector->name }}</option>
+                                  @endforeach
+                                </optgroup>
+                              @endforeach
+                            </select>
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mb-3">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="address_en">{{ __('admin.English Address') }}
+                              *</label>
+                            <textarea style="direction: ltr" class="form-control mt-2" id="address_en" name='address_en' required
+                              placeholder="{{ __('admin.English Address') }} *">{{ $client->company ? $client->company->address_en : old('address_en') }}</textarea>
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mb-3">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="address_ar">{{ __('admin.Arabic Address') }}
+                              *</label>
+                            <textarea style="direction: rtl;" class="form-control mt-2" id="address_ar" name='address_ar' required
+                              placeholder="{{ __('admin.Arabic Address') }} *">{{ $client->company ? $client->company->address_ar : old('address_ar') }}</textarea>
+                            <br>
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3">
+                          <div class="form-label-group">
+                            <label class="fs-6 mb-2" for="phone">{{ __('admin.Phone') }}*</label>
+                            <input type="text" class="form-control mt-2" id="phone"
+                              placeholder="{{ __('admin.Phone') }}*"
+                              value="{{ $client->company ? $client->company->phone : old('phone') }}" name="phone"
+                              required autocomplete="new-phone">
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3">
+                          <div class="form-label-group">
+                            <label class="fs-6 mb-2" for="email">{{ __('admin.E-mail') }} *</label>
+                            <input style="direction: ltr" type="email" class="form-control mt-2" id="email"
+                              placeholder="{{ __('admin.E-mail') }} *"
+                              value="{{ $client->company ? $client->company->email : old('email') }}" name="email"
+                              required autocomplete="new-email">
+
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="est_date">{{ __('admin.est_date') }}</label>
+                            <input type="text" class="form-control mt-2" id="est_date"
+                              value="{{ $client->company ? $client->company->est_date : old('est_date') }}"
+                              name="est_date">
+                          </div>
+                        </div>
+
+                        <div class="col-md-6 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="stage">{{ __('admin.stage') }}*</label>
+                            <select class="form-control mt-2" required id="stage" name='stage'>
+                              <option value="">{{ __('admin.stage') }}</option>
+                              <option value="idea"
+                                {{ !empty($client->company) && $client->company->stage == 'idea' ? 'selected' : '' }}>
+                                {{ __('admin.stage_idea') }}</option>
+                              <option value="prototype"
+                                {{ !empty($client->company) && $client->company->stage == 'prototype' ? 'selected' : '' }}>
+                                {{ __('admin.stage_prototype') }}</option>
+                              <option value="ready_product"
+                                {{ !empty($client->company) && $client->company->stage == 'ready_product' ? 'selected' : '' }}>
+                                {{ __('admin.stage_ready_product') }}</option>
+                              <option value="company_in_market"
+                                {{ !empty($client->company) && $client->company->stage == 'company_in_market' ? 'selected' : '' }}>
+                                {{ __('admin.stage_company_in_market') }}</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="stage">{{ __('admin.Business Type') }}*</label>
+                            <select class="form-control mt-2" required id="business_type" name='business_type'>
+                              <option value="">{{ __('admin.Business Type') }}</option>
+                              <option value="B2C"
+                                {{ !empty($client->company) && $client->company->business_type == 'B2C' ? 'selected' : '' }}>
+                                B2C</option>
+                              <option value="B2B"
+                                {{ !empty($client->company) && $client->company->business_type == 'B2B' ? 'selected' : '' }}>
+                                B2B</option>
+                              <option value="B2B2C"
+                                {{ !empty($client->company) && $client->company->business_type == 'B2B2C' ? 'selected' : '' }}>
+                                B2B2C</option>
+                              <option value="C2C"
+                                {{ !empty($client->company) && $client->company->business_type == 'C2C' ? 'selected' : '' }}>
+                                C2C</option>
+                              <option value="B2G"
+                                {{ !empty($client->company) && $client->company->business_type == 'B2G' ? 'selected' : '' }}>
+                                B2G</option>
+                              <option value="Platform"
+                                {{ !empty($client->company) && $client->company->business_type == 'Platform' ? 'selected' : '' }}>
+                                Platform</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="raised_fund">{{ __('admin.raised_fund_egp') }}
+                              {{ $Setting->Currency }}</label>
+                            <input type="number" class="form-control mt-2" id="raised_fund"
+                              placeholder="{{ __('admin.raised_fund_egp') }} {{ $Setting->Currency }}"
+                              value="{{ $client->company ? $client->company->raised_fund : old('raised_fund') }}"
+                              name="raised_fund" autocomplete="raised_fund">
+                          </div>
+                        </div>
+
+
+                        <div class="col-md-6 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="investors">{{ __('admin.investors') }}</label>
+                            <input type="text" class="form-control mt-2" id="investors"
+                              placeholder="{{ __('admin.investors') }}"
+                              value="{{ $client->company ? $client->company->investors : old('investors') }}"
+                              name="investors" autocomplete="new-investors">
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="founder">{{ __('admin.founder') }}</label>
+                            <input type="text" class="form-control mt-2" id="founder"
+                              placeholder="{{ __('admin.founder') }}"
+                              value="{{ $client->company ? $client->company->founder : old('founder') }}"
+                              name="founder" autocomplete="new-founder">
+                          </div>
+                        </div>
+                        {{--                                                                    <div class="col-md-12 col-12 mb-3"> --}}
+                        {{--                                                                        <div class="form-group"> --}}
+                        {{--                                                                            <label class="fs-6 mb-2" for="idea">{{ __('admin.idea')}}</label> --}}
+                        {{--                                                                            <textarea class="form-control mt-2" id="idea" name='idea' placeholder="{{__('admin.idea')}}">{{($client->company)? $client->company->idea:old('idea')}}</textarea> --}}
+                        {{--                                                                        </div> --}}
+                        {{--                                                                    </div> --}}
+                        {{--                                                                    <div class="col-md-12 col-12 mb-3"> --}}
+                        {{--                                                                        <div class="form-group"> --}}
+                        {{--                                                                            <label class="fs-6 mb-2" for="problem">{{ __('admin.Problem Solution')}}</label> --}}
+                        {{--                                                                            <textarea class="form-control mt-2" id="problem" name='problem' placeholder="{{ __('admin.Problem Solution')}}">{{($client->company)? $client->company->problem:old('problem')}}</textarea> --}}
+                        {{--                                                                        </div> --}}
+                        {{--                                                                    </div> --}}
+                        <div class="col-md-12 col-12 mb-3">
+                          <div class="form-label-group mt-75">
+                            <label class="fs-6 mb-2" for="team_num">{{ __('admin.team_num') }}</label>
+                            <input type="number" class="form-control mt-2" id="team_num"
+                              placeholder="{{ __('admin.team_num') }}"
+                              value="{{ $client->company ? $client->company->team_num : old('team_num') }}"
+                              name="team_num" autocomplete="new-team_num">
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mb-3">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="problem">{{ __('admin.solution') }}</label>
+                            <textarea class="form-control mt-2" id="solution" name='solution' placeholder="{{ __('admin.solution') }}">{{ $client->company ? $client->company->solution : old('solution') }}</textarea>
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mb-3">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="institutions">{{ __('admin.institutions_question') }}</label>
+                            <select id="institutions" name="institutions[]" multiple="multiple"
+                              class="form-control mt-2">
+                              @if ($client->company && !is_null($client->company->institutions))
+                                @foreach ($client->company->institutions as $key)
+                                  <option value="{{ $key }}" selected>{{ $key }}</option>
+                                @endforeach
+                              @endif
+                            </select>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <div class="row">
+                        <div class="col-12 d-flex justify-content-end">
+                          <button type="submit" class="btn btn-primary mr-1 mb-1" id="submit-button">
+                            <span id="button-text">{{ __('admin.Update') }}</span>
+                            <span id="button-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+
+                    <form id="contactForm" method="post" action="{{ route('update_my_company') }}"
+                      enctype="multipart/form-data">
+                      {!! csrf_field() !!}
+                      <div class="row">
+                        <div class="col-md-6 col-12 mb-3 ">
+                          <div class="form-label-group">
+                            <label class="fs-6 mb-2" for="facebook">{{ __('admin.Website') }}</label>
+                            <input style="direction: ltr" type="text" class="form-control mt-2" id="facebook"
+                              placeholder="{{ __('admin.Website') }}"
+                              value="{{ $client->company ? $client->company->website : old('website') }}"
+                              name="website" autocomplete="website">
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3 ">
+                          <div class="form-label-group">
+                            <label class="fs-6 mb-2" for="facebook">{{ __('admin.Facebook') }}</label>
+                            <input style="direction: ltr" type="text" class="form-control mt-2" id="facebook"
+                              placeholder="{{ __('admin.Facebook') }}"
+                              value="{{ $client->company ? $client->company->facebook : old('facebook') }}"
+                              name="facebook" autocomplete="facebook">
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3 ">
+                          <div class="form-label-group">
+                            <label class="fs-6 mb-2" for="twitter">{{ __('admin.Twitter') }}</label>
+                            <input style="direction: ltr" type="text" class="form-control mt-2" id="twitter"
+                              placeholder="{{ __('admin.Twitter') }}"
+                              value="{{ $client->company ? $client->company->twitter : old('twitter') }}"
+                              name="twitter" autocomplete="twitter">
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3 ">
+                          <div class="form-label-group">
+                            <label class="fs-6 mb-2" for="linkedin">{{ __('admin.Linkedin') }}</label>
+                            <input style="direction: ltr" type="text" class="form-control mt-2" id="linkedin"
+                              placeholder="{{ __('admin.Linkedin') }}"
+                              value="{{ $client->company ? $client->company->linkedin : old('linkedin') }}"
+                              name="linkedin" autocomplete="new-linkedin">
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3 ">
+                          <div class="form-label-group">
+                            <label class="fs-6 mb-2" for="youtube">{{ __('admin.Youtube') }}</label>
+                            <input style="direction: ltr" type="text" class="form-control mt-2" id="youtube"
+                              placeholder="{{ __('admin.Youtube') }}"
+                              value="{{ $client->company ? $client->company->youtube : old('youtube') }}"
+                              name="youtube" autocomplete="new-youtube">
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-12 mb-3 ">
+                          <div class="form-group">
+                            <label class="fs-6 mb-2" for="google_map">{{ __('admin.Google Map') }}</label>
+                            <textarea style="direction: ltr" class="form-control height-100" id="google_map" name='google_map'
+                              placeholder="{{ __('admin.Google Map full URL') }}">{{ $client->company ? $client->company->google_map : old('google_map') }}</textarea>
+                          </div>
+                        </div>
+
+                      </div>
+                      <div class="row">
+                        <div class="col-12 d-flex justify-content-end">
+                          <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Update') }}</button>
+                        </div>
+                      </div>
+                    </form>
+
                     <div class="row">
                       <div class="col-12">
-                        <div class="jq-tab-wrapper" id="verticalTab">
-                          <div class="jq-tab-menu">
-                            <div class="jq-tab-title active" data-tab="1"><i class="bx bx-info-circle"></i>
-                              {{ __('admin.company Information') }}</div>
-                            {{--                                                        <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div> --}}
-                            {{--                                                        <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div> --}}
-                            {{--                                                        <div class="jq-tab-title" data-tab="4"><i class="bx bxs-slideshow"></i> {{ __('admin.about') }}</div> --}}
-                            <div class="jq-tab-title" data-tab="5"><i class="bx bxs-contact"></i>
-                              {{ __('admin.social & contact') }}</div>
-                          </div>
+                        <div class="jq-tab-wrapper">
                           <div class="jq-tab-content-wrapper">
-                            <div class="jq-tab-content active" data-tab="1">
-                              <form method="post" action="{{ route('update_my_company') }}"
-                                enctype="multipart/form-data">
-                                {!! csrf_field() !!}
-                                <div class="row">
-                                  <div class="col-md-12 col-12 mb-3">
-                                    @if (isset($client->company->logo))
-                                      <img src="{{ $client->company->logo_url }}" alt="Company logo" height="80px">
-                                    @endif
-                                    <div class="form-group mb-3">
-                                      <label class="fs-6 mb-2" for="basicInput">{{ __('admin.Logo') }}</label>
-                                      <div class="input-group">
-                                        <div class="input-group-prepend">
-                                          <span class="input-group-text"
-                                            id="inputGroupFileAddon01">{{ __('admin.Upload') }}</span>
-                                        </div>
-                                        <div class="custom-file">
-                                          <input type="file" class="custom-file-input" id="img_url" name="img_url"
-                                            accept="image/*" style="direction: ltr;"
-                                            aria-describedby="inputGroupFileAddon00">
-                                          <label class="fs-6 mb-2" class="custom-file-label"
-                                            for="inputGroupFile00">{{ __('admin.Select image file') }}</label>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="name_en">{{ __('admin.English Name') }} *</label>
-                                      <input style="direction: ltr"
-                                        value="{{ $client->company ? $client->company->name_en : old('name_en') }}"
-                                        name="name_en" type="text" class="form-control mt-2" id="name_en"
-                                        placeholder="{{ __('admin.English Name') }} *" required autocomplete="name_en" />
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="name_ar">{{ __('admin.Arabic Name') }} *</label>
-                                      <input style="direction: rtl;"
-                                        value="{{ $client->company ? $client->company->name_ar : old('name_ar') }}"
-                                        name="name_ar" type="text" class="form-control mt-2" id="name_ar"
-                                        placeholder="{{ __('admin.Arabic Name') }} *" required autocomplete="name_ar" />
-                                    </div>
-                                  </div>
-                                  @php
-                                    if ($client->company) {
-                                        $stateID = optional($client->company)->state_id;
-                                    } else {
-                                        $stateID = 0;
-                                    }
-                                  @endphp
-                                  <div class="col-md-4 col-12 mb-3">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2" for="state_id">{{ __('admin.Country') }}</label>
-
-                                      <select class="form-control mt-2" required id="country_id" name='country_id'>
-                                        <option value="">{{ __('admin.Country') }}</option>
-                                        @foreach ($countries as $country)
-                                          <option value="{{ $country->id }}"
-                                            {{ $country->id == $client->country_id ? 'selected' : '' }}>
-                                            {{ $country->{'name_' . $l} }}</option>
-                                        @endforeach
-                                      </select>
-
-                                    </div>
-                                  </div>
-                                  <div class="col-md-4 col-12 mb-3">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2" for="state_id">{{ __('admin.State') }} *</label>
-                                      <select class="form-control mt-2" required id="state_id" name='state_id'>
-                                        <option value="">{{ __('admin.State') }}</option>
-                                        @foreach ($states as $state)
-                                          <option value="{{ $state->id }}"
-                                            {{ $state->id == $stateID ? 'selected' : '' }}>{{ $state->$name }}</option>
-                                        @endforeach
-                                      </select>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-4 col-12 mb-3">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2" for="city_id">{{ __('admin.City') }} *</label>
-                                      <select class="form-control mt-2" required id="city_id" name='city_id'>
-                                        <option value="">{{ __('admin.City') }} </option>
-                                        @if (isset($client->company) && $client->company->city_id != null)
-                                          <option value="{{ $client->company->city_id }}" selected>
-                                            {{ $client->company->city->{$name} }}</option>
-                                        @endif
-                                      </select>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-12 col-12 mb-3">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2" for="sector">{{ __('admin.Sector') }} *</label>
-                                      <select id="selectsector" class="form-control mt-2" required
-                                        onchange="ssector(this.options[this.selectedIndex].value)" name='sector'>
-                                        @foreach ($sectors as $sector_group)
-                                          <optgroup label="{{ $sector_group->name }}">
-                                            @foreach ($sector_group->children as $sector)
-                                              <option value="{{ $sector->name_en }}">{{ $sector->name }}</option>
-                                            @endforeach
-                                          </optgroup>
-                                        @endforeach
-                                      </select>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-12 col-12 mb-3">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2" for="address_en">{{ __('admin.English Address') }}
-                                        *</label>
-                                      <textarea style="direction: ltr" class="form-control mt-2" id="address_en" name='address_en' required
-                                        placeholder="{{ __('admin.English Address') }} *">{{ $client->company ? $client->company->address_en : old('address_en') }}</textarea>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-12 col-12 mb-3">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2" for="address_ar">{{ __('admin.Arabic Address') }}
-                                        *</label>
-                                      <textarea style="direction: rtl;" class="form-control mt-2" id="address_ar" name='address_ar' required
-                                        placeholder="{{ __('admin.Arabic Address') }} *">{{ $client->company ? $client->company->address_ar : old('address_ar') }}</textarea>
-                                      <br>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3">
-                                    <div class="form-label-group">
-                                      <label class="fs-6 mb-2" for="phone">{{ __('admin.Phone') }}*</label>
-                                      <input type="text" class="form-control mt-2" id="phone"
-                                        placeholder="{{ __('admin.Phone') }}*"
-                                        value="{{ $client->company ? $client->company->phone : old('phone') }}"
-                                        name="phone" required autocomplete="new-phone">
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3">
-                                    <div class="form-label-group">
-                                      <label class="fs-6 mb-2" for="email">{{ __('admin.E-mail') }} *</label>
-                                      <input style="direction: ltr" type="email" class="form-control mt-2" id="email"
-                                        placeholder="{{ __('admin.E-mail') }} *"
-                                        value="{{ $client->company ? $client->company->email : old('email') }}"
-                                        name="email" required autocomplete="new-email">
-
-                                    </div>
-                                  </div>
-                                  <div class="col-md-12 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="est_date">{{ __('admin.est_date') }}</label>
-                                      <input type="text" class="form-control mt-2" id="est_date"
-                                        value="{{ $client->company ? $client->company->est_date : old('est_date') }}"
-                                        name="est_date">
-                                    </div>
-                                  </div>
-
-                                  <div class="col-md-6 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="stage">{{ __('admin.stage') }}*</label>
-                                      <select class="form-control mt-2" required id="stage" name='stage'>
-                                        <option value="">{{ __('admin.stage') }}</option>
-                                        <option value="idea"
-                                          {{ !empty($client->company) && $client->company->stage == 'idea' ? 'selected' : '' }}>
-                                          {{ __('admin.stage_idea') }}</option>
-                                        <option value="prototype"
-                                          {{ !empty($client->company) && $client->company->stage == 'prototype' ? 'selected' : '' }}>
-                                          {{ __('admin.stage_prototype') }}</option>
-                                        <option value="ready_product"
-                                          {{ !empty($client->company) && $client->company->stage == 'ready_product' ? 'selected' : '' }}>
-                                          {{ __('admin.stage_ready_product') }}</option>
-                                        <option value="company_in_market"
-                                          {{ !empty($client->company) && $client->company->stage == 'company_in_market' ? 'selected' : '' }}>
-                                          {{ __('admin.stage_company_in_market') }}</option>
-                                      </select>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="stage">{{ __('admin.Business Type') }}*</label>
-                                      <select class="form-control mt-2" required id="business_type" name='business_type'>
-                                        <option value="">{{ __('admin.Business Type') }}</option>
-                                        <option value="B2C"
-                                          {{ !empty($client->company) && $client->company->business_type == 'B2C' ? 'selected' : '' }}>
-                                          B2C</option>
-                                        <option value="B2B"
-                                          {{ !empty($client->company) && $client->company->business_type == 'B2B' ? 'selected' : '' }}>
-                                          B2B</option>
-                                        <option value="B2B2C"
-                                          {{ !empty($client->company) && $client->company->business_type == 'B2B2C' ? 'selected' : '' }}>
-                                          B2B2C</option>
-                                        <option value="C2C"
-                                          {{ !empty($client->company) && $client->company->business_type == 'C2C' ? 'selected' : '' }}>
-                                          C2C</option>
-                                        <option value="B2G"
-                                          {{ !empty($client->company) && $client->company->business_type == 'B2G' ? 'selected' : '' }}>
-                                          B2G</option>
-                                        <option value="Platform"
-                                          {{ !empty($client->company) && $client->company->business_type == 'Platform' ? 'selected' : '' }}>
-                                          Platform</option>
-                                      </select>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="raised_fund">{{ __('admin.raised_fund_egp') }}
-                                        {{ $Setting->Currency }}</label>
-                                      <input type="number" class="form-control mt-2" id="raised_fund"
-                                        placeholder="{{ __('admin.raised_fund_egp') }} {{ $Setting->Currency }}"
-                                        value="{{ $client->company ? $client->company->raised_fund : old('raised_fund') }}"
-                                        name="raised_fund" autocomplete="raised_fund">
-                                    </div>
-                                  </div>
-
-
-                                  <div class="col-md-6 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="investors">{{ __('admin.investors') }}</label>
-                                      <input type="text" class="form-control mt-2" id="investors"
-                                        placeholder="{{ __('admin.investors') }}"
-                                        value="{{ $client->company ? $client->company->investors : old('investors') }}"
-                                        name="investors" autocomplete="new-investors">
-                                    </div>
-                                  </div>
-                                  <div class="col-md-12 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="founder">{{ __('admin.founder') }}</label>
-                                      <input type="text" class="form-control mt-2" id="founder"
-                                        placeholder="{{ __('admin.founder') }}"
-                                        value="{{ $client->company ? $client->company->founder : old('founder') }}"
-                                        name="founder" autocomplete="new-founder">
-                                    </div>
-                                  </div>
-                                  {{--                                                                    <div class="col-md-12 col-12 mb-3"> --}}
-                                  {{--                                                                        <div class="form-group"> --}}
-                                  {{--                                                                            <label class="fs-6 mb-2" for="idea">{{ __('admin.idea')}}</label> --}}
-                                  {{--                                                                            <textarea class="form-control mt-2" id="idea" name='idea' placeholder="{{__('admin.idea')}}">{{($client->company)? $client->company->idea:old('idea')}}</textarea> --}}
-                                  {{--                                                                        </div> --}}
-                                  {{--                                                                    </div> --}}
-                                  {{--                                                                    <div class="col-md-12 col-12 mb-3"> --}}
-                                  {{--                                                                        <div class="form-group"> --}}
-                                  {{--                                                                            <label class="fs-6 mb-2" for="problem">{{ __('admin.Problem Solution')}}</label> --}}
-                                  {{--                                                                            <textarea class="form-control mt-2" id="problem" name='problem' placeholder="{{ __('admin.Problem Solution')}}">{{($client->company)? $client->company->problem:old('problem')}}</textarea> --}}
-                                  {{--                                                                        </div> --}}
-                                  {{--                                                                    </div> --}}
-                                  <div class="col-md-12 col-12 mb-3">
-                                    <div class="form-label-group mt-75">
-                                      <label class="fs-6 mb-2" for="team_num">{{ __('admin.team_num') }}</label>
-                                      <input type="number" class="form-control mt-2" id="team_num"
-                                        placeholder="{{ __('admin.team_num') }}"
-                                        value="{{ $client->company ? $client->company->team_num : old('team_num') }}"
-                                        name="team_num" autocomplete="new-team_num">
-                                    </div>
-                                  </div>
-                                  <div class="col-md-12 col-12 mb-3">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2" for="problem">{{ __('admin.solution') }}</label>
-                                      <textarea class="form-control mt-2" id="solution" name='solution' placeholder="{{ __('admin.solution') }}">{{ $client->company ? $client->company->solution : old('solution') }}</textarea>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-12 col-12 mb-3">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2"
-                                        for="institutions">{{ __('admin.institutions_question') }}</label>
-                                      <select id="institutions" name="institutions[]" multiple="multiple"
-                                        class="form-control mt-2">
-                                        @if ($client->company && !is_null($client->company->institutions))
-                                          @foreach ($client->company->institutions as $key)
-                                            <option value="{{ $key }}" selected>{{ $key }}</option>
-                                          @endforeach
-                                        @endif
-                                      </select>
-                                    </div>
-                                  </div>
-
-                                </div>
-
-                                <div class="row">
-                                  <div class="col-12 d-flex justify-content-end">
-                                    <button type="submit"
-                                      class="btn btn-primary mr-1 mb-1">{{ __('admin.Update') }}</button>
-                                  </div>
-                                </div>
-                              </form>
-
-                            </div>
                             <div class="jq-tab-content" data-tab="2">
                               <div class="col-12">
                                 <div class="row">
@@ -592,8 +664,8 @@
                                                     <label class="fs-6 mb-2" class="text-bold-600"
                                                       for="currently_fundraising">{{ __('admin.currently_fundraising') }}
                                                       *</label>
-                                                    <select class="form-control mt-2" required id="currently_fundraising"
-                                                      name='currently_fundraising'>
+                                                    <select class="form-control mt-2" required
+                                                      id="currently_fundraising" name='currently_fundraising'>
                                                       <option value="No"
                                                         {{ !empty($client->company) && $client->company->currently_fundraising == 'No' ? 'selected' : '' }}>
                                                         No</option>
@@ -608,8 +680,8 @@
                                                     <label class="fs-6 mb-2" class="text-bold-600"
                                                       for="desired_funding_amount">{{ __('admin.desired_funding_amount') }}
                                                       *</label>
-                                                    <select class="form-control mt-2" required id="desired_funding_amount"
-                                                      name='desired_funding_amount'>
+                                                    <select class="form-control mt-2" required
+                                                      id="desired_funding_amount" name='desired_funding_amount'>
                                                       <option value="No Funding"
                                                         {{ !empty($client->company) && $client->company->desired_funding_amount == 'No Funding' ? 'selected' : '' }}>
                                                         No Funding</option>
@@ -791,71 +863,7 @@
                               </form>
                             </div>
                             <div class="jq-tab-content" data-tab="5">
-                              <form method="post" action="{{ route('update_my_company') }}"
-                                enctype="multipart/form-data">
-                                {!! csrf_field() !!}
-                                <div class="row">
-                                  <div class="col-md-6 col-12 mb-3 ">
-                                    <div class="form-label-group">
-                                      <label class="fs-6 mb-2" for="facebook">{{ __('admin.Website') }}</label>
-                                      <input style="direction: ltr" type="text" class="form-control mt-2" id="facebook"
-                                        placeholder="{{ __('admin.Website') }}"
-                                        value="{{ $client->company ? $client->company->website : old('website') }}"
-                                        name="website" autocomplete="website">
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3 ">
-                                    <div class="form-label-group">
-                                      <label class="fs-6 mb-2" for="facebook">{{ __('admin.Facebook') }}</label>
-                                      <input style="direction: ltr" type="text" class="form-control mt-2" id="facebook"
-                                        placeholder="{{ __('admin.Facebook') }}"
-                                        value="{{ $client->company ? $client->company->facebook : old('facebook') }}"
-                                        name="facebook" autocomplete="facebook">
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3 ">
-                                    <div class="form-label-group">
-                                      <label class="fs-6 mb-2" for="twitter">{{ __('admin.Twitter') }}</label>
-                                      <input style="direction: ltr" type="text" class="form-control mt-2" id="twitter"
-                                        placeholder="{{ __('admin.Twitter') }}"
-                                        value="{{ $client->company ? $client->company->twitter : old('twitter') }}"
-                                        name="twitter" autocomplete="twitter">
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3 ">
-                                    <div class="form-label-group">
-                                      <label class="fs-6 mb-2" for="linkedin">{{ __('admin.Linkedin') }}</label>
-                                      <input style="direction: ltr" type="text" class="form-control mt-2" id="linkedin"
-                                        placeholder="{{ __('admin.Linkedin') }}"
-                                        value="{{ $client->company ? $client->company->linkedin : old('linkedin') }}"
-                                        name="linkedin" autocomplete="new-linkedin">
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3 ">
-                                    <div class="form-label-group">
-                                      <label class="fs-6 mb-2" for="youtube">{{ __('admin.Youtube') }}</label>
-                                      <input style="direction: ltr" type="text" class="form-control mt-2" id="youtube"
-                                        placeholder="{{ __('admin.Youtube') }}"
-                                        value="{{ $client->company ? $client->company->youtube : old('youtube') }}"
-                                        name="youtube" autocomplete="new-youtube">
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6 col-12 mb-3 ">
-                                    <div class="form-group">
-                                      <label class="fs-6 mb-2" for="google_map">{{ __('admin.Google Map') }}</label>
-                                      <textarea style="direction: ltr" class="form-control height-100" id="google_map" name='google_map'
-                                        placeholder="{{ __('admin.Google Map full URL') }}">{{ $client->company ? $client->company->google_map : old('google_map') }}</textarea>
-                                    </div>
-                                  </div>
 
-                                </div>
-                                <div class="row">
-                                  <div class="col-12 d-flex justify-content-end">
-                                    <button type="submit"
-                                      class="btn btn-primary mr-1 mb-1">{{ __('admin.Update') }}</button>
-                                  </div>
-                                </div>
-                              </form>
                             </div>
                           </div>
                         </div>
@@ -1018,12 +1026,72 @@
       </div>
     </div>
   </div>
-
 @stop
+
+@section('scripts')
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+@stop
+
 @section('pagescripts')
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script src="/tabs/dist/jquery.tabs.min.js"></script>
   <script src="/app-assets/vendors/js/forms/select/select2.full.min.js"></script>
+  <script>
+    const contactButton = document.getElementById('contactButton');
+    const infoButton = document.getElementById('infoButton');
+
+    const infoForm = document.getElementById('infoForm');
+    const contactForm = document.getElementById('contactForm');
+
+    contactForm.style.display = 'none';
+
+    infoButton.addEventListener('click', function() {
+      console.log('clicked');
+      infoForm.style.display = 'block';
+      contactForm.style.display = 'none';
+      infoButton.classList.remove('btn-label-secondary');
+      infoButton.classList.add('btn-primary');
+      contactButton.classList.remove('btn-primary');
+      contactButton.classList.add('btn-label-secondary');
+    });
+
+    contactButton.addEventListener('click', function() {
+      console.log('clicked');
+      infoForm.style.display = 'none';
+      contactForm.style.display = 'block';
+      contactButton.classList.remove('btn-label-secondary');
+      contactButton.classList.add('btn-primary');
+      infoButton.classList.remove('btn-primary');
+      infoButton.classList.add('btn-label-secondary');
+    });
+  </script>
+
+  <script>
+    document.getElementById('img_url').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('company-logo').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+  <script>
+    document.getElementById('update-form').addEventListener('submit', function(event) {
+    var button = document.getElementById('submit-button');
+    var buttonText = document.getElementById('button-text');
+    var buttonSpinner = document.getElementById('button-spinner');
+
+    button.disabled = true;
+    buttonText.classList.add('d-none');
+    buttonSpinner.classList.remove('d-none');
+  });
+  </script>
+
   <script>
     $(document).ready(function() {
       $('.roundBtn').click(function() {
