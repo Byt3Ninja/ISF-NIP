@@ -133,6 +133,7 @@ return [
     'Training courses' => 'Training courses',
     'Select course' => 'Select course',
     'Add new content' => 'Add new content',
+    'Add new Training' => 'Add new Training',
     'Created at' => 'Created at',
     'Added By' => 'Added By',
     'Edit/Delete' => 'Edit/Delete',
@@ -248,5 +249,26 @@ return [
     'days'=>'Days',
     'export_willsuccess'=>'Export process started. You will receive an email with the download attached.',
     'export_Notsuccess'=>'There is no data to export from the table.',
+    'ProgramCount'=>'Program Counter ',
+    'Course Name'=>'Course Name',
+    'Code'=>' Code ',
+    'CoursCategories'=>' Categories ',
+    'Tags'=>' Tags ',
+    'CoursLevel'=>' Cours Level ',
+    'Quizs'=>' Quiz ',
+    'Instractor'=>' Instractor ',
+    'CoursStart'=>' Cours Start ',
+    'CoursEnd'=>' Cours End ',
+    'Draft'=>' Draft ',
+    'Published'=>' Published ',
+    'SaveProgram'=>' Save a Program ',
+    'Cancel'=>' Cancel ',
+    'PublishProgram'=>' Publish a Program ',
+    'Beginner'=>' Beginner ',
+    'Intermediate'=>' Intermediate ',
+    'Advanced'=>' Advanced ',
+
+
+
 ];
 

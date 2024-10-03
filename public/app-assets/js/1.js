@@ -100,6 +100,36 @@ $(document).ready(function () {
 
     });
 
+   
+
+    $(document).on('click', '.ExportFinanceTS', function() {
+        var hours = $('.hours').val();
+        var condition = $('.condition').val();
+        var cycle_name = $('.cycle_name').val();
+        var user_id = $('.user_id').val();
+        var org_id = $('.org_id').val();
+        alert(messages.exportSuccess);
+        $.ajax({
+            url: `/dashboard/export-FinanceTS`,
+            type: 'GET',
+            data:{hours:hours,
+                condition:condition,
+                cycle_name:cycle_name,
+                user_id:user_id,
+                org_id:org_id
+            },
+            success: function(response) {
+                
+                //  alert(response.message);
+            },
+            error: function(error) {
+                console.error('Error:', error);
+
+            }
+        });
+
+    });
+
 
     $(document).on('click', '.ExportExcelScreesRes', function() {
         var step = $('.stepsExcel').val();
@@ -259,39 +289,50 @@ alert(messages.exportSuccess);
 $(document).on('change', '.Meeting', function(){
     var meeting = $(this).val();
 
-    if(meeting == 'Google'){
-$('.GOOGLE_CLIENT_ID').show();
-$('.MICROSOFT_CLIENT').hide();
-$('.ZOOM_CLIENT').hide();
+   if(meeting == 'Teams'){
 
-
-    }else if(meeting == 'Teams'){
-
-        $('.GOOGLE_CLIENT_ID').hide();
+        
         $('.MICROSOFT_CLIENT').show();
         $('.ZOOM_CLIENT').hide();
 
     }else if(meeting == 'Zoom'){
 
-        $('.GOOGLE_CLIENT_ID').hide();
+       
         $('.MICROSOFT_CLIENT').hide();
         $('.ZOOM_CLIENT').show();
 
     }
 
-
-
-
 });
 
 
 
-  
+$(document).on('change', '.roleshow', function(){
+    var role = $(this).val();
+   
+   if(role == 'Mentor'){
+        $('.ShowInputMentor').show();
+    }else{
+        $('.ShowInputMentor').hide();
+    }
+});
 
+$(document).on('click', '.Val0', function(){
+    var role = $('.getVal').val('0');
+});
+$(document).on('click', '.Val1', function(){
+    var role = $('.getVal').val('1');
+});
 
-
-
-
+$(document).on('click', '.vallevel0', function(){
+    var role = $('.getValLevel').val('Beginner');
+});
+$(document).on('click', '.vallevel1', function(){
+    var role = $('.getValLevel').val('Intermediate');
+});
+$(document).on('click', '.vallevel2', function(){
+    var role = $('.getValLevel').val('Advanced');
+});
 
 
 

@@ -255,7 +255,7 @@
             <div class="modal-header">
                 <h4 class="modal-title" id="myModalLabel33">{{__('messages.SendMessageTo')}} {{ $company->user->{'first_name_'.$l} }}
                     {{ $company->user->{'last_name_'.$l} }} ({{ $company->{'name_'.$l} }}).</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <i class="bx bx-x"></i>
                 </button>
             </div>
@@ -275,7 +275,7 @@
                         </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
                         <i class="bx bx-x d-block d-sm-none"></i>
                         <span class="d-none d-sm-block">{{__('messages.Close')}}</span>
                     </button>

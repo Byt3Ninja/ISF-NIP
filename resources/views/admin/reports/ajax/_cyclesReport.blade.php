@@ -1,166 +1,180 @@
 <div class="col-md-12">
-    <!-- users view card details start -->
-    <div class="card">
-        <div class="card-header border-bottom">
+  <!-- users view card details start -->
+  <div class="card">
+    <div class="card-header border-bottom">
+      <h4 class="card-title d-flex align-items-center mb-3">
+        <i class='ti ti-briefcase ti-28px'></i> 
+        <span class="mx-2">{{ $cycle->title }}</span>
+      </h4>
+      <span>
+        {{ __('dashboard.start from') . ': ' . $cycle->start_format . ' ' . __('dashboard.to') . ': ' . $cycle->end_format }}
+      </span>
 
-                <h4 class="card-title d-flex align-items-center mb-1">
-                    <i class='bx bx-briefcase font-medium-4 mr-1'></i> {{$cycle->title }}
-                </h4>
-
-                <span >{{ __('dashboard.start from').": " .$cycle->start_format. " ".__('dashboard.to').": " .$cycle->end_format  }}</span>
-
-                <div class="media align-items-center mt-2">
-                    <div class="media-left mr-50">
-                        <img src="{{$cycle->organization->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
-                    </div>
-                    <div class="media align-items-center">
-                        {{$cycle->organization->name }}
-                    </div>
-                </div>
-            </div>
+      <div class="d-flex align-items-center mt-2">
+        <div class="media-left mr-50">
+          <img 
+            src="{{ $cycle->organization->image_url }}"
+            alt="avatar"
+            class="rounded-circle"
+            height="40"
+            width="40"
+          />
+        </div>
+        <span class="mx-2">
+          {{ $cycle->organization->name }}
+        </span>
+      </div>
     </div>
-    <!-- users view card details ends -->
+  </div>
+  <!-- users view card details ends -->
 </div>
-<div class="col-12">
-    <div class="row">
-        <div class="col-sm-12 col-12 dashboard-users-success">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="dashboard/cycles/{{ $cycle->id }}/registered">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-info mx-auto mb-50">
-                                <i class="bx bx-briefcase-alt font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('admin.Subscribe Startups in Cycle')}}</div>
-                            <h3 class="mb-0">{{$startups}}</h3>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3 col-12 dashboard-users-danger">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="/dashboard/users#search=Mentor">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
-                                <i class="bx bxs-graduation font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('admin.Mentors')}}</div>
-                            <h3 class="mb-0">{{$mentors_count}}</h3>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-sm-3 col-12 dashboard-users-danger">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="/dashboard/mentorship/sessions?show=all">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
-                                <i class="bx bxs-book font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('admin.Mentorship requests')}}</div>
-                            <h3 class="mb-0">{{$mentorRequests_count}}</h3>
-                        </div>
-                    </a>
-                </div>
+<div class="col-12 mt-6">
+  <div class="row g-6">
+    <a href="dashboard/cycles/{{ $cycle->id }}/registered" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-primary h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-primary">
+                <i class="ti ti-building ti-28px"></i>
+              </span>
             </div>
+            <h4 class="mb-0">{{ $startups }}</h4>
+          </div>
+          <p class="mb-1">{{ __('admin.Subscribe Startups in Cycle') }}</p>
         </div>
-        <div class="col-sm-3 col-12 dashboard-users-danger">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="/dashboard/mentorship/sessions?show=all">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-secondary mx-auto mb-50">
-                                <i class="bx bxs-calendar-event font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('admin.Mentorship requests Duration')}}</div>
-                            <h3 class="mb-0">{{$mentorships_period}} </h3>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3 col-12 dashboard-users-danger">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="/dashboard/mentorship/sessions?show=all">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-danger mx-auto mb-50">
-                                <i class="bx bxs-book-open font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('admin.Company Attendance Rate')}}</div>
-                            <h3 class="mb-0">{{(integer)$mentorship_attendance_rate}} % </h3>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-12 dashboard-users-danger">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="/dashboard/training/sessions">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-warning mx-auto mb-50">
-                                <i class="bx bxs-book-bookmark font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('admin.Training sessions')}}</div>
-                            <h3 class="mb-0">{{$training_sessions_count}}</h3>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-12 dashboard-users-danger">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="/dashboard/training/sessions">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-success mx-auto mb-50">
-                                <i class="bx bxs-timer font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('admin.Training sessions Duration')}}</div>
-                            <h3 class="mb-0">{{$training_sessions_period}}</h3>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-12 dashboard-users-success">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="/dashboard/screening/results">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-info mx-auto mb-50">
-                                <i class="bx bx-badge-check font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('dashboard.First screening')}}</div>
-                            <h3 class="mb-0">{{$screening_sessions_count}}</h3>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-12 dashboard-users-danger">
-            <div class="card text-center">
-                <div class="card-content">
-                    <a href="/dashboard/final/results">
-                        <div class="card-body py-1">
-                            <div class="badge-circle badge-circle-lg badge-circle-light-primary mx-auto mb-50">
-                                <i class="bx bx-rocket font-medium-5"></i>
-                            </div>
-                            <div class="text-muted line-ellipsis">{{__('dashboard.Final screening')}}</div>
-                            <h3 class="mb-0">{{$final_screening_count}}</h3>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
+      </div>
+    </a>
 
-    </div>
+    <a href="/dashboard/users#search=Mentor" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-warning h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-warning">
+                <i class="ti ti-school ti-28px"></i>
+              </span>
+            </div>
+            <h4 class="mb-0">{{ $mentors_count }}</h4>
+          </div>
+          <p class="mb-1">{{ __('admin.Mentors') }}</p>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-success h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-success">
+                <i class="ti ti-book ti-28px"></i>
+              </span>
+            </div>
+            <h4 class="mb-0">{{ $mentorRequests_count }}</h4>
+          </div>
+          <p class="mb-1">{{ __('admin.Mentorship requests') }}</p>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-danger h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-danger">
+                <i class="ti ti-clock ti-28px"></i>
+              </span>
+            </div>
+            <h4 class="mb-0">{{ $mentorships_period }}</h4>
+          </div>
+          <p class="mb-1">{{ __('admin.Mentorship requests Duration') }}</p>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dashboard/mentorship/sessions?show=all" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-secondary h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-secondary">
+                <i class="ti ti-browser ti-28px"></i>
+              </span>
+            </div>
+            <h4 class="mb-0">{{ (int) $mentorship_attendance_rate }} %</h4>
+          </div>
+          <p class="mb-1">{{ __('admin.Company Attendance Rate') }}</p>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dashboard/training/sessions" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-warning h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-warning">
+                <i class="ti ti-user-screen ti-28px"></i>
+              </span>
+            </div>
+            <h4 class="mb-0">{{ $training_sessions_count }}</h4>
+          </div>
+          <p class="mb-1">{{ __('admin.Training sessions') }}</p>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dashboard/training/sessions" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-primary h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-primary">
+                <i class="ti ti-clock ti-28px"></i>
+              </span>
+            </div>
+            <h4 class="mb-0">{{ $training_sessions_period }}</h4>
+          </div>
+          <p class="mb-1">{{ __('admin.Training sessions Duration') }}</p>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dashboard/screening/results" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-success h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-success">
+                <i class="ti ti-rocket ti-28px"></i>
+              </span>
+            </div>
+            <h4 class="mb-0">{{ $screening_sessions_count }}</h4>
+          </div>
+          <p class="mb-1">{{ __('dashboard.First screening') }}</p>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dashboard/final/results" class="col-lg-4 col-sm-6">
+      <div class="card card-border-shadow-primary h-100">
+        <div class="card-body" style="display: grid; place-items: center;">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar me-4">
+              <span class="avatar-initial rounded bg-label-primary">
+                <i class="ti ti-telescope ti-28px"></i>
+              </span>
+            </div>
+            <h4 class="mb-0">{{ $final_screening_count }}</h4>
+          </div>
+          <p class="mb-1">{{ __('dashboard.Final screening') }}</p>
+        </div>
+      </div>
+    </a>
+  </div>
 </div>
 {{--<div class="col-12">--}}
 {{--    <div class="row">--}}

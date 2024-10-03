@@ -68,7 +68,7 @@
 
   <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>
   <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
-  <script src="/app-assets/js/1.js"></script>
+ 
 
   <!-- Main Page JS -->
   <!-- End Main JS-->

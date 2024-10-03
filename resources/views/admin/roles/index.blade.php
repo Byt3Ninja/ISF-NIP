@@ -6,21 +6,22 @@
 @section('subTitle', __('Roles list'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    <div class="content-wrapper">
-    @include('admin.includes.heading')
-        <div class="invoice-create-btn mb-1">
-            <a href="{{route('roles.create')}}" class="btn btn-primary glow">{{ __('admin.Add New')}}</a>
-        </div>
-        <div class="content-body">
+    {{-- @include('admin.includes.heading') --}}
+    <div class="content-body">
+      <a href="{{route('roles.create')}}" class="btn btn-primary glow mb-4">
+        <i class="ti ti-plus me-1"></i>
+        {{ __('admin.Add New')}}
+      </a>
+          
             <section id="basic-datatable">
-
-
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header mb-4 border-bottom">
+                              <h4 class="card-title">{{ $l == 'en' ? 'Roles' : 'الأدوار' }}</h4>
                             </div>
                             <div class="card-content">
                                 <div class="card-body card-dashboard">
@@ -28,24 +29,19 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                                    <button type="button" class="close" data-dismiss="alert"
+                                                  {{ __('admin.'.session()->get('msg')) }}
+                                                  {{ Session::forget('msg') }}
+                                                    <button type="button" class="close" data-bs-dismiss="alert"
                                                             aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="bx bx-like"></i>
-                                                        <span>
-                                                            {{ __('admin.'.session()->get('msg')) }}
-                                                            {{ Session::forget('msg') }}
-                                                        </span>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     @endif
                                     <div class="table-responsive">
                                         <table class="table zero-configuration">
-                                            <thead>
+                                            <thead class="table-light">
                                                 <tr>
                                                     <th>{{ __('ID')}}</th>
                                                     <th>{{ __('Title')}}</th>
@@ -62,15 +58,19 @@
                                                         <td>
                                                             {{ $role->name  ?? '' }}
                                                         </td>
-                                                        <td style="line-height: 1.8em;">
+                                                        <td >
+                                                          <div style="max-height: 100px; overflow-y: auto;">
                                                             @foreach($role->permissions as $key => $item)
-                                                             <a href="/dashboard/permissions/{{$item->id}}/edit"><span class="badge badge-pill badge-primary">{{ $item->name }}</span></a>
+                                                                <a href="/dashboard/permissions/{{$item->id}}/edit">
+                                                                    <span class="btn rounded-pill btn-label-secondary m-1">{{ $item->name }}</span>
+                                                                </a>
                                                             @endforeach
-                                                        </td>
+                                                          </div>
+                                                      </td>
                                                         <td>
-                                                            <a href="{{route('roles.edit', ['role' => $role->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                            <a href="{{route('roles.edit', ['role' => $role->id])}}" class="btn btn-label-primary"><i class="ti ti-edit"> </i></a>
                                                             @if(!in_array($role->id,[1,2,3,4,5,6,7,8,9,10]))
-                                                                <button id='deleteAction' data-id='{{$role->id}}' data-url="{{route('roles.destroy', ['role' => $role->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                                <button id='deleteAction' data-id='{{$role->id}}' data-url="{{route('roles.destroy', ['role' => $role->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash"> </i></button>
                                                             @endif
                                                         </td>
 

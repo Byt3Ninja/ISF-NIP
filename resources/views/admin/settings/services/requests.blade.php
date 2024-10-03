@@ -7,41 +7,27 @@
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
-			<div class="content-header row">
-				<div class="content-header-left col-12 mb-2 mt-1">
-					<div class="row breadcrumbs-top">
-						<div class="col-12">
-							<h5 class="content-header-title float-left pr-1 mb-0">{{__('cycles.Services requests')}}</h5>
-							<div class="breadcrumb-wrapper col-12">
-								<ol class="breadcrumb p-0 mb-0">
-									<li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
-									</li>
-									<li class="breadcrumb-item active">{{__('cycles.Show new requests')}}
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
 			<div class="content-body">
-				<!-- Zero configuration table -->
+        <!-- Zero configuration table -->
 				<section id="basic-datatable">
 						<div class="row">
 							@if (count($received)>0)
 							<div class="col-12">
 								<div class="card">
-									<div class="card-header"><br>
+                  <div class="card-header border-bottom border-light mb-2">
+                    <h4 class="content-title">{{__('cycles.Services requests')}}</h4>
 										@if ($countold)
-										<a href="/dashboard/requests/old" class="btn btn-primary glow">{{__('cycles.Show old records')}}</a>
-											@endif
+                      <a href="/dashboard/requests/old" class="btn btn-primary glow">
+                        {{__('cycles.Show old records')}}
+                      </a>
+                    @endif
 									</div>
 									<div class="card-content">
-										<div class="card-body card-dashboard">
+                    <div class="card-body card-dashboard">
 											<div class="table-responsive">
 												<table class="table zero-configuration">
-													<thead>
-													<tr>
+                          <thead>
+                            <tr>
 														<th>#</th>
 														<th>{{__('cycles.SenderName')}}</th>
 														<th>{{__('cycles.Service')}}</th>
@@ -120,7 +106,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h4 class="modal-title" id="myModalLabel33">{{__('messages.SendMessageTo')}} <span id="uname"></span></h4>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 						<i class="bx bx-x"></i>
 					</button>
 				</div>
@@ -140,7 +126,7 @@
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+						<button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
 							<i class="bx bx-x d-block d-sm-none"></i>
 							<span class="d-none d-sm-block">{{__('messages.Close')}}</span>
 						</button>
@@ -160,7 +146,7 @@
 		  <div class="modal-content">
 			  <div class="modal-header">
 				  <h4 class="modal-title" id="myModalLabel33">{{__('cycles.Response to')}} <span id="rname"></span></h4>
-				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 					  <i class="bx bx-x"></i>
 				  </button>
 			  </div>
@@ -174,7 +160,7 @@
 					  </div>
 				  </div>
 				  <div class="modal-footer">
-					  <button type="button" class="btn btn-success" data-dismiss="modal" onclick="approve('Yes')">
+					  <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="approve('Yes')">
 						  <i class="bx bx-x d-block d-sm-none"></i>
 						  <span class="d-none d-sm-block">{{__('cycles.Approve')}}</span>
 					  </button>

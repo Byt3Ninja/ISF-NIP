@@ -116,7 +116,8 @@ class ZoomService implements OnlineMeetingServiceInterface
 
         $response =  $this->client->post($url.$path, $body);
 
-        $response =json_decode($response->getBody(), true);
+        $response =json_decode($response->getBody(), associative: true);
+        if($response == false){
         return [
             'success' => $response->getStatusCode() === 201,
             'data'    => [
@@ -125,6 +126,12 @@ class ZoomService implements OnlineMeetingServiceInterface
                 'join_url'=>$response['join_url'],
             ],
         ];
+    }else{
+        return [
+            'success' => false,
+            'data'    => null,
+        ];
+    }
     }
 
     public function update($id, $data)

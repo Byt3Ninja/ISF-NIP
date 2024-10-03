@@ -40,6 +40,8 @@
       </a>
     </li>
 
+    
+
     @if (auth()->user()->HaveCompany == 1)
       <li class="{{ Request::is('*myCompany') ? 'active' : '' }} menu-item">
         <a href="{{ route('my_company') }}" class="menu-link">
@@ -104,6 +106,14 @@
           class="menu-link">
           <i class="ti ti-search ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('admin.Services') }}</div>
+        </a>
+      </li>
+    @endif
+    @if (Auth::user()->hasanyRole('Mentor|Judger|Startup|Admin'))
+      <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a href="/dashboard/show/Mentors"
+          class="menu-link">
+          <i class="ti ti-users ti-md me-2 me-lg-4 ti-lg"></i>
+          <div>{{ __('admin.Mentors') }}</div>
         </a>
       </li>
     @endif
@@ -176,6 +186,15 @@
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
+
+      <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Tags.index') }}" class="menu-link">
+          <i class="ti ti-flag me-3 ti-md"></i>
+          <div>{{ __('admin.Tags') }}</div>
+        </a>
+      </li>
+
+      
     @endif
 
     @can('edit_forms')
@@ -214,6 +233,41 @@
           </li>
         </ul>
       </li>
+
+
+<!-- Start Time Sheets -->
+<li class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/Category*') ? 'sidebar-group-active open' : '' }} menu-item">
+  <a class="menu-link menu-toggle">
+    <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
+    <div>{{ __('admin.TimeSheet') }}</div>
+  </a>
+  <ul class="menu-sub">
+    <li class="{{ Request::is('*TimeSheet') ? 'active' : '' }} menu-item">
+      <a href="{{ route('TimeSheet.index') }}" class="menu-link">
+        <span class="menu-item">{{ __('admin.TimeSheet') }}</span>
+        <i class="bx bx-message"></i>
+      </a>
+    </li>
+    <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
+      <a href="{{ route('show_finance_time_sheet') }}" class="menu-link">
+        <span class="menu-item">{{ __('admin.Financial Report') }}</span>
+        <i class="bx bx-message"></i>
+      </a>
+    </li>
+    <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
+      <a href="{{ route('Category.index') }}" class="menu-link">
+        <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+        <span class="menu-item"> {{ __('admin.Category') }}</span>
+      </a>
+    </li>
+  </ul>
+</li>
+
+<!-- End Time Sheets -->
+
+
+
+
 
       <li class="{{ Request::is('dashboard/screening*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
@@ -317,9 +371,12 @@
       <!-- End Questions Nav Item -->
 
       <li class="{{ Request::is('*training*', '*quizzes*') ? 'sidebar-group-active open' : '' }} menu-item">
-        <a class="menu-link menu-toggle"><i class="menu-livicon" data-icon="info-alt"></i>
+        <a class="menu-link menu-toggle">
+          {{-- <i class="menu-livicon" data-icon="info-alt"></i> --}}
+          <i class="ti ti-presentation me-3 ti-md"></i>
           <div>{{ __('admin.Training') }}</div>
         </a>
+        
         <ul class="menu-sub">
           <li class="{{ Request::is('dashboard/training/sessions*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/training/sessions">
@@ -483,7 +540,7 @@
         </a>
       </li>
     @endcan
-
+    @if (auth()->user()->hasRole('Admin'))
     @can('view_report')
       <li class="{{ Request::is('reports*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="/dashboard/settings">
@@ -492,6 +549,7 @@
         </a>
       </li>
     @endcan
+    @endif
     {{--  @can('edit_settings')
         <li class="{{Request::is('dashboard/settings')?'active':''}} nav-item">
             <a href="/dashboard/settings">

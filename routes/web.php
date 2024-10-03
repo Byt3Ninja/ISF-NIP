@@ -118,6 +118,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::put('settings/UpdateMail', 'SettingsController@update_settingsmail')->name('updateMail');
     Route::put('settings/UpdatePush', 'SettingsController@update_settingspush')->name('updatePush');
     Route::put('settings/UpdateMeeting', 'SettingsController@update_settingsMeeting')->name('updateMeeting');
+    Route::put('settings/UpdateLogin', 'SettingsController@update_settingsLogin')->name('updateSMLogin');
 
 	//services categories Manager routes
 	Route::resource('serviceCategories', 'ServiceCategoryController');
@@ -144,6 +145,15 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
 	Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
 	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
+    Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
+    Route::get('/show/Mentors', 'ClientProfileController@showMintors');
+
+    Route::resource('Tags', 'TagsController');
+    Route::resource('TimeSheet', 'TimeSheetController');
+    Route::resource('Category', 'CatigoriesController'); // category in TimeSheet Folder
+    Route::get('/show/FinanceTimeSheet', 'TimeSheetController@Finance')->name('show_finance_time_sheet');
+    Route::get('/export-FinanceTS', 'TimeSheetController@exportFTS')->name('exportFTS');
+
 	//Client's company
     Route::resource('organizations', 'organizationsController');
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
@@ -272,6 +282,9 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('training/my/{id}/quiz/{quiz_id}','TrainingController@myQuiz')->name('quiz.overview');
     Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}','TrainingController@myQuizResponses')->name('quiz.response');
     Route::post('training/my/{id}/quiz/{quiz_id}','TrainingController@doQuiz')->name('quiz.start');
+    Route::get('training/EditTR/{id}','TrainingController@editTR');
+    Route::get('training/viewCourse/{id}','TrainingController@showCourse');
+
 
     Route::get('training/results/{id?}','TrainingController@results');
     Route::get('training/sessions/{id?}','TrainingController@sessions');
@@ -282,7 +295,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('trainings/getdsc/{id}' ,'TrainingController@getdsc');
     Route::get('/export-Tresult', 'TrainingController@exportTresult');
     Route::post('trainings/change/Tresult','TrainingController@changAllTL');
-
+    Route::get('training/create','TrainingController@create')->name('training.create');
 
 
 

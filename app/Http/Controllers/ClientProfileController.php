@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 use App\Country;
+use App\Cycle;
 use App\Expertise;
 use App\Http\Requests\UpdateClientProfileRequest;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
+use App\User;
 use App\UsersBio;
 use Storage;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -14,6 +16,10 @@ use Auth;
 use Log;
 use Exception;
 use Session;
+use App\CyclesMentors;
+use App\Schedule;
+use App\MentorshipRequest;
+use App\MentorshipTask;
 
 class ClientProfileController extends Controller
 {
@@ -47,8 +53,35 @@ class ClientProfileController extends Controller
 
     public function show(){
       $client = Auth::user();
+      $mentors = CyclesMentors::where('user_id',  Auth::user()->id ?? 0)->get();
 
-      return view('admin/clients/profile', compact('client'));
+      if($client->hasRole('Admin')){
+      $mentorshipTasks = MentorshipTask::where('mentor_id',Auth::user()->id)->where('status','pending')->get();
+      }else{
+
+      
+        if ($client && $client->company) {
+            $companyId = $client->company->id;
+            $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
+            
+        }else{
+            $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->get();
+        }
+    }
+      
+      $mentrequests =  MentorshipRequest::where('mentor_id', Auth::user()->id);
+
+        $mentrequests_count = $mentrequests->count();
+        $mentrequests_period = $mentrequests->sum('period')/60;
+
+
+        $average_rating = MentorshipRequest::where('mentor_id', Auth::user()->id)
+    ->where('approved', 'Yes')
+    ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
+    ->avg('rating'); 
+   
+
+      return view('admin/clients/profile', compact('client','mentors','mentorshipTasks','mentrequests_count','mentrequests_period','average_rating'));
     }
 
     /**
@@ -129,4 +162,70 @@ class ClientProfileController extends Controller
             abort(500);
         }
     }
+
+    public function showMintorprofile($id){
+
+        
+        $client = User::find($id);
+        if(!empty($client)){
+        // $exp = Expertise::where('parent_id',null)->get();
+        // $expertises = Expertise::where('parent_id',null)->get();
+        $mentrequests =  MentorshipRequest::where('mentor_id', $id);
+
+        $mentrequests_count = $mentrequests->count();
+        $mentrequests_period = $mentrequests->sum('period')/60;
+
+
+        $average_rating = MentorshipRequest::where('mentor_id', $id)
+    ->where('approved', 'Yes')
+    ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
+    ->avg('rating'); 
+
+
+         
+        $mentors = User::find($id);
+        if ($mentors) {
+            $expertises = $mentors->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
+        } else {
+            // الموجه غير موجود
+            $expertises = [];
+        }
+        $mentors = CyclesMentors::where('user_id', $id ?? 0)->get();
+
+
+
+        $order = CyclesMentors::where('cycle_id', Auth::user()->company->cycle ?? 0)->where('user_id', $id ?? 0)->first();
+
+        
+        $mentorshipTasks = MentorshipTask::where('mentor_id',$id)->where('status','pending')->get();
+       
+
+            return view('admin/clients/UserProfile', compact('client',
+            'expertises',
+            'mentors',
+            'order',
+            'mentorshipTasks',
+            'mentrequests_count',
+            'mentrequests_period',
+            'average_rating'));
+
+    }else{
+        return redirect()->route('my_profile')->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
+    }
+    }
+
+    public function showMintors(){
+
+      
+        $mentors = User::role('mentor')->get();
+        
+       
+
+            return view('admin/clients/Mentors', compact('mentors'));
+
+
+    }
+
+
+
 }

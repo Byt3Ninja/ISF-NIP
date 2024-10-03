@@ -131,6 +131,7 @@ return [
     'Training courses' => 'البرامج التدريبية',
     'Select course' => 'إختيار كورس',
     'Add new content' => 'إضافة محتوى جديد',
+    'Add new Training' => 'إضافة تدريب جديد',
     'Created at' => 'أنشئ بتاريخ',
     'Added By' => 'إضيف بواسطة',
     'Edit/Delete' => 'تحرير/ حذف',
@@ -246,5 +247,32 @@ return [
     'days'=>'ايام',
     'export_willsuccess'=>' بدأت عملية التصدير. ستتلقى بريدًا إلكترونيًا يحتوي على الملف المرفق بالتنزيل ',
     'export_Notsuccess'=>' لا يوجد بيانات لإستخراجها من الجدول ',
+    'ProgramCount'=>'عدد البرامج',
+    'Course Name'=>' اسم الكورس ',
+    'Code'=>' الكود ',
+    'CoursCategories'=>' القسم ',
+    'Tags'=>' الوسم ',
+    'CoursLevel'=>' مستوى الكورس ',
+    'Quizs'=>' الاسئلة ',
+    'Instractor'=>' المُحاضر ',
+    'CoursStart'=>' تاريخ البداية ',
+    'CoursEnd'=>' تاريخ الانتهاء ',
+    'Draft'=>' حفظ ',
+    'Published'=>' نشر ',
+    'SaveProgram'=>' حفظ البرنامج ',
+    'Cancel'=>' ألغاء ',
+    'Beginner'=>' مبتداء ',
+    'Intermediate'=>' متوسط ',
+    'Advanced'=>' متقدم ',
+    'PublishProgram'=>' نشر البرنامج ',
+
+
+
+
+
+
+
+
+
     ];
 

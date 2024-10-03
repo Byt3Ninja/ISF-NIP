@@ -6,21 +6,25 @@
 @section('subTitle', __('Permissions list'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    <div class="content-wrapper">
-    @include('admin.includes.heading')
-        <div class="invoice-create-btn mb-1">
-            <a href="{{route('permissions.create')}}" class="btn btn-primary glow">{{ __('admin.Add New')}}</a>
+    {{-- @include('admin.includes.heading') --}}
+        <div class="content-header mb-4">
+          <h4 class="content-card-title">{{ $l == 'en' ? 'Permissions List' : 'قائمة الصلاحيات' }}</h4>
         </div>
         <div class="content-body">
-            <section id="basic-datatable">
-
-
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
+          <section id="basic-datatable">
+            
+            
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header mb-4">
+                              <a href="{{route('permissions.create')}}" class="btn btn-primary glow">
+                                <i class="ti ti-plus me-1"></i>
+                                {{ __('admin.Add New')}}
+                              </a>
                             </div>
                             <div class="card-content">
                                 <div class="card-body card-dashboard">
@@ -28,7 +32,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                                    <button type="button" class="close" data-dismiss="alert"
+                                                    <button type="button" class="close" data-bs-dismiss="alert"
                                                             aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
@@ -45,7 +49,7 @@
                                     @endif
                                     <div class="table-responsive">
                                         <table class="table zero-configuration">
-                                            <thead>
+                                            <thead class="table-light">
                                                 <tr>
                                                     <th>{{ __('ID')}}</th>
                                                     <th>{{ __('Title')}}</th>
@@ -62,7 +66,7 @@
                                                             {{ $permission->name  ?? '' }}
                                                         </td>
                                                         <td>
-                                                            <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                            <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-label-primary"><i class="ti ti-edit"> </i></a>
 {{--                                                            <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>--}}
                                                         </td>
 

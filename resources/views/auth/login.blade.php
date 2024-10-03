@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="{{ $l }}">
 <html lang="{{ $l }}" dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
   data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
   class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-theme="theme-default"
@@ -54,6 +53,20 @@
   <!-- Page -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
+  <style>
+    #switcher-container {
+      position: absolute;
+      top: 1rem;
+      width: 100px;
+    }
+    
+    @media screen and (min-width: 768px) {
+      #switcher-container {
+        width: 120px;
+      }
+    }
+  </style>
+
   <!-- Helpers -->
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
   <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
@@ -70,29 +83,88 @@
 <body>
   <!-- Content -->
   @php
-    $brandName = 'GrowthLabs';
     $formHeading = $l == 'ar' ? 'مرحبًا بعودتك' : 'Welcome to GrowthLabs';
     $formSubHeading =
-        $l == 'ar'
-            ? 'الرجاء تسجيل الدخول إلى حسابك وابدأ المغامرة'
-            : 'Please sign-in to your account and
-  start the adventure';
+    $l == 'ar'
+    ? 'الرجاء تسجيل الدخول إلى حسابك وابدأ المغامرة'
+    : 'Please sign-in to your account and
+    start the adventure';
     $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
-  @endphp
+    @endphp
 
   <!-- Content -->
+  <!-- Toggle theme and language -->
+  <nav 
+    class="container-xxl navbar navbar-expand-xl align-items-center"
+    style="{{ $l == 'ar' ? 'left: 1rem' : 'right: 1rem' }}"
+    id="switcher-container"
+  >
+    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+      <ul class="navbar-nav flex-row align-items-center ms-auto">
+        <!-- Language -->
+        <li class="nav-item dropdown-language dropdown" style="position: relative;">
+          <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+            href="javascript:void(0);" data-bs-toggle="dropdown">
+            <i class="ti ti-language rounded-circle ti-md"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" 
+            style="position: absolute; left: {{$l == 'ar' ? '2rem' : '-8rem'}}; top: 2rem;"
+          >
+            <li class="dropdown dropdown-language nav-item">
+              @if ($l == 'ar')
+                <a class="dropdown-item" href="/lang/en">
+                  <i class="flag-icon flag-icon-us"></i>
+                  <span class="selected-language">English</span>
+                </a>
+              @else
+                <a class="dropdown-item" href="/lang/ar">
+                  <i class="flag-icon flag-icon-sa"></i>
+                  <span class="selected-language">عربي</span>
+                </a>
+              @endif
+            </li>
+          </ul>
+        </li>
+        <!--/ Language -->
+
+        <!-- Style Switcher -->
+        <li class="nav-item dropdown-style-switcher dropdown" style="position: relative;">
+          <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow"
+            href="javascript:void(0);" data-bs-toggle="dropdown">
+            <i class="ti ti-md"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-styles" 
+            style="position: absolute; left: {{$l == 'ar' ? '2rem' : '-8rem'}}; top: 2rem; width: 150px;"
+          >
+            <li>
+              <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+                <span class="align-middle"><i class="ti ti-sun ti-md me-3"></i>Light</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+                <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
+                <span class="align-middle"><i class="ti ti-device-desktop-analytics ti-md me-3"></i>System</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <!-- / Style Switcher-->
+      </ul>
+    </div>
+  </nav>
+  <!-- Toggle theme and language -->  
 
   <div class="authentication-wrapper authentication-cover">
     <!-- Logo -->
     <a href="/dashboard" class="app-brand auth-cover-brand">
       <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
-      {{-- <span class="app-brand-logo demo">
-        <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
-      </span> --}}
-      {{-- <span class="app-brand-text demo text-heading fw-bold">{{ $brandName }}</span> --}}
     </a>
     <!-- /Logo -->
-
     <div class="authentication-inner row m-0">
       <!-- /Left Text -->
       <div class="d-none d-lg-flex col-lg-8 p-0">

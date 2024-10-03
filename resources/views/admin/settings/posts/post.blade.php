@@ -32,7 +32,7 @@
                 <section id="basic-datatable">
 					@if(session()->has('message'))
 				<div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                             <div class="d-flex align-items-center">
@@ -45,7 +45,7 @@
 					@endif
 					@if(session()->has('message2'))
 					 <div class="alert alert-danger alert-dismissible mb-2" role="alert">
-                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                             <div class="d-flex align-items-center">
@@ -90,7 +90,7 @@
 
 									<!-- Modal -->
               <div class="modal fade" id="PhotoModal{{$post->id}}" tabindex="-1" role="dialog" aria-labelledby="Photo" aria-hidden="true"><div class="modal-dialog modal-dialog-centered">
-              <div data-dismiss="modal" class="modal-content">
+              <div data-bs-dismiss="modal" class="modal-content">
 			<img src="/images/blog/{{$post->image}}" width="600" /></div></div></div></div>
 <!-- END: Modal-->
 
