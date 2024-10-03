@@ -9,6 +9,16 @@
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/jquery.rateyo.min.css">
+
+  <style>
+    .radius-15 {
+      border-radius: 15px;
+    }
+
+    .custom-shadow {
+      box-shadow: 0px 2px 0px 0px #F2F1F3;
+    }
+  </style>
 @stop
 
 @section('content')
@@ -21,6 +31,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
       <div class="content-body">
+        <!-- Alert -->
         @if (session()->has('msg'))
           <div class="row">
             <div class="col-md-12">
@@ -35,11 +46,142 @@
             </div>
           </div>
         @endif
+        <!-- / Alert -->
+
+        <!-- Header -->
+        <h4 class="fw-bold text-primary">{{ __('dashboard.Mentors') }}</h4>
+        <div class="card mb-6" style="border-radius: 20px;">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex bg-label-warning p-2 justify-content-center align-items-center radius-15 shadow">
+                <div class="bg-white d-flex justify-content-center align-items-center radius-15"
+                  style="width: 40px; height: 40px; shadow">
+                  <i class="ti ti-users ti-24px"></i>
+                  {{-- <i class="ti ti-border-all" style="font-size: 35px; ti-24px"></i> --}}
+                </div>
+                <div class="mx-4" style="height: 50px;">
+                  <p class="text-black fw-medium fs-5" style="margin-bottom: -3px;">{{ __('admin.Mentors') }}</p>
+                  <span class="fs-5">
+                    <!-- Total Mentors Count -->
+                    {{-- {{ count($Mentors) }} --}} 1
+                  </span>
+                </div>
+              </div>
+              <div>
+                <div class="d-flex align-items-center justify-content-end">
+                  <!-- Filter -->
+                  <form method="GET">
+                    <div class="d-flex align-items-center">
+                      <div style="display: flex; align-items: center;" class="mx-2">
+                        <button id="filterButton"
+                          class="btn bg-primary p-3 d-flex justify-content-center align-items-center custom-shadow"
+                          style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
+                          <i class="ti ti-filter text-white ti-24px"></i>
+                        </button>
+                      </div>
+                      <!-- Search Bar -->
+                      <div class="position-relative d-none d-md-flex">
+                        <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
+                          <i class="ti ti-search text-primary ti-24px"></i>
+                        </div>
+  
+                        <input
+                          class="form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
+                          style="width: 366px;" id="search-table" placeholder="Search" name="search"
+                          {{-- value="{{ request('search') }}"  --}} />
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="d-flex align-items-center mt-2">
+                  <span class="mx-2 fw-bold">Sorting:</span>
+                  <div class="row d-flex align-items-center">
+                    <div class="col-md-3 d-flex flex-nowrap align-items-center">
+                      <span class="fw-bold mx-1 text-black" style="font-size:13px;">Rate</span>
+                      <button class="btn btn-sm btn-label-primary rounded-pill" 
+                        style="height:25px; min-width:90px; font-size:13px;"
+                      >
+                        <i class="ti ti-star me-2"></i>
+                        <span class="fw-bold text-primary">Default</span>
+                      </button>
+                    </div>
+                    <div class="col-md-3 d-flex flex-nowrap align-items-center">
+                      <span class="fw-bold mx-1 text-black" style="font-size:13px;">Linkedin</span>
+                      <button class="btn btn-sm btn-label-primary rounded-pill" 
+                        style="height:25px; min-width:90px; font-size:13px;"
+                      >
+                        <i class="ti ti-star me-2"></i>
+                        <span class="fw-bold text-primary">Default</span>
+                      </button>
+                    </div>
+                    <div class="col-md-3 d-flex flex-nowrap align-items-center">
+                      <span class="fw-bold mx-1 text-black text-nowrap" style="font-size:13px;">Programs Count</span>
+                      <button class="btn btn-sm btn-label-primary rounded-pill" 
+                        style="height:25px; min-width:90px; font-size:13px;"
+                      >
+                        <i class="ti ti-star me-2"></i>
+                        <span class="fw-bold text-primary">Default</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Search Bar (Mobile) -->
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="position-relative me-3 mt-4 d-block d-md-none w-100">
+                <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
+                  <i class="ti ti-search text-primary ti-24px"></i>
+                </div>
+                <input
+                  class="form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2 w-100"
+                  id="search-table" placeholder="Search" />
+              </div>
+            </div>
+            <!-- / Search Bar (Mobile) -->
+          </div>
+        </div>
+        <!-- / Header -->
+
+        <!-- Mentors List -->
+        <section>
+          <h5 class="border-bottom pb-2 mb-6">Mentors List</h5>
+          <div class="row">
+            @foreach([1, 2, 3] as $mentor)
+              <div class="col-md-4">
+                <div 
+                  class="radius-15 border" 
+                  style="background-image: url('/images/background/Hossam-Shaban.png'); 
+                  height:293px; background-size: cover;
+                  background-position: center;"
+                >
+                </div>
+                <div 
+                  class="card shadow-none mx-4" 
+                  style="z-index: 1; margin-top: -25px; border-radius: 15px;"
+                >
+                  <div class="card-body">
+                    <div class="bg-white radius-15 px-2 py-1 d-flex justify-content-between align-items-center">
+                      <div class="d-flex flex-column">
+                        <span class="text-black fw-bold fs-5">Hossam Shaban</span>
+                        <span class="text-secondary fs-6">Computer Science</span>
+                      </div>
+                      <a href="#">
+                        <img src="/icons/linkedin.svg" width="30" height="30" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            @endforeach
+          </div>
+        </section>
+        <!-- / Mentors List -->
       </div>
 
       <!-- My Mentors -->
 
-      <section>
+      {{-- <section>
         <div class="row">
           <div class="col-md-12">
             <div class="">
@@ -120,7 +262,7 @@
             </div>
           </div>
         </div>
-      </section>
+      </section> --}}
       <!-- / My Mentors -->
     </div>
   </div>
@@ -131,7 +273,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title">
-            {{ __('dashboard.Add mentorship session with') }} 
+            {{ __('dashboard.Add mentorship session with') }}
           </h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -148,18 +290,10 @@
               <div class="form-group mb-3" id="showdates">
                 <label class="fs-6 mb-2">{{ __('dashboard.Start meeting Date/ Time') }}:</label>
                 <div class="position-relative">
-                  <input 
-                    id="date" 
-                    name="date" 
-                    type="text" 
-                    class="date width-250 form-control pr-5" 
-                    placeholder="{{ __('dashboard.Start meeting Date/ Time') }}"
-                    value="" 
-                    required 
-                    onkeydown="return false"
-                  />
-                  <i 
-                    class="ti ti-calendar position-absolute" 
+                  <input id="date" name="date" type="text" class="date width-250 form-control pr-5"
+                    placeholder="{{ __('dashboard.Start meeting Date/ Time') }}" value="" required
+                    onkeydown="return false" />
+                  <i class="ti ti-calendar position-absolute"
                     style="{{ $l == 'ar' ? 'left: 10px;' : 'right: 10px;' }} top: 50%; transform: translateY(-50%);">
                   </i>
                 </div>
@@ -295,77 +429,54 @@
                     "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
                     "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
                 }
-            }
-            @endif
-        });
+            } @endif
+          });
 
-        $("#date").datetimepicker({
-            format: 'Y-m-d H:i',
-            onGenerate: function(ct) {
-                jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled');
-            },
-            maxDate: '{{ date('Y/m/d', strtotime('-1 days')) }}',
-            timepicker: true
-        });
-
-        function request(id, mentor, organization_id = null, cycle_id = null) {
-            const modal = $('#SendRequest');
-
-            modal.style.display = "block";
-
-            $('#mentorid').val(id);
-            $('#rname').html(mentor);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                type: "POST",
-                url: "/dashboard/mentors/modify",
-                data: {
-                    "id": id,
-                    "rtype": 5
-                },
-                success: function(response) {
-                    $('#SendRequest li').remove();
-                    $('#name').html(name);
-                    if (response.length > 0) {
-                        $.each(response, function(i, item) {
-                            let note = '';
-                            let time = item.tfrom + " {{ __('dashboard.to') }} " + item.tto;
-                            if (item.notes) {
-                                note = item.notes;
-                            }
-                            switch (item.type) {
-                                case 'OneDay':
-                                    $('<li>').html("<b>" + item.dfrom + "</b> (" + time + ").").appendTo('#schedule');
-                                    break;
-                                case 'Weekly':
-                                    $('<li>').html("<b> {{ __('dashboard.Weekly') }} </b>(" + item.days + ") - (" + time + ").").appendTo('#schedule');
-                                    break;
-                                case 'WorkingDays':
-                                    $('<li>').html("<b>{{ __('dashboard.All working days') }} </b>(" + time + ").").appendTo('#schedule');
-                                    break;
-                                case 'Period':
-                                    $('<li>').html("<b> {{ __('dashboard.from') }} " + item.dfrom + " {{ __('dashboard.to') }} " + item.dto + " </b> (" + time + ").").appendTo('#schedule');
-                                    break;
-                                default:
-                            }
-                        });
-                    } else {
-                        $('<li>').html("{{ __('dashboard.No records saved') }}.</li>").appendTo('#schedule');
-                    }
-                    $('#addOrganizationID').val(organization_id);
-                    $('#addCycleID').val(cycle_id);
-                    $('#SendRequest').modal('show');
-                },
-                error: function(error) {
-                    console.log(error);
-                    alert("Error Occurred, Try again!");
-                }
-            });
+          $(" #date").datetimepicker({ format: 'Y-m-d H:i' , onGenerate: function(ct) {
+    jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+    maxDate: '{{ date('Y/m/d', strtotime('-1 days')) }}' , timepicker: true }); function request(id, mentor,
+    organization_id=null, cycle_id=null) { const modal=$('#SendRequest'); modal.style.display="block" ;
+    $('#mentorid').val(id); $('#rname').html(mentor); $.ajaxSetup({ headers: { 'X-CSRF-TOKEN' : $('meta[name="csrf-token"
+    ]').attr('content') } }); $.ajax({ type: "POST" , url: "/dashboard/mentors/modify" , data: { "id" : id, "rtype" : 5 },
+    success: function(response) { $('#SendRequest li').remove(); $('#name').html(name); if (response.length>
+    0) {
+      $.each(response, function(i, item) {
+        let note = '';
+        let time = item.tfrom + " {{ __('dashboard.to') }} " + item.tto;
+        if (item.notes) {
+          note = item.notes;
         }
+        switch (item.type) {
+          case 'OneDay':
+            $('<li>').html("<b>" + item.dfrom + "</b> (" + time + ").").appendTo('#schedule');
+            break;
+          case 'Weekly':
+            $('<li>').html("<b> {{ __('dashboard.Weekly') }} </b>(" + item.days + ") - (" + time + ").").appendTo(
+              '#schedule');
+            break;
+          case 'WorkingDays':
+            $('<li>').html("<b>{{ __('dashboard.All working days') }} </b>(" + time + ").").appendTo('#schedule');
+            break;
+          case 'Period':
+            $('<li>').html("<b> {{ __('dashboard.from') }} " + item.dfrom + " {{ __('dashboard.to') }} " + item
+              .dto + " </b> (" + time + ").").appendTo('#schedule');
+            break;
+          default:
+        }
+      });
+    } else {
+      $('<li>').html("{{ __('dashboard.No records saved') }}.</li>").appendTo('#schedule');
+    }
+    $('#addOrganizationID').val(organization_id);
+    $('#addCycleID').val(cycle_id);
+    $('#SendRequest').modal('show');
+    },
+    error: function(error) {
+    console.log(error);
+    alert("Error Occurred, Try again!");
+    }
+    });
+    }
     });
   </script>
   <script>
