@@ -43,16 +43,16 @@
                   Security</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-billing.html"><i class="ti-sm ti ti-bookmark me-1_5"></i>
-                  Billing & Plans</a>
+                <button class="nav-link"><i class="ti-sm ti ti-bookmark me-1_5"></i>
+                  Billing & Plans</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-notifications.html"><i
-                    class="ti-sm ti ti-bell me-1_5"></i> Notifications</a>
+                <button class="nav-link"><i
+                    class="ti-sm ti ti-bell me-1_5"></i> Notifications</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-connections.html"><i class="ti-sm ti ti-link me-1_5"></i>
-                  Connections</a>
+                <button class="nav-link"><i class="ti-sm ti ti-link me-1_5"></i>
+                  Connections</button>
               </li>
             </ul>
           </div>
