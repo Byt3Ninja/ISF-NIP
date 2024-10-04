@@ -161,7 +161,9 @@
                   style="z-index: 1; margin-top: -25px; border-radius: 15px;"
                 >
                   <div class="card-body">
-                    <div class="bg-white radius-15 px-2 py-1 d-flex justify-content-between align-items-center">
+                    <div 
+                      class="bg-white custom-shadow border radius-15 px-2 py-1 d-flex justify-content-between align-items-center"
+                    >
                       <div class="d-flex flex-column">
                         <span class="text-black fw-bold fs-5">Hossam Shaban</span>
                         <span class="text-secondary fs-6">Computer Science</span>
