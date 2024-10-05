@@ -319,10 +319,10 @@
                                                 <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
                                                     <td class="text-center">
                                                         <div class="media align-items-center">
-                                                            <a class="media-left mr-50" href="/dashboard/users/{{$task->user_id}}/edit">
+                                                            <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">
                                                                 <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
-                                                            <a href="/dashboard/users/{{$task->user_id}}/edit">
+                                                            <a href="{{ route('show_mentor_profile', $task->user_id) }}">
                                                                 <div class="media-body">
                                                                     <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
                                                                     <span class="font-small-2">{{$task->user->title}}</span>

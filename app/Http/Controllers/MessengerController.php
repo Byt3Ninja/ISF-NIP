@@ -23,7 +23,12 @@ class MessengerController extends Controller
         $sent = Messenger::leftJoin('users','receiver','=','users.id')
             ->where('sender',Auth::user()->id)->orderBy('created_at','DESC')->get(['messenger.id','first_name_en','last_name_en','first_name_ar',
                 'last_name_ar','subject','read','messenger.receiver','messenger.created_at']);
+                
+                if($sent == null){
         return view('admin.clients.outbox')->with('sent',$sent);
+                }else{
+                    return redirect()->route('sendmessage');
+                }
     }
     public function openmsg(Request $request) {
 	    if ($request->type==1) {

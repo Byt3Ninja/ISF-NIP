@@ -181,7 +181,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/training/photos/{path}','FilemanagerController@trainingimage')->where('path', '.*');
     //SendMessage
     Route::post('/send_message','MessengerController@sendmsg');
-    Route::get('/sendmessage','MessengerController@sendmessage');
+    Route::get('/sendmessage','MessengerController@sendmessage')->name('sendmessage');
     Route::post('/sendmessage','MessengerController@savemessage');
     //ShowMessages
     Route::get('/inbox','MessengerController@index')->name('inbox');
