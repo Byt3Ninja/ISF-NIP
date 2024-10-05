@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Closure;
 use App;
+use App\Settings;
 use Illuminate\Support\Facades\Route;
 
 class IndexController extends Controller
@@ -14,12 +15,15 @@ class IndexController extends Controller
     private $SocialIcons; // Social media icons
     private $contact; // Footer contact details
 
+    private $Settings;
     public function __construct()
     {
-        $this->t = App\Settings::where('type', '1')->first(['ar_title', 'title']);
-//        $this->SocialIcons = App\settings::where('type', 2)->whereNotNull('url')->orderBy('set_order')->get();
-//        $this->contact = App\Settings::findorfail('11');
-
+        $this->Settings = Settings::where('id', 1)->first();
+        $this->t = Settings::where('type', '1')->first(['ar_title', 'title']);
+        if($this->Settings->HomePage == true){
+       $this->SocialIcons = settings::where('type', 2)->whereNotNull('url')->orderBy('set_order')->get();
+       $this->contact = Settings::findorfail('11');
+        }
     }
 
     public function lang($locale)
@@ -34,31 +38,36 @@ class IndexController extends Controller
 
     public function home()
     {
+        if($this->Settings->HomePage == false){
+
         if (auth()->check()){
             return redirect(route('dashboard'));
         }
         return view('auth.login')->with('t', $this->t);
-//        $CR = Route::getFacadeRoot()->current()->uri();
-//        if ($CR == "about") {
-//            $about = App\Settings::findorfail('10');
-//            return view('pages.about')->with('t', $this->t)->with('about', $about)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
-//        }
-//        elseif ($CR == "contact") {
-//            return view('pages.contact')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons);
-//        }
-//        elseif ($CR == "events") {
-//            return view('pages.events')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR);
-//        }
-//        elseif ($CR == "faqs") {
-//            $faqs = App\Faq::whereNotNull('Published')->get();
-//            return view('pages.faqs')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR)->with('faqs',$faqs);
-//        }
-//        elseif ($CR == "/") {
-//            $CR = 'pages.home';
-//        } else {
-//            $CR = 'pages.' . $CR;
-//        }
-//        return view($CR)->with('t', $this->t)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
+        
+    }else{
+       $CR = Route::getFacadeRoot()->current()->uri();
+       if ($CR == "about") {
+           $about = App\Settings::findorfail('10');
+           return view('pages.about')->with('t', $this->t)->with('about', $about)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
+       }
+       elseif ($CR == "contact") {
+           return view('pages.contact')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons);
+       }
+       elseif ($CR == "events") {
+           return view('pages.events')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR);
+       }
+       elseif ($CR == "faqs") {
+           $faqs = App\Faq::whereNotNull('Published')->get();
+           return view('pages.faqs')->with('t', $this->t)->with('contact', $this->contact)->with('SocialIcons', $this->SocialIcons)->with('CR',$CR)->with('faqs',$faqs);
+       }
+       elseif ($CR == "/") {
+           $CR = 'pages.home';
+       } else {
+           $CR = 'pages.' . $CR;
+       }
+       return view($CR)->with('t', $this->t)->with('SocialIcons', $this->SocialIcons)->with('contact', $this->contact);
+    }
     }
 
     public function post($id)

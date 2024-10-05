@@ -84,7 +84,11 @@
                   <li class="nav-item">
                     <a class="nav-link" id="Login-tab" data-bs-toggle="tab" href="#SocialMediaLogin" role="tab" aria-controls="SocialMediaLogin" aria-selected="false">{{__('settings.SocialMediaLogin')}}</a>
                 </li>
-
+              @if ($Title->HomePage == true)
+                <li class="nav-item">
+                  <a class="nav-link" id="Login-tab" data-bs-toggle="tab" href="#HomePage" role="tab" aria-controls="HomePage" aria-selected="false">{{__('admin.HomePageSetting')}}</a>
+              </li>
+              @endif
               </ul>
               <!-- اعدادات الـ Tabs End -->
 
@@ -216,6 +220,15 @@
 
                               </select>
                             </div>
+                          </div>
+
+<br>
+                          <div class="col-md-12 col-12">
+                          <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" name="HomePage" type="checkbox"  {{ $Title->HomePage == '1' ? 'checked' : '' }} />
+                            <label class="form-check-label">{{ __('admin.HomePage') }}</label
+                            >
+                          </div>
                           </div>
 
 
@@ -639,8 +652,10 @@
 
               </div>
               <!-- End Tabs Data -->
-
-              {{-- <div class="card">
+<!-- Start Home Page -->
+@if ($Title->HomePage == true)
+<div class="tab-pane fade" id="HomePage" role="tabpanel" aria-labelledby="HomePage-tab">
+              <div class="card">
                 <div class="card-header">
                     <h5 class="card-title">{{__('settings.HomeWelcomeImages')}}</h5>
                 </div>
@@ -805,8 +820,8 @@
                             </div>
                         </div>
 
-              </div> --}}
-              {{-- <div class="card">
+              </div> 
+              <div class="card">
                 <div class="card-header">
                     <h5 class="card-title">{{__('settings.Impact Icons')}}</h5>
                 </div>
@@ -856,7 +871,12 @@
                         </div>
                     </div>
                 </div>
-              </div> --}}
+              </div>
+            </div>
+            @endif
+<!-- End Home Page -->
+
+
             </div>
           </div>
       </div>

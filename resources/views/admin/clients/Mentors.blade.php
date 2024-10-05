@@ -123,7 +123,7 @@
                         <input
                           class="form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
                           style="width: 366px;" id="search-table" placeholder="Search" name="search"
-                          {{-- value="{{ request('search') }}"  --}} />
+                          value="{{ request('search') }}"  />
                       </div>
                     </div>
                   </form>
@@ -170,7 +170,7 @@
 
   <!-- Mentors -->
   <section class="px-md-5 mb-10">
-    <h5 class="border-bottom pb-2 mb-6 mx-4 mx-md-0">Mentors List</h5>
+    <h5 class="border-bottom pb-2 mb-6 mx-4 mx-md-0">{{ __('admin.Mentors') }}</h5>
     <div class="mentors-list-container">
       <!-- Mentors List -->
       @foreach ($mentors as $key => $mentor)
@@ -182,9 +182,10 @@
         <!-- Mentor Card -->
         <div class="mentor-card radius-15">
           <div class="border radius-15"
-            style="background-image: url('/images/background/Hossam-Shaban.png'); 
+            style="background-image: url('{{ $mentor->image_url }}'); 
             height:293px; background-size: cover;
             background-position: center;">
+            
           </div>
           <div 
             class="card shadow-none mx-2 p-3" 
@@ -209,16 +210,34 @@
                   href="{{ $mentor->bio->linkedin }}">
                   <img src="/icons/linkedin.svg" width="30" height="30" />
                 </a>
+                @else
+                <!-- Please Change this SVG To color #eee -->
+                <a 
+                  title="Linkedin URL" 
+                  target="_blank" 
+                  href="#">
+                  <img src="/icons/linkedin.svg" width="30" height="30" />
+                </a>
               @endif
             </div>
             <!-- Mentor Experience -->
             <div class="mb-3">
-              <p class="fs-6 fw-bold text-black mb-2">Expertises</p>
+              <p class="fs-6 fw-bold text-black mb-2">{{ __('admin.Expertises') }}</p>
               <div class="d-flex flex-wrap" style="gap: 5px;">
-                <span class="btn btn-xs btn-outline-warning rounded-pill">Web</span>
-                <span class="btn btn-xs btn-outline-warning rounded-pill">Mobile</span>
-                <span class="btn btn-xs btn-outline-warning rounded-pill">UI/UX Design</span>
-                <span class="btn btn-xs btn-outline-warning rounded-pill">Data Science</span>
+                @php
+                  if ($mentor) {
+            $expertises = $mentor->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
+        }else {
+            $expertises = [];
+        }
+                @endphp
+                @if($mentor->mentorExpertises->isNotEmpty())
+                @foreach ($expertises as $expert)
+                <span class="btn btn-xs btn-outline-warning rounded-pill">{{ $expert->title }}</span>
+                @endforeach
+                @else
+                <span class="btn btn-xs btn-outline-warning rounded-pill">{{ __('cycles.NA') }}</span>
+                @endif
               </div>
             </div>
             <!-- / Mentor Experience -->
@@ -230,10 +249,18 @@
                   <span class="text-black fw-bold fs-6">{{ $m_count }}</span>
                 </div>
               </div>
+              @php
+                $rateMentorAVG = \App\MentorshipRequest::where('mentor_id', $mentor->id)
+    ->where(function ($query) {
+        $query->where('approved', 'Yes')
+              ->orWhereNull('approved');
+    })->avg('rating');
+              @endphp
               <div class="badge bg-label-light rounded rounded-pill">
                 <div class="d-flex align-items-center justify-content-center">
+                  
+                  <span style="color: orange" class="fw-bold mt-1 mx-1">{{ number_format($rateMentorAVG, 2, '.', '') }}</span>
                   <img src="/icons/star.svg" width="15" height="15" />
-                  <span style="color: orange" class="fw-bold mt-1 mx-1">4.8</span>
                 </div>
               </div>
             </div>
@@ -244,6 +271,13 @@
                 <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
                 <small class="text-muted line-clamp-4">
                   {{ $mentor->bio->{'bio_' . $l} }}
+                </small>
+              </div>
+              @else
+              <div class="mb-2 mt-auto">
+                <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
+                <small class="text-muted line-clamp-4">
+                  {{ __('cycles.NA') }}
                 </small>
               </div>
             @endif

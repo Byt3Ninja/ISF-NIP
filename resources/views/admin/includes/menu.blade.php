@@ -550,100 +550,107 @@
       </li>
     @endcan
     @endif
-    {{--  @can('edit_settings')
-        <li class="{{Request::is('dashboard/settings')?'active':''}} nav-item">
-            <a href="/dashboard/settings">
+    @php
+      $updateSittings = App\Settings::where('id', 1)->first();
+    @endphp
+    
+    @if ($updateSittings->HomePage == true)
+    
+     @can('edit_settings')
+        <li class="{{Request::is('dashboard/settings')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/settings">
                 <i class="menu-livicon" data-icon="wrench"></i>
-                <span class="menu-title">{{__('admin.Homesettings')}}</span>
+                <div>{{__('admin.Homesettings')}}</div>
             </a>
         </li>
-        <li class="{{Request::is('dashboard/setaboutus')?'active':''}} nav-item">
-            <a href="/dashboard/setaboutus">
+        <li class="{{Request::is('dashboard/setaboutus')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/setaboutus">
                 <i class="menu-livicon" data-icon="globe"></i>
-                <span class="menu-title">{{__('admin.About Settings')}}</span>
+                <span>{{__('admin.About Settings')}}</span>
             </a>
         </li>
-        <li class="{{Request::is('dashboard/setcontactus')?'active':''}} nav-item">
-            <a href="/dashboard/setcontactus">
+        <li class="{{Request::is('dashboard/setcontactus')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/setcontactus">
                 <i class="menu-livicon" data-icon="paper-plane"></i>
-                <span class="menu-title">{{__('admin.Contact Settings')}}</span>
+                <span>{{__('admin.Contact Settings')}}</span>
             </a>
         </li>
     @endcan
     @can('manage_menus')
-        <li class="{{Request::is('*menu*')?'active':''}} nav-item">
-            <a href="/dashboard/menus">
+        <li class="{{Request::is('*menu*')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/menus">
                 <i class="menu-livicon" data-icon="morph-menu-arrow-bottom"></i>
-                <span class="menu-title">{{__('admin.Menusettings')}}</span>
+                <span>{{__('admin.Menusettings')}}</span>
             </a>
         </li>
     @endcan
     @can('view_slide')
-        <li class="{{Request::is('*slide*')?'active':''}} nav-item">
-            <a href="/dashboard/slides">
+        <li class="{{Request::is('*slide*')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/slides">
                 <i class="menu-livicon" data-icon="settings"></i>
-                <span class="menu-title">{{__('admin.Slidersettings')}}</span>
+                <span>{{__('admin.Slidersettings')}}</span>
             </a>
         </li>
     @endcan
     @can('manage_pages')
-        <li class="{{Request::is('*page*')?'active':''}} nav-item">
-            <a href="/dashboard/pages">
+        <li class="{{Request::is('*page*')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/pages">
                 <i class="menu-livicon" data-icon="briefcase"></i>
-                <span class="menu-title">{{__('admin.Pagesettings')}}</span>
+                <span>{{__('admin.Pagesettings')}}</span>
             </a>
         </li>
     @endcan
     @can('manage_posts')
-        <li class="{{Request::is('*post*')?'active':''}} nav-item">
-            <a href="/dashboard/posts">
+        <li class="{{Request::is('*post*')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/posts">
                 <i class="menu-livicon" data-icon="box-add"></i>
-                <span class="menu-title">{{__('admin.Postsettings')}}</span>
+                <span>{{__('admin.Postsettings')}}</span>
             </a>
         </li>
     @endcan
     @can('view_faqs')
-        <li class="{{Request::is('*faqs*')?'active':''}} nav-item">
-            <a href="/dashboard/faqs">
+        <li class="{{Request::is('*faqs*')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/faqs">
                 <i class="menu-livicon" data-icon="comments"></i>
-                <span class="menu-title">{{__('admin.Faqs settings')}}</span>
+                <span>{{__('admin.Faqs settings')}}</span>
             </a>
         </li>
     @endcan
     @can('view_partner')
-        <li class="{{Request::is('*partners*')?'active':''}} nav-item">
-            <a href="/dashboard/partners">
+        <li class="{{Request::is('*partners*')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/partners">
                 <i class="menu-livicon" data-icon="share"></i>
-                <span class="menu-title">{{__('admin.partners settings')}}</span>
+                <span>{{__('admin.partners settings')}}</span>
             </a>
         </li>
     @endcan
     @can('view_press')
-        <li class="{{Request::is('*press*')?'active':''}} nav-item">
-            <a href="/dashboard/press">
+        <li class="{{Request::is('*press*')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/press">
                 <i class="menu-livicon" data-icon="paper-clip"></i>
-                <span class="menu-title">{{__('admin.press settings')}}</span>
+                <span>{{__('admin.press settings')}}</span>
             </a>
         </li>
     @endcan
     @can('manage_events')
-        <li class="{{Request::is('*event*')?'active':''}} nav-item">
-            <a href="/dashboard/allevents">
+        <li class="{{Request::is('*event*')?'active':''}} menu-item">
+            <a class="menu-link" href="/dashboard/allevents">
                 <i class="menu-livicon" data-icon="calendar"></i>
-                <span class="menu-title">{{__('admin.manageevents')}}</span>
+                <span>{{__('admin.manageevents')}}</span>
             </a>
         </li>
     @endcan
     @can('manage_page')
         @if (Auth::user()->PageId)
-            <li class="{{Request::is('editmypage')?'active':''}} nav-item">
-                <a href="/dashboard/editmypage">
+            <li class="{{Request::is('editmypage')?'active':''}} menu-item">
+                <a class="menu-link" href="/dashboard/editmypage">
                     <i class="menu-livicon" data-icon="briefcase"></i>
-                    <span class="menu-title">{{__('admin.editmypage')}}</span>
+                    <span>{{__('admin.editmypage')}}</span>
                 </a>
             </li>
         @endif
-    @endcan  --}}
+    @endcan 
+    @endif
   </ul>
 </aside>
 <!-- / Menu -->

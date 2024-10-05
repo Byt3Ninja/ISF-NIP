@@ -5,7 +5,7 @@ return [
 	'EditSettings'   => 'تحرير الإعدادات',
 	'ARABICWEBSITETITLE'   => 'عنوان الموقع باللغة العربية',
 	'ENGLISHWEBSITETITLE'   => 'عنوان الموقع باللغة الإنجليزية',
-	'SocialMediaLinks'   => 'روابط مواقع السوشيال ميديا',
+	'SocialMediaLinks'   => 'روابط التواصل الاجتماعى',
 	'URLOF'   => 'رابط',
 	'HomeWelcomeImages'   => 'صور الترحيب الرئيسية',
 	'Chooseimagefile'   => 'اختر صورة',
