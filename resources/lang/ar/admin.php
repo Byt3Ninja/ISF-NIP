@@ -652,4 +652,6 @@ return [
 	'admin'=>' مسؤل ',
 	'sending_request'=>' تم قبول طلب جلسه الارشاد ',
 	'Expertises'=>' الخبرات ',
+	'HomePage'=>' الصفحة الرئيسية ',
+	'HomePageSetting'=>' اعدادات الصفحة الرئيسية ',
 ];

@@ -297,6 +297,12 @@ public function calendar(Request $request){
         $Currency = $request->input('Currency');
         
 
+if($request->HomePage == 'on'){
+    $homePage = '1';
+}else{
+    $homePage = '0';
+}
+
         $updateSittings = Settings::where('id', $id)->first();
 
         $updateSittings->ar_title = $site_ar_title;
@@ -309,6 +315,7 @@ public function calendar(Request $request){
         $updateSittings->Default_Language = $Default_Language;
         $updateSittings->timezone = $timezone;
         $updateSittings->Currency = $Currency;
+        $updateSittings->HomePage = $homePage;
         $updateSittings->save();
 
 

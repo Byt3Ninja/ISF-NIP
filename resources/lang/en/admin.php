@@ -652,5 +652,7 @@ return [
 	'admin'=>' Admin ',
 	'sending_request'=>' Accepted Request ',
 	'Expertises'=>' Expertises ',
+	'HomePage'=>' Home Page ',
+	'HomePageSetting'=>' Home Page Settings ',
 	
 ];
