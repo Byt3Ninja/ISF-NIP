@@ -651,4 +651,5 @@ return [
 	'registered'=>' مؤسس ',
 	'admin'=>' مسؤل ',
 	'sending_request'=>' تم قبول طلب جلسه الارشاد ',
+	'Expertises'=>' الخبرات ',
 ];

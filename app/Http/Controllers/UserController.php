@@ -133,9 +133,10 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+
         try{
 
-//            $this->preProcessingCheck('edit_user');
+            $this->preProcessingCheck('edit_user');
             $roles = Role::all();
             $countries = Country::all();
             return view('admin/users/edit', compact('user', 'roles','countries'));
@@ -144,7 +145,7 @@ class UserController extends Controller
 
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            abort(500);
+            abort(401);
 
         }
     }
