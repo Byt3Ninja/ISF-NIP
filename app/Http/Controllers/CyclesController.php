@@ -304,7 +304,13 @@ class CyclesController extends Controller
     function view ($c,Request $request)
     {
         $private = Cycle::where('private',$c)->first();
-        $c=$private->id;
+        
+        if($private == null){
+            $private = Cycle::where('id',$c)->first();
+            $c = $private->id;
+        }else{
+            $c = $private->id;
+        }
         
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);}
