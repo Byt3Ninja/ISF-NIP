@@ -101,11 +101,11 @@
                                             </tbody>
                                         </table>
 <br><br><br>
-
+@if(!empty($icons))
 @foreach($icons as $icon)
     <img style="width: 150px;" src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar }}">
 @endforeach
-
+@endif
 
 
 <br><br><br>

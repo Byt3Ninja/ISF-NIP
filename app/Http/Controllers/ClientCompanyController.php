@@ -40,11 +40,13 @@ class ClientCompanyController extends Controller
                                 ->with('city')
                                 ->with('user')
                                 ->findorfail($id);
-
+if(!empty($company->Sustainable_development)){
                                 $sustainableDevelopment = json_decode($company->Sustainable_development, true);
 
                                 $icons = SustainableIcon::whereIn('title', $sustainableDevelopment)->get();
-
+}else{
+    $icons = '';
+}
                                 // استرجاع الأيقونات المناسبة
                                 // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
                                 
