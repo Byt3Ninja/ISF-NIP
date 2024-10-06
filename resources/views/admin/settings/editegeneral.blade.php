@@ -227,7 +227,7 @@
                           <div class="col-md-12 col-12">
                           <div class="form-check form-switch mb-2">
                             <input class="form-check-input" name="HomePage" type="checkbox"  {{ $Title->HomePage == '1' ? 'checked' : '' }} />
-                            <label class="form-check-label">{{ __('admin.HomePage') }}</label
+                            <label class="form-check-label">{{ __('settings.HomeSettings') }}</label
                             >
                           </div>
                           </div>
