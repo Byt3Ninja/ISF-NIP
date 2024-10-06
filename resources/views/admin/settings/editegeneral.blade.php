@@ -95,7 +95,8 @@
               <!-- Start Tabs Data -->
               <div class="tab-content" id="settingsTabsContent">
                 <!-- general settings tab -->
-                <div class="tab-pane fade show active" id="general-settings" role="tabpanel" aria-labelledby="general-settings-tab">
+                <!-- Active And Show ===================================================== -->
+                <div class="tab-pane fade  show active" id="general-settings" role="tabpanel" aria-labelledby="general-settings-tab">
                   <form class="form" action= "{{ route('updateone') }}" method="POST" enctype="multipart/form-data">
                     {!! csrf_field() !!}
                     @method('PUT')
@@ -245,7 +246,7 @@
                 <!-- End general settings tab -->
 
                 <!-- app identity tab -->
-                <div class="tab-pane fade" id="app-identity" role="tabpanel" aria-labelledby="app-identity-tab">
+                <div class="tab-pane fade " id="app-identity" role="tabpanel" aria-labelledby="app-identity-tab">
                   <form class="form" action= "{{ route('updatelogo') }}" method="POST" enctype="multipart/form-data">
                     {!! csrf_field() !!}
                     @method('PUT')
@@ -256,25 +257,45 @@
                       </div>
                       <div class="card-content">
                         <div class="card-body">
-                          <div class="col-md-12 col-12">
+                          <div class="col-md-6 col-12" style="display: inline-block;">
                             <div class="form-label-group">
                               <label class="form-label" for="logo">{{ __('settings.Logo') }}</label>
                               <input id="logo" type="file" class="form-control"
                                 value="{{ $Title->Logo }}" name="logo">
                             </div>
                           </div>
-                          <div class="col-md-12 col-12">
+
+                          <div class="col-md-5 col-12" style="display: inline-block;text-align: center;">
+                            <div class="form-label-group">
+                              <img src="/images/logo/{{ $Title->Logo }}" alt="Logo" style="width: 200px;"   >
+                            </div>
+                          </div>
+
+                          <div class="col-md-6 col-12" style="display: inline-block;">
                             <div class="form-label-group">
                               <label class="form-label" for="header">{{ __('settings.header') }}</label>
                               <input id="header" type="file" class="form-control" value="{{ $Title->header }}"
                                 name="header">
                               </div>
                             </div>
-                          <div class="col-md-12 col-12">
+
+                            <div class="col-md-5 col-12" style="display: inline-block;text-align: center;">
+                              <div class="form-label-group">
+                                <img src="/images/header/{{ $Title->header }}" alt="header" style="width: 200px;"  >
+                              </div>
+                            </div>
+
+                          <div class="col-md-6 col-12" style="display: inline-block;">
                             <div class="form-label-group">
                               <label class="form-label" for="footer">{{ __('settings.footer') }}</label>
                               <input type="file" class="form-control" value="{{ $Title->footer }}" name="footer"
                                 id="footer">
+                            </div>
+                          </div>
+
+                          <div class="col-md-5 col-12" style="display: inline-block;text-align: center;">
+                            <div class="form-label-group">
+                              <img src="/images/footer/{{ $Title->footer }}" alt="footer" style="width: 200px;"   >
                             </div>
                           </div>
 
@@ -659,6 +680,9 @@
                 <div class="card-header">
                     <h5 class="card-title">{{__('settings.HomeWelcomeImages')}}</h5>
                 </div>
+                <form action="{{ route('updateSMImgHome') }}" method="POST" enctype="multipart/form-data" >
+                  @csrf
+                  @method('PUT')
                 <div class="card-content">
                     <div class="card-body">
               <div class="col-md-12 col-12">
@@ -820,6 +844,8 @@
                             </div>
                         </div>
 
+                      </form>
+
               </div> 
               <div class="card">
                 <div class="card-header">
@@ -827,6 +853,9 @@
                 </div>
                 <div class="card-content">
                     <div class="card-body">
+                      <form action="{{ route('updateSMAchiev') }}" method="POST"  >
+                        @csrf
+                        @method('PUT')
                         @foreach ($Counters as $num => $Counter)
                             <div class="col-md-3 col-3">
                                 <label>{{__('settings.Select Icon')}}  {{$num+1}}</label>
@@ -869,6 +898,7 @@
                         <div class="col-12 d-flex justify-content-end mt-6">
                             <button type="submit" class="btn btn-primary mr-1 mb-1">{{__('settings.Submit')}}</button>
                         </div>
+                      </form>
                     </div>
                 </div>
               </div>
