@@ -95,10 +95,9 @@
               <!-- Start Tabs Data -->
               <div class="tab-content" id="settingsTabsContent">
                 <!-- general settings tab -->
-                <div class="tab-pane fade show active" id="general-settings" role="tabpanel"
-                  aria-labelledby="general-settings-tab">
-                  <form class="form" action= "{{ route('updateone') }}" method="POST"
-                    enctype="multipart/form-data">
+                <!-- Active And Show ===================================================== -->
+                <div class="tab-pane fade  show active" id="general-settings" role="tabpanel" aria-labelledby="general-settings-tab">
+                  <form class="form" action= "{{ route('updateone') }}" method="POST" enctype="multipart/form-data">
                     {!! csrf_field() !!}
                     @method('PUT')
                     <input type="hidden" name="id" value="{{ $Title->id }}">
@@ -253,9 +252,8 @@
                 <!-- End general settings tab -->
 
                 <!-- app identity tab -->
-                <div class="tab-pane fade" id="app-identity" role="tabpanel" aria-labelledby="app-identity-tab">
-                  <form class="form" action= "{{ route('updatelogo') }}" method="POST"
-                    enctype="multipart/form-data">
+                <div class="tab-pane fade " id="app-identity" role="tabpanel" aria-labelledby="app-identity-tab">
+                  <form class="form" action= "{{ route('updatelogo') }}" method="POST" enctype="multipart/form-data">
                     {!! csrf_field() !!}
                     @method('PUT')
                     <input type="hidden" name="id" value="{{ $Title->id }}">
@@ -265,25 +263,44 @@
                       </div>
                       <div class="card-content">
                         <div class="card-body">
-                          <div class="col-md-12 col-12">
+                          <div class="col-md-6 col-12" style="display: inline-block;">
                             <div class="form-label-group">
                               <label class="form-label" for="logo">{{ __('settings.Logo') }}</label>
                               <input id="logo" type="file" class="form-control" value="{{ $Title->Logo }}"
                                 name="logo">
                             </div>
                           </div>
-                          <div class="col-md-12 col-12">
+
+                          <div class="col-md-5 col-12" style="display: inline-block;text-align: center;">
+                            <div class="form-label-group">
+                              <img src="/images/logo/{{ $Title->Logo }}" alt="Logo" style="width: 200px;"   >
+                            </div>
+                          </div>
+
+                          <div class="col-md-6 col-12" style="display: inline-block;">
                             <div class="form-label-group">
                               <label class="form-label" for="header">{{ __('settings.header') }}</label>
                               <input id="header" type="file" class="form-control" value="{{ $Title->header }}"
                                 name="header">
                             </div>
-                          </div>
-                          <div class="col-md-12 col-12">
+
+                            <div class="col-md-5 col-12" style="display: inline-block;text-align: center;">
+                              <div class="form-label-group">
+                                <img src="/images/header/{{ $Title->header }}" alt="header" style="width: 200px;"  >
+                              </div>
+                            </div>
+
+                          <div class="col-md-6 col-12" style="display: inline-block;">
                             <div class="form-label-group">
                               <label class="form-label" for="footer">{{ __('settings.footer') }}</label>
                               <input type="file" class="form-control" value="{{ $Title->footer }}" name="footer"
                                 id="footer">
+                            </div>
+                          </div>
+
+                          <div class="col-md-5 col-12" style="display: inline-block;text-align: center;">
+                            <div class="form-label-group">
+                              <img src="/images/footer/{{ $Title->footer }}" alt="footer" style="width: 200px;"   >
                             </div>
                           </div>
 
@@ -691,23 +708,174 @@
 
               </div>
               <!-- End Tabs Data -->
-              <!-- Start Home Page -->
-              @if ($Title->HomePage == true)
-                <div class="tab-pane fade" id="HomePage" role="tabpanel" aria-labelledby="HomePage-tab">
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="card-title">{{ __('settings.HomeWelcomeImages') }}</h5>
-                    </div>
-                    <div class="card-content">
-                      <div class="card-body">
-                        <div class="col-md-12 col-12">
-                          <div class="form-label-group">
-                            <label>{{ __('settings.1STIMAGE') }}</label>
-                            <div class="custom-file">
-                              <input type="file" class="form-control" name="img1" id="img1"
-                                accept='image/*'>
-                              <label class="form-label" class="custom-file-label"
-                                for="img1">{{ __('settings.Chooseimagefile', ['id' => '1']) }}</label>
+<!-- Start Home Page -->
+@if ($Title->HomePage == true)
+<div class="tab-pane fade" id="HomePage" role="tabpanel" aria-labelledby="HomePage-tab">
+              <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">{{__('settings.HomeWelcomeImages')}}</h5>
+                </div>
+                <form action="{{ route('updateSMImgHome') }}" method="POST" enctype="multipart/form-data" >
+                  @csrf
+                  @method('PUT')
+                <div class="card-content">
+                    <div class="card-body">
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+              <label>{{__('settings.1STIMAGE')}}</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="form-control" name="img1" id="img1" accept='image/*'>
+                                            <label class="form-label" class="custom-file-label" for="img1">{{__('settings.Chooseimagefile',['id'=>'1'])}}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img1->ar_title}}" name="ar_img1title" required>
+                                        <label class="form-label" for="ar_img1title">{{__('settings.Image')}} 1 - {{__('settings.ARABICTITLE')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img1->title}}" name="img1title" required>
+                                        <label class="form-label" for="img1title">{{__('settings.Image')}} 1 - {{__('settings.ENGLISHTITLE')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img1->ar_set1}}" name="ar_img1title2" required>
+                                        <label class="form-label" for="ar_img1title2">{{__('settings.Image')}} 1 - {{__('settings.ARABICECONDTITLE')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img1->set1}}" name="img1title2" required>
+                                        <label class="form-label" for="img1title2">{{__('settings.Image')}} 1 - {{__('settings.ENGLISHSECONDTITLE')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img1->ar_dsc}}" name="ar_img1dsc" required>
+                                        <label class="form-label" for="ar_img1dsc">{{__('settings.Image')}} 1 - {{__('settings.ARABICDESCRIPTION')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img1->dsc}}" name="img1dsc" required>
+                                        <label class="form-label" for="img1dsc">{{__('settings.Image')}} 1 - {{__('settings.ENGLISHDESCRIPTION')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img1->url}}" name="img1url" required>
+                                        <label class="form-label" for="img1url">{{__('settings.Image')}} 1 - {{__('settings.URLOF')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+              <label>{{__('settings.2NDIMAGE')}}</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="form-control" name="img2" id="img2" accept='image/*'>
+                                            <label class="form-label" class="custom-file-label" for="img2">{{__('settings.Chooseimagefile',['id'=>'2'])}}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img2->ar_title}}" id="ar_img2title" name="ar_img2title" required>
+                                        <label class="form-label" for="ar_img2title">{{__('settings.Image')}} 2 - {{__('settings.ARABICTITLE')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img2->title}}" name="img2title" id="img2title" required>
+                                        <label class="form-label" for="img2title">{{__('settings.Image')}} 2 - {{__('settings.ENGLISHTITLE')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img2->ar_set1}}" name="ar_img2title2" id="ar_img2title2" required>
+                                        <label class="form-label" for="ar_img2title2">{{__('settings.Image')}} 2 - {{__('settings.ARABICECONDTITLE')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img2->set1}}" name="img2title2" id="img2title2" required>
+                                        <label class="form-label" for="img2title2">{{__('settings.Image')}} 2 - {{__('settings.ENGLISHSECONDTITLE')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img2->ar_dsc}}" name="ar_img2dsc" id="ar_img2dsc" required>
+                                        <label class="form-label" for="ar_img2dsc">{{__('settings.Image')}} 2 - {{__('settings.ARABICDESCRIPTION')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img2->dsc}}" name="img2dsc" id="img2dsc" required>
+                                        <label class="form-label" for="img2dsc">{{__('settings.Image')}} 2 - {{__('settings.ENGLISHDESCRIPTION')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img2->url}}" name="img2url" id="img2url" required>
+                                        <label class="form-label" for="img2url">{{__('settings.Image')}} 2 - {{__('settings.URLOF')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+              <label>{{__('settings.3RDIMAGE')}}</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="form-control" name="img3" id="img3" accept='image/*'>
+                                            <label class="form-label" class="custom-file-label" for="img3">{{__('settings.Chooseimagefile',['id'=>'3'])}}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img3->ar_title}}" name="ar_img3title" id="ar_img3title" required>
+                                        <label class="form-label" for="ar_img3title">{{__('settings.Image')}} 3 - {{__('settings.ARABICTITLE')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img3->title}}" name="img3title" id="img3title" required>
+                                        <label class="form-label" for="img3title">{{__('settings.Image')}} 3 - {{__('settings.ENGLISHTITLE')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img3->ar_set1}}" name="ar_img3title2" id="ar_img3title2" required>
+                                        <label class="form-label" for="ar_img3title2">{{__('settings.Image')}} 3 - {{__('settings.ARABICECONDTITLE')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img3->set1}}" name="img3title2" id="img3title2" required>
+                                        <label class="form-label" for="img3title2">{{__('settings.Image')}} 3 - {{__('settings.ENGLISHSECONDTITLE')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img3->ar_dsc}}" name="ar_img3dsc" id="ar_img3dsc" required>
+                                        <label class="form-label" for="ar_img3dsc">{{__('settings.Image')}} 3 - {{__('settings.ARABICDESCRIPTION')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img3->dsc}}" name="img3dsc" id="img3dsc" required>
+                                        <label class="form-label" for="img3dsc">{{__('settings.Image')}} 3 - {{__('settings.ENGLISHDESCRIPTION')}}</label>
+                                    </div>
+                                </div>
+              <div class="col-md-12 col-12">
+                                    <div class="form-label-group">
+                                        <input type="text" class="form-control" value="{{$Img3->url}}" name="img3url" id="img3url" required>
+                                        <label class="form-label" for="img3url">{{__('settings.Image')}} 3 - {{__('settings.URLOF')}}</label>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex justify-content-end mt-6">
+                                    <button type="submit" class="btn btn-primary mr-1 mb-1">{{__('settings.Submit')}}</button>
+                                </div>
                             </div>
                           </div>
                         </div>
@@ -908,13 +1076,18 @@
                       </div>
                     </div>
 
-                  </div>
-                  <div class="card">
-                    <div class="card-header">
-                      <h5 class="card-title">{{ __('settings.Impact Icons') }}</h5>
-                    </div>
-                    <div class="card-content">
-                      <div class="card-body">
+                      </form>
+
+              </div> 
+              <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">{{__('settings.Impact Icons')}}</h5>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                      <form action="{{ route('updateSMAchiev') }}" method="POST"  >
+                        @csrf
+                        @method('PUT')
                         @foreach ($Counters as $num => $Counter)
                           <div class="col-md-3 col-3">
                             <label>{{ __('settings.Select Icon') }} {{ $num + 1 }}</label>
@@ -969,7 +1142,7 @@
                           <button type="submit"
                             class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
                         </div>
-                      </div>
+                      </form>
                     </div>
                   </div>
                 </div>

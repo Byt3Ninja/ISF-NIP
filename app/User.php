@@ -139,7 +139,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Tags::class,'user_id');
     }
-
+    public function mentorshipRequests()
+    {
+        return $this->hasMany(MentorshipRequest::class, 'mentor_id');
+    }
 
 
 }

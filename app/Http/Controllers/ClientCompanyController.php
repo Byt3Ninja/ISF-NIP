@@ -14,6 +14,7 @@ use App\City;
 use App\Company;
 use App\Like;
 use App\Settings;
+use App\SustainableIcon;
 use DB;
 use Auth;
 use Log;
@@ -39,7 +40,16 @@ class ClientCompanyController extends Controller
                                 ->with('city')
                                 ->with('user')
                                 ->findorfail($id);
-            return view('admin/clients/company_profile', compact('company'));
+
+                                $sustainableDevelopment = json_decode($company->Sustainable_development, true);
+
+                                $icons = SustainableIcon::whereIn('title', $sustainableDevelopment)->get();
+
+                                // استرجاع الأيقونات المناسبة
+                                // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
+                                
+                                
+            return view('admin/clients/company_profile', compact('company','icons'));
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
