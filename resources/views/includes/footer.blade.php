@@ -10,7 +10,7 @@
                         <!--Footer Column-->
                         <div class="footer-column col-md-6 col-sm-6 col-xs-12">
                             <div class="footer-widget about-widget">
-                                <figure class="footer-logo"><a href="https://www.usaid.gov/"><img style="width: 80%;" src="/images/logo/usaid-logo.jpg" alt="USAID"></a></figure>                               
+                                <figure class="footer-logo"><a href="https://growthlabs.app/"><img style="width: 80%;" src="/images/logo/gl-logo.png" alt="USAID"></a></figure>                               
                                 <div class="widget-content">
                                     <div class="text">
 									<p>{{$l=='ar'?'هذا الموقع تم تنفيذه بدعم من الوكالة الأمريكية للتنمية الدولية.':'This portal was produced with the financial support of the USAID.'}}</p>
