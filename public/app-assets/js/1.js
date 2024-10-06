@@ -334,8 +334,40 @@ $(document).on('click', '.vallevel2', function(){
     var role = $('.getValLevel').val('Advanced');
 });
 
-
-
+$('.RateShowOrNot').change(function() {
+    if ($(this).is(':checked')) {
+        // إذا كانت العلامة مفعلة
+        $('.RateSelect').show();   // إظهار العنصر
+        $('.Search').hide();       // إخفاء العنصر
+        $('.Search').val('');
+        $('.ExpertiesInput').hide();
+        $('.ExpertiesSearch').val('');
+    } else {
+        // إذا كانت العلامة غير مفعلة
+        $('.RateSelect').hide();   // إخفاء العنصر
+        $('.rateSearch').val('');
+        $('.Search').show();       // إظهار العنصر (أو أي منطق تريده)
+        $('.ExpertiesInput').hide(); // إظهار العنصر (أو أي منطق تريده)
+        $('.ExpertiesSearch').val('');
+    }
+});
+$('.ExpertiesShowOrNot').change(function() {
+    if ($(this).is(':checked')) {
+        // إذا كانت العلامة مفعلة
+        $('.RateSelect').hide();  // إظهار العنصر
+        $('.rateSearch').val('');
+        $('.Search').hide();       // إخفاء العنصر
+        $('.Search').val('');
+        $('.ExpertiesInput').show();
+    } else {
+        // إذا كانت العلامة غير مفعلة
+        $('.RateSelect').hide();   // إخفاء العنصر
+        $('.rateSearch').val('');
+        $('.Search').show();       // إظهار العنصر (أو أي منطق تريده)
+        $('.ExpertiesInput').hide(); // إظهار العنصر (أو أي منطق تريده)
+        $('.ExpertiesSearch').val('');
+    }
+});
 
 
 

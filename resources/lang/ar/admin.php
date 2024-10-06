@@ -654,4 +654,6 @@ return [
 	'Expertises'=>' الخبرات ',
 	'HomePage'=>' الصفحة الرئيسية ',
 	'HomePageSetting'=>' اعدادات الصفحة الرئيسية ',
+	'empty'=>' فارغ ',
+	'Experties_Search'=>' بحث بالخبرات ',
 ];

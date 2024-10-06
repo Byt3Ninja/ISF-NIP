@@ -94,7 +94,7 @@
                   </p>
                   <span class="fs-5">
                     <!-- Total Mentors Count -->
-                    {{ count($mentors) }} 1
+                    {{ count($mentors) }} 
                   </span>
                 </div>
               </div>
@@ -103,12 +103,12 @@
                 <!-- Search Container -->
                 <div class="d-flex align-items-center justify-content-end">
                   <!-- Filter -->
-                  <form method="GET">
+                  <form method="GET" action="{{ route('Mentors_Filter') }}">
                     <div class="d-flex align-items-center">
                       <div style="display: flex; align-items: center;" class="mx-2">
                         <button 
-                          id="filterButton"
-                          type="button"
+                          {{-- id="filterButton" --}}
+                          type="submit"
                           class="btn bg-primary p-3 d-flex justify-content-center align-items-center custom-shadow"
                           style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
                           <i class="ti ti-filter text-white ti-24px"></i>
@@ -119,23 +119,67 @@
                         <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
                           <i class="ti ti-search text-primary ti-24px"></i>
                         </div>
-
+                        <div @if (request('ExpertiesSearch') !='') style="display: none;" @endif class="Search">
                         <input
-                          class="form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
-                          style="width: 366px;" id="search-table" placeholder="Search" name="search"
+                          class="Search form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
+                          style="width: 366px;" id="search-table" placeholder="{{ __('admin.Search') }}" name="search"
                           value="{{ request('search') }}"  />
+                        </div>
+<div @if (request('rateSearch') =='') style="display: none;" @endif class="RateSelect">
+  <select name="rateSearch" class="rateSearch form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
+  style="width: 366px;">
+    <option value="" {{ request('rateSearch') == '' ? 'selected':'' }} >{{ __('admin.empty') }}</option>
+    <option value="1" {{ request('rateSearch') == '1' ? 'selected':'' }} >1</option>
+    <option value="2" {{ request('rateSearch') == '2' ? 'selected':'' }}>2</option>
+    <option value="3" {{ request('rateSearch') == '3' ? 'selected':'' }}>3</option>
+    <option value="4" {{ request('rateSearch') == '4' ? 'selected':'' }}>4</option>
+    <option value="5" {{ request('rateSearch') == '5' ? 'selected':'' }}>5</option>
+  </select>
+</div>
+<div @if (request('ExpertiesSearch') =='') style="display: none;" @endif class="ExpertiesInput">
+<input type="text" value="{{ request('ExpertiesSearch') }}" placeholder="{{ __('admin.Experties_Search') }}" name="ExpertiesSearch" class="ExpertiesSearch form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
+style="width: 366px;">
+</div>
+
                       </div>
                     </div>
+
+
+                    <div class="row">
+                      <!-- Sorting -->
+                      <div id="sortContainer" class="d-none d-md-flex align-items-center mt-4">
+                        <div class="row d-flex align-items-center" style="gap: 10px;">
+                          <div class="col-md-3 d-flex flex-nowrap align-items-center">
+                            <span class="fw-bold mx-1 text-black d-none d-md-flex" style="font-size:13px;">{{ __('admin.Rate') }}</span>
+                            <div class="btn btn-sm btn-label-primary rounded-pill"
+                              style="height:25px; min-width:95px; font-size:13px;">
+                              <i class="ti ti-star me-2 text-warning"></i>
+                              <input type="checkbox" {{ request('rateSearch') !=''? 'checked': '' }} class="RateShowOrNot" >
+                              
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row d-flex align-items-center" style="gap: 10px;">
+                          <div class="col-md-3 d-flex flex-nowrap align-items-center">
+                            <span class="fw-bold mx-1 text-black d-none d-md-flex" style="font-size:13px;">{{ __('admin.Expertises') }}</span>
+                            <div class="btn btn-sm btn-label-primary rounded-pill"
+                              style="height:25px; min-width:95px; font-size:13px;">
+                              <i class="ti-24px ti ti-brand-linkedin me-2 text-info"></i>
+                              <input type="checkbox" {{ request('ExpertiesSearch') !=''? 'checked': '' }} class="ExpertiesShowOrNot" >
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Sort Content Here -->
+                      </div>
+                      <!-- Sorting -->
+                    </div>
+
+
                   </form>
                 </div>
                 <!-- / Search Container -->
-                <div class="row">
-                  <!-- Sorting -->
-                  <div id="sortContainer" class="d-none d-md-flex align-items-center mt-4">
-                    <!-- Sort Content Here -->
-                  </div>
-                  <!-- Sorting -->
-                </div>
+                
               </div>
             </div>
             <!-- Search Bar (Mobile) -->

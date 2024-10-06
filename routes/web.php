@@ -146,7 +146,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
 	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
-    Route::get('/show/Mentors', 'ClientProfileController@showMintors');
+    Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('Mentors_Filter');
 
     Route::resource('Tags', 'TagsController');
     Route::resource('TimeSheet', 'TimeSheetController');

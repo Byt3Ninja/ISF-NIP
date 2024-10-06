@@ -20,6 +20,8 @@ use App\CyclesMentors;
 use App\Schedule;
 use App\MentorshipRequest;
 use App\MentorshipTask;
+use Illuminate\Http\Request;
+
 
 class ClientProfileController extends Controller
 {
@@ -214,10 +216,51 @@ class ClientProfileController extends Controller
     }
     }
 
-    public function showMintors(){
+    public function showMintors(Request $request){
 
-      
-        $mentors = User::role('mentor')->get();
+        $search = $request->input('search');
+        $rateSearch = $request->input('rateSearch');
+        $ExpertiesSearch = $request->input('ExpertiesSearch');
+
+        
+        
+    $l = app()->getLocale();
+    
+    // إعداد الأعمدة الصحيحة بناءً على اللغة
+    $firstNameColumn = $l == 'ar' ? 'first_name_ar' : 'first_name_en';
+    $lastNameColumn = $l == 'ar' ? 'last_name_ar' : 'last_name_en';
+
+    // البحث في الموجهين
+    $mentors = User::role('mentor')
+        ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
+
+    if ($rateSearch > 0) {
+        $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
+            $q->where(function ($q2) {
+                $q2->where('approved', 'Yes')
+                   ->orWhereNull('approved');
+            })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
+        });
+    }
+    
+    if (!empty($ExpertiesSearch)) {
+        // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
+        $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
+
+        if ($expertiesMentor) { // تأكد من وجود الخبرة
+            $expid = $expertiesMentor->id;
+
+            // تصفية الموجهين بناءً على الخبرة
+            $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
+                $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
+            });
+        }
+    }
+
+
+    // جلب النتائج
+    $mentors = $mentors->get();
+        // $mentors = User::role('mentor')->get();
         
         
 
