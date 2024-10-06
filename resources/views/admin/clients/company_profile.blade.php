@@ -100,7 +100,15 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-<br>
+<br><br><br>
+
+@foreach($icons as $icon)
+    <img style="width: 150px;" src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar }}">
+@endforeach
+
+
+
+<br><br><br>
                                         <h5 class="mb-1"><i class="bx bx-user"></i> {{__('admin.Contact Person Info')}}</h5>
                                         <hr>
                                         <table class="table table-borderless table-hover mb-0">

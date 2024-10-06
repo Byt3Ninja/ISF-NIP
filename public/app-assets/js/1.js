@@ -369,7 +369,25 @@ $('.ExpertiesShowOrNot').change(function() {
     }
 });
 
+$('#CoursCategories').select2({
+    templateResult: formatState,
+    templateSelection: formatState
+});
 
+
+// دالة لتخصيص الخيارات بالألوان
+function formatState (state) {
+if (!state.id) {
+    return state.text; // Return the default text for placeholders
+}
+
+// تخصيص كل خيار حسب الفئة
+var colorClass = $(state.element).attr('class');
+var $state = $(
+    '<span class="' + colorClass + '">' + state.text + '</span>'
+);
+return $state;
+}
 
 
 
