@@ -22,7 +22,7 @@
               <div class="card">
                 <div class="card-content">
                   <div class="card-body card-dashboard">
-                    <div class="invoice-create-btn mb-1">
+                    <div class="invoice-create-btn mb-4">
                       <a href="{{ route('serviceCategories.create') }}" class="btn btn-primary glow">
                         {{ __('admin.Add New') }}
                         <i class="ti ti-plus mx-1"></i>
@@ -36,7 +36,7 @@
                               <span aria-hidden="true">&times;</span>
                             </button>
                             <div class="d-flex align-items-center">
-                              <i class="bx bx-like"></i>
+                              <i class="ti ti-check"></i>
                               <span>
                                 {{ __('admin.' . session()->get('msg')) }}
                                 {{ Session::forget('msg') }}
@@ -75,13 +75,13 @@
                               <td>
                                 @can('edit_service_category')
                                   <a href="{{ route('serviceCategories.edit', ['serviceCategory' => $category->id]) }}"
-                                    class="btn btn-label-primary"><i class="ti ti-edit"> </i></a>
+                                    class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
                                 @endcan
 
                                 @can('delete_service_category')
                                   <button id='deleteAction' data-id='{{ $category->id }}'
                                     data-url="{{ route('serviceCategories.destroy', ['serviceCategory' => $category->id]) }}"
-                                    type="button" class="btn btn-label-danger"><i class="ti ti-trash"> </i></button>
+                                    type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>
                                 @endcan
                               </td>
                             </tr>

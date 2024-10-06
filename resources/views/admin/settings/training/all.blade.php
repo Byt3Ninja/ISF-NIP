@@ -96,13 +96,13 @@
                               <td>
                                 <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
                                   class="btn btn-icon btn-label-info rounded-circle">
-                                  <i class="ti ti-edit"></i></a>
+                                  <i class="ti ti-edit text-info"></i></a>
 
                                 @if (isset($course))
                                   <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle"
                                     onclick="deleteme({{ $course->id ?? 0 }},1)">
                                     <span class="align-middle ml-25">
-                                      <i class="ti ti-trash"></i>
+                                      <i class="ti ti-trash text-danger"></i>
                                     </span>
                                   </button>
                                 @endif

@@ -110,7 +110,7 @@
 																<div class="dropdown-menu">
 																	<a href="{{ route('quizzes.questions', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-list-ul"></i> {{ __('admin.manageQuestions') }} </a>
 																	<a href="{{ route('quizzes.edit', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-edit"></i> {{ __('admin.Edit') }}</a>
-																	<a id='deleteAction' data-id='{{ $quiz->id }}' data-url="{{ route('quizzes.destroy', ['quiz' => $quiz->id]) }}" href="{{ route('quizzes.destroy', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-trash"></i> {{ __('admin.Delete') }} </a>
+																	<a id='deleteAction' data-id='{{ $quiz->id }}' data-url="{{ route('quizzes.destroy', ['quiz' => $quiz->id]) }}" href="{{ route('quizzes.destroy', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="ti ti-trash text-danger"></i> {{ __('admin.Delete') }} </a>
 																</div>
 															</div>
 														</td>

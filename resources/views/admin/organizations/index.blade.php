@@ -76,7 +76,7 @@
 												<td style="padding: 0px;font-size: small;">
 													@can('delete_user')
 														<button id='deleteAction' data-id='{{$organization->id}}' data-url="{{route('organizations.destroy', ['organization' => $organization->id])}}" type="button" class="btn btn-label-danger btn-sm">
-                              <i class="ti ti-trash"></i>
+                              <i class="ti ti-trash text-danger"></i>
                             </button>
 													@endcan
 												</td>

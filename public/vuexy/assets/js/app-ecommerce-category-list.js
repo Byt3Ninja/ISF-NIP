@@ -165,7 +165,7 @@ $(function () {
           render: function (data, type, full, meta) {
             return (
               '<div class="d-flex align-items-sm-center justify-content-sm-center">' +
-              '<button class="btn btn-icon btn-text-secondary rounded-pill waves-effect waves-light"><i class="ti ti-edit"></i></button>' +
+              '<button class="btn btn-icon btn-text-secondary rounded-pill waves-effect waves-light"><i class="ti ti-edit text-info"></i></button>' +
               '<button class="btn btn-icon btn-text-secondary rounded-pill waves-effect waves-light dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ti ti-dots-vertical ti-md"></i></button>' +
               '<div class="dropdown-menu dropdown-menu-end m-0">' +
               '<a href="javascript:0;" class="dropdown-item">View</a>' +

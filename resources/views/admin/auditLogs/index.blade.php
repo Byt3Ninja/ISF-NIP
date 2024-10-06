@@ -6,10 +6,10 @@
 @section('subTitle', __('audit.Log viewer'). (count($auditLogs)>0 ?" (".$TotalRec.__('audit.record of').count($auditLogs).")":"") )
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
-    @include('admin.includes.heading')
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
+    
         <div class="content-body">
             <section id="basic-datatable">
                 <div class="row">

@@ -52,10 +52,10 @@
                     </select>
                     <div class="input-group-append mx-auto">
                       <button class="btn btn-label-primary" onclick="DoChange(1)">
-                        <i class="ti ti-edit"></i> <span class="mx-1">{{ __('cycles.Edit') }}</span>
+                        <i class="ti ti-edit text-info"></i> <span class="mx-1">{{ __('cycles.Edit') }}</span>
                       </button>
                       <button class="btn btn-label-danger" onclick="DoChange(2)">
-                        <i class="ti ti-trash"></i> <span class="mx-1">{{ __('cycles.Delete') }}</span>
+                        <i class="ti ti-trash text-danger"></i> <span class="mx-1">{{ __('cycles.Delete') }}</span>
                       </button>
                       <button class="btn btn-label-secondary"
                         onclick="window.location.href='/dashboard/final/results/{{ $id }}'">
@@ -196,10 +196,10 @@
                                   @elseif($company->fsession($cstep->id)->join_url)
                                     <button title="Edit" onclick="edit({{ $company->fsession($cstep->id)->id }})"
                                       type="button" class="btn btn-icon rounded-circle btn-label-edit">
-                                      <i class="ti ti-edit"></i></button>
+                                      <i class="ti ti-edit text-info"></i></button>
                                     <button title="Delete" onclick="deleteme({{ $company->fsession($cstep->id)->id }})"
                                       type="button" class="btn btn-icon rounded-circle btn-label-danger">
-                                      <i class="ti ti-trash"></i></button>
+                                      <i class="ti ti-trash text-danger"></i></button>
                                     <a href="{{ $company->fsession($cstep->id)->start_url }}" target="_blank">
                                       <button title="Start Meeting" type="button"
                                         class="btn btn-icon rounded-circle btn-label-success">
@@ -211,11 +211,11 @@
                                   @else
                                     <button title="Edit" onclick="edit({{ $company->fsession($cstep->id)->id }})"
                                       type="button" class="btn btn-icon rounded-circle btn-label-info">
-                                      <i class="ti ti-edit"></i></button>
+                                      <i class="ti ti-edit text-info"></i></button>
 
                                     <button title="Delete" onclick="deleteme({{ $company->fsession($cstep->id)->id }})"
                                       type="button" class="btn btn-icon rounded-circle btn-label-danger">
-                                      <i class="ti ti-trash"></i></button>
+                                      <i class="ti ti-trash text-danger"></i></button>
                                     <button title="Add meeting" onclick="addzoom({{ $company->id }})" type="button"
                                       class="btn btn-icon rounded-circle btn-label-success">
                                       <i class="ti ti-plus"></i></button>

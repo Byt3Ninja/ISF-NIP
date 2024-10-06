@@ -6,9 +6,9 @@
 @section('subTitle', __('Rooms List'))
 @section('content')
     <!-- BEGIN: Content-->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
+    <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">
                     <div class="row breadcrumbs-top">
@@ -36,7 +36,7 @@
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                                 <div class="d-flex align-items-center">
-                                    <i class="bx bx-like"></i>
+                                    <i class="ti ti-check"></i>
                                     <span>
                                         {{ __(''.session()->get('msg')) }}
                                         {{ Session::forget('msg') }}
@@ -102,7 +102,7 @@
                                                 <?php $cont++;?>
                                                 <td style="padding: 0px;font-size: small;">
                                                     @can('delete_user')
-                                                         <button id='deleteAction' data-id='{{$room->id}}' data-url="{{route('rooms.destroy', ['room' => $room->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="bx bx-trash"> </i></button>
+                                                         <button id='deleteAction' data-id='{{$room->id}}' data-url="{{route('rooms.destroy', ['room' => $room->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="ti ti-trash text-danger"> </i></button>
                                                     @endcan
                                                 </td>
                                             </tr>

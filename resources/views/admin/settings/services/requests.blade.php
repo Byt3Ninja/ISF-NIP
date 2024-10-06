@@ -69,7 +69,7 @@
 															<td>{{ $rec->date_time }}</td>
 															<td>
 																<button onclick="reply({{$rec->id}},'{{ $user }}','{{ $rec->service->{'name_'.$l} }}');" type="button" class="btn btn-icon rounded-circle btn-light-success mr-1" >
-																	<i class="bx bx-edit-alt"></i></button>
+																	<i class="ti ti-edit text-info"></i></button>
 																<button onclick="OpenModal({{$rec->user_id}},'{{ $user }}','{{ $rec->service->{'name_'.$l} }}');" type="button" class="btn btn-icon rounded-circle btn-light-primary mr-1" >
 																	<i class="bx bxl-telegram"></i></button>
 															</td>

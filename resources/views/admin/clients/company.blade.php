@@ -25,7 +25,7 @@
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
-      {{-- @include('admin.includes.heading') --}}
+      
       <div class="content-body">
         <h4 class="content-title">{{ __('admin.Edit the Company information') }}</h4>
         <!-- BuilderForm start -->
@@ -38,7 +38,7 @@
                     <button id="infoButton" class="btn btn-primary">
                       {{ __('admin.company Information') }}
                     </button>
-                    {{-- <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div> --}}
+                    {{-- <div class="jq-tab-title" data-tab="2"><i class="ti ti-download text-secondary"></i> {{ __('admin.elevator Pitch') }}</div> --}}
                     {{-- <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div> --}}
                     {{-- <div class="jq-tab-title" data-tab="4"><i class="bx bxs-slideshow"></i> {{ __('admin.about') }}</div> --}}
                     <button id="contactButton" class="btn btn-label-secondary mx-3">

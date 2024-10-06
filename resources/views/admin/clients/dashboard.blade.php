@@ -133,7 +133,7 @@
               <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <div class="d-flex align-items-center">
-                  <i class="bx bx-error"></i>
+                  <i class="ti ti-error"></i>
                   <span> {{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }} </span>
                 </div>
               </div>
