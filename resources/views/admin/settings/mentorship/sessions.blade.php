@@ -250,10 +250,10 @@
                             <td>
                               <button title="Edit" onclick="edit({{ $session->id }})" type="button"
                                 class="btn btn-icon rounded-circle btn-label-info">
-                                <i class="ti ti-edit"></i></button>
+                                <i class="ti ti-edit text-info"></i></button>
                               <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
                                 class="btn btn-icon rounded-circle btn-label-danger">
-                                <i class="ti ti-trash"></i></button>
+                                <i class="ti ti-trash text-danger"></i></button>
                               @if (!$session->approved)
                                 <button title="Approve" onclick="approve({{ $session->id }},'Yes')" type="button"
                                   class="btn btn-icon rounded-circle btn-label-success">
@@ -275,7 +275,7 @@
                               @if ($session->fileurl)
                                 <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank"
                                   title="Download attched" class="btn btn-icon rounded-circle btn-label-primary">
-                                  <i class="ti ti-download"></i></a>
+                                  <i class="ti ti-download text-secondary"></i></a>
                               @endif
                             </td>
                           </tr>

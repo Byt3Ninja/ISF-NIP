@@ -17,9 +17,9 @@ $title=App\BuilderForm::findOrFail($id);
 @section('subTitle', __('builder.Preview'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
         <div class="content-body">
             <section>
                 <div class="row">

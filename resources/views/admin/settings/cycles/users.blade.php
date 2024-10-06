@@ -68,13 +68,13 @@
                           class="align-middle mx-2">{{ __('cycles.steps') }}</span>
                       </button>
                       <button class="btn btn-label-primary" onclick="DoChange(1)">
-                        <i class="ti ti-edit"></i> <span class="align-middle mx-2">{{ __('cycles.Edit') }}</span>
+                        <i class="ti ti-edit text-info"></i> <span class="align-middle mx-2">{{ __('cycles.Edit') }}</span>
                       </button>
                       <button class="btn btn-label-success" onclick="DoChange(2)">
                         <i class="ti ti-plus"></i> <span class="align-middle mx-2">{{ __('cycles.New') }}</span>
                       </button>
                       <button class="btn btn-label-danger" onclick="DoChange(3)">
-                        <i class="ti ti-trash"></i> <span class="align-middle mx-2">{{ __('cycles.Delete') }}</span>
+                        <i class="ti ti-trash text-danger"></i> <span class="align-middle mx-2">{{ __('cycles.Delete') }}</span>
                       </button>
                     </div>
                   </fieldset>

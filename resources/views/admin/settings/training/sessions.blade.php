@@ -119,10 +119,10 @@
                               </td>
                               <td> <button title="Edit" onclick="editme({{ $session->id }})" type="button"
                                   class="btn btn-icon btn-label-info rounded-circle waves-effect">
-                                  <i class="ti ti-edit"></i></button>&nbsp;
+                                  <i class="ti ti-edit text-info"></i></button>&nbsp;
                                 <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
                                   class="btn btn-label-danger btn-icon rounded-circle waves-effect">
-                                  <i class="ti ti-trash"></i></button>
+                                  <i class="ti ti-trash text-danger"></i></button>
 
                               </td>
                             </tr>

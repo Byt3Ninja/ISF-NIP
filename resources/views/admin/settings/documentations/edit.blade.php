@@ -7,7 +7,7 @@
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
-      {{-- @include('admin.includes.heading') --}}
+      
       <div class="content-body">
 
         <section id="basic-input">

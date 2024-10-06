@@ -18,7 +18,7 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                             <div class="d-flex align-items-center">
-                                <i class="bx bx-like"></i>
+                                <i class="ti ti-check"></i>
                                 <span>
                                                     {{ __('admin.'.session()->get('message')) }}
                                                 </span>
@@ -32,7 +32,7 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                             <div class="d-flex align-items-center">
-                                <i class="bx bx-error"></i>
+                                <i class="ti ti-error"></i>
                                 <span>
                                                     {{ __('admin.'.session()->get('message2')) }}
                                     @forelse($errors->all() as $message)

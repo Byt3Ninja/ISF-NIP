@@ -218,7 +218,7 @@ $(function () {
         '</div>' +
         '<a class="todo-item-favorite ml-50">' +
         '<i class="bx bx-star"></i>' + '</a>' +
-        '<a class="todo-item-delete ml-50">' + '<i class="bx bx-trash"></i>' + '</a>' +
+        '<a class="todo-item-delete ml-50">' + '<i class="ti ti-trash text-danger"></i>' + '</a>' +
         '</div></div></li>');
       // new task sidebar, overlay hide
       todoNewTasksidebar.removeClass('show');

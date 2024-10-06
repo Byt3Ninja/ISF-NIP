@@ -119,14 +119,14 @@
                           <td>
                             
                             <div class="btn btn-icon btn-label-info rounded-circle"  data-bs-toggle="modal" data-bs-target="#EditTimeSheet{{ $timesheet->id }}">
-                              <i class="ti ti-edit"></i>
+                              <i class="ti ti-edit text-info"></i>
                             </a></div>
                             <form action="{{ route('TimeSheet.destroy', $timesheet->id) }}" method="POST" style="display: inline-block;">
                               @csrf
                               @method('DELETE')
                               <button class="btn btn-label-danger btn-icon rounded-circle" type="submit" onclick="return confirm('Are you sure you want to delete this post?')">
                                 <span class="align-middle ml-25">
-                                <i class="ti ti-trash"></i>
+                                <i class="ti ti-trash text-danger"></i>
                               </span>
                             </button>
                           </form>

@@ -6,11 +6,11 @@
 @section('subTitle', __('admin.Type`s List'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
-    @include('admin.includes.heading')
-        <div class="invoice-create-btn mb-1">
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
+    
+        <div class="invoice-create-btn mb-4">
             <a href="{{route('types.create')}}" class="btn btn-primary glow">{{ __('admin.Add New')}}</a>
         </div>
         <div class="content-body">
@@ -34,7 +34,7 @@
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                     <div class="d-flex align-items-center">
-                                                        <i class="bx bx-like"></i>
+                                                        <i class="ti ti-check"></i>
                                                         <span>
                                                             {{ __('admin.'.session()->get('msg')) }}
                                                             {{ Session::forget('msg') }}
@@ -72,11 +72,11 @@
                                                         <td>{{$type->created_at}}</td>
                                                         <td>
                                                             @can('edit_type')
-                                                                <a href="{{route('types.edit', ['type' => $type->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                                <a href="{{route('types.edit', ['type' => $type->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
                                                             @endcan
 
                                                             @can('delete_type')
-                                                                <button id='deleteAction' data-id='{{$type->id}}' data-url="{{route('types.destroy', ['type' => $type->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                                <button id='deleteAction' data-id='{{$type->id}}' data-url="{{route('types.destroy', ['type' => $type->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>
                                                             @endcan
                                                         </td>
                                                     </tr>

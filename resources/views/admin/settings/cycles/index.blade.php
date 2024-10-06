@@ -73,7 +73,7 @@
                             <span class="mx-1">{{ __('admin.Startups') }}</span>
                           </button>
                           <button class="btn btn-label-info btn-sm py-2" onclick="DoChange(1)">
-                            <i class="ti ti-edit"></i>
+                            <i class="ti ti-edit text-info"></i>
                             <span class="mx-1">{{ __('cycles.Edit') }}</span>
                           </button>
                           <button class="btn btn-label-primary btn-sm py-2" onclick="DoChange(2)">
@@ -81,7 +81,7 @@
                             <span class="mx-1">{{ __('cycles.New') }}</span>
                           </button>
                           <button class="btn btn-label-danger btn-sm py-2" onclick="DoChange(3)">
-                            <i class="ti ti-trash"></i>
+                            <i class="ti ti-trash text-danger"></i>
                             <span class="mx-1">{{ __('cycles.Delete') }}</span>
                           </button>
                         </div>
@@ -178,12 +178,12 @@
                                 <a href="javascript:void(0)" onclick="ModifyStep(1,{{ $step->id }})"
                                   id="{{ $step->id }}" title="{{ __('cycles.Edit Title and dates') }}">
                                   <span class="btn btn-icon btn-label-info rounded-circle">
-                                    <i class="ti ti-edit"></i></span>
+                                    <i class="ti ti-edit text-info"></i></span>
                                 </a>&nbsp;
                                 <a href="javascript:void(0)" onclick="deleteStep(this.id)" id="{{ $step->id }}"
                                   title="{{ __('cycles.Delete current step') }}">
                                   <span class="btn btn-label-danger btn-icon rounded-circle">
-                                    <i class="ti ti-trash"></i></span>
+                                    <i class="ti ti-trash text-danger"></i></span>
                                 </a>&nbsp;
                                 @php
                                   if ($step->stype == '1') {

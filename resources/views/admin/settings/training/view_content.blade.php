@@ -21,7 +21,7 @@
                     <div class="float-right">
                       <a title="Edit" href="/dashboard/training/editcontent/{{ $content->id }}"
                         class="btn btn-icon rounded-circle btn-label-success">
-                        <i class="ti ti-edit"></i></a>
+                        <i class="ti ti-edit text-info"></i></a>
 
                       <a title="Back" href="/dashboard/training/all/{{ $content->training_id }}"
                         class="btn btn-icon rounded-circle btn-label-primary">

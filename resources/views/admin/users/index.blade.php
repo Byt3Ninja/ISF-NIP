@@ -116,7 +116,7 @@
                             <button id='deleteAction' data-id='{{ $user->id }}'
                               data-url="{{ route('users.destroy', ['user' => $user->id]) }}" type="button"
                               class="btn btn-label-danger btn-sm">
-                              <i class="ti ti-trash"> </i>
+                              <i class="ti ti-trash text-danger"> </i>
                             </button>
                           @endcan
                         </td>
