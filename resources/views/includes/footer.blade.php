@@ -10,13 +10,13 @@
                         <!--Footer Column-->
                         <div class="footer-column col-md-6 col-sm-6 col-xs-12">
                             <div class="footer-widget about-widget">
-                                <figure class="footer-logo"><a href="https://www.usaid.gov/"><img style="width: 80%;" src="/images/logo/usaid-logo.jpg" alt="USAID"></a></figure>                               
+                                <figure class="footer-logo"><a href="https://growthlabs.app/"><img style="width: 80%;" src="/images/logo/gl-logo.png" alt="GrowthLabs"></a></figure>                               
                                 <div class="widget-content">
-                                    <div class="text">
-									<p>{{$l=='ar'?'هذا الموقع تم تنفيذه بدعم من الوكالة الأمريكية للتنمية الدولية.':'This portal was produced with the financial support of the USAID.'}}</p>
-									<p>{{$l=='ar'?"كافة محتويات الموقع مسئولية الحاضنة الإفتراضية، ولا تعكس بالضرورة رؤى الوكالة الإمريكية.":"All contents are the sole responsibility of the VI and do not necessarily reflect the views of the USAID."}}</p> </div>
+                                    <div class="text">labs
+									<p>{{$l=='ar'?'هذا الموقع تم تنفيذه بدعم من الوكالة الأمريكية للتنمية الدولية.':'This portal was produced with the financial support of the Growth.'}}</p>labs
+									<p>{{$l=='ar'?"كافة محتويات الموقع مسئولية الحاضنة الإفتراضية، ولا تعكس بالضرورة رؤى الوكالة الإمريكية.":"All contents are the sole responsibility of the VI and do not necessarily reflect the views of the Growth."}}</p> </div>
                                     <div class="link">
-                                        <a href="https://www.usaid.gov/" class="default_link">{{$l=='ar'?"المزيد":"More About USAID"}}<i class="fa fa-angle-right"></i></a>
+                                        <a href="https://www.growthlabs.app/" class="default_link">{{$l=='ar'?"المزيد":"More About GrowthLabs"}}<i class="fa fa-angle-right"></i></a>
                                     </div>
                                 </div>
                             </div>

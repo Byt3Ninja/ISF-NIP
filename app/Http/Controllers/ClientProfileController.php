@@ -219,7 +219,7 @@ class ClientProfileController extends Controller
       
         $mentors = User::role('mentor')->get();
         
-       
+        
 
             return view('admin/clients/Mentors', compact('mentors'));
 
