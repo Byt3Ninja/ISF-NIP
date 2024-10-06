@@ -9,7 +9,7 @@
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    {{-- @include('admin.includes.heading') --}}
+    
         <div class="content-header mb-4">
           <h4 class="content-card-title">{{ $l == 'en' ? 'Permissions List' : 'قائمة الصلاحيات' }}</h4>
         </div>
@@ -37,7 +37,7 @@
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                     <div class="d-flex align-items-center">
-                                                        <i class="bx bx-like"></i>
+                                                        <i class="ti ti-check"></i>
                                                         <span>
                                                             {{ __('admin.'.session()->get('msg')) }}
                                                             {{ Session::forget('msg') }}
@@ -66,8 +66,8 @@
                                                             {{ $permission->name  ?? '' }}
                                                         </td>
                                                         <td>
-                                                            <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-label-primary"><i class="ti ti-edit"> </i></a>
-{{--                                                            <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>--}}
+                                                            <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
+{{--                                                            <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>--}}
                                                         </td>
 
                                                     </tr>

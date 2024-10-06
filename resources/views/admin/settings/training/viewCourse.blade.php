@@ -19,7 +19,7 @@
             <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
               role="alert">
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              <div class="d-flex align-items-center"> <i class="bx bx-like"></i> <span>
+              <div class="d-flex align-items-center"> <i class="ti ti-check"></i> <span>
                   {{ __('admin.' . session()->get('message')) }} </span> </div>
             </div>
           @endif
@@ -60,13 +60,13 @@
                             <td>
                               <a title="Edit" href="/dashboard/training/editcontent/{{ $content->id }}"
                                 class="btn btn-icon btn-label-info rounded-circle">
-                                <i class="ti ti-edit"></i></a>
+                                <i class="ti ti-edit text-info"></i></a>
 
                               @if (isset($content))
                                 <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle"
                                   onclick="deleteme({{ $content->id ?? 0 }},0)">
                                   <span class="align-middle ml-25">
-                                    <i class="ti ti-trash"></i>
+                                    <i class="ti ti-trash text-danger"></i>
                                   </span>
                                 </button>
                               @endif

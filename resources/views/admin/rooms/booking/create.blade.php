@@ -7,10 +7,10 @@
 @section('subTitle', __('Add new Book'))
 @section('content')
     <!-- BEGIN: Content-->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
-            @include('admin.includes.heading')
+    <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
+            
             <div class="content-body">
                 <!-- BuilderForm start -->
                 <section id="basic-input">
@@ -111,7 +111,7 @@
                                                             <span aria-hidden="true">&times;</span>
                                                         </button>
                                                         <div class="d-flex align-items-center">
-                                                            <i class="bx bx-error"></i>
+                                                            <i class="ti ti-error"></i>
                                                             <span>
                                                         {{ __('admin.'.session()->get('msg')) }}
                                                                 {{ Session::forget('msg') }}

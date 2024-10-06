@@ -9,7 +9,7 @@
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    {{-- @include('admin.includes.heading') --}}
+    
     <div class="content-body">
       <a href="{{route('roles.create')}}" class="btn btn-primary glow mb-4">
         <i class="ti ti-plus me-1"></i>
@@ -68,9 +68,9 @@
                                                           </div>
                                                       </td>
                                                         <td>
-                                                            <a href="{{route('roles.edit', ['role' => $role->id])}}" class="btn btn-label-primary"><i class="ti ti-edit"> </i></a>
+                                                            <a href="{{route('roles.edit', ['role' => $role->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
                                                             @if(!in_array($role->id,[1,2,3,4,5,6,7,8,9,10]))
-                                                                <button id='deleteAction' data-id='{{$role->id}}' data-url="{{route('roles.destroy', ['role' => $role->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash"> </i></button>
+                                                                <button id='deleteAction' data-id='{{$role->id}}' data-url="{{route('roles.destroy', ['role' => $role->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>
                                                             @endif
                                                         </td>
 

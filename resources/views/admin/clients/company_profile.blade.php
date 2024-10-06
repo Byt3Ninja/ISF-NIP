@@ -9,9 +9,9 @@
     }
 </style>
 <!-- BEGIN: Content .users-view .table-borderless td -->
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
         <div class="content-body">
             <!-- users view start -->
             <section class="users-view">
