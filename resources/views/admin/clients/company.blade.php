@@ -17,6 +17,21 @@
     .form-label-group>label {
       display: contents !important;
     }
+    .Red {
+    color: red;
+}
+
+.Green {
+    color: green;
+}
+
+.Yellow {
+    color: yellow;
+}
+
+.Gray {
+    color: rgb(214, 200, 200);
+}
   </style>
 @stop
 
@@ -25,7 +40,7 @@
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
-      {{-- @include('admin.includes.heading') --}}
+      
       <div class="content-body">
         <h4 class="content-title">{{ __('admin.Edit the Company information') }}</h4>
         <!-- BuilderForm start -->
@@ -38,7 +53,7 @@
                     <button id="infoButton" class="btn btn-primary">
                       {{ __('admin.company Information') }}
                     </button>
-                    {{-- <div class="jq-tab-title" data-tab="2"><i class="bx bx-download"></i> {{ __('admin.elevator Pitch') }}</div> --}}
+                    {{-- <div class="jq-tab-title" data-tab="2"><i class="ti ti-download text-secondary"></i> {{ __('admin.elevator Pitch') }}</div> --}}
                     {{-- <div class="jq-tab-title" data-tab="3"><i class="bx bx-bar-chart-alt"></i> {{ __('admin.Funding Data') }}</div> --}}
                     {{-- <div class="jq-tab-title" data-tab="4"><i class="bx bxs-slideshow"></i> {{ __('admin.about') }}</div> --}}
                     <button id="contactButton" class="btn btn-label-secondary mx-3">
@@ -233,7 +248,33 @@
                               name="est_date">
                           </div>
                         </div>
-
+                       
+                        <div class="form-group mb-3">
+                          <label class="form-label fs-6" for="CoursCategories">
+                            {{ __('admin.Sustainable_development') }}
+                          </label>
+                          
+                          <select name="Sustainable_development[]" class="select2 form-control" multiple="multiple" id="CoursCategories">
+                            <option value="no_poverty" @if($client->company->Sustainable_development && in_array('no_poverty', json_decode($client->company->Sustainable_development, true))) selected @endif  >{{ __('admin.no_poverty') }}</option>
+    <option value="zero_hunger" @if($client->company->Sustainable_development && in_array('zero_hunger', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.zero_hunger') }}</option>
+    <option value="good_health" @if($client->company->Sustainable_development && in_array('good_health', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.good_health') }}</option>
+    <option value="quality_education" @if($client->company->Sustainable_development && in_array('quality_education', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.quality_education') }}</option>
+    <option value="gender_equality" @if($client->company->Sustainable_development && in_array('gender_equality', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.gender_equality') }}</option>
+    <option value="clean_water" @if($client->company->Sustainable_development && in_array('clean_water', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.clean_water') }}</option>
+    <option value="clean_energy" @if($client->company->Sustainable_development && in_array('clean_energy', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.clean_energy') }}</option>
+    <option value="decent_work" @if($client->company->Sustainable_development && in_array('decent_work', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.decent_work') }}</option>
+    <option value="industry_innovation" @if($client->company->Sustainable_development && in_array('industry_innovation', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.industry_innovation') }}</option>
+    <option value="reduced_inequalities" @if($client->company->Sustainable_development && in_array('reduced_inequalities', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.reduced_inequalities') }}</option>
+    <option value="sustainable_cities" @if($client->company->Sustainable_development && in_array('sustainable_cities', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.sustainable_cities') }}</option>
+    <option value="responsible_consumption" @if($client->company->Sustainable_development && in_array('responsible_consumption', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.responsible_consumption') }}</option>
+    <option value="climate_action" @if($client->company->Sustainable_development && in_array('climate_action', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.climate_action') }}</option>
+    <option value="life_below_water" @if($client->company->Sustainable_development && in_array('life_below_water', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.life_below_water') }}</option>
+    <option value="life_on_land" @if($client->company->Sustainable_development && in_array('life_on_land', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.life_on_land') }}</option>
+    <option value="peace_justice" @if($client->company->Sustainable_development && in_array('peace_justice', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.peace_justice') }}</option>
+    <option value="partnership_goals" @if($client->company->Sustainable_development && in_array('partnership_goals', json_decode($client->company->Sustainable_development, true))) selected @endif >{{ __('admin.partnership_goals') }}</option>
+                          </select>
+                        </div>
+                        
                         <div class="col-md-6 col-12 mb-3">
                           <div class="form-label-group mt-75">
                             <label class="fs-6 mb-2" for="stage">{{ __('admin.stage') }}*</label>
@@ -1210,5 +1251,7 @@
         }
       }
     }
+
+    
   </script>
 @stop

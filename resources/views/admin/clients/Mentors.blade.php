@@ -14,9 +14,11 @@
     .radius-15 {
       border-radius: 15px;
     }
+
     .custom-shadow {
       box-shadow: 0px 2px 0px 0px #F2F1F3;
     }
+
     .line-clamp-4 {
       display: -webkit-box;
       -webkit-box-orient: vertical;
@@ -31,10 +33,11 @@
       flex-wrap: wrap;
       gap: 10px;
     }
+
     .mentor-card {
       width: 370px;
     }
-    
+
     @media screen and (max-width: 768px) {
       .mentors-list-container {
         min-width: 100%;
@@ -43,6 +46,7 @@
         overflow-x: auto;
         gap: 10px;
       }
+
       .mentor-card {
         min-width: 370px;
       }
@@ -94,7 +98,7 @@
                   </p>
                   <span class="fs-5">
                     <!-- Total Mentors Count -->
-                    {{ count($mentors) }} 1
+                    {{ count($mentors) }} 
                   </span>
                 </div>
               </div>
@@ -103,12 +107,12 @@
                 <!-- Search Container -->
                 <div class="d-flex align-items-center justify-content-end">
                   <!-- Filter -->
-                  <form method="GET">
+                  <form method="GET" action="{{ route('Mentors_Filter') }}">
                     <div class="d-flex align-items-center">
                       <div style="display: flex; align-items: center;" class="mx-2">
                         <button 
-                          id="filterButton"
-                          type="button"
+                          {{-- id="filterButton" --}}
+                          type="submit"
                           class="btn bg-primary p-3 d-flex justify-content-center align-items-center custom-shadow"
                           style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
                           <i class="ti ti-filter text-white ti-24px"></i>
@@ -119,23 +123,67 @@
                         <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
                           <i class="ti ti-search text-primary ti-24px"></i>
                         </div>
-
+                        <div @if (request('ExpertiesSearch') !='') style="display: none;" @endif class="Search">
                         <input
-                          class="form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
-                          style="width: 366px;" id="search-table" placeholder="Search" name="search"
+                          class="Search form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
+                          style="width: 366px;" id="search-table" placeholder="{{ __('admin.Search') }}" name="search"
                           value="{{ request('search') }}"  />
+                        </div>
+<div @if (request('rateSearch') =='') style="display: none;" @endif class="RateSelect">
+  <select name="rateSearch" class="rateSearch form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
+  style="width: 366px;">
+    <option value="" {{ request('rateSearch') == '' ? 'selected':'' }} >{{ __('admin.empty') }}</option>
+    <option value="1" {{ request('rateSearch') == '1' ? 'selected':'' }} >1</option>
+    <option value="2" {{ request('rateSearch') == '2' ? 'selected':'' }}>2</option>
+    <option value="3" {{ request('rateSearch') == '3' ? 'selected':'' }}>3</option>
+    <option value="4" {{ request('rateSearch') == '4' ? 'selected':'' }}>4</option>
+    <option value="5" {{ request('rateSearch') == '5' ? 'selected':'' }}>5</option>
+  </select>
+</div>
+<div @if (request('ExpertiesSearch') =='') style="display: none;" @endif class="ExpertiesInput">
+<input type="text" value="{{ request('ExpertiesSearch') }}" placeholder="{{ __('admin.Experties_Search') }}" name="ExpertiesSearch" class="ExpertiesSearch form-control custom-shadow search border rounded mx-1 bg-transparent text-primary px-10 py-2"
+style="width: 366px;">
+</div>
+
                       </div>
                     </div>
+
+
+                    <div class="row">
+                      <!-- Sorting -->
+                      <div id="sortContainer" class="d-none d-md-flex align-items-center mt-4">
+                        <div class="row d-flex align-items-center" style="gap: 10px;">
+                          <div class="col-md-3 d-flex flex-nowrap align-items-center">
+                            <span class="fw-bold mx-1 text-black d-none d-md-flex" style="font-size:13px;">{{ __('admin.Rate') }}</span>
+                            <div class="btn btn-sm btn-label-primary rounded-pill"
+                              style="height:25px; min-width:95px; font-size:13px;">
+                              <i class="ti ti-star me-2 text-warning"></i>
+                              <input type="checkbox" {{ request('rateSearch') !=''? 'checked': '' }} class="RateShowOrNot" >
+                              
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row d-flex align-items-center" style="gap: 10px;">
+                          <div class="col-md-3 d-flex flex-nowrap align-items-center">
+                            <span class="fw-bold mx-1 text-black d-none d-md-flex" style="font-size:13px;">{{ __('admin.Expertises') }}</span>
+                            <div class="btn btn-sm btn-label-primary rounded-pill"
+                              style="height:25px; min-width:95px; font-size:13px;">
+                              <i class="ti-24px ti ti-brand-linkedin me-2 text-info"></i>
+                              <input type="checkbox" {{ request('ExpertiesSearch') !=''? 'checked': '' }} class="ExpertiesShowOrNot" >
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Sort Content Here -->
+                      </div>
+                      <!-- Sorting -->
+                    </div>
+
+
                   </form>
                 </div>
                 <!-- / Search Container -->
-                <div class="row">
-                  <!-- Sorting -->
-                  <div id="sortContainer" class="d-none d-md-flex align-items-center mt-4">
-                    <!-- Sort Content Here -->
-                  </div>
-                  <!-- Sorting -->
-                </div>
+                
               </div>
             </div>
             <!-- Search Bar (Mobile) -->
@@ -152,157 +200,136 @@
             <!-- / Search Bar (Mobile) -->
             <!-- Sorting (Mobile) -->
             <div class="d-flex align-items-center mt-2">
-              <div 
-                id="sortContainerMobile" 
-                class="d-flex d-md-none align-items-center mt-2"
-                style="gap: 3px;"
-              >
+              <div id="sortContainerMobile" class="d-flex d-md-none align-items-center mt-2" style="gap: 3px;">
                 <!-- Sort Content Here -->
               </div>
             </div>
             <!-- Sorting (Mobile) -->
           </div>
         </div>
-        <!-- / Header -->    
+        <!-- / Header -->
+
+        <!-- Mentors -->
+        <section class="mb-10 mt-4">
+          <h5 class="border-bottom pb-2 mb-6 mx-4 mx-md-0">{{ __('admin.Mentors') }}</h5>
+          <div class="row">
+            <!-- Mentors List -->
+            @foreach ($mentors as $key => $mentor)
+              @php
+                $getcount = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->get();
+                $m_count = count($getcount);
+                $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
+              @endphp
+              <!-- Mentor Card -->
+              <div class="col-md-4 radius-15 mb-3">
+                <div class="border radius-15"
+                  style="background-image: url('{{ $mentor->image_url }}'); 
+                    height:293px; background-size: cover;
+                    background-position: center;">
+                </div>
+                <div class="card shadow-none mx-2 p-3"
+                  style="height: 350px; z-index: 1; margin-top: -25px; border-radius: 15px;">
+                  <div
+                    class="bg-white custom-shadow border radius-15 px-2 py-1 d-flex justify-content-between align-items-center mb-2"
+                    style="height: 55px;">
+                    <a target="_blank" href="{{ route('show_mentor_profile', $mentor->id) }}" class="d-flex flex-column">
+                      <span class="text-black fw-bold fs-6">{{ $mentor->name }}</span>
+                      <small class="text-secondary">{{ $mentor->title }}</small>
+                    </a>
+                    @if ($mentor->bio->linkedin ?? 0)
+                      <a title="Linkedin URL" target="_blank" href="{{ $mentor->bio->linkedin }}">
+                        <img src="/icons/linkedin.svg" width="30" height="30" />
+                      </a>
+                    @else
+                      <!-- Please Change this SVG To color #eee -->
+                      <a title="Linkedin URL" target="_blank" href="#">
+                        <img src="/icons/linkedin.svg" width="30" height="30" />
+                      </a>
+                    @endif
+                  </div>
+                  <!-- Mentor Experience -->
+                  <div class="mb-3" style="max-height: 100px; overflow: auto;">
+                    <p class="fs-6 fw-bold text-black mb-2">{{ __('admin.Expertises') }}</p>
+                    <div class="d-flex flex-wrap" style="gap: 5px;">
+                      @php
+                        if ($mentor) {
+                            $expertises = $mentor->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
+                        } else {
+                            $expertises = [];
+                        }
+                      @endphp
+                      @if ($mentor->mentorExpertises->isNotEmpty())
+                        @foreach ($expertises as $expert)
+                          <span class="btn btn-xs btn-outline-warning rounded-pill">{{ $expert->title }}</span>
+                        @endforeach
+                      @else
+                        <span class="btn btn-xs btn-outline-warning rounded-pill">{{ __('cycles.NA') }}</span>
+                      @endif
+                    </div>
+                  </div>
+                  <!-- / Mentor Experience -->
+                  <!-- Mentor Programs & Rating -->
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="bg-white custom-shadow px-2 py-1 border" style="border-radius: 15px;">
+                      <div class="d-flex flex-column justify-content-center align-items-center">
+                        <small class="text-info fw-bold">{{ __('cycles.ProgramCount') }}</small>
+                        <span class="text-black fw-bold fs-6">{{ $m_count }}</span>
+                      </div>
+                    </div>
+                    @php
+                      $rateMentorAVG = \App\MentorshipRequest::where('mentor_id', $mentor->id)
+                          ->where(function ($query) {
+                              $query->where('approved', 'Yes')->orWhereNull('approved');
+                          })
+                          ->avg('rating');
+                    @endphp
+                    <div class="badge bg-label-light rounded rounded-pill">
+                      <div class="d-flex align-items-center justify-content-center">
+
+                        <span style="color: orange"
+                          class="fw-bold mt-1 mx-1">{{ number_format($rateMentorAVG, 2, '.', '') }}</span>
+                        <img src="/icons/star.svg" width="15" height="15" />
+                      </div>
+                    </div>
+                  </div>
+                  <!-- / Mentor Programs & Rating -->
+                  <!-- Mentor Bio -->
+                  @if ($mentor->bio)
+                    <div class="mb-2 mt-auto">
+                      <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
+                      <small class="text-muted line-clamp-4">
+                        {{ $mentor->bio->{'bio_' . $l} }}
+                      </small>
+                    </div>
+                  @else
+                    <div class="mb-2 mt-auto">
+                      <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
+                      <small class="text-muted line-clamp-4">
+                        {{ __('cycles.NA') }}
+                      </small>
+                    </div>
+                  @endif
+                  <!-- / Mentor Bio -->
+                  @if ($getid->user ?? 0)
+                    <div class="row px-4 mt-auto">
+                      <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
+                        data-bs-toggle="modal" data-bs-target="#SendRequest" title="Add new request"
+                        onclick="request({{ $mentor->id }},'{{ optional($getid->user)->{'first_name_' . $l} }} {{ optional($getid->user)->{'last_name_' . $l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})">
+                        {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
+                      </button>
+                    </div>
+                  @endif
+                </div>
+              </div>
+              <!-- Mentor Card -->
+            @endforeach
+            <!-- / Mentors List -->
+          </div>
+        </section>
+        <!-- / Mentors -->
       </div>
     </div>
   </div>
-
-  <!-- Mentors -->
-  <section class="px-md-5 mb-10">
-    <h5 class="border-bottom pb-2 mb-6 mx-4 mx-md-0">{{ __('admin.Mentors') }}</h5>
-    <div class="mentors-list-container">
-      <!-- Mentors List -->
-      @foreach ($mentors as $key => $mentor)
-        @php
-          $getcount = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->get();
-          $m_count = count($getcount);
-          $getid = \App\CyclesMentors::where('user_id', $mentor->id ?? 0)->first();
-        @endphp
-        <!-- Mentor Card -->
-        <div class="mentor-card radius-15">
-          <div class="border radius-15"
-            style="background-image: url('{{ $mentor->image_url }}'); 
-            height:293px; background-size: cover;
-            background-position: center;">
-            
-          </div>
-          <div 
-            class="card shadow-none mx-2 p-3" 
-            style="height: 350px; z-index: 1; margin-top: -25px; border-radius: 15px;"
-          >
-            <div
-              class="bg-white custom-shadow border radius-15 px-2 py-1 d-flex justify-content-between align-items-center mb-2"
-              style="height: 55px;"
-            >
-              <a 
-                target="_blank" 
-                href="{{ route('show_mentor_profile', $mentor->id) }}" 
-                class="d-flex flex-column"
-              >
-                <span class="text-black fw-bold fs-6">{{ $mentor->name }}</span>
-                <small class="text-secondary">{{ $mentor->title }}</small>
-              </a>
-              @if ($mentor->bio->linkedin ?? 0)
-                <a 
-                  title="Linkedin URL" 
-                  target="_blank" 
-                  href="{{ $mentor->bio->linkedin }}">
-                  <img src="/icons/linkedin.svg" width="30" height="30" />
-                </a>
-                @else
-                <!-- Please Change this SVG To color #eee -->
-                <a 
-                  title="Linkedin URL" 
-                  target="_blank" 
-                  href="#">
-                  <img src="/icons/linkedin.svg" width="30" height="30" />
-                </a>
-              @endif
-            </div>
-            <!-- Mentor Experience -->
-            <div class="mb-3">
-              <p class="fs-6 fw-bold text-black mb-2">{{ __('admin.Expertises') }}</p>
-              <div class="d-flex flex-wrap" style="gap: 5px;">
-                @php
-                  if ($mentor) {
-            $expertises = $mentor->mentorExpertises; // جلب جميع الخبرات المرتبطة بهذا الموجه
-        }else {
-            $expertises = [];
-        }
-                @endphp
-                @if($mentor->mentorExpertises->isNotEmpty())
-                @foreach ($expertises as $expert)
-                <span class="btn btn-xs btn-outline-warning rounded-pill">{{ $expert->title }}</span>
-                @endforeach
-                @else
-                <span class="btn btn-xs btn-outline-warning rounded-pill">{{ __('cycles.NA') }}</span>
-                @endif
-              </div>
-            </div>
-            <!-- / Mentor Experience -->
-            <!-- Mentor Programs & Rating -->
-            <div class="d-flex align-items-center justify-content-between mb-3">
-              <div class="bg-white custom-shadow p-2 border" style="border-radius: 15px;">
-                <div class="d-flex flex-column justify-content-center align-items-center">
-                  <small class="text-info fw-bold">{{ __('cycles.ProgramCount') }}</small>
-                  <span class="text-black fw-bold fs-6">{{ $m_count }}</span>
-                </div>
-              </div>
-              @php
-                $rateMentorAVG = \App\MentorshipRequest::where('mentor_id', $mentor->id)
-    ->where(function ($query) {
-        $query->where('approved', 'Yes')
-              ->orWhereNull('approved');
-    })->avg('rating');
-              @endphp
-              <div class="badge bg-label-light rounded rounded-pill">
-                <div class="d-flex align-items-center justify-content-center">
-                  
-                  <span style="color: orange" class="fw-bold mt-1 mx-1">{{ number_format($rateMentorAVG, 2, '.', '') }}</span>
-                  <img src="/icons/star.svg" width="15" height="15" />
-                </div>
-              </div>
-            </div>
-            <!-- / Mentor Programs & Rating -->
-            <!-- Mentor Bio -->
-            @if($mentor->bio)
-              <div class="mb-2 mt-auto">
-                <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
-                <small class="text-muted line-clamp-4">
-                  {{ $mentor->bio->{'bio_' . $l} }}
-                </small>
-              </div>
-              @else
-              <div class="mb-2 mt-auto">
-                <p class="fs-6 fw-bold text-black mb-1">{{ __('dashboard.Bio') }}</p>
-                <small class="text-muted line-clamp-4">
-                  {{ __('cycles.NA') }}
-                </small>
-              </div>
-            @endif
-            <!-- / Mentor Bio -->
-            @if ($getid->user ?? 0)
-              <div class="row px-4 mt-auto">
-                <button
-                  type="button"
-                  class="btn btn-sm btn-success rounded-pill custom-shadow"
-                  data-bs-toggle="modal"
-                  data-bs-target="#SendRequest"
-                  title="Add new request" 
-                  onclick="request({{ $mentor->id}},'{{optional($getid->user)->{'first_name_'.$l} }} {{optional($getid->user)->{'last_name_'.$l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})"
-                >
-                {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
-                </button>
-              </div>
-            @endif
-          </div>
-        </div>
-        <!-- Mentor Card -->
-      @endforeach
-      <!-- / Mentors List -->
-    </div>
-  </section>
 
   <!--  Edit SP Modal -->
   <div class="modal fade" id="SendRequest" tabindex="-1" aria-hidden="true">
@@ -398,11 +425,11 @@
 
     const sortLabel = `<span class="mx-2 fw-bold">Sorting:</span>`;
 
-    const sortContent = `
+   const sortContent = `
       <div class="row d-flex align-items-center" style="gap: 10px;">
         <div class="col-md-3 d-flex flex-nowrap align-items-center">
           <span class="fw-bold mx-1 text-black d-none d-md-flex" style="font-size:13px;">Rate</span>
-          <button class="btn btn-sm btn-label-primary rounded-pill"
+          <button class="btn btn-sm btn-label-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#rateModal"
             style="height:25px; min-width:95px; font-size:13px;">
             <i class="ti ti-star me-2 text-warning"></i>
             <span class="fw-bold text-primary">Default</span>
@@ -431,6 +458,41 @@
         </div>
       </div>
     `;
+
+    const modalContent = `
+    <div class="modal fade" id="rateModal" tabindex="-1" aria-labelledby="rateModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="rateModalLabel">Filter By Rate</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group">
+              <li class="list-group-item">
+                <i class="ti ti-star ti-filled text-warning fill-warning me-2"></i> 1
+              </li>
+              <li class="list-group-item">
+                <i class="ti ti-star ti-filled text-warning fill-warning me-2"></i> 2
+              </li>
+              <li class="list-group-item">
+                <i class="ti ti-star ti-filled text-warning fill-warning me-2"></i> 3
+              </li>
+              <li class="list-group-item">
+                <i class="ti ti-star ti-filled text-warning fill-warning me-2"></i> 4
+              </li>
+              <li class="list-group-item">
+                <i class="ti ti-star ti-filled text-warning fill-warning me-2"></i> 5
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+
+    // Append the modal content to the body
+    document.body.insertAdjacentHTML('beforeend', modalContent);
 
     let isToggled = false;
 
@@ -525,9 +587,9 @@
                     "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
                 }
             } @endif
-            });
+              });
 
-            $(" #date").datetimepicker({ format: 'Y-m-d H:i' , onGenerate: function(ct) {
+              $(" #date").datetimepicker({ format: 'Y-m-d H:i' , onGenerate: function(ct) {
     jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
     maxDate: '{{ date('Y/m/d', strtotime('-1 days')) }}' , timepicker: true }); function request(id, mentor,
     organization_id=null, cycle_id=null) { const modal=$('#SendRequest'); modal.style.display="block" ;

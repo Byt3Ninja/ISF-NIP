@@ -6,7 +6,7 @@
       @if (!is_null(auth()->user()->organization))
         <img src="{{ auth()->user()->organization->image_url }}" alt="avatar" height="40" width="80">
       @else
-        <img src="/images/logo/{{$setting->Logo}}" alt="avatar" height="50" width="150">
+        <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" height="50" width="150">
       @endif
     </a>
 
@@ -40,7 +40,7 @@
       </a>
     </li>
 
-    
+
 
     @if (auth()->user()->HaveCompany == 1)
       <li class="{{ Request::is('*myCompany') ? 'active' : '' }} menu-item">
@@ -110,8 +110,8 @@
       </li>
     @endif
     @if (Auth::user()->hasanyRole('Mentor|Registered|Admin'))
-      <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a href="/dashboard/show/Mentors"
-          class="menu-link">
+      <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
+          href="/dashboard/show/Mentors" class="menu-link">
           <i class="ti ti-users ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('admin.Mentors') }}</div>
         </a>
@@ -193,8 +193,6 @@
           <div>{{ __('admin.Tags') }}</div>
         </a>
       </li>
-
-      
     @endif
 
     @can('edit_forms')
@@ -207,7 +205,8 @@
     @endcan
 
     @can('edit_cycles')
-      <li class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <li
+        class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="menu-icon tf-icons ti ti-components"></i>
           <div>{{ __('admin.Cycles') }}</div>
@@ -235,35 +234,36 @@
       </li>
 
 
-<!-- Start Time Sheets -->
-<li class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/Category*') ? 'sidebar-group-active open' : '' }} menu-item">
-  <a class="menu-link menu-toggle">
-    <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
-    <div>{{ __('admin.TimeSheet') }}</div>
-  </a>
-  <ul class="menu-sub">
-    <li class="{{ Request::is('*TimeSheet') ? 'active' : '' }} menu-item">
-      <a href="{{ route('TimeSheet.index') }}" class="menu-link">
-        <span class="menu-item">{{ __('admin.TimeSheet') }}</span>
-        <i class="bx bx-message"></i>
-      </a>
-    </li>
-    <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
-      <a href="{{ route('show_finance_time_sheet') }}" class="menu-link">
-        <span class="menu-item">{{ __('admin.Financial Report') }}</span>
-        <i class="bx bx-message"></i>
-      </a>
-    </li>
-    <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
-      <a href="{{ route('Category.index') }}" class="menu-link">
-        <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-        <span class="menu-item"> {{ __('admin.Category') }}</span>
-      </a>
-    </li>
-  </ul>
-</li>
+      <!-- Start Time Sheets -->
+      <li
+        class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/Category*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
+          <div>{{ __('admin.TimeSheet') }}</div>
+        </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('*TimeSheet') ? 'active' : '' }} menu-item">
+            <a href="{{ route('TimeSheet.index') }}" class="menu-link">
+              <span class="menu-item">{{ __('admin.TimeSheet') }}</span>
+              <i class="bx bx-message"></i>
+            </a>
+          </li>
+          <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
+            <a href="{{ route('show_finance_time_sheet') }}" class="menu-link">
+              <span class="menu-item">{{ __('admin.Financial Report') }}</span>
+              <i class="bx bx-message"></i>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
+            <a href="{{ route('Category.index') }}" class="menu-link">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Category') }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
 
-<!-- End Time Sheets -->
+      <!-- End Time Sheets -->
 
 
 
@@ -348,24 +348,25 @@
       <!-- End Mentorship Nav Item -->
 
       <!-- Questions Nav Item -->
-      <li class="{{ Request::is('*question-categories*', '*questions-bank*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <li
+        class="{{ Request::is('*question-categories*', '*questions-bank*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-question-mark me-3 ti-md"></i>
           <div>{{ __('admin.Questions') }}</div>
         </a>
         <ul class="menu-sub">
-            <li class="{{ Request::is('dashboard/question-categories*') ? 'active' : ''}}">
-                <a class="menu-link" href="/dashboard/question-categories">
-                    <i class="bx bx-{{$arrow}}-arrow-alt"></i>
-                    <span class="menu-item"> {{__('admin.Questions Categories')}}</span>
-                </a>
-            </li>
-            <li class="{{Request::is('dashboard/questions-bank*')?'active':''}}">
-                <a class="menu-link" href="/dashboard/questions-bank">
-                    <i class="bx bx-{{$arrow}}-arrow-alt"></i>
-                    <span class="menu-item"> {{__('admin.Questions Bank')}}</span>
-                </a>
-            </li>
+          <li class="{{ Request::is('dashboard/question-categories*') ? 'active' : '' }}">
+            <a class="menu-link" href="/dashboard/question-categories">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Questions Categories') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/questions-bank*') ? 'active' : '' }}">
+            <a class="menu-link" href="/dashboard/questions-bank">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Questions Bank') }}</span>
+            </a>
+          </li>
         </ul>
       </li>
       <!-- End Questions Nav Item -->
@@ -376,7 +377,7 @@
           <i class="ti ti-presentation me-3 ti-md"></i>
           <div>{{ __('admin.Training') }}</div>
         </a>
-        
+
         <ul class="menu-sub">
           <li class="{{ Request::is('dashboard/training/sessions*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/training/sessions">
@@ -397,10 +398,10 @@
               <span class="menu-item">{{ __('admin.Results') }}</span>
             </a>
           </li>
-          <li class="{{ Request::is('dashboard/quizzes*') ? 'active' : ''}} menu-item">
+          <li class="{{ Request::is('dashboard/quizzes*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/quizzes">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{__('admin.quizzes')}}</span>
+              <span class="menu-item"> {{ __('admin.quizzes') }}</span>
             </a>
           </li>
         </ul>
@@ -454,13 +455,13 @@
               </a>
             </li>
             <!--
-                                    <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
-                                      <a href="{{ route('rooms.index') }}">
-                                        <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-                                        <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
-                                      </a>
-                                    </li>
-                                  -->
+                                      <li class="{{ Request::is('dashboard/room*', '') ? 'active' : '' }} menu-item">
+                                        <a href="{{ route('rooms.index') }}">
+                                          <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+                                          <span class="menu-item">{{ __('admin.Rooms Management') }}</span>
+                                        </a>
+                                      </li>
+                                    -->
             <li class="{{ Request::is('dashboard/serviceCategories*') ? 'active' : '' }} menu-item">
               <a class="menu-link" href="{{ route('serviceCategories.index') }}">
                 <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
@@ -540,116 +541,120 @@
         </a>
       </li>
     @endcan
-    @if (auth()->user()->hasRole('Admin'))
-    @can('view_report')
-      <li class="{{ Request::is('reports*') ? 'active' : '' }} menu-item">
+  
+    @can('edit_settings')
+      <li class="{{ Request::is('dashboard/settings') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="/dashboard/settings">
           <i class="menu-icon tf-icons ti ti-settings"></i>
           <div>{{ __('admin.settings') }}</div>
         </a>
       </li>
     @endcan
-    @endif
+
     @php
       $updateSittings = App\Settings::where('id', 1)->first();
     @endphp
-    
     @if ($updateSittings->HomePage == true)
-    
-     @can('edit_settings')
-        <li class="{{Request::is('dashboard/settings')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/settings">
-                <i class="menu-livicon" data-icon="wrench"></i>
-                <div>{{__('admin.Homesettings')}}</div>
+      @if (auth()->user()->hasRole('Admin'))
+        @can('edit_settings')
+          <li class="menu-item">
+            <a class="menu-link menu-toggle">
+              <i class="menu-livicon" data-icon="wrench"></i>
+              <div>{{ __('admin.Homesettings') }}</div>
             </a>
-        </li>
-        <li class="{{Request::is('dashboard/setaboutus')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/setaboutus">
-                <i class="menu-livicon" data-icon="globe"></i>
-                <span>{{__('admin.About Settings')}}</span>
-            </a>
-        </li>
-        <li class="{{Request::is('dashboard/setcontactus')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/setcontactus">
-                <i class="menu-livicon" data-icon="paper-plane"></i>
-                <span>{{__('admin.Contact Settings')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('manage_menus')
-        <li class="{{Request::is('*menu*')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/menus">
-                <i class="menu-livicon" data-icon="morph-menu-arrow-bottom"></i>
-                <span>{{__('admin.Menusettings')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('view_slide')
-        <li class="{{Request::is('*slide*')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/slides">
-                <i class="menu-livicon" data-icon="settings"></i>
-                <span>{{__('admin.Slidersettings')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('manage_pages')
-        <li class="{{Request::is('*page*')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/pages">
-                <i class="menu-livicon" data-icon="briefcase"></i>
-                <span>{{__('admin.Pagesettings')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('manage_posts')
-        <li class="{{Request::is('*post*')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/posts">
-                <i class="menu-livicon" data-icon="box-add"></i>
-                <span>{{__('admin.Postsettings')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('view_faqs')
-        <li class="{{Request::is('*faqs*')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/faqs">
-                <i class="menu-livicon" data-icon="comments"></i>
-                <span>{{__('admin.Faqs settings')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('view_partner')
-        <li class="{{Request::is('*partners*')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/partners">
-                <i class="menu-livicon" data-icon="share"></i>
-                <span>{{__('admin.partners settings')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('view_press')
-        <li class="{{Request::is('*press*')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/press">
-                <i class="menu-livicon" data-icon="paper-clip"></i>
-                <span>{{__('admin.press settings')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('manage_events')
-        <li class="{{Request::is('*event*')?'active':''}} menu-item">
-            <a class="menu-link" href="/dashboard/allevents">
-                <i class="menu-livicon" data-icon="calendar"></i>
-                <span>{{__('admin.manageevents')}}</span>
-            </a>
-        </li>
-    @endcan
-    @can('manage_page')
-        @if (Auth::user()->PageId)
-            <li class="{{Request::is('editmypage')?'active':''}} menu-item">
-                <a class="menu-link" href="/dashboard/editmypage">
-                    <i class="menu-livicon" data-icon="briefcase"></i>
-                    <span>{{__('admin.editmypage')}}</span>
-                </a>
-            </li>
-        @endif
-    @endcan 
+            <ul class="menu-sub">
+                @can('edit_settings')
+                  <li class="{{ Request::is('dashboard/setaboutus') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/setaboutus">
+                      <i class="menu-livicon" data-icon="globe"></i>
+                      <span>{{ __('admin.About Settings') }}</span>
+                    </a>
+                  </li>
+                  <li class="{{ Request::is('dashboard/setcontactus') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/setcontactus">
+                      <i class="menu-livicon" data-icon="paper-plane"></i>
+                      <span>{{ __('admin.Contact Settings') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('manage_menus')
+                  <li class="{{ Request::is('*menu*') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/menus">
+                      <i class="menu-livicon" data-icon="morph-menu-arrow-bottom"></i>
+                      <span>{{ __('admin.Menusettings') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('view_slide')
+                  <li class="{{ Request::is('*slide*') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/slides">
+                      <i class="menu-livicon" data-icon="settings"></i>
+                      <span>{{ __('admin.Slidersettings') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('manage_pages')
+                  <li class="{{ Request::is('*page*') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/pages">
+                      <i class="menu-livicon" data-icon="briefcase"></i>
+                      <span>{{ __('admin.Pagesettings') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('manage_posts')
+                  <li class="{{ Request::is('*post*') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/posts">
+                      <i class="menu-livicon" data-icon="box-add"></i>
+                      <span>{{ __('admin.Postsettings') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('view_faqs')
+                  <li class="{{ Request::is('*faqs*') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/faqs">
+                      <i class="menu-livicon" data-icon="comments"></i>
+                      <span>{{ __('admin.Faqs settings') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('view_partner')
+                  <li class="{{ Request::is('*partners*') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/partners">
+                      <i class="menu-livicon" data-icon="share"></i>
+                      <span>{{ __('admin.partners settings') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('view_press')
+                  <li class="{{ Request::is('*press*') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/press">
+                      <i class="menu-livicon" data-icon="paper-clip"></i>
+                      <span>{{ __('admin.press settings') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('manage_events')
+                  <li class="{{ Request::is('*event*') ? 'active' : '' }} menu-item">
+                    <a class="menu-link" href="/dashboard/allevents">
+                      <i class="menu-livicon" data-icon="calendar"></i>
+                      <span>{{ __('admin.manageevents') }}</span>
+                    </a>
+                  </li>
+                @endcan
+                @can('manage_page')
+                  @if (Auth::user()->PageId)
+                    <li class="{{ Request::is('editmypage') ? 'active' : '' }} menu-item">
+                      <a class="menu-link" href="/dashboard/editmypage">
+                        <i class="menu-livicon" data-icon="briefcase"></i>
+                        <span>{{ __('admin.editmypage') }}</span>
+                      </a>
+                    </li>
+                  @endif
+                @endcan
+            </ul>
+          </li>
+        @endcan
+      @endif
     @endif
   </ul>
 </aside>

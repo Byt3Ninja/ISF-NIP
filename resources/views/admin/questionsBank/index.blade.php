@@ -81,7 +81,7 @@
 														</td>
 														<td class="text-right">
 															<a href="{{ route('questions-bank.edit', ['questions_bank' => $question->id]) }}" class="btn btn-primary btn-sm"> <i class="bx bx-edit"></i> {{ __('admin.Edit') }}</a>
-															<button id='deleteAction' data-id='{{ $question->id }}' data-url="{{ route('questions-bank.destroy', ['questions_bank' => $question->id]) }}" class="btn btn-danger btn-sm"> <i class="bx bx-trash"></i> {{ __('admin.Delete') }}</button>
+															<button id='deleteAction' data-id='{{ $question->id }}' data-url="{{ route('questions-bank.destroy', ['questions_bank' => $question->id]) }}" class="btn btn-danger btn-sm"> <i class="ti ti-trash text-danger"></i> {{ __('admin.Delete') }}</button>
 														</td>
 													</tr>
 												@endforeach

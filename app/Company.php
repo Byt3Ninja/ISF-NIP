@@ -15,7 +15,7 @@ class Company extends Model
         'linkedin', 'youtube', 'google_map', 'logo','cycle','step','approved','approved_by','business_type','institutions',
         'development_stage','revenue_generating','currently_fundraising', 'desired_funding_amount','business_model','business_plan','pitch_deck','financial_plan',
         'business_model_description','business_plan_description','pitch_deck_description','financial_plan_description',
-        'about_problem','about_market_opportunity','about_competitors','about_monetize','about_challenges'
+        'about_problem','about_market_opportunity','about_competitors','about_monetize','about_challenges','Sustainable_development'
     ];
 
     // ===========> Attributes <==============
@@ -168,4 +168,12 @@ class Company extends Model
     public function fundingRounds(){
         return $this->hasMany(FundingRound::class,'company_id');
     }
+
+    public function sustainableIcons()
+    {
+        return $this->hasMany(SustainableIcon::class); // تأكد من أن العلاقة صحيحة
+    }
+
+
+
 }

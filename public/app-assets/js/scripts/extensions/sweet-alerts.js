@@ -49,7 +49,7 @@ $(document).ready(function () {
       showCancelButton: true,
       focusConfirm: false,
       confirmButtonText:
-        '<i class="bx bx-like"></i> Great!',
+        '<i class="ti ti-check"></i> Great!',
       confirmButtonAriaLabel: 'Thumbs up, great!',
       cancelButtonText:
         '<i class="bx bx-dislike"></i>',

@@ -65,7 +65,7 @@
 													<td> {{ $category->questions->count() }} </td>
 													<td class="text-right">
 														<a href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}" class="btn btn-primary btn-sm"> <i class="bx bx-edit"></i> {{ __('admin.Edit') }}</a>
-														<button id='deleteAction' data-id='{{ $category->id }}' data-url="{{ route('question-categories.destroy', ['question_category' => $category->id]) }}" class="btn btn-danger btn-sm"> <i class="bx bx-trash"></i> {{ __('admin.Delete') }}</button>
+														<button id='deleteAction' data-id='{{ $category->id }}' data-url="{{ route('question-categories.destroy', ['question_category' => $category->id]) }}" class="btn btn-danger btn-sm"> <i class="ti ti-trash text-danger"></i> {{ __('admin.Delete') }}</button>
 													</td>
 												</tr>
 												@endforeach

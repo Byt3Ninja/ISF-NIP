@@ -34,7 +34,7 @@
 						<div class="alert alert-{{ session()->get('class') ?? 'danger' }} mb-2" role="alert">
 							<button type="button" class="close" data-bs-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
 							<div class="d-flex align-items-center">
-								<i class="bx bx-error"></i>
+								<i class="ti ti-error"></i>
 								<span> {{ session()->get('msg') }} {{ Session::forget('msg') }} </span>
 							</div>
 						</div>
