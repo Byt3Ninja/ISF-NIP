@@ -19,7 +19,30 @@
       width: 35px;
       height: 35px;
     }
-
+    .text-xs {
+      font-size: 12px;
+    }
+    .progress-circle {
+      position: relative;
+      display: inline-block;
+    }
+    .circle-bg {
+      stroke: #e6e6e6; /* Background circle color */
+    }
+    .circle {
+      stroke: rgba(115, 103, 240, 0.9); /* Progress color */
+      transition: stroke-dasharray 0.3s ease;
+    }
+    .flex-container {
+      display: flex;
+      gap: 10px;
+    }
+    .flex-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
     @media screen and (min-width: 768px) {
       .section-3 {
         width: 75%;
@@ -27,6 +50,10 @@
     }
   </style>
 @stop
+
+@php
+  $dummyText = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Laborum, ipsum cumque earum veniam voluptatem animi. Eligendi officiis cupiditate mollitia temporibus aspernatur cum aliquid asperiores iste quasi itaque inventore, vitae recusandae?"
+@endphp
 
 @section('content')
   <div class="content-wrapper">
@@ -269,6 +296,369 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
+      <section class="mt-6">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 290px;">
+              <div class="p-3">
+                <h5 class="card-title mb-3">Founders</h5>
+                <div class="card shadow-sm mb-4" style="border-radius: 15px;">
+                  <div class="p-3">
+                    <div class="d-flex align-items-center">
+                      <div 
+                        class="border d-flex radius-15 d-flex flex-shrink-0" 
+                        style="width: 80px; height: 80px;"
+                      >
+                        <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />
+                      </div>
+                      <div 
+                        class="mx-3 d-flex flex-column justify-content-center gap-1" 
+                        style="height: 76px;"
+                      >
+                        <div class="text-black fs-6">Name founder</div>
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="ti ti-mail text-primary"></i>
+                          <span class="text-muted text-xs">Lorem ipsum dolor</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <img src="/icons/linkedin.svg" width="18" height="18" />
+                          <span class="text-muted text-xs">Lorem ipsum dolor</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card shadow-sm" style="border-radius: 15px;">
+                  <div class="p-3">
+                    <div class="d-flex align-items-center">
+                      <div 
+                        class="border d-flex radius-15 d-flex flex-shrink-0" 
+                        style="width: 70px; height: 70px;"
+                      >
+                        <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />
+                      </div>
+                      <div 
+                        class="mx-3 d-flex flex-column justify-content-center gap-1" 
+                        style="height: 76px;"
+                      >
+                        <div class="text-black fs-6">Name founder</div>
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="ti ti-mail text-primary"></i>
+                          <span class="text-muted text-xs">Lorem ipsum dolor</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <img src="/icons/linkedin.svg" width="18" height="18" />
+                          <span class="text-muted text-xs">Lorem ipsum dolor</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 290px;">
+              <div class="p-3">
+                <h5 class="card-title mb-3">Shareholders</h5>
+                <div class="card shadow-sm mb-4" style="border-radius: 15px;">
+                  <div class="p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div 
+                        class="mx-3 d-flex flex-column justify-content-center gap-1" 
+                        style="height: 76px;"
+                      >
+                        <div class="text-black fs-6">Course content</div>
+                        <button 
+                          class="btn btn-outline-primary btn-xs rounded-pill mt-1 fw-bold"
+                          style="height: 22px; width: fit-content"
+                        >
+                          Founder
+                        </button>
+                      </div>
+                      <div 
+                        class="mx-3 d-flex align-items-center gap-3" 
+                        style="height: 76px;"
+                      >
+                        <i class="ti ti-chevrons-right ti-28px;"></i>
+                        <!-- Circular Progress -->
+                        <div 
+                          class="progress-circle p-3 position-relative d-flex align-items-center justify-content-center" 
+                          style="width: 54px; height: 54px;"
+                        >
+                          <span class="position-absolute text-black fw-bold" style="font-size: 13px;">72%</span>
+                          <svg class="position-absolute" width="54" height="54" viewBox="0 0 36 36">
+                            <path class="circle-bg"
+                              d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none" stroke="#e6e6e6" stroke-width="2.5" />
+                            <path class="circle"
+                              d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none" stroke="#007bff" stroke-width="2.5" stroke-dasharray="72, 100" />
+                          </svg>
+                        </div>
+                        <!-- Circular Progress -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card shadow-sm" style="border-radius: 15px;">
+                  <div class="p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div 
+                        class="mx-3 d-flex flex-column justify-content-center gap-1" 
+                        style="height: 76px;"
+                      >
+                        <div class="text-black fs-6">Course content</div>
+                        <button 
+                          class="btn btn-outline-primary btn-xs rounded-pill mt-1 fw-bold"
+                          style="height: 22px; width: fit-content"
+                        >
+                          Angel group
+                        </button>
+                      </div>
+                      <div 
+                        class="mx-3 d-flex align-items-center gap-3" 
+                        style="height: 76px;"
+                      >
+                        <i class="ti ti-chevrons-right ti-28px;"></i>
+                        <!-- Circular Progress -->
+                        <div 
+                          class="progress-circle p-3 position-relative d-flex align-items-center justify-content-center" 
+                          style="width: 54px; height: 54px;"
+                        >
+                          <span class="position-absolute text-black fw-bold" style="font-size: 13px;">72%</span>
+                          <svg class="position-absolute" width="54" height="54" viewBox="0 0 36 36">
+                            <path class="circle-bg"
+                              d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none" stroke="#e6e6e6" stroke-width="2.5" />
+                            <path class="circle"
+                              d="M18 2.0845
+                                  a 15.9155 15.9155 0 0 1 0 31.831
+                                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none" stroke="#007bff" stroke-width="2.5" stroke-dasharray="72, 100" />
+                          </svg>
+                        </div>
+                        <!-- Circular Progress -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 290px;">
+              <div class="p-3">
+                <h5 class="card-title mb-3">Investors</h5>
+                <div class="card shadow-sm mb-4" style="border-radius: 15px;">
+                  <div class="p-3">
+                    <div class="d-flex align-items-center">
+                      <div 
+                        class="border d-flex radius-15 d-flex flex-shrink-0" 
+                        style="width: 80px; height: 80px;"
+                      >
+                        <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />
+                      </div>
+                      <div 
+                        class="mx-3 d-flex flex-column justify-content-center gap-1" 
+                        style="height: 76px;"
+                      >
+                        <div class="text-black fs-6">Name founder</div>
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="ti ti-drone text-info"></i>
+                          <button class="btn btn-outline-primary btn-xs rounded-pill fw-bold"
+                           style="height: 18px;">
+                            Seed
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card shadow-sm" style="border-radius: 15px;">
+                  <div class="p-3">
+                    <div class="d-flex align-items-center">
+                      <div 
+                        class="border d-flex radius-15 d-flex flex-shrink-0" 
+                        style="width: 70px; height: 70px;"
+                      >
+                        <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />
+                      </div>
+                      <div 
+                        class="mx-3 d-flex flex-column justify-content-center gap-1" 
+                        style="height: 76px;"
+                      >
+                        <div class="text-black fs-6">Name founder</div>
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="ti ti-drone text-info"></i>
+                          <button class="btn btn-outline-primary btn-xs rounded-pill fw-bold" 
+                          style="height: 18px;">
+                            Seriea A
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mt-6">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 520px;">
+              <div class="p-3">
+                <h5 class="card-title">Pitch deck:</h5>
+                <div class="card-body text-center">
+                  <div class="d-flex flex-column justify-content-between align-items-center">
+                    <img src="/images/deck.svg" style="width: 350px; height: 350px;" />
+                    <div class="mt-auto d-flex flex-column">
+                      <span class="text-muted">To get analysis for your pitch deck please</span>
+                      <a href="#" class="text-primary fw-medium text-decoration-underline mt-1">Click here</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 520px;">
+              <div class="p-3">
+                <h5 class="card-title">Pitch deck video:</h5>
+                <div class="card-body text-center d-grid justify-content-between">
+                  <div class="d-flex flex-column justify-content-between align-items-center">
+                    <img src="/images/deck-video.svg" style="width: 350px; height: 350px;" />
+                    <div class="mt-auto d-flex flex-column">
+                      <span class="text-muted">
+                        To get analysis for your pitch deck please upload your pitch deck video
+                      </span>
+                      <a href="#" class="text-primary fw-medium text-decoration-underline mt-1">Click here</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mt-6">        
+        <div class="flex-container">
+          <div class="flex-item">
+            <div class="card shadow-sm" style="border-radius: 15px;">
+              <div class="p-3">
+                <h5 class="card-title">Pitch deck information</h5>
+                <div class="d-flex flex-column gap-2">
+                  @foreach([1, 2, 3] as $key => $document)
+                    <div class="card shadow-sm" style="height: 132px; border-radius: 15px;">
+                      <div class="card-body">
+                        <h6 class="border-bottom d-flex gap-2 pb-2 d-flex align-items-center">
+                          <div
+                            style="width: 32px; height: 32px;" 
+                            class="rounded-circle bg-primary text-white d-flex 
+                            justify-content-center align-items-center me-2"
+                          >
+                            {{ $key + 1 }}
+                          </div>
+                          Pitch deck summery
+                        </h6>
+                        <p class="text-muted line-clamp-2 fs-6">
+                        {{$dummyText}}
+                        </p>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
+              </div>
+            </div>
+            <div class="card shadow-sm" style="border-radius: 15px;">
+              <div class="p-3">
+                <h5 class="card-title">Documents</h5>
+                <div class="d-flex flex-column gap-2">
+                  @foreach([1, 2, 3] as $key => $document)
+                    <div class="card shadow-sm" style="border-radius: 15px;">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="d-flex align-items-center gap-3">
+                            <i class="ti ti-file fs-1 text-warning"></i>
+                            <span>Document.pdf</span>
+                          </div>
+                          <button class="btn btn-transparent">
+                            <i class="ti ti-download fs-3 text-primary"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex-item">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 350px;">
+              <div class="p-3">
+                <h5 class="card-title">Achieved milestones</h5>
+                <div class="d-flex flex-column gap-2">
+                  @foreach([1, 2, 3] as $key => $document)
+                    <div class="card shadow-sm" style="border-radius: 15px;">
+                      <div class="card-body">
+                        <div class="d-flex gap-2 d-flex align-items-center justify-content-center">
+                          <div
+                            style="width: 32px; height: 32px;" 
+                            class="rounded-circle bg-primary text-white d-flex 
+                            flex-shrink-0 justify-content-center align-items-center me-2"
+                          >
+                            {{ $key + 1 }}
+                          </div>
+                          <div class="text-muted line-clamp-2 fs-6">
+                          {{$dummyText}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
+              </div>
+            </div>
+            <div class="card shadow-sm" style="border-radius: 15px;">
+              <div class="p-3">
+                <h5 class="card-title">Planned milestones</h5>
+                <div class="d-flex flex-column gap-2">
+                  @foreach([1, 2, 3] as $key => $document)
+                    <div class="card shadow-sm" style="border-radius: 15px;">
+                      <div class="card-body">
+                        <div class="d-flex gap-2 d-flex align-items-center justify-content-center">
+                          <div
+                            style="width: 32px; height: 32px;" 
+                            class="rounded-circle bg-primary text-white d-flex 
+                            flex-shrink-0 justify-content-center align-items-center me-2"
+                          >
+                            {{ $key + 1 }}
+                          </div>
+                          <div class="text-muted line-clamp-2 fs-6">
+                          {{$dummyText}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mt-6">
+        <div class="row">
         </div>
       </section>
     </div>
