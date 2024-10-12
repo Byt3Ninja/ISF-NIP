@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Country;
+use App\Currency;
 use App\Cycle;
 use App\Expertise;
 use App\Http\Requests\UpdateClientProfileRequest;
@@ -45,7 +46,8 @@ class ClientProfileController extends Controller
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id',null)->get();
-            return view('admin/clients/editProfile', compact('client','countries','expertises'));
+            $Currencies = Currency::all();
+            return view('admin/clients/editProfile', compact('client','Currencies', 'countries','expertises'));
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);

@@ -273,10 +273,9 @@
                     <label for="currency" class="form-label">Currency</label>
                     <select id="currency" name="currency" class="select2 form-select">
                       <option value="">Select Currency</option>
-                      <option value="$" {{ $client->currency == '$' ? 'selected' : '' }} >USD</option>
-                      <option value="euro" {{ $client->currency == 'euro' ? 'selected' : '' }} >Euro</option>
-                      <option value="pound" {{ $client->currency == 'pound' ? 'selected' : '' }} >Pound</option>
-                      <option value="bitcoin" {{ $client->currency == 'bitcoin' ? 'selected' : '' }} >Bitcoin</option>
+                      @foreach ($Currencies as $Currency)
+                            <option value="{{ $Currency->currency_code }}" {{ $client->currency && $client->currency == $Currency->currency_code ? 'selected' : '' }}> {{ $Currency->currency_name }} </option>
+                            @endforeach
                     </select>
                   </div>
 
