@@ -24,6 +24,12 @@
       background-size: cover;
       background-position: center;
     }
+
+    @media screen and (min-width: 1440px) {
+      .card-container {
+        width: 390px;
+      }
+    }
   </style>
 @stop
 
@@ -134,7 +140,10 @@
             @foreach ($companies as $company)
               <!-- Company Card -->
               <div class="col-md-4">
-                <div class="bg-white border shadow-sm p-4 mb-3 radius-15" style="height: 580px;">
+                <div 
+                  class="bg-white border shadow-sm p-4 mb-3 radius-15 card-container" 
+                  style="height: 580px;"
+                >
                   <div class="w-100 d-flex justify-content-between align-items-center">
                     <span class="text-muted text-sm fw-semibold">
                       {{ $l == 'en' ? 'Startup' : 'الشركة' }} 
