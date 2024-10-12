@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use \Spatie\Permission\Models\Role as Role;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserPasswordRequest;
+use Illuminate\Support\Facades\Storage;
 
 use App\User;
 
@@ -98,6 +99,13 @@ class UserController extends Controller
             $inputs['password'] = Hash::make( $inputs['password'] );
             $inputs['password_confirmation'] = Hash::make( $inputs['password_confirmation'] );
             $result = User::create( $inputs );
+
+        Storage::disk('UsersLFM')->makeDirectory("$result->id");
+        Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
+        Storage::disk('UsersLFM')->makeDirectory("$result->id/FinancialPlans");
+        Storage::disk('UsersLFM')->makeDirectory("$result->id/PitchDeck");
+        Storage::disk('UsersLFM')->makeDirectory("$result->id/Shared");
+        Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
 
             $result->assignRole($request->role);
 

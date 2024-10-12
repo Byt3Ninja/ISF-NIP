@@ -98,6 +98,12 @@ return [
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
         ],
+        'UsersLFM' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads/files'),
+            'url' => env('APP_URL').'/dashboard/uploads',
+            'visibility' => 'private',
+        ],
 
     ],
 

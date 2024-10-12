@@ -25,7 +25,7 @@ class Company extends Model
         if (!$image) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return "/191014/".$image;
+        return $image;
     }
     public function getBusinessModelUrlAttribute()
     {
@@ -33,7 +33,7 @@ class Company extends Model
         if (!$file) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return "/191014/".$file;
+        return $file;
     }
     public function getBusinessPlanUrlAttribute()
     {
@@ -41,7 +41,7 @@ class Company extends Model
         if (!$file) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return "/191014/".$file;
+        return $file;
     }
     public function getPitchDeckUrlAttribute()
     {
@@ -49,7 +49,7 @@ class Company extends Model
         if (!$file) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return "/191014/".$file;
+        return $file;
     }
     public function getFinancialPlanUrlAttribute()
     {
@@ -57,7 +57,7 @@ class Company extends Model
         if (!$file) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return "/191014/".$file;
+        return $file;
     }
 
     public function getNameAttribute()

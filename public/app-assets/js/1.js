@@ -390,16 +390,184 @@ return $state;
 }
 
 
+$('.lfm').filemanager('file');
 
 
 
 
 
+$('.AddFounders').click(function() {
+        
+    var founder_name = $('.founder_name').val();
+    var founder_email = $('.founder_email ').val();
+    var founder_linkedin = $('.founder_linkedin').val();
+ 
+        $.ajax({
+            url: '/dashboard/AddCompanyTeams', 
+            method: 'post',
+            data: {
+                'founder_name': founder_name,
+                'founder_email': founder_email,
+                'founder_linkedin': founder_linkedin,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                
+                if (response.state) {
+                    alert(response.state);
+                    
+                    // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+                     $('.ShowTableResults').load(location.href + ' .ShowTableResults');
+                }else{
+                    alert(errors);
+                }
+            },
+            error: function(error) {
+                if (error.responseJSON && error.responseJSON.errors) {
+                    var errors = error.responseJSON.errors;
+    
+                    // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
+                    if (errors.founder_name) {
+                        alert(errors.founder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+                    }
+                    if (errors.founder_email) {
+                        alert(errors.founder_email[0]); // عرض رسالة الخطأ الخاصة بالبريد الإلكتروني
+                    }
+                    if (errors.founder_linkedin) {
+                        alert(errors.founder_linkedin[0]); // عرض رسالة الخطأ الخاصة بالرابط
+                    }
+                }
+            }
+        });
+    
+});
 
+$('.AddSherHolders').click(function() {
+    var shareholder_name = $('.shareholder_name').val();
+    var shareholder_role = $('.shareholder_role').val();
+    var shareholder_ownership_percentage = $('.shareholder_ownership_percentage').val();
+        $.ajax({
+            url: '/dashboard/AddCompanyShereholder', 
+            method: 'post',
+            data: {
+                'shareholder_name': shareholder_name,
+                'shareholder_role': shareholder_role,
+                'shareholder_ownership_percentage': shareholder_ownership_percentage,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                
+                if (response.state) {
+                    alert(response.state);
+                    // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+                  $('.ShowTableResults').load(location.href + ' .ShowTableResults');
+                }else{
+                    alert(errors);
+                }
+            },
+            error: function(error) {
+                if (error.responseJSON && error.responseJSON.errors) {
+                    var errors = error.responseJSON.errors;
+    
+                    // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
+                    if (errors.shareholder_name) {
+                        alert(errors.shareholder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+                    }
+                    if (errors.shareholder_role) {
+                        alert(errors.shareholder_role[0]); 
+                    }
+                    if (errors.shareholder_ownership_percentage) {
+                        alert(errors.shareholder_ownership_percentage[0]); 
+                    }
+                    
+                }
+            }
+        });
+    
+});
 
+$('.AddInvistor').click(function() {
+    var investor_name = $('.investor_name').val();
+    var investment_type = $('.investment_type').val();
+        $.ajax({
+            url: '/dashboard/AddCompanyInvistor', 
+            method: 'post',
+            data: {
+                'investor_name': investor_name,
+                'investment_type': investment_type,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                
+                if (response.state) {
+                    alert(response.state);
+                    // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+                      $('.ShowTableResults').load(location.href + ' .ShowTableResults');
+                }else{
+                    alert(errors);
+                }
+            },
+            error: function(error) {
+                if (error.responseJSON && error.responseJSON.errors) {
+                    var errors = error.responseJSON.errors;
+    
+                    // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
+                    if (errors.investor_name) {
+                        alert(errors.investor_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+                    }
+                    if (errors.investment_type) {
+                        alert(errors.investment_type[0]); 
+                    }
+                    
+                }
+            }
+        });
+    
+});
 
-
-
+$('.AddMileStone').click(function() {
+    var achieved_milestone_description = $('.achieved_milestone_description').val();
+    var achieved_milestone_name = $('.achieved_milestone_name').val();
+    var achieved_milestones = $('.achieved_milestones').val();
+        $.ajax({
+            url: '/dashboard/AddCompanyMileStone', 
+            method: 'post',
+            data: {
+                'achieved_milestone_description': achieved_milestone_description,
+                'achieved_milestone_name': achieved_milestone_name,
+                'achieved_milestones': achieved_milestones,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                
+                if (response.state) {
+                    alert(response.state);
+                    // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+                      $('.ShowTableResultsMil').load(location.href + ' .ShowTableResultsMil');
+                }else{
+                    alert(errors);
+                }
+            },
+            error: function(error) {
+                if (error.responseJSON && error.responseJSON.errors) {
+                    var errors = error.responseJSON.errors;
+    
+                    // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
+                    if (errors.achieved_milestone_name) {
+                        alert(errors.achieved_milestone_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+                    }
+                    if (errors.achieved_milestones) {
+                        alert(errors.achieved_milestones[0]); 
+                    }
+                    if (errors.achieved_milestone_description) {
+                        alert(errors.achieved_milestone_description[0]); 
+                    }
+                    
+                }
+            }
+        });
+    
+});
 
 
 
