@@ -534,7 +534,7 @@
     @endif
 
     @can('view_report')
-      <li class="{{ Request::is('reports*') ? 'active' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/reports*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('reports.index') }}">
           <i class="menu-icon tf-icons ti ti-id"></i>
           <div>{{ __('admin.Reports') }}</div>
@@ -543,7 +543,7 @@
     @endcan
   
     @can('edit_settings')
-      <li class="{{ Request::is('dashboard/settings') ? 'active' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="/dashboard/settings">
           <i class="menu-icon tf-icons ti ti-settings"></i>
           <div>{{ __('admin.settings') }}</div>
@@ -557,14 +557,14 @@
     @if ($updateSittings->HomePage == true)
       @if (auth()->user()->hasRole('Admin'))
         @can('edit_settings')
-          <li class="menu-item">
+          <li id="settingMenu" class="menu-item">
             <a class="menu-link menu-toggle">
               <i class="menu-livicon" data-icon="wrench"></i>
               <div>{{ __('admin.Homesettings') }}</div>
             </a>
             <ul class="menu-sub">
                 @can('edit_settings')
-                  <li class="{{ Request::is('dashboard/setaboutus') ? 'active' : '' }} menu-item">
+                  <li class="{{ Request::is('dashboard/setaboutus*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/setaboutus">
                       <i class="menu-livicon" data-icon="globe"></i>
                       <span>{{ __('admin.About Settings') }}</span>
@@ -659,3 +659,40 @@
   </ul>
 </aside>
 <!-- / Menu -->
+
+<script>
+  // Scroll to the active menu item
+  document.addEventListener('DOMContentLoaded', () => {
+    const activeMenuItem = document.querySelector('.menu-item.active');
+    
+    if (activeMenuItem) {
+      activeMenuItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  window.onload = () => {
+    const settingMenu = document.getElementById('settingMenu');
+    // const layoutMenu = document.getElementById('layout-menu');
+    
+    settingTabs = [
+      'setaboutus',
+      'setcontactus',
+      'menus',
+      'slides',
+      'pages',
+      'posts',
+      'faqs',
+      'partners',
+      'press',
+      'allevents',
+      'editmypage'
+    ];
+
+    // Check if the current page is one of the settings tabs
+    settingTabs.forEach(tab => {
+      if (window.location.href.includes(tab)) {
+        settingMenu.classList.add('open');
+      }
+    });
+  };
+</script>

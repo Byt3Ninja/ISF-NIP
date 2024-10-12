@@ -46,9 +46,9 @@
       <div class="col">
         <div class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white">
           <!-- Tabs -->
-          <ul class="nav nav-tabs" role="tablist">
+          <ul class="nav nav-tabs border-none" role="tablist">
             @foreach ($tabs as $key => $tab)
-              <li class="nav-item">
+              <li class="nav-item bg-label-light mb-1">
                 <a 
                   href="#navs-left-{{ $tab['target'] }}" 
                   class="nav-link {{ $key == 0 ? 'active' : '' }} py-3" 
