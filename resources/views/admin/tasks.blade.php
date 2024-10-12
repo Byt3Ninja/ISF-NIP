@@ -17,7 +17,7 @@
                 <div class="sidebar">
                     <div class="todo-sidebar d-flex">
                         <span class="sidebar-close-icon">
-                            <i class="bx bx-x"></i>
+                            
                         </span>
                         <!-- todo app menu -->
                         <div class="todo-app-menu">
@@ -109,7 +109,7 @@
                                     </span>
                                 </div>
                                 <button type="button" class="close close-icon">
-                                    <i class="bx bx-x"></i>
+                                    
                                 </button>
                             </div>
                             <!-- form start -->

@@ -209,9 +209,7 @@
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Add new mentorship session') }} <span id="rname"></span>
             </h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <i class="bx bx-x"></i>
-            </button>
+            
           </div>
           <div class="modal-body">
             @csrf

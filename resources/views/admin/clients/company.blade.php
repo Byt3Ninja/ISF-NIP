@@ -933,9 +933,7 @@
           <div class="modal-header">
             <h4 class="modal-title">{{ __('admin.Add new funding round') }}
             </h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <i class="bx bx-x"></i>
-            </button>
+            
           </div>
           <div class="modal-body">
             @csrf
