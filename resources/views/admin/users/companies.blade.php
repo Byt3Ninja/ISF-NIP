@@ -68,7 +68,7 @@
                   </p>
                   <span class="text-black fs-4">
                     <!-- Total Companies Count -->
-                    {{-- {{ count($companies) }} --}} 10
+                    {{ count($companies) }}
                   </span>
                 </div>
               </div>
@@ -126,137 +126,163 @@
         </div>
         <!-- / Header -->
         <!-- Company List -->
-        <section>
+        <section class="mb-10 mt-4">
+          <h5 class="border-bottom pb-2 mb-6 mx-4 mx-md-0">
+            {{ $l == 'en' ? 'Companies List' : 'قائمة الشركات' }}
+          </h5>
           <div class="row">
-            @foreach ($companies as $key => $company)
-            <div class="col-md-4">
-              <div class="bg-white border shadow-sm p-4 mb-3 radius-15">
-                <div class="w-100 d-flex justify-content-between align-items-center">
-                  <span class="text-muted text-sm">Startup</span>
-                  <a 
-                    href="/dashboard/companyProfile/{{ $company->id }}"
-                    class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"
-                  >
-                    <i class="ti ti-world me-2 fs-5"></i>
-                    <span class="text-xs fw-bold">More Info</span>
-                  </a>
-                </div>
-                <div 
-                  class="company-image-container mt-2 border custom-shadow radius-15"
-                  style="background-image: url('/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}')"
-                >
-                </div>
-                <h6 class="mt-3 fw-bold text-capitalize">{{ $company->{'name_' . $l} }}</h6>
-                <p class="text-muted text-xs" style="margin-top: -10px;">{{ $company->sector }}</p>
-                <div 
-                  style="margin-top: -10px;" 
-                  class="d-flex justify-content-between align-items-center"
-                >
-                  <div class="p-1 bg-label-info rounded">
-                    <div class="d-flex align-items-center justif-content-center">
-                      <div class="d-flex align-items-center">
-                        <i class="ti ti-calendar-time fs-5"></i>
-                        <span class="mx-1 fw-bold text-black text-xxs text-nowrap fs-bold">{{ $company->est_date }}</span>
-                      </div>
-                      <span class="text-nowrap text-xxs w-bold">Establishment date</span>
-                    </div>
-                  </div>
-                  <div class="d-flex align-items-center" style="gap: 10px;">
-                    @if ($company->facebook)
-                      <a
-                        class="d-flex align-items-center" 
-                        href="{{ strpos($company->facebook,"http")===0?$company->facebook:'http://'.$company->facebook }}"
-                        target='_blank'>
-                        <i class="fa-brands fa-facebook-f fs-6"></i>
-                      </a>
-                    @endif
-                    @if ($company->linkedin)
-                      <a
-                        class="d-flex align-items-center" 
-                        href="{{ strpos($company->linkedin,"http")===0?$company->linkedin:'http://'.$company->linkedin }}"
-                        target='_blank'>
-                        <img src="/icons/linkedin.svg" width="15" height="15" />
-                      </a>
-                    @endif
-                    <a href="#" class="d-flex align-items-center">
-                      <i class="fa-brands fa-whatsapp fs-6 text-success"></i>
+            @foreach ($companies as $company)
+              <!-- Company Card -->
+              <div class="col-md-4">
+                <div class="bg-white border shadow-sm p-4 mb-3 radius-15" style="height: 580px;">
+                  <div class="w-100 d-flex justify-content-between align-items-center">
+                    <span class="text-muted text-sm fw-semibold">
+                      {{ $l == 'en' ? 'Startup' : 'الشركة' }} 
+                    </span>
+                    <a 
+                      href="/dashboard/companyProfile/{{ $company->id }}"
+                      class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"
+                    >
+                      <i class="ti ti-world me-2 fs-5"></i>
+                      <span class="text-xs fw-bold">
+                        {{ $l == 'en' ? 'More Info' : 'المزيد' }}
+                      </span>
                     </a>
-                    @if ($company->twitter)
-                      <a
-                        class="d-flex align-items-center" 
-                        href="{{ strpos($company->twitter,"http")===0?$company->twitter:'http://'.$company->twitter }}"
-                        target='_blank'>
-                        <i class="fa-brands fa-twitter fs-6 text-info"></i>
-                      </a>
-                    @endif
-                    @if ($company->youtube)
-                      <a
-                        class="d-flex align-items-center" 
-                        href="{{ strpos($company->youtube,"http")===0?$company->youtube:'http://'.$company->youtube }}"
-                        target='_blank'>
-                        <i class="fa-brands fa-youtube fs-6 text-danger"></i>
-                      </a>
-                    @endif
                   </div>
-                </div>
-                <!-- Founders -->
-                <div class="mt-3">
-                  <span class="text-muted text-xs fw-medium">Founders</span>
-                  <div class="row mt-1">
-                    @foreach([1, 2, 3] as $founder) 
-                      <div class="col-md-4">
-                        <div 
-                          class="px-3 border redius-15 text-center radius-15 flex flex-column g-1" 
-                          style="height: 70px; width: 90px;"
-                        >
-                          <i class="ti ti-user fs-5"></i> <br />
-                          <div>
-                            <span class="text-xs" style="margin-bottom: -10px;">Ahmed</span>
-                            <span class="text-muted text-xs">roles</span>
+                  <div 
+                    class="company-image-container mt-2 border custom-shadow radius-15"
+                    style="background-image: url('/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}')"
+                  >
+                  </div>
+                  <div class="w-100 d-flex flex-column justify-content-between" style="height: 80px;">
+                    <h6 class="mt-3 fw-bold text-capitalize">{{ $company->{'name_' . $l} }}</h6>
+                    <p class="text-muted text-xs" style="margin-top: -10px;">{{ $company->sector }}</p>
+                    <div 
+                      style="margin-top: -10px;" 
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      @if($company->est_date)
+                        <div class="p-1 bg-label-info rounded">
+                          <div class="d-flex align-items-center justif-content-center">
+                            <div class="d-flex align-items-center">
+                              <i class="ti ti-calendar-time fs-5"></i>
+                              <span class="mx-1 fw-bold text-black text-xxs text-nowrap fs-bold">
+                                {{ $company->est_date }}
+                              </span>
+                            </div>
+                            <span class="text-nowrap text-xxs fw-bold">
+                              {{ __('admin.Established date') }}
+                            </span>
                           </div>
                         </div>
+                      @else
+                        <span class="text-nowrap text-sm">
+                          {{ $l == 'en' ? 'Social Links' : 'روابط التواصل' }}
+                        </span>
+                      @endif
+                      <div class="d-flex align-items-center" style="gap: 10px;">
+                        @if ($company->facebook)
+                          <a
+                            class="d-flex align-items-center" 
+                            href="{{ strpos($company->facebook,"http")===0?$company->facebook:'http://'.$company->facebook }}"
+                            target='_blank'>
+                            <i class="fa-brands fa-facebook-f fs-6"></i>
+                          </a>
+                        @endif
+                        @if ($company->linkedin)
+                          <a
+                            class="d-flex align-items-center" 
+                            href="{{ strpos($company->linkedin,"http")===0?$company->linkedin:'http://'.$company->linkedin }}"
+                            target='_blank'>
+                            <img src="/icons/linkedin.svg" width="15" height="15" />
+                          </a>
+                        @endif
+                        <a href="#" class="d-flex align-items-center">
+                          <i class="fa-brands fa-whatsapp fs-5 text-success"></i>
+                        </a>
+                        @if ($company->twitter)
+                          <a
+                            class="d-flex align-items-center" 
+                            href="{{ strpos($company->twitter,"http")===0?$company->twitter:'http://'.$company->twitter }}"
+                            target='_blank'>
+                            <i class="fa-brands fa-twitter fs-6 text-info"></i>
+                          </a>
+                        @endif
+                        @if ($company->youtube)
+                          <a
+                            class="d-flex align-items-center" 
+                            href="{{ strpos($company->youtube,"http")===0?$company->youtube:'http://'.$company->youtube }}"
+                            target='_blank'>
+                            <i class="fa-brands fa-youtube fs-6 text-danger"></i>
+                          </a>
+                        @endif
                       </div>
-                    @endforeach
-                  </div>
-                </div>
-                <!-- / Founders -->
-                <div class="mt-2 border p-2 radius-15">
-                  <span class="text-muted text-xs fw-medium">Industry</span>
-                  <div class="d-flex align-items-center gap-2 mt-1">
-                    <div class="bg-label-secondary px-1 rounded">
-                      <span class="text-xxs text-primary fw-bold">Fintech</span>
-                    </div>
-                    <div class="bg-label-secondary px-1 rounded">
-                      <span class="text-xxs text-primary fw-bold">Healthcare</span>
-                    </div>
-                    <div class="bg-label-secondary px-1 rounded">
-                      <span class="text-xxs text-primary fw-bold">All</span>
                     </div>
                   </div>
-                </div>
-                <div class="mt-2 border p-2 radius-15">
-                  <span class="text-muted text-xs">Funding stage</span>
-                  <div class="d-flex align-items-center gap-2 mt-1">
-                    <div class="bg-label-warning px-1 rounded">
-                      <span class="text-xxs text-warning fw-bold">Fintech</span>
-                    </div>
-                    <div class="bg-label-warning px-1 rounded">
-                      <span class="text-xxs text-warning fw-bold">Healthcare</span>
-                    </div>
-                    <div class="bg-label-warning px-1 rounded">
-                      <span class="text-xxs text-warning fw-bold">All</span>
+                  <!-- Founders -->
+                  <div class="mt-3">
+                    <span class="text-muted text-xs fw-medium">Founders</span>
+                    <div class="d-flex align-items-center mt-1 gap-2">
+                      @foreach([1, 2, 3] as $founder) 
+                        <div class="col-md-4">
+                          <div 
+                            class="px-3 border redius-15 text-center radius-15 flex flex-column g-1" 
+                            style="height: 70px; width: 90px;"
+                          >
+                            <i class="ti ti-user fs-5 mt-1"></i> <br />
+                            <div>
+                              <span class="text-xs line-clamp-1">
+                                {{ $company->founder }}
+                              </span>
+                              <span class="text-muted text-xs">roles</span>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Company Card -->
+                      @endforeach
                     </div>
                   </div>
-                </div>
-                <div class="mt-2 d-flex align-items-center justify-content-center gap-2">
-                  <i class="ti ti-map-pin text-danger"></i>
-                  <span class="text-muted text-xs">Location</span>
-                  <div class="border px-2 rounded">
-                    <span class="text-xs">Cairo, Egypt</span>
+                  <!-- / Founders -->
+                  <div class="mt-2 border p-2 radius-15">
+                    <span class="text-muted text-xs fw-medium">Industry</span>
+                    <div class="d-flex align-items-center gap-2 mt-1">
+                      <div class="bg-label-secondary px-1 rounded">
+                        <span class="text-xxs text-primary fw-bold">Fintech</span>
+                      </div>
+                      <div class="bg-label-secondary px-1 rounded">
+                        <span class="text-xxs text-primary fw-bold">Healthcare</span>
+                      </div>
+                      <div class="bg-label-secondary px-1 rounded">
+                        <span class="text-xxs text-primary fw-bold">All</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mt-2 border p-2 radius-15">
+                    <span class="text-muted text-xs">Funding stage</span>
+                    <div class="d-flex align-items-center gap-2 mt-1">
+                      <div class="bg-label-warning px-1 rounded">
+                        <span class="text-xxs text-warning fw-bold">Fintech</span>
+                      </div>
+                      <div class="bg-label-warning px-1 rounded">
+                        <span class="text-xxs text-warning fw-bold">Healthcare</span>
+                      </div>
+                      <div class="bg-label-warning px-1 rounded">
+                        <span class="text-xxs text-warning fw-bold">All</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mt-2 d-flex align-items-center justify-content-center gap-2">
+                    <i class="ti ti-map-pin text-danger"></i>
+                    <span class="text-muted text-xs">{{ optional($company->state)->{'name_'.$l} }}</span>
+                    <div class="border px-2 rounded">
+                      <span class="text-xs">
+                        {{ optional($company->city)->{'name_'.$l} }}, 
+                        {{ optional($company->country)->{'name_'.$l} }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             @endforeach
           </div>
         </section>
