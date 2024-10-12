@@ -146,9 +146,7 @@
             <h5 class="modal-title" id="Title">
             </h5>
 
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <i class="bx bx-x"></i>
-            </button>
+            
           </div>
           <form action="{{ URL::to('dashboard/msgreply') }}" method="POST" enctype="multipart/form-data"
             autocomplete="off">
@@ -188,7 +186,7 @@
                   <i class="bx bx-x d-block d-sm-none"></i>
                   <span class="d-none d-sm-block">{{ __('messages.Delete') }}</span>
                 </button></a>
-              <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
+              <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
                 <i class="bx bx-x d-block d-sm-none"></i>
                 <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
               </button> --}}

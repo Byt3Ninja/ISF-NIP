@@ -223,7 +223,7 @@
 					@endif
 					<div class="heading-elements">
 						<ul class="list-inline mb-0">
-							<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
+							<li> <a data-action="close">  </a> </li>
 						</ul>
 					</div>
 				</div>
@@ -877,7 +877,7 @@
   
           <div class="modal-header">
             <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <i class="bx bx-x"></i> </button>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">  </button>
           </div>
           <div class="modal-body">
             @csrf

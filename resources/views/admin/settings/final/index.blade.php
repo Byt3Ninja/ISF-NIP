@@ -299,7 +299,7 @@
             <div class="modal-header">
               <h4 class="modal-title white">{{ __('cycles.Add new zoom session') }}</h4>
               <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <i class="bx bx-x"></i>
+                
               </button>
             </div>
             <div class="modal-body">
@@ -342,7 +342,7 @@
             <div class="modal-header">
               <h4 class="modal-title">{{ __('cycles.Modify Final Screen') }} </h4>
               <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <i class="bx bx-x"></i>
+                
               </button>
             </div>
             <div class="modal-body">
