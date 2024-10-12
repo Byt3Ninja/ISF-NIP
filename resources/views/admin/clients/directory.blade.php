@@ -136,7 +136,7 @@
         <div class="modal-header">
           <h3 class="modal-title" id="title"></h3>
           <button type="button" class="close rounded-pill" data-bs-dismiss="modal" aria-label="Close">
-            <i class="bx bx-x"></i>
+            
           </button>
         </div>
         <div class="modal-body">

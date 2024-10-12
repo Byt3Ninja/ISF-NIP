@@ -49,7 +49,7 @@
                     <ul class="list-inline mb-0">
                       <li>
                         <a data-action="close">
-                          <i class="bx bx-x"></i>
+                          
                         </a>
                       </li>
                     </ul>
@@ -58,7 +58,7 @@
                     <ul class="list-inline mb-0">
                       <li>
                         <a data-action="close">
-                          <i class="bx bx-x"></i>
+                          
                         </a>
                       </li>
                     </ul>
