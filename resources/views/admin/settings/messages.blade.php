@@ -178,16 +178,16 @@
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary send-btn">
-                <i class="bx bx-x d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-inline"> {{ __('messages.Send') }}</span>
               </button>
               {{-- <a id="DelMe" onclick="return confirm('{{ __('Are you sure?') }}');" href="#">
                 <button type="button" class="btn btn-light-danger">
-                  <i class="bx bx-x d-block d-sm-none"></i>
+                  
                   <span class="d-none d-sm-block">{{ __('messages.Delete') }}</span>
                 </button></a>
               <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-                <i class="bx bx-x d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
               </button> --}}
             </div>

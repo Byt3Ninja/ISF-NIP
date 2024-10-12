@@ -273,7 +273,7 @@
 									</td>
 									<td>
 										<button type="submit" class="btn btn-primary ml-1" >
-											<i class="bx bx-check d-block d-sm-none"></i>
+											
 											<span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
 										</button>	
 									</td>
@@ -327,7 +327,7 @@
 									</td>
 									<td>
 										<button type="submit" class="btn btn-primary ml-1">
-											<i class="bx bx-check d-block d-sm-none"></i>
+											
 											<span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
 										</button>
 									</td>
@@ -653,19 +653,19 @@
 											@foreach($nextSessions as $session)
 												<tr>
 													{{-- <td>
-														<div class="media align-items-center">
+														<div class="d-flex align-items-center gap-1">
 															<a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
 																<img src="{{$session->user->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 															</a>
 															<a href="/dashboard/companyProfile/{{$session->user->company->id}}">
-																<div class="media align-items-center">
+																<div class="d-flex align-items-center gap-1">
 																	{{$session->user->company->{'name_'.$l} }}
 																</div>
 															</a>
 														</div>
 													</td> --}}
 													<td>
-														<div class="media align-items-center">
+														<div class="d-flex align-items-center gap-1">
 															<a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
 																<img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 															</a>
@@ -699,7 +699,7 @@
 														<br>({{$session->period}}M)
 													</td>
 													<td>
-														<div class="media align-items-center">
+														<div class="d-flex align-items-center gap-1">
 															{!!  __($session->approved) ??'<span class="warning">'.__('Waiting').'</span>'  !!}
 														</div>
 													</td>
@@ -762,7 +762,7 @@
 													<td>{{$key+1}}</td>
 													<td>
                             
-														<div class="media align-items-center">
+														<div class="d-flex align-items-center gap-1">
 															<a class="media-left mr-50">
 																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 															</a>
@@ -856,7 +856,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="submit" class="btn btn-primary ml-1" >
-                      <i class="bx bx-check d-block d-sm-none"></i>
+                      
                       <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
                     </button>
                   </div>
@@ -877,7 +877,6 @@
   
           <div class="modal-header">
             <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">  </button>
           </div>
           <div class="modal-body">
             @csrf
@@ -918,7 +917,7 @@
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1" >
-              <i class="bx bx-check d-block d-sm-none"></i>
+              
               <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
             </button>
           </div>

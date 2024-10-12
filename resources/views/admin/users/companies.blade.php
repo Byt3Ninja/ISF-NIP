@@ -328,7 +328,7 @@
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
                               <a href="/dashboard/companyProfile/{{ $company->id }}">
-                                <div class="media align-items-center">
+                                <div class="d-flex align-items-center gap-1">
                                   {{ $company->{'name_' . $l} }}
                                 </div>
                               </a>
