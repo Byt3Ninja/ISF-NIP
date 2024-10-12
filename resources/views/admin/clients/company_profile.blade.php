@@ -69,41 +69,84 @@
                   class="border d-flex radius-15 d-flex flex-shrink-0" 
                   style="width: 90px; height: 90px;"
                 >
-                  <img src="/images/background/logo.png" class="img-fluid m-auto" alt="logo" />
+                  <img src="{{$company->logo_url}}" class="img-fluid m-auto" alt="logo" />
                 </div>
                 <div class="d-flex flex-column pt-3">
                   <div class="d-flex align-items-center">
                     <div class="d-flex align-items-center">
                       <i class="ti ti-building-skyscraper ti-24px me-2 text-primary"></i>
-                      <span class="fw-bold fs-5">Company Name</h5>
+                      <span class="fw-bold fs-5 pt-1">{{ $company->{'name_'.$l} }}</h5>
                     </div>
                     <div class="d-flex align-items-center mx-8" style="gap: 1rem;">
-                      <a href="#" class="d-flex align-items-center">
-                        <i class="fa-brands fa-facebook-f fs-4"></i>
-                      </a>
+                      @if ($company->facebook)
+                        <a
+                          class="d-flex align-items-center" 
+                          href="{{ strpos($company->facebook,"http")===0?$company->facebook:'http://'.$company->facebook }}"
+                          target='_blank'>
+                          <i class="fa-brands fa-facebook-f fs-4"></i>
+                        </a>
+                      @endif
+                      @if ($company->linkedin)
+                        <a
+                          class="d-flex align-items-center" 
+                          href="{{ strpos($company->linkedin,"http")===0?$company->linkedin:'http://'.$company->linkedin }}"
+                          target='_blank'>
+                          <img src="/icons/linkedin.svg" />
+                        </a>
+                      @endif
                       <a href="#" class="d-flex align-items-center">
                         <i class="fa-brands fa-whatsapp fs-3 text-success"></i>
                       </a>
-                      <a href="#" class="d-flex align-items-center">
-                        <img src="/icons/linkedin.svg" />
-                      </a>
+                      @if ($company->twitter)
+                        <a
+                          class="d-flex align-items-center" 
+                          href="{{ strpos($company->twitter,"http")===0?$company->twitter:'http://'.$company->twitter }}"
+                          target='_blank'>
+                          <i class="fa-brands fa-twitter fs-4 text-info"></i>
+                        </a>
+                      @endif
+                      @if ($company->youtube)
+                        <a
+                          class="d-flex align-items-center" 
+                          href="{{ strpos($company->youtube,"http")===0?$company->youtube:'http://'.$company->youtube }}"
+                          target='_blank'>
+                          <i class="fa-brands fa-youtube fs-4 text-danger"></i>
+                        </a>
+                      @endif
                     </div>
                   </div>
                   <p class="text-light mt-2 fw-medium line-clamp-1">
-                    Lorem ipsum, dolor sit amet consectetur adipisicinonsectetur adipisicinonsectetur adipisicin
+                    {{ __($company->sector) }}
                   </p>
                 </div>
               </div>
             </div>
+            <!-- Action Button -->
             <div class="col-md-2 d-flex align-items-center justify-content-end">
-              <a 
+              @if (
+                isset(Auth::user()->company()->first()->id) 
+                && $company->id == Auth::user()->company()->first()->id
+              )
+               <a 
                 href="/dashboard/myCompany" 
                 class="btn btn-label-primary shadow-sm text-primary fw-bold"
                 style="border-radius: 15px;"
               >
                 Edit <i class="ti ti-edit mx-2"></i>
               </a>
+              @else
+                <a 
+                  href="javascript:void(0);"
+                  data-bs-toggle="modal"
+                  data-bs-target="#MessageModal" 
+                  class="btn btn-label-primary shadow-sm text-primary fw-bold"
+                  style="border-radius: 15px;"
+                >
+                  Contact <i class="ti ti-message mx-2"></i>
+                </a>
+              @endif
             </div>
+            <!-- / Action Button -->
           </div>
         </div>
         <!-- / Company Info Card -->
@@ -120,7 +163,7 @@
                   >
                     <i class="ti ti-users ti-28px"></i>
                     <div class="mx-1 d-flex flex-column">
-                      <span class="fw-bold text-black fs-6">100</span>
+                      <span class="fw-bold text-black fs-6">{{ $company->team_num }}</span>
                       <span class="fw-bold mt-2" style="font-size: 12px;">Team number</span>
                     </div>
                   </div>
@@ -131,7 +174,7 @@
                     <div class="d-flex flex-column align-items-center justif-content-center">
                       <div class="d-flex align-items-center mb-2">
                         <i class="ti ti-calendar-time ti-28px"></i>
-                        <span class="mx-1 fw-bold text-black fs-6">2024/12/30</span>
+                        <span class="mx-1 fw-bold text-black fs-6">{{ $company->est_date }}</span>
                       </div>
                       <span class="text-nowrap" style="font-size: 12px;">Establishment date</span>
                     </div>
@@ -150,21 +193,36 @@
             <div class="card shadow-sm" style="border-radius: 15px; height: 196px;">
               <div class="card-body d-flex flex-column h-100 justify-content-between">
                 <div class="d-flex justify-content-between">
-                  <div class="">
-                    <i class="ti ti-map-2 ti-28px text-primary me-2"></i> Country
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-map-2 ti-24px text-primary me-2"></i> 
+                    {{ optional($company->country)->{'name_'.$l} }}
                   </div>
-                  <div class="">
-                    <i class="ti ti-map-pin ti-28px text-primary me-2"></i> State
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-map-pin ti-24px text-primary me-2"></i> 
+                    {{ optional($company->state)->{'name_'.$l} }}
                   </div>
-                  <div class="">
-                    <i class="ti ti-current-location ti-28px text-primary me-2"></i> City
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-current-location ti-24px text-primary me-2"></i> 
+                    {{ optional($company->city)->{'name_'.$l} }}
                   </div>
                 </div>
-                <div class="d-flex align-items-center">
-                  <i class="ti ti-phone ti-28px text-primary me-2"></i> 01098765897
+                <div class="d-flex justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-mail ti-24px text-primary me-2"></i>
+                    {{ $company->email }}
+                  </div>
+                  @if ($company->website)
+                    <div class="d-flex align-items-center">
+                      <i class="ti ti-world ti-24px text-primary me-2"></i>
+                      <a href="{{ strpos($company->website,'http')===0?$company->website:'http://'.$company->website }}" target="_blank">
+                        {{ $company->website }}
+                      </a>
+                    </div>
+                  @endif
                 </div>
                 <div class="d-flex align-items-center">
-                  <i class="ti ti-mail ti-28px text-primary me-2"></i> kareem.khaled@gmail.com
+                  <i class="ti ti-phone ti-28px text-primary me-2"></i> 
+                  {{ $company->phone }}
                 </div>
               </div>
             </div>
@@ -292,7 +350,7 @@
               <div class="p-2" style="display: grid; place-items: center;">
                 <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
                 <span class="text-black" style="font-size: 12px;">Raised Fund</span>
-                <span class="text-primary" style="font-size: 12px;">$1000</span>
+                <span class="text-primary" style="font-size: 12px;">{{ $company->raised_fund }}</span>
               </div>
             </div>
           </div>
@@ -317,7 +375,7 @@
                         class="mx-3 d-flex flex-column justify-content-center gap-1" 
                         style="height: 76px;"
                       >
-                        <div class="text-black fs-6">Name founder</div>
+                        <div class="text-black fs-6">{{ $company->founder }}</div>
                         <div class="d-flex align-items-center gap-2">
                           <i class="ti ti-mail text-primary"></i>
                           <span class="text-muted text-xs">Lorem ipsum dolor</span>
@@ -471,7 +529,7 @@
                         class="mx-3 d-flex flex-column justify-content-center gap-1" 
                         style="height: 76px;"
                       >
-                        <div class="text-black fs-6">Name founder</div>
+                        <div class="text-black fs-6">{{ $company->investors }}</div>
                         <div class="d-flex align-items-center gap-2">
                           <i class="ti ti-drone text-info"></i>
                           <button class="btn btn-outline-primary btn-xs rounded-pill fw-bold"
@@ -659,8 +717,121 @@
       </section>
       <section class="mt-6">
         <div class="row">
+          @if ($company->cycle)
+            @role('Admin')
+              <div class="card shadow-sm" style="border-radius: 15px;">
+                <div class="p-3">
+                  <h5 class="mb-4">{{ __('admin.Cycle informations') }}</h5>
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <td class="width-200"> {{ __('admin.Cycle') }}:</td>
+                        <td>{{ $company->cycledata->title }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ __('admin.Current Step') }}:</td>
+                        <td><b>{{ $company->stepdata->arr }}:</b> {{ $company->stepdata->title }}</td>
+                      </tr>
+                      <tr>
+                        <td>{{ __('admin.Screening result') }}:</td>
+                        <td>
+                          @php
+                            $form = \App\Step::where('cycle_id', $company->cycle)
+                                ->where('stype', 1)
+                                ->orderBy('arr')
+                                ->first(['id']);
+                            $weight = $company->companyWeight($company->id, $form->id, 0);
+                            $judges = $company->judges($company->id, $form->id);
+                            $judges = \App\User::whereIn('id', $judges)->get();
+                          @endphp
+                          <span
+                            class="badge badge-light-{{ $weight < 25 ? 'danger' : ($weight < 50 ? 'warning' : 'success') }}">
+                            {{ $weight }} %</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          {{ __('admin.Screening by') }}:
+                        </td>
+                        <td>
+                          @foreach ($judges as $ju)
+                            ({{ $ju->id }})
+                            {{ $ju->{'first_name_' . $l} }} {{ $ju->{'last_name_' . $l} }},
+                          @endforeach
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  @php($fdata = \App\Formdata::where('user_id', $company->user->id)->get())
+                  <br /><br />
+                  <h5 class="mb-4 pb-3">{{ __('admin.Data collected through Cycle') }}</h5>
+                  @if (count($fdata) > 0)
+                    <table class="table">
+                      <tbody>
+                        @foreach ($fdata as $field)
+                          <tr>
+                            <td class="width-200">{{ $field->question }}:</td>
+                            <td>
+                              {!! strpos($field->answer, 'http') === 0
+                                  ? '<a target="_blank" href="' . $field->answer . '"> ' . __('admin.Download File') . ' </a>'
+                                  : $field->answer !!}
+                              {{-- @php(
+                                $comments = \App\Formdata::where('field_id', $field->field_id)->where('company_id', $company->id)->first(['comments'])->comments,
+                                )
+                              @foreach ($comments as $key => $cc)
+                                @if ($cc)
+                                  <div class="warning">{{ __('admin.comment') }}({{ $key }}):
+                                    {{ $cc }}</div>
+                                @endif
+                              @endforeach --}}
+                            </td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  @endif
+                </div>
+              </div>
+            @endrole
+          @endif
         </div>
       </section>
     </div>
   </div>
+  <!-- Modal -->
+  <div class="modal fade text-left" id="MessageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel33">
+            {{ __('messages.SendMessageTo') }} {{ $company->user->{'first_name_'.$l} }} {{ $company->user->{'last_name_'.$l} }} ({{ $company->{'name_'.$l} }}).
+          </h4>
+        </div>
+        <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
+          {!! csrf_field() !!}
+          <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
+          <input type="hidden" name="receiver" value="{{ $company->user->id }}">
+          <div class="modal-body">
+            <div class="form-group mb-3">
+              <label class="form-label fs-6 mb-1">{{ __('messages.Subject') }}:</label>
+              <input name="subject" type="text" placeholder="{{ __('messages.Subject') }}" class="form-control" required>
+            </div>
+            <div class="form-group mb-3">
+              <label class="form-label fs-6 mb-1">{{ __('messages.Message') }}: </label>
+              <textarea class="form-control" id="message" name="message" rows="8" placeholder="{{ __('messages.Write your message') }}" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+              <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
+            </button>
+            <button type="submit" class="btn btn-primary ml-1">
+              <span class="d-none d-sm-block">{{ __('messages.Send') }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- / Modal -->
 @stop
