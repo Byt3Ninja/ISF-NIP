@@ -106,27 +106,27 @@
                         @foreach ($companies as $company)
                           <tr>
                             <td>
-                              <div class="media align-items-center">
+                              <div class="d-flex align-items-center gap-1">
                                 <input type="checkbox" class="chboxTresult" do="{{ $company->id }}"
                                   userid="{{ $company->user->id }}" value="1" name="chboxcyclesReg[]">
                               </div>
                             </td>
 
                             <td>
-                              <div class="media align-items-center">
+                              <div class="d-flex align-items-center gap-1">
                                 <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
                                   <img src="/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}"
                                     alt="avatar" class="rounded-circle" height="40" width="40">
                                 </a>
                                 <a href="/dashboard/companyProfile/{{ $company->id }}">
-                                  <div class="media align-items-center">
+                                  <div class="d-flex align-items-center gap-1">
                                     {{ $company->{'name_' . $l} }}
                                   </div>
                                 </a>
                               </div>
                             </td>
                             <td>
-                              <div class="media align-items-center">
+                              <div class="d-flex align-items-center gap-1">
                                 <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
                                   <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}"
                                     alt="avatar" class="rounded-circle" height="40" width="40">
@@ -153,7 +153,7 @@
                                 %</span>
                             </td>
                             <td>
-                              <div class="media align-items-center">
+                              <div class="d-flex align-items-center gap-1">
                                 <select id="cstep" class="select form-control"
                                   onchange="changestep({{ $company->id }},this.options[this.selectedIndex].value)">
                                   <option value="0">Disapprove</option>

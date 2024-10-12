@@ -102,19 +102,19 @@
                                                         {{ $task->mentorshipRequest->zoom_date }}
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="media align-items-center">
+                                                        <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
                                                                 <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
                                                             <a href="/dashboard/companyProfile/{{$task->company->id}}">
-                                                                <div class="media align-items-center">
+                                                                <div class="d-flex align-items-center gap-1">
                                                                     {{$task->company->name }}
                                                                 </div>
                                                             </a>
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="media align-items-center">
+                                                        <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50" href="/dashboard/users/{{$task->user_id}}/edit">
                                                                 <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>

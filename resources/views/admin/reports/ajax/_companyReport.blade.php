@@ -171,7 +171,7 @@
                         <br>({{ $session->period }}M)
                       </td>
                       <td>
-                        <div class="media align-items-center">
+                        <div class="d-flex align-items-center gap-1">
                           {!! __($session->approved) ?? '<span class="warning">' . __('Waiting') . '</span>' !!}
                         </div>
                       </td>

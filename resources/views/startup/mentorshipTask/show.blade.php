@@ -56,7 +56,7 @@
                                                                         <div class="media-left mr-50">
                                                                             <img src="{{$comment->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                         </div>
-                                                                        <div class="media align-items-center">
+                                                                        <div class="d-flex align-items-center gap-1">
                                                                             {{$comment->user->name }}
                                                                         </div>
 
