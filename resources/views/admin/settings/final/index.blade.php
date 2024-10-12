@@ -298,10 +298,6 @@
           <form method="post" action="/dashboard/final/addzoom" enctype="multipart/form-data" autocomplete="off">
             <div class="modal-header">
               <h4 class="modal-title white">{{ __('cycles.Add new zoom session') }}</h4>
-              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                
-              </button>
-            </div>
             <div class="modal-body">
               @csrf
               <p class="text-danger">{{ __('cycles.Before submit review') }}.</p>
@@ -326,7 +322,7 @@
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary ml-1">
-                <i class="bx bx-check d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
               </button>
             </div>
@@ -341,9 +337,6 @@
           <form method="post" action="/dashboard/final/editZoom" enctype="multipart/form-data">
             <div class="modal-header">
               <h4 class="modal-title">{{ __('cycles.Modify Final Screen') }} </h4>
-              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                
-              </button>
             </div>
             <div class="modal-body">
               @csrf

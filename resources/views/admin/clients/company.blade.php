@@ -1697,7 +1697,7 @@
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1">
-              <i class="bx bx-check d-block d-sm-none"></i>
+              
               <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
             </button>
           </div>

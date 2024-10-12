@@ -172,7 +172,7 @@
           <button class="btn btn-success glow mr-auto ml-0" type="button"
             onclick="requestserv()">{{ __('admin.Make a request') }}</button>
           <button type="button" class="btn btn-light-primary" data-bs-dismiss="modal">
-            <i class="bx bx-x d-block d-sm-none"></i>
+            
             <span class="d-none d-sm-block">{{ __('admin.Close') }}</span>
           </button>
         </div>

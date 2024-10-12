@@ -106,9 +106,6 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h4 class="modal-title" id="myModalLabel33">{{__('messages.SendMessageTo')}} <span id="uname"></span></h4>
-					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-						
-					</button>
 				</div>
 				<form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
 					{!! csrf_field() !!}
@@ -127,11 +124,11 @@
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-							<i class="bx bx-x d-block d-sm-none"></i>
+							
 							<span class="d-none d-sm-block">{{__('messages.Close')}}</span>
 						</button>
 						<button type="submit" class="btn btn-primary ml-1">
-							<i class="bx bx-check d-block d-sm-none"></i>
+							
 							<span class="d-none d-sm-block">{{__('messages.Send')}}</span>
 						</button>
 					</div>
@@ -146,9 +143,6 @@
 		  <div class="modal-content">
 			  <div class="modal-header">
 				  <h4 class="modal-title" id="myModalLabel33">{{__('cycles.Response to')}} <span id="rname"></span></h4>
-				  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-					  
-				  </button>
 			  </div>
 				  <input type="hidden" name="sender" value="{{Auth::user()->id}}">
 				  <input type="hidden" name="receiver" id="resid" value="">
@@ -161,11 +155,11 @@
 				  </div>
 				  <div class="modal-footer">
 					  <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="approve('Yes')">
-						  <i class="bx bx-x d-block d-sm-none"></i>
+						  
 						  <span class="d-none d-sm-block">{{__('cycles.Approve')}}</span>
 					  </button>
 					  <button type="button" class="btn btn-danger ml-1" onclick="approve('No')">
-						  <i class="bx bx-check d-block d-sm-none"></i>
+						  
 						  <span class="d-none d-sm-block">{{__('cycles.Disapprove')}}</span>
 					  </button>
 				  </div>

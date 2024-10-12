@@ -273,7 +273,7 @@
 									</td>
 									<td>
 										<button type="submit" class="btn btn-primary ml-1" >
-											<i class="bx bx-check d-block d-sm-none"></i>
+											
 											<span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
 										</button>	
 									</td>
@@ -327,7 +327,7 @@
 									</td>
 									<td>
 										<button type="submit" class="btn btn-primary ml-1">
-											<i class="bx bx-check d-block d-sm-none"></i>
+											
 											<span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
 										</button>
 									</td>
@@ -856,7 +856,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="submit" class="btn btn-primary ml-1" >
-                      <i class="bx bx-check d-block d-sm-none"></i>
+                      
                       <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
                     </button>
                   </div>
@@ -877,7 +877,6 @@
   
           <div class="modal-header">
             <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">  </button>
           </div>
           <div class="modal-body">
             @csrf
@@ -918,7 +917,7 @@
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1" >
-              <i class="bx bx-check d-block d-sm-none"></i>
+              
               <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
             </button>
           </div>

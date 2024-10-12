@@ -231,7 +231,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-md btn-dark" data-bs-dismiss="modal">
-					<i class="bx bx-x d-block d-sm-none"></i>
+					
 					<span class="d-none d-sm-block">{{__('messages.Close')}}</span>
 				</button>
 			</div>
