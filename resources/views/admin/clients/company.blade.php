@@ -4,18 +4,28 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet"
     href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+
+  <style>
+    .radius-15 {
+      border-radius: 15px;
+    }
+    
+    .light-shadow {
+      box-shadow: 0px 2px 0px 0px #F2F1F3;
+    }
+  </style>
 @stop
 
 @php
   $name = 'name_' . $l;
   $tabs = collect([
-      ['company-info', __('admin.company Information')],
-      ['company-contact-info', __('admin.Contact_Information')],
-      ['company-description', __('admin.Company_Description')],
-      ['company-financial-info', __('admin.Financial_Information')],
-      ['team-info', __('admin.Team_Information')],
-      ['pitch-deck', __('admin.Pitch_Deck_&_Supporting_Documents')],
-      ['company-milestones', __('admin.Milestones')],
+      ['company-info', $l == 'en' ? 'Company Info' : 'معلومات الشركة'],
+      ['company-contact-info', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
+      ['company-description', $l == 'en' ? 'Description' : 'الوصف'],
+      ['company-financial-info', $l == 'en' ? 'Financial' : ' المالية'],
+      ['team-info', $l == 'en' ? 'Team Info' : ' الفريق'],
+      ['pitch-deck', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
+      ['company-milestones', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['company-social', $l == 'en' ? 'Social Links' : 'روابط التواصل'],
   ])
       ->map(function ($tab) {
@@ -41,13 +51,13 @@
         @endforeach
       @endif
       <!-- / Alert -->
-      <div class="d-flex gap-2">
-        <div class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white">
+      <div class="d-flex gap-3">
+        <div class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white" style="height: 430px;">
           <!-- Tabs -->
           <ul class="nav nav-tabs border-none" role="tablist">
             @foreach ($tabs as $key => $tab)
               <li class="nav-item bg-label-light mb-2"
-                style="width: 200px; overflow: hidden;">
+                style="width: 150px; overflow: hidden;">
                 <a href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
                   data-bs-toggle="tab" role="tab">
@@ -59,11 +69,14 @@
           <!-- / Tabs -->
         </div>
         <!-- Tab Content On Tab Click -->
-        <div class="tab-content bg-white shadow rounded w-100"
+        <div class="tab-content card w-100"
           style="height: fit-content;">
           @foreach ($tabs as $index => $tab)
             <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}"
               id="navs-left-{{ $tab['target'] }}">
+              <div class="border-bottom border-light mb-6">
+                <h5 class="card-title">{{ $tab['label'] }}</h5>
+              </div>
               @switch($tab['target'])
                 @case('company-info')
                   @include('partials.forms.company.company-info-form')
@@ -111,37 +124,8 @@
 @section('pagescripts')
   <script src="/vuexy/assets/js/forms-selects.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
-  <script src="/tabs/dist/jquery.tabs.min.js"></script>
-  <script src="/app-assets/vendors/js/forms/select/select2.full.min.js"></script>
-  <script>
-    const contactButton = document.getElementById('contactButton');
-    const infoButton = document.getElementById('infoButton');
-
-    const infoForm = document.getElementById('infoForm');
-    const contactForm = document.getElementById('contactForm');
-
-    contactForm.style.display = 'none';
-
-    infoButton.addEventListener('click', function() {
-      console.log('clicked');
-      infoForm.style.display = 'block';
-      contactForm.style.display = 'none';
-      infoButton.classList.remove('btn-label-secondary');
-      infoButton.classList.add('btn-primary');
-      contactButton.classList.remove('btn-primary');
-      contactButton.classList.add('btn-label-secondary');
-    });
-
-    contactButton.addEventListener('click', function() {
-      console.log('clicked');
-      infoForm.style.display = 'none';
-      contactForm.style.display = 'block';
-      contactButton.classList.remove('btn-label-secondary');
-      contactButton.classList.add('btn-primary');
-      infoButton.classList.remove('btn-primary');
-      infoButton.classList.add('btn-label-secondary');
-    });
-  </script>
+  {{-- <script src="/tabs/dist/jquery.tabs.min.js"></script> --}}
+  {{-- <script src="/app-assets/vendors/js/forms/select/select2.full.min.js"></script> --}}
 
   <script>
     document.getElementById('img_url').addEventListener('change', function(
