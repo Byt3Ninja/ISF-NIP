@@ -55,8 +55,23 @@ if(!empty($company->Sustainable_development)){
                                 // استرجاع الأيقونات المناسبة
                                 // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
                                 
-                                
-            return view('admin/clients/company_profile', compact('company','icons'));
+            $fonders = Team_Member::where('TeamMember', 'Founder')->get(); 
+            $Shareholders = Team_Member::where('TeamMember', 'Shareholder')->get(); 
+            $Investors = Team_Member::where('TeamMember', 'Investor')->get(); 
+
+
+            $Achieved_Milestones = Milestone::where('plan', 'Achieved_Milestones')->get();
+            $Planned_Milestones = Milestone::where('plan', 'Planned_Milestones')->get();
+            $Currencies = Currency::all(); // جلب جميع الأعضاء
+     // مسار الملف
+    $pathToFile = storage_path($company->pitch_deck);
+    // تحقق من وجود الملف
+    $fileExists = file_exists($pathToFile);
+
+
+    
+
+            return view('admin/clients/company_profile', compact('company','Currencies','Achieved_Milestones', 'Planned_Milestones', 'icons','fonders','Shareholders','Investors', 'fileExists', 'pathToFile'));
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -357,11 +372,10 @@ if($data['CompanyN']==6){
         'pitch_deck_summary' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
         'problem_facing' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
         'solution_problem' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
-        'documents.*' => 'nullable|mimes:pdf,ppt,pptx|max:20480', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+        'documents.*' => 'nullable|array|mimes:pdf,ppt,pptx|max:20480', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
     ], [
         'pitch_deck.mimes' => __('admin.Pitch_Deck must be a pdf or ppt file'),
         'pitch_deck.max' => __('admin.Pitch_Deck max size is 10MB'),
-        'pitch_deck_video.url' => __('admin.Pitch_Deck_Video must be a valid URL'),
         'pitch_deck_info.required' => __('admin.Pitch_Deck_Information is required'),
         'pitch_deck_summary.required' => __('admin.Pitch_Deck_Summary is required'),
         'pitch_deck_summary.string' => __('admin.Pitch_Deck_Summary must be a string'),
@@ -370,8 +384,25 @@ if($data['CompanyN']==6){
         'documents.*.max' => __('admin.Documents max size is 20MB'),
     ]);
     
+    
             // $result = Company::updateOrCreate(['id' => $companyId], $data);
             if ($companyId) {
+                $result1 = Company::where('id', $companyId)->first();
+                if($data['pitch_deck'] == ""){
+                    $data['pitch_deck'] = $result1->pitch_deck;
+                }
+                if($data['pitch_deck_video'] == ""){
+                    $data['pitch_deck_video'] = $result1->pitch_deck_video;
+                }
+                if($data['pitch_deck_info'] == ""){
+                    $data['pitch_deck_info'] = $result1->pitch_deck_info;
+                }
+                if($data['pitch_deck_summary'] == ""){
+                    $data['pitch_deck_summary'] = $result1->pitch_deck_summary;
+                }
+                if($data['documents'] == ""){
+                    $data['documents'] = $result1->documents;
+                }
                 
                 // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                 $result = Company::where('id', $companyId)->update([
@@ -379,7 +410,7 @@ if($data['CompanyN']==6){
                     'pitch_deck_video' => $data['pitch_deck_video'],
                     'pitch_deck_description' => $data['pitch_deck_info'],
                     'pitch_deck_summary' => $data['pitch_deck_summary'],
-                    'documents' => isset($data['documents']) ? json_encode($data['documents']) : null,
+                    'documents' =>  $data['documents'],
                 ]);
                 $msgtype = 'UpdateComp';
                 
@@ -395,7 +426,7 @@ if($data['CompanyN']==6){
                 $msgtype = 'NewComp';
             }
 
-            $msgtype = 'UpdateComp';
+            
             if(!$companyId) {
                 User::where('id', Auth::id())->update(['company_id' => $result->id]);
                 $msgtype = 'NewComp';

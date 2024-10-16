@@ -828,7 +828,7 @@
                                   <i class="fa fa-picture-o"></i> {{ __('admin.Choose') }}
                                 </a>
                               </span>
-                              <input id="documents" class="form-control" type="text" name="documents[]" >
+                              <input id="documents" class="form-control" type="text" name="documents" >
                             </div>
                             
                           </div>

@@ -302,7 +302,7 @@ return [
 	'raised_fund' => 'Raised fund',
 	'Stage' => 'Current Stage',
 	'Team number' => 'Team number',
-	'solution' => 'Working team',
+	'solution' => 'Solution',
 	'Idea' => 'Problem',
 	'Established date' => 'Established date',
 	'Company profile' => 'Company profile',
