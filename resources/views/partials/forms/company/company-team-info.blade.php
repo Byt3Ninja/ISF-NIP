@@ -1,6 +1,6 @@
 <div class="row">
   <!-- Founders Column -->
-  <div class="col-md-4">
+  <div class="col-md-4 mb-2">
     <div class="card shadow-sm" style="border-radius: 15px;">
       <div class="p-4">
         <h5 class="card-title">Founders</h5>
@@ -23,7 +23,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 text-center mt-2" style="height: 40px;">
+          <div class="col-12 text-center mt-3" style="height: 40px;">
             <button type="submit" class="btn btn-outline-primary text-black fw-bold rounded-pill">
               <i class="ti ti-plus me-3"></i>
                 {{ $l == 'en' ? 'Add new founder' : 'إضافة مؤسس جديد' }}
@@ -35,7 +35,7 @@
   </div>
 
   <!-- Shareholders Column -->
-  <div class="col-md-4">
+  <div class="col-md-4 mb-2">
     <div class="card shadow-sm" style="border-radius: 15px;">
       <div class="p-4">
         <h5 class="card-title">Shareholders</h5>
@@ -58,7 +58,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 text-center mt-2" style="height: 40px;">
+          <div class="col-12 text-center mt-3" style="height: 40px;">
             <button type="submit" class="btn btn-outline-primary text-black fw-bold rounded-pill">
               <i class="ti ti-plus me-3"></i>
               {{ $l == 'en' ? 'Add new shareholder' : 'إضافة مساهم جديد' }}
@@ -70,7 +70,7 @@
   </div>
 
   <!-- Investors Column -->
-  <div class="col-md-4">
+  <div class="col-md-4 mb-2">
     <div class="card shadow-sm" style="border-radius: 15px;">
       <div class="p-4">
         <h5 class="card-title">Investors</h5>
@@ -88,7 +88,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 text-center mt-2" style="height: 40px;">
+          <div class="col-12 text-center mt-3" style="height: 40px;">
             <button type="submit" class="btn btn-outline-primary text-black fw-bold rounded-pill">
               <i class="ti ti-plus me-3"></i>
               {{ $l == 'en' ? 'Add new investor' : 'إضافة مستثمر جديد' }}

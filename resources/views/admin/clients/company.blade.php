@@ -4,7 +4,8 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet"
     href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
-
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <style>
     .radius-15 {
       border-radius: 15px;
@@ -13,23 +14,32 @@
     .light-shadow {
       box-shadow: 0px 2px 0px 0px #F2F1F3;
     }
+    .custom-container {
+      width: 100%;
+    }
+
+    @media screen and (min-width: 768px) {
+      .custom-container {
+        width: 80%;
+      }
+    }
   </style>
 @stop
 
 @php
   $name = 'name_' . $l;
   $tabs = collect([
-      ['company-info', $l == 'en' ? 'Company Info' : 'معلومات الشركة'],
-      ['company-contact-info', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
-      ['company-description', $l == 'en' ? 'Description' : 'الوصف'],
-      ['company-financial-info', $l == 'en' ? 'Financial' : ' المالية'],
-      ['team-info', $l == 'en' ? 'Team Info' : ' الفريق'],
-      ['pitch-deck', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
-      ['company-milestones', $l == 'en' ? 'Milestones' : 'الإنجازات'],
-      ['company-social', $l == 'en' ? 'Social Links' : 'روابط التواصل'],
+      ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Company Info' : 'معلومات الشركة'],
+      ['company-contact-info', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
+      ['company-description', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
+      ['company-financial-info', 'ti-currency-dollar', $l == 'en' ? 'Financial' : ' المالية'],
+      ['team-info', 'ti-users', $l == 'en' ? 'Team Info' : ' الفريق'],
+      ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
+      ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
+      ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
   ])
       ->map(function ($tab) {
-          return ['target' => $tab[0], 'label' => $tab[1]];
+          return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
       })
       ->toArray();
 @endphp
@@ -38,7 +48,7 @@
   <!-- Content wrapper -->
   <div class="content-wrapper">
     <!-- Content -->
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
       <!-- Alert -->
       @if (session()->has('msg'))
         <x-alert type="{{ session()->get('class') ?? 'danger' }}"
@@ -51,56 +61,75 @@
         @endforeach
       @endif
       <!-- / Alert -->
-      <div class="d-flex gap-3">
-        <div class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white" style="height: 430px;">
+
+      <!-- Tabs (mobile) -->
+      <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">
+        <ul class="nav nav-pills flex-nowrap" role="tablist">
+          @foreach ($tabs as $key => $tab)
+            <li class="nav-item d-flex justify-content-center align-items-center">
+              <a href="#navs-left-{{ $tab['target'] }}"
+                class="nav-link {{ $key == 0 ? 'active' : '' }}"
+                data-bs-toggle="tab" role="tab">
+                <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
+                {{ $tab['label'] }}
+              </a>
+            </li>
+          @endforeach
+        </ul>
+      </div>
+      <!-- / Tabs (mobile) -->
+
+      <div class="d-flex justify-content-between w-100 mb-6">
+        <nav 
+          class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed w-15 d-none d-md-block" 
+          style="height: 440px;">
           <!-- Tabs -->
-          <ul class="nav nav-tabs border-none" role="tablist">
+          <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light mb-2"
-                style="width: 150px; overflow: hidden;">
+              <li class="nav-item bg-label-light mb-2 rounded overflow-hidden d-flex align-items-center"
+                style="width: 160px; overflow: hidden;">
                 <a href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
                   data-bs-toggle="tab" role="tab">
+                  <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                   {{ $tab['label'] }}
                 </a>
               </li>
             @endforeach
           </ul>
           <!-- / Tabs -->
-        </div>
+        </nav>
         <!-- Tab Content On Tab Click -->
-        <div class="tab-content card w-100"
-          style="height: fit-content;">
+        <div class="tab-content p-0 overflow-y-auto custom-container" 
+          style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
+        >
           @foreach ($tabs as $index => $tab)
             <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}"
               id="navs-left-{{ $tab['target'] }}">
-              <div class="border-bottom border-light mb-6">
-                <h5 class="card-title">{{ $tab['label'] }}</h5>
-              </div>
               @switch($tab['target'])
                 @case('company-info')
-                  @include('partials.forms.company.company-info-form')
+                  @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
                 @break
                 @case('company-contact-info')
-                  @include('partials.forms.company.company-contact')
+                  @include('partials.forms.company.company-contact', ['heading' => $tab['label']])
                 @break
                 @case('company-description')
-                  @include('partials.forms.company.company-desc')
+                  @include('partials.forms.company.company-desc', ['heading' => $tab['label']])
                 @break
                 @case('company-financial-info')
-                  @include('partials.forms.company.company-financial')
+                  @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
                 @break
                 @case('team-info')
-                  @include('partials.forms.company.company-team-info')
+                  @include('partials.forms.company.company-team-info', ['heading' => $tab['label']])
                 @break
                 @case('pitch-deck')
-                  @include('partials.forms.company.company-pitch-deck')
+                  @include('partials.forms.company.company-pitch-deck', ['heading' => $tab['label']])
                 @break
                 @case('company-milestones')
-                  @include('partials.forms.company.company-milestones')
+                  @include('partials.forms.company.company-milestones', ['heading' => $tab['label']])
                 @break
                 @case('company-social')
-                  @include('partials.forms.company.company-social')
+                  @include('partials.forms.company.company-social', ['heading' => $tab['label']])
                 @break
               @endswitch
             </div>
@@ -116,16 +145,15 @@
 
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js">
-  </script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 @stop
 
 @section('pagescripts')
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
-  {{-- <script src="/tabs/dist/jquery.tabs.min.js"></script> --}}
-  {{-- <script src="/app-assets/vendors/js/forms/select/select2.full.min.js"></script> --}}
+  <script src="/vuexy/assets/js/forms-pickers.js"></script>
 
   <script>
     document.getElementById('img_url').addEventListener('change', function(
@@ -139,7 +167,8 @@
         reader.readAsDataURL(file);
       }
     });
-  </script>
+  </script> 
+
   <script>
     document.getElementById('update-form').addEventListener('submit', function(
       event) {
@@ -186,19 +215,10 @@
         allowClear: true
       });
     });
-    $(function() {
-      $('#verticalTab').jqTabs();
-      $('#horizontalTab').jqTabs({
-        direction: 'horizontal'
-      });
-    });
   </script>
+
   <script>
     $(document).ready(function() {
-      $('#est_date').datetimepicker({
-        timepicker: false,
-        format: 'Y-m-d'
-      });
       getStates($('#country_id').val());
       $('#country_id').change(function() {
         getStates($(this).val());
@@ -265,7 +285,7 @@
       });
     }
   </script>
-  <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
+    
   <script>
     $('#logo').filemanager(['image']);
 
@@ -281,8 +301,6 @@
         }
       }
     }
-
-
 
     document.addEventListener('DOMContentLoaded', function() {
       // الاستماع لتغيير التبويبات
@@ -304,12 +322,6 @@
         });
       });
     });
-
-
-
-
-
-
 
     // Function to upload file with progress bar
     function uploadFile(inputId, progressBarId, route) {
@@ -371,3 +383,5 @@
     });
   </script>
 @stop
+
+
