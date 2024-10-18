@@ -1,42 +1,51 @@
-@php
-  $name = 'name_' . $l;
-@endphp
-
 @extends('layouts.admin')
 
-@section('title', __('admin.My company'))
-@section('subTitle', __('admin.Edit the Company information'))
-
 @section('style')
-  <link rel="stylesheet" href="/tabs/dist/jquery.tabs.css">
-  {{-- <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/forms/select/select2.min.css"> --}}
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet"
+    href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <style>
-    .form-label-group>label {
-      display: contents !important;
+    .radius-15 {
+      border-radius: 15px;
     }
-    .Red {
-    color: red;
-}
+    
+    .light-shadow {
+      box-shadow: 0px 2px 0px 0px #F2F1F3;
+    }
+    .custom-container {
+      width: 100%;
+    }
 
-.Green {
-    color: green;
-}
-
-.Yellow {
-    color: yellow;
-}
-
-.Gray {
-    color: rgb(214, 200, 200);
-}
+    @media screen and (min-width: 768px) {
+      .custom-container {
+        width: 80%;
+      }
+    }
   </style>
 @stop
 
+@php
+  $name = 'name_' . $l;
+  $tabs = collect([
+      ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Company Info' : 'معلومات الشركة'],
+      ['company-contact-info', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
+      ['company-description', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
+      ['company-financial-info', 'ti-currency-dollar', $l == 'en' ? 'Financial' : ' المالية'],
+      ['team-info', 'ti-users', $l == 'en' ? 'Team Info' : ' الفريق'],
+      ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
+      ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
+      ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
+  ])
+      ->map(function ($tab) {
+          return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
+      })
+      ->toArray();
+@endphp
+
 @section('content')
-  <!-- BEGIN: Content-->
+  <!-- Content wrapper -->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
@@ -1554,203 +1563,31 @@
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-        <!-- BuilderForm end -->
-
-
+          @endforeach
+        </div>
+        <!-- / Tab Content On Tab Click -->
       </div>
     </div>
+    <!-- / Content -->
   </div>
-  <!-- END: Content-->
-
-  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-      <div class="modal-content">
-        <form method="post" class="fundingForm" action="{{ route('startup.fundingRounds.store') }}"
-          enctype="multipart/form-data" autocomplete="off">
-          <div class="modal-header">
-            <h4 class="modal-title">{{ __('admin.Add new funding round') }}
-            </h4>
-            
-          </div>
-          <div class="modal-body">
-            @csrf
-            <input type="hidden" name="_method" value="PUT" class="fundingMethod">
-            <div class="row">
-              <div class="form-group col-6">
-                <label class="fs-6 mb-2">{{ __('admin.Funding Stage') }} * :</label>
-                <select class="form-control mt-2" required id="funding_stage" name='funding_stage'>
-                  <option value="Undisclosed"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Undisclosed' ? 'selected' : '' }}>
-                    Undisclosed</option>
-                  <option value="Friends and Family"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Friends and Family' ? 'selected' : '' }}>
-                    Friends and Family</option>
-                  <option value="SEED"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'SEED' ? 'selected' : '' }}>
-                    SEED</option>
-                  <option value="Pre-Series A"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Pre-Series A' ? 'selected' : '' }}>
-                    Pre-Series A</option>
-                  <option value="Series A"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Series A' ? 'selected' : '' }}>
-                    Series A</option>
-                  <option value="Series B"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Series B' ? 'selected' : '' }}>
-                    Series B</option>
-                  <option value="Angel Investment"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Angel Investment' ? 'selected' : '' }}>
-                    Angel Investment</option>
-                  <option value="Pre-SEED"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Pre-SEED' ? 'selected' : '' }}>
-                    Pre-SEED</option>
-                  <option value="Series C"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Series C' ? 'selected' : '' }}>
-                    Series C</option>
-                  <option value="Series D"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Series D' ? 'selected' : '' }}>
-                    Series D</option>
-                  <option value="Bridge"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Bridge' ? 'selected' : '' }}>
-                    Bridge</option>
-                  <option value="Convertible Note"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Convertible Note' ? 'selected' : '' }}>
-                    Convertible Note</option>
-                  <option value="Merger and Acquisition (M&A)"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Merger and Acquisition (M&A)' ? 'selected' : '' }}>
-                    Merger and Acquisition (M&A)</option>
-                  <option value="Series E"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Series E' ? 'selected' : '' }}>
-                    Series E</option>
-                  <option value="Series F"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Series F' ? 'selected' : '' }}>
-                    Series F</option>
-                  <option value="Crowdfunding"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Crowdfunding' ? 'selected' : '' }}>
-                    Crowdfunding</option>
-                  <option value="Private Equity"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Private Equity' ? 'selected' : '' }}>
-                    Private Equity</option>
-                  <option value="Pre-Series B"
-                    {{ !empty($client->company) && $client->company->funding_stage == 'Pre-Series B' ? 'selected' : '' }}>
-                    Pre-Series B</option>
-
-                </select>
-              </div>
-              <div class="form-group col-6">
-                <label class="fs-6 mb-2">{{ __('admin.Amount') }} * :</label>
-                <input value="{{ $client->company ? $client->company->amount : old('amount') }}" name="amount"
-                  type="number" class="form-control mt-2" id="amount" placeholder="{{ __('admin.Amount') }} *"
-                  required autocomplete="amount" />
-              </div>
-              <div class="form-group col-6">
-                <label class="fs-6 mb-2">{{ __('admin.Post Money Valuation') }} * :</label>
-                <input
-                  value="{{ $client->company ? $client->company->post_money_valuation : old('post_money_valuation') }}"
-                  name="post_money_valuation" type="number" class="form-control mt-2" id="post_money_valuation"
-                  placeholder="{{ __('admin.Post Money Valuation') }} *" required
-                  autocomplete="post_money_valuation" />
-              </div>
-              <div class="form-group col-6">
-                <label class="fs-6 mb-2">{{ __('admin.Date Raised') }} * :</label>
-                <div class="input-group">
-                  <input type="date" name="date_raised" id="date_raised"
-                    placeholder="{{ __('admin.selectDate') }}" class="form-control mt-2">
-                </div>
-              </div>
-              <div class="form-group col-6">
-                <label class="fs-6 mb-2">{{ __('admin.Investment Vehicle') }} * :</label>
-                <div class="input-group">
-                  <select class="form-control mt-2" required id="investment_vehicle" name='investment_vehicle'>
-                    <option value="Equity"
-                      {{ !empty($client->company) && $client->company->investment_vehicle == 'Equity' ? 'selected' : '' }}>
-                      Equity</option>
-                    <option value="Venture Debt"
-                      {{ !empty($client->company) && $client->company->investment_vehicle == 'Venture Debt' ? 'selected' : '' }}>
-                      Venture Debt</option>
-                    <option value="Conventional Debt"
-                      {{ !empty($client->company) && $client->company->investment_vehicle == 'Conventional Debt' ? 'selected' : '' }}>
-                      Conventional Debt</option>
-                    <option value="Grant"
-                      {{ !empty($client->company) && $client->company->investment_vehicle == 'Grant' ? 'selected' : '' }}>
-                      Grant</option>
-                    <option value="Non-equity Assistance"
-                      {{ !empty($client->company) && $client->company->investment_vehicle == 'Non-equity Assistance' ? 'selected' : '' }}>
-                      Non-equity Assistance</option>
-                    <option value="Line of Credit"
-                      {{ !empty($client->company) && $client->company->investment_vehicle == 'Line of Credit' ? 'selected' : '' }}>
-                      Line of Credit</option>
-
-                  </select>
-                </div>
-              </div>
-              <div class="form-group col-6">
-                <label class="fs-6 mb-2">{{ __('admin.Amount Raised') }} * :</label>
-                <input value="{{ $client->company ? $client->company->post_money_valuation : old('amount_raised') }}"
-                  name="amount_raised" type="number" class="form-control mt-2" id="amount_raised"
-                  placeholder="{{ __('admin.Amount Raised') }} *" required autocomplete="amount_raised" />
-              </div>
-            </div>
-
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary ml-1">
-              
-              <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+  <!-- / Content wrapper -->
 @stop
 
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 @stop
 
 @section('pagescripts')
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
-  <script src="/tabs/dist/jquery.tabs.min.js"></script>
-  <script src="/app-assets/vendors/js/forms/select/select2.full.min.js"></script>
-  <script>
-     
-    const contactButton = document.getElementById('contactButton');
-    const infoButton = document.getElementById('infoButton');
-
-    const infoForm = document.getElementById('infoForm');
-    const contactForm = document.getElementById('contactForm');
-
-    contactForm.style.display = 'none';
-
-    infoButton.addEventListener('click', function() {
-      console.log('clicked');
-      infoForm.style.display = 'block';
-      contactForm.style.display = 'none';
-      infoButton.classList.remove('btn-label-secondary');
-      infoButton.classList.add('btn-primary');
-      contactButton.classList.remove('btn-primary');
-      contactButton.classList.add('btn-label-secondary');
-    });
-
-    contactButton.addEventListener('click', function() {
-      console.log('clicked');
-      infoForm.style.display = 'none';
-      contactForm.style.display = 'block';
-      contactButton.classList.remove('btn-label-secondary');
-      contactButton.classList.add('btn-primary');
-      infoButton.classList.remove('btn-primary');
-      infoButton.classList.add('btn-label-secondary');
-    });
-  </script>
+  <script src="/vuexy/assets/js/forms-pickers.js"></script>
 
   <script>
-    document.getElementById('img_url').addEventListener('change', function(event) {
+    document.getElementById('img_url').addEventListener('change', function(
+    event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
@@ -1760,17 +1597,19 @@
         reader.readAsDataURL(file);
       }
     });
-  </script>
-  <script>
-    document.getElementById('update-form').addEventListener('submit', function(event) {
-    var button = document.getElementById('submit-button');
-    var buttonText = document.getElementById('button-text');
-    var buttonSpinner = document.getElementById('button-spinner');
+  </script> 
 
-    button.disabled = true;
-    buttonText.classList.add('d-none');
-    buttonSpinner.classList.remove('d-none');
-  });
+  <script>
+    document.getElementById('update-form').addEventListener('submit', function(
+      event) {
+      var button = document.getElementById('submit-button');
+      var buttonText = document.getElementById('button-text');
+      var buttonSpinner = document.getElementById('button-spinner');
+
+      button.disabled = true;
+      buttonText.classList.add('d-none');
+      buttonSpinner.classList.remove('d-none');
+    });
   </script>
 
   <script>
@@ -1781,13 +1620,16 @@
         } else {
           $('.fundingMethod').attr('name', '_method');
           $.ajax({
-            url: "/dashboard/startup/fundingRounds/" + $(this).data('id'),
+            url: "/dashboard/startup/fundingRounds/" + $(this).data(
+              'id'),
             success: function(data) {
               $('#funding_stage').val(data['funding_stage']);
               $('#amount').val(data['amount']);
-              $('#post_money_valuation').val(data['post_money_valuation']);
+              $('#post_money_valuation').val(data[
+                'post_money_valuation']);
               $('#date_raised').val(data['date_raised']);
-              $('#investment_vehicle').val(data['investment_vehicle']);
+              $('#investment_vehicle').val(data[
+                'investment_vehicle']);
               $('#amount_raised').val(data['amount_raised']);
 
             }
@@ -1803,19 +1645,10 @@
         allowClear: true
       });
     });
-    $(function() {
-      $('#verticalTab').jqTabs();
-      $('#horizontalTab').jqTabs({
-        direction: 'horizontal'
-      });
-    });
   </script>
+
   <script>
     $(document).ready(function() {
-      $('#est_date').datetimepicker({
-        timepicker: false,
-        format: 'Y-m-d'
-      });
       getStates($('#country_id').val());
       $('#country_id').change(function() {
         getStates($(this).val());
@@ -1827,7 +1660,8 @@
 
     function getStates(country_id) {
       var $state = $('#state_id');
-      var currentState = '{{ $client->company ? optional($client->company)->state_id : 0 }}';
+      var currentState =
+        '{{ $client->company ? optional($client->company)->state_id : 0 }}';
       var selected = '';
       $.ajax({
         url: "{{ route('get_states_by_country') }}",
@@ -1835,7 +1669,8 @@
           country_id: country_id
         },
         success: function(data) {
-          $state.html('<option value="" >{{ __('admin.State') }}</option>');
+          $state.html(
+          '<option value="" >{{ __('admin.State') }}</option>');
           $.each(data, function(id, value) {
             // selected = '';
             if (currentState === id) {
@@ -1844,8 +1679,10 @@
             } else {
               selected = '';
             }
-            $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
-            $('#city_id').html('<option value="" >{{ __('admin.City') }}</option>');
+            $state.append('<option value="' + id + '" ' + selected +
+              '>' + value + '</option>');
+            $('#city_id').html(
+              '<option value="" >{{ __('admin.City') }}</option>');
           });
           $('#state').show(150);
         }
@@ -1854,7 +1691,8 @@
 
     function getCities(state_id) {
       var $city = $('#city_id');
-      var currentCity = '{{ $client->company ? optional($client->company)->city_id : 0 }}';
+      var currentCity =
+        '{{ $client->company ? optional($client->company)->city_id : 0 }}';
       var selected = '';
       $.ajax({
         url: "{{ route('cities.index') }}",
@@ -1869,14 +1707,15 @@
             } else {
               selected = '';
             }
-            $city.append('<option value="' + id + '" ' + selected + ' >' + value + '</option>');
+            $city.append('<option value="' + id + '" ' + selected +
+              ' >' + value + '</option>');
           });
           $('#city').show(150);
         }
       });
     }
   </script>
-  <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
+    
   <script>
     $('#logo').filemanager(['image']);
 
@@ -1884,7 +1723,8 @@
       if (selection === 'other') {
         let other = prompt('{{ __('Enter your company sector name') }}');
         if (other) {
-          let newItem = "<option selected value='" + other + "'>" + other + "</option>";
+          let newItem = "<option selected value='" + other + "'>" + other +
+            "</option>";
           $('#selectsector').append(newItem);
         } else {
           $('#selectsector').val('Industrial');
@@ -1892,85 +1732,86 @@
       }
     }
 
-    
-    
-  document.addEventListener('DOMContentLoaded', function () {
-    // الاستماع لتغيير التبويبات
-    document.querySelectorAll('.nav-link').forEach(tab => {
-      tab.addEventListener('shown.bs.tab', function (e) {
-        // تحديد التبويب النشط
-        const activeTab = e.target.getAttribute('href');
-        // تعطيل الحقول المطلوبة للتبويبات غير النشطة
-        document.querySelectorAll('.tab-pane').forEach(pane => {
-          if (pane.getAttribute('id') === activeTab.substring(1)) {
-            pane.querySelectorAll('input').forEach(input => input.removeAttribute('disabled'));
-          } else {
-            pane.querySelectorAll('input').forEach(input => input.setAttribute('disabled', 'disabled'));
-          }
+    document.addEventListener('DOMContentLoaded', function() {
+      // الاستماع لتغيير التبويبات
+      document.querySelectorAll('.nav-link').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+          // تحديد التبويب النشط
+          const activeTab = e.target.getAttribute('href');
+          // تعطيل الحقول المطلوبة للتبويبات غير النشطة
+          document.querySelectorAll('.tab-pane').forEach(pane => {
+            if (pane.getAttribute('id') === activeTab.substring(
+              1)) {
+              pane.querySelectorAll('input').forEach(input =>
+                input.removeAttribute('disabled'));
+            } else {
+              pane.querySelectorAll('input').forEach(input =>
+                input.setAttribute('disabled', 'disabled'));
+            }
+          });
         });
       });
     });
-  });
 
+    // Function to upload file with progress bar
+    function uploadFile(inputId, progressBarId, route) {
+      var formData = new FormData();
+      var file = document.getElementById(inputId).files[0];
+      formData.append(inputId, file);
 
-
-
-
-
-
- // Function to upload file with progress bar
- function uploadFile(inputId, progressBarId, route) {
-        var formData = new FormData();
-        var file = document.getElementById(inputId).files[0];
-        formData.append(inputId, file);
-
-        $.ajax({
-            url: route,
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            xhr: function () {
-                var xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener('progress', function (e) {
-                    if (e.lengthComputable) {
-                        var percentComplete = Math.round((e.loaded / e.total) * 100);
-                        $('#' + progressBarId).css('width', percentComplete + '%');
-                        $('#' + progressBarId).attr('aria-valuenow', percentComplete);
-                        $('#' + progressBarId).text(percentComplete + '%');
-                    }
-                }, false);
-                return xhr;
-            },
-            success: function (data) {
-                if (data.success) {
-                    console.log('File uploaded successfully: ' + data.path);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.log('Error uploading file: ' + error);
+      $.ajax({
+        url: route,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        xhr: function() {
+          var xhr = new window.XMLHttpRequest();
+          xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+              var percentComplete = Math.round((e.loaded / e.total) *
+                100);
+              $('#' + progressBarId).css('width', percentComplete +
+              '%');
+              $('#' + progressBarId).attr('aria-valuenow',
+                percentComplete);
+              $('#' + progressBarId).text(percentComplete + '%');
             }
-        });
+          }, false);
+          return xhr;
+        },
+        success: function(data) {
+          if (data.success) {
+            console.log('File uploaded successfully: ' + data.path);
+          }
+        },
+        error: function(xhr, status, error) {
+          console.log('Error uploading file: ' + error);
+        }
+      });
     }
 
     // Upload for Pitch Deck
-    $('#pitch_deck').on('change', function () {
-        uploadFile('pitch_deck', 'progress-bar-pitch_deck', '{{ route('update_my_company') }}');
+    $('#pitch_deck').on('change', function() {
+      uploadFile('pitch_deck', 'progress-bar-pitch_deck',
+        '{{ route('update_my_company') }}');
     });
 
     // Upload for Pitch Deck Video
-    $('#pitch_deck_video').on('change', function () {
-        uploadFile('pitch_deck_video', 'progress-bar-pitch_deck_video', '{{ route('update_my_company') }}');
+    $('#pitch_deck_video').on('change', function() {
+      uploadFile('pitch_deck_video', 'progress-bar-pitch_deck_video',
+        '{{ route('update_my_company') }}');
     });
 
     // Upload for Pitch Deck Video
-    $('#img_url').on('change', function () {
-        uploadFile('img_url', 'progress-bar-Logo', '{{ route('update_my_company') }}');
+    $('#img_url').on('change', function() {
+      uploadFile('img_url', 'progress-bar-Logo',
+        '{{ route('update_my_company') }}');
     });
-
-
   </script>
 @stop
+
+

@@ -207,10 +207,12 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <div class="d-flex align-items-center">
-                    <i class="ti ti-mail ti-24px text-primary me-2"></i>
-                    {{ $company->email }}
-                  </div>
+                  @if ($company->email)
+                    <div class="d-flex align-items-center">
+                      <i class="ti ti-mail ti-24px text-primary me-2"></i>
+                      {{ $company->email }}
+                    </div>
+                  @endif
                   @if ($company->website)
                     <div class="d-flex align-items-center">
                       <i class="ti ti-world ti-24px text-primary me-2"></i>
@@ -220,10 +222,12 @@
                     </div>
                   @endif
                 </div>
-                <div class="d-flex align-items-center">
-                  <i class="ti ti-phone ti-28px text-primary me-2"></i> 
-                  {{ $company->phone }}
-                </div>
+                @if ($company->phone)
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-phone ti-28px text-primary me-2"></i> 
+                    {{ $company->phone }}
+                  </div>
+                @endif
               </div>
             </div>
           </div>

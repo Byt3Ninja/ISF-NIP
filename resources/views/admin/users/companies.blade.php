@@ -141,8 +141,9 @@
               <!-- Company Card -->
               <div class="col-md-4">
                 <div 
-                  class="bg-white border shadow-sm p-4 mb-3 radius-15 card-container" 
+                  class="bg-white border shadow-sm p-4 mb-3 radius-15 card-container cursor-pointer" 
                   style="height: 580px;"
+                  onclick="window.location.href='/dashboard/companyProfile/{{ $company->id }}'"
                 >
                   <div class="w-100 d-flex justify-content-between align-items-center">
                     <span class="text-muted text-sm fw-semibold">
