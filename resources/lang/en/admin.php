@@ -699,6 +699,7 @@ return [
     'Pitch_Deck' => 'Pitch Deck',
     'Pitch_Deck_Video' => 'Pitch Deck Video',
     'Pitch_Deck_Information' => 'Pitch Deck Information',
+    'Click_here' => 'Click here',
     'Pitch_Deck_Summary' => 'Pitch Deck Summary',
     'Problem_We_Are_Facing' => 'Problem We Are Facing',
     'solution_problem' => 'Solution to the Problem',
@@ -795,12 +796,17 @@ return [
     'MileStone_added' => 'Milestone Added',
 
 	// 8 Company Controller
-'Website_Not_URL'=>' Website URL not Correct ',
-'img_url_Not_URL'=>' img_url URL not Correct ',
-'facebook_Not_URL'=>' facebook URL not Correct ',
-'twitter_Not_URL'=>' twitter URL not Correct ',
-'linkedin_Not_URL'=>' linkedin URL not Correct ',
-'youtube_Not_URL'=>' youtube URL not Correct ',
-'google_map_Not_URL'=>' Google_map URL not Correct ',
+	'Website_Not_URL'=>' Website URL not Correct ',
+	'img_url_Not_URL'=>' img_url URL not Correct ',
+	'facebook_Not_URL'=>' facebook URL not Correct ',
+	'twitter_Not_URL'=>' twitter URL not Correct ',
+	'linkedin_Not_URL'=>' linkedin URL not Correct ',
+	'youtube_Not_URL'=>' youtube URL not Correct ',
+	'google_map_Not_URL'=>' Google_map URL not Correct ',
+
+	'founder_Edited'=>'تم تعديل المؤسس بنجاح',
+	'Shareholder_Edited'=>'تم تعديل المساهم بنجاح',
+	'Investor_Edited'=>'تم تعديل المستثمر بنجاح',
+	'Funding_Target'=>' هدف التمويل ',
 	
 ];

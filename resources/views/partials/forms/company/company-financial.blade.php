@@ -9,7 +9,7 @@
       <input type="hidden" value="4" name="CompanyN">
 
       <div class="row">
-        <div class="col-12 mb-3">
+        <div class="col-6 mb-3">
           <label for="Currency"
             class="form-label">{{ __('settings.Currency') }}</label>
           <div class="position-relative">
@@ -28,7 +28,7 @@
           </div>
         </div>
 
-        <div class="col-12 mb-3">
+        <div class="col-6 mb-3">
           <label for="pre_money_valuation"
             class="form-label">{{ __('admin.Pre_money_Valuation') }}</label>
           <div class="position-relative">
@@ -36,14 +36,14 @@
               class="form-control border-light light-shadow px-8"
               id="pre_money_valuation"
               placeholder="{{ __('admin.Pre_money_Valuation') }}"
-              value="{{ $client->company ? $client->company->pre_money_valuation : old('pre_money_valuation') }}"
-              name="pre_money_valuation" autocomplete="pre_money_valuation">
+              value="{{ $client->company ? $client->company->Pre_money_Valuation : old('pre_money_valuation') }}"
+              name="pre_money_valuation" autocomplete="Pre_money_Valuation">
             <i class="ti ti-cash fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
               style="left: 7px;"></i>
           </div>
         </div>
 
-        <div class="col-12 mb-3">
+        <div class="col-6 mb-3">
           <label for="raised_fund"
             class="form-label">{{ __('admin.raised_fund_egp') }}{{ $Setting->Currency }}</label>
           <div class="position-relative">
@@ -57,7 +57,23 @@
           </div>
         </div>
 
-        <div class="col-12 mb-3">
+        
+
+        <div class="col-6 mb-3">
+          <label for="Funding_Target"
+            class="form-label">{{ __('admin.Funding_Target') }}{{ $Setting->Currency }}</label>
+          <div class="position-relative">
+            <input type="number"
+              class="form-control border-light light-shadow px-8"
+              id="Funding_Target" placeholder="{{ __('admin.Funding_Target') }}"
+              value="{{ $client->company ? $client->company->Funding_Target : old('Funding_Target') }}"
+              name="Funding_Target" autocomplete="Funding_Target">
+            <i class="ti ti-trending-up fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
+              style="left: 7px;"></i>
+          </div>
+        </div>
+
+        <div class="col-6 mb-3">
           <label for="stage"
             class="form-label">{{ __('admin.stage') }}*</label>
           <div class="position-relative">
@@ -86,11 +102,11 @@
           </div>
         </div>
 
-        <div class="col-12 mb-3">
+        <div class="col-6 mb-3">
           <label for="targeted_market"
             class="form-label">{{ __('admin.Targeted_Market') }}</label>
           <div class="position-relative">
-            <input type="number"
+            <input type="text"
               class="form-control border-light light-shadow px-8"
               id="targeted_market"
               placeholder="{{ __('admin.Targeted_Market') }}"
@@ -101,7 +117,7 @@
           </div>
         </div>
 
-        <div class="col-12 mb-3">
+        <div class="col-6 mb-3">
           <label for="business_type"
             class="form-label">{{ __('admin.Business Type') }}*</label>
           <div class="position-relative">

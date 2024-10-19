@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('Industries')->nullable()->after('targeted_market');
             $table->string('pitch_deck_video')->nullable()->after('pitch_deck');
             $table->string('pitch_deck_summary')->nullable()->after('pitch_deck_description');
-            $table->string('documents')->nullable()->after('pitch_deck_summary');
+            $table->longText('documents')->nullable()->after('pitch_deck_summary');
             $table->text('working_team_summary')->nullable()->after('team_num');
         });
     }

@@ -58,7 +58,7 @@
 @section('content')
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <h4 class="fw-bold mb-4">My Company</h4>
+      <h4 class="fw-bold mb-4">{{ __('admin.My company') }}</h4>
       <section>
         <!-- Company Info Card -->
         <div class="card shadow-sm" style="border-radius: 15px;">
@@ -153,7 +153,7 @@
       </section>
       <section class="mt-6">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="card shadow-sm" style="border-radius: 15px; height: 196px;">
               <div class="card-body d-flex flex-column h-100 justify-content-between">
                 <div class="d-flex">
@@ -189,7 +189,7 @@
               </div>
             </div>
           </div>
-          <div class="col-md-6 mt-6 mt-md-0">
+          <div class="col-md-4 mt-6 mt-md-0">
             <div class="card shadow-sm" style="border-radius: 15px; height: 196px;">
               <div class="card-body d-flex flex-column h-100 justify-content-between">
                 <div class="d-flex justify-content-between">
@@ -231,6 +231,37 @@
               </div>
             </div>
           </div>
+
+          @php 
+
+ // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+//  $Sustainables = explode(',', $company->Sustainable_development);
+ $Sustainables = json_decode($company->Sustainable_development);
+                @endphp
+
+          <div class="col-md-4 mt-6 mt-md-0">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 196px;">
+              <div class="card-body d-flex flex-column h-100 justify-content-between">
+                <div class="d-flex justify-content-between">
+                  @foreach ($Sustainables as $Sustainable)
+@php
+  $icon = App\SustainableIcon::where('title', $Sustainable)->first();
+@endphp
+
+                @if ($loop->index > 0 && $loop->index % 3 == 0) 
+                    <!-- يتم بدء سطر جديد بعد كل 4 عناصر -->
+                    </div><div class="d-flex flex-wrap mt-3">
+                @endif
+
+                  <div class="col-md-2">
+                    <img src="{{ asset('/images/sustainability/'. $l .'/'. $icon->icon_ar) }}" alt="icon" style="width: 100px" >
+                  </div>
+                  @endforeach
+              </div>
+            </div>
+          </div>
+
+
         </div>
       </section>
       <section class="w-100 mt-6 d-flex flex-column flex-md-row" style="gap: 2rem;">
@@ -256,8 +287,8 @@
                     <div class="text-center">
                       <img class="card-icon mb-2" src="/icons/headquarter.svg" alt="icon" />
                     </div>
-                    <span class="text-black">Headquarters</span>
-                    <span class="text-primary">Egypt</span>
+                    <span class="text-black">{{ __('admin.Country') }}</span>
+                    <span class="text-primary">{{ optional($company->country)->{'name_'.$l} }}</span>
                   </div>
                 </div>
               </div>
@@ -333,8 +364,8 @@
             >
               <div class="p-2" style="display: grid; place-items: center;">
                 <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
-                <span class="text-black" style="font-size: 12px;">Funding Target</span>
-                <span class="text-primary" style="font-size: 12px;">$1000</span>
+                <span class="text-black" style="font-size: 12px;">{{ __('admin.Funding_Target') }}</span>
+                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->Funding_Target }}</span>
               </div>
             </div>
             <div 
@@ -343,8 +374,8 @@
             >
               <div class="p-2" style="display: grid; place-items: center;">
                 <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
-                <span class="text-black" style="font-size: 12px;">Pre-money valuation</span>
-                <span class="text-primary" style="font-size: 12px;">$1000</span>
+                <span class="text-black" style="font-size: 12px;">{{ __('admin.Pre_money_Valuation') }}</span>
+                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->Pre_money_Valuation }}</span>
               </div>
             </div>
             <div 
@@ -354,7 +385,7 @@
               <div class="p-2" style="display: grid; place-items: center;">
                 <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
                 <span class="text-black" style="font-size: 12px;">{{ __('admin.raised_fund') }}</span>
-                <span class="text-primary" style="font-size: 12px;">{{ $company->raised_fund }}</span>
+                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->raised_fund }}</span>
               </div>
             </div>
           </div>

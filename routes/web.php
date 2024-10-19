@@ -161,8 +161,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
 	Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
 	Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
-	Route::post('/AddCompanyShereholder', 'ClientCompanyController@AddTeamsSherHolder')->name('AddTeamsSherHolder_Comp');
-	Route::post('/AddCompanyInvistor', 'ClientCompanyController@AddTeamsInvistor')->name('AddTeamsInvistor_Comp');
+	Route::post('/AddCompanyEdit', 'ClientCompanyController@EditTeams')->name('EditTeams_Comp');
+	Route::post('/AddCompanyDelete', 'ClientCompanyController@DeleteTeams')->name('DeleteTeams_Comp');
 	Route::post('/AddCompanyMileStone', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
 	//like a service
 	Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');

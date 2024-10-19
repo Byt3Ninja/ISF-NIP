@@ -99,11 +99,17 @@ if(!empty($company->Sustainable_development)){
             $funding_rounds=auth()->user()->company?auth()->user()->company->fundingRounds:[];
 
             $teamMembers = Team_Member::all(); // جلب جميع الأعضاء
+
+            $fonders = Team_Member::where('TeamMember', 'Founder')->get(); 
+            $Shareholders = Team_Member::where('TeamMember', 'Shareholder')->get(); 
+            $Investors = Team_Member::where('TeamMember', 'Investor')->get(); 
+
+
             $MileStones = Milestone::all(); // جلب جميع الأعضاء
             $Currencies = Currency::all(); // جلب جميع الأعضاء
 
             return view('admin/clients/company', compact(
-                'client','Currencies','MileStones', 'teamMembers', 'states', 'cities','countries','sectors','funding_rounds','Setting'
+                'client', 'fonders', 'Shareholders', 'Investors', 'Currencies','MileStones', 'teamMembers', 'states', 'cities','countries','sectors','funding_rounds','Setting'
             ));
         }catch (Exception $e){
             //log what happend
@@ -278,6 +284,7 @@ if($data['CompanyN']==4){
         'Currency' => 'required|string',
         'pre_money_valuation' => 'required|numeric|min:0',
         'raised_fund' => 'required|numeric|min:0',
+        'Funding_Target' => 'required|numeric|min:0',
         'stage' => 'required|string',
         'targeted_market' => 'required|string',
         'business_type' => 'required|string',
@@ -305,6 +312,7 @@ if($data['CompanyN']==4){
                     'Currency' => $data['Currency'],
                     'Pre_money_Valuation' => $data['pre_money_valuation'],
                     'raised_fund' => $data['raised_fund'],
+                    'Funding_Target' => $data['Funding_Target'],
                     'stage' => $data['stage'],
                     'targeted_market' => $data['targeted_market'],
                     'business_type' => $data['business_type'],
@@ -316,6 +324,7 @@ if($data['CompanyN']==4){
                     'Currency' => $data['Currency'],
                     'Pre_money_Valuation' => $data['pre_money_valuation'],
                     'raised_fund' => $data['raised_fund'],
+                    'Funding_Target' => $data['Funding_Target'],
                     'stage' => $data['stage'],
                     'targeted_market' => $data['targeted_market'],
                     'business_type' => $data['business_type'],
@@ -366,62 +375,37 @@ if($data['CompanyN']==5){
 if($data['CompanyN']==6){
     
     $validator = Validator::make($request->all(), [
-        'pitch_deck' => 'nullable|mimes:pdf,ppt,pptx|max:10240', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
-        'pitch_deck_video' => 'nullable|url', // يجب أن يكون رابط صالح
         'pitch_deck_info' => 'nullable', // يجب أن يكون إما نعم أو لا
         'pitch_deck_summary' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
         'problem_facing' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
         'solution_problem' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
-        'documents.*' => 'nullable|array|mimes:pdf,ppt,pptx|max:20480', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
     ], [
-        'pitch_deck.mimes' => __('admin.Pitch_Deck must be a pdf or ppt file'),
-        'pitch_deck.max' => __('admin.Pitch_Deck max size is 10MB'),
         'pitch_deck_info.required' => __('admin.Pitch_Deck_Information is required'),
         'pitch_deck_summary.required' => __('admin.Pitch_Deck_Summary is required'),
         'pitch_deck_summary.string' => __('admin.Pitch_Deck_Summary must be a string'),
         'pitch_deck_summary.max' => __('admin.Pitch_Deck_Summary max length is 500 characters'),
-        'documents.*.mimes' => __('admin.Documents must be a pdf or ppt file'),
-        'documents.*.max' => __('admin.Documents max size is 20MB'),
     ]);
     
     
             // $result = Company::updateOrCreate(['id' => $companyId], $data);
             if ($companyId) {
-                $result1 = Company::where('id', $companyId)->first();
-                if($data['pitch_deck'] == ""){
-                    $data['pitch_deck'] = $result1->pitch_deck;
-                }
-                if($data['pitch_deck_video'] == ""){
-                    $data['pitch_deck_video'] = $result1->pitch_deck_video;
-                }
-                if($data['pitch_deck_info'] == ""){
-                    $data['pitch_deck_info'] = $result1->pitch_deck_info;
-                }
-                if($data['pitch_deck_summary'] == ""){
-                    $data['pitch_deck_summary'] = $result1->pitch_deck_summary;
-                }
-                if($data['documents'] == ""){
-                    $data['documents'] = $result1->documents;
-                }
                 
                 // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                 $result = Company::where('id', $companyId)->update([
-                    'pitch_deck' => $data['pitch_deck'],
-                    'pitch_deck_video' => $data['pitch_deck_video'],
                     'pitch_deck_description' => $data['pitch_deck_info'],
                     'pitch_deck_summary' => $data['pitch_deck_summary'],
-                    'documents' =>  $data['documents'],
+                    'problem' => $data['problem_facing'],
+                    'solution' => $data['solution_problem'],
                 ]);
                 $msgtype = 'UpdateComp';
                 
             } else {
                 // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                 $result = Company::create([
-                    'pitch_deck' => $data['pitch_deck'],
-                    'pitch_deck_video' => $data['pitch_deck_video'],
                     'pitch_deck_description' => $data['pitch_deck_info'],
                     'pitch_deck_summary' => $data['pitch_deck_summary'],
-                    'documents' => isset($data['documents']) ? json_encode($data['documents']) : null,
+                    'problem' => $data['problem_facing'],
+                    'solution' => $data['solution_problem'],
                 ]);
                 $msgtype = 'NewComp';
             }
@@ -489,9 +473,88 @@ if($data['CompanyN']==8){
             }
 
 }
+if($data['CompanyN']==9){
+    $validator = Validator::make($request->all(), [
+        'pitch_deck' => 'nullable|mimes:pdf,ppt,pptx|max:10240', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
+    ], [
+        'pitch_deck.mimes' => __('admin.Pitch_Deck must be a pdf or ppt file'),
+        'pitch_deck.max' => __('admin.Pitch_Deck max size is 10MB'),
 
+    ]);
+            // $result = Company::updateOrCreate(['id' => $companyId], $data);
+            if ($companyId) {
+                // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
+                $result = Company::where('id', $companyId)->update([
+                    'pitch_deck' => $data['pitch_deck'],
+                ]);
+                $msgtype = 'UpdateComp';
+            } else {
+                // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
+                $result = Company::create([
+                    'pitch_deck' => $data['pitch_deck'],
+                ]);
+                $msgtype = 'NewComp';
+            }
+            if(!$companyId) {
+                User::where('id', Auth::id())->update(['company_id' => $result->id]);
+                $msgtype = 'NewComp';
+            }
 
+}
+if($data['CompanyN']==10){
+    $validator = Validator::make($request->all(), [
+        'pitch_deck_video' => 'nullable|url',
+    ]);
+            // $result = Company::updateOrCreate(['id' => $companyId], $data);
+            if ($companyId) {
+                // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
+                $result = Company::where('id', $companyId)->update([
+                    'pitch_deck_video' => $data['pitch_deck_video'],
+                ]);
+                $msgtype = 'UpdateComp';
+            } else {
+                // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
+                $result = Company::create([
+                    'pitch_deck_video' => $data['pitch_deck_video'],
+                ]);
+                $msgtype = 'NewComp';
+            }
+            if(!$companyId) {
+                User::where('id', Auth::id())->update(['company_id' => $result->id]);
+                $msgtype = 'NewComp';
+            }
 
+}
+if($data['CompanyN']==11){
+    // $validator = Validator::make($request->all(), [
+    //     'documents.*' => 'nullable|array|mimes:pdf,ppt,pptx|max:20480',
+    // ],[
+    //     'documents.*.mimes' => __('admin.Documents must be a pdf or ppt file'),
+    //     'documents.*.max' => __('admin.Documents max size is 20MB'),
+    // ]);
+            // $result = Company::updateOrCreate(['id' => $companyId], $data);
+            if ($companyId) {
+
+                // dd($data['documents']);
+                // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
+                $result = Company::where('id', $companyId)->update([
+                    'documents' =>  $data['documents'],
+                ]);
+                
+                $msgtype = 'UpdateComp';
+            } else {
+                // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
+                $result = Company::create([
+                    'documents' => $data['documents'],
+                ]);
+                $msgtype = 'NewComp';
+            }
+            if(!$companyId) {
+                User::where('id', Auth::id())->update(['company_id' => $result->id]);
+                $msgtype = 'NewComp';
+            }
+
+}
                
 
 
@@ -569,46 +632,45 @@ if($data['CompanyN']==8){
     public function AddTeams(Request $request){
         $user = Auth::user();
             $companyId = $user->company_id;  
-// تحقق من صحة البيانات
-$validator = Validator::make($request->all(), [
-    'founder_name' => 'required|string|max:255',
-    'founder_email' => 'required|email|max:255',
-    'founder_linkedin' => 'nullable|url|max:255',
-], [
-    'founder_name.required' => __('admin.Name is Required founder'),
-    'founder_email.required' => __('admin.Email is Required founder'),
-    'founder_email.email' => __('admin.Email is Not Correct founder'),
-    'founder_linkedin.url' => __('admin.Linkedin URL is Not Correct founder'),
-]);
-
-// إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-if ($validator->fails()) {
-    return response()->json([
-        'errors' => $validator->errors(),
-    ], 422); // حالة الخطأ 422
-}
-
-$founder = 'Founder';
-// إنشاء وحفظ بيانات العضو في قاعدة البيانات
-$teamMember = new Team_member(); // افترض أن لديك موديل اسمه TeamMember
-$teamMember->TeamMember = $founder;
-$teamMember->Name = $request->input('founder_name');
-$teamMember->Email = $request->input('founder_email');
-$teamMember->LinkedIn = $request->input('founder_linkedin');
-$teamMember->Company_id = $companyId;
-$teamMember->save();
-
-// استجابة بعد الحفظ
-return response()->json([
-    'state' => __('admin.founder_added'),
-]);
-    }
-    public function AddTeamsSherHolder(Request $request){
-        
-        $user = Auth::user();
-            $companyId = $user->company_id;
-            
+if($request->TeamsNo == "Founders"){
         // تحقق من صحة البيانات
+        $validator = Validator::make($request->all(), [
+            'founder_name' => 'required|string|max:255',
+            'founder_email' => 'required|email|max:255',
+            'founder_linkedin' => 'nullable|url|max:255',
+        ], [
+            'founder_name.required' => __('admin.Name is Required founder'),
+            'founder_email.required' => __('admin.Email is Required founder'),
+            'founder_email.email' => __('admin.Email is Not Correct founder'),
+            'founder_linkedin.url' => __('admin.Linkedin URL is Not Correct founder'),
+        ]);
+
+        // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422); // حالة الخطأ 422
+        }
+
+        $founder = 'Founder';
+        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
+        $teamMember = new Team_member(); // افترض أن لديك موديل اسمه TeamMember
+        $teamMember->TeamMember = $founder;
+        $teamMember->Name = $request->input('founder_name');
+        $teamMember->Email = $request->input('founder_email');
+        $teamMember->LinkedIn = $request->input('founder_linkedin');
+        $teamMember->Company_id = $companyId;
+        $teamMember->save();
+
+        // استجابة بعد الحفظ
+        return response()->json([
+            'state' => __('admin.founder_added'),
+        ]);
+
+}
+if($request->TeamsNo == "Shareholders"){
+
+            // تحقق من صحة البيانات
         $validator = Validator::make($request->all(), [
             'shareholder_name' => 'required|string|max:255',
             'shareholder_role' => 'required|max:255',
@@ -618,7 +680,7 @@ return response()->json([
             'shareholder_role.required' => __('admin.Role is Required Shareholder'),
             'shareholder_ownership_percentage.required' => __('admin.Precent is required Shareholder'),
         ]);
-       
+
         // تحقق من النسب المئوية الكلية
         $totalPercentage = Team_member::where('Company_id', $companyId)
         ->sum('PresentagShereholder');
@@ -648,49 +710,191 @@ return response()->json([
         $teamMember->PresentagShereholder = $request->shareholder_ownership_percentage;
         $teamMember->Company_id = $companyId;
         $teamMember->save();
-        
+
         // استجابة بعد الحفظ
         return response()->json([
             'state' => __('admin.Shareholder_added'),
         ]);
-        
+
+}
+
+if($request->TeamsNo == "Investors"){
+
+     // تحقق من صحة البيانات
+     $validator = Validator::make($request->all(), [
+        'investor_name' => 'required|string|max:255',
+        'investment_type' => 'required|max:255',
+    ], [
+        'investor_name.required' => __('admin.Name is Required Investor'),
+        'investment_type.required' => __('admin.Type is Required Investor'),
+    ]);
+   
+    // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+    if ($validator->fails()) {
+        return response()->json([
+            'errors' => $validator->errors(),
+        ], 422); // حالة الخطأ 422
+    }
+    
+    $founder = 'Investor';
+    // إنشاء وحفظ بيانات العضو في قاعدة البيانات
+    $teamMember = new Team_member(); // افترض أن لديك موديل اسمه TeamMember
+    $teamMember->TeamMember = $founder;
+    $teamMember->Name = $request->investor_name;
+    $teamMember->investorType = $request->investment_type;
+    $teamMember->Company_id = $companyId;
+    $teamMember->save();
+    
+    // استجابة بعد الحفظ
+    return response()->json([
+        'state' => __('admin.Investor_added'),
+    ]);
+}
     }
 
-    public function AddTeamsInvistor(Request $request){
+    public function EditTeams(Request $request){
         $user = Auth::user();
             $companyId = $user->company_id;
+
+        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
+        $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
+        if($teamMember->TeamMember == "Founder"){
+
+// تحقق من صحة البيانات
+$validator = Validator::make($request->all(), [
+    'founder_name' => 'required|string|max:255',
+    'founder_email' => 'required|email|max:255',
+    'founder_linkedin' => 'nullable|url|max:255',
+
+], [
+    'founder_name.required' => __('admin.Name is Required founder'),
+    'founder_email.required' => __('admin.Email is Required founder'),
+    'founder_email.email' => __('admin.Email is Not Correct founder'),
+    'founder_linkedin.url' => __('admin.Linkedin URL is Not Correct founder'),
+    
+]);
+
+// إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+if ($validator->fails()) {
+    return response()->json([
+        'errors' => $validator->errors(),
+    ], 422); // حالة الخطأ 422
+}
+
+        $teamMember->Name = $request->input('founder_name');
+        $teamMember->Email = $request->input('founder_email');
+        $teamMember->LinkedIn = $request->input('founder_linkedin');
+        $teamMember->save();
+
+        // استجابة بعد الحفظ
+        return response()->json([
+            'state' => __('admin.founder_Edited'),
+        ]);
+    }
+    elseif($teamMember->TeamMember == "Shareholder"){
+
         // تحقق من صحة البيانات
         $validator = Validator::make($request->all(), [
-            'investor_name' => 'required|string|max:255',
-            'investment_type' => 'required|max:255',
+            'shareholder_name' => 'required|string|max:255',
+            'shareholder_role' => 'required|max:255',
+            'shareholder_ownership_percentage' => 'required',
+
         ], [
-            'investor_name.required' => __('admin.Name is Required Investor'),
-            'investment_type.required' => __('admin.Type is Required Investor'),
+            'shareholder_name.required' => __('admin.Name is Required Shareholder'),
+            'shareholder_role.required' => __('admin.Role is Required Shareholder'),
+            'shareholder_ownership_percentage.required' => __('admin.Precent is required Shareholder'),
         ]);
-       
+
         // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
         if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
             ], 422); // حالة الخطأ 422
         }
-        
-        $founder = 'Investor';
-        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-        $teamMember = new Team_member(); // افترض أن لديك موديل اسمه TeamMember
-        $teamMember->TeamMember = $founder;
-        $teamMember->Name = $request->investor_name;
-        $teamMember->investorType = $request->investment_type;
-        $teamMember->Company_id = $companyId;
+
+
+        // تحقق من النسب المئوية الكلية
+        $totalPercentage = Team_member::where('Company_id', $companyId)
+        ->where('id', '!=', $request->id)
+        ->sum('PresentagShereholder');
+
+        $newPercentage = $request->shareholder_ownership_percentage;
+
+            // تحقق من أن النسبة المئوية الجديدة لا تتجاوز 100%
+            if ($totalPercentage + $newPercentage > 100) {
+            return response()->json([
+            'errors' => [
+            'shareholder_ownership_percentage' => [__('admin.Total ownership percentage cannot exceed 100%')],
+            ],
+            ], 422); // حالة الخطأ 422
+            }
+        // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422); // حالة الخطأ 422
+        }
+        $teamMember->Name = $request->shareholder_name;
+        $teamMember->RoleShereholder = $request->shareholder_role;
+        $teamMember->PresentagShereholder = $request->shareholder_ownership_percentage;
         $teamMember->save();
-        
         // استجابة بعد الحفظ
         return response()->json([
-            'state' => __('admin.Investor_added'),
+            'state' => __('admin.Shareholder_Edited'),
         ]);
-        
 
     }
+    elseif($teamMember->TeamMember == "Investor"){
+        // تحقق من صحة البيانات
+        $validator = Validator::make($request->all(), [
+            'investor_name' => 'required|string|max:255',
+            'investment_type' => 'required|max:255',
+
+        ], [
+            'investor_name.required' => __('admin.Name is Required Investor'),
+            'investment_type.required' => __('admin.Type is Required Investor'),
+        ]);
+
+        // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422); // حالة الخطأ 422
+        }
+
+    $teamMember->Name = $request->investor_name;
+    $teamMember->investorType = $request->investment_type;
+    $teamMember->save();
+    // استجابة بعد الحفظ
+    return response()->json([
+        'state' => __('admin.Investor_Edited'),
+    ]);
+
+    }
+
+
+
+
+    }
+    
+
+    public function DeleteTeams(Request $request){
+        $user = Auth::user();
+            $companyId = $user->company_id;
+
+        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
+        $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
+        
+        $teamMember->delete(); 
+
+        // استجابة بعد الحفظ
+        return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+    
+    
+
+    }
+
+
 
     public function AddMileStone(Request $request){
         $user = Auth::user();

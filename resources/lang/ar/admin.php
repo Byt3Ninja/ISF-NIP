@@ -700,6 +700,7 @@ return [
     'Pitch_Deck' => 'عرض تقديمي',
     'Pitch_Deck_Video' => 'فيديو عرض تقديمي',
     'Pitch_Deck_Information' => 'معلومات العرض التقديمي',
+    'Click_here' => ' اضغط هنا ',
     'Pitch_Deck_Summary' => 'ملخص العرض التقديمي',
     'Problem_We_Are_Facing' => 'المشكله القائمة',
     'solution_problem' => 'حلول المشكله',
@@ -805,5 +806,10 @@ return [
 	'youtube_Not_URL'=>' يوتيوب غير صالح ',
 	'google_map_Not_URL'=>' خرائط جوجل غير صالح ',
 
+
+	'founder_Edited'=>'تم تعديل المؤسس بنجاح',
+	'Shareholder_Edited'=>'تم تعديل المساهم بنجاح',
+	'Investor_Edited'=>'تم تعديل المستثمر بنجاح',
+	'Funding_Target'=>' هدف التمويل ',
 
 ];
