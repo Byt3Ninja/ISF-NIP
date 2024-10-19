@@ -45,7 +45,7 @@
 
         <div class="col-6 mb-3">
           <label for="raised_fund"
-            class="form-label">{{ __('admin.raised_fund_egp') }}{{ $Setting->Currency }}</label>
+            class="form-label">{{ __('admin.raised_fund_egp') }} {{ $Setting->Currency }}</label>
           <div class="position-relative">
             <input type="number"
               class="form-control border-light light-shadow px-8"

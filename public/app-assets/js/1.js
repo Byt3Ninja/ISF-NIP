@@ -591,24 +591,58 @@ $('.EditTeams').click(function() {
 
 
 $('.AddMileStone').click(function() {
+
+    var Plan = $(this).attr('do');
+
+    
+    if(Plan == "Achieved_Milestones"){
     var achieved_milestone_description = $('.achieved_milestone_description').val();
     var achieved_milestone_name = $('.achieved_milestone_name').val();
-    var achieved_milestones = $('.achieved_milestones').val();
+  
+    }else if(Plan == "Planned_Milestones"){
+        var planned_milestone_description = $('.planned_milestone_description').val();
+        var planned_milestone_name = $('.planned_milestone_name').val();
+       
+    }
+    else if(Plan == "Archived_Milestones"){
+        var Archived_milestone_description = $('.Archived_milestone_description').val();
+        var Archived_milestone_name = $('.Archived_milestone_name').val();
+        
+    }
+  
+
         $.ajax({
             url: '/dashboard/AddCompanyMileStone', 
             method: 'post',
             data: {
                 'achieved_milestone_description': achieved_milestone_description,
                 'achieved_milestone_name': achieved_milestone_name,
-                'achieved_milestones': achieved_milestones,
+                'Plan': Plan,
+                'planned_milestone_description': planned_milestone_description,
+                'planned_milestone_name': planned_milestone_name,
+                'Archived_milestone_description': Archived_milestone_description,
+                'Archived_milestone_name': Archived_milestone_name,
                 _token: $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
                 
                 if (response.state) {
                     alert(response.state);
-                    // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
-                      $('.ShowTableResultsMil').load(location.href + ' .ShowTableResultsMil');
+                    if(Plan == "Achieved_Milestones"){
+                        // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+                      $('.ShowTableAchieved').load(location.href + ' .ShowTableAchieved');
+                      
+                        }else if(Plan == "Planned_Milestones"){
+                            // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+                      $('.ShowTablePlanned').load(location.href + ' .ShowTablePlanned');
+                           
+                        }
+                        else if(Plan == "Archived_Milestones"){
+                            // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+                      $('.ShowTableArchive').load(location.href + ' .ShowTableArchive');
+                            
+                        }
+                    
                 }else{
                     alert(errors);
                 }
@@ -634,6 +668,77 @@ $('.AddMileStone').click(function() {
     
 });
 
+
+$('.EditMilestone').click(function() {
+    var id = $(this).attr('do');
+
+    
+  var Achieved_name = $('.Achieved_name'+id).val();
+  var Achieved_desc = $('.Achieved_desc'+id).val();
+  var Planned_name = $('.Planned_name'+id).val();
+  var Planned_desc = $('.Planned_desc'+id).val();
+  var Archived_name = $('.Archived_name'+id).val();
+  var Archived_desc = $('.Archived_desc'+id).val();
+
+
+
+      $.ajax({
+          url: '/dashboard/EditCompanyMileStone', 
+          method: 'post',
+          data: {
+              'id': id,
+              'Achieved_name': Achieved_name,
+              'Achieved_desc': Achieved_desc,
+              'Planned_name': Planned_name,
+              'Planned_desc': Planned_desc,
+              'Archived_name': Archived_name,
+              'Archived_desc': Archived_desc,
+              _token: $('meta[name="csrf-token"]').attr('content')
+          },
+          success: function(response) {
+              
+              if (response.state) {
+                  alert(response.state);
+                 
+                  
+                  location.reload();
+
+
+              }else{
+                  alert(errors);
+              }
+          },
+          error: function(error) {
+              if (error.responseJSON && error.responseJSON.errors) {
+                  var errors = error.responseJSON.errors;
+  
+                  // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
+                  if (errors.Achieved_name) {
+                      alert(errors.Achieved_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+                  }
+                  if (errors.Achieved_desc) {
+                      alert(errors.Achieved_desc[0]); // عرض رسالة الخطأ الخاصة بالبريد الإلكتروني
+                  }
+                  if (errors.Planned_name) {
+                      alert(errors.Planned_name[0]); // عرض رسالة الخطأ الخاصة بالرابط
+                  }
+
+                  if (errors.Planned_desc) {
+                    alert(errors.Planned_desc[0]); // عرض رسالة الخطأ الخاصة بالاسم
+                }
+                if (errors.Archived_name) {
+                    alert(errors.Archived_name[0]); 
+                }
+                if (errors.Archived_desc) {
+                    alert(errors.Archived_desc[0]); 
+                }
+
+              }
+          }
+      });
+  
+  
+});
 
 
 

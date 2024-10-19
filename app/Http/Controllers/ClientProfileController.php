@@ -13,8 +13,6 @@ use Storage;
 use Intervention\Image\ImageManagerStatic as Image;
 use Hash;
 use DB;
-use Auth;
-use Log;
 use Exception;
 use Session;
 use App\CyclesMentors;
@@ -22,7 +20,8 @@ use App\Schedule;
 use App\MentorshipRequest;
 use App\MentorshipTask;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class ClientProfileController extends Controller
 {

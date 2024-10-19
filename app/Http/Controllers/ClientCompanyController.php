@@ -20,14 +20,12 @@ use App\Settings;
 use App\SustainableIcon;
 use \Illuminate\Validation\ValidationException;
 use DB;
-use Auth;
-use Log;
 use Exception;
 use Session;
 use Storage;
 use Intervention\Image\ImageManagerStatic as Image;
-
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 class ClientCompanyController extends Controller
 {
     /**
@@ -105,11 +103,18 @@ if(!empty($company->Sustainable_development)){
             $Investors = Team_Member::where('TeamMember', 'Investor')->get(); 
 
 
-            $MileStones = Milestone::all(); // جلب جميع الأعضاء
+    
+
+
+            $Achieveds = Milestone::where('plan', 'Achieved_Milestones')->get(); 
+            $Planneds = Milestone::where('plan', 'Planned_Milestones')->get(); 
+            $Archiveds = Milestone::where('plan', 'Archived_Milestones')->get(); 
+
+
             $Currencies = Currency::all(); // جلب جميع الأعضاء
 
             return view('admin/clients/company', compact(
-                'client', 'fonders', 'Shareholders', 'Investors', 'Currencies','MileStones', 'teamMembers', 'states', 'cities','countries','sectors','funding_rounds','Setting'
+                'client', 'fonders', 'Shareholders', 'Investors', 'Currencies', 'Achieveds', 'Planneds', 'Archiveds', 'teamMembers', 'states', 'cities','countries','sectors','funding_rounds','Setting'
             ));
         }catch (Exception $e){
             //log what happend
@@ -557,14 +562,6 @@ if($data['CompanyN']==11){
 }
                
 
-
-
-
-
-
-
-
-
             if($result) {
                 event(new WebMessage($msgtype, $user->first_name_en));
                 return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
@@ -899,13 +896,16 @@ if ($validator->fails()) {
     public function AddMileStone(Request $request){
         $user = Auth::user();
             $companyId = $user->company_id;
+
+
+            if($request->Plan == "Achieved_Milestones"){
         // تحقق من صحة البيانات
         $validator = Validator::make($request->all(), [
-            'achieved_milestones' => 'required|string|max:255',
+            'Plan' => 'required|string|max:255',
             'achieved_milestone_name' => 'required|max:255',
             'achieved_milestone_description' => 'required|max:255',
         ], [
-            'achieved_milestones.required' => __('admin.Choose achieved milestones'),
+            'Plan.required' => __('admin.Choose achieved milestones'),
             'achieved_milestone_name.required' => __('admin.Name is Required MileStone'),
             'achieved_milestone_description.required' => __('admin.milestone achieved description'),
         ]);
@@ -916,12 +916,66 @@ if ($validator->fails()) {
                 'errors' => $validator->errors(),
             ], 422); // حالة الخطأ 422
         }
+
+        $plan = $request->Plan;
+        $name = $request->achieved_milestone_name;
+        $desc = $request->achieved_milestone_description;
+
+    }
+    if($request->Plan == "Planned_Milestones"){
+        // تحقق من صحة البيانات
+        $validator = Validator::make($request->all(), [
+            'Plan' => 'required|string|max:255',
+            'planned_milestone_name' => 'required|max:255',
+            'planned_milestone_description' => 'required|max:255',
+        ], [
+            'Plan.required' => __('admin.Choose achieved milestones'),
+            'planned_milestone_name.required' => __('admin.Name is Required MileStone'),
+            'planned_milestone_description.required' => __('admin.milestone achieved description'),
+        ]);
         
+        // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422); // حالة الخطأ 422
+        }
+
+        $plan = $request->Plan;
+        $name = $request->planned_milestone_name;
+        $desc = $request->planned_milestone_description;
+
+    }
+    if($request->Plan == "Archived_Milestones"){
+        // تحقق من صحة البيانات
+        $validator = Validator::make($request->all(), [
+            'Plan' => 'required|string|max:255',
+            'Archived_milestone_name' => 'required|max:255',
+            'Archived_milestone_description' => 'required|max:255',
+        ], [
+            'Plan.required' => __('admin.Choose achieved milestones'),
+            'Archived_milestone_name.required' => __('admin.Name is Required MileStone'),
+            'Archived_milestone_description.required' => __('admin.milestone achieved description'),
+        ]);
+        
+        // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422); // حالة الخطأ 422
+        }
+
+        $plan = $request->Plan;
+        $name = $request->Archived_milestone_name;
+        $desc = $request->Archived_milestone_description;
+
+    }
+
         // إنشاء وحفظ بيانات العضو في قاعدة البيانات
         $mileStone = new Milestone(); // افترض أن لديك موديل اسمه TeamMember
-        $mileStone->plan = $request->achieved_milestones;
-        $mileStone->name = $request->achieved_milestone_name;
-        $mileStone->description = $request->achieved_milestone_description;
+        $mileStone->plan = $plan;
+        $mileStone->name = $name;
+        $mileStone->description = $desc;
         $mileStone->Company_id = $companyId;
         $mileStone->save();
         
@@ -933,7 +987,116 @@ if ($validator->fails()) {
 
     }
 
+    public function EditMileStone(Request $request){
+        $user = Auth::user();
+            $companyId = $user->company_id;
 
+            $id= $request->id;
+            
+
+            $mileStone = Milestone::where('id', $id)->first(); // افترض أن لديك موديل اسمه
+
+            
+            if($mileStone->plan == "Achieved_Milestones"){
+        // تحقق من صحة البيانات
+        $validator = Validator::make($request->all(), [
+            'Achieved_name' => 'required|max:255',
+            'Achieved_desc' => 'required|max:255',
+        ], [
+            'Achieved_name.required' => __('admin.Name is Required MileStone'),
+            'Achieved_desc.required' => __('admin.milestone achieved description'),
+        ]);
+        
+        // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422); // حالة الخطأ 422
+        }
+
+        
+        $name = $request->Achieved_name;
+        $desc = $request->Achieved_desc;
+
+    }
+    
+    if($mileStone->plan == "Planned_Milestones"){
+        
+        // تحقق من صحة البيانات
+        $validator = Validator::make($request->all(), [
+            
+            'Planned_name' => 'required|max:255',
+            'Planned_desc' => 'required|max:255',
+        ], [
+           
+            'Planned_name.required' => __('admin.Name is Required MileStone'),
+            'Planned_desc.required' => __('admin.milestone achieved description'),
+        ]);
+        
+        // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422); // حالة الخطأ 422
+        }
+
+       
+        $name = $request->Planned_name;
+        $desc = $request->Planned_desc;
+
+        
+    }
+    if($mileStone->plan == "Archived_Milestones"){
+        // تحقق من صحة البيانات
+        $validator = Validator::make($request->all(), [
+            'Archived_name' => 'required|max:255',
+            'Archived_desc' => 'required|max:255',
+        ], [
+            'Archived_name.required' => __('admin.Name is Required MileStone'),
+            'Archived_desc.required' => __('admin.milestone achieved description'),
+        ]);
+        
+        // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422); // حالة الخطأ 422
+        }
+
+        $name = $request->Archived_name;
+        $desc = $request->Archived_desc;
+
+    }
+
+        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
+     
+        
+        $mileStone->name = $name;
+        $mileStone->description = $desc;
+        $mileStone->save();
+        
+        // استجابة بعد الحفظ
+        return response()->json([
+            'state' => __('admin.MileStone_Edited'),
+        ]);
+        
+
+    }
+    public function DeleteMileStone(Request $request){
+        $user = Auth::user();
+            $companyId = $user->company_id;
+
+        // إنشاء وحفظ بيانات العضو في قاعدة البيانات
+        $Milestone = Milestone::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
+        
+        $Milestone->delete(); 
+
+        // استجابة بعد الحفظ
+        return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+    
+    
+
+    }
 
 
 
