@@ -164,6 +164,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::post('/AddCompanyEdit', 'ClientCompanyController@EditTeams')->name('EditTeams_Comp');
 	Route::post('/AddCompanyDelete', 'ClientCompanyController@DeleteTeams')->name('DeleteTeams_Comp');
 	Route::post('/AddCompanyMileStone', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
+	Route::post('/EditCompanyMileStone', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
+	Route::post('/DeleteCompanyMileStone', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
 	//like a service
 	Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');
 	//Users  Manager routes

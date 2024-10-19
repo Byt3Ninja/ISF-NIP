@@ -271,7 +271,7 @@
                   </div>
               </div>
           </div>
-          <!--/ Edit JO Modal -->
+              <!--/ Edit JO Modal -->
             @endforeach
 
       </div>

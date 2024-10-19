@@ -812,4 +812,6 @@ return [
 	'Investor_Edited'=>'تم تعديل المستثمر بنجاح',
 	'Funding_Target'=>' هدف التمويل ',
 
+	'MileStone_Edited' => 'تم تعديل الانجاز بنجاح',
+
 ];

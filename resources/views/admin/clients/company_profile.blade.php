@@ -360,32 +360,29 @@
           <div class="row d-flex flex-column w-100" style="gap: 1rem;">
             <div 
               class="border-primary w-100" 
-              style="border: 2px dashed; height: 100px;"
-            >
+              style="border: 2px dashed; height: 100px;" >
               <div class="p-2" style="display: grid; place-items: center;">
                 <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
                 <span class="text-black" style="font-size: 12px;">{{ __('admin.Funding_Target') }}</span>
-                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->Funding_Target }}</span>
+                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->Funding_Target }} {{ $company->Currency }}</span>
               </div>
             </div>
             <div 
               class="border-primary w-100" 
-              style="border: 2px dashed; height: 100px;"
-            >
+              style="border: 2px dashed; height: 100px;" >
               <div class="p-2" style="display: grid; place-items: center;">
                 <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
                 <span class="text-black" style="font-size: 12px;">{{ __('admin.Pre_money_Valuation') }}</span>
-                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->Pre_money_Valuation }}</span>
+                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->Pre_money_Valuation }} {{ $company->Currency }}</span>
               </div>
             </div>
             <div 
               class="border-primary w-100" 
-              style="border: 2px dashed; height: 100px;"
-            >
+              style="border: 2px dashed; height: 100px;" >
               <div class="p-2" style="display: grid; place-items: center;">
                 <img class="sm-card-icon mb-2" src="/icons/coin.svg" alt="icon" />
                 <span class="text-black" style="font-size: 12px;">{{ __('admin.raised_fund') }}</span>
-                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->raised_fund }}</span>
+                <span class="text-primary commanums" style="font-size: 12px;">{{ $company->raised_fund }} {{ $company->Currency }}</span>
               </div>
             </div>
           </div>
