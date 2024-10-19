@@ -63,6 +63,8 @@ return [
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'application/vnd.ms-powerpoint',
                 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'video/mp4',  // إضافة دعم لصيغة mp4
+                'video/x-msvideo',
             ],
         ],
         'image' => [
