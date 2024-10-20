@@ -330,10 +330,12 @@
     //         return date;
     //     })(),
     // });
+
+
     $(".flatpickr").flatpickr({
       inline: false,
       enableTime: true,
-      dateFormat: "d-m-Y h:i a",
+      dateFormat: "d-m-Y h:i K",
       minDate: "today",
       mode: "multiple",
       locale: "ar",
@@ -349,7 +351,7 @@
         $('#addCycleID').val(cycle_id);
         $('#SendRequest').modal('show');
       } else {
-        alert("{{ 'cycles.Please select mentor first, and try again' }}!");
+        alert("{{ __('cycles.Please select mentor first, and try again') }}!");
       }
     }
 
