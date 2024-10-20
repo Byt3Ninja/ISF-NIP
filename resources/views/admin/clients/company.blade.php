@@ -381,6 +381,37 @@
         '{{ route('update_my_company') }}');
     });
   </script>
+
+<script>
+
+  const selectedCountryCode = '{{$client->company->country_code}}';
+
+  fetch('https://restcountries.com/v3.1/all')
+  .then(response => response.json())
+  .then(data => {
+      const select = document.getElementById('country_code');
+      data.forEach(country => {
+          // دمج root و suffixes لتكوين كود الهاتف الدولي الكامل
+          const countryCode = `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
+          
+          // إنشاء عنصر <option> لكل دولة
+          const option = document.createElement('option');
+          option.value = countryCode;
+          option.text = `${countryCode} (${country.cca2})`;
+          option.style.fontSize = '12px';
+          
+          // إذا كان كود الهاتف من قاعدة البيانات مطابقاً للكود الحالي
+          if (countryCode === selectedCountryCode) {
+              option.selected = true;  // يتم تحديد الخيار
+          }if (!selectedCountryCode && country.cca2 === 'EG') {
+              option.selected = true; // تعيين "مصر" كخيار افتراضي
+          }
+
+          select.appendChild(option);  // إضافة العنصر إلى القائمة المنسدلة
+      });
+  });
+</script>
+
 @stop
 
 

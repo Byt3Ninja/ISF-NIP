@@ -813,5 +813,6 @@ return [
 	'Funding_Target'=>' هدف التمويل ',
 
 	'MileStone_Edited' => 'تم تعديل الانجاز بنجاح',
+	'Country_Code' => 'مفتاح الدولة ',
 
 ];
