@@ -14,7 +14,7 @@
             *</label>
           <div class="position-relative">
             <input type="text"
-              class="form-control border-light light-shadow px-8" id="name_en"
+              class="form-control border-light light-shadow px-10" id="name_en"
               name="name_en" placeholder="{{ __('admin.English Name') }} *"
               value="{{ $client->company ? $client->company->name_en : old('name_en') }}"
               required autocomplete="name_en" style="direction: ltr;">
@@ -27,7 +27,7 @@
             *</label>
           <div class="position-relative">
             <input type="text"
-              class="form-control border-light light-shadow px-8" id="name_ar"
+              class="form-control border-light light-shadow px-10" id="name_ar"
               name="name_ar" placeholder="{{ __('admin.Arabic Name') }} *"
               value="{{ $client->company ? $client->company->name_ar : old('name_ar') }}"
               required autocomplete="name_ar" style="direction: rtl;">
@@ -44,7 +44,7 @@
           <label for="country_id"
             class="form-label">{{ __('admin.Country') }}</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-8"
+            <select class="form-select border-light light-shadow px-10"
               id="country_id" name="country_id" required>
               <option value="">{{ __('admin.Country') }}</option>
               @foreach ($countries as $country)
@@ -61,7 +61,7 @@
           <label for="state_id" class="form-label">{{ __('admin.State') }}
             *</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-8"
+            <select class="form-select border-light light-shadow px-10"
               id="state_id" name="state_id" required>
               <option value="">{{ __('admin.State') }}</option>
               @foreach ($states as $state)
@@ -78,7 +78,7 @@
           <label for="city_id" class="form-label">{{ __('admin.City') }}
             *</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-8"
+            <select class="form-select border-light light-shadow px-10"
               id="city_id" name="city_id" required>
               <option value="">{{ __('admin.City') }}</option>
               @if (isset($client->company) && $client->company->city_id != null)
@@ -95,7 +95,7 @@
             *</label>
           <div class="position-relative">
             <select id="selectsector"
-              class="form-select border-light light-shadow px-8" name="sector"
+              class="form-select border-light light-shadow px-10" name="sector"
               required
               onchange="ssector(this.options[this.selectedIndex].value)">
               @foreach ($sectors as $sector_group)
@@ -115,7 +115,7 @@
           <label for="address_en"
             class="form-label">{{ __('admin.English Address') }} *</label>
           <div class="position-relative">
-            <textarea class="form-control border-light light-shadow px-8" id="address_en"
+            <textarea class="form-control border-light light-shadow px-10" id="address_en"
               name="address_en" required placeholder="{{ __('admin.English Address') }} *"
               style="direction: ltr;">{{ $client->company ? $client->company->address_en : old('address_en') }}</textarea>
             <i class="ti ti-map-pins fs-5 position-absolute me-3 text-primary"
@@ -126,7 +126,7 @@
           <label for="address_ar"
             class="form-label">{{ __('admin.Arabic Address') }} *</label>
           <div class="position-relative">
-            <textarea class="form-control border-light light-shadow px-8" id="address_ar"
+            <textarea class="form-control border-light light-shadow px-10" id="address_ar"
               name="address_ar" required placeholder="{{ __('admin.Arabic Address') }} *"
               style="direction: rtl;">{{ $client->company ? $client->company->address_ar : old('address_ar') }}</textarea>
             <i class="ti ti-map-pins fs-5 position-absolute me-3 text-primary"
@@ -141,7 +141,7 @@
               type="text" 
               name="est_date"
               value="{{ $client->company ? $client->company->est_date : old('est_date') }}"
-              class="form-control border-light light-shadow px-8"
+              class="form-control border-light light-shadow px-10"
               placeholder="YYYY-MM-DD" 
               id="flatpickr-date" 
             />

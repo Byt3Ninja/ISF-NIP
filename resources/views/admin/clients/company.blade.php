@@ -79,15 +79,14 @@
       </div>
       <!-- / Tabs (mobile) -->
 
-      <div class="d-flex justify-content-between w-100 mb-6">
+      <div class="d-flex justify-content-start w-100 mb-6">
         <nav 
-          class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed w-15 d-none d-md-block" 
-          style="height: 440px;">
+          class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
+          style="height: 440px; min-width: 15%; max-width: 15%;">
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light mb-2 rounded overflow-hidden d-flex align-items-center"
-                style="width: 160px; overflow: hidden;">
+              <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
                 <a href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
                   data-bs-toggle="tab" role="tab">
@@ -100,7 +99,7 @@
           <!-- / Tabs -->
         </nav>
         <!-- Tab Content On Tab Click -->
-        <div class="tab-content p-0 overflow-y-auto custom-container" 
+        <div class="tab-content p-0 overflow-y-auto custom-container mb-6" 
           style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
         >
           @foreach ($tabs as $index => $tab)

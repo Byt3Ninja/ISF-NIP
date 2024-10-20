@@ -12,7 +12,7 @@
         <label for="About_the_Company"
           class="form-label">{{ __('admin.About_the_Company') }}</label>
         <div class="position-relative">
-          <textarea class="form-control border-light light-shadow px-8"
+          <textarea class="form-control border-light light-shadow px-10"
             id="About_the_Company" maxlength="500" name="company_description"
             placeholder="{{ __('admin.About_the_Company') }}">{{ $client->company->info_company }}</textarea>
           <i class="ti ti-info-circle fs-5 position-absolute me-3 text-primary"
@@ -25,7 +25,7 @@
           class="form-label">{{ __('admin.Sustainable_development') }}</label>
         <div class="position-relative">
           <select name="Sustainable_development[]"
-            class="form-select select2 border-light light-shadow px-8"
+            class="form-select select2 border-light light-shadow px-10"
             multiple="multiple">
             <option value="no_poverty"
               @if (
