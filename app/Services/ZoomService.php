@@ -116,22 +116,23 @@ class ZoomService implements OnlineMeetingServiceInterface
 
         $response =  $this->client->post($url.$path, $body);
 
-        $response =json_decode($response->getBody(), associative: true);
-        if($response == false){
-        return [
-            'success' => $response->getStatusCode() === 201,
-            'data'    => [
-                'id'=>$response['id'],
-                'start_url'=>$response['start_url'],
-                'join_url'=>$response['join_url'],
-            ],
-        ];
-    }else{
-        return [
-            'success' => false,
-            'data'    => null,
-        ];
-    }
+        // التأكد من أن الاستجابة ليست فارغة وأن الكود هو 201 (تم الإنشاء بنجاح)
+if ($response && $response->getStatusCode() === 201) {
+    $responseData = json_decode($response->getBody(), true);
+    return [
+        'success' => true,
+        'data'    => [
+            'id'        => $responseData['id'],
+            'start_url' => $responseData['start_url'],
+            'join_url'  => $responseData['join_url'],
+        ],
+    ];
+} else {
+    return [
+        'success' => false,
+        'data'    => null,
+    ];
+}
     }
 
     public function update($id, $data)
