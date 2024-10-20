@@ -13,7 +13,7 @@
             class="form-label">{{ __('admin.Phone') }}*</label>
           <div class="position-relative">
             <input type="text"
-              class="form-control border-light light-shadow px-8" id="phone"
+              class="form-control border-light light-shadow px-10" id="phone"
               placeholder="{{ __('admin.Phone') }}*"
               value="{{ $client->company ? $client->company->phone : old('phone') }}"
               name="phone" required autocomplete="new-phone">
@@ -26,7 +26,7 @@
             class="form-label">{{ __('admin.WhatsApp') }}*</label>
           <div class="position-relative">
             <input type="text"
-              class="form-control border-light light-shadow px-8" id="WhatsApp"
+              class="form-control border-light light-shadow px-10" id="WhatsApp"
               placeholder="{{ __('admin.WhatsApp') }}*"
               value="{{ $client->company ? $client->company->WhatsApp : old('WhatsApp') }}"
               name="WhatsApp" required autocomplete="WhatsApp">
@@ -39,7 +39,7 @@
             *</label>
           <div class="position-relative">
             <input type="email"
-              class="form-control border-light light-shadow px-8" id="email"
+              class="form-control border-light light-shadow px-10" id="email"
               placeholder="{{ __('admin.E-mail') }} *"
               value="{{ $client->company ? $client->company->email : old('email') }}"
               name="email" required autocomplete="new-email"

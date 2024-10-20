@@ -13,7 +13,7 @@
           <label for="Currency"
             class="form-label">{{ __('settings.Currency') }}</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-8"
+            <select class="form-select border-light light-shadow px-10"
               name="Currency" id="Currency">
               <option value="">{{ __('settings.Currency') }}</option>
               @foreach ($Currencies as $Currency)
@@ -33,7 +33,7 @@
             class="form-label">{{ __('admin.Pre_money_Valuation') }}</label>
           <div class="position-relative">
             <input type="number"
-              class="form-control border-light light-shadow px-8"
+              class="form-control border-light light-shadow px-10"
               id="pre_money_valuation"
               placeholder="{{ __('admin.Pre_money_Valuation') }}"
               value="{{ $client->company ? $client->company->Pre_money_Valuation : old('pre_money_valuation') }}"
@@ -48,7 +48,7 @@
             class="form-label">{{ __('admin.raised_fund_egp') }} {{ $Setting->Currency }}</label>
           <div class="position-relative">
             <input type="number"
-              class="form-control border-light light-shadow px-8"
+              class="form-control border-light light-shadow px-10"
               id="raised_fund" placeholder="{{ __('admin.raised_fund_egp') }}"
               value="{{ $client->company ? $client->company->raised_fund : old('raised_fund') }}"
               name="raised_fund" autocomplete="raised_fund">
@@ -64,7 +64,7 @@
             class="form-label">{{ __('admin.Funding_Target') }}{{ $Setting->Currency }}</label>
           <div class="position-relative">
             <input type="number"
-              class="form-control border-light light-shadow px-8"
+              class="form-control border-light light-shadow px-10"
               id="Funding_Target" placeholder="{{ __('admin.Funding_Target') }}"
               value="{{ $client->company ? $client->company->Funding_Target : old('Funding_Target') }}"
               name="Funding_Target" autocomplete="Funding_Target">
@@ -77,7 +77,7 @@
           <label for="stage"
             class="form-label">{{ __('admin.stage') }}*</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-8" required
+            <select class="form-select border-light light-shadow px-10" required
               id="stage" name="stage">
               <option value="">{{ __('admin.stage') }}</option>
               <option value="idea"
@@ -105,23 +105,27 @@
         <div class="col-6 mb-3">
           <label for="targeted_market"
             class="form-label">{{ __('admin.Targeted_Market') }}</label>
-          <div class="position-relative">
-            <input type="text"
-              class="form-control border-light light-shadow px-8"
-              id="targeted_market"
-              placeholder="{{ __('admin.Targeted_Market') }}"
-              value="{{ $client->company ? $client->company->targeted_market : old('Targeted Market') }}"
-              name="targeted_market" autocomplete="targeted_market">
-            <i class="ti ti-target fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-              style="left: 7px;"></i>
-          </div>
+            <div class="position-relative">
+              <select
+                class="form-select select2 border-light light-shadow px-10"
+                id="targeted_market"
+                name="targeted_market[]"
+                multiple
+                autocomplete="targeted_market">
+                <option value="market1" selected>Market 1</option>
+                <option value="market2" {{ in_array('market2', explode(',', $client->company ? $client->company->targeted_market : old('Targeted Market', ''))) ? 'selected' : '' }}>Market 2</option>
+                <option value="market3" {{ in_array('market3', explode(',', $client->company ? $client->company->targeted_market : old('Targeted Market', ''))) ? 'selected' : '' }}>Market 3</option>
+                <!-- Add more options as needed -->
+              </select>
+              <i class="ti ti-target fs-5 position-absolute top-50 translate-middle-y me-3 text-primary" style="right: 7px;"></i>
+            </div>
         </div>
 
         <div class="col-6 mb-3">
           <label for="business_type"
             class="form-label">{{ __('admin.Business Type') }}*</label>
           <div class="position-relative">
-            <select class="form-select border-light light-shadow px-8" required
+            <select class="form-select border-light light-shadow px-10" required
               id="business_type" name="business_type">
               <option value="">{{ __('admin.Business Type') }}</option>
               <option value="B2C"

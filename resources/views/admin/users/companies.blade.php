@@ -25,11 +25,11 @@
       background-position: center;
     }
 
-    @media screen and (min-width: 1440px) {
+    /* @media screen and (min-width: 1440px) {
       .card-container {
         width: 390px;
       }
-    }
+    } */
   </style>
 @stop
 

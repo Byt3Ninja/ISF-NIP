@@ -81,7 +81,7 @@
             <div class="col-md-4">
               <div class="position-relative">
                 <input type="text"
-                  class="form-control px-8 input-shadow border-light mb-4"
+                  class="form-control px-10 input-shadow border-light mb-4"
                   {{-- style="height: 42px;" --}} id="linkedin"
                   placeholder="{{ __('admin.Linkedin') }}"
                   value="{{ $client->company ? $client->company->linkedin : old('linkedin') }}"
@@ -94,7 +94,7 @@
             <div class="col-md-4">
               <div class="position-relative">
                 <input type="text"
-                  class="form-control px-8 input-shadow border-light mb-4"
+                  class="form-control px-10 input-shadow border-light mb-4"
                   {{-- style="height: 42px;" --}} id="twitter"
                   placeholder="{{ __('admin.Twitter') }}"
                   value="{{ $client->company ? $client->company->twitter : old('twitter') }}"
@@ -106,7 +106,7 @@
             <div class="col-md-4">
               <div class="position-relative">
                 <input type="text"
-                  class="form-control px-8 input-shadow border-light mb-4"
+                  class="form-control px-10 input-shadow border-light mb-4"
                   {{-- style="height: 42px;" --}} id="facebook"
                   placeholder="{{ __('admin.Facebook') }}"
                   value="{{ $client->company ? $client->company->facebook : old('facebook') }}"
@@ -118,7 +118,7 @@
             <div class="col-md-4">
               <div class="position-relative">
                 <input type="text"
-                  class="form-control px-8 input-shadow border-light mb-4"
+                  class="form-control px-10 input-shadow border-light mb-4"
                   {{-- style="height: 42px;" --}} id="youtube"
                   placeholder="{{ __('admin.Youtube') }}"
                   value="{{ $client->company ? $client->company->youtube : old('youtube') }}"
@@ -130,7 +130,7 @@
             <div class="col-md-4">
               <div class="position-relative">
                 <input type="text"
-                  class="form-control px-8 input-shadow border-light mb-4"
+                  class="form-control px-10 input-shadow border-light mb-4"
                   {{-- style="height: 42px;" --}} id="website"
                   placeholder="{{ __('admin.Website') }}"
                   value="{{ $client->company ? $client->company->website : old('website') }}"
@@ -142,7 +142,7 @@
             <div class="col-md-4">
               <div class="position-relative">
                 <input type="text"
-                  class="form-control px-8 input-shadow border-light mb-4"
+                  class="form-control px-10 input-shadow border-light mb-4"
                   {{-- style="height: 42px;" --}} id="google_map" name="google_map"
                   placeholder="{{ __('admin.Google Map full URL') }}"
                   value="{{ $client->company ? $client->company->google_map : old('google_map') }}">
@@ -160,7 +160,7 @@
                 <input
                   value="{{ $client->company ? $client->company->name_en : old('name_en') }}"
                   name="name_en" type="text"
-                  class="form-control px-8 input-shadow border-light mb-4"
+                  class="form-control px-10 input-shadow border-light mb-4"
                   id="name_en" placeholder="{{ __('admin.English Name') }} *"
                   required autocomplete="name_en" />
                 <i class="ti ti-building-skyscraper position-absolute top-50 translate-middle-y me-3 text-primary"
@@ -176,7 +176,7 @@
                 <input style="direction: rtl;"
                   value="{{ $client->company ? $client->company->name_ar : old('name_ar') }}"
                   name="name_ar" type="text"
-                  class="form-control px-8 input-shadow border-light mb-4"
+                  class="form-control px-10 input-shadow border-light mb-4"
                   id="name_ar" placeholder="{{ __('admin.Arabic Name') }} *"
                   required autocomplete="name_ar" />
                 <i class="ti ti-building-skyscraper position-absolute top-50 translate-middle-y me-3 text-primary"
