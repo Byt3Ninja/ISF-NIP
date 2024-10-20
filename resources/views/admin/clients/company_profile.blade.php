@@ -243,6 +243,8 @@
             <div class="card shadow-sm" style="border-radius: 15px; height: 196px;">
               <div class="card-body d-flex flex-column h-100 justify-content-between">
                 <div class="d-flex justify-content-between">
+                  @if (!empty($Sustainables))
+                      
                   @foreach ($Sustainables as $Sustainable)
 @php
   $icon = App\SustainableIcon::where('title', $Sustainable)->first();
@@ -257,6 +259,11 @@
                     <img src="{{ asset('/images/sustainability/'. $l .'/'. $icon->icon_ar) }}" alt="icon" style="width: 100px" >
                   </div>
                   @endforeach
+@else
+<div class="col-md-12 text-center">
+  {{ __('cycles.NA') }}
+</div>
+                  @endif
               </div>
             </div>
           </div>

@@ -225,6 +225,7 @@ if($data['CompanyN']==2){
             if ($companyId) {
                 // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                 $result = Company::where('id', $companyId)->update([
+                    'country_code' => $data['country_code'],  // مثال لإضافة حقل الهاتف
                     'phone' => $data['phone'],  // مثال لإضافة حقل الهاتف
                     'whatsapp' => $data['WhatsApp'],  // مثال لإضافة حقل الواتساب
                     'email' => $data['email'],  // مثال لإضافة حقل البريد الإلكتروني
@@ -234,6 +235,7 @@ if($data['CompanyN']==2){
             } else {
                 // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                 $result = Company::create([
+                    'country_code' => $data['country_code'],  // مثال لإضافة حقل الهاتف
                     'phone' => $data['phone'],  // مثال لإضافة حقل الهاتف
                     'whatsapp' => $data['WhatsApp'],  // مثال لإضافة حقل الواتساب
                     'email' => $data['email'],  // مثال لإضافة حقل البريد الإلكتروني

@@ -804,9 +804,12 @@ return [
 	'youtube_Not_URL'=>' youtube URL not Correct ',
 	'google_map_Not_URL'=>' Google_map URL not Correct ',
 
-	'founder_Edited'=>'تم تعديل المؤسس بنجاح',
-	'Shareholder_Edited'=>'تم تعديل المساهم بنجاح',
-	'Investor_Edited'=>'تم تعديل المستثمر بنجاح',
-	'Funding_Target'=>' هدف التمويل ',
+	'founder_Edited'=>'founder Modified',
+	'Shareholder_Edited'=>'Shareholder Modified',
+	'Investor_Edited'=>'Investor Modified',
+	'Funding_Target'=>'Funding Target',
+
+	'MileStone_Edited' => 'Milestone Modified',
+	'Country_Code' => 'Country Code ',
 	
 ];
