@@ -94,7 +94,7 @@
                           <img src="/icons/linkedin.svg" />
                         </a>
                       @endif
-                      <a href="{{ 'https://wa.me/'.$company->country_code . $company->whatsapp }}" target="_blank" class="d-flex align-items-center">
+                      <a href="{{ 'https://wa.me/'. $company->country_code . $company->whatsapp }}" target="_blank" class="d-flex align-items-center">
                         <i class="fa-brands fa-whatsapp fs-3 text-success"></i>
                       </a>
                       @if ($company->twitter)
@@ -119,10 +119,12 @@
                     {{ __($company->sector) }}
                   </p>
                 </div>
+
               </div>
             </div>
             <!-- Action Button -->
             <div class="col-md-2 d-flex align-items-center justify-content-end">
+              
               @if (
                 isset(Auth::user()->company()->first()->id) 
                 && $company->id == Auth::user()->company()->first()->id
@@ -132,7 +134,7 @@
                 class="btn btn-label-primary shadow-sm text-primary fw-bold"
                 style="border-radius: 15px;"
               >
-                Edit <i class="ti ti-edit mx-2"></i>
+                {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
               </a>
               @else
                 <a 

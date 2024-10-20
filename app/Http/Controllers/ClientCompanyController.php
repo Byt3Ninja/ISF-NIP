@@ -53,13 +53,19 @@ if(!empty($company->Sustainable_development)){
                                 // استرجاع الأيقونات المناسبة
                                 // $icons = SustainableIcon::where('title', $sustainableDevelopment)->get();
                                 
-            $fonders = Team_Member::where('TeamMember', 'Founder')->get(); 
-            $Shareholders = Team_Member::where('TeamMember', 'Shareholder')->get(); 
-            $Investors = Team_Member::where('TeamMember', 'Investor')->get(); 
+            $fonders = Team_Member::where('TeamMember', 'Founder')
+            ->where('Company_id', $id)
+            ->get(); 
+            $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
+            ->where('Company_id', $id)->get(); 
+            $Investors = Team_Member::where('TeamMember', 'Investor')
+            ->where('Company_id', $id)->get(); 
 
 
-            $Achieved_Milestones = Milestone::where('plan', 'Achieved_Milestones')->get();
-            $Planned_Milestones = Milestone::where('plan', 'Planned_Milestones')->get();
+            $Achieved_Milestones = Milestone::where('plan', 'Achieved_Milestones')
+            ->where('Company_id', $id)->get();
+            $Planned_Milestones = Milestone::where('plan', 'Planned_Milestones')
+            ->where('Company_id', $id)->get();
             $Currencies = Currency::all(); // جلب جميع الأعضاء
      // مسار الملف
     $pathToFile = storage_path($company->pitch_deck);
@@ -98,17 +104,23 @@ if(!empty($company->Sustainable_development)){
 
             $teamMembers = Team_Member::all(); // جلب جميع الأعضاء
 
-            $fonders = Team_Member::where('TeamMember', 'Founder')->get(); 
-            $Shareholders = Team_Member::where('TeamMember', 'Shareholder')->get(); 
-            $Investors = Team_Member::where('TeamMember', 'Investor')->get(); 
+            $fonders = Team_Member::where('TeamMember', 'Founder')
+            ->where('Company_id', auth()->user()->company->id)->get(); 
+            $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
+            ->where('Company_id', auth()->user()->company->id)->get(); 
+            $Investors = Team_Member::where('TeamMember', 'Investor')
+            ->where('Company_id', auth()->user()->company->id)->get(); 
 
 
     
 
 
-            $Achieveds = Milestone::where('plan', 'Achieved_Milestones')->get(); 
-            $Planneds = Milestone::where('plan', 'Planned_Milestones')->get(); 
-            $Archiveds = Milestone::where('plan', 'Archived_Milestones')->get(); 
+            $Achieveds = Milestone::where('plan', 'Achieved_Milestones')
+            ->where('Company_id', auth()->user()->company->id)->get(); 
+            $Planneds = Milestone::where('plan', 'Planned_Milestones')
+            ->where('Company_id', auth()->user()->company->id)->get(); 
+            $Archiveds = Milestone::where('plan', 'Archived_Milestones')
+            ->where('Company_id', auth()->user()->company->id)->get(); 
 
 
             $Currencies = Currency::all(); // جلب جميع الأعضاء
