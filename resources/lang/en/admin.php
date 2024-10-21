@@ -811,5 +811,15 @@ return [
 
 	'MileStone_Edited' => 'Milestone Modified',
 	'Country_Code' => 'Country Code ',
+
+	'Angel_Investor' => ' Angel Investor ',
+	'Angel_Group' => 'Angel Group',
+	'Venture_Capital_Firm' => ' Venture Capital Firm ',
+	'Accelerator' => 'Accelerator',
+	'Incubator' => 'Incubator',
+	'Corporate_Investor' => 'Corporate Investor',
+	'Family_Office' => 'Family Office',
+	'Family' => ' Family ',
+	'Friends' => ' Friends ',
 	
 ];

@@ -305,7 +305,7 @@ if($data['CompanyN']==4){
         'raised_fund' => 'required|numeric|min:0',
         'Funding_Target' => 'required|numeric|min:0',
         'stage' => 'required|string',
-        'targeted_market' => 'required|string',
+        'targeted_market.*' => 'required',
         'business_type' => 'required|string',
     ], [
         'Currency.required' => __('admin.Currency is required'),
@@ -320,7 +320,7 @@ if($data['CompanyN']==4){
     
         'stage.required' => __('admin.Stage is required'),
     
-        'targeted_market.required' => __('admin.Targeted market is required'),
+        'targeted_market.*.required' => __('admin.Targeted market is required'),
     
         'business_type.required' => __('admin.Business type is required'),
     ]);
@@ -333,7 +333,7 @@ if($data['CompanyN']==4){
                     'raised_fund' => $data['raised_fund'],
                     'Funding_Target' => $data['Funding_Target'],
                     'stage' => $data['stage'],
-                    'targeted_market' => $data['targeted_market'],
+                    'targeted_market' => json_encode($data['targeted_market']),
                     'business_type' => $data['business_type'],
                 ]);
                 $msgtype = 'UpdateComp';
@@ -345,7 +345,7 @@ if($data['CompanyN']==4){
                     'raised_fund' => $data['raised_fund'],
                     'Funding_Target' => $data['Funding_Target'],
                     'stage' => $data['stage'],
-                    'targeted_market' => $data['targeted_market'],
+                    'targeted_market' => json_encode($data['targeted_market']),
                     'business_type' => $data['business_type'],
                 ]);
                 $msgtype = 'NewComp';
