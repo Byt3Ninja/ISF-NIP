@@ -207,7 +207,7 @@
                           style="width: fit-content;" 
                           class="bg-label-light light-shadow border radius-15 mx-1 mb-2"
                         >
-                          <img src="/images/sustainability/{{$l}}/{{$icon->icon_ar}}" alt="icon" style="width: 95px; height: 80px;">
+                          <img src="/images/sustainability/{{$l}}/{{$icon->icon_ar ?? '1.png'}}" alt="icon" style="width: 95px; height: 80px;">
                         </div>
                       </div>
                       @endforeach
@@ -279,7 +279,7 @@
                  @endphp
                  <div style="width: fit-content;" class="border light-shadow radius-15">
                     @if($icon->icon_ar)
-                      <img src="/images/sustainability/{{$l}}/{{$icon->icon_ar}}" alt="icon" style="width: 100px; height: 100px;">
+                      <img src="/images/sustainability/{{$l}}/{{$icon->icon_ar ?? '1.png'}}" alt="icon" style="width: 100px; height: 100px;">
                     @endif
                  </div>
                @endforeach
@@ -300,7 +300,7 @@
                       <img class="card-icon mb-2" src="/icons/development-stages.svg" alt="icon" />
                     </div>
                     <span class="text-black">{{ __('admin.development_stage') }}</span>
-                    <span class="text-primary">{{ $company->development_stage }}</span>
+                    <span class="text-primary">{{ $company->development_stage ?? 'N/A' }}</span>
                   </div>
                 </div>
               </div>
@@ -326,7 +326,7 @@
                       <img class="card-icon mb-2" src="/icons/coin.svg" alt="icon" />
                     </div>
                     <span class="text-black">{{ __('admin.Stage') }}</span>
-                    <span class="text-primary">{{ $company->stage }}</span>
+                    <span class="text-primary">{{ $company->stage ?? 'N/A' }}</span>
                   </div>
                 </div>
               </div>
@@ -340,7 +340,7 @@
                     </div>
                     <span class="text-black">{{ __('admin.Targeted_Market') }}</span>
                     <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
-                      <button class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->targeted_market }}</button>
+                      <button class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->targeted_market ?? 'N/A' }}</button>
                       
                     </div>
                   </div>
@@ -356,7 +356,7 @@
                     </div>
                     <span class="text-black">{{ __('admin.Business Type') }}</span>
                     <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
-                      <button class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->business_type }}</button>
+                      <button class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->business_type ?? 'N/A' }}</button>
                       
                     </div>
                   </div>
@@ -372,7 +372,7 @@
                     </div>
                     <span class="text-black">{{ __('admin.Sector') }}</span>
                     <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
-                      <button class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->sector }}</button>
+                      <button class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->sector ?? 'N/A' }}</button>
                       
                     </div>
                   </div>
@@ -416,10 +416,9 @@
       <section class="mt-6">
         <div class="row">
           <div class="col-md-4">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 290px;">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 290px; overflow-y: auto;">
               <div class="p-3">
                 <h5 class="card-title mb-3">{{ __('admin.Founders') }}</h5>
-
                 @foreach ( $fonders as $fonder)
                 <div class="card shadow-sm mb-4" style="border-radius: 15px;">
                   <div class="p-3">
@@ -439,28 +438,23 @@
                           <i class="ti ti-mail text-primary"></i>
                           <span class="text-muted text-xs">{{ $fonder->Email }}</span>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
+                        <a href="{{$fonder->LinkedIn}}" class="d-flex align-items-center gap-2" style="width: 200px;">
                           <img src="/icons/linkedin.svg" width="18" height="18" />
-                          <span class="text-muted text-xs">{{ $fonder->LinkedIn }}</span>
-                        </div>
+                          <span class="text-muted text-xs line-clamp-1">{{ $fonder->LinkedIn }}</span>
+                        </a>
                       </div>
                     </div>
                   </div>
                 </div>
                 @endforeach
-
-
               </div>
             </div>
           </div>
           <div class="col-md-4">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 290px;">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 290px; overflow-y: auto;">
               <div class="p-3">
                 <h5 class="card-title mb-3">{{ __('admin.shareholders') }}</h5>
-
                 @foreach ($Shareholders as $Shareholder)
-                  
-                
                 <div class="card shadow-sm mb-4" style="border-radius: 15px;">
                   <div class="p-3">
                     <div class="d-flex align-items-center justify-content-between">
@@ -468,7 +462,7 @@
                         class="mx-3 d-flex flex-column justify-content-center gap-1" 
                         style="height: 76px;"
                       >
-                        <div class="text-black fs-6">{{ __('admin.shareholder_role') }}</div>
+                        <div class="text-black fs-6">{{ $Shareholder->Name }}</div>
                         <button 
                           class="btn btn-outline-primary btn-xs rounded-pill mt-1 fw-bold"
                           style="height: 22px; width: fit-content"
@@ -506,20 +500,14 @@
                   </div>
                 </div>
                 @endforeach
-
-
-
               </div>
             </div>
           </div>
           <div class="col-md-4">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 290px;">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 290px; overflow-y: auto;">
               <div class="p-3">
                 <h5 class="card-title mb-3">{{ __('admin.investors') }}</h5>
-
                 @foreach ( $Investors as $Investor)
-                  
-               
                 <div class="card shadow-sm mb-4" style="border-radius: 15px;">
                   <div class="p-3">
                     <div class="d-flex align-items-center">
@@ -546,8 +534,6 @@
                   </div>
                 </div>
                 @endforeach
-
-
               </div>
             </div>
           </div>
@@ -557,25 +543,25 @@
         <div class="row">
           <div class="col-md-6">
             <div class="card shadow-sm" style="border-radius: 15px; height: 520px;">
-              <div class="p-3">
+              <div class="p-3 h-100">
                 <h5 class="card-title">{{ __('admin.Pitch_Deck') }}:</h5>
               @if($company->pitch_deck != null)
-                <div class="card-body text-center">
-                  <div class="d-flex flex-column justify-content-between align-items-center">
-                    <iframe src="{{ url($company->pitch_deck) }}" target="_blank" width="100%" height="600px" style="border: none;">
+                <div class="card-body text-center h-100">
+                  <div class="d-flex flex-column justify-content-between align-items-center h-100">
+                    <iframe src="{{ url($company->pitch_deck) }}" target="_blank" style="width: 100%; height: 350px; object-fit:" class="img-fluid">
                       <p>Your browser does not support iframes.</p>
                   </iframe>
-        <div class="mt-auto d-flex flex-column">
+        <div class="mt-auto d-flex flex-column mb-6">
             <span class="text-muted">To get analysis for your pitch deck please</span>
             <a href="#" class="text-primary fw-medium text-decoration-underline mt-1">Click here</a>
         </div>
                   </div>
                 </div>
                 @else
-                <div class="card-body text-center">
-                  <div class="d-flex flex-column justify-content-between align-items-center">
+                <div class="card-body text-center h-100">
+                  <div class="d-flex flex-column justify-content-between align-items-center h-100">
                 <img src="/images/deck.svg" style="width: 350px; height: 350px;" />
-                    <div class="mt-auto d-flex flex-column">
+                    <div class="mt-auto d-flex flex-column mb-6">
                       <span class="text-muted">To get analysis for your pitch deck please</span>
                       <a href="#" class="text-primary fw-medium text-decoration-underline mt-1">Click here</a>
                     </div>
@@ -588,15 +574,28 @@
           </div>
           <div class="col-md-6">
             <div class="card shadow-sm" style="border-radius: 15px; height: 520px;">
-              <div class="p-3">
+              <div class="p-3 h-100">
                 <h5 class="card-title">{{ __('admin.Pitch_Deck_Video') }}:</h5>
 @if($company->pitch_deck_video != null)
-                <div class="card-body text-center d-grid justify-content-between">
-                  <div class="d-flex flex-column justify-content-between align-items-center">
+                <div class="card-body text-center d-flex flex-column justify-content-between h-100">
+                  <div class="d-flex flex-column justify-content-between align-items-center h-100">
                     <video width="100%" controls>
                       <source src="{{ $company->pitch_deck_video }}" type="video/mp4">
                       Your browser does not support the video tag.
-                  </video>
+                    </video>
+                    <div class="mt-auto d-flex flex-column mb-6">
+                      <span class="text-muted">
+                        To get analysis for your pitch deck please upload your pitch deck video
+                      </span>
+                      <a href="#" class="text-primary fw-medium text-decoration-underline mt-1">Click here</a>
+                    </div>
+                  </div>
+                </div>
+                @else
+
+                <div class="card-body text-center d-grid justify-content-between">
+                  <div class="d-flex flex-column justify-content-between align-items-center">
+                    <img src="/images/deck-video.svg" style="width: 350px; height: 350px;" />
                     <div class="mt-auto d-flex flex-column">
                       <span class="text-muted">
                         To get analysis for your pitch deck please upload your pitch deck video
@@ -605,21 +604,8 @@
                     </div>
                   </div>
                 </div>
-@else
 
-<div class="card-body text-center d-grid justify-content-between">
-  <div class="d-flex flex-column justify-content-between align-items-center">
-    <img src="/images/deck-video.svg" style="width: 350px; height: 350px;" />
-    <div class="mt-auto d-flex flex-column">
-      <span class="text-muted">
-        To get analysis for your pitch deck please upload your pitch deck video
-      </span>
-      <a href="#" class="text-primary fw-medium text-decoration-underline mt-1">Click here</a>
-    </div>
-  </div>
-</div>
-
-@endif
+                @endif
 
               </div>
             </div>
@@ -634,15 +620,15 @@
                 <h5 class="card-title">{{ __('admin.Pitch_Deck_Information') }}</h5>
                 <div class="d-flex flex-column gap-2">
                   {{-- @foreach([1, 2, 3] as $key => $document) --}}
-                    <div class="card shadow-sm" style="height: 132px; border-radius: 15px;">
+                    <div class="card shadow-sm" style="height: 132px; border-radius: 15px;  overflow-y: auto;">
                       <div class="card-body">
                         <h6 class="border-bottom d-flex gap-2 pb-2 d-flex align-items-center">
-                          <div
+                          {{-- <div
                             style="width: 32px; height: 32px;" 
                             class="rounded-circle bg-primary text-white d-flex 
                             justify-content-center align-items-center me-2">
                            
-                          </div>
+                          </div> --}}
                           {{ $company->pitch_deck_summary }} 
                         </h6>
                         <p class="text-muted line-clamp-2 fs-6">
@@ -670,7 +656,7 @@
                 <div class="d-flex flex-column gap-2">
                   @foreach($documents as $index => $document)
                   @if (is_string($document))
-                    <div class="card shadow-sm" style="border-radius: 15px;">
+                    <div class="card shadow-sm" style="border-radius: 15px; max-height: 300px;  overflow-y: auto;">
                       <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                           <div class="d-flex align-items-center gap-3">
@@ -690,7 +676,7 @@
             </div>
           </div>
           <div class="flex-item">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 350px;">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 350px; overflow-y: auto;">
               <div class="p-3">
                 <h5 class="card-title">{{ __('admin.Achieved_Milestones') }}</h5>
                 <div class="d-flex flex-column gap-2">
@@ -721,7 +707,7 @@
                 <h5 class="card-title">{{ __('admin.Planned_Milestones') }}</h5>
                 <div class="d-flex flex-column gap-2">
                   @foreach($Planned_Milestones as $key => $Planned)
-                  <div class="card shadow-sm" style="height: 132px; border-radius: 15px;">
+                  <div class="card shadow-sm" style="height: 132px; border-radius: 15px;  overflow-y: auto;">
                     <div class="card-body">
                       <h6 class="border-bottom d-flex gap-2 pb-2 d-flex align-items-center">
                         <div
