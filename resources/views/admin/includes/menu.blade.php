@@ -236,24 +236,32 @@
 
       <!-- Start Time Sheets -->
       <li
-        class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/Category*') ? 'sidebar-group-active open' : '' }} menu-item">
+        class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/UserTimeSheet*', 'dashboard/Category*', 'dashboard/show/FinanceTimeSheet*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
           <div>{{ __('admin.TimeSheet') }}</div>
         </a>
         <ul class="menu-sub">
-          <li class="{{ Request::is('*TimeSheet') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/TimeSheet*') ? 'active' : '' }} menu-item">
             <a href="{{ route('TimeSheet.index') }}" class="menu-link">
               <span class="menu-item">{{ __('admin.TimeSheet') }}</span>
               <i class="bx bx-message"></i>
             </a>
           </li>
-          <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/show/FinanceTimeSheet*') ? 'active' : '' }} menu-item">
             <a href="{{ route('show_finance_time_sheet') }}" class="menu-link">
               <span class="menu-item">{{ __('admin.Financial Report') }}</span>
               <i class="bx bx-message"></i>
             </a>
           </li>
+
+          <li class="{{ Request::is('dashboard/UserTimeSheet*') ? 'active' : '' }} menu-item">
+            <a href="{{ route('UserTimeSheet') }}" class="menu-link">
+              <span class="menu-item">{{ __('admin.UserTimeSheet') }}</span>
+              <i class="bx bx-message"></i>
+            </a>
+          </li>
+
           <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
             <a href="{{ route('Category.index') }}" class="menu-link">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>

@@ -621,6 +621,7 @@ return [
 	'Tags Created At'=>'تم الانشاء بتاريخ',
 	'Show'=>'مشاهدة',
 	'TimeSheet'=>' منظم الوقت ',
+	'UserTimeSheet'=>' مستخدمين الوقت ',
 	'Financial Report'=>' التقرير المالى ',
 	'all TimeSheets'=>' جميع الاوقات ',
 	'Add new Time'=>' اضافة وقت جديد ',
