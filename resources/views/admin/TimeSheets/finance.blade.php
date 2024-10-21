@@ -35,12 +35,12 @@
                 <form method="GET" action="{{ route('show_finance_time_sheet') }}">
 
 
-                  <div class="mb-6 width49">
+                  <div class="mb-6 width20">
                     <label for="start_date">{{ __('admin.Number') }}</label>
                     <input type="text" id="hours" name="hours" value="{{ request('hours') }}" class="hours form-control">
                 </div>
             
-                <div class="mb-6 width49">
+                <div class="mb-6 width20">
                     <label class="form-label fs-6">
                       {{ __('admin.Condition') }}
                       
@@ -58,11 +58,19 @@
                      
                     </select>
                   </div>
-              
-                     
-                      
+              <br>
+                  <div class="mb-6 width20">
+                    <label for="start_date">{{ __('admin.StartDate') }}</label>
+                    <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}" class="form-control datewithouttime" placeholder="{{ __('admin.StartDate') }}">
+                </div>
+            
+                <div class="mb-6 width20">
+                    <label for="end_date">{{ __('admin.EndDate') }}</label>
+                    <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}" class="form-control datewithouttime" placeholder="{{ __('admin.EndDate') }}">
+                </div>
+                <br> 
 
-                      <div class="mb-6 width49">
+                      <div class="mb-6 width25">
                         <label class="form-label fs-6">
                           {{ __('admin.Program') }}
                         </label>
@@ -81,7 +89,7 @@
 
                       
                       @hasanyrole('Admin|organizationManager|manager')
-                                          <div class="mb-6 width49">
+                                          <div class="mb-6 width25">
                                             <label class="form-label fs-6">
                                               {{ __('admin.Users') }}
                                               
@@ -99,7 +107,7 @@
                         @endhasanyrole
 
                         @hasanyrole('Admin')
-                                          <div class="mb-6 width49">
+                                          <div class="mb-6 width25">
                                             <label class="form-label fs-6">
                                               {{ __('admin.Orgnizations') }}
                                               
@@ -116,7 +124,7 @@
                                           </div>
                         @endhasanyrole
                   
-              
+                        <br>
                   <button type="submit" class="btn btn-primary">{{ __('admin.Search') }}</button>
               </form>
 <br><br><br>

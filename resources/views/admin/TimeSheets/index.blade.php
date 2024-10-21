@@ -42,20 +42,20 @@
                 <form method="GET" action="{{ route('TimeSheet.index') }}">
 
 
-                  <div class="mb-6 width49">
+                  <div class="mb-6 width20">
                     <label for="start_date">{{ __('admin.StartDate') }}</label>
-                    <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}" class="form-control" placeholder="Select Start Date">
+                    <input type="text" id="start_date" name="start_date" value="{{ request('start_date') }}" class="form-control datewithouttime" placeholder="Select Start Date">
                 </div>
             
-                <div class="mb-6 width49">
+                <div class="mb-6 width20">
                     <label for="end_date">{{ __('admin.EndDate') }}</label>
-                    <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}" class="form-control" placeholder="Select End Date">
+                    <input type="text" id="end_date" name="end_date" value="{{ request('end_date') }}" class="form-control datewithouttime" placeholder="Select End Date">
                 </div>
               
                      
                       
 
-                      <div class="mb-6 width49">
+                      <div class="mb-6 width25">
                         <label class="form-label fs-6">
                           {{ __('admin.Program') }}
                           
@@ -120,7 +120,7 @@
                             
                             <div class="btn btn-icon btn-label-info rounded-circle"  data-bs-toggle="modal" data-bs-target="#EditTimeSheet{{ $timesheet->id }}">
                               <i class="ti ti-edit text-info"></i>
-                            </a></div>
+                            </div>
                             <form action="{{ route('TimeSheet.destroy', $timesheet->id) }}" method="POST" style="display: inline-block;">
                               @csrf
                               @method('DELETE')

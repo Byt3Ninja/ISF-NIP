@@ -10,7 +10,18 @@
 .dark-style .menu .app-brand.demo {
   height: 64px;
 }
-
+.width49{
+	width: 49%;
+    display: inline-block;
+}
+.width20{
+	width: 20%;
+    display: inline-block;
+}
+.width25{
+	width: 25%;
+    display: inline-block;
+}
 .app-brand-logo.demo {
   -ms-flex-align: center;
   align-items: center;

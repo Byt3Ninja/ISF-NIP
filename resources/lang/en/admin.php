@@ -621,6 +621,7 @@ return [
 	'Tags Created At'=>'Created At',
 	'Show'=>'Show',
 	'TimeSheet'=>'Time Sheet',
+	'UserTimeSheet'=>'Time Sheet Users',
 	'Financial Report'=>' Financial Report ',
 	'all TimeSheets'=>'all Time Sheets',
 	'Add new Time'=>' Add New Time',
