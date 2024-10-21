@@ -113,7 +113,7 @@
                 multiple
                 autocomplete="targeted_market">
                 @foreach($countries as $country)
-                <option value="{{$country->id}}" {{ in_array($country->id, json_decode($client->company ? $client->company->targeted_market : old('Targeted Market', '[]'))) ? 'selected' : '' }} >{{$country->{'name_'.$l} }}</option>
+                <option value="{{$country->id}}" {{ $client->company ? (in_array($country->id, json_decode($client->company->targeted_market)) ? 'selected' : '') : (in_array($country->id, json_decode(old('Targeted Market', '[]'))) ? 'selected' : '') }} >{{$country->{'name_'.$l} }}</option>
             @endforeach
                 <!-- Add more options as needed -->
               </select>
