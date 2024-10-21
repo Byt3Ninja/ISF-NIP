@@ -8,10 +8,8 @@
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-header row">
+      <div class="content-header">
         <h5 class="content-header-title mb-4">{{ __('cycles.all courses') }}</h5>
-        </div>
       </div>
       <div class="content-body">
         <section id="multiple-column-form">
