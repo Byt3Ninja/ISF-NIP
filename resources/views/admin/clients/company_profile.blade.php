@@ -155,44 +155,70 @@
       </section>
       <section class="mt-6">
         <div class="row">
-          <div class="col-md-4">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 196px;">
-              <div class="card-body d-flex flex-column h-100 justify-content-between">
-                <div class="d-flex">
-                  <div 
-                    class="p-2 bg-label-warning radius-15 d-flex align-items-center"
-                    style="width: 150px; height: 74px; gap: 10px;"
-                  >
-                    <i class="ti ti-users ti-28px"></i>
-                    <div class="mx-1 d-flex flex-column">
-                      <span class="fw-bold text-black fs-6">{{ $company->team_num }}</span>
-                      <span class="fw-bold mt-2" style="font-size: 12px;">{{ __('admin.Team number') }}</span>
-                    </div>
-                  </div>
-                  <div 
-                    class="p-2 bg-label-info mx-4 radius-15"
-                    style="width: 150px; height: 74px;"
-                  >
-                    <div class="d-flex flex-column align-items-center justif-content-center">
-                      <div class="d-flex align-items-center mb-2">
-                        <i class="ti ti-calendar-time ti-28px"></i>
-                        <span class="mx-1 fw-bold text-black fs-6">{{ $company->est_date }}</span>
+          <div class="col-md-6">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 220px;">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div class="d-flex flex-column justify-content-between">
+                    <div class="d-flex">
+                      <div 
+                        class="p-2 bg-label-warning radius-15 d-flex align-items-center"
+                        style="width: 150px; height: 74px; gap: 10px;"
+                      >
+                        <i class="ti ti-users ti-28px"></i>
+                        <div class="mx-1 d-flex flex-column">
+                          <span class="fw-bold text-black fs-6">{{ $company->team_num }}</span>
+                          <span class="fw-bold mt-2" style="font-size: 12px;">{{ __('admin.Team number') }}</span>
+                        </div>
                       </div>
-                      <span class="text-nowrap" style="font-size: 12px;">{{ __('admin.Established date') }}</span>
+                      <div 
+                        class="p-2 bg-label-info mx-4 radius-15"
+                        style="width: 150px; height: 74px;"
+                      >
+                        <div class="d-flex flex-column align-items-center justif-content-center">
+                          <div class="d-flex align-items-center mb-2">
+                            <i class="ti ti-calendar-time ti-28px"></i>
+                            <span class="mx-1 fw-bold text-black fs-6">{{ $company->est_date }}</span>
+                          </div>
+                          <span class="text-nowrap" style="font-size: 12px;">{{ __('admin.Established date') }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-10" style="max-width: 220px;"> 
+                      <span class="fw-bold">{{ __('admin.Working_Team_Details') }}</span>
+                      <p class="text-muted line-clamp-2 p-2">
+                        {{ $company->working_team_summary }} 
+                      </p>
                     </div>
                   </div>
-                </div>
-                <div class="mt-3">
-                  <span class="fw-bold">{{ __('admin.Working_Team_Details') }}</span>
-                  <p class="text-muted line-clamp-2 p-2">
-                    {{ $company->working_team_summary }} 
-                  </p>
+                  @php
+                  // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+                  //  $Sustainables = explode(',', $company->Sustainable_development);
+                  $Sustainables = json_decode($company->Sustainable_development);
+                  @endphp
+                  <div class="row me-3 d-flex justify-content-end" style="width: 210px;">
+                    @if (!empty($Sustainables) && count($Sustainables) <= 4)
+                    @foreach ($Sustainables as $Sustainable)
+                      <div class="col-md-6">
+                        @php
+                          $icon = App\SustainableIcon::where('title', $Sustainable)->first();
+                        @endphp
+                        <div 
+                          style="width: fit-content;" 
+                          class="bg-label-light light-shadow border radius-15 mx-1 mb-2"
+                        >
+                          <img src="/images/sustainability/{{$l}}/{{$icon->icon_ar}}" alt="icon" style="width: 95px; height: 80px;">
+                        </div>
+                      </div>
+                      @endforeach
+                    @endif
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-md-4 mt-6 mt-md-0">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 196px;">
+          <div class="col-md-6 mt-6 mt-md-0">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 220px;">
               <div class="card-body d-flex flex-column h-100 justify-content-between">
                 <div class="d-flex justify-content-between">
                   <div class="d-flex align-items-center">
@@ -233,46 +259,36 @@
               </div>
             </div>
           </div>
-
-          @php 
-
- // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-//  $Sustainables = explode(',', $company->Sustainable_development);
- $Sustainables = json_decode($company->Sustainable_development);
-                @endphp
-
-          <div class="col-md-4 mt-6 mt-md-0">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 196px;">
-              <div class="card-body d-flex flex-column h-100 justify-content-between">
-                <div class="d-flex justify-content-between">
-                  @if (!empty($Sustainables))
-                      
-                  @foreach ($Sustainables as $Sustainable)
-@php
-  $icon = App\SustainableIcon::where('title', $Sustainable)->first();
-@endphp
-
-                @if ($loop->index > 0 && $loop->index % 3 == 0) 
-                    <!-- يتم بدء سطر جديد بعد كل 4 عناصر -->
-                    </div><div class="d-flex flex-wrap mt-3">
-                @endif
-
-                  <div class="col-md-2">
-                    <img src="{{ asset('/images/sustainability/'. $l .'/'. $icon->icon_ar) }}" alt="icon" style="width: 100px" >
-                  </div>
-                  @endforeach
-@else
-<div class="col-md-12 text-center">
-  {{ __('cycles.NA') }}
-</div>
-                  @endif
-              </div>
-            </div>
-          </div>
-
-
         </div>
       </section>
+      <!-- Sustainable Development Icons -->
+     @if (!empty($Sustainables) && count($Sustainables) > 4)
+       <section class="mt-6">
+         <div class="card shadow-sm" style="border-radius: 15px;">
+           <div 
+            class="px-6 d-flex flex-column justify-content-center aligh-items-center" 
+            style="height: 180px;"
+          >
+            <h5 class="">{{$l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة'}}</h5>
+             <div 
+               style="min-width: 100%; overflow-x: auto;"
+               class="d-flex justify-content-between align-items-center flex-nowrap gap-1">
+               @foreach ($Sustainables as $Sustainable)
+                 @php
+                   $icon = App\SustainableIcon::where('title', $Sustainable)->first();
+                 @endphp
+                 <div style="width: fit-content;" class="border light-shadow radius-15">
+                    @if($icon->icon_ar)
+                      <img src="/images/sustainability/{{$l}}/{{$icon->icon_ar}}" alt="icon" style="width: 100px; height: 100px;">
+                    @endif
+                 </div>
+               @endforeach
+             </div>
+           </div>
+         </div>
+       </section>
+     @endif
+     <!-- / Sustainable Development Icons -->
       <section class="w-100 mt-6 d-flex flex-column flex-md-row" style="gap: 2rem;">
         <div class="section-3">
           <div class="row">
