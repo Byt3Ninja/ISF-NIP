@@ -756,8 +756,6 @@ return [
     'Stage is required' => 'المرحلة مطلوبة',
     'Invalid stage' => 'المرحلة غير صحيحة',
     'Targeted market is required' => 'السوق المستهدف مطلوب',
-    'Targeted market must be a number' => 'السوق المستهدف يجب أن يكون رقمًا',
-    'Targeted market must be a positive number' => 'السوق المستهدف يجب أن يكون رقمًا موجبًا',
     'Business type is required' => 'نوع العمل مطلوب',
     'Invalid business type' => 'نوع العمل غير صحيح',
 
@@ -814,5 +812,16 @@ return [
 
 	'MileStone_Edited' => 'تم تعديل الانجاز بنجاح',
 	'Country_Code' => 'مفتاح الدولة ',
+
+	'Angel_Investor' => ' مستثمر ملائكي ',
+	'Angel_Group' => ' مجموعة مستثمرين ملائكيين ',
+	'Venture_Capital_Firm' => ' شركة رأس مال مخاطر ',
+	'Accelerator' => ' مسرع أعمال ',
+	'Incubator' => ' حاضنة أعمال ',
+	'Corporate_Investor' => ' مستثمر مؤسسي ',
+	'Family_Office' => ' مكتب عائلي ',
+	'Family' => ' عائلة ',
+	'Friends' => ' أصدقاء ',
+
 
 ];

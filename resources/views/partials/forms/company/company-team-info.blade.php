@@ -418,16 +418,16 @@
                 autocomplete="investment_type" required>
                  <i class="ti ti-world position-absolute top-50 translate-middle-y me-3 text-primary"
                   style="left: 7px;"></i>
-                <option value="{{ __('admin.investment_type') }}" selected
-                  disabled>
-                  {{ __('admin.investment_type') }}
-                </option>
-                <option value="type1">
-                  Type 1</option>
-                <option value="type2">
-                  Type 2</option>
-                <option value="type3">
-                  Type 3</option>
+                <option value="{{ __('admin.investment_type') }}" selected disabled> {{ __('admin.investment_type') }} </option>
+                <option value="Angel_Investor">{{ __('admin.Angel_Investor') }}</option>
+                <option value="Angel_Group">{{ __('admin.Angel_Group') }}</option>
+                <option value="Venture_Capital_Firm">{{ __('admin.Venture_Capital_Firm') }}</option>
+                <option value="Accelerator">{{ __('admin.Accelerator') }}</option>
+                <option value="Incubator">{{ __('admin.Incubator') }}</option>
+                <option value="Corporate_Investor">{{ __('admin.Corporate_Investor') }}</option>
+                <option value="Family_Office">{{ __('admin.Family_Office') }}</option>
+                <option value="Family">{{ __('admin.Family') }}</option>
+                <option value="Friends">{{ __('admin.Friends') }}</option>
                 <!-- Add more options as needed -->
               </select>
             </div>

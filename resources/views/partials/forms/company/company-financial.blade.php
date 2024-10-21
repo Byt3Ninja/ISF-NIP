@@ -112,9 +112,9 @@
                 name="targeted_market[]"
                 multiple
                 autocomplete="targeted_market">
-                <option value="market1" selected>Market 1</option>
-                <option value="market2" {{ in_array('market2', explode(',', $client->company ? $client->company->targeted_market : old('Targeted Market', ''))) ? 'selected' : '' }}>Market 2</option>
-                <option value="market3" {{ in_array('market3', explode(',', $client->company ? $client->company->targeted_market : old('Targeted Market', ''))) ? 'selected' : '' }}>Market 3</option>
+                @foreach($countries as $country)
+                <option value="{{$country->id}}" {{ in_array($country->id, json_decode($client->company ? $client->company->targeted_market : old('Targeted Market', '[]'))) ? 'selected' : '' }} >{{$country->{'name_'.$l} }}</option>
+            @endforeach
                 <!-- Add more options as needed -->
               </select>
               <i class="ti ti-target fs-5 position-absolute top-50 translate-middle-y me-3 text-primary" style="right: 7px;"></i>
