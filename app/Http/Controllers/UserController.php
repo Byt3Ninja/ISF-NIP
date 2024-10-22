@@ -9,14 +9,15 @@ use \Spatie\Permission\Models\Role as Role;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserPasswordRequest;
 use Illuminate\Support\Facades\Storage;
-
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Hash;
 use App\User;
 
 use DB;
 use Log;
 use Exception;
 use Session;
-use Hash;
+
 use Illuminate\Support\Facades\Log as FacadesLog;
 
 class UserController extends Controller
@@ -278,4 +279,71 @@ class UserController extends Controller
         })->get();
         return view('admin/users/companies')->with('companies',$companies);
     }
+
+    public function showImportForm()
+    {
+        return view('admin/users/uploadExcel');
+    }
+
+    // معالجة الشيت واستيراد المستخدمين
+    public function import(Request $request)
+    {
+        // التحقق من صحة الملف
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        $file = $request->file('file');
+        $spreadsheet = IOFactory::load($file->getPathname());
+
+        $data = $spreadsheet->getActiveSheet()->toArray();
+
+        foreach ($data as $row) {
+            // هنا قم بمعالجة الصفوف
+            // $user = User::create([
+            //     'name' => $row[0],
+            //     'email' => $row[1],
+            //     'password' => Hash::make($row[2]),
+            // ]);
+
+            $user = User::create([
+                'email'    => $row[1],   // تأكد من وجود العمود
+                'first_name_en'    => $row[2],   // تأكد من وجود العمود
+                'last_name_en'    => $row[3],   // تأكد من وجود العمود
+                'first_name_ar'    => $row[2],   // تأكد من وجود العمود
+                'last_name_ar'    => $row[3],   // تأكد من وجود العمود
+                'phone'         => $row[4]."".$row[5],   // تأكد من وجود العمود
+                'HaveCompany'    => (int)$row[8],   // تأكد من وجود العمود
+                'country_id'    => (int)$row[7],   // تأكد من وجود العمود
+                'password' => Hash::make('123456789'),
+    
+               
+            ]);
+
+            if (isset($row[8]) && (int)$row[8] == 1) { // تحقق إذا كان هناك شركة
+                $companyId = Company::create([
+                    'country_id'    => (int)$row[7],    // اسم الشركة
+                    'name_en'    => $row[9],    // اسم الشركة
+                    'name_ar' => $row[9], // عنوان الشركة
+                    'address_en' => $row[9], // عنوان الشركة
+                    'address_ar' => $row[9], // عنوان الشركة
+                    'country_code' => $row[4], // عنوان الشركة
+                    'phone' => $row[5], // عنوان الشركة
+                    'whatsapp' => $row[5], // عنوان الشركة
+                    'email' => $row[1], // عنوان الشركة
+                    'institutions' => '0', // عنوان الشركة
+                    'user_id' => $user->id,               // ربط الشركة بالمستخدم
+                ]);
+
+                $user->company_id = $companyId->id;
+                $user->save();
+
+
+            }
+        }
+
+        return redirect()->back()->with('success', 'تم رفع الشيت بنجاح!');
+    }
+
+
 }
