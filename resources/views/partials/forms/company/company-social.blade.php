@@ -34,43 +34,37 @@
         <!-- Upload Company Logo -->
         <div
           class="d-flex flex-column gap-1 justify-content-between align-items-center picker-container">
-          <span class="text-center text-black fw-medium">Add Logo</span>
+          <span class="text-center text-black fw-medium">{{ __('admin.Logo') }}</span>
           <div class="position-relative">
             @if (isset($client->company->logo))
+            <div id="holder">
               <img 
-                id="company-logo" 
-                src="{{ $client->company->logo_url }}"
+                id="company-logo holder" 
+                src="{{ $client->company->logo }}"
                 alt="Company logo"
                 class="mb-2 radius-15"
-                onclick="document.getElementById('img_url').click();" 
+                 
               />
+            </div>
             @else
+            <div id="holder">
               <img 
                 id="company-logo" 
                 src="/images/background/logo.png"
                 alt="Default logo"
                 style="width: 90px; height: 90px; border-radius: 10px; cursor: pointer;"
                 class="mb-2"
-                onclick="document.getElementById('img_url').click();" 
+                 
               />
+            </div>
             @endif
-            <div class="custom-file mb-3" style="width: 300px; display: none;">
-              <label class="fs-6 mb-2">{{ __('admin.Logo') }}</label>
-              <input type="file" class="form-control" id="img_url"
-                name="img_url" accept="image/*"
-                aria-describedby="inputGroupFileAddon00"
-                onchange="previewImage(event)" />
-            </div>
+              <input type="text" class="form-control d-none" id="file1"
+                name="img_url"  />
             <!-- right bottom-icon -->
-            <div
-              class="position-absolute bottom-0 end-0 bg-white rounded-circle p-1 shadow">
-              <i class="ti ti-upload fs-5 text-primary"
-                onclick="document.getElementById('img_url').click();">
-              </i>
-            </div>
+            
           </div>
-          <button type="button" onClick="resetImage()"
-            class="btn btn-outline-primary rounded-pill btn-sm">
+          <button 
+            class="btn btn-outline-primary rounded-pill btn-sm lfm" data-input="file1" data-preview="holder" >
             {{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
           </button>
         </div>
