@@ -19,6 +19,13 @@
       color: #000;
       vertical-align: middle;
     }
+    .fc .fc-toolbar .fc-toolbar-chunk:nth-child(3) {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
   </style>
 @stop
 

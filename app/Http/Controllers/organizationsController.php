@@ -28,7 +28,7 @@ class organizationsController extends Controller
 
 	public function index()
 	{
-		$organizations = Organization::with(['user'])->get();
+		$organizations = Organization::all();
 		return view('admin.organizations.index', compact('organizations'));
 	}
 
