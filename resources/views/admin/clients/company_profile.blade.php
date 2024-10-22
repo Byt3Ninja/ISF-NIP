@@ -292,7 +292,7 @@
                         src="/icons/development-stages.svg" alt="icon" />
                     </div>
                     <span
-                      class="text-black">{{ __('admin.development_stage') }}</span>
+                      class="text-black fs-5">{{ __('admin.development_stage') }}</span>
                     <span
                       class="text-primary">{{ $company->development_stage ?? 'N/A' }}</span>
                   </div>
@@ -308,7 +308,7 @@
                       <img class="card-icon mb-2" src="/icons/headquarter.svg"
                         alt="icon" />
                     </div>
-                    <span class="text-black">{{ __('admin.Country') }}</span>
+                    <span class="text-black fs-5">{{ __('admin.Country') }}</span>
                     <span
                       class="text-primary">{{ optional($company->country)->{'name_' . $l} }}</span>
                   </div>
@@ -324,7 +324,7 @@
                       <img class="card-icon mb-2" src="/icons/coin.svg"
                         alt="icon" />
                     </div>
-                    <span class="text-black">{{ __('admin.Stage') }}</span>
+                    <span class="text-black fs-5">{{ __('admin.Stage') }}</span>
                     <span
                       class="text-primary">{{ $company->stage ?? 'N/A' }}</span>
                   </div>
@@ -341,7 +341,7 @@
                         alt="icon" />
                     </div>
                     <span
-                      class="text-black">{{ __('admin.Targeted_Market') }}</span>
+                      class="text-black fs-5">{{ __('admin.Targeted_Market') }}</span>
                     <div
                       class="d-flex align-items-center justify-content-center mt-2"
                       style="gap: 5px;">
@@ -364,13 +364,12 @@
                         src="/icons/business-modal.svg" alt="icon" />
                     </div>
                     <span
-                      class="text-black">{{ __('admin.Business Type') }}</span>
+                      class="text-black fs-5">{{ __('admin.Business Type') }}</span>
                     <div
                       class="d-flex align-items-center justify-content-center mt-2"
                       style="gap: 5px;">
                       <button
                         class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->business_type ?? 'N/A' }}</button>
-
                     </div>
                   </div>
                 </div>
@@ -384,7 +383,7 @@
                       <img class="card-icon mb-2" src="/icons/industries.svg"
                         alt="icon" />
                     </div>
-                    <span class="text-black">{{ __('admin.Sector') }}</span>
+                    <span class="text-black fs-5">{{ __('admin.Sector') }}</span>
                     <div
                       class="d-flex align-items-center justify-content-center mt-2"
                       style="gap: 5px;">
@@ -791,7 +790,7 @@
         </div>
       </div>
     </section>
-    <section class="px-4">
+    <section>
       <div class="row">
         @if (count($Achieved_Milestones) > 0)
           <div class="col-md-6">
