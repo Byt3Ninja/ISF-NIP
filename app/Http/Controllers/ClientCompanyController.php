@@ -299,33 +299,32 @@ if($data['CompanyN']==3){
 
 }
 if($data['CompanyN']==4){
+    
     $request->validate([
-        'Currency' => 'required|string',
+        'Currency' => 'required',
         'pre_money_valuation' => 'required|numeric|min:0',
         'raised_fund' => 'required|numeric|min:0',
         'Funding_Target' => 'required|numeric|min:0',
-        'stage' => 'required|string',
+        'stage' => 'required',
         'targeted_market.*' => 'required',
-        'business_type' => 'required|string',
+        'business_type' => 'required',
     ], [
         'Currency.required' => __('admin.Currency is required'),
     
         'pre_money_valuation.required' => __('admin.Pre-money valuation is required'),
         'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
         'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
-    
         'raised_fund.required' => __('admin.Raised fund is required'),
         'raised_fund.numeric' => __('admin.Raised fund must be a number'),
         'raised_fund.min' => __('admin.Raised fund must be a positive number'),
-    
         'stage.required' => __('admin.Stage is required'),
-    
         'targeted_market.*.required' => __('admin.Targeted market is required'),
-    
         'business_type.required' => __('admin.Business type is required'),
     ]);
+    
             // $result = Company::updateOrCreate(['id' => $companyId], $data);
             if ($companyId) {
+                
                 // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                 $result = Company::where('id', $companyId)->update([
                     'Currency' => $data['Currency'],
@@ -336,6 +335,8 @@ if($data['CompanyN']==4){
                     'targeted_market' => json_encode($data['targeted_market']),
                     'business_type' => $data['business_type'],
                 ]);
+
+
                 $msgtype = 'UpdateComp';
             } else {
                 // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
