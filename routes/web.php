@@ -58,7 +58,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/', 'HomeController@index')->name('admin');
 	Route::get('/dashboard', 'HomeController@index')->name('dashboard');
 	Route::get('/dark','HomeController@dark');
-
+	Route::get('/import-users','UserController@showImportForm')->name('import.form');
+	Route::post('/import-users','UserController@import')->name('import.users');
 
     //Roles
     Route::get('documentation/view/{id?}','HomeController@help');
@@ -158,6 +159,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/UserTimeSheet', 'TimeSheetController@ClockUsers')->name('UserTimeSheet');
     Route::post('/UserTimeSheet/{id}', 'TimeSheetController@updateClockUser')->name('UserClockUpdate');
 
+    
 	//Client's company
     Route::resource('organizations', 'organizationsController');
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
