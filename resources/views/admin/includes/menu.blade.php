@@ -44,7 +44,7 @@
 
     @if (auth()->user()->HaveCompany == 1)
       <li class="{{ Request::is('*myCompany') ? 'active' : '' }} menu-item">
-        <a href="{{ route('my_company') }}" class="menu-link">
+        <a href="{{ route('company_profile', auth()->user()->company->id ) }}" class="menu-link">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>
@@ -236,24 +236,32 @@
 
       <!-- Start Time Sheets -->
       <li
-        class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/Category*') ? 'sidebar-group-active open' : '' }} menu-item">
+        class="{{ Request::is('dashboard/TimeSheet*', 'dashboard/UserTimeSheet*', 'dashboard/Category*', 'dashboard/show/FinanceTimeSheet*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
           <div>{{ __('admin.TimeSheet') }}</div>
         </a>
         <ul class="menu-sub">
-          <li class="{{ Request::is('*TimeSheet') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/TimeSheet*') ? 'active' : '' }} menu-item">
             <a href="{{ route('TimeSheet.index') }}" class="menu-link">
               <span class="menu-item">{{ __('admin.TimeSheet') }}</span>
               <i class="bx bx-message"></i>
             </a>
           </li>
-          <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/show/FinanceTimeSheet*') ? 'active' : '' }} menu-item">
             <a href="{{ route('show_finance_time_sheet') }}" class="menu-link">
               <span class="menu-item">{{ __('admin.Financial Report') }}</span>
               <i class="bx bx-message"></i>
             </a>
           </li>
+
+          <li class="{{ Request::is('dashboard/UserTimeSheet*') ? 'active' : '' }} menu-item">
+            <a href="{{ route('UserTimeSheet') }}" class="menu-link">
+              <span class="menu-item">{{ __('admin.UserTimeSheet') }}</span>
+              <i class="bx bx-message"></i>
+            </a>
+          </li>
+
           <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
             <a href="{{ route('Category.index') }}" class="menu-link">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
@@ -534,7 +542,7 @@
     @endif
 
     @can('view_report')
-      <li class="{{ Request::is('reports*') ? 'active' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/reports*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('reports.index') }}">
           <i class="menu-icon tf-icons ti ti-id"></i>
           <div>{{ __('admin.Reports') }}</div>
@@ -543,7 +551,7 @@
     @endcan
   
     @can('edit_settings')
-      <li class="{{ Request::is('dashboard/settings') ? 'active' : '' }} menu-item">
+      <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="/dashboard/settings">
           <i class="menu-icon tf-icons ti ti-settings"></i>
           <div>{{ __('admin.settings') }}</div>
@@ -557,14 +565,14 @@
     @if ($updateSittings->HomePage == true)
       @if (auth()->user()->hasRole('Admin'))
         @can('edit_settings')
-          <li class="menu-item">
+          <li id="settingMenu" class="menu-item">
             <a class="menu-link menu-toggle">
               <i class="menu-livicon" data-icon="wrench"></i>
               <div>{{ __('admin.Homesettings') }}</div>
             </a>
             <ul class="menu-sub">
                 @can('edit_settings')
-                  <li class="{{ Request::is('dashboard/setaboutus') ? 'active' : '' }} menu-item">
+                  <li class="{{ Request::is('dashboard/setaboutus*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/setaboutus">
                       <i class="menu-livicon" data-icon="globe"></i>
                       <span>{{ __('admin.About Settings') }}</span>
@@ -659,3 +667,40 @@
   </ul>
 </aside>
 <!-- / Menu -->
+
+<script>
+  // Scroll to the active menu item
+  document.addEventListener('DOMContentLoaded', () => {
+    const activeMenuItem = document.querySelector('.menu-item.active');
+    
+    if (activeMenuItem) {
+      activeMenuItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  window.onload = () => {
+    const settingMenu = document.getElementById('settingMenu');
+    // const layoutMenu = document.getElementById('layout-menu');
+    
+    settingTabs = [
+      'setaboutus',
+      'setcontactus',
+      'menus',
+      'slides',
+      'pages',
+      'posts',
+      'faqs',
+      'partners',
+      'press',
+      'allevents',
+      'editmypage'
+    ];
+
+    // Check if the current page is one of the settings tabs
+    settingTabs.forEach(tab => {
+      if (window.location.href.includes(tab)) {
+        settingMenu.classList.add('open');
+      }
+    });
+  };
+</script>

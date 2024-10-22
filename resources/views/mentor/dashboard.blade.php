@@ -429,7 +429,7 @@
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary">
-                <i class="bx bx-check d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-block">{{ __('dashboard.Submit') }}</span>
               </button>
             </div>

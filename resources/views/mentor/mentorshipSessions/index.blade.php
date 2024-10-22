@@ -93,19 +93,19 @@
                                                 <tr>
                                                     <td class="text-center">{{ $loop->iteration }}</td>
                                                     <td class="text-center">
-                                                        <div class="media align-items-center">
+                                                        <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                                 <img src="{{$session->user->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
                                                             <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
-                                                                <div class="media align-items-center">
+                                                                <div class="d-flex align-items-center gap-1">
                                                                     {{$session->user->company->name }}
                                                                 </div>
                                                             </a>
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <div class="media align-items-center">
+                                                        <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                                                 <img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>

@@ -155,11 +155,19 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::resource('Category', 'CatigoriesController'); // category in TimeSheet Folder
     Route::get('/show/FinanceTimeSheet', 'TimeSheetController@Finance')->name('show_finance_time_sheet');
     Route::get('/export-FinanceTS', 'TimeSheetController@exportFTS')->name('exportFTS');
+    Route::get('/UserTimeSheet', 'TimeSheetController@ClockUsers')->name('UserTimeSheet');
+    Route::post('/UserTimeSheet/{id}', 'TimeSheetController@updateClockUser')->name('UserClockUpdate');
 
 	//Client's company
     Route::resource('organizations', 'organizationsController');
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
 	Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
+	Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
+	Route::post('/AddCompanyEdit', 'ClientCompanyController@EditTeams')->name('EditTeams_Comp');
+	Route::post('/AddCompanyDelete', 'ClientCompanyController@DeleteTeams')->name('DeleteTeams_Comp');
+	Route::post('/AddCompanyMileStone', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
+	Route::post('/EditCompanyMileStone', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
+	Route::post('/DeleteCompanyMileStone', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
 	//like a service
 	Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');
 	//Users  Manager routes

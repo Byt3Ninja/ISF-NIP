@@ -123,11 +123,11 @@
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary">
-                <i class="bx bx-check d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-block">{{ __('messages.Send') }}</span>
               </button>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                <i class="bx bx-x d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
               </button>
             </div>

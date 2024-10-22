@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Country;
+use App\Currency;
 use App\Cycle;
 use App\Expertise;
 use App\Http\Requests\UpdateClientProfileRequest;
@@ -12,8 +13,6 @@ use Storage;
 use Intervention\Image\ImageManagerStatic as Image;
 use Hash;
 use DB;
-use Auth;
-use Log;
 use Exception;
 use Session;
 use App\CyclesMentors;
@@ -21,7 +20,8 @@ use App\Schedule;
 use App\MentorshipRequest;
 use App\MentorshipTask;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class ClientProfileController extends Controller
 {
@@ -45,7 +45,8 @@ class ClientProfileController extends Controller
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id',null)->get();
-            return view('admin/clients/editProfile', compact('client','countries','expertises'));
+            $Currencies = Currency::all();
+            return view('admin/clients/editProfile', compact('client','Currencies', 'countries','expertises'));
         }catch (Exception $e){
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);

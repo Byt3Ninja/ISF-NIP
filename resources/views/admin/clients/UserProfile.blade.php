@@ -355,7 +355,7 @@
                     @foreach($mentorshipTasks as $task)
                                                 <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
                                                     <td class="text-center">
-                                                        <div class="media align-items-center">
+                                                        <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">
                                                                 <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
@@ -369,12 +369,12 @@
                                                     </td>
                                                     
                                                     <td class="text-center">
-                                                        <div class="media align-items-center">
+                                                        <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
                                                                 <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
                                                             <a href="/dashboard/companyProfile/{{$task->company->id}}">
-                                                                <div class="media align-items-center">
+                                                                <div class="d-flex align-items-center gap-1">
                                                                     {{$task->company->name }}
                                                                 </div>
                                                             </a>
@@ -511,7 +511,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="submit" class="btn btn-primary ml-1" >
-                      <i class="bx bx-check d-block d-sm-none"></i>
+                      
                       <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
                     </button>
                   </div>

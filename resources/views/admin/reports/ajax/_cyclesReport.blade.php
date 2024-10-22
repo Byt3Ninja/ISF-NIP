@@ -205,13 +205,13 @@
 {{--                                @foreach($cycle_mentors as $mentor)--}}
 {{--                                    <tr>--}}
 {{--                                        <td class="text-center">--}}
-{{--                                            <div class="media align-items-center">--}}
+{{--                                            <div class="d-flex align-items-center gap-1">--}}
 {{--                                                <div class="media-left mr-50">--}}
 {{--                                                    <img src="{{$mentor->image_url}}"--}}
 {{--                                                         alt="avatar" class="rounded-circle" height="40"--}}
 {{--                                                         width="40">--}}
 {{--                                                </div>--}}
-{{--                                                <div class="media align-items-center">--}}
+{{--                                                <div class="d-flex align-items-center gap-1">--}}
 {{--                                                    {{$mentor->name }}--}}
 {{--                                                </div>--}}
 

@@ -24,10 +24,11 @@ class TimeSheetController extends Controller
         $cycles = Cycle::all();
 
         }else{
-            $timeSheets= TimeSheet::where('user_id', auth()->user()->id);
+            $timeSheets= TimeSheet::where('user_id', auth()->user()->id)->get();
             // جلب المستخدمين بناءً على الدور
 
         if (auth()->user()->hasRole('organizationManager')) {
+            
             // جلب المستخدمين الذين لديهم دور manager أو coordinator
     $orgnizaion = Organization::where('user_id', '=', auth()->user()->id)->first();
     $cycles = Cycle::where('organization_id', '=', $orgnizaion->id)->get();
@@ -63,7 +64,7 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
 }
        
         $categories = Category::all();
-
+    
         return view('admin.TimeSheets.index', compact('timeSheets','categories','users','cycles'));
     }
 
@@ -88,12 +89,18 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
             'description' => 'required|string',
             'category' => 'required|exists:categories,id',
             'program' => 'required|exists:cycles,id',
-            'user_id' => 'required|exists:users,id',
             'status' => 'required|numeric',
         ]);
+
+        if($request->user_id == ""){
+            $usedId = Auth()->user()->id;
+        }else{
+            $usedId = $request->user_id;
+        }
+
         $timesheet = new TimeSheet();
         $timesheet->title = $request->title;
-        $timesheet->user_id = $request->user_id;
+        $timesheet->user_id = $usedId;
         $timesheet->date = $request->TimeSheet_date;
         $timesheet->hours_worked = $request->hours_worked;
         $timesheet->description = $request->description;
@@ -222,6 +229,14 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
         $timeSheets = $timeSheets->where('program_id', $request->cycle_name);
     }
 
+    if ($request->has('start_date') && $request->start_date != null) {
+        $timeSheets = $timeSheets->where('date', '>=', $request->start_date);
+    }
+    
+    if ($request->has('end_date') && $request->end_date != null) {
+        $timeSheets = $timeSheets->where('date', '<=', $request->end_date);
+    }
+
     $categories = Category::all();
 
     // جلب جميع الساعات
@@ -251,8 +266,91 @@ public function exportFTS(Request $request)
         return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
 
+    public function ClockUsers(Request $request)
+    {
+        $timeSheets = collect(); // إنشاء مجموعة فارغة
+    $orgnization = collect(); // إنشاء مجموعة فارغة للمؤسسات
 
+    if (auth()->user()->hasRole('Admin')) {
+        $users = User::all();
+        $timeSheets = TimeSheet::all();
+        $cycles = Cycle::all();
+        $orgnization = Organization::all(); // جلب جميع المؤسسات
+    } else {
+        $timeSheets = TimeSheet::where('user_id', auth()->user()->id)->get(); // جلب الساعات للمستخدم الحالي
+        
+        if (auth()->user()->hasRole('organizationManager')) {
+            $organization = Organization::where('user_id', auth()->user()->id)->first();
+            if ($organization) {
+                $cycles = Cycle::where('organization_id', $organization->id)->get();
+                $users = User::where('organization_id', $organization->id)->role(['manager', 'coordinator'])->get();
+                $orgnization = Organization::where('id', $organization->id)->get(); // جلب المؤسسة المرتبطة
+            }
+        } elseif (auth()->user()->hasRole('manager')) {
+            $organization = Organization::where('user_id', auth()->user()->id)->first();
+            if ($organization) {
+                $cycles = Cycle::where('organization_id', $organization->id)->get();
+                $users = User::where('organization_id', $organization->id)->role('coordinator')->get();
+                $orgnization = Organization::where('id', $organization->id)->get(); // جلب المؤسسة المرتبطة
+            }
+        } elseif (auth()->user()->hasRole('coordinator')) {
+            $users = collect(); // إرجاع مجموعة فارغة
+        }
+    }
 
+    // فلترة حسب user_id إذا تم إدخاله في النموذج
+    if ($request->has('user_id') && $request->user_id != null) {
+        $timeSheets = $timeSheets->filter(function($timesheet) use ($request) {
+            return $timesheet->user_id == $request->input('user_id');
+        });
+    }
+
+    // فلترة حسب org_id (المؤسسة) إذا تم إدخاله في النموذج
+    if ($request->has('org_id') && $request->org_id != null) {
+        $userOrg = User::where('organization_id', $request->org_id)->pluck('id'); // جلب IDs للمستخدمين في المؤسسة
+        $timeSheets = $timeSheets->filter(function($timesheet) use ($userOrg) {
+            return $userOrg->contains($timesheet->user_id); // التحقق من أن user_id موجود ضمن المستخدمين في المؤسسة
+        });
+    }
+
+    // فلترة حسب اسم الدورة إذا تم إدخاله في النموذج
+    if ($request->has('cycle_name') && $request->cycle_name != null) {
+        $timeSheets = $timeSheets->where('program_id', $request->cycle_name);
+    }
+
+    if ($request->has('start_date') && $request->start_date != null) {
+        $timeSheets = $timeSheets->where('date', '>=', $request->start_date);
+    }
+    
+    if ($request->has('end_date') && $request->end_date != null) {
+        $timeSheets = $timeSheets->where('date', '<=', $request->end_date);
+    }
+
+    $categories = Category::all();
+
+    // جلب جميع الساعات
+    $groupedTimeSheets = $timeSheets->load('user')->groupBy('user_id')->map(function ($timesheets) {
+        return [
+            'user' => $timesheets->first()->user, // أول مستخدم في المجموعة
+            'total_hours' => $timesheets->sum('hours_worked'), // مجموع الساعات
+        ];
+    });
+
+        return view('admin.TimeSheets.priceclock', compact('timeSheets', 'orgnization', 'categories', 'users', 'cycles', 'groupedTimeSheets'));
+    }
+
+    public function updateClockUser(Request $request, string $id)
+    {
+        $request->validate([
+            'pricetime' => 'required',
+        ]);
+        
+        $user = User::find($id);
+        $user->houre_rate = $request->pricetime;
+        $user->save();
+        // إرجاع استجابة ناجحة (يمكن تعديلها حسب الحاجة)
+        return back()->with(['class'=>'success','message'=>__('StoredSuccessfully')]);
+    }
 
 
 

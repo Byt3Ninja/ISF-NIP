@@ -116,7 +116,8 @@ class MentorsController extends Controller
             $dates = explode(',',$request->date);
             foreach ($dates as $key){
                 $date = ltrim($key);
-
+                
+                
                 $topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
                 
                 $data = ['topic'=>$topic, "start_time"=>$date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
@@ -124,6 +125,8 @@ class MentorsController extends Controller
                 $onlineMeeting = $this->meetingService->createMeeting($data);
                 
                 if (!$onlineMeeting['success']) {return back()->with(['message2' => "meeting_error"]);}
+                $date = substr($date, 0, -2);
+
 
                 $dateFormat = new \DateTime($date);
                 MentorshipRequest::create([
