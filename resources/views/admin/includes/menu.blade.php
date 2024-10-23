@@ -52,7 +52,7 @@
 
     @if (auth()->user()->HaveCompany == 1)
       <li class="{{ Request::is('*myCompany') ? 'active' : '' }} menu-item">
-        <a href="{{ route('company_profile', auth()->user()->company->id ) }}" class="menu-link">
+        <a href="/dashboard/myCompany" class="menu-link">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>
