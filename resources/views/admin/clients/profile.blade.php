@@ -60,7 +60,11 @@
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-map-pin ti-lg"></i><span
-                          class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
+                          class="fw-medium">
+                          @if($client->city != null)
+                          {{  $client->city->{'name_' . $l}  }}
+                          @endif
+                        </span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> {{ __('admin.Joined') }} {{ $client->created_at->locale($l)->translatedFormat('M-Y') }}</span>
