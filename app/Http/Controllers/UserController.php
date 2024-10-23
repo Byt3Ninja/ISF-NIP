@@ -315,10 +315,11 @@ class UserController extends Controller
                 'phone'         => $row[4]."".$row[5],   // تأكد من وجود العمود
                 'HaveCompany'    => (int)$row[8],   // تأكد من وجود العمود
                 'country_id'    => (int)$row[7],   // تأكد من وجود العمود
+                'organization_id'    => '18',   // تأكد من وجود العمود
                 'password' => Hash::make('123456789'),
-    
-               
+                'email_verified_at' => now(),
             ]);
+            $user->assignRole('Registered');
 
             if (isset($row[8]) && (int)$row[8] == 1) { // تحقق إذا كان هناك شركة
                 $companyId = Company::create([
