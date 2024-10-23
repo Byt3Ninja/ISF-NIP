@@ -8,19 +8,6 @@
       {!! csrf_field() !!}
       <input type="hidden" value="2" name="CompanyN">
       <div class="row">
-
-        <div class="col-md-2 col-12 mb-3">
-          <label for="phone"
-            class="form-label">{{ __('admin.Country_Code') }}*</label>
-          <div class="position-relative">
-
-            <div class="codeInputContainer">
-              <select id="country_code" name="country_code"
-                class="form-select select2" required>
-              </select>
-            </div>
-          </div>
-        </div>
         <div class="col-md-4 col-12 mb-3">
           <label for="phone"
             class="form-label">{{ __('admin.Phone') }}*</label>
