@@ -109,7 +109,7 @@
       <!-- / Style Switcher-->
 
       <!-- Quick links  -->
-      <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown">
+      {{-- <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown">
         <a class="nav-link btn btn-text-secondary btn-icon rounded-pill btn-icon dropdown-toggle hide-arrow"
           href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
           <i class="ti ti-layout-grid-add ti-md"></i>
@@ -190,7 +190,7 @@
             </div>
           </div>
         </div>
-      </li>
+      </li> --}}
       <!-- Quick links -->
 
       <!-- Notifications -->
