@@ -523,6 +523,7 @@
               </div>
             </div>
           @endif
+          @if (count($Investors) > 0)
           <div class="col-md-4">
             <div class="card shadow-sm"
               style="border-radius: 15px; height: 500px;">
@@ -560,6 +561,7 @@
               </div>
             </div>
           </div>
+          @endif
         </div>
       </section>
       <section class="mt-6 row">
@@ -695,7 +697,6 @@
                     </div>
                   </div>
                 @endif
-
               </div>
             </div>
           </div>
@@ -703,6 +704,7 @@
       </section>
       <section class="mt-6">
         <div class="row">
+          @if ($company->pitch_deck_summary)
           <div class="col-md-6">
             <div class="card shadow-sm"
               style="border-radius: 15px; height: 300px; overflow-y:auto;">
@@ -710,18 +712,11 @@
                 <h5 class="card-title">{{ __('admin.Pitch_Deck_Information') }}
                 </h5>
                 <div class="d-flex flex-column gap-2">
-                  {{-- @foreach ([1, 2, 3] as $key => $document) --}}
                   <div class="card shadow-sm"
                     style="height: 132px; border-radius: 15px;  overflow-y: auto;">
                     <div class="card-body">
                       <h6
                         class="border-bottom d-flex gap-2 pb-2 d-flex align-items-center">
-                        {{-- <div
-                            style="width: 32px; height: 32px;" 
-                            class="rounded-circle bg-primary text-white d-flex 
-                            justify-content-center align-items-center me-2">
-                           
-                          </div> --}}
                         {{ $company->pitch_deck_summary }}
                       </h6>
                       <p class="text-muted line-clamp-2 fs-6">
@@ -729,18 +724,16 @@
                       </p>
                     </div>
                   </div>
-                  {{-- @endforeach --}}
                 </div>
               </div>
             </div>
-
           </div>
+          @endif
           <div class="col-md-6 mb-6">
             <div class="card shadow-sm"
               style="border-radius: 15px; height: 300px; overflow-y:auto;">
               <div class="p-3">
                 @php
-
                   // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
                   $documents = explode(',', $company->documents);
                   // استخراج اسم كل ملف من الروابط
@@ -778,6 +771,7 @@
           </div>
         </div>
       </section>
+      
       <section>
         <div class="row">
           @if (count($Achieved_Milestones) > 0)

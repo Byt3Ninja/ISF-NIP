@@ -93,8 +93,8 @@
                   </div>
                   <div class="ms-auto position-relative">
                     <div id="popup-{{ $fonder->id }}"
-                      class="popup-menu position-absolute bg-white shadow-sm p-2 rounded"
-                      style="display: none; right: 0.5rem; top: -1rem;">
+                      class="popup-menu z-3 position-absolute bg-white shadow-sm p-2 rounded"
+                      style="display: none; {{$l == 'en' ? 'right: 0.5rem;' : 'left: 0.5rem;'}} top: -1rem;">
                       <div
                         class="d-flex align-items-center gap-2 p-2 cursor-pointer"
                         data-bs-toggle="modal"
@@ -304,7 +304,7 @@
                         <!-- Circular Progress -->
                       </div>
                       <div class="ms-auto position-relative">
-                        <div id="popup-{{ $Shareholder->id }}" class="popup-menu position-absolute bg-white shadow-sm p-2 rounded" style="display: none; right: 0.5rem; top: -1rem;">
+                        <div id="popup-{{ $Shareholder->id }}" class="popup-menu z-3 position-absolute bg-white shadow-sm p-2 rounded" style="display: none; {{$l == 'en' ? 'right: 0.5rem;' : 'left: 0.5rem;'}} top: -1rem;">
                           <div class="d-flex align-items-center gap-2 p-2 cursor-pointer" data-bs-toggle="modal" data-bs-target="#EditTeams{{ $Shareholder->id }}">
                             <i class="ti ti-pencil text-primary fs-6"></i>
                             <span style="font-size: 11px;" class="fw-bold">{{ __('admin.Edit') }}</span>
@@ -477,8 +477,8 @@
                       </div>
                       <div class="ms-auto position-relative">
                         <div id="popup-{{ $Investor->id }}"
-                          class="popup-menu position-absolute bg-white shadow-sm p-2 rounded"
-                          style="display: none; right: 0.5rem; top: -1rem;">
+                          class="popup-menu z-3 position-absolute bg-white shadow-sm p-2 rounded"
+                          style="display: none; {{$l == 'en' ? 'right: 0.5rem;' : 'left: 0.5rem;'}} top: -1rem;">
                           <div
                             class="d-flex align-items-center gap-2 p-2 cursor-pointer"
                             data-bs-toggle="modal"
@@ -592,7 +592,7 @@
 
   // Close the popup if clicked outside
   document.addEventListener('click', function(event) {
-    const popups = document.querySelectorAll('.popup-menu');
+    const popups = document.querySelectorAll('.popup-menu z-3');
     popups.forEach(popup => {
       if (!popup.contains(event.target) && !popup.previousElementSibling
         .contains(event.target)) {
