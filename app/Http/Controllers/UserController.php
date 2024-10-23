@@ -330,8 +330,12 @@ class UserController extends Controller
                     'address_ar' => $row[9], // عنوان الشركة
                     'country_code' => $row[4], // عنوان الشركة
                     'phone' => $row[5], // عنوان الشركة
-                    'whatsapp' => $row[5], // عنوان الشركة
+                    'whatsapp' => (int)$row[5], // عنوان الشركة
                     'email' => $row[1], // عنوان الشركة
+                    'cycle' => '58', // عنوان الشركة
+                    'step' => '220', // عنوان الشركة
+                    'approved' => '1', // عنوان الشركة
+                    'approved_by' => '1', // عنوان الشركة
                     'institutions' => '0', // عنوان الشركة
                     'user_id' => $user->id,               // ربط الشركة بالمستخدم
                 ]);
