@@ -59,7 +59,7 @@
           </div>
         </div>
         {{-- </form> --}}
-
+        @if($client->company)
         <div class="ShowTableFounders mt-4">
           @foreach ($fonders as $fonder)
             <div class="card shadow-sm mb-4 position-relative"
@@ -211,6 +211,7 @@
             <!--/ Edit JO Modal -->
           @endforeach
         </div>
+        @endif
       </div>
     </div>
   </div>
@@ -274,7 +275,7 @@
           </div>
         </form>
 
-
+        @if($client->company)
         <div class="ShowTableShareholders mt-4">
           <div class="row">
             @foreach ($Shareholders as $Shareholder)
@@ -386,6 +387,8 @@
             @endforeach
           </div>
         </div>
+        @endif
+
       </div>
     </div>
   </div>
@@ -442,7 +445,7 @@
           </div>
         </div>
 
-
+        @if($client->company)
         <div class="ShowTableInvestors">
           <div class="row px-4 mt-4">
             @foreach ($Investors as $Investor)
@@ -579,6 +582,7 @@
             @endforeach
           </div>
         </div>
+        @endif
       </div>
     </div>
   </div>

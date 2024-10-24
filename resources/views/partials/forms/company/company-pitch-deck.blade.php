@@ -12,12 +12,14 @@
           <div class="card-body text-center">
             <div
               class="d-flex h-100 flex-column justify-content-between align-items-center">
+              @if($client->company)
               @if ($client->company->pitch_deck != null)
                 <iframe src="{{ url($client->company->pitch_deck) }}"
                   target="_blank" width="100%" height="250px"
                   style="border: none;">
                   <p>Your browser does not support iframes.</p>
                 </iframe>
+                @endif
               @else
                 <img src="/images/deck.svg"
                   style="width: 350px; height: 250px;" />
@@ -65,13 +67,14 @@
           <div class="card-body text-center d-grid justify-content-between">
             <div
               class="d-flex flex-column justify-content-between align-items-center">
-
+              @if($client->company)
               @if ($client->company->pitch_deck_video != null)
                 <video width="100%" controls>
                   <source src="{{ $client->company->pitch_deck_video }}"
                     type="video/mp4">
                   Your browser does not support the video tag.
                 </video>
+                @endif
               @else
                 <img id="deck-video-image" src="/images/deck-video.svg"
                   class="radius-15" />
@@ -117,6 +120,7 @@
         <div class="p-3">
           <h5 class="card-title">{{ __('admin.Documents') }}</h5>
           <div class="d-flex flex-column gap-2">
+            @if($client->company)
             @php
 
               // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
@@ -146,6 +150,7 @@
                 </div>
               @endif
             @endforeach
+            @endif
             <div class="mt-3" style="display: grid; place-items: center;">
 
 
@@ -193,10 +198,12 @@
                 class="form-select light-shadow border-light">
                 <option value="" selected disabled>{{ __('admin.Pitch_Deck_Information') }}</option>
                 <option value="yes"
-                  {{ $client->company->pitch_deck_description == 'yes' ? 'selected' : '' }}>
+                @if($client->company)
+                  {{ $client->company->pitch_deck_description == 'yes' ? 'selected' : '' }} @endif>
                   {{ __('admin.Yes') }}</option>
                 <option value="no"
-                  {{ $client->company->pitch_deck_description == 'no' ? 'selected' : '' }}>
+                @if($client->company)
+                  {{ $client->company->pitch_deck_description == 'no' ? 'selected' : '' }} @endif>
                   {{ __('admin.No') }}</option>
               </select>
             </div>

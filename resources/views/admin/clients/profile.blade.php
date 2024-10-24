@@ -69,9 +69,14 @@
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> {{ __('admin.Joined') }} {{ $client->created_at->locale($l)->translatedFormat('M-Y') }}</span>
                       </li>
-                      
                     </ul>
                   </div>
+                  <a class="btn btn-light-info" href="/dashboard/myProfile">
+                    <i class="ti ti-settings me-3 ti-md"></i>
+                    <span class="align-middle">
+                      {{$l=='ar'?'تعديل':'Edit'}}
+                    </span>
+                  </a>
                   {{-- <a href="javascript:void(0)" class="btn btn-primary mb-1">
                     <i class="ti ti-user-check ti-xs me-2"></i>Connected
                   </a> --}}
