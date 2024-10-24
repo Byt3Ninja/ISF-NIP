@@ -44,7 +44,7 @@
                           @hasanyrole('Admin|organizationManager|manager')
                           <th>{{ __('admin.user') }}</th>
                           @endhasanyrole
-                          <th>{{ __('admin.Price') }}</th>
+                          <th>{{ __('admin.Price') }}  {{ $setting->Currency }}</th>
                           <th>{{ __('admin.Actions') }}</th>
                         </tr>
                       </thead>
@@ -65,7 +65,12 @@
                           <td>{{$user->{'first_name_'.$l} ." ". $user->{'last_name_'.$l} }}</td>
                           @endhasanyrole
                           <form method="post" action="{{ route('UserClockUpdate', $user->id) }}" >
-                          <td><input type="text" name="pricetime" class="form-control" value="{{ $user->houre_rate }}" style="width: 20%" > </td>
+                          <td><div class="input-group" style="width: 20%;">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">{{ $setting->Currency }}</span>
+                            </div>
+                            <input type="text" name="pricetime" class="form-control" value="{{ $user->houre_rate }}">
+                        </div>  </td>
                          
                           <td>
                              @csrf

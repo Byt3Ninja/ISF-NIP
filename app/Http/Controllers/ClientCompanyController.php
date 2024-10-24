@@ -104,6 +104,7 @@ if(!empty($company->Sustainable_development)){
 
             $teamMembers = Team_Member::all(); // جلب جميع الأعضاء
 
+            if(auth()->user()->company){
             $fonders = Team_Member::where('TeamMember', 'Founder')
             ->where('Company_id', auth()->user()->company->id)->get(); 
             $Shareholders = Team_Member::where('TeamMember', 'Shareholder')
@@ -121,7 +122,14 @@ if(!empty($company->Sustainable_development)){
             ->where('Company_id', auth()->user()->company->id)->get(); 
             $Archiveds = Milestone::where('plan', 'Archived_Milestones')
             ->where('Company_id', auth()->user()->company->id)->get(); 
-
+            }else{
+                $fonders = 'NA'; 
+                $Shareholders = 'NA'; 
+                $Investors = 'NA'; 
+                $Achieveds = 'NA'; 
+                $Planneds = 'NA'; 
+                $Archiveds = 'NA'; 
+            }
 
             $Currencies = Currency::all(); // جلب جميع الأعضاء
 
@@ -178,7 +186,7 @@ if(!empty($company->Sustainable_development)){
 
            
 if($data['CompanyN']==1){
-
+    
     $validatedData = $request->validate([
         'name_en' => 'required|string|max:255',
         'name_ar' => 'required|string|max:255',
@@ -203,10 +211,53 @@ if($data['CompanyN']==1){
         'address_ar.required' => __('admin.Arabic Address is required'),
         'est_date.required' => __('admin.Established Date must be a valid date'),
     ]);
+    
+            // $result = Company::updateOrCreate(['id' => $companyId], values: $data);
+            
+            // $msgtype = 'UpdateComp';
 
-            $result = Company::updateOrCreate(['id' => $companyId], $data);
+            if ($companyId) {
+                
+                // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
+                $result = Company::where('id', $companyId)->update([
+                    'name_en' => $data['name_en'],
+                    'name_ar' => $data['name_ar'],
+                    'country_id' => $data['country_id'],
+                    'state_id' => $data['state_id'],
+                    'city_id' => $data['city_id'],
+                    'sector' => $data['sector'],
+                    'address_en' => $data['address_en'],
+                    'address_ar' => $data['address_ar'],
+                    'est_date' => $data['est_date'],
+                ]);
 
-            $msgtype = 'UpdateComp';
+
+                $msgtype = 'UpdateComp';
+            } else {
+                    $institutions = 'null';
+                    $email = 'null';
+                    $phone = '0';
+                
+                // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
+                $result = Company::create([
+                    'name_en' => $data['name_en'],
+                    'name_ar' => $data['name_ar'],
+                    'country_id' => $data['country_id'],
+                    'state_id' => $data['state_id'],
+                    'city_id' => $data['city_id'],
+                    'sector' => $data['sector'],
+                    'address_en' => $data['address_en'],
+                    'address_ar' => $data['address_ar'],
+                    'est_date' => $data['est_date'],
+                    'institutions' => $institutions,
+                    'email' => $email,
+                    'phone' => $phone,
+
+                ]);
+                $msgtype = 'NewComp';
+            }
+
+            
             if(!$companyId) {
                 User::where('id', Auth::id())->update(['company_id' => $result->id]);
                 $msgtype = 'NewComp';
@@ -590,6 +641,7 @@ if($data['CompanyN']==11){
         } catch (Exception $e) {
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+            dd($e);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later.'), 'class' => 'danger']);
         }
     }

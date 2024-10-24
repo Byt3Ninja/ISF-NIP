@@ -383,9 +383,11 @@
   </script>
 
 <script>
-
+@if($client->company)
   const selectedCountryCode = '{{$client->company->country_code}}';
-
+ @else
+  const selectedCountryCode = '+20';
+@endif
   fetch('https://restcountries.com/v3.1/all')
   .then(response => response.json())
   .then(data => {

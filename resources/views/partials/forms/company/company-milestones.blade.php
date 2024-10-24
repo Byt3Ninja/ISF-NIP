@@ -36,7 +36,7 @@
             {{ __('admin.Add') }}
           </div>
         </div>
-
+        @if($client->company)
         <div class="ShowTableAchieved mt-4">
           @foreach ($Achieveds as $key => $Achieved)
             <div class="card shadow-sm border mb-3" style="border-radius: 15px;">
@@ -132,6 +132,7 @@
             <!--/ Edit JO Modal -->
           @endforeach
         </div>
+        @endif
       </div>
     </div>
   </div>
@@ -173,6 +174,8 @@
             {{ __('admin.Add') }}
           </div>
         </div>
+
+        @if($client->company)
         <div class="ShowTablePlanned mt-4">
           @foreach ($Planneds as $key => $Planned)
             <div class="card shadow-sm border mb-3"
@@ -281,7 +284,7 @@
           @endforeach
 
         </div>
-
+        @endif
       </div>
     </div>
   </div>
@@ -327,7 +330,7 @@
             {{ __('admin.Add') }}
           </div>
         </div>
-
+        @if($client->company)
         <div class="ShowTableArchive mt-4">
           @foreach ($Archiveds as $key => $Archived)
             <div class="card shadow-sm border mb-3"
@@ -423,7 +426,7 @@
           @endforeach
 
         </div>
-
+        @endif
       </div>
     </div>
   </div>
