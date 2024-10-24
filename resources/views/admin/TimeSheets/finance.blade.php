@@ -142,7 +142,7 @@
                           <th>{{ __('admin.user') }}</th>
                           @endhasanyrole
                           <th>{{ __('admin.CountTotalHours') }}</th>
-                          <th>{{ __('admin.TotalAmount') }}</th>
+                          <th>{{ __('admin.TotalAmount') }} {{ $setting->Currency }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -180,7 +180,7 @@
                           <td>{{$c++}}</td>
                           <td>{{$user->{'first_name_'.$l} ." ". $user->{'last_name_'.$l} }}</td>
                           <td>{{$totalHours}}</td>
-                          <td>{{$totalPayment}}</td>
+                          <td>{{$totalPayment}} {{ $setting->Currency }}</td>
                           
                         </tr>
                         @endif

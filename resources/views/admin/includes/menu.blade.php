@@ -34,7 +34,7 @@
     </li> --}}
     <!-- Dashboards -->
     <li
-      class="{{ Request::is('dashboard', 'dashboard/final/*/*', 'dashboard/companyProfile/*', 'dashboard/cycles/view/*', 'dashboard/cycles/my/*', 'dashboard/screening/*/*') ? 'active' : '' }} menu-item">
+      class="{{ Request::is('dashboard', 'dashboard/final/*/*', 'dashboard/cycles/view/*', 'dashboard/cycles/my/*', 'dashboard/screening/*/*') ? 'active' : '' }} menu-item">
       <a href="/dashboard" class="menu-link">
         <i class="menu-icon tf-icons ti ti-smart-home"></i>
         <div>{{ __('admin.Dashboard') }}</div>
@@ -50,9 +50,16 @@
 
 
 
-    @if (auth()->user()->HaveCompany == 1)
-      <li class="{{ Request::is('*myCompany') ? 'active' : '' }} menu-item">
-        <a href="/dashboard/myCompany" class="menu-link">
+    @if (auth()->user()->HaveCompany != 1)
+      <li class="{{ Request::is('*companyProfile') ? 'active' : '' }} menu-item">
+        <a href="{{ route('my_company') }}" class="menu-link">
+          <i class="ti ti-building me-3 ti-md"></i>
+          <div>{{ __('admin.My company') }}</div>
+        </a>
+      </li>
+      @else
+      <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>

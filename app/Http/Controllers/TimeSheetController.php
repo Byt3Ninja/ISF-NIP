@@ -9,6 +9,7 @@ use App\Category;
 use App\User;
 use Illuminate\Http\Request;
 use App\Jobs\ExportFTSData;
+Use App\Settings;
 
 class TimeSheetController extends Controller
 {
@@ -17,7 +18,7 @@ class TimeSheetController extends Controller
      */
     public function index(Request $request)
     {
-        
+        $setting = Settings::findOrfail('1');
         if(auth()->user()->hasRole('Admin')){
         $timeSheets= TimeSheet::all();
         $users = User::all();
@@ -65,7 +66,7 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
        
         $categories = Category::all();
     
-        return view('admin.TimeSheets.index', compact('timeSheets','categories','users','cycles'));
+        return view('admin.TimeSheets.index', compact('timeSheets','categories','users','cycles', 'setting'));
     }
 
 
@@ -179,6 +180,7 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
 
     public function Finance(Request $request)
 {
+    $setting = Settings::findOrfail('1');
     $timeSheets = collect(); // إنشاء مجموعة فارغة
     $orgnization = collect(); // إنشاء مجموعة فارغة للمؤسسات
 
@@ -247,7 +249,7 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
         ];
     });
 
-    return view('admin.TimeSheets.finance', compact('timeSheets', 'orgnization', 'categories', 'users', 'cycles', 'groupedTimeSheets'));
+    return view('admin.TimeSheets.finance', compact('timeSheets', 'orgnization', 'categories', 'users', 'cycles', 'groupedTimeSheets', 'setting'));
 }
 
 public function exportFTS(Request $request)
@@ -268,6 +270,7 @@ public function exportFTS(Request $request)
 
     public function ClockUsers(Request $request)
     {
+        $setting = Settings::findOrfail('1');
         $timeSheets = collect(); // إنشاء مجموعة فارغة
     $orgnization = collect(); // إنشاء مجموعة فارغة للمؤسسات
 
@@ -336,7 +339,7 @@ public function exportFTS(Request $request)
         ];
     });
 
-        return view('admin.TimeSheets.priceclock', compact('timeSheets', 'orgnization', 'categories', 'users', 'cycles', 'groupedTimeSheets'));
+        return view('admin.TimeSheets.priceclock', compact('timeSheets', 'orgnization', 'categories', 'users', 'cycles', 'groupedTimeSheets','setting'));
     }
 
     public function updateClockUser(Request $request, string $id)

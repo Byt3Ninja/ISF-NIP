@@ -162,6 +162,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     
 	//Client's company
     Route::resource('organizations', 'organizationsController');
+    //Company profile
+	Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
 	Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
 	Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
@@ -179,8 +181,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	//Cities
 	Route::resource('cities', 'CityController');
     Route::get('get_states','CityController@states')->name('get_states_by_country');
-	//Company profile
-	Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
+	
 	//FileManager
     Route::get('/myFiles','FilemanagerController@index');
     Route::get('/uploads/files/{id}/{path}','FilemanagerController@showfile')->where('path', '.*');
