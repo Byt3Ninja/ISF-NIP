@@ -2,9 +2,9 @@
 
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <link rel="stylesheet" href="/vuexy/libs/tagify/tagify.css" />
-
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <style>
     .custom-container-ar {
       padding-left: 8rem;
@@ -131,14 +131,30 @@
                   </select>
                 </div>
                 <div class="form-group mb-3">
-                  <label class="fs-6 mb-1" for="flatpickr-date" class="form-label">{{ __('cycles.CoursStart') }}</label>
-                  <input type="text" class="form-control flatpickr-input active"
-                    value="{{ $course->start_date }}" name="start_date" placeholder="YYYY-MM-DD">
+                  <label class="fs-6 mb-1" for="flatpickr-date" class="form-label">
+                    {{ __('cycles.CoursStart') }}
+                  </label>
+                  <input 
+                    type="text" 
+                    class="form-control flatpickr-input active" 
+                    value="{{ $course->start_date }}" 
+                    name="start_date"
+                    placeholder="YYYY-MM-DD" 
+                    id="flatpickr-date"
+                  />
                 </div>
                 <div class="form-group mb-3">
-                  <label class="fs-6 mb-1" for="flatpickr-date" class="form-label">{{ __('cycles.CoursEnd') }}</label>
-                  <input type="text" class="form-control flatpickr-input active"
-                    value="{{ $course->end_date }}" name="end_date" placeholder="YYYY-MM-DD" id="flatpickr-date">
+                  <label class="fs-6 mb-1" for="flatpickr-date" class="form-label">
+                    {{ __('cycles.CoursEnd') }}
+                  </label>
+                  <input 
+                    type="text" 
+                    class="form-control flatpickr-input active" 
+                    value="{{ $course->end_date }}" 
+                    name="end_date"
+                    placeholder="YYYY-MM-DD" 
+                    id="flatpickr-date"
+                  />
                 </div>
                 <div class="row mb-3">
                   <span class="fs-6 mb-1">{{ $visibilityStatus }}</span>
@@ -192,34 +208,37 @@
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
   <script src="/vuexy/assets/js/forms-tagify.js"></script>
 @stop
+
 @section('pagescripts')
-    <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-    <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-    <script src="/js/jquery.datetimepicker.full.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#userstable').DataTable({
-                "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
-                "columnDefs": [
-                    {"orderable": false, "targets":  [4]},
-                ],
-                @if ($l == 'ar')
-                "language": {
-                    "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
-                    "sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-                    "sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
-                    "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                    "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-                    "sInfoPostFix":  "", "sSearch":       "ابحث:", "sUrl":          "",
-                    "oPaginate": {"sFirst":    "الأول", "sPrevious": "السابق", "sNext":     "التالي", "sLast":     "الأخير"},
-                    "oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}} @endif
-              });
+  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
+  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
+  <script src="/vuexy/assets/js/forms-pickers.js"></script>
+
+  <script>
+    $(document).ready(function() {
+        $('#userstable').DataTable({
+            "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
+            "columnDefs": [
+                {"orderable": false, "targets":  [4]},
+            ],
+            @if ($l == 'ar')
+            "language": {
+                "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
+                "sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
+                "sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
+                "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                "sInfoPostFix":  "", "sSearch":       "ابحث:", "sUrl":          "",
+                "oPaginate": {"sFirst":    "الأول", "sPrevious": "السابق", "sNext":     "التالي", "sLast":     "الأخير"},
+                "oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}} @endif
           });
-      </script>
-          
+      });
+  </script>   
 @stop

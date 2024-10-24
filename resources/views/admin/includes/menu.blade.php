@@ -1,14 +1,22 @@
 @php $setting = \App\Settings::where('id', 1)->first(); @endphp
+<style>
+  /* Add this to your CSS file */
+.logo-img {
+    max-width: 50%;
+    height: auto;
+    display: block;
+}
+</style>
 <!-- Menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
       @if (!is_null(auth()->user()->organization))
-        <img src="{{ auth()->user()->organization->image_url }}" alt="avatar" height="40" width="80">
+          <img src="{{ auth()->user()->organization->image_url }}" alt="avatar" class="logo-img">
       @else
-        <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" height="50" width="150">
+          <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
       @endif
-    </a>
+  </a>
 
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
       <i class="ti menu-toggle-icon d-none d-xl-block align-middle"></i>
@@ -44,7 +52,7 @@
 
     @if (auth()->user()->HaveCompany == 1)
       <li class="{{ Request::is('*myCompany') ? 'active' : '' }} menu-item">
-        <a href="{{ route('company_profile', auth()->user()->company->id ) }}" class="menu-link">
+        <a href="/dashboard/myCompany" class="menu-link">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>
@@ -212,13 +220,13 @@
           <div>{{ __('admin.Cycles') }}</div>
         </a>
         <ul class="menu-sub">
-          <li class="{{ Request::is('/dashboard/programlist*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/programlist*') ? 'active' : '' }} menu-item">
             <a href="/dashboard/programlist" class="menu-link">
               <span class="menu-item">{{ __('admin.ProgramList') }}</span>
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
             </a>
           </li>
-          <li class="{{ Request::is('/dashboard/cycles*') ? 'active' : '' }} menu-item">
+          <li class="{{ Request::is('dashboard/cycles*') ? 'active' : '' }} menu-item">
             <a href="/dashboard/cycles" class="menu-link">
               <span class="menu-item">{{ __('cycles.steps') }}</span>
               <i class="bx bx-message"></i>
@@ -324,26 +332,26 @@
               <div>{{ __('admin.Sessions') }}</div>
             </a>
             <ul class="menu-sub">
-              <li class="{{ Request::is('/dashboard/mentorship/sessions?show=all') ? 'active' : '' }} menu-item">
+              <li class="{{ request()->show == 'all' ? 'active' : '' }} menu-item">
                 <a class="menu-link" href="/dashboard/mentorship/sessions?show=all">
                   <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                   <span class="menu-item">{{ __('cycles.All requests') }}</span>
                 </a>
               </li>
-              <li class="{{ Request::is('/dashboard/mentorship/sessions') ? 'active' : '' }} menu-item">
+              <li class="{{ !request()->show ? 'active' : '' }} menu-item">
                 <a class="menu-link" href="/dashboard/mentorship/sessions">
                   <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                   <span class="menu-item">{{ __('cycles.New requests only') }}</span>
                 </a>
               </li>
-              <li class="{{ Request::is('/dashboard/mentorship/sessions?show=approved') ? 'active' : '' }} menu-item">
+              <li class="{{ request()->show == 'approved' ? 'active' : '' }} menu-item">
                 <a class="menu-link" href="/dashboard/mentorship/sessions?show=approved">
                   <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                   <span class="menu-item">{{ __('cycles.approved requests') }}</span>
                 </a>
               </li>
               <li
-                class="{{ Request::is('/dashboard/mentorship/sessions?show=disapproved') ? 'active' : '' }} menu-item">
+                class="{{ request()->show == 'disapproved' ? 'active' : '' }} menu-item">
                 <a class="menu-link" href="/dashboard/mentorship/sessions?show=disapproved">
                   <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
                   <span class="menu-item">{{ __('cycles.disapproved requests') }}</span>
@@ -363,13 +371,13 @@
           <div>{{ __('admin.Questions') }}</div>
         </a>
         <ul class="menu-sub">
-          <li class="{{ Request::is('dashboard/question-categories*') ? 'active' : '' }}">
+          <li class="{{ Request::is('dashboard/question-categories*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/question-categories">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item"> {{ __('admin.Questions Categories') }}</span>
             </a>
           </li>
-          <li class="{{ Request::is('dashboard/questions-bank*') ? 'active' : '' }}">
+          <li class="{{ Request::is('dashboard/questions-bank*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/questions-bank">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item"> {{ __('admin.Questions Bank') }}</span>
