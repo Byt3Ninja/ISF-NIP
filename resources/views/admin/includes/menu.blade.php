@@ -50,21 +50,22 @@
 
 
 
-    @if (auth()->user()->HaveCompany != 1)
+    @if (auth()->user()->HaveCompany == 1 && !auth()->user()->company)
       <li class="{{ Request::is('*companyProfile') ? 'active' : '' }} menu-item">
         <a href="{{ route('my_company') }}" class="menu-link">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>
       </li>
-      @else
+      @endif
+      @if (auth()->user()->company)
       <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
         <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>
       </li>
-    @endif
+      @endif
 
     <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
       <a href="{{ route('calendar') }}" class="menu-link">
