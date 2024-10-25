@@ -100,8 +100,14 @@
                 {!! csrf_field() !!}
                 <div class="card-body">
                   <div class="d-flex align-items-start align-items-sm-center gap-6">
-                    <img src="/191014/{{ $client->img_url ?? '../images/placeholder.jpg' }}" alt="user-avatar"
-                      class="d-block w-px-100 h-px-100 rounded" id="uploadedAvatar" />
+                    <img 
+                      id="uploadedAvatar" 
+                      class="d-block w-px-100 h-px-100" 
+                      alt="user-avatar"
+                      src="/images/user-placeholder.jpeg"
+                      style="border-radius: 10px;"
+                      onerror="this.src='/images/user-placeholder.jpeg'" 
+                    />
                     <div class="button-wrapper">
                       <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
                         <span class="d-none d-sm-block">Upload new photo</span>

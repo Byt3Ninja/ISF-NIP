@@ -57,7 +57,7 @@
           <div>{{ __('admin.My company') }}</div>
         </a>
       </li>
-      @endif
+    @endif
       @if (auth()->user()->company)
       <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
         <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">

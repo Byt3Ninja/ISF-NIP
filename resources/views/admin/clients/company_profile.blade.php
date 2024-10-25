@@ -171,7 +171,7 @@
                         <i class="ti ti-users ti-28px"></i>
                         <div class="mx-1 d-flex flex-column">
                           <span
-                            class="fw-bold text-black fs-6">{{ $company->team_num }}</span>
+                            class="fw-bold text-black fs-6">{{ $company->team_num ?? 0 }}</span>
                           <span class="fw-bold mt-2"
                             style="font-size: 12px;">{{ __('admin.Team number') }}</span>
                         </div>
@@ -183,10 +183,14 @@
                           <div class="d-flex align-items-center mb-2">
                             <i class="ti ti-calendar-time ti-28px"></i>
                             <span
-                              class="mx-1 fw-bold text-black fs-6">{{ $company->est_date }}</span>
+                              class="mx-1 fw-bold text-black fs-6">
+                              {{ $company->est_date ?? 'N/A' }}
+                            </span>
                           </div>
                           <span class="text-nowrap"
-                            style="font-size: 12px;">{{ __('admin.Established date') }}</span>
+                            style="font-size: 12px;">
+                            {{ __('admin.Established date') }}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -418,7 +422,7 @@
           @if (count($fonders) > 0)
             <div class="col-md-4">
               <div class="card shadow-sm"
-                style="border-radius: 15px; height: 500px;">
+                style="border-radius: 15px; min-height: 500px;">
                 <div class="p-3">
                   <h5 class="card-title mb-3">{{ __('admin.Founders') }}</h5>
                   <div class="row">
@@ -464,7 +468,7 @@
           @if (count($Shareholders) > 0)
             <div class="col-md-4">
               <div class="card shadow-sm"
-                style="border-radius: 15px; height: 500px;">
+                style="border-radius: 15px; min-height: 500px;">
                 <div class="p-3">
                   <h5 class="card-title mb-3">{{ __('admin.shareholders') }}
                   </h5>
@@ -526,7 +530,7 @@
           @if (count($Investors) > 0)
           <div class="col-md-4">
             <div class="card shadow-sm"
-              style="border-radius: 15px; height: 500px;">
+              style="border-radius: 15px; min-height: 500px;">
               <div class="p-3">
                 <h5 class="card-title mb-3">{{ __('admin.investors') }}</h5>
                 @foreach ($Investors as $Investor)
@@ -564,19 +568,19 @@
           @endif
         </div>
       </section>
-      <section class="mt-6 row">
-        <!-- Sustainable Development Icons -->
-        @php
-          // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-          //  $Sustainables = explode(',', $company->Sustainable_development);
-          $Sustainables = json_decode(
-              $company->Sustainable_development,
-          );
-        @endphp
-        @if (!empty($Sustainables) && count($Sustainables) > 0)
+      <!-- Sustainable Development Icons -->
+      @php
+        // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+        //  $Sustainables = explode(',', $company->Sustainable_development);
+        $Sustainables = json_decode(
+            $company->Sustainable_development,
+        );
+      @endphp
+      @if (!empty($Sustainables) && count($Sustainables) > 0)
+        <section class="mt-6 row">
           <div class="col-12">
             <div class="card shadow-sm"
-              style="border-radius: 15px; height: 290px;">
+              style="border-radius: 15px; min-height: 290px;">
               <div class="p-4">
                 <h5 class="">
                   {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}
@@ -604,9 +608,9 @@
               </div>
             </div>
           </div>
-        @endif
-        <!-- / Sustainable Development Icons -->
-      </section>
+        </section>
+      @endif
+      <!-- / Sustainable Development Icons -->
       <section class="mt-6">
         <div class="row">
           <div class="col-md-6">
