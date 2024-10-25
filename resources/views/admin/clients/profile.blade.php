@@ -21,8 +21,13 @@
             </div>
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
               <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                <img src="{{ $client->image_url }}" alt="user image" class="d-block ms-0 ms-sm-6 rounded user-profile-img"
-                  style="height: 130px" />
+                <img 
+                  src="{{ $client->image_url ? $client->image_url : '/images/user-placeholder.jpeg' }}" 
+                  alt="user image" 
+                  class="d-block ms-0 ms-sm-6 rounded user-profile-img"
+                  style="height: 130px" 
+                  onerror="this.src='/images/user-placeholder.jpeg';"
+                />
               </div>
               <div class="flex-grow-1 mt-3 mt-lg-5">
                 <div
@@ -71,15 +76,12 @@
                       </li>
                     </ul>
                   </div>
-                  <a class="btn btn-light-info" href="/dashboard/myProfile">
+                  <a href="/dashboard/myProfile" class="btn btn-primary mb-1">
                     <i class="ti ti-settings me-3 ti-md"></i>
                     <span class="align-middle">
                       {{$l=='ar'?'تعديل':'Edit'}}
                     </span>
                   </a>
-                  {{-- <a href="javascript:void(0)" class="btn btn-primary mb-1">
-                    <i class="ti ti-user-check ti-xs me-2"></i>Connected
-                  </a> --}}
                 </div>
               </div>
             </div>
