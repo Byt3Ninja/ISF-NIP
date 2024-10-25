@@ -44,7 +44,10 @@
       </div>
 
       <!-- Kanban Wrapper -->
-      <div class="kanban-wrapper bg-white p-4"></div>
+      <div 
+        class="kanban-wrapper bg-white px-4 py-8" 
+        style="border-radius: 1rem;">
+      </div>
 
       <!-- Edit Task/Task & Activities -->
       <div class="offcanvas offcanvas-end kanban-update-item-sidebar">
