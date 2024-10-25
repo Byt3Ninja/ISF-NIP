@@ -20,7 +20,7 @@
               <img src="/vuexy/assets/img/pages/profile-banner.png" alt="Banner image" class="rounded-top" />
             </div>
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
-              <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+              <div class="flex-shrink-0 mx-sm-0 mx-auto">
                 <img 
                   src="{{ $client->image_url ? $client->image_url : '/images/user-placeholder.jpeg' }}" 
                   alt="user image" 
