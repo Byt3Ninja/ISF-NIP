@@ -136,7 +136,7 @@
     @role('Mentor')
       <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
         <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
-          <i class="menu-livicon" data-icon="briefcase"></i>
+          <i class="ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
@@ -177,7 +177,7 @@
       </li>
       <li class="{{ Request::is('dashboard/startup/mentorshipTasks*') ? 'active' : '' }} menu-item">
         <a href="{{ route('startup.mentorshipTasks.home') }}" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-checklist"></i>
+          <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
