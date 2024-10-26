@@ -6,10 +6,13 @@
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/css{{ $l == 'ar' ? '-rtl' : '' }}/pages/widgets.css">
   <link rel="stylesheet" type="text/css" href="/app-assets/css{{ $l == 'ar' ? '-rtl' : '' }}/pages/dashboard-ecommerce.css">
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/jquery.rateyo.min.css">
-
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
   <style>
     .radius-15 {
       border-radius: 15px;
@@ -353,11 +356,19 @@ style="width: 366px;">
                 <h5 class="modal-title">{{ __('dashboard.Mentor schedule') }}</h5>
               </div>
               <div class="form-group mb-3" id="showdates">
-                <label class="fs-6 mb-2">{{ __('dashboard.Start meeting Date/ Time') }}:</label>
+                <label for="flatpickr-datetime" class="fs-6 mb-2">
+                  {{ __('dashboard.Start meeting Date/ Time') }}:
+                </label>
                 <div class="position-relative">
-                  <input id="date" name="date" type="text" class="date width-250 form-control pr-5"
-                    placeholder="{{ __('dashboard.Start meeting Date/ Time') }}" value="" required
-                    onkeydown="return false" />
+                  <input 
+                    id="flatpickr-datetime"
+                    name="date" 
+                    type="text"
+                    class="form-control"
+                    placeholder="YYYY-MM-DD HH:MM"
+                    required
+                    onkeydown="return false" 
+                  />
                   <i class="ti ti-calendar position-absolute"
                     style="{{ $l == 'ar' ? 'left: 10px;' : 'right: 10px;' }} top: 50%; transform: translateY(-50%);">
                   </i>
@@ -402,7 +413,6 @@ style="width: 366px;">
 @stop
 
 @section('scripts')
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -411,12 +421,19 @@ style="width: 366px;">
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
   {{-- <script src="/vuexy/src/js/scripts/extensions/ext-component-ratings.js"></script> --}}
 @stop
   
 @section('pagescripts')
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+  <script src="/vuexy/assets/js/forms-pickers.js"></script>
 
   <script>
     const sortContainer = document.getElementById('sortContainer');
