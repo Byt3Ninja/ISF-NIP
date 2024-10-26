@@ -422,7 +422,7 @@
           @if (count($fonders) > 0)
             <div class="col-md-4">
               <div class="card shadow-sm"
-                style="border-radius: 15px; min-height: 500px;">
+                style="border-radius: 15px;">
                 <div class="p-3">
                   <h5 class="card-title mb-3">{{ __('admin.Founders') }}</h5>
                   <div class="row">
@@ -468,7 +468,7 @@
           @if (count($Shareholders) > 0)
             <div class="col-md-4">
               <div class="card shadow-sm"
-                style="border-radius: 15px; min-height: 500px;">
+                style="border-radius: 15px;">
                 <div class="p-3">
                   <h5 class="card-title mb-3">{{ __('admin.shareholders') }}
                   </h5>
@@ -530,7 +530,7 @@
           @if (count($Investors) > 0)
           <div class="col-md-4">
             <div class="card shadow-sm"
-              style="border-radius: 15px; min-height: 500px;">
+              style="border-radius: 15px;">
               <div class="p-3">
                 <h5 class="card-title mb-3">{{ __('admin.investors') }}</h5>
                 @foreach ($Investors as $Investor)
