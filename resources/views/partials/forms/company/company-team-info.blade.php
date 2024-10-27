@@ -224,7 +224,7 @@
         <form method="post" action="{{ route('AddTeams_Comp') }}"
           enctype="multipart/form-data" onsubmit="resetForm(this)">
           {!! csrf_field() !!}
-          <div class="show_Shareholders row m-2" px-10>
+          <div class="show_Shareholders row m-2">
 
             <div class="col-12">
               <div class="form-group position-relative">
@@ -399,7 +399,7 @@
       <div class="p-4">
         <h5 class="card-title">{{ __('admin.investors') }}</h5>
 
-        <div class="show_investor row m-2" px-10>
+        <div class="show_investor row m-2">
           <div class="col-12">
             <div class="form-group position-relative">
               <input type="text"

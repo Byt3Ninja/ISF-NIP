@@ -24,7 +24,37 @@
   if (!kanbanResponse.ok) {
     console.error('error', kanbanResponse);
   }
-  boards = await kanbanResponse.json();
+
+  const tasks = mentorshipTasks;
+
+  const getModeifiedTasks = () => {
+    if (tasks?.length > 0) {
+      return [
+        {
+          id: "board-in-progress",
+          title: "In Progress",
+          item: tasks.filter(task => task.status === 'uncompleted'),
+        },
+        {
+          id: "board-in-review",
+          title: "In Review",
+          item: tasks.filter(task => task.status === 'pending'),
+        },
+        {
+          id: "board-done",
+          title: "Done",
+          item: tasks.filter(task => task.status === 'completed'),
+        }
+      ]
+    }
+  }
+
+  // const finalTasks = getModeifiedTasks();
+  // console.log('tasks in js', tasks);
+  // console.log('finalTasks', finalTasks);
+
+  // boards = await kanbanResponse.json();
+  boards = getModeifiedTasks();
 
   // datepicker init
   if (datePicker) {

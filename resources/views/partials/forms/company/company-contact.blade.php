@@ -8,13 +8,15 @@
       {!! csrf_field() !!}
       <input type="hidden" value="2" name="CompanyN">
       <div class="row">
-        <div class="col-md-4 col-12 mb-3">
+        <div class="col-md-6 col-12 mb-6">
           <label for="phone"
             class="form-label">{{ __('admin.Phone') }}*</label>
-          <div class="input-group">
+          <div class="d-flex align-items-center gap-1">
             <div class="codeInputContainer">
               <select id="country_code" name="country_code"
-                class="form-select select2" required>
+                class="form-select border-light light-shadow" required
+                style="width: 130px;"
+                >
               </select>
             </div>
             <div class="position-relative">
@@ -28,7 +30,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-6 col-12 mb-3">
+        <div class="col-md-6 col-12 mb-6">
           <label for="WhatsApp"
             class="form-label">{{ __('admin.WhatsApp') }}*</label>
           <div class="position-relative">
@@ -41,7 +43,7 @@
               style="left: 7px;"></i>
           </div>
         </div>
-        <div class="col-md-6 col-12 mb-3">
+        <div class="col-md-6 col-12 mb-6">
           <label for="email" class="form-label">{{ __('admin.E-mail') }}
             *</label>
           <div class="position-relative">
