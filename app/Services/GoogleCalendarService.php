@@ -4,11 +4,14 @@
 namespace App\Services;
 
 use Google_Client;
-use Google_Service_Calendar;
+// use Google_Service_Calendar;
 use App\UserOauthToken;
 use Google_Service_Calendar_Event;
 use Carbon\Carbon;
 use App\Settings;
+use Google\Client;
+use Google\Service\Calendar as Google_Service_Calendar;
+
 class GoogleCalendarService
 {
     protected $client;
