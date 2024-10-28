@@ -40,6 +40,9 @@ return [
                 'cluster' => config('broadcasting.connections.pusher.PUSHER_APP_CLUSTER'),
                 'useTLS' => true,
             ],
+
+            
+
         ],
 
         'redis' => [
