@@ -22,7 +22,7 @@ class GoogleCalendarService
         if($Setting){
         $GOOGLE_CLIENT_ID = $Setting->GOOGLE_CLIENT_ID;
         $GOOGLE_CLIENT_SECRET= $Setting->GOOGLE_CLIENT_SECRET;
-        $CALENDER_GOOGLE_REDIRECT_URI= $Setting->CALENDER_GOOGLE_REDIRECT_URI;
+        $CALENDER_GOOGLE_REDIRECT_URI= $Setting->GOOGLE_REDIRECT;
         }else{
             $GOOGLE_CLIENT_ID = '';
             $GOOGLE_CLIENT_SECRET= '';
