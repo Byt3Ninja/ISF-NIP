@@ -43,7 +43,7 @@ return [
     'google' => [
         'client_id' => config('broadcasting.connections.pusher.GOOGLE_CLIENT_ID'),
         'client_secret' => config('broadcasting.connections.pusher.GOOGLE_CLIENT_SECRET'),
-        'redirect' => config('broadcasting.connections.pusher.GOOGLE_REDIRECT'),
+        'redirect' => config('broadcasting.connections.pusher.options.GOOGLE_REDIRECT'),
     ],
     'microsoft' => [
         'client_id' => config('broadcasting.connections.pusher.MICROSOFT_CLIENT_ID'),

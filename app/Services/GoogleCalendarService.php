@@ -20,7 +20,7 @@ class GoogleCalendarService
 
     public function __construct()
     {
-
+        
         $Setting = Settings::where('id', 1)->first();
         if($Setting){
         $GOOGLE_CLIENT_ID = $Setting->GOOGLE_CLIENT_ID;
@@ -41,6 +41,7 @@ class GoogleCalendarService
 
     public function getAuthUrl()
     {
+        
         return $this->client->createAuthUrl();
     }
 

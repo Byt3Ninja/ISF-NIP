@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
             
             'broadcasting.connections.pusher.GOOGLE_CLIENT_ID' => $pusherConfig['GOOGLE_CLIENT_ID'],
             'broadcasting.connections.pusher.GOOGLE_CLIENT_SECRET' => $pusherConfig['GOOGLE_CLIENT_SECRET'],
-            'broadcasting.connections.pusher.GOOGLE_REDIRECT' => $pusherConfig['GOOGLE_REDIRECT'],
+            'broadcasting.connections.pusher.options.GOOGLE_REDIRECT' => $pusherConfig['GOOGLE_REDIRECT'],
             
             'broadcasting.connections.pusher.MICROSOFT_CLIENT_ID' => $pusherConfig['MICROSOFT_CLIENT_ID'],
             'broadcasting.connections.pusher.MICROSOFT_CLIENT_SECRET_VALUE' => $pusherConfig['MICROSOFT_CLIENT_SECRET_VALUE'],
