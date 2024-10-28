@@ -41,9 +41,9 @@ return [
     ], 
 
     'google' => [
-        'client_id' => config('broadcasting.connections.pusher.GOOGLE_CLIENT_ID'),
-        'client_secret' => config('broadcasting.connections.pusher.GOOGLE_CLIENT_SECRET'),
-        'redirect' => config('broadcasting.connections.pusher.options.GOOGLE_REDIRECT'),
+        'client_id' => config('services.google.client_id'),
+        'client_secret' => config('services.google.client_secret'),
+        'redirect' => config('services.google.redirect'),
     ],
     'microsoft' => [
         'client_id' => config('broadcasting.connections.pusher.MICROSOFT_CLIENT_ID'),
