@@ -28,7 +28,7 @@ return [
     'My Requests' => 'طلباتي',
     'Mentors' => 'المرشدين',
     'MentorsSession' => 'جلسات المرشدين',
-    'No Cycles started yet' => 'لا يوجد دورات جديدة حاليا',
+    'No Cycles started yet' => 'لا يوجد برامج جديدة حاليا',
     'Your next mentorship session with' => 'اجتماعك القادم سيكون مع',
     'will start' => 'سوف يبدأ',
     'Name/Title' => 'الاسم/ الوظيفة',
