@@ -319,11 +319,11 @@ class CyclesController extends Controller
         if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);}
         //Check private
         $private = Cycle::findOrFail($c);
-        if ($private->private==null) {
+//         if ($private->private==null) {
             
-            return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
-//            abort(404);
-        }
+//             return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
+// //            abort(404);
+//         }
         
         // Check STEPS
         if (!Auth::user()->company->cycle || Auth::user()->company->cycle == $c) {

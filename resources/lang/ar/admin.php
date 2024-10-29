@@ -823,6 +823,8 @@ return [
 	'Family_Office' => ' مكتب عائلي ',
 	'Family' => ' عائلة ',
 	'Friends' => ' أصدقاء ',
+	'No Quizzes added yet' => ' لا يوجد اختبارات حالياً ',
+	'NoHaveCompany' => ' لا يوجد شركة مفعلة ',
 
 
 ];

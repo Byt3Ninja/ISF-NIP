@@ -822,5 +822,7 @@ return [
 	'Family_Office' => 'Family Office',
 	'Family' => ' Family ',
 	'Friends' => ' Friends ',
+	'NoHaveCompany' => ' Company Not Active ',
+	'No Quizzes added yet' => 'No Quizzes added yet',
 	
 ];

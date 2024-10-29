@@ -58,7 +58,7 @@
         </a>
       </li>
     @endif
-      @if (auth()->user()->company)
+      @if (auth()->user()->HaveCompany != 0 &&auth()->user()->company)
       <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
         <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">
           <i class="ti ti-building me-3 ti-md"></i>
