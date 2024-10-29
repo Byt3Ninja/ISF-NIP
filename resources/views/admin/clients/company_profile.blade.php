@@ -304,7 +304,7 @@
                     </div>
                     <span class="text-black fs-5">{{ __('admin.Stage') }}</span>
                     <span
-                      class="text-primary">{{ $company->stage ?? 'N/A' }}</span>
+                      class="text-primary">{{ __('admin.stage_'.$company->stage) ?? 'N/A' }}</span>
                   </div>
                 </div>
               </div>
