@@ -12,6 +12,7 @@
 	<div class="content-wrapper">
 		<div class="container-xxl flex-grow-1 container-p-y">
 			<div class="content-overlay"></div>
+			@if (!empty($quizzes))
 			<div class="content-header row">
 				<div class="content-header-left col-12 mb-2 mt-1">
 					<div class="row breadcrumbs-top">
@@ -42,6 +43,7 @@
 				</div>
 				@endif
 			</div>
+			
 			<div class="content-body">
 				<section class="organizations-list-wrapper">
 					<div class="organizations-list-table">
@@ -97,6 +99,23 @@
 					</div>
 				</section>
 			</div>
+			@else
+			<section class="row">
+				<div class="col-xl-12 col-md-12 col-sm-12">
+				  <div class="card px-4">
+					<div class="card-header border-bottom mb-4">
+					  <h4 class="card-title">{{ __('cycles.nosubscripe') }}</h4>
+					</div>
+	
+					<div class="card-body">
+					  {{ __('admin.No Quizzes added yet') }}, <a href="/dashboard">{{ __('cycles.Back') }}</a>.
+					</div>
+				  </div>
+				</div>
+			  </section>
+
+			@endif
+
 		</div>
 	</div>
 @endsection

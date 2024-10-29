@@ -19,6 +19,8 @@
 
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="app-kanban">
+
+      @if (!empty($mentorshipTasks))
       <!-- Add new board -->
       <div class="row">
         <div class="col-12">
@@ -255,6 +257,25 @@
           </div>
         </div>
       </div>
+      
+      @else
+			<section class="row">
+				<div class="col-xl-12 col-md-12 col-sm-12">
+				  <div class="card px-4">
+					<div class="card-header border-bottom mb-4">
+					  <h4 class="card-title">{{ __('cycles.nosubscripe') }}</h4>
+					</div>
+	
+					<div class="card-body">
+					  {{ __('admin.No Quizzes added yet') }}, <a href="/dashboard">{{ __('cycles.Back') }}</a>.
+					</div>
+				  </div>
+				</div>
+			  </section>
+
+			@endif
+
+
     </div>
   </div>
   <!-- / Content -->

@@ -315,11 +315,24 @@ style="width: 366px;">
                   <!-- / Mentor Bio -->
                   @if ($getid->user ?? 0)
                     <div class="row px-4 mt-auto">
+                    @if(auth()->user()->company && auth()->user()->company->cycle != 0 && auth()->user()->hasRole('Registered'))
                       <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
                         data-bs-toggle="modal" data-bs-target="#SendRequest" title="Add new request"
                         onclick="request({{ $mentor->id }},'{{ optional($getid->user)->{'first_name_' . $l} }} {{ optional($getid->user)->{'last_name_' . $l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})">
                         {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                       </button>
+                    @else
+                      <div class="btn btn-sm btn-success rounded-pill custom-shadow">{{ __('cycles.nosubscripe') }}</div>
+                    @endif
+                    @if(!auth()->user()->hasRole('Registered'))
+                    <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
+                    data-bs-toggle="modal" data-bs-target="#SendRequest" title="Add new request"
+                    onclick="request({{ $mentor->id }},'{{ optional($getid->user)->{'first_name_' . $l} }} {{ optional($getid->user)->{'last_name_' . $l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})">
+                    {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
+                  </button>
+                  @endif
+
+
                     </div>
                   @endif
                 </div>
