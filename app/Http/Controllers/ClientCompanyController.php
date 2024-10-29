@@ -95,6 +95,9 @@ if(!empty($company->Sustainable_development)){
             $client = User::where('HaveCompany',1)->with('company')
                 ->with('company.city')
                 ->find(Auth::id());
+                if(empty($client)){
+                    return redirect()->route('my_profile')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                }
             $countries = Country::all();
             $states = State::all();
             $cities = City::all();
