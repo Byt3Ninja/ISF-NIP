@@ -72,7 +72,7 @@ if(!empty($company->Sustainable_development)){
     // تحقق من وجود الملف
     $fileExists = file_exists($pathToFile);
 
-
+    
     
 
             return view('admin/clients/company_profile', compact('company','Currencies','Achieved_Milestones', 'Planned_Milestones', 'icons','fonders','Shareholders','Investors', 'fileExists', 'pathToFile'));
@@ -411,12 +411,10 @@ if($data['CompanyN']==4){
 
 }
 if($data['CompanyN']==5){
+  
     $request->validate([
-        'working_team' => 'required|string',
-        'team_num' => 'required|numeric',
+        'team_num' => 'numeric',
     ], [
-        'working_team.required' => __('admin.Currency is required'),
-        'team_num.required' => __('admin.Raised fund is required'),
         'team_num.numeric' => __('admin.Raised fund must be a number'),
     ]);
             // $result = Company::updateOrCreate(['id' => $companyId], $data);
@@ -424,14 +422,14 @@ if($data['CompanyN']==5){
                 // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                 $result = Company::where('id', $companyId)->update([
                     'team_num' => $data['team_num'],
-                    'working_team_summary' => $data['working_team'],
+                    'working_team_summary' => $data['working_team_summary'],
                 ]);
                 $msgtype = 'UpdateComp';
             } else {
                 // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                 $result = Company::create([
                     'team_num' => $data['team_num'],
-                    'working_team_summary' => $data['working_team'],
+                    'working_team_summary' => $data['working_team_summary'],
                 ]);
                 $msgtype = 'NewComp';
             }

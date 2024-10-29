@@ -323,10 +323,19 @@
                     <div
                       class="d-flex align-items-center justify-content-center mt-2"
                       style="gap: 5px;">
+                      @php
+                        $countryIds  = json_decode($company->targeted_market, true);
+                      @endphp
+
+                      @foreach ($countryIds  as $countryId )
+                      @php
+                      $targetedCountries = App\Country::whereIn('id', $countryIds)->get()->keyBy('id');
+                    @endphp
                       <button
                         class="btn btn-outline-primary btn-xs rounded-pill">
-                        {{ $company->targeted_market ?? 'N/A' }}
+                        {{ $targetedCountries[$countryId]->{"name_".$l} ?? 'N/A' }}
                       </button>
+                      @endforeach
                     </div>
                   </div>
                 </div>

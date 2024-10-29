@@ -697,7 +697,7 @@ return [
     'shareholder_ownership_percentage' => 'نسبه المساهم',
     'nvestor_name' => 'اسم المستثمر',
     'investment_type' => 'نوع الاستثمار',
-    'Working_Team_Details' => 'نبذه عن فريق العمل',
+    'Working_Team_Details' => 'نبذة عن فريق العمل',
     'Pitch_Deck' => 'عرض تقديمي',
     'Pitch_Deck_Video' => 'فيديو عرض تقديمي',
     'Pitch_Deck_Information' => 'معلومات العرض التقديمي',
