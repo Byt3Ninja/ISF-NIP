@@ -26,7 +26,7 @@ class GoogleCalendarController extends Controller
 
     public function redirectToGoogle()
     {
-        // dd(route('calender.callback.google'));
+         dd(route('calender.callback.google'));
         return redirect($this->googleService->getAuthUrl());
     }
 

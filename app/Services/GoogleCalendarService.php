@@ -4,11 +4,14 @@
 namespace App\Services;
 
 use Google_Client;
-use Google_Service_Calendar;
+// use Google_Service_Calendar;
 use App\UserOauthToken;
 use Google_Service_Calendar_Event;
 use Carbon\Carbon;
 use App\Settings;
+use Google\Client;
+use Google\Service\Calendar as Google_Service_Calendar;
+
 class GoogleCalendarService
 {
     protected $client;
@@ -17,12 +20,12 @@ class GoogleCalendarService
 
     public function __construct()
     {
-
+        
         $Setting = Settings::where('id', 1)->first();
         if($Setting){
         $GOOGLE_CLIENT_ID = $Setting->GOOGLE_CLIENT_ID;
         $GOOGLE_CLIENT_SECRET= $Setting->GOOGLE_CLIENT_SECRET;
-        $CALENDER_GOOGLE_REDIRECT_URI= $Setting->CALENDER_GOOGLE_REDIRECT_URI;
+        $CALENDER_GOOGLE_REDIRECT_URI= $Setting->GOOGLE_REDIRECT;
         }else{
             $GOOGLE_CLIENT_ID = '';
             $GOOGLE_CLIENT_SECRET= '';
@@ -38,6 +41,7 @@ class GoogleCalendarService
 
     public function getAuthUrl()
     {
+        
         return $this->client->createAuthUrl();
     }
 
