@@ -9,6 +9,14 @@
 	<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/jquery.rateyo.min.css">
+
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 @stop
 
 @section('content')
@@ -827,9 +835,10 @@
                       <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
                     </div>
                     <hr>
+                    
                     <div class="form-group" id="showdates">
                       <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
-                      <input class="date width-250 form-control" type="text" id="date" name="date" value="" required onkeydown="return false">
+                      <input class=" width-250 form-control" id="flatpickr-datetimeLimit" type="text"  name="date" required >
                     </div>
                     <div class="form-group">
                       <label>{{__('dashboard.Meeting duration')}}:</label>
@@ -940,8 +949,18 @@
   {{-- <script src="/vuexy/src/js/scripts/extensions/ext-component-ratings.js"></script> --}}
 
 
+  
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+
+
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+  <script src="/vuexy/assets/js/forms-pickers.js"></script>
+ 
 @stop
 
 @section('pagescripts')
@@ -951,11 +970,24 @@
 
   <script>
     $(document).ready(function() {
+      var today = new Date().toISOString().split('T')[0]; // الحصول على تاريخ اليوم بصيغة yyyy-mm-dd
       $('#dfrom, #dto').datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
-        todayHighlight: true
+        todayHighlight: true,
       });
+
+     
+      $('.DatePicker').datepicker({
+        format: 'yyyy-m-d H:i',
+        onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+        autoclose: true,
+        todayHighlight: true,
+        startDate: today,
+        maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
+		  timepicker: true
+      });
+
     });
   </script>
 
