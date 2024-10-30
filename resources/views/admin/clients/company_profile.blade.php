@@ -184,7 +184,7 @@
                             <i class="ti ti-calendar-time ti-28px"></i>
                             <span
                               class="mx-1 fw-bold text-black fs-6">
-                              {{ $company->est_date ?? 'N/A' }}
+                              {{ $company->est_date ?? __('admin.N/A') }}
                             </span>
                           </div>
                           <span class="text-nowrap"
@@ -198,7 +198,7 @@
                       <span
                         class="fw-bold">{{ __('admin.Working_Team_Details') }}</span>
                       <p class="text-muted line-clamp-2 p-2">
-                        {{ $company->working_team_summary }}
+                        {{ $company->working_team_summary ?? __('admin.N/A') }}
                       </p>
                     </div>
                   </div>
@@ -271,7 +271,7 @@
                     <span
                       class="text-black fs-5">{{ __('admin.development_stage') }}</span>
                     <span
-                      class="text-primary">{{ $company->development_stage ?? 'N/A' }}</span>
+                      class="text-primary">{{ $company->development_stage ?? __('admin.N/A') }}</span>
                   </div>
                 </div>
               </div>
@@ -304,7 +304,7 @@
                     </div>
                     <span class="text-black fs-5">{{ __('admin.Stage') }}</span>
                     <span
-                      class="text-primary">{{ __('admin.stage_'.$company->stage) ?? 'N/A' }}</span>
+                      class="text-primary">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
                   </div>
                 </div>
               </div>
@@ -327,15 +327,18 @@
                         $countryIds  = json_decode($company->targeted_market, true);
                       @endphp
 
-                      @foreach ($countryIds  as $countryId )
-                      @php
-                      $targetedCountries = App\Country::whereIn('id', $countryIds)->get()->keyBy('id');
-                    @endphp
-                      <button
-                        class="btn btn-outline-primary btn-xs rounded-pill">
-                        {{ $targetedCountries[$countryId]->{"name_".$l} ?? 'N/A' }}
-                      </button>
-                      @endforeach
+                        @if(is_array($countryIds) && count($countryIds) > 0)
+                        @php
+                            $targetedCountries = App\Country::whereIn('id', $countryIds)->get()->keyBy('id');
+                        @endphp
+                        @foreach ($countryIds as $countryId)
+                            <button class="btn btn-outline-primary btn-xs rounded-pill">
+                                {{ $targetedCountries[$countryId]->{"name_".$l} ?? __('admin.N/A') }}
+                            </button>
+                        @endforeach
+                        @else
+                        <p>{{ __('admin.N/A') }}</p>
+                        @endif
                     </div>
                   </div>
                 </div>
@@ -356,7 +359,7 @@
                       class="d-flex align-items-center justify-content-center mt-2"
                       style="gap: 5px;">
                       <button
-                        class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->business_type ?? 'N/A' }}</button>
+                        class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->business_type ?? __('admin.N/A') }}</button>
                     </div>
                   </div>
                 </div>
@@ -376,7 +379,7 @@
                       class="d-flex align-items-center justify-content-center mt-2"
                       style="gap: 5px;">
                       <button
-                        class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->sector ?? 'N/A' }}</button>
+                        class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->sector ?? __('admin.N/A') }}</button>
                     </div>
                   </div>
                 </div>
@@ -640,7 +643,7 @@
                       <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">To get analysis for your pitch
                           deck please</span>
-                        <a href="#"
+                        <a href="{{ route('my_company') }}"
                           class="text-primary fw-medium text-decoration-underline mt-1">Click
                           here</a>
                       </div>
@@ -655,7 +658,7 @@
                       <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">To get analysis for your pitch
                           deck please</span>
-                        <a href="#"
+                        <a href="{{ route('my_company') }}"
                           class="text-primary fw-medium text-decoration-underline mt-1">Click
                           here</a>
                       </div>
@@ -685,7 +688,7 @@
                           To get analysis for your pitch deck please upload your
                           pitch deck video
                         </span>
-                        <a href="#"
+                        <a href="{{ route('my_company') }}"
                           class="text-primary fw-medium text-decoration-underline mt-1">Click
                           here</a>
                       </div>
@@ -703,7 +706,7 @@
                           To get analysis for your pitch deck please upload your
                           pitch deck video
                         </span>
-                        <a href="#"
+                        <a href="{{ route('my_company') }}"
                           class="text-primary fw-medium text-decoration-underline mt-1">Click
                           here</a>
                       </div>
@@ -742,19 +745,24 @@
             </div>
           </div>
           @endif
+
+          @php
+                  // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+              $documents = explode(',', $company->documents);
+              // استخراج اسم كل ملف من الروابط
+              $fileNames = array_map(function ($url) {
+                  return basename($url); // استخراج اسم الملف من الرابط
+              }, $documents);
+
+          @endphp
+
+
+        @if (!empty($document))
           <div class="col-md-6 mb-6">
             <div class="card shadow-sm"
               style="border-radius: 15px; height: 300px; overflow-y:auto;">
               <div class="p-3">
-                @php
-                  // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-                  $documents = explode(',', $company->documents);
-                  // استخراج اسم كل ملف من الروابط
-                  $fileNames = array_map(function ($url) {
-                      return basename($url); // استخراج اسم الملف من الرابط
-                  }, $documents);
-
-                @endphp
+                
                 <h5 class="card-title">{{ __('admin.Documents') }}</h5>
                 <div class="d-flex flex-column gap-2">
                   @foreach ($documents as $index => $document)
@@ -782,6 +790,10 @@
               </div>
             </div>
           </div>
+        @endif
+
+
+
         </div>
       </section>
       
