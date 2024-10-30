@@ -10,6 +10,7 @@
   const flatpickrDate = document.querySelectorAll('#flatpickr-date'),
     flatpickrTime = document.querySelector('#flatpickr-time'),
     flatpickrDateTime = document.querySelector('#flatpickr-datetime'),
+    flatpickrDateTimeLimit = document.querySelector('#flatpickr-datetimeLimit'),
     flatpickrMulti = document.querySelector('#flatpickr-multi'),
     flatpickrRange = document.querySelector('#flatpickr-range'),
     flatpickrInline = document.querySelector('#flatpickr-inline'),
@@ -38,6 +39,16 @@
       dateFormat: 'Y-m-d H:i'
     });
   }
+
+   // Datetime
+   if (flatpickrDateTimeLimit) {
+    flatpickrDateTimeLimit.flatpickr({
+      enableTime: true,
+      dateFormat: 'Y-m-d H:i',
+      minDate: 'today'
+    });
+  }
+
 
   // Multi Date Select
   if (flatpickrMulti) {
