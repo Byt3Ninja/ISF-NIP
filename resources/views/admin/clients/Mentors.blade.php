@@ -317,8 +317,7 @@ style="width: 366px;">
                     <div class="row px-4 mt-auto">
                     @if(auth()->user()->company && auth()->user()->company->cycle != 0 && auth()->user()->hasRole('Registered'))
                       <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
-                        data-bs-toggle="modal" data-bs-target="#SendRequest" title="Add new request"
-                        onclick="request({{ $mentor->id }},'{{ optional($getid->user)->{'first_name_' . $l} }} {{ optional($getid->user)->{'last_name_' . $l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})">
+                      onclick="request({{$mentor->id}},'{{optional($getid->user)->{'first_name_'.$l} }} {{optional($getid->user)->{'last_name_'.$l} }}', {{ $getid->cycle->organization_id }},{{ $getid->cycle_id }})" title="Add new request">
                         {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                       </button>
                     @else
@@ -341,85 +340,7 @@ style="width: 366px;">
                 </div>
               </div>
               <!-- Mentor Card -->
-              @if ($getid->user ?? 0)
-              <!--  Edit SP Modal -->
-                <div class="modal fade" id="SendRequest" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h4 class="modal-title">
-                          {{ __('dashboard.Add mentorship session with') }}
-                        </h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body">
-                        <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data"
-                          autocomplete="off">
-                          <div class="modal-body">
-                            @csrf
-                            <input type="hidden" name="mentorid" value="{{ $mentor->id }}" id="mentorid">
-                            <input type="hidden" name="organization_id" value="{{ $getid->cycle->organization_id }}" id="addOrganizationID">
-                            <input type="hidden" name="cycle_id" value="{{ $getid->cycle_id }}" id="addCycleID">
-                            <div class="border-bottom mb-4 pb-2">
-                              <h5 class="modal-title">{{ __('dashboard.Mentor schedule') }}</h5>
-                            </div>
-                            <div class="form-group mb-3" id="showdates">
-                              <label for="flatpickr-datetimeLimit" class="fs-6 mb-2">
-                                {{ __('dashboard.Start meeting Date/ Time') }}:
-                              </label>
-                              <div class="position-relative">
-                                <input 
-                                  id="flatpickr-datetimeLimit"
-                                  name="date" 
-                                  type="text"
-                                  class="form-control"
-                                  placeholder="YYYY-MM-DD HH:MM"
-                                  required
-                                  onkeydown="return false" 
-                                />
-                                <i class="ti ti-calendar position-absolute"
-                                  style="{{ $l == 'ar' ? 'left: 10px;' : 'right: 10px;' }} top: 50%; transform: translateY(-50%);">
-                                </i>
-                              </div>
-                            </div>
-                            <div class="form-group mb-3">
-                              <label class="fs-6 mb-2">{{ __('dashboard.Meeting duration') }}:</label>
-                              <select name="period" class="select form-control width-150">
-                                <option value="30">30 {{ __('dashboard.Minutes') }}</option>
-                                <option value="60" selected>1 {{ __('dashboard.Hour') }}</option>
-                                <option value="120">2 {{ __('dashboard.Hours') }}</option>
-                                <option value="180">3 {{ __('dashboard.Hours') }}</option>
-                                <option value="240">4 {{ __('dashboard.Hours') }}</option>
-                                <option value="300">5 {{ __('dashboard.Hours') }}</option>
-                              </select>
-                            </div>
-                            <div class="form-group mb-3">
-                              <label class="fs-6 mb-2" for="basicInputFile">{{ __('dashboard.Send file with your request') }}</label>
-                              <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url"
-                                  accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
-                                {{-- <label class="custom-file-label" for="inputGroupFile01">{{ __('dashboard.Choose file') }}</label> --}}
-                              </div>
-                            </div>
-                            <label class="fs-6 mb-2">{{ __('dashboard.Add note') }}:</label>
-                            <div class="form-group mb-3">
-                              <textarea class="form-control" id="notes" name='notes' rows="4"
-                                placeholder="{{ __('dashboard.Write your note here') }}"></textarea>
-                            </div>
-                          </div>
-
-                          <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary ml-1">
-                              {{ __('dashboard.Submit') }}
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              <!-- / Edit SP Modal -->
-            @endif
+              
             @endforeach
             <!-- / Mentors List -->
           </div>
@@ -428,7 +349,70 @@ style="width: 366px;">
       </div>
     </div>
   </div>
+<!--  Edit SP Modal -->
+<div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+      <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <div class="text-center mb-6">
+                  <h4 class="mb-2">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
+              </div>
+              <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
 
+                <div class="modal-body">
+                  @csrf
+                  <input type="hidden" name="mentorid" value="0" id="mentorid">
+                  <input type="hidden" name="organization_id" id="addOrganizationID">
+                  <input type="hidden" name="cycle_id" id="addCycleID">
+                  <div>
+                    <h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
+                    <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
+                  </div>
+                  <hr>
+                  
+                  <div class="form-group" id="showdates">
+                    <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
+                    <input class=" width-250 form-control" id="flatpickr-datetimeLimit" type="text"  name="date" required >
+                  </div>
+                  <div class="form-group">
+                    <label>{{__('dashboard.Meeting duration')}}:</label>
+                    <select name="period" class="select form-control width-150">
+                      <option value="30">30 {{__('dashboard.Minutes')}}</option>
+                      <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
+                      <option value="120">2 {{__('dashboard.Hours')}}</option>
+                      <option value="180">3 {{__('dashboard.Hours')}}</option>
+                      <option value="240">4 {{__('dashboard.Hours')}}</option>
+                      <option value="300">5 {{__('dashboard.Hours')}}</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="basicInputFile">{{__('dashboard.Send file with your request')}}</label>
+                    <div class="custom-file">
+                      <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+                      <label class="custom-file-label" for="inputGroupFile01">{{__('dashboard.Choose file')}}</label>
+                    </div>
+                  </div>
+                  <label>{{__('dashboard.Add note')}}:</label>
+                  <div class="form-group">
+                    <textarea class="form-control" id="notes" name='notes' rows="4" placeholder="{{__('dashboard.Write your note here')}}" ></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary ml-1" >
+                    
+                    <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
+                  </button>
+                </div>
+              </form>
+
+
+
+          </div>
+      </div>
+  </div>
+</div>
+<!--/ Edit SP Modal -->
   
 @stop
 
@@ -631,9 +615,9 @@ style="width: 366px;">
 		maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
 		timepicker: true
 	});
+});
 
-  function request(id,mentor,organization_id=null,cycle_id=null) {
-    alert(organization_id);
+function request(id,mentor,organization_id=null,cycle_id=null) {
 		$('#mentorid').val(id);
 		$('#rname').html(mentor);
 		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
@@ -664,7 +648,6 @@ style="width: 366px;">
 			}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
 		});
 	}
-});
   </script>
   <script>
     function modify(type, id, stat) {

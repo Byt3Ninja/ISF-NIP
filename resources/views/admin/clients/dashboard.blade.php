@@ -456,6 +456,7 @@
                   @endphp
                   <tr>
                     <td>
+                      @if($step->stype == 1)
                       @if (Auth::user()->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
@@ -463,6 +464,9 @@
                       @endif
                       {{ $step->title }}
                       </a>
+                      @else
+                      {{ $step->title }}
+                      @endif
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span>
                     </td>
@@ -1078,6 +1082,7 @@ window.location.href = url;
 	});
 
 	function request(id,mentor,organization_id=null,cycle_id=null) {
+    
 		$('#mentorid').val(id);
 		$('#rname').html(mentor);
 		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
