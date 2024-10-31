@@ -212,45 +212,7 @@
           @endforeach
         </div>
 
-        <form method="post" action="{{ route('update_my_company') }}"
-        enctype="multipart/form-data">
-        {!! csrf_field() !!}
-          <input type="hidden" value="5" name="CompanyN">
-          <div class="row">
-
-          <div class="col-md-3 col-12 mb-3">
-            <div class="form-label-group mt-75">
-              <label class="fs-6 mb-2" for="team_num">{{ __('admin.team_num') }}</label>
-              <input type="number" class="form-control mt-2" id="team_num"
-                placeholder="{{ __('admin.team_num') }}"
-                value="{{ $client->company ? $client->company->team_num : old('team_num') }}"
-                name="team_num" autocomplete="new-team_num">
-            </div>
-          </div>
-
-          <div class="col-md-4 col-12 mb-3">
-            <div class="form-label-group mt-75">
-              <label class="fs-6 mb-2" for="working_team_summary">{{ __('admin.Working_Team_Details') }}</label>
-                <textarea class="form-control mt-2" id="working_team_summary"
-                placeholder="{{ __('admin.Working_Team_Details') }}"
-                value=""
-                name="working_team_summary" autocomplete="new-working_team_summary">{{ $client->company ? $client->company->working_team_summary : old('working_team_summary') }}</textarea>
-            </div>
-          </div>
-
-
-
-          <div class="row">
-            <div class="col-12 d-flex justify-content-end">
-              <button type="submit" class="btn btn-primary mr-1 mb-1" id="submit-button">
-                <span id="button-text">{{ __('admin.Update') }}</span>
-                <span id="button-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-              </button>
-            </div>
-          </div>
-
-          </div>
-        </form>
+        
 
         @endif
       </div>
@@ -628,6 +590,61 @@
       </div>
     </div>
   </div>
+
+
+<!-- Investors Column -->
+<div class="col-md-12 mb-3 px-10">
+  <div class="card shadow-sm" style="border-radius: 15px;">
+    <div class="p-4">
+      <h5 class="card-title">{{ __('admin.Working_Team_Details') }}</h5>
+
+      <form method="post" action="{{ route('update_my_company') }}"
+      enctype="multipart/form-data">
+      {!! csrf_field() !!}
+        <input type="hidden" value="5" name="CompanyN">
+        <div class="row">
+
+        <div class="col-md-3 col-12 mb-3">
+          <div class="form-label-group mt-75">
+            <label class="fs-6 mb-2" for="team_num">{{ __('admin.team_num') }}</label>
+            <input type="number" class="form-control mt-2" id="team_num"
+              placeholder="{{ __('admin.team_num') }}"
+              value="{{ $client->company ? $client->company->team_num : old('team_num') }}"
+              name="team_num" autocomplete="new-team_num">
+          </div>
+        </div>
+
+        <div class="col-md-4 col-12 mb-3">
+          <div class="form-label-group mt-75">
+            <label class="fs-6 mb-2" for="working_team_summary">{{ __('admin.Working_Team_Details') }}</label>
+              <textarea class="form-control mt-2" id="working_team_summary"
+              placeholder="{{ __('admin.Working_Team_Details') }}"
+              value=""
+              name="working_team_summary" autocomplete="new-working_team_summary">{{ $client->company ? $client->company->working_team_summary : old('working_team_summary') }}</textarea>
+          </div>
+        </div>
+
+
+
+        <div class="row">
+          <div class="col-12 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary mr-1 mb-1" id="submit-button">
+              <span id="button-text">{{ __('admin.Update') }}</span>
+              <span id="button-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+
+        </div>
+      </form>
+      
+
+     
+    </div>
+  </div>
+</div>
+
+
 </div>
 
 <script>

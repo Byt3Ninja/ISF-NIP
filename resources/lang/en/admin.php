@@ -824,5 +824,6 @@ return [
 	'Friends' => ' Friends ',
 	'NoHaveCompany' => ' Company Not Active ',
 	'No Quizzes added yet' => 'No Quizzes added yet',
+	'N/A' => 'Not Avilable',
 	
 ];

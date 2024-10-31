@@ -47,30 +47,32 @@
         <div class="col-lg-8">
           <div class="card" style="border-radius: 1rem;">
             <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center flex-wrap mb-6 gap-2">
-                <div class="me-1">
-                  <h5 class="mb-0">{{$ccontent->title}}</h5>
-                </div>
-                <div class="d-flex align-items-center">
-                  <span class="badge bg-label-danger">Course type</span>
-                  <button 
-                    id="shareButton"
-                    class="btn btn-transparent btn-icon btn-sm shadow-none ms-2"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    title="Share"
-                  >
-                    <i class="ti ti-share ti-lg"></i>
-                  </button>
-                  <button 
-                    id="copyUrlButton"
-                    class="btn btn-transparent btn-icon btn-sm shadow-none"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    title="Copy URL"
-                  >
-                    <i id="copy-icon" class="ti ti-bookmarks ti-lg"></i>
-                  </button>
+              <div class="d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center flex-wrap mb-6 gap-2">
+                  <div class="me-1">
+                    <h5 class="mb-0">{{$ccontent->title}}</h5>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <span class="badge bg-label-danger">Course type</span>
+                    <button 
+                      id="shareButton"
+                      class="btn btn-transparent btn-icon btn-sm shadow-none ms-2"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="Share"
+                    >
+                      <i class="ti ti-share ti-lg"></i>
+                    </button>
+                    <button 
+                      id="copyUrlButton"
+                      class="btn btn-transparent btn-icon btn-sm shadow-none"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="Copy URL"
+                    >
+                      <i id="copy-icon" class="ti ti-bookmarks ti-lg"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div class="card academy-content shadow-none border">
@@ -92,9 +94,17 @@
                         <img src="/icons/account.svg" alt="Avatar" class="rounded-circle" />
                       </div>
                     </div>
-                    <div class="d-flex flex-column">
+                    <div class="d-flex flex-column mb-6">
                       <h6 class="mb-1">Devonne Wallbridge</h6>
                       <small>Web Developer, Designer, and Teacher</small>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-end w-100 px-10">
+                    <div class="w-px-100">
+                      <a href="/dashboard/quizzes/my" class="btn btn-primary">
+                        <i class="ti ti-pointer-question me-2"></i>
+                        {{ $l == 'en' ? 'Quizzes' : 'الاختبارات' }}
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -150,7 +160,9 @@
                     @endif
                   </div>
                     <span class="d-flex flex-column">
-                      <span class="text-body fw-normal text-muted tex-sm">Step {{ $key + 1 }}</span>
+                      @if ($key != 0)
+                        <span class="text-body fw-normal text-muted tex-sm">Step {{ $key }}</span>
+                      @endif
                       <span class="mb-0 fs-6 fw-bold">{{ $content->title }}</span>
                     </span>
                   </a>
