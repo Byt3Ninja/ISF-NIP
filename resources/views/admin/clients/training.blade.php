@@ -164,7 +164,7 @@
                 </div>
               </div>
             @endforeach
-            @if (!$ccontent->done())
+            @if ($ccontent->done())
               <div 
                 class="card bg-white shadow-sm mb-3"
                 style="border-radius: 1rem;"
