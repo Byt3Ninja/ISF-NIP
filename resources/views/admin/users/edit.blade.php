@@ -349,13 +349,11 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-            <span class="d-none d-sm-block">{{__('messages.Close')}}</span>
+            {{__('messages.Close')}}
           </button>
           <button type="submit" class="btn btn-primary ml-1">
-            <span class="d-none d-sm-block">
-              <i class="ti ti-send me-2"></i></i>
-              {{__('messages.Send')}}
-            </span>
+            <i class="ti ti-send me-2"></i>
+            {{__('messages.Send')}}
           </button>
         </div>
       </form>
