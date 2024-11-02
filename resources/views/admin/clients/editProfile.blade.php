@@ -104,7 +104,7 @@
                       id="uploadedAvatar" 
                       class="d-block w-px-100 h-px-100" 
                       alt="user-avatar"
-                      src="/images/user-placeholder.jpeg"
+                      src="{{ $client->image_url ? $client->image_url : '/images/user-placeholder.jpeg' }}"
                       style="border-radius: 10px;"
                       onerror="this.src='/images/user-placeholder.jpeg'" 
                     />
