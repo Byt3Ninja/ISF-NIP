@@ -825,5 +825,6 @@ return [
 	'NoHaveCompany' => ' Company Not Active ',
 	'No Quizzes added yet' => 'No Quizzes added yet',
 	'N/A' => 'Not Avilable',
+	'Meeting_will_start_at_time' => 'Meeting will start at time',
 	
 ];
