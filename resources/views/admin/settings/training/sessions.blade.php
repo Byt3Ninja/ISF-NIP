@@ -58,7 +58,7 @@
                           <i class="ti ti-plus"></i> <span
                             class="mx-1">{{ __('cycles.Add new training') }}</span>
                         </button>
-                        <a class="btn btn-label-success" href="/dashboard/cycles/{{ $ccycle }}">
+                        <a class="btn btn-label-success" href="/dashboard/cycles/{{ $step->id == $id ? $ccycle : '' }}">
                           <i class="ti ti-pencil"></i> <span class="mx-1">{{ __('cycles.Cycle') }}</span>
                         </a>
                       </div>
