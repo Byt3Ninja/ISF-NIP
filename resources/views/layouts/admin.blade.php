@@ -51,7 +51,7 @@
   <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
   <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
   <script src="/vuexy/assets/vendor/js/menu.js"></script>
-
+  <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <!-- endbuild -->
 
   <!-- Vendors JS -->

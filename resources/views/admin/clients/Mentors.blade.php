@@ -321,9 +321,10 @@ style="width: 366px;">
                         {{ __('dashboard.Request') }} <i class="ti ti-square-plus mx-3"></i>
                       </button>
                     @else
+                    
                       <div class="btn btn-sm btn-success rounded-pill custom-shadow">{{ __('cycles.nosubscripe') }}</div>
                     @endif
-                    @if(!auth()->user()->hasRole('Registered'))
+                    @if(!auth()->user()->hasRole('Registered') && !auth()->user()->hasRole('Mentor') && !auth()->user()->hasRole('Admin'))
                     <button type="button" class="btn btn-sm btn-success rounded-pill custom-shadow"
                     data-bs-toggle="modal" data-bs-target="#SendRequest" title="Add new request"
                     onclick="request({{ $mentor->id }},

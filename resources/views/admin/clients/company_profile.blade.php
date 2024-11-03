@@ -77,7 +77,7 @@
                 <div class="border d-flex radius-15 d-flex flex-shrink-0"
                   style="width: 90px; height: 90px;">
                   <img src="{{ $company->logo_url }}" class="img-fluid m-auto"
-                    alt="logo" />
+                    alt="logo" style="width: 90px; height: 90px; border-radius: 15px;" />
                 </div>
                 <div class="d-flex flex-column pt-3">
                   <div class="d-flex align-items-center">
