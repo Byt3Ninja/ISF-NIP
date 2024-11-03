@@ -63,10 +63,10 @@
             <!-- right bottom-icon -->
             
           </div>
-          <button 
+          <div 
             class="btn btn-outline-primary rounded-pill btn-sm lfm" data-input="file1" data-preview="holder" >
             {{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
-          </button>
+          </div>
         </div>
         <!-- / Upload Company Logo -->
 
