@@ -335,11 +335,13 @@
     $(".flatpickr").flatpickr({
       inline: false,
       enableTime: true,
-      dateFormat: "d-m-Y h:i K",
+      dateFormat: "d-m-Y H:i",
       minDate: "today",
       mode: "multiple",
       locale: "ar",
-      wrap: true
+      wrap: true,
+      time_24hr: true
+
     });
 
     function add(id, organization_id, cycle_id) {
