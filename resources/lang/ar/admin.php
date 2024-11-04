@@ -826,6 +826,8 @@ return [
 	'No Quizzes added yet' => ' لا يوجد اختبارات حالياً ',
 	'NoHaveCompany' => ' لا يوجد شركة مفعلة ',
 	'N/A' => ' لا يوجد ',
+	'Meeting_will_start_at_time' => 'الاجتماع سوف يبداء فى المعاد',
+	'Meeting_added_successfully' => ' تم اضافة الاجتماع ',
 
 
 ];

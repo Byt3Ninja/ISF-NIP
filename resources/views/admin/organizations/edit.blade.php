@@ -82,17 +82,43 @@
 												<fieldset class="form-group">
 													<label for="basicInput">{{ __('admin.Image')}}</label>
 													<div class="input-group">
-														<div class="input-group-prepend">
-                                                            <span class="input-group-text"
-																  id="inputGroupFileAddon01">{{ __('admin.Upload')}}</span>
+															<!-- Upload Company Logo -->
+														<div class="d-flex flex-column gap-1 justify-content-between align-items-center picker-container">
+															<span class="text-center text-black fw-medium">{{ __('admin.Image')}}</span>
+															<div class="position-relative">
+															@if (isset($organization->image_url))
+															<div id="holder">
+																<img 
+																id="company-logo holder" 
+																src="{{$organization->image_url }}"
+																alt="Company logo"
+																class="mb-2 radius-15"
+																style="height: 100px;"
+																
+																/>
+															</div>
+															@else
+															<div id="holder">
+																<img 
+																id="company-logo" 
+																src="/images/background/logo.png"
+																alt="Default logo"
+																style="width: 90px; height: 90px; border-radius: 10px; cursor: pointer;"
+																class="mb-2"
+																/>
+															</div>
+															@endif
+																<input type="text" class="form-control d-none" id="file1"
+																name="img_url"  />
+															<!-- right bottom-icon -->
+															
+															</div>
+															<div 
+															class="btn btn-outline-primary rounded-pill btn-sm lfm" data-input="file1" data-preview="holder" >
+															{{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
+															</div>
 														</div>
-														<div class="custom-file">
-															<input type="file" class="custom-file-input" id="img_url"
-																   name="img_url" accept="image/*" style="direction: ltr;"
-																   aria-describedby="inputGroupFileAddon00">
-															<label class="custom-file-label"
-																   for="inputGroupFile00">{{ __('admin.SelectFile')}}</label>
-														</div>
+														<!-- / Upload Company Logo -->
 													</div>
 												</fieldset>
 
@@ -176,7 +202,7 @@
 											</div>
 										</div>
 
-										<div class="row">
+										{{-- <div class="row">
 											<div class="col-md-3">
 												<div class="card">
 													<div class="card-content">
@@ -186,7 +212,7 @@
 													</div>
 												</div>
 											</div>
-										</div>
+										</div> --}}
 										<div class="row">
 											<div class="col-12 d-flex justify-content-end">
 												<button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
@@ -207,4 +233,7 @@
 @stop
 @section('pagescripts')
 <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+<script>
+    $('.lfm').filemanager('file');
+  </script>
 @stop

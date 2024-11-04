@@ -77,7 +77,7 @@
                 <div class="border d-flex radius-15 d-flex flex-shrink-0"
                   style="width: 90px; height: 90px;">
                   <img src="{{ $company->logo_url }}" class="img-fluid m-auto"
-                    alt="logo" />
+                    alt="logo" style="width: 90px; height: 90px; border-radius: 15px;" />
                 </div>
                 <div class="d-flex flex-column pt-3">
                   <div class="d-flex align-items-center">
@@ -868,7 +868,7 @@
       <section class="mt-6 px-4">
         <div class="row">
           @if ($company->cycle)
-            @role('Admin')
+            @hasanyrole('Admin|organizationManager')
               <div class="card shadow-sm" style="border-radius: 15px;">
                 <div class="p-3">
                   <h5 class="mb-4">{{ __('admin.Cycle informations') }}</h5>

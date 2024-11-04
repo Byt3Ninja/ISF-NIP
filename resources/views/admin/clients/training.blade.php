@@ -26,7 +26,6 @@
 
     .circle-bg {
       stroke: #e6e6e6;
-      /* Background circle color */
     }
 
     .circle {
@@ -43,14 +42,14 @@
     <!-- Content -->
 
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="inner-container">
+      <div class="row">
         <div class="col-lg-8">
           <div class="card" style="border-radius: 1rem;">
             <div class="card-body">
               <div class="d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-center flex-wrap mb-6 gap-2">
                   <div class="me-1">
-                    <h5 class="mb-0">{{$ccontent->title}}</h5>
+                    <h5 class="mb-0">{{ $ccontent->title }}</h5>
                   </div>
                   <div class="d-flex align-items-center">
                     <span class="badge bg-label-danger">Course type</span>
@@ -82,29 +81,25 @@
                   </div>
                 </div>
                 <div class="card-body pt-4">
-                  <h5>{{ $l == 'en' ? 'Description' : 'الوصف' }}</h5>
-                  <p class="mb-6">
-                    {{$ccontent->desc}}
-                  </p>
-                  <hr class="my-6" />
-                  <h5>{{ $l == 'en' ? 'Instructor' : 'المدرب' }}</h5>
-                  <div class="d-flex justify-content-start align-items-center user-name">
-                    <div class="avatar-wrapper">
-                      <div class="avatar me-4">
-                        <img src="/icons/account.svg" alt="Avatar" class="rounded-circle" />
+                  @if ($ccontent->desc)
+                    <h5>{{ $l == 'en' ? 'Description' : 'الوصف' }}</h5>
+                    <p class="mb-6">
+                      {{ $ccontent->desc }}
+                    </p>
+                  @endif
+                  <div id="instructorsContainer">
+                    <hr class="my-6" />
+                    <h5>{{ $l == 'en' ? 'Instructor' : 'المدرب' }}</h5>
+                    <div class="d-flex justify-content-start align-items-center user-name">
+                      <div class="avatar-wrapper">
+                        <div class="avatar me-4">
+                          <img src="/icons/account.svg" alt="Avatar" class="rounded-circle" />
+                        </div>
                       </div>
-                    </div>
-                    <div class="d-flex flex-column mb-6">
-                      <h6 class="mb-1">Devonne Wallbridge</h6>
-                      <small>Web Developer, Designer, and Teacher</small>
-                    </div>
-                  </div>
-                  <div class="d-flex justify-content-end w-100 px-10">
-                    <div class="w-px-100">
-                      <a href="/dashboard/quizzes/my" class="btn btn-primary">
-                        <i class="ti ti-pointer-question me-2"></i>
-                        {{ $l == 'en' ? 'Quizzes' : 'الاختبارات' }}
-                      </a>
+                      <div class="d-flex flex-column mb-6">
+                        <h6 class="mb-1">Devonne Wallbridge</h6>
+                        <small>Web Developer, Designer, and Teacher</small>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -124,41 +119,41 @@
                     class="d-flex align-items-center gap-4 text-black"
                     href="/dashboard/training/my/{{$content->training_id}}?c={{$content->id}}"
                   >
-                  <div class="w-15">
-                    @if ($content->done())
-                      <span 
-                        class="w-px-30 h-px-30 bg-primary rounded-circle text-white"
-                        style="display: grid; place-items: center;"
-                      >
-                        <i class='ti ti-check ti-28px;'></i>
-                      </span>
-                    @else
-                      <!-- Circular Progress -->
-                      <div
-                        class="progress-circle p-3 position-relative d-flex align-items-center justify-content-center"
-                        style="width: 40px; height: 40px;">
-                        <span
-                          class="position-absolute text-black fw-bold"
-                          style="font-size: 13px;">30%</span>
-                        <svg class="position-absolute" width="54"
-                          height="54" viewBox="0 0 36 36">
-                          <path class="circle-bg"
-                            d="M18 2.0845
-                            a 15.9155 15.9155 0 0 1 0 31.831
-                            a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
-                            stroke="#e6e6e6" stroke-width="2.5" />
-                          <path class="circle"
-                            d="M18 2.0845
-                            a 15.9155 15.9155 0 0 1 0 31.831
-                            a 15.9155 15.9155 0 0 1 0 -31.831"
-                            fill="none" stroke="#007bff"
-                            stroke-width="2.5"
-                            stroke-dasharray="30, 100" />
-                        </svg>
-                      </div>
-                      <!-- Circular Progress -->
-                    @endif
-                  </div>
+                    <div class="w-15">
+                      @if ($content->done())
+                        <span 
+                          class="w-px-30 h-px-30 bg-primary rounded-circle text-white"
+                          style="display: grid; place-items: center;"
+                        >
+                          <i class='ti ti-check ti-28px;'></i>
+                        </span>
+                      @else
+                        <!-- Circular Progress -->
+                        <div
+                          class="progress-circle p-3 position-relative d-flex align-items-center justify-content-center"
+                          style="width: 40px; height: 40px;">
+                          <span
+                            class="position-absolute text-black fw-bold"
+                            style="font-size: 13px;">30%</span>
+                          <svg class="position-absolute" width="54"
+                            height="54" viewBox="0 0 36 36">
+                            <path class="circle-bg"
+                              d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+                              stroke="#e6e6e6" stroke-width="2.5" />
+                            <path class="circle"
+                              d="M18 2.0845
+                              a 15.9155 15.9155 0 0 1 0 31.831
+                              a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none" stroke="#007bff"
+                              stroke-width="2.5"
+                              stroke-dasharray="30, 100" />
+                          </svg>
+                        </div>
+                        <!-- Circular Progress -->
+                      @endif
+                    </div>
                     <span class="d-flex flex-column">
                       @if ($key != 0)
                         <span class="text-body fw-normal text-muted tex-sm">Step {{ $key }}</span>
@@ -169,6 +164,24 @@
                 </div>
               </div>
             @endforeach
+            @if ($ccontent->done())
+              <div 
+                class="card bg-white shadow-sm mb-3"
+                style="border-radius: 1rem;"
+              >
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center w-100">
+                    {{ $l == 'en' ? 'Quizzes' : 'الاختبارات' }}
+                    <div class="w-px-100">
+                      <a href="/dashboard/quizzes/my" class="btn btn-primary">
+                        <i class="ti ti-pointer-question me-2"></i>
+                        {{ $l == 'en' ? 'View' : 'عرض' }}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            @endif
           </div>
         </div>
       </div>
@@ -182,10 +195,34 @@
 
 @section('pagescripts')
   <script>
+    console.log(@json($ccontent))
+  </script>
+  <script>
+    const url = window.location.href;
+    const urlArr = url.split('/');
+    
+    if (urlArr && urlArr.length > 0) {
+      const latestItem = urlArr[urlArr.length - 1];
+
+      const trainingContent = latestItem.includes('c');
+
+      const instructorsContainer = document.getElementById('instructorsContainer');
+
+      if (trainingContent) {
+        instructorsContainer.style.display = 'none';
+      }
+    }
+  </script>
+
+  <script>
+    const contentTitle = @json($ccontent->title);
+    const contentDesc = @json($ccontent->desc);
+
     const copyUrlButton = document.getElementById('copyUrlButton');
     const shareButton = document.getElementById('shareButton');
     const copyIcon = document.getElementById('copy-icon');
 
+    // Copy Training URL
     copyUrlButton.addEventListener('click', () => {
       if (copyIcon.classList.contains('text-primary')) {
         navigator.clipboard.writeText('');
@@ -196,17 +233,20 @@
       }
     });
 
-    shareButton.addEventListener('click', () => {
-      if (navigator.share) {
-        navigator.share({
-          title: 'Web Development',
-          text: 'Learn Web Development',
-          url: window.location.href
-        })
-          .then(() => console.log('Successful share'))
-          .catch((error) => console.log('Error sharing', error));
-      }
-    });
+    // Share Training
+    if (contentTitle) {
+      shareButton.addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({
+            title: contentTitle,
+            text: contentDesc ? contentDesc : '',
+            url: window.location.href
+          })
+            .then(() => console.log('Successful share'))
+            .catch((error) => console.log('Error sharing', error));
+        }
+      });
+    }
   </script>
 @stop
 
