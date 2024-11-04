@@ -114,21 +114,24 @@ class MentorsController extends Controller
 
         if ($request->userid) {
             $dates = explode(',',$request->date);
+            
             foreach ($dates as $key){
-                $date = ltrim($key);
+                $date1 = ltrim($key);
                 
                 
                 $topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
                 
-                $data = ['topic'=>$topic, "start_time"=>$date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
+                $data = ['topic'=>$topic, "start_time"=>$date1, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
                 
                 $onlineMeeting = $this->meetingService->createMeeting($data);
                 
                 if (!$onlineMeeting['success']) {return back()->with(['message2' => "meeting_error"]);}
-                $date = substr($date, 0, -2);
-
+                $date = substr($date1, 0, -2);
+                $dateAM = substr($date1, -2);
+                
 
                 $dateFormat = new \DateTime($date);
+                
                 MentorshipRequest::create([
                     'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
                     'admin_id' => Auth::id(), 'start_url' => $onlineMeeting['data']['start_url'], 'join_url' => $onlineMeeting['data']['join_url'],
@@ -148,7 +151,7 @@ class MentorsController extends Controller
                 $user->id = $mentor->id;
 
                 $MSG = new TemplateEmail;
-                $MSG->Message=["New Mentorship session - VI portal","Dear ".$mentor_name.",","Kindly note you have a new mentorship session with '".$startup_owner_name."', Session will start:".$date.
+                $MSG->Message=["New Mentorship session - VI portal","Dear ".$mentor_name.",","Kindly note you have a new mentorship session with '".$startup_owner_name."', Session will start:".$date." ".$dateAM.
                     ", Check your account to join the session ","/dashboard"];
                 $user->notify($MSG);
 
@@ -157,7 +160,7 @@ class MentorsController extends Controller
                 $user->email = $startup_owner->email;
                 $user->id = $startup_owner->id;
                 $MSG = new TemplateEmail;
-                $MSG->Message=["New Mentorship session - VI portal","Dear ".$startup_owner_name.",","Kindly note you have a new mentorship session with '".$mentor_name."', Session will start:".$date.
+                $MSG->Message=["New Mentorship session - VI portal","Dear ".$startup_owner_name.",","Kindly note you have a new mentorship session with '".$mentor_name."', Session will start:".$date." ".$dateAM.
                     ", Check your account to join the session ","/dashboard"];
                 $user->notify($MSG);
                 /// End of mail send
