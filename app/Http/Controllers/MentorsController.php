@@ -135,7 +135,7 @@ class MentorsController extends Controller
                 MentorshipRequest::create([
                     'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
                     'admin_id' => Auth::id(), 'start_url' => $onlineMeeting['data']['start_url'], 'join_url' => $onlineMeeting['data']['join_url'],
-                    'zoom_date' => $dateFormat->format('Y-m-d H:i')." ".$dateAM, 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
+                    'zoom_date' => $dateFormat->format('Y-m-d H:i'), 'period' => $request->period,'organization_id'=>$request->organization_id,'cycle_id'=>$request->cycle_id,
                 ]);
                 /// notify user via Mail
 
