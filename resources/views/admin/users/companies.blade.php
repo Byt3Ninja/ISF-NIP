@@ -161,7 +161,7 @@
                   </div>
                   <div 
                     class="company-image-container mt-2 border custom-shadow radius-15"
-                    style="background-image: url('/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}')"
+                    style="background-image: url('{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}')"
                   >
                   </div>
                   <div class="w-100 d-flex flex-column justify-content-between" style="height: 80px;">
@@ -226,14 +226,69 @@
                             <i class="fa-brands fa-youtube fs-6 text-danger"></i>
                           </a>
                         @endif
+
+                        @php
+                  // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+                  //  $Sustainables = explode(',', $company->Sustainable_development);
+                  $Sustainables = json_decode(
+                      $company->Sustainable_development,
+                  );
+                @endphp
+                @if (!empty($Sustainables) && count($Sustainables) > 0)
+                  
+                    <a class="btn btn-primary" href="#"  data-bs-toggle="modal" data-bs-target="#EditLabor"><i class="ti ti-user"></i></a>
+<!-- Edit Customer Modal -->
+<div class="modal fade" id="EditLabor" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+      <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <div class="text-center mb-6">
+                  <h4 class="mb-2">{{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}</h4>
+                  <div class="row w-75">
+                    @foreach ($Sustainables as $Sustainable)
+                      @php
+                        $icon = App\SustainableIcon::where(
+                            'title',
+                            $Sustainable,
+                        )->first();
+                      @endphp
+                      <div class="col-md-2 mb-2">
+                        <div class="border light-shadow radius-15" style="display: grid; place-items: center;">
+                          @if ($icon->icon_ar)
+                            <img
+                              src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}"
+                              alt="icon"
+                              style="width: 100px; height: 100px;">
+                          @endif
+                        </div>
+                      </div>
+                    @endforeach
+                  </div>
+              </div>
+
+          </div>
+      </div>
+  </div>
+</div>
+<!--/ Edit JO Modal -->
+                  
+                  @endif
+                        
                       </div>
                     </div>
                   </div>
                   <!-- Founders -->
+                  @php
+                    $fonders = App\Team_Member::where('TeamMember', 'Founder')
+                    ->where('Company_id', $company->id)->get(); 
+                  @endphp
+                  
                   <div class="mt-3">
-                    <span class="text-muted text-xs fw-medium">Founders</span>
+                    <span class="text-muted text-xs fw-medium">{{ __('admin.Founders') }}</span>
                     <div class="d-flex align-items-center mt-1 gap-2">
-                      @foreach([1, 2, 3] as $founder) 
+                      @if(!empty($fonders))
+                      @foreach($fonders as $founder)
                         <div class="col-md-4">
                           <div 
                             class="px-3 border redius-15 text-center radius-15 flex flex-column g-1" 
@@ -244,43 +299,54 @@
                               <span class="text-xs line-clamp-1">
                                 {{ $company->founder }}
                               </span>
-                              <span class="text-muted text-xs">roles</span>
+                              <span class="text-muted text-xs">{{ $founder->Name }}</span>
                             </div>
                           </div>
                         </div>
                         <!-- Company Card -->
                       @endforeach
+                      @else
+                      <div class="col-md-4">
+                        <div 
+                          class="px-3 border redius-15 text-center radius-15 flex flex-column g-1" 
+                          style="height: 70px; width: 90px;"
+                        >
+                          <i class="ti ti-user fs-5 mt-1"></i> <br />
+                          <div>
+                            <span class="text-xs line-clamp-1">
+                              {{ __('admin.N/A') }}
+                            </span>
+                            <span class="text-muted text-xs">{{ __('admin.N/A') }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Company Card -->
+                      @endif
                     </div>
                   </div>
+                  
                   <!-- / Founders -->
                   <div class="mt-2 border p-2 radius-15">
-                    <span class="text-muted text-xs fw-medium">Industry</span>
+                    <span class="text-muted text-xs fw-medium">{{ __('admin.Sector') }}</span>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <div class="bg-label-secondary px-1 rounded">
-                        <span class="text-xxs text-primary fw-bold">Fintech</span>
+                        <span class="text-xxs text-primary fw-bold">{{ $company->sector ? __('admin.' . $company->sector) : __('admin.N/A') }}</span>
                       </div>
-                      <div class="bg-label-secondary px-1 rounded">
-                        <span class="text-xxs text-primary fw-bold">Healthcare</span>
-                      </div>
-                      <div class="bg-label-secondary px-1 rounded">
-                        <span class="text-xxs text-primary fw-bold">All</span>
-                      </div>
+                      
+                      
                     </div>
                   </div>
                   <div class="mt-2 border p-2 radius-15">
-                    <span class="text-muted text-xs">Funding stage</span>
+                    <span class="text-muted text-xs">{{ __('admin.Stage') }}</span>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <div class="bg-label-warning px-1 rounded">
-                        <span class="text-xxs text-warning fw-bold">Fintech</span>
+                        <span class="text-xxs text-warning fw-bold">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
                       </div>
-                      <div class="bg-label-warning px-1 rounded">
-                        <span class="text-xxs text-warning fw-bold">Healthcare</span>
-                      </div>
-                      <div class="bg-label-warning px-1 rounded">
-                        <span class="text-xxs text-warning fw-bold">All</span>
-                      </div>
+                      
                     </div>
                   </div>
+                  
+
                   <div class="mt-2 d-flex align-items-center justify-content-center gap-2">
                     <i class="ti ti-map-pin text-danger"></i>
                     <span class="text-muted text-xs">{{ optional($company->state)->{'name_'.$l} }}</span>

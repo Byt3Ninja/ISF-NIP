@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Hash;
 use App\User;
-
+use Illuminate\Support\Facades\Auth;
 use DB;
 use Log;
 use Exception;
 use Session;
-
+use App\Team_member;
 use Illuminate\Support\Facades\Log as FacadesLog;
 
 class UserController extends Controller
@@ -270,14 +270,28 @@ class UserController extends Controller
     }
 
     public function companies () {
-        $this->preProcessingCheck('view_user');
+        // $this->preProcessingCheck('view_user');
+
+        if (!Auth::user()->hasRole('Registered')){
+
         $organization_id=auth()->user()->organization_id;
-        $companies = Company::when(!is_null($organization_id),function ($query) use($organization_id){
-            return $query->whereHas('cycledata',function ($q) use ($organization_id){
-                $q->where('organization_id',$organization_id);
-            });
-        })->get();
-        return view('admin/users/companies')->with('companies',$companies);
+        $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->get();
+
+
+
+    }else{
+        $organization_id=auth()->user()->organization_id;
+        $cycle_id=auth()->user()->company->cycle;
+        $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->where('cycle', $cycle_id)->get();
+
+
+
+    }
+
+
+
+
+        return view('admin/users/companies', compact('companies'));
     }
 
     public function showImportForm()
