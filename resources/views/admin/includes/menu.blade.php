@@ -124,6 +124,14 @@
           <div>{{ __('admin.Services') }}</div>
         </a>
       </li>
+      @endif
+    @if (Auth::user()->hasanyRole('Registered'))
+    <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="{{ route('users.companies') }}">
+        <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
+        <span class="menu-item">{{ __('admin.Companies') }}</span>
+      </a>
+    </li>
     @endif
     @if (Auth::user()->hasanyRole('Mentor|Registered|Admin'))
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
