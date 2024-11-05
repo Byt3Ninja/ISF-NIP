@@ -280,7 +280,7 @@
                   </div>
                   <!-- Founders -->
                   @php
-                    $founders = App\Team_Member::where([
+                    $founders = App\Team_member::where([
                         ['TeamMember', 'Founder'],
                         ['Company_id', $company->id]
                     ])->get();

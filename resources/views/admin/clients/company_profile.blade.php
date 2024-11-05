@@ -900,10 +900,8 @@
                                 0,
                             );
                             $judges = $company->judges($company->id, $form->id);
-                             
                             $judges = \App\User::whereIn('id', $judges)->get();
                           @endphp
-                          
                           <span
                             class="badge badge-light-{{ $weight < 25 ? 'danger' : ($weight < 50 ? 'warning' : 'success') }}">
                             {{ $weight }} %</span>
