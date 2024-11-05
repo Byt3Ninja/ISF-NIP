@@ -186,17 +186,17 @@
                         style="width: fit-content; 
                         {{ $l == 'ar' ? 'margin-left: 20px;' : 'margin-right: 20px' }}"
                       >
-                        <div 
-                          class="border border-light align-items-center
-                          justify-content-center d-none d-md-flex h-100"
-                          style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
-                        >
-                          <img 
+                      <div 
+                        class="border border-light align-items-center justify-content-center d-none d-md-flex h-100"
+                        style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
+                      >
+                        <img 
                             src="{{$cycle->organization->image_url}}"
                             alt="Logo"
-                            style="width: 100%; height: 100%; object-fit: contain;"
-                          />
-                        </div>
+                            class="img-fluid"
+                            style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                        />
+                      </div>
                       </div>
                       <div class="d-flex flex-column justify-content-between" style="flex: 1;">
                         <!-- Program Title -->
@@ -516,14 +516,12 @@
             <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Cycle data') }}
             </h4>
 
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <i class="bx bx-x ti-24px"></i>
-            </button>
+            
           </div>
           <div class="modal-body">
             @if (is_null(auth()->user()->organization_id))
-              <label>{{ __('builder.Choose Organization') }}: </label>
-              <div class="form-group ">
+            <div class="form-group mb-3">
+                <label class="form-label fs-6 mb-1">{{ __('builder.Choose Organization') }}: </label>
                 <select class="select form-control" id="organization_id" name="organization_id" required>
                   @foreach (\App\Organization::all() as $org)
                     <option value="{{ $org->id }}">{{ $org->name_ar }}</option>
@@ -534,29 +532,29 @@
               <input type="hidden" name="organization_id" value="{{ auth()->user()->organization_id }}"
                 id="organization_id">
             @endif
-            <label>{{ __('cycles.Cycle title') }}: </label>
-            <div class="form-group">
+            <div class="form-group mb-3">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.Cycle title') }}: </label>
               <input type="hidden" name="type" id="type">
               <input type="hidden" name="cycleid" id="cycleid">
               <input id='title' name='title' type="text" placeholder="{{ __('cycles.Title') }}"
                 class="form-control" required>
             </div>
-            <label>{{ __('cycles.Valid from') }}: </label>
-            <div class="form-group">
+            <div class="form-group mb-3">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.Valid from') }}: </label>
               <input id='start' name='start' type="text" placeholder="{{ now()->format('Y-m-d') }}"
                 class="form-control date" required>
             </div>
-            <label>{{ __('cycles.Valid to') }}: </label>
-            <div class="form-group">
+            <div class="form-group mb-3">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.Valid to') }}: </label>
               <input id='end' name='end' type="text"
                 placeholder="{{ now()->addDays(15)->format('Y-m-d') }}" class="form-control date" required>
             </div>
-            <label>{{ __('cycles.Description') }}: </label>
-            <div class="form-group mb-0">
+            <div class="form-group mb-3 mb-0">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.Description') }}: </label>
               <textarea id='description' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control"></textarea>
             </div>
-            <label> </label>
-            <div class="form-group mb-0 custom-switch">
+            <div class="form-group mb-3 mb-0 custom-switch">
+              <label class="form-label fs-6 mb-1"> </label>
               <span>{{ __('settings.Private') }}</span>&nbsp;
               <input name="private" type="checkbox" class="custom-control-input" id="customSwitch3">
               <label class="custom-control-label mr-1" for="customSwitch3"></label>
@@ -564,7 +562,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
               <i class="bx bx-x d-block d-sm-none ti-24px"></i>
               <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
             </button>

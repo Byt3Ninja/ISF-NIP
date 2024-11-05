@@ -63,7 +63,7 @@
                         <i class="ti ti-pencil"></i> <span class="mx-1">{{ __('cycles.Edit') }}</span>
                       </button>
                       <button class="btn btn-label-danger" onclick="DoChange(2)">
-                        <i class="ti ti-trash"></i> <span class="mx-1">{{ __('cycles.Delete') }}</span>
+                        <i class="ti ti-trash text-danger"></i> <span class="mx-1">{{ __('cycles.Delete') }}</span>
                       </button>
                       </div>
                     </fieldset>
@@ -156,7 +156,7 @@
                                 @endphp
                                 <input type="hidden" value="{{ $panel }}" name="panel{{ $key }}">
                                 <div class="col-md-1"><button type="button" class="btn btn-warning"
-                                    onclick="openusers({{ $key }})"><i class="ti ti-edit"></i></button></div>
+                                    onclick="openusers({{ $key }})"><i class="ti ti-edit text-info"></i></button></div>
                               </div>
                             </div>
                           @endforeach

@@ -11,15 +11,10 @@
       <div class="content-overlay"></div>
       <div class="content-header row">
         @if (session()->has('msg'))
-          <div class="col-md-12">
-            <div class="alert alert-success alert-dismissible mb-2" role="alert">
-              {{ __('admin.' . session()->get('msg')) }}
-              {{ Session::forget('msg') }}
-              <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-          </div>
+          <x-alert 
+            type="success" 
+            message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}"
+          />
         @endif
       </div>
       <div class="content-body">
@@ -116,7 +111,7 @@
                             <button id='deleteAction' data-id='{{ $user->id }}'
                               data-url="{{ route('users.destroy', ['user' => $user->id]) }}" type="button"
                               class="btn btn-label-danger btn-sm">
-                              <i class="ti ti-trash"> </i>
+                              <i class="ti ti-trash text-danger"> </i>
                             </button>
                           @endcan
                         </td>

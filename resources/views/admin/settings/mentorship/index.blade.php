@@ -209,9 +209,7 @@
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Add new mentorship session') }} <span id="rname"></span>
             </h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <i class="bx bx-x"></i>
-            </button>
+            
           </div>
           <div class="modal-body">
             @csrf
@@ -259,7 +257,7 @@
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1">
-              <i class="bx bx-check d-block d-sm-none"></i>
+              
               <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
             </button>
           </div>
@@ -332,14 +330,18 @@
     //         return date;
     //     })(),
     // });
+
+
     $(".flatpickr").flatpickr({
       inline: false,
       enableTime: true,
-      dateFormat: "d-m-Y h:i a",
+      dateFormat: "d-m-Y H:i",
       minDate: "today",
       mode: "multiple",
       locale: "ar",
-      wrap: true
+      wrap: true,
+      time_24hr: true
+
     });
 
     function add(id, organization_id, cycle_id) {
@@ -351,7 +353,7 @@
         $('#addCycleID').val(cycle_id);
         $('#SendRequest').modal('show');
       } else {
-        alert("{{ 'cycles.Please select mentor first, and try again' }}!");
+        alert("{{ __('cycles.Please select mentor first, and try again') }}!");
       }
     }
 

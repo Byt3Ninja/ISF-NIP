@@ -3,10 +3,76 @@
 @section('title', __('admin.Builder'))
 @section('subTitle', __('admin.Edit form'))
 
+@section('vendorstyle')
+  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/vendors{{$l=='ar'?'-rtl':''}}.min.css">
+@stop
+
 @section('style')
   <style>
     .section {
       padding: 0 30px;
+    }
+    .section button.close {
+      display: none;
+    }
+
+    #myModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
+    }
+
+    #myModal .modal-dialog .modal-content form label {
+      margin-bottom: 0.2rem;
+    }
+    #myModal .modal-dialog .modal-content button {
+      margin: 0 0.2rem;
+    }
+    #myModal .modal-dialog .modal-content form input {
+      margin-bottom: 1rem;
+    }
+    #myModal .modal-dialog .modal-content form .modal-body .form-group:nth-child(3) {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    #myModal .modal-dialog .modal-content form .modal-body .form-group:nth-child(2) div {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+    }
+  
+    #myModal .modal-dialog .modal-content form .modal-body .form-group:nth-child(3) label {
+      margin: 0 0.2rem;
+    }
+
+    #myModal .modal-dialog .modal-content .modal-header button {
+      display: none;
+    }
+    #myModal .modal-dialog .modal-content .modal-header h5 {
+      margin-bottom: 1rem;
+    }
+    #myModal .modal-dialog .modal-content {
+      border: none;
+      box-shadow: none;
+      shadow: none;
+    }
+    #myModal .modal-dialog {
+      background-color: #FFF;
+      padding: 2rem;
+      border-radius: 0.3rem;
+      width: 90%;
+      margin: auto; /* Center horizontally */
+    }
+
+    @media (min-width: 992px) {
+      #myModal .modal-dialog {
+        max-width: 50%;
+      }
     }
 
     .bg-light {
@@ -21,6 +87,13 @@
 
     hr {
       margin: 0 0 15px;
+    }
+
+    .card-header {
+      color: #FFF;
+    }
+    .card-title {
+      color: #000;
     }
   </style>
 @stop
@@ -40,7 +113,7 @@
                 </div>
                 <hr>
                 <div class="card-body">
-                  <label class="form-label">{{ __('builder.Select from') }}:</label>
+                  <label class="form-label mb-2 fs-6">{{ __('builder.Select from') }}:</label>
                   <fieldset class="form-group d-flex align-items-center w-100">
                     <div
                       style="width: 55%; float: {{ $l == 'ar' ? 'right' : 'left' }};
@@ -146,11 +219,20 @@
 @stop
 
 @section('scripts')
+  <script> 
+    document.addEventListener('DOMContentLoaded', () => {
+      const formBuilderContainer = document.getElementById('builder-app');
+      const formBuilderButton = formBuilderContainer.querySelector('.btn-secondary');
+      const secondColChild = formBuilderContainer.querySelectorAll('.col')[1];
+      const secondColChildHeader = secondColChild.querySelector('.card-header');
+            
+      secondColChildHeader.classList.add('text-white');
+      formBuilderButton.classList.replace('btn-secondary', 'btn-primary');
+    })
+  </script>
+  
   <script>
-    document.body.classList.add("menu-collapsed");
-
     function showForm(set, id, title, organization_id) {
-
       $('#mtitle').val(title);
       if (typeof(organization_id) != "undefined") {
         $('#organization_id').val(organization_id)

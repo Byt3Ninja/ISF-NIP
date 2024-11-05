@@ -4,19 +4,23 @@
  use App\Events\WebMessage;
  use Illuminate\Http\Request;
  use Validator,Redirect,Response,File;
- use Socialite;
+
  use App\User;
  use Illuminate\Support\Str;
  use Illuminate\Support\Facades\Hash;
-
+ use Laravel\Socialite\Facades\Socialite;
  class SocialController extends Controller
  {
 
     public function redirect($provider){
+      // dd(config('services.google.client_id'), config('services.google.client_secret'), config('services.google.redirect'));
+      
         return Socialite::driver($provider)->redirect();
     }
     public function callback($provider){
         $getInfo = Socialite::driver($provider)->user();
+
+        
         $user = $this->createUser($getInfo,$provider);
       if ($user == [1]) {
       return redirect()->to('/login')->withErrors(['social'=>'error']);
@@ -54,16 +58,18 @@
 
 
     public function handleGoogleCallback(){
-
+      
         try {
             $guser = Socialite::driver('google')->user();
             $finduser = User::where('google_id', $guser->id)->first();
+            
 			if (!$finduser) {
                 $finduser = User::where('email', $guser->email)->first();
 //                if ($finduser){
 //                  return redirect()->to('/login')->withErrors(['social'=>'error']);
 //                }
-                $finduser->update(['google_id'=> $guser->id,'email_verified_at' => now()]);
+
+                // $finduser->update(['google_id'=> $guser->id,'email_verified_at' => now()]);
             }
             if($finduser){
               	auth()->login($finduser);

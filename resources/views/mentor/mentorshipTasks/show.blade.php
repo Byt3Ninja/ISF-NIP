@@ -12,9 +12,9 @@
         }
     </style>
     <!-- BEGIN: Content .users-view .table-borderless td -->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
+    <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">
                     <div class="row breadcrumbs-top">
@@ -60,13 +60,13 @@
                                                                         <div class="media-left mr-50">
                                                                             <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                         </div>
-                                                                        <div class="media align-items-center">
+                                                                        <div class="d-flex align-items-center gap-1">
                                                                             {{$task->user->name }}
                                                                         </div>
                                                                         <div class="media-left mr-50">
                                                                             <img src="{{$task->company->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                         </div>
-                                                                        <div class="media align-items-center">
+                                                                        <div class="d-flex align-items-center gap-1">
                                                                             {{$task->company->name }}
                                                                         </div>
                                                                     </div>
@@ -105,7 +105,7 @@
                                                                                 <div class="media-left mr-50">
                                                                                     <img src="{{$comment->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                                 </div>
-                                                                                <div class="media align-items-center">
+                                                                                <div class="d-flex align-items-center gap-1">
                                                                                     {{$comment->user->name }}
                                                                                     @if(!$comment->user->hasRole('Mentor'))
                                                                                         - {{ $comment->user->company->name }}

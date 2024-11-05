@@ -43,16 +43,16 @@
                   Security</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-billing.html"><i class="ti-sm ti ti-bookmark me-1_5"></i>
-                  Billing & Plans</a>
+                <button class="nav-link"><i class="ti-sm ti ti-bookmark me-1_5"></i>
+                  Billing & Plans</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-notifications.html"><i
-                    class="ti-sm ti ti-bell me-1_5"></i> Notifications</a>
+                <button class="nav-link"><i
+                    class="ti-sm ti ti-bell me-1_5"></i> Notifications</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-connections.html"><i class="ti-sm ti ti-link me-1_5"></i>
-                  Connections</a>
+                <button class="nav-link"><i class="ti-sm ti ti-link me-1_5"></i>
+                  Connections</button>
               </li>
             </ul>
           </div>
@@ -68,7 +68,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         <div class="d-flex justify-content-between align-items-center">
                           <div class="d-flex align-items-center">
-                            <i class="bx bx-error"></i>
+                            <i class="ti ti-error"></i>
                             <span>
                               {{ __('admin.' . session()->get('msg')) }}
                               {{ Session::forget('msg') }}
@@ -100,8 +100,14 @@
                 {!! csrf_field() !!}
                 <div class="card-body">
                   <div class="d-flex align-items-start align-items-sm-center gap-6">
-                    <img src="/191014/{{ $client->img_url ?? '../images/placeholder.jpg' }}" alt="user-avatar"
-                      class="d-block w-px-100 h-px-100 rounded" id="uploadedAvatar" />
+                    <img 
+                      id="uploadedAvatar" 
+                      class="d-block w-px-100 h-px-100" 
+                      alt="user-avatar"
+                      src="{{ $client->image_url ? $client->image_url : '/images/user-placeholder.jpeg' }}"
+                      style="border-radius: 10px;"
+                      onerror="this.src='/images/user-placeholder.jpeg'" 
+                    />
                     <div class="button-wrapper">
                       <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
                         <span class="d-none d-sm-block">Upload new photo</span>
@@ -273,10 +279,9 @@
                     <label for="currency" class="form-label">Currency</label>
                     <select id="currency" name="currency" class="select2 form-select">
                       <option value="">Select Currency</option>
-                      <option value="$" {{ $client->currency == '$' ? 'selected' : '' }} >USD</option>
-                      <option value="euro" {{ $client->currency == 'euro' ? 'selected' : '' }} >Euro</option>
-                      <option value="pound" {{ $client->currency == 'pound' ? 'selected' : '' }} >Pound</option>
-                      <option value="bitcoin" {{ $client->currency == 'bitcoin' ? 'selected' : '' }} >Bitcoin</option>
+                      @foreach ($Currencies as $Currency)
+                            <option value="{{ $Currency->currency_code }}" {{ $client->currency && $client->currency == $Currency->currency_code ? 'selected' : '' }}> {{ $Currency->currency_name }} </option>
+                            @endforeach
                     </select>
                   </div>
 

@@ -77,7 +77,7 @@
 
                             <a id="DelMe" onclick="delme({{ $sent->id }})" href="javascript:void(0);"
                               class="btn btn-icon btn-label-danger rounded-circle">
-                              <i class="ti ti-trash"></i>
+                              <i class="ti ti-trash text-danger"></i>
                             </a>
                           </div>
                         </div>

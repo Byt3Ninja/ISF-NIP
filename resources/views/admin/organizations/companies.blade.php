@@ -4,9 +4,9 @@
 @stop
 @section('content')
 <!-- BEGIN: Content-->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
+    <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">
                     <div class="row breadcrumbs-top">
@@ -32,7 +32,7 @@
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                             <div class="d-flex align-items-center">
-                                                <i class="bx bx-like"></i>
+                                                <i class="ti ti-check"></i>
                                                 <span>
                                                     {{ __('admin.'.session()->get('message')) }}
                                                 </span>
@@ -45,7 +45,7 @@
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                             <div class="d-flex align-items-center">
-                                                <i class="bx bx-error"></i>
+                                                <i class="ti ti-error"></i>
                                                 <span>
                                                     {{ __('admin.'.session()->get('message2')) }}
                                                 </span>
@@ -84,12 +84,12 @@
                                         {{$key+1}}
                                     </td>
                                     <td>
-                                        <div class="media align-items-center">
+                                        <div class="d-flex align-items-center gap-1">
                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
                                                 <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                             </a>
                                             <a href="/dashboard/companyProfile/{{$company->id}}">
-                                                <div class="media align-items-center">
+                                                <div class="d-flex align-items-center gap-1">
                                                     {{$company->{'name_'.$l} }}
                                                 </div>
                                             </a>

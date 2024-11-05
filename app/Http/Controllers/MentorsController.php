@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TemplateEmail;
+use Carbon\Carbon;
+
 
 class MentorsController extends Controller
 {
@@ -24,7 +26,7 @@ class MentorsController extends Controller
     protected $meetingService;
     public function __construct()
     {
-        // $this->meetingService =  OnlineMeetingFactory::create();
+         $this->meetingService =  OnlineMeetingFactory::create();
     }
   
 
@@ -114,15 +116,27 @@ class MentorsController extends Controller
 
         if ($request->userid) {
             $dates = explode(',',$request->date);
+            
             foreach ($dates as $key){
                 $date = ltrim($key);
-
+                
+                
                 $topic = "Online mentorship meeting (M" . $request->mentorid . '- U'.$request->userid . ')';
+                
                 $data = ['topic'=>$topic, "start_time"=>$date, 'duration'=>$request->period, 'host_video'=>1, 'participant_video'=>1];
+                
                 $onlineMeeting = $this->meetingService->createMeeting($data);
-                if (!$onlineMeeting['success']) {return back()->with(['message2' => "Error, can't create online meeting."]);}
+                
+                if (!$onlineMeeting['success']) {return back()->with(['message2' => "meeting_error"]);}
+                // $date = substr($date1, 0, -2);
+                // $dateAM = substr($date1, -2);
+                
+                
 
                 $dateFormat = new \DateTime($date);
+                
+                // dd($dateFormat->format('Y-m-d H:i'));
+
                 MentorshipRequest::create([
                     'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
                     'admin_id' => Auth::id(), 'start_url' => $onlineMeeting['data']['start_url'], 'join_url' => $onlineMeeting['data']['join_url'],

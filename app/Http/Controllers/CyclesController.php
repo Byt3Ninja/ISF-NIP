@@ -304,7 +304,13 @@ class CyclesController extends Controller
     function view ($c,Request $request)
     {
         $private = Cycle::where('private',$c)->first();
-        $c=$private->id;
+        
+        if($private == null){
+            $private = Cycle::where('id',$c)->first();
+            $c = $private->id;
+        }else{
+            $c = $private->id;
+        }
         
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);}
@@ -313,11 +319,11 @@ class CyclesController extends Controller
         if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);}
         //Check private
         $private = Cycle::findOrFail($c);
-        if ($private->private==null) {
+//         if ($private->private==null) {
             
-            return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
-//            abort(404);
-        }
+//             return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
+// //            abort(404);
+//         }
         
         // Check STEPS
         if (!Auth::user()->company->cycle || Auth::user()->company->cycle == $c) {

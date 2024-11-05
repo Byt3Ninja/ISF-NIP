@@ -34,7 +34,7 @@ class Organization extends Model
         if (!$image) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return "/191014/".$image;
+        return $image;
     }
     // =============> Relations <=================
 	/**

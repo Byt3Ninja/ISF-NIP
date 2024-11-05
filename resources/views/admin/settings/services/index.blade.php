@@ -19,7 +19,7 @@
               <div class="card">
                 <div class="card-content">
                   <div class="card-body card-dashboard">
-                    <div class="invoice-create-btn mb-1">
+                    <div class="invoice-create-btn mb-4">
                       <a href="{{ route('services.create') }}" class="btn btn-primary glow">
                         {{ __('cycles.Add New') }}
                         <i class="ti ti-plus mx-1"></i>
@@ -79,7 +79,7 @@
                                   <button id='deleteAction' data-id='{{ $service->id }}'
                                     data-url="{{ route('services.destroy', ['service' => $service->id]) }}" type="button"
                                     class="btn btn-label-danger">
-                                    <i class="ti ti-trash"></i>
+                                    <i class="ti ti-trash text-danger"></i>
                                   </button>
                                 @endcan
                               </td>

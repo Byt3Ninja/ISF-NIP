@@ -58,7 +58,7 @@
                           <i class="ti ti-plus"></i> <span
                             class="mx-1">{{ __('cycles.Add new training') }}</span>
                         </button>
-                        <a class="btn btn-label-success" href="/dashboard/cycles/{{ $ccycle }}">
+                        <a class="btn btn-label-success" href="/dashboard/cycles/{{ $step->id == $id ? $ccycle : '' }}">
                           <i class="ti ti-pencil"></i> <span class="mx-1">{{ __('cycles.Cycle') }}</span>
                         </a>
                       </div>
@@ -119,10 +119,10 @@
                               </td>
                               <td> <button title="Edit" onclick="editme({{ $session->id }})" type="button"
                                   class="btn btn-icon btn-label-info rounded-circle waves-effect">
-                                  <i class="ti ti-edit"></i></button>&nbsp;
+                                  <i class="ti ti-edit text-info"></i></button>&nbsp;
                                 <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
                                   class="btn btn-label-danger btn-icon rounded-circle waves-effect">
-                                  <i class="ti ti-trash"></i></button>
+                                  <i class="ti ti-trash text-danger"></i></button>
 
                               </td>
                             </tr>
@@ -236,7 +236,7 @@
                   </div>
                   <div class="modal-footer">
                       <button type="submit" class="btn btn-primary ml-1" >
-                          <i class="bx bx-check d-block d-sm-none"></i>
+                          
                           <span class="d-none d-sm-block">{{__('cycles.Submit')}}</span>
                       </button>
                     </form>
@@ -261,9 +261,7 @@
         <form method="post" action="/dashboard/training/addsession" enctype="multipart/form-data" autocomplete="off">
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Add new training session') }} </h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <i class="bx bx-x"></i>
-            </button>
+            
           </div>
           <div class="modal-body">
             @csrf
@@ -360,9 +358,7 @@
           autocomplete="off">
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Edit training session') }} </h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <i class="bx bx-x"></i>
-            </button>
+            
           </div>
           <div class="modal-body">
             @csrf
@@ -425,7 +421,7 @@
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1">
-              <i class="bx bx-check d-block d-sm-none"></i>
+              
               <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
             </button>
           </div>

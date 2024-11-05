@@ -9,6 +9,14 @@
 	<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-logistics-dashboard.css" />
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/jquery.rateyo.min.css">
+
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 @stop
 
 @section('content')
@@ -133,7 +141,7 @@
               <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <div class="d-flex align-items-center">
-                  <i class="bx bx-error"></i>
+                  <i class="ti ti-error"></i>
                   <span> {{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }} </span>
                 </div>
               </div>
@@ -223,7 +231,7 @@
 					@endif
 					<div class="heading-elements">
 						<ul class="list-inline mb-0">
-							<li> <a data-action="close"> <i class="bx bx-x"></i> </a> </li>
+							<li> <a data-action="close">  </a> </li>
 						</ul>
 					</div>
 				</div>
@@ -273,7 +281,7 @@
 									</td>
 									<td>
 										<button type="submit" class="btn btn-primary ml-1" >
-											<i class="bx bx-check d-block d-sm-none"></i>
+											
 											<span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
 										</button>	
 									</td>
@@ -327,7 +335,7 @@
 									</td>
 									<td>
 										<button type="submit" class="btn btn-primary ml-1">
-											<i class="bx bx-check d-block d-sm-none"></i>
+											
 											<span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
 										</button>
 									</td>
@@ -448,6 +456,7 @@
                   @endphp
                   <tr>
                     <td>
+                      @if($step->stype == 1)
                       @if (Auth::user()->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
@@ -455,6 +464,9 @@
                       @endif
                       {{ $step->title }}
                       </a>
+                      @else
+                      {{ $step->title }}
+                      @endif
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span>
                     </td>
@@ -653,19 +665,19 @@
 											@foreach($nextSessions as $session)
 												<tr>
 													{{-- <td>
-														<div class="media align-items-center">
+														<div class="d-flex align-items-center gap-1">
 															<a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">
 																<img src="{{$session->user->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 															</a>
 															<a href="/dashboard/companyProfile/{{$session->user->company->id}}">
-																<div class="media align-items-center">
+																<div class="d-flex align-items-center gap-1">
 																	{{$session->user->company->{'name_'.$l} }}
 																</div>
 															</a>
 														</div>
 													</td> --}}
 													<td>
-														<div class="media align-items-center">
+														<div class="d-flex align-items-center gap-1">
 															<a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
 																<img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 															</a>
@@ -699,7 +711,7 @@
 														<br>({{$session->period}}M)
 													</td>
 													<td>
-														<div class="media align-items-center">
+														<div class="d-flex align-items-center gap-1">
 															{!!  __($session->approved) ??'<span class="warning">'.__('Waiting').'</span>'  !!}
 														</div>
 													</td>
@@ -762,7 +774,7 @@
 													<td>{{$key+1}}</td>
 													<td>
                             
-														<div class="media align-items-center">
+														<div class="d-flex align-items-center gap-1">
 															<a class="media-left mr-50">
 																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
 															</a>
@@ -827,9 +839,10 @@
                       <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
                     </div>
                     <hr>
+                    
                     <div class="form-group" id="showdates">
                       <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
-                      <input class="date width-250 form-control" type="text" id="date" name="date" value="" required onkeydown="return false">
+                      <input class=" width-250 form-control" id="flatpickr-datetimeLimit" type="text"  name="date" required >
                     </div>
                     <div class="form-group">
                       <label>{{__('dashboard.Meeting duration')}}:</label>
@@ -856,7 +869,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="submit" class="btn btn-primary ml-1" >
-                      <i class="bx bx-check d-block d-sm-none"></i>
+                      
                       <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
                     </button>
                   </div>
@@ -877,7 +890,6 @@
   
           <div class="modal-header">
             <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> <i class="bx bx-x"></i> </button>
           </div>
           <div class="modal-body">
             @csrf
@@ -918,7 +930,7 @@
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1" >
-              <i class="bx bx-check d-block d-sm-none"></i>
+              
               <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
             </button>
           </div>
@@ -941,8 +953,18 @@
   {{-- <script src="/vuexy/src/js/scripts/extensions/ext-component-ratings.js"></script> --}}
 
 
+  
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+
+
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+  <script src="/vuexy/assets/js/forms-pickers.js"></script>
+ 
 @stop
 
 @section('pagescripts')
@@ -952,11 +974,24 @@
 
   <script>
     $(document).ready(function() {
+      var today = new Date().toISOString().split('T')[0]; // الحصول على تاريخ اليوم بصيغة yyyy-mm-dd
       $('#dfrom, #dto').datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
-        todayHighlight: true
+        todayHighlight: true,
       });
+
+     
+      $('.DatePicker').datepicker({
+        format: 'yyyy-m-d H:i',
+        onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+        autoclose: true,
+        todayHighlight: true,
+        startDate: today,
+        maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
+		  timepicker: true
+      });
+
     });
   </script>
 
@@ -1047,6 +1082,7 @@ window.location.href = url;
 	});
 
 	function request(id,mentor,organization_id=null,cycle_id=null) {
+    
 		$('#mentorid').val(id);
 		$('#rname').html(mentor);
 		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});

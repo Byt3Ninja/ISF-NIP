@@ -66,6 +66,12 @@ return [
             'url' => env('APP_URL') . '/images/logo',
             'visibility' => 'public',
         ],
+        'Home_upload' => [
+            'driver' => 'local',
+            'root' => public_path('images/resource'), // المسار المطلوب
+            'url' => env('APP_URL') . '/images/resource',
+            'visibility' => 'public',
+        ],
         'UsersDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads'),
@@ -91,6 +97,12 @@ return [
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
+        ],
+        'UsersLFM' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads/files'),
+            'url' => env('APP_URL').'/dashboard/uploads',
+            'visibility' => 'private',
         ],
 
     ],

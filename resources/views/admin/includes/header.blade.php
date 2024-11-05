@@ -109,7 +109,7 @@
       <!-- / Style Switcher-->
 
       <!-- Quick links  -->
-      <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown">
+      {{-- <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown">
         <a class="nav-link btn btn-text-secondary btn-icon rounded-pill btn-icon dropdown-toggle hide-arrow"
           href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
           <i class="ti ti-layout-grid-add ti-md"></i>
@@ -190,7 +190,7 @@
             </div>
           </div>
         </div>
-      </li>
+      </li> --}}
       <!-- Quick links -->
 
       <!-- Notifications -->
@@ -201,8 +201,15 @@
       <li class="nav-item navbar-dropdown dropdown-user dropdown">
         <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
           <div class="avatar avatar-online">
-            <img class="rounded-circle" src="{{ auth()->user()->image_url }}" alt />
-            {{-- <img src="/vuexy/assets/img/avatars/1.png" alt class="rounded-circle" /> --}}
+            @if (auth()->user()->image_url)
+              <img 
+                class="rounded-circle" 
+                src="{{ auth()->user()->image_url }}"
+                onerror="this.src='/icons/account.svg'"
+              />
+            @else
+              <img class="rounded-circle" src="/icons/account.svg" alt="avatar" />
+            @endif
           </div>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
@@ -211,7 +218,15 @@
               <div class="d-flex align-items-center">
                 <div class="flex-shrink-0 me-2">
                   <div class="avatar avatar-online">
-                    <img src="{{ auth()->user()->image_url }}" alt class="rounded-circle" />
+                    @if (auth()->user()->image_url)
+                      <img 
+                        class="rounded-circle" 
+                        src="{{ auth()->user()->image_url }}"
+                        onerror="this.src='/icons/account.svg'"
+                      />
+                    @else
+                      <img class="rounded-circle" src="/icons/account.svg" alt="avatar" />
+                    @endif
                   </div>
                 </div>
                 <div class="flex-grow-1">

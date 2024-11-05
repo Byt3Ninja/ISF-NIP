@@ -140,11 +140,12 @@ class FinalscreeningController extends Controller
                'host_video' => 1,
                 'participant_video' => 1
             ];
+            
             $onlineMeeting = $this->meetingService->createMeeting($data);
             if (!$onlineMeeting['success']) {
                 return back()->with(['message2' => "API Error, can't create zoom meeting."]);
             }
-
+            
             $finalScreening = Finalscreening::where('step_id', $request->step)->where('company_id', $request->company)->first();
             
             $finalScreening->update([
@@ -154,7 +155,7 @@ class FinalscreeningController extends Controller
                 'start_url' =>  $onlineMeeting['data']['start_url'],
                 'join_url' =>  $onlineMeeting['data']['join_url']
                 ]);
-
+                
             $startup_owner = Company::findOrFail($request->company)->user;
             $startup_owner_name = $startup_owner->name;
 
@@ -174,12 +175,13 @@ class FinalscreeningController extends Controller
                 $judges_names .= $judge->name .', ';
 
             }
-
-
+            
+            
             /// Notify Startup Owner
-            $startup_owner = User::findOrFail($request->userid);
+            $startup_owner = User::findOrFail($startup_owner->id);
+            
             $startup_owner_name = $startup_owner->name;
-
+            
             $user = new User();
             $user->email = $startup_owner->email;
             $user->id = $startup_owner->id;
@@ -188,8 +190,8 @@ class FinalscreeningController extends Controller
                 ", Check your account to join the session ","/dashboard"];
             $user->notify($MSG);
             /// End of mail send
-
-            return Redirect::back()->with('message', 'Meeting added successfully.');
+            
+            return Redirect::back()->with('message', 'Meeting_added_successfully');
         } else {return Redirect::back()->with('message2', 'Error');}
     }
     public function results(Request $request,$id = 0)

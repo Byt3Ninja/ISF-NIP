@@ -201,12 +201,15 @@ class quizzesController extends Controller
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
-			if( empty( $cycleData ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
-			if( empty( $cycleData->organization_id ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
-
+			// if( empty( $cycleData ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
+			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
+			if( !empty( $cycleData->organization_id ) ) {
 			$organization_id = $cycleData->organization_id;
-			$quizzes = Quizzes::where('status', 'published')->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->get();
 			
+			$quizzes = Quizzes::where('status', 'published')->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->get();
+		}else{
+			$quizzes = '';
+		}
 			return view('admin/clients/quiz/dashboard', compact('quizzes'));
 		} else { return abort(401); }
 	}

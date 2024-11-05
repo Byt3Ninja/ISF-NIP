@@ -20,9 +20,14 @@
               <img src="/vuexy/assets/img/pages/profile-banner.png" alt="Banner image" class="rounded-top" />
             </div>
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
-              <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                <img src="{{ $client->image_url }}" alt="user image" class="d-block ms-0 ms-sm-6 rounded user-profile-img"
-                  style="height: 130px" />
+              <div class="flex-shrink-0 mx-sm-0 mx-auto">
+                <img 
+                  src="{{ $client->image_url ? $client->image_url : '/images/user-placeholder.jpeg' }}" 
+                  alt="user image" 
+                  class="d-block ms-0 ms-sm-6 rounded user-profile-img"
+                  style="height: 130px" 
+                  onerror="this.src='/images/user-placeholder.jpeg';"
+                />
               </div>
               <div class="flex-grow-1 mt-3 mt-lg-5">
                 <div
@@ -37,7 +42,19 @@
                         <i class="ti ti-brand-linkedin ti-lg"></i>
                         </a>
                         @endrole
+                        @php
+                        // جلب الأدوار كمجموعة
+                        $roles = $client->getRoleNames();
                     
+                        // ترجمة الأدوار وإزالة الأقواس والدبل كوت
+                        $translatedRoles = $roles->map(function ($role) {
+                            return __('admin.' . strtolower($role)); // ترجمة الدور
+                        })->implode(', '); // دمج الأدوار في سلسلة واحدة
+                    
+                        // إزالة أي أقواس أو دبل كوت
+                        $cleanedRoles = str_replace(['[', ']', '"'], '', $translatedRoles);
+                    @endphp
+                                            <br><h5 class="fw-medium"><i class="ti ti-user ti-lg"></i> {{ $cleanedRoles }} </h5>
                     </h4>
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
@@ -48,16 +65,22 @@
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-map-pin ti-lg"></i><span
-                          class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
+                          class="fw-medium">
+                          @if($client->city != null)
+                          {{  $client->city->{'name_' . $l}  }}
+                          @endif
+                        </span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined {{ $client->created_at->format('M-Y') }}</span>
+                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> {{ __('admin.Joined') }} {{ $client->created_at->locale($l)->translatedFormat('M-Y') }}</span>
                       </li>
-                      
                     </ul>
                   </div>
-                  <a href="javascript:void(0)" class="btn btn-primary mb-1">
-                    <i class="ti ti-user-check ti-xs me-2"></i>Connected
+                  <a href="/dashboard/myProfile" class="btn btn-primary mb-1">
+                    <i class="ti ti-settings me-3 ti-md"></i>
+                    <span class="align-middle">
+                      {{$l=='ar'?'تعديل':'Edit'}}
+                    </span>
                   </a>
                 </div>
               </div>
@@ -171,7 +194,7 @@
  </a>
 </div>
 @endif
-
+</div>
 <!-- / Count cards -->
 <br><br>
       @endrole
@@ -219,10 +242,7 @@
                 </li>
                 <li class="d-flex align-items-center mb-2">
                   <i class="ti ti-language ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar'
-                        ? 'اللغات:'
-                        : '
-                                        Languages:' }}
+                    {{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}
                   </span>
                   <span>
                     {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
@@ -248,7 +268,8 @@
                   <span>{{ $client->email }}</span>
                 </li>
               </ul>
-              <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
+
+              {{-- <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
                 @foreach ($mentors as $cycleOrg) 
                 @php
@@ -262,12 +283,12 @@
                 </li>
                 @endforeach
                 @endforeach
-              </ul>
+              </ul> --}}
             </div>
           </div>
           <!--/ About User -->
           <!-- Profile Overview -->
-          <div class="card mb-6">
+          {{-- <div class="card mb-6">
             <div class="card-body">
               <small class="card-text text-uppercase text-muted small">Overview</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
@@ -285,7 +306,7 @@
                 </li>
               </ul>
             </div>
-          </div>
+          </div> --}}
           <!--/ Profile Overview -->
         </div>
 
@@ -303,16 +324,16 @@
                                                 <th class="text-center">{{__('cycles.Done')}}</th>
                   </tr>
 
-                  @role('Mentor')
+                  
                   <tbody>
                     @foreach($mentorshipTasks as $task)
                                                 <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
                                                     <td class="text-center">
-                                                        <div class="media align-items-center">
-                                                            <a class="media-left mr-50" href="/dashboard/users/{{$task->user_id}}/edit">
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">
                                                                 <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
-                                                            <a href="/dashboard/users/{{$task->user_id}}/edit">
+                                                            <a href="{{ route('show_mentor_profile', $task->user_id) }}">
                                                                 <div class="media-body">
                                                                     <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
                                                                     <span class="font-small-2">{{$task->user->title}}</span>
@@ -322,12 +343,12 @@
                                                     </td>
                                                     
                                                     <td class="text-center">
-                                                        <div class="media align-items-center">
+                                                        <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
                                                                 <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
                                                             <a href="/dashboard/companyProfile/{{$task->company->id}}">
-                                                                <div class="media align-items-center">
+                                                                <div class="d-flex align-items-center gap-1">
                                                                     {{$task->company->name }}
                                                                 </div>
                                                             </a>
@@ -344,7 +365,7 @@
                                                 </tr>
                                             @endforeach
                   </tbody>
-@endrole
+
 
                 </thead>
               </table>
@@ -356,7 +377,6 @@
       <!--/ User Profile Content -->
     </div>
   </div>
-</div>
 
 <!-- Programms tab -->
 <div class="tab-pane fade" id="Programms" role="tabpanel" aria-labelledby="Programms-tab">
@@ -375,7 +395,6 @@
           <table class="table zero-configuration">
             <thead>
             <tr>
-                <th>#</th>
                 <th>{{__('admin.Title')}}</th>
                 <th>{{__('admin.Description')}}</th>
                 <th>{{__('admin.Start')}}</th>
@@ -383,16 +402,23 @@
             </tr>
             </thead>
             <tbody>
-              @foreach ($mentors as $n=>$mentor) 
+              @if (!@empty(Auth::user()->company->cycledata->title))
               <tr>
-                <td>{{$n+1}}</td>
-                <td>{{$mentor->cycle->title}}</td>
-                <td>{{$mentor->cycle->description}}</td>
-                <td>{{$mentor->cycle->start}}</td>
-                <td>{{$mentor->cycle->end}}</td>
+                <td>{{ Auth::user()->company->cycledata->title }}</td>
+                <td>{{ Auth::user()->company->cycledata->description }}</td>
+                <td>{{ Auth::user()->company->cycledata->start }}</td>
+                <td>{{ Auth::user()->company->cycledata->end }}</td>
               </tr>
-
-          @endforeach
+              @else
+              @foreach ($mentorshipTasks as $item)
+              <tr>
+                <td>{{ $item->title }}</td>
+                <td>{{ $item->description }}</td>
+                <td>{{ $item->start }}</td>
+                <td>{{ $item->end }}</td>
+              </tr>
+              @endforeach
+              @endif
         </tbody>
       </table>
 
@@ -403,6 +429,9 @@
   
 
 </div>
+</div>
+
+
 <!-- Programms tab -->
 
 
@@ -412,6 +441,7 @@
     <!-- / Content -->
  
     <div class="content-backdrop fade"></div>
+  
   </div>
   <!-- Content wrapper -->
 @stop

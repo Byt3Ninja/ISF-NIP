@@ -10,7 +10,8 @@
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
       <div class="content-body">
-        <section id="multiple-column-form">
+        <section id="multiple-column-form" class="mb-4">
+          <h4 class="card-title">{{ __('cycles.all courses') }}</h4>
           @if (session()->has('message'))
             <div 
               class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
@@ -21,25 +22,17 @@
             </div>
           @endif
         </section>
-        <section id="multiple-column-form">
-          <div class="row match-height">
-            <div class="col-xl-12 col-md-12 col-sm-12">
-              <div class="card">
-                <div class="card-header" style="padding-bottom: 15px;">
-                  <h4 class="card-title">{{ __('cycles.all courses') }}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
         <section class="row">
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
               <div class="card-header">
 
                 @if (Auth::user()->hasanyRole('organizationManager|Mentor|Admin'))
-                  <a class="btn btn-info glow"
-                    href="{{ route('training.create') }}">{{ __('cycles.Add new Training') }}</a>
+                  <a class="btn btn-primary"
+                    href="{{ route('training.create') }}">
+                    <i class="ti ti-plus me-1"></i>
+                    {{ __('cycles.Add new Training') }}
+                  </a>
                 @endif
               </div>
               <div class="card-body">
@@ -103,13 +96,13 @@
                               <td>
                                 <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
                                   class="btn btn-icon btn-label-info rounded-circle">
-                                  <i class="ti ti-edit"></i></a>
+                                  <i class="ti ti-edit text-info"></i></a>
 
                                 @if (isset($course))
                                   <button title="Delete" class="btn btn-label-danger btn-icon rounded-circle"
                                     onclick="deleteme({{ $course->id ?? 0 }},1)">
                                     <span class="align-middle ml-25">
-                                      <i class="ti ti-trash"></i>
+                                      <i class="ti ti-trash text-danger"></i>
                                     </span>
                                   </button>
                                 @endif

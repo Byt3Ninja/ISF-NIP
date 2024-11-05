@@ -68,13 +68,13 @@
                           class="align-middle mx-2">{{ __('cycles.steps') }}</span>
                       </button>
                       <button class="btn btn-label-primary" onclick="DoChange(1)">
-                        <i class="ti ti-edit"></i> <span class="align-middle mx-2">{{ __('cycles.Edit') }}</span>
+                        <i class="ti ti-edit text-info"></i> <span class="align-middle mx-2">{{ __('cycles.Edit') }}</span>
                       </button>
                       <button class="btn btn-label-success" onclick="DoChange(2)">
                         <i class="ti ti-plus"></i> <span class="align-middle mx-2">{{ __('cycles.New') }}</span>
                       </button>
                       <button class="btn btn-label-danger" onclick="DoChange(3)">
-                        <i class="ti ti-trash"></i> <span class="align-middle mx-2">{{ __('cycles.Delete') }}</span>
+                        <i class="ti ti-trash text-danger"></i> <span class="align-middle mx-2">{{ __('cycles.Delete') }}</span>
                       </button>
                     </div>
                   </fieldset>
@@ -126,7 +126,7 @@
                       @foreach ($companies as $company)
                         <tr>
                           <td>
-                            <div class="media align-items-center">
+                            <div class="d-flex align-items-center gap-1">
                               <input type="checkbox" class="chboxcyclesReg" do="{{ $company->id }}"
                                 userid="{{ $company->user->id }}" value="1" name="chboxcyclesReg[]">
                             </div>
@@ -138,7 +138,7 @@
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
                               <a href="/dashboard/companyProfile/{{ $company->id }}">
-                                <div class="media align-items-center">
+                                <div class="d-flex align-items-center gap-1">
                                   {{ $company->{'name_' . $l} }}
                                 </div>
                               </a>
@@ -166,7 +166,7 @@
                             {{ $company->user->email }}
                           </td>
                           <td>
-                            <div class="media align-items-center">
+                            <div class="d-flex align-items-center gap-1">
                               <select id="cstep" class="select form-control"
                                 onchange="changestep({{ $company->id }},this.options[this.selectedIndex].value)">
                                 <option value="0">{{ __('cycles.Disapprove') }}</option>

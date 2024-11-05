@@ -297,6 +297,12 @@ public function calendar(Request $request){
         $Currency = $request->input('Currency');
         
 
+if($request->HomePage == 'on'){
+    $homePage = '1';
+}else{
+    $homePage = '0';
+}
+
         $updateSittings = Settings::where('id', $id)->first();
 
         $updateSittings->ar_title = $site_ar_title;
@@ -309,6 +315,7 @@ public function calendar(Request $request){
         $updateSittings->Default_Language = $Default_Language;
         $updateSittings->timezone = $timezone;
         $updateSittings->Currency = $Currency;
+        $updateSittings->HomePage = $homePage;
         $updateSittings->save();
 
 
@@ -534,7 +541,217 @@ public function update_settingsLogin(Request $request){
 }
 
 
+public function update_settingsImgHome(Request $request){
+        
+    $Img1 =  Settings::findOrfail('7');
+    $Img2 =  Settings::findOrfail('8');
+    $Img3 =  Settings::findOrfail('9');
 
+
+
+    //Image 1 =======================================
+    if ($request->hasFile('img1')) {
+        $image = $request->file('img1');
+        // الحصول على اسم الصورة الأصلي بدون الامتداد
+        $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+        // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
+        // هنا نضيف "new_" كبادئة لاسم الصورة
+        $newName = $originalName; 
+        // تحديد الامتداد الأصلي للصورة
+        $extension = $image->getClientOriginalExtension();
+        // تركيب الاسم الجديد مع الامتداد
+        $img1name = $newName . '.' . $extension;
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $img1 = $image->storeAs('', $img1name, 'Home_upload');
+
+    } else {
+        $img1 = $Img1->img_url; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+    }
+
+
+    $ar_img1title = $request->input('ar_img1title');
+    $img1title = $request->input('img1title');
+    $ar_img1title2 = $request->input('ar_img1title2');
+    $img1title2 = $request->input('img1title2');
+    $ar_img1dsc = $request->input('ar_img1dsc');
+    $img1dsc = $request->input('img1dsc');
+    $img1url = $request->input('img1url');
+
+
+    $updateSittingsImg1 = Settings::where('id', '7')->first();
+    $updateSittingsImg1->img_url = $img1;
+    $updateSittingsImg1->ar_title = $ar_img1title;
+    $updateSittingsImg1->title = $img1title;
+    $updateSittingsImg1->ar_set1 = $ar_img1title2;
+    $updateSittingsImg1->set1 = $img1title2;
+    $updateSittingsImg1->ar_dsc = $ar_img1dsc;
+    $updateSittingsImg1->dsc = $img1dsc;
+    $updateSittingsImg1->url = $img1url;
+    $updateSittingsImg1->save();
+
+
+//Image 2 =======================================
+    if ($request->hasFile('img2')) {
+        $image = $request->file('img2');
+        // الحصول على اسم الصورة الأصلي بدون الامتداد
+        $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+        // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
+        // هنا نضيف "new_" كبادئة لاسم الصورة
+        $newName = $originalName; 
+        // تحديد الامتداد الأصلي للصورة
+        $extension = $image->getClientOriginalExtension();
+        // تركيب الاسم الجديد مع الامتداد
+        $img2name = $newName . '.' . $extension;
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $img2 = $image->storeAs('', $img2name, 'Home_upload');
+
+    } else {
+        $img2 = $Img2->img_url; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+    }
+    $ar_img2title = $request->input('ar_img2title');
+    $img2title = $request->input('img2title');
+    $ar_img2title2 = $request->input('ar_img2title2');
+    $img2title2 = $request->input('img2title2');
+    $ar_img2dsc = $request->input('ar_img2dsc');
+    $img2dsc = $request->input('img2dsc');
+    $img2url = $request->input('img2url');
+
+
+    $updateSittingsImg2 = Settings::where('id', '8')->first();
+    $updateSittingsImg2->img_url = $img2;
+    $updateSittingsImg2->ar_title = $ar_img2title;
+    $updateSittingsImg2->title = $img2title;
+    $updateSittingsImg2->ar_set1 = $ar_img2title2;
+    $updateSittingsImg2->set1 = $img2title2;
+    $updateSittingsImg2->ar_dsc = $ar_img2dsc;
+    $updateSittingsImg2->dsc = $img2dsc;
+    $updateSittingsImg2->url = $img2url;
+    $updateSittingsImg2->save();
+
+
+    //Image 3 =======================================
+    
+    if ($request->hasFile('img3')) {
+        $image = $request->file('img3');
+        // الحصول على اسم الصورة الأصلي بدون الامتداد
+        $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+        // تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
+        // هنا نضيف "new_" كبادئة لاسم الصورة
+        $newName = $originalName; 
+        // تحديد الامتداد الأصلي للصورة
+        $extension = $image->getClientOriginalExtension();
+        // تركيب الاسم الجديد مع الامتداد
+        $img3name = $newName . '.' . $extension;
+        // استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
+        $img3 = $image->storeAs('', $img3name, 'Home_upload');
+
+    } else {
+        $img3 = $Img3->img_url; // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+    }
+
+
+    $ar_img3title = $request->input('ar_img3title');
+    $img3title = $request->input('img3title');
+    $ar_img3title2 = $request->input('ar_img3title2');
+    $img3title2 = $request->input('img3title2');
+    $ar_img3dsc = $request->input('ar_img3dsc');
+    $img3dsc = $request->input('img3dsc');
+    $img3url = $request->input('img3url');
+    
+
+    $updateSittingsImg3 = Settings::where('id', '9')->first();
+    $updateSittingsImg3->img_url = $img3;
+    $updateSittingsImg3->ar_title = $ar_img3title;
+    $updateSittingsImg3->title = $img3title;
+    $updateSittingsImg3->ar_set1 = $ar_img3title2;
+    $updateSittingsImg3->set1 = $img3title2;
+    $updateSittingsImg3->ar_dsc = $ar_img3dsc;
+    $updateSittingsImg3->dsc = $img3dsc;
+    $updateSittingsImg3->url = $img3url;
+    $updateSittingsImg3->save();
+
+
+    return redirect()->back()->with('message', 'StoredSuccessfully');
+}
+
+public function update_settingsAchievements(Request $request){
+        
+    $data1 =  Settings::findOrfail('12');
+    $data2 =  Settings::findOrfail('13');
+    $data3 =  Settings::findOrfail('14');
+    $data4 =  Settings::findOrfail('15');
+
+
+//Achievment 12 =======================================
+    $ct12icon = $request->input('ct12icon');
+    $ct12title = $request->input('ct12title');
+    $ct12titlear = $request->input('ct12titlear');
+    $ct12num = $request->input(key: 'ct12num');
+
+
+    $updateSittingsAch12 = Settings::where('id', '12')->first();
+    $updateSittingsAch12->dsc = $ct12num;
+    $updateSittingsAch12->ar_title = $ct12titlear;
+    $updateSittingsAch12->title = $ct12title;
+    $updateSittingsAch12->img_url = $ct12icon;
+    $updateSittingsAch12->save();
+
+//Achievment 12 =======================================
+//Achievment 13 =======================================
+
+$ct13icon = $request->input('ct13icon');
+    $ct13title = $request->input('ct13title');
+    $ct13titlear = $request->input('ct13titlear');
+    $ct13num = $request->input(key: 'ct13num');
+
+
+    $updateSittingsAch13 = Settings::where('id', '13')->first();
+    
+    $updateSittingsAch13->img_url = $ct13icon;
+    $updateSittingsAch13->title = $ct13title;
+    $updateSittingsAch13->ar_title = $ct13titlear;
+    $updateSittingsAch13->dsc = $ct13num;
+    $updateSittingsAch13->save();
+
+//Achievment 13 =======================================
+   //Achievment 14 =======================================
+
+$ct14icon = $request->input('ct14icon');
+$ct14title = $request->input('ct14title');
+$ct14titlear = $request->input('ct14titlear');
+$ct14num = $request->input(key: 'ct14num');
+
+
+$updateSittingsAch14 = Settings::where('id', '14')->first();
+
+$updateSittingsAch14->img_url = $ct14icon;
+$updateSittingsAch14->title = $ct14title;
+$updateSittingsAch14->ar_title = $ct14titlear;
+$updateSittingsAch14->dsc = $ct14num;
+$updateSittingsAch14->save();
+
+//Achievment 14 ======================================= 
+   //Achievment 15 =======================================
+
+   $ct15icon = $request->input('ct15icon');
+   $ct15title = $request->input('ct15title');
+   $ct15titlear = $request->input('ct15titlear');
+   $ct15num = $request->input(key: 'ct15num');
+   
+   
+   $updateSittingsAch15 = Settings::where('id', '15')->first();
+   
+   $updateSittingsAch15->img_url = $ct15icon;
+   $updateSittingsAch15->title = $ct15title;
+   $updateSittingsAch15->ar_title = $ct15titlear;
+   $updateSittingsAch15->dsc = $ct15num;
+   $updateSittingsAch15->save();
+   
+   //Achievment 15 ======================================= 
+
+
+    return redirect()->back()->with('message', 'StoredSuccessfully');
+}
 
 
 

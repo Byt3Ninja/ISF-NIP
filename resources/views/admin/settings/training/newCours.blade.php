@@ -377,8 +377,7 @@
                         rows="4"
                         placeholder="{{ __('cycles.Write your description here') }}."
                         style="height: 220px;"
-                      >
-                      </textarea>
+                      ></textarea>
                     </div>
 
                     <hr> <br>

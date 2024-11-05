@@ -52,10 +52,10 @@
                     </select>
                     <div class="input-group-append mx-auto">
                       <button class="btn btn-label-primary" onclick="DoChange(1)">
-                        <i class="ti ti-edit"></i> <span class="mx-1">{{ __('cycles.Edit') }}</span>
+                        <i class="ti ti-edit text-info"></i> <span class="mx-1">{{ __('cycles.Edit') }}</span>
                       </button>
                       <button class="btn btn-label-danger" onclick="DoChange(2)">
-                        <i class="ti ti-trash"></i> <span class="mx-1">{{ __('cycles.Delete') }}</span>
+                        <i class="ti ti-trash text-danger"></i> <span class="mx-1">{{ __('cycles.Delete') }}</span>
                       </button>
                       <button class="btn btn-label-secondary"
                         onclick="window.location.href='/dashboard/final/results/{{ $id }}'">
@@ -147,14 +147,14 @@
                                       {{ in_array($company->id, []) ? 'checked' : '' }} name='users[]'
                                       value="{{ $company->id }}">
                                     <label for="checkbox{{ $company->id }}">
-                                      <div class="media align-items-center">
+                                      <div class="d-flex align-items-center">
                                         <a class="media-left mr-50"
                                           href="/dashboard/companyProfile/{{ $company->id }}">
                                           <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle"
                                             height="40" width="40">
                                         </a>
                                         <a href="/dashboard/companyProfile/{{ $company->id }}">
-                                          <div class="media align-items-center">
+                                          <div class="d-flex align-items-center">
                                             {{ $company->name }}
                                           </div>
                                         </a>
@@ -163,7 +163,7 @@
                                   </div>
                                 </td>
                                 <td>
-                                  <div class="media align-items-center">
+                                  <div class="d-flex align-items-center">
                                     <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
                                       <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}"
                                         alt="avatar" class="rounded-circle" height="40" width="40">
@@ -179,7 +179,7 @@
                                 <td>
                                   @foreach (\App\User::whereIn('id', $company->finals($cstep->id))->get() as $judge)
                                     <div class="chip mr-1">
-                                      <div class="chip-body">
+                                      <div class="d-flex align-items-center">
                                         <div class="avatar">
                                           <img class="img-fluid" src="{{ $judge->image_url }}" alt="click to view"
                                             height="20" width="20">
@@ -195,30 +195,30 @@
                                     {{ __('cycles.Add Judges first') }}
                                   @elseif($company->fsession($cstep->id)->join_url)
                                     <button title="Edit" onclick="edit({{ $company->fsession($cstep->id)->id }})"
-                                      type="button" class="btn btn-icon rounded-circle btn-info">
-                                      <i class="bx bxs-edit-alt"></i></button>
+                                      type="button" class="btn btn-icon rounded-circle btn-label-edit">
+                                      <i class="ti ti-edit text-info"></i></button>
                                     <button title="Delete" onclick="deleteme({{ $company->fsession($cstep->id)->id }})"
-                                      type="button" class="btn btn-icon rounded-circle btn-danger">
-                                      <i class="bx bx-trash"></i></button>
+                                      type="button" class="btn btn-icon rounded-circle btn-label-danger">
+                                      <i class="ti ti-trash text-danger"></i></button>
                                     <a href="{{ $company->fsession($cstep->id)->start_url }}" target="_blank">
                                       <button title="Start Meeting" type="button"
-                                        class="btn btn-icon rounded-circle btn-light-success">
-                                        <i class="bx bx-slider-alt"></i></button></a>
+                                        class="btn btn-icon rounded-circle btn-label-success">
+                                        <i class="ti ti-brand-zoom"></i></button></a>
                                     <a href="{{ $company->fsession($cstep->id)->join_url }}" target="_blank">
                                       <button title="Join only" type="button"
                                         class="btn btn-icon rounded-circle btn-light-primary">
-                                        <i class="bx bx-user"></i></button></a>
+                                        <i class="ti ti-user"></i></button></a>
                                   @else
                                     <button title="Edit" onclick="edit({{ $company->fsession($cstep->id)->id }})"
-                                      type="button" class="btn btn-icon rounded-circle btn-info">
-                                      <i class="bx bxs-edit-alt"></i></button>
+                                      type="button" class="btn btn-icon rounded-circle btn-label-info">
+                                      <i class="ti ti-edit text-info"></i></button>
 
                                     <button title="Delete" onclick="deleteme({{ $company->fsession($cstep->id)->id }})"
-                                      type="button" class="btn btn-icon rounded-circle btn-danger">
-                                      <i class="bx bx-trash"></i></button>
+                                      type="button" class="btn btn-icon rounded-circle btn-label-danger">
+                                      <i class="ti ti-trash text-danger"></i></button>
                                     <button title="Add meeting" onclick="addzoom({{ $company->id }})" type="button"
-                                      class="btn btn-icon rounded-circle btn-success">
-                                      <i class="bx bx-plus"></i></button>
+                                      class="btn btn-icon rounded-circle btn-label-success">
+                                      <i class="ti ti-plus"></i></button>
                                   @endif
                                 </td>
                               </tr>
@@ -258,23 +258,23 @@
               <input type="hidden" name="sid" value="{{ $cstep->id }}">
               <input type="hidden" name="type" value="8">
               <br>
-              <label>{{ __('cycles.Title') }}: </label>
               <div class="form-group mb-3">
+                <label class="fs-6 mb-1">{{ __('cycles.Title') }}: </label>
                 <input value="{{ $cstep->title }}" name='title' type="text" placeholder="Title"
                   class="form-control" required>
               </div>
               <div class="form-group mb-3">
-                <label>{{ __('cycles.from') }}: </label>
+                <label class="fs-6 mb-1">{{ __('cycles.from') }}: </label>
                 <input value="{{ $cstep->from->format('Y-m-d') }}" name='fromDate' type="text"
                   class="form-control date" required>
               </div>
               <div class="form-group mb-3">
-                <label>{{ __('cycles.to') }}: </label>
+                <label class="fs-6 mb-1">{{ __('cycles.to') }}: </label>
                 <input value="{{ $cstep->to->format('Y-m-d') }}" name='toDate' type="text"
                   class="form-control date" required>
               </div>
               <div class="form-group mb-0">
-                <label>{{ __('cycles.Description') }}: </label>
+                <label class="fs-6 mb-1">{{ __('cycles.Description') }}: </label>
                 <textarea name='description' placeholder="Description" class="form-control">{{ $cstep->description }}</textarea>
               </div>
             </div>
@@ -296,24 +296,20 @@
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
           <form method="post" action="/dashboard/final/addzoom" enctype="multipart/form-data" autocomplete="off">
-            <div class="modal-header bg-primary">
+            <div class="modal-header">
               <h4 class="modal-title white">{{ __('cycles.Add new zoom session') }}</h4>
-              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <i class="bx bx-x"></i>
-              </button>
-            </div>
             <div class="modal-body">
               @csrf
               <p class="text-danger">{{ __('cycles.Before submit review') }}.</p>
               <input type="hidden" name="step" value="{{ $cstep->id }}" id="sid">
               <input type="hidden" name="company" value="0" id="cid">
-              <div class="form-group" id="showdates mb-3">
-                <label>{{ __('cycles.Date/Time') }}:</label>
+              <div class="form-group mb-3" id="showdates mb-3">
+                <label class="fs-6 mb-1">{{ __('cycles.Date/Time') }}:</label>
                 <input class='width-200 form-control' type="text" id="date" name="date" value=""
                   required>
               </div>
               <div class="form-group mb-3">
-                <label>{{ __('cycles.Meeting period') }}:</label>
+                <label class="fs-6 mb-1">{{ __('cycles.Meeting period') }}:</label>
                 <select name="period" class="select form-control">
                   <option value="30">30 {{ __('cycles.Minutes') }}</option>
                   <option value="60" selected>1 {{ __('cycles.Hour') }}</option>
@@ -326,7 +322,7 @@
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary ml-1">
-                <i class="bx bx-check d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
               </button>
             </div>
@@ -341,9 +337,6 @@
           <form method="post" action="/dashboard/final/editZoom" enctype="multipart/form-data">
             <div class="modal-header">
               <h4 class="modal-title">{{ __('cycles.Modify Final Screen') }} </h4>
-              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <i class="bx bx-x"></i>
-              </button>
             </div>
             <div class="modal-body">
               @csrf
@@ -351,12 +344,12 @@
               <input type="hidden" name="step" value="{{ $cstep->id }}" id="sid">
               <input type="hidden" name="company" value="0" id="cid">
               <div class="form-group" id="showdates mb-3">
-                <label>{{ __('cycles.Date/Time') }}:</label>
+                <label class="fs-6 mb-1">{{ __('cycles.Date/Time') }}:</label>
                 <input class='date width-200 form-control' type="text" id="sdate" name="date"
                   value="" required>
               </div>
               <div class="form-group mb-3">
-                <label>{{ __('cycles.Meeting period') }}:</label>
+                <label class="fs-6 mb-1">{{ __('cycles.Meeting period') }}:</label>
                 <select name="period" class="select form-control" id="period">
                   <option value="30">30 {{ __('cycles.Minutes') }}</option>
                   <option value="60">1 {{ __('cycles.Hour') }}</option>
@@ -366,12 +359,9 @@
                   <option value="300">5 {{ __('cycles.Hours') }}</option>
                 </select>
               </div>
-
-
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary ml-1">
-                <i class="bx bx-check d-block d-sm-none"></i>
                 <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
               </button>
             </div>
@@ -381,6 +371,7 @@
     </div>
   @endif
 @stop
+
 @section('pagescripts')
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script>

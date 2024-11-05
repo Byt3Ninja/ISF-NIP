@@ -67,7 +67,7 @@
 												<td>
 													<div class="d-flex align-items-center">
 														<a class="media-left mr-50" href="{{route('organizations.edit', ['organization' => $organization->id])}}">
-															<img src="{{$organization->image_url}}" alt="avatar" class="" height="40" >
+															<img src="{{$organization->image_url ?? '../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="" height="40" >
 														</a>
 													</div>
 												</td>
@@ -76,7 +76,7 @@
 												<td style="padding: 0px;font-size: small;">
 													@can('delete_user')
 														<button id='deleteAction' data-id='{{$organization->id}}' data-url="{{route('organizations.destroy', ['organization' => $organization->id])}}" type="button" class="btn btn-label-danger btn-sm">
-                              <i class="ti ti-trash"></i>
+                              <i class="ti ti-trash text-danger"></i>
                             </button>
 													@endcan
 												</td>

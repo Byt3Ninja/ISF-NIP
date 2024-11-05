@@ -4,10 +4,10 @@
 @section('subTitle', __('admin.CreateRole'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    <div class="content-wrapper">
-        @include('admin.includes.heading')
+        
         <div class="content-body">
             <!-- BuilderForm start -->
             <section id="basic-input">
@@ -28,7 +28,7 @@
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
                                                 <div class="d-flex align-items-center">
-                                                    <i class="bx bx-error"></i>
+                                                    <i class="ti ti-error"></i>
                                                     <span>
                                                         {{ __('admin.'.session()->get('msg')) }}
                                                         {{ Session::forget('msg') }}
@@ -54,10 +54,10 @@
                                     @endif
                                         <form method="POST" action="{{ route("roles.store") }}" enctype="multipart/form-data">
                                             @csrf
-                                        <div class="row">
+                                        <div class="row mb-4">
                                             <div class="col-md-12">
                                                 <fieldset class="form-group">
-                                                    <label for="basicInput">{{ __('admin.Title')}}</label>
+                                                    <label class="fs-6 mb-1" for="basicInput">{{ __('admin.Title')}}</label>
                                                     <input type="text" class="form-control" id="name" name='name'
                                                         required placeholder="{{__('admin.Title')}}" >
                                                 </fieldset>
@@ -65,9 +65,9 @@
                                             </div>
                                         </div>
                                             <div class="form-group">
-                                                <label class="required" for="permissions">{{ __('Permissions') }}</label>
+                                                <label class="fs-6 mb-1" class="required" for="permissions">{{ __('Permissions') }}</label>
 
-                                                <select class="form-control select2 {{ $errors->has('permissions') ? 'is-invalid' : '' }}" name="permissions[]" id="permissions" multiple >
+                                                <select class="form-control select {{ $errors->has('permissions') ? 'is-invalid' : '' }}" name="permissions[]" id="permissions" multiple >
                                                     @foreach($permissions as $id => $permission)
                                                         <option value="{{ $id }}" {{ in_array($id, old('permissions', [])) ? 'selected' : '' }}>{{ $permission }}</option>
                                                     @endforeach
@@ -79,7 +79,7 @@
                                                 @endif
 
                                             </div>
-                                        <div class="row">
+                                        <div class="row mt-4">
                                             <div class="col-12 d-flex justify-content-end">
                                                 <button type="submit"
                                                     class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
