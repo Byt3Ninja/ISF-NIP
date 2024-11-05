@@ -269,9 +269,9 @@
       const searchParams = new URLSearchParams(window.location.search);
       if (searchParams.has('taskId')) {
         searchParams.delete('taskId');
+        const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname;
+        window.history.pushState({}, '', newUrl);
       }
-      const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname;
-      window.history.pushState({}, '', newUrl);
     });
   </script>
   <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
