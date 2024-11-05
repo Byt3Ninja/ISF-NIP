@@ -280,9 +280,11 @@
                   </div>
                   <!-- Founders -->
                   @php
-                    $fonders = App\Team_Member::where('TeamMember', 'Founder')
-                    ->where('Company_id', $company->id)->get(); 
-                  @endphp
+                    $founders = App\Team_Member::where([
+                        ['TeamMember', 'Founder'],
+                        ['Company_id', $company->id]
+                    ])->get();
+                @endphp
                   
                   <div class="mt-3">
                     <span class="text-muted text-xs fw-medium">{{ __('admin.Founders') }}</span>
