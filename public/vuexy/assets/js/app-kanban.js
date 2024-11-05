@@ -6,11 +6,12 @@
 
 const url =  window.location.href;
 
+// Disable add task for startup page
 const disableAddTask = () => {
   if (url && url.includes('startup')) {
     return true;
-  }
-}
+  };
+};
 
 (async function () {
   let boards;
@@ -101,7 +102,7 @@ const disableAddTask = () => {
       "<div class='dropdown kanban-tasks-item-dropdown'>" +
       "<i class='dropdown-toggle ti ti-dots-vertical' id='kanban-tasks-item-dropdown' data-bs-toggle='dropdown' aria-haspopup='true' aria-expanded='false'></i>" +
       "<div class='dropdown-menu dropdown-menu-end' aria-labelledby='kanban-tasks-item-dropdown'>" +
-      "<a class='dropdown-item' href='javascript:void(0)'>Copy task link</a>" +
+      "<a class='dropdown-item' id='copy-task-link' href='javascript:void(0)'>Copy task link</a>" +
       "<a class='dropdown-item' href='javascript:void(0)'>Duplicate task</a>" +
       "<a class='dropdown-item delete-task' href='javascript:void(0)'>Delete</a>" +
       '</div>' +
@@ -205,6 +206,23 @@ const disableAddTask = () => {
       searchParams.set('taskId', taskId);
       const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
       window.history.pushState({}, '', newUrl);
+
+      // Copy task link
+      const copyTaskLink = document.getElementById('copy-task-link');
+
+      // if (copyTaskLink) {
+      //   copyTaskLink.addEventListener('click', function () {
+      //     console.log('copyTaskLink', taskId);
+      //     searchParams.set('taskId', taskId);
+      //     const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
+      //     window.history.pushState({}, '', newUrl);
+      //     setTimeout(() => {
+      //       if (searchParams.has('taskId')) {
+      //         navigator.clipboard.writeText(window.location.href);
+      //       }
+      //     }, 1000)
+      //   });
+      // }
 
       let title = element.getAttribute('data-eid')
           ? element.querySelector('.kanban-text').textContent
