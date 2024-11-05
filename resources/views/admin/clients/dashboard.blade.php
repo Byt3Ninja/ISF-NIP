@@ -82,7 +82,7 @@
         ],
         [
             'color' => 'secondary',
-            'href' => '/dashboard/mentorship/mine',
+            'href' => '/dashboard/show/Mentors',
             'icon' => 'ti ti-school',
             'text' => __('dashboard.Mentors'),
             'count' => $m_count,

@@ -105,7 +105,7 @@ class MentorsController extends Controller
             ]);
             // Notify Admin here
             event(new WebMessage('NewMent', Auth::user()->first_name_en .' '. Auth::user()->last_name_en));
-            return back()->with(['msg' => 'Request successfully added','class'=>'success']);
+            return back()->with(['msg' => 'Request_successfully_added_Startup','class'=>'success']);
         } else {
             return back()->with(['msg' => "Error, can't add request",'class'=>'danger']);
         }

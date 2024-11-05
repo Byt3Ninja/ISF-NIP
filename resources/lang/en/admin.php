@@ -852,5 +852,6 @@ return [
 	'EdTech' => 'EdTech',
 	'E-Learning' => 'E-Learning',
 	'Skill Development' => 'Skill Development',
+	'Request_successfully_added_Startup'=> 'Request successfully added',
 	
 ];
