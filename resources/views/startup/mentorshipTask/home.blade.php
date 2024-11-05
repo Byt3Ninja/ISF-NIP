@@ -10,6 +10,11 @@
 
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
+  <style>
+    .kanban-board-header .dropdown {
+      display: none;
+    }
+  </style>
 @stop
 
 @section('content')
@@ -21,7 +26,7 @@
     <div class="app-kanban">
 
       @if (!empty($mentorshipTasks))
-      <!-- Add new board -->
+      {{-- <!-- Add new board -->
       <div class="row">
         <div class="col-12">
           <form class="kanban-add-new-board">
@@ -43,7 +48,7 @@
             </div>
           </form>
         </div>
-      </div>
+      </div> --}}
 
       <!-- Kanban Wrapper -->
       <div 
@@ -54,7 +59,7 @@
       <!-- Edit Task/Task & Activities -->
       <div class="offcanvas offcanvas-end kanban-update-item-sidebar">
         <div class="offcanvas-header border-bottom">
-          <h5 class="offcanvas-title">Edit Task</h5>
+          <h5 class="offcanvas-title">Add Comment</h5>
           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body pt-0">
@@ -78,35 +83,6 @@
             <!-- Update item/tasks -->
             <div class="tab-pane fade show active" id="tab-update" role="tabpanel">
               <form>
-                <div class="mb-5">
-                  <label class="form-label" for="title">Title</label>
-                  <input type="text" id="title" class="form-control" placeholder="Enter Title" />
-                </div>
-                <div class="mb-5">
-                  <label class="form-label" for="due-date">Due Date</label>
-                  <input type="text" id="due-date" class="form-control" placeholder="Enter Due Date" />
-                </div>
-                <div class="mb-5">
-                  <label class="form-label" for="label"> Label</label>
-                  <select class="select2 select2-label form-select" id="label">
-                    <option data-color="bg-label-success" value="UX">UX</option>
-                    <option data-color="bg-label-warning" value="Images">Images</option>
-                    <option data-color="bg-label-info" value="Info">Info</option>
-                    <option data-color="bg-label-danger" value="Code Review">Code Review</option>
-                    <option data-color="bg-label-secondary" value="App">App</option>
-                    <option data-color="bg-label-primary" value="Charts & Maps">Charts & Maps</option>
-                  </select>
-                </div>
-                <div class="mb-5">
-                  <label class="form-label">Assigned</label>
-                  <div class="assigned d-flex flex-wrap"></div>
-                </div>
-                <div class="mb-5">
-                  <label class="form-label" for="attachments">Attachments</label>
-                  <div>
-                    <input type="file" class="form-control" id="attachments" />
-                  </div>
-                </div>
                 <div class="mb-5">
                   <label class="form-label">Comment</label>
                   <div class="comment-editor border-bottom-0"></div>
@@ -257,7 +233,6 @@
           </div>
         </div>
       </div>
-      
       @else
 			<section class="row">
 				<div class="col-xl-12 col-md-12 col-sm-12">
@@ -272,10 +247,7 @@
 				  </div>
 				</div>
 			  </section>
-
 			@endif
-
-
     </div>
   </div>
   <!-- / Content -->
@@ -286,6 +258,17 @@
 @stop
 
 @section('scripts')
+  <script>
+    // Remove taskId from URL
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.has('taskId')) {
+        searchParams.delete('taskId');
+      }
+      const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname;
+      window.history.pushState({}, '', newUrl);
+    });
+  </script>
   <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
@@ -296,7 +279,32 @@
 
 @section('pagescripts')
   <script>
+    // Mentorship tasks data
     const mentorshipTasks = @json($mentorshipTasks);
+
+    // Restructure tasks
+    const restructureTasks = () => {
+      if (mentorshipTasks?.length > 0) {
+        return [
+          {
+            id: "board-in-progress",
+            title: "Pending",
+            item: mentorshipTasks.filter(task => task.status === 'pending'),
+          },
+          {
+            id: "board-in-review",
+            title: "In Review",
+            item: mentorshipTasks.filter(task => task.status === 'in-review'),
+          },
+          {
+            id: "board-done",
+            title: "Done",
+            item: mentorshipTasks.filter(task => task.status === 'completed'),
+          }
+        ]
+      }
+    }
+    const tasks = restructureTasks();
   </script>
   <script src="/vuexy/assets/js/app-kanban.js"></script>
 @stop
