@@ -14,6 +14,11 @@
     .kanban-board-header .dropdown {
       display: none;
     }
+    .kanban-container {
+      display: flex;
+      width: max-content !important;
+      gap: 3rem;
+    }
   </style>
 @stop
 
