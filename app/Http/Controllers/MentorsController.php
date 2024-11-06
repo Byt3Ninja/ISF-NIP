@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TemplateEmail;
+use Carbon\Carbon;
+
 
 class MentorsController extends Controller
 {
@@ -103,7 +105,7 @@ class MentorsController extends Controller
             ]);
             // Notify Admin here
             event(new WebMessage('NewMent', Auth::user()->first_name_en .' '. Auth::user()->last_name_en));
-            return back()->with(['msg' => 'Request successfully added','class'=>'success']);
+            return back()->with(['msg' => 'Request_successfully_added_Startup','class'=>'success']);
         } else {
             return back()->with(['msg' => "Error, can't add request",'class'=>'danger']);
         }
@@ -114,6 +116,7 @@ class MentorsController extends Controller
 
         if ($request->userid) {
             $dates = explode(',',$request->date);
+            
             foreach ($dates as $key){
                 $date = ltrim($key);
                 
@@ -125,10 +128,15 @@ class MentorsController extends Controller
                 $onlineMeeting = $this->meetingService->createMeeting($data);
                 
                 if (!$onlineMeeting['success']) {return back()->with(['message2' => "meeting_error"]);}
-                $date = substr($date, 0, -2);
-
+                // $date = substr($date1, 0, -2);
+                // $dateAM = substr($date1, -2);
+                
+                
 
                 $dateFormat = new \DateTime($date);
+                
+                // dd($dateFormat->format('Y-m-d H:i'));
+
                 MentorshipRequest::create([
                     'mentor_id' => $request->mentorid, 'user_id' => $request->userid, 'admin_comment' => $request->notes, 'approved' => 'Yes',
                     'admin_id' => Auth::id(), 'start_url' => $onlineMeeting['data']['start_url'], 'join_url' => $onlineMeeting['data']['join_url'],

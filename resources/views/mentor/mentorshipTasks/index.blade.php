@@ -10,6 +10,13 @@
 
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
+  <style>
+    .kanban-container {
+      display: flex;
+      width: max-content !important;
+      gap: 3rem;
+    }
+  </style>
 @stop
 
 @section('content')
@@ -19,30 +26,6 @@
 
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="app-kanban">
-      <!-- Add new board -->
-      <div class="row">
-        <div class="col-12">
-          <form class="kanban-add-new-board">
-            <label class="kanban-add-board-btn" for="kanban-add-board-input">
-              <i class="ti ti-plus"></i>
-              <span class="align-middle">Add new</span>
-            </label>
-            <input
-              type="text"
-              class="form-control w-px-250 kanban-add-board-input mb-4 d-none"
-              placeholder="Add Board Title"
-              id="kanban-add-board-input"
-              required />
-            <div class="mb-4 kanban-add-board-input d-none">
-              <button class="btn btn-primary btn-sm me-4">Add</button>
-              <button type="button" class="btn btn-label-secondary btn-sm kanban-add-board-cancel-btn">
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
       <!-- Kanban Wrapper -->
       <div 
         class="kanban-wrapper bg-white px-4 py-8" 
@@ -265,6 +248,17 @@
 @stop
 
 @section('scripts')
+  <script>
+    // Remove taskId from URL
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.has('taskId')) {
+        searchParams.delete('taskId');
+        const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname;
+        window.history.pushState({}, '', newUrl);
+      }
+    });
+  </script>
   <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
@@ -275,8 +269,32 @@
 
 @section('pagescripts')
   <script>
+    // Mentorship tasks data
     const mentorshipTasks = @json($mentorshipTasks);
-    console.log('mentorshipTasks', mentorshipTasks)
+
+    // Restructure tasks
+    const restructureTasks = () => {
+      if (mentorshipTasks?.length > 0) {
+        return [
+          {
+            id: "board-in-progress",
+            title: "Pending",
+            item: mentorshipTasks.filter(task => task.status === 'pending'),
+          },
+          {
+            id: "board-in-review",
+            title: "In Review",
+            item: mentorshipTasks.filter(task => task.status === 'in-review'),
+          },
+          {
+            id: "board-done",
+            title: "Done",
+            item: mentorshipTasks.filter(task => task.status === 'completed'),
+          }
+        ]
+      }
+    }
+    const tasks = restructureTasks();
   </script>
   <script src="/vuexy/assets/js/app-kanban.js"></script>
 @stop

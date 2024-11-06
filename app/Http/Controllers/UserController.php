@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Company;
 use App\Country;
+use App\Cycle;
 use Illuminate\Http\Request;
 use \Spatie\Permission\Models\Role as Role;
 use App\Http\Requests\StoreUserRequest;
@@ -12,12 +13,12 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Hash;
 use App\User;
-
+use Illuminate\Support\Facades\Auth;
 use DB;
 use Log;
 use Exception;
 use Session;
-
+use App\Team_member;
 use Illuminate\Support\Facades\Log as FacadesLog;
 
 class UserController extends Controller
@@ -269,15 +270,130 @@ class UserController extends Controller
         }
     }
 
-    public function companies () {
-        $this->preProcessingCheck('view_user');
-        $organization_id=auth()->user()->organization_id;
-        $companies = Company::when(!is_null($organization_id),function ($query) use($organization_id){
-            return $query->whereHas('cycledata',function ($q) use ($organization_id){
-                $q->where('organization_id',$organization_id);
-            });
-        })->get();
-        return view('admin/users/companies')->with('companies',$companies);
+    public function companies (Request $request) {
+        // $this->preProcessingCheck('view_user');
+        $l = app()->getLocale();
+        if (Auth::user()->hasRole('Registered')){
+
+            $organization_id=auth()->user()->organization_id;
+            $cycle_id=auth()->user()->company->cycle;
+            // $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->where('cycle', $cycle_id)->get();
+            $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+            $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)
+        ->where('cycle', $cycle_id)
+        ->when($request->search, function($query) use ($request, $name) {
+            $query->where($name, 'like', '%' . $request->search . '%');
+        })
+        ->when($request->sector, function($query) use ($request) {
+            $query->where('sector', 'like', '%' . $request->sector . '%');
+        })
+        ->when($request->stage, function($query) use ($request) {
+            $query->where('stage', 'like', '%' . $request->stage . '%');
+        })
+        ->get();
+
+
+            
+
+    }else if(Auth::user()->hasRole('organizationManager')){
+        
+        $organization_id = auth()->user()->organization_id;
+        $cycle_ids = Cycle::where('organization_id', $organization_id)->get();
+
+        // foreach ($cycle_ids as $cycle) {
+        //     $cycle_companies = Company::where('cycle', $cycle->id)->get();
+        //     $companies = $companies->merge($cycle_companies); // دمج المجموعات
+        // }
+
+        $companies = collect(); 
+        $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+        foreach ($cycle_ids as $cycle) {
+            
+            $cycle_companies = Company::where('cycle', $cycle->id)
+                ->when($request->search, function($query) use ($request, $name) {
+                    $query->where($name, 'like', '%' . $request->search . '%');
+                })
+                ->when($request->sector, function($query) use ($request) {
+                    $query->where('sector', 'like', '%' . $request->sector . '%');
+                })
+                ->when($request->stage, function($query) use ($request) {
+                    $query->where('stage', 'like', '%' . $request->stage . '%');
+                })
+                ->get();
+
+                
+                $companies = $companies->merge($cycle_companies);
+                
+            }
+            
+            
+            
+            
+
+    }else if(Auth::user()->hasRole('Mentor')){
+        
+        $organization_id = auth()->user()->organization_id;
+        $cycle_ids = Cycle::where('organization_id', $organization_id)
+        ->whereHas('mentors', function($query) {
+            $query->where('user_id', auth()->id());
+        })
+        ->pluck('id');
+        
+        // foreach ($cycle_ids as $cycle) {
+        //     $cycle_companies = Company::where('cycle', $cycle->id)->get();
+        //     $companies = $companies->merge($cycle_companies); // دمج المجموعات
+        // }
+
+        $companies = collect(); 
+    $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+    // استعراض الـ cycles للحصول على الشركات المرتبطة
+    foreach ($cycle_ids as $cycle_id) {
+        
+        $cycle_companies = Company::where('cycle', $cycle_id)
+            ->when($request->search, function($query) use ($request, $name) {
+                $query->where($name, 'like', '%' . $request->search . '%');
+            })
+            ->when($request->sector, function($query) use ($request) {
+                $query->where('sector', 'like', '%' . $request->sector . '%');
+            })
+            ->when($request->stage, function($query) use ($request) {
+                $query->where('stage', 'like', '%' . $request->stage . '%');
+            })
+            ->get();
+            
+        $companies = $companies->merge($cycle_companies);
+    }
+            
+    }else{
+
+        // $organization_id=auth()->user()->organization_id;
+        // $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->get();
+        $l = app()->getLocale(); // أو أي طريقة أخرى للحصول على اللغة
+        $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+        $cycle_ids = Cycle::where('organization_id', $request->orgnization)->get();
+
+        $companies = Company::when($request->search, function($query) use ($request, $name) {
+                    $query->where($name, 'like', '%' . $request->search . '%');
+                })
+                ->when($request->sector, function($query) use ($request) {
+                    $query->where('sector', 'like', '%' . $request->sector . '%');
+                })
+                ->when($request->stage, function($query) use ($request) {
+                    $query->where('stage', 'like', '%' . $request->stage . '%');
+                })
+                ->get();
+
+                if(!empty($request->orgnization)){
+                // تصفية الشركات بناءً على الـ cycle_ids
+$companies = $companies->filter(function($company) use ($cycle_ids) {
+    return $cycle_ids->contains('id', $company->id);
+});
+                }
+    }
+
+    
+
+        return view('admin/users/companies', compact('companies'));
     }
 
     public function showImportForm()
