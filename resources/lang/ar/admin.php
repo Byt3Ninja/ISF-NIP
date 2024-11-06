@@ -853,6 +853,8 @@ return [
 	'EdTech' => ' التكنولوجيا التعليمية ',
 	'E-Learning' => ' التعلم الإلكتروني ',
 	'Skill Development' => ' تطوير المهارات ',
+	'Shipping and Delivery' => 'الشحن والتوصيل',
 	'Request_successfully_added_Startup'=> 'تم تسجيل الطلب، سيتم ابلاغك فور الموافقة علي الطلب',
+	
 
 ];

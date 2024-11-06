@@ -174,6 +174,10 @@ class Company extends Model
         return $this->hasMany(SustainableIcon::class); // تأكد من أن العلاقة صحيحة
     }
 
+    public function cycle()
+    {
+        return $this->belongsTo(Cycle::class, 'cycle', 'id');
+    }
 
 
 }
