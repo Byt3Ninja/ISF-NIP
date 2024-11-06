@@ -122,6 +122,7 @@
               style="left: 7px; top: 10px;"></i>
           </div>
         </div>
+
         <div class="col-md-12 col-12 mb-3">
           <label for="address_ar"
             class="form-label">{{ __('admin.Arabic Address') }} *</label>
@@ -133,6 +134,7 @@
               style="left: 7px; top: 10px;"></i>
           </div>
         </div>
+
         <div class="col-md-12 col-12 mb-3">
           <label for="est_date" class="form-label">{{ __('admin.est_date') }}</label>
           <!-- Date Picker-->
@@ -150,6 +152,72 @@
           </div>
           <!-- /Date Picker -->
         </div>
+
+        <div class="col-md-12 col-12 mb-3">
+          <label for="CreatedTax" class="form-label">{{ __('admin.Have_Rgister_Company') }}
+            *</label>
+          <div class="position-relative">
+            <select id="CreatedTax"
+              class="form-select border-light light-shadow px-10 CreatedTax" name="CreatedTax" required >
+              
+                    <option value="0" {{ $client->company->CreatedTax == '0' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
+                    <option value="1" {{ $client->company->CreatedTax == '1' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
+                  
+            </select>
+            <i class="ti ti-building-factory-2 fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
+              style="left: 7px;"></i>
+          </div>
+        </div>
+
+      <div class="row ShowCreatedTax" style="{{ $client->company->CreatedTax == '1' ? '' : 'display: none;' }}" > 
+
+        <div class="col-md-4 col-12 mb-3">
+          <label for="Country_Register"
+            class="form-label">{{ __('admin.Country_Register') }}</label>
+          <div class="position-relative">
+            <select class="form-select border-light light-shadow px-10 Country_Register" 
+              id="Country_Register" name="Country_Register">
+              <option value="">{{ __('admin.Country') }}</option>
+              @foreach ($countries as $country)
+                <option value="{{ $country->id }}"
+                  {{ $country->id == $client->company->Country_Register_id ? 'selected' : '' }}>
+                  {{ $country->{'name_' . $l} }}</option>
+              @endforeach
+            </select>
+            <i class="ti ti-map-2 fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
+              style="left: 7px;"></i>
+          </div>
+        </div>
+
+<div class="col-md-4 col-12 mb-3">
+          <label for="Commercial_Register" class="form-label">{{ __('admin.Commercial_Register') }}
+            *</label>
+          <div class="position-relative">
+            <input type="text"
+              class="form-control border-light light-shadow px-10 Commercial_Register" id="Commercial_Register"
+              name="Commercial_Register" placeholder="{{ __('admin.Commercial_Register') }} *"
+              value="{{ $client->company ? $client->company->Commercial_Register : old('Commercial_Register') }}"
+               autocomplete="Commercial_Register" style="direction: rtl;">
+            <i class="ti ti-building-skyscraper position-absolute top-50 translate-middle-y me-3 text-primary"
+              style="left: 7px;"></i>
+          </div>
+        </div>
+
+        <div class="col-md-4 col-12 mb-3">
+          <label for="Tax_Card" class="form-label">{{ __('admin.Tax_Card') }}
+            *</label>
+          <div class="position-relative">
+            <input type="text"
+              class="form-control border-light light-shadow px-10 Tax_Card" id="Tax_Card"
+              name="Tax_Card" placeholder="{{ __('admin.Tax_Card') }} *"
+              value="{{ $client->company ? $client->company->Tax_Card : old('Tax_Card') }}"
+               autocomplete="Tax_Card" style="direction: rtl;">
+            <i class="ti ti-building-skyscraper position-absolute top-50 translate-middle-y me-3 text-primary"
+              style="left: 7px;"></i>
+          </div>
+        </div>
+    </div>
+
         <div class="col-12 d-flex justify-content-end">
           <button type="submit" class="btn btn-primary" id="submit-button">
             <span id="button-text">{{ __('admin.Update') }}</span>

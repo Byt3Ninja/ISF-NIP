@@ -219,6 +219,24 @@ if($data['CompanyN']==1){
             
             // $msgtype = 'UpdateComp';
 
+if($data['CreatedTax'] == 0){
+    $CreatedTax = 0;
+    $cuntryReg = 0;
+    $Commercial_Register = '';
+    $Tax_Card = '';
+
+
+}else{
+    $CreatedTax = $data['CreatedTax'];
+    $cuntryReg = $data['Country_Register'];
+    $Commercial_Register = $data['Commercial_Register'];
+    $Tax_Card = $data['Tax_Card'];
+
+
+}
+
+
+
             if ($companyId) {
                 
                 // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
@@ -232,6 +250,10 @@ if($data['CompanyN']==1){
                     'address_en' => $data['address_en'],
                     'address_ar' => $data['address_ar'],
                     'est_date' => $data['est_date'],
+                    'CreatedTax' => $CreatedTax,
+                    'Commercial_Register' => $Commercial_Register,
+                    'Tax_Card' => $Tax_Card,
+                    'Country_Register_id' => $cuntryReg,
                 ]);
 
 
@@ -252,6 +274,10 @@ if($data['CompanyN']==1){
                     'address_en' => $data['address_en'],
                     'address_ar' => $data['address_ar'],
                     'est_date' => $data['est_date'],
+                    'CreatedTax' => $CreatedTax,
+                    'Commercial_Register' => $Commercial_Register,
+                    'Tax_Card' => $Tax_Card,
+                    'Country_Register_id' => $cuntryReg,
                     'institutions' => $institutions,
                     'email' => $email,
                     'phone' => $phone,

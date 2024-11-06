@@ -853,5 +853,9 @@ return [
 	'E-Learning' => 'E-Learning',
 	'Skill Development' => 'Skill Development',
 	'Request_successfully_added_Startup'=> 'Request successfully added',
+	'Commercial_Register'=>'Commercial Register No. ',
+	'Tax_Card'=>'Tax Card No. ',
+	'Have_Rgister_Company'=>'Have Rgister Company',
+	'Country_Register'=>'Where you registered ?',
 	
 ];
