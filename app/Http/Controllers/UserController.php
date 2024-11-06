@@ -272,6 +272,9 @@ class UserController extends Controller
 
     public function companies (Request $request) {
         // $this->preProcessingCheck('view_user');
+
+        
+
         $l = app()->getLocale();
         if (Auth::user()->hasRole('Registered')){
 

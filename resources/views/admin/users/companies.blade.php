@@ -217,9 +217,17 @@
                   style="height: 580px;"
                   onclick="window.location.href='/dashboard/companyProfile/{{ $company->id }}'"
                 >
+                @php
+                  $client = App\User::where('company_id',$company->id)->first();
+                @endphp
                   <div class="w-100 d-flex justify-content-between align-items-center">
                     <span class="text-muted text-sm fw-semibold">
-                      {{ $l == 'en' ? 'Startup' : 'الشركة' }} 
+                      {{ $l == 'en' ? 'Startup' : 'الشركة' }}
+                      
+                      <a 
+                      href="{{ route('users.edit', ['user' => $client->id]) }}"
+                      class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"
+                    ><i class="ti ti-user-circle"></i></a>
                     </span>
                     <a 
                       href="/dashboard/companyProfile/{{ $company->id }}"
@@ -361,8 +369,8 @@
                   <div class="mt-3">
                     <span class="text-muted text-xs fw-medium">{{ __('admin.Founders') }}</span>
                     <div class="d-flex align-items-center mt-1 gap-2">
-                      @if(!empty($fonders))
-                      @foreach($fonders as $founder)
+                      @if(!empty($founders))
+                      @foreach($founders as $founder)
                         <div class="col-md-4">
                           <div 
                             class="px-3 border redius-15 text-center radius-15 flex flex-column g-1" 
