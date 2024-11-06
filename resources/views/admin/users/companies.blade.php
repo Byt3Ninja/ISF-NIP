@@ -80,7 +80,7 @@
               </div>
               <div class="d-flex align-items-center justify-content-end">
                 <!-- Filter -->
-                <form method="GET" action="">
+                <form method="GET" action="{{ route('users.companies') }}">
                   <div class="d-flex align-items-center gap-3">
                     <div style="display: flex; align-items: center;">
                       <button class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center"
@@ -90,13 +90,85 @@
                     </div>
                     <!-- Search Bar -->
                     <div class="position-relative d-none d-md-flex">
+
+                      <div class="SearchName">
                       <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
                         <i class="ti ti-search text-primary ti-24px"></i>
                       </div>
 
                       <input class="form-control search border rounded mx-1 bg-transparent text-primary px-10"
                         style="width: 300px;" id="search-table" placeholder="Search" name="search"
-                        {{-- value="{{ request('search') }}"  --}} />
+                        value="{{ request('search') }}"  />
+                      </div>
+
+
+          <div class="SearchSector">
+            @php
+              $sectors = App\Sector::whereNull('parent_id')->get();
+            @endphp
+
+                                    <select id="selectsector"
+                          class="form-control sector border rounded mx-1 bg-transparent text-primary px-10"style="width: 300px;" name="sector">
+                          <option value="" selected >{{ __('admin.Sector') }}
+                          </option>
+                          @foreach ($sectors as $sector_group)
+                            <optgroup label="{{ $sector_group->name }}">
+                              @foreach ($sector_group->children as $sector)
+                                <option value="{{ $sector->name_en }} " {{ $sector->name_en == request('sector') ? 'selected' : '' }} >{{ $sector->name }}
+                                </option>
+                              @endforeach
+                            </optgroup>
+                          @endforeach
+                        </select>
+          </div>
+                        
+
+                        <div class="SearchStage">
+                        
+                    <select class="form-control stage border rounded mx-1 bg-transparent text-primary px-10"
+                            style="width: 300px;" name="stage">
+                          <option value="">{{ __('admin.stage') }}</option>
+                          <option value="idea"
+                            {{ 'idea' == request('stage') ? 'selected' : '' }}>
+                            {{ __('admin.stage_idea') }}
+                          </option>
+                          <option value="prototype"
+                            {{ "prototype" == request('stage') ? 'selected' : '' }}>
+                            {{ __('admin.stage_prototype') }}
+                          </option>
+                          <option value="ready_product"
+                            {{ "ready_product" == request('stage') ? 'selected' : '' }}>
+                            {{ __('admin.stage_ready_product') }}
+                          </option>
+                          <option value="company_in_market"
+                            {{ "company_in_market" == request('stage') ? 'selected' : '' }}>
+                            {{ __('admin.stage_company_in_market') }}
+                          </option>
+                    </select>
+
+
+                          </div>
+
+                          @role('Admin')
+                          <div class="SearchOrg">
+                            @php
+                              $orgs = App\Organization::all();
+                              $orgrequest = App\Organization::where('id', request('orgnization'))->get();
+                            @endphp
+                
+                                                    <select
+                                          class="form-control sector border rounded mx-1 bg-transparent text-primary px-10" style="width: 300px;" name="orgnization">
+                                          <option value="" selected >{{ __('admin.Organizations') }}
+                                          </option>
+                                          @foreach ($orgs as $org)
+                                                <option value="{{ $org->id }} " {{ $org->id == request('orgnization') ? 'selected' : '' }} >{{ $org->{'name_'.$l} }}
+                                                </option>
+                                          @endforeach
+                                        </select>
+                          </div>
+                          @endrole
+
+                        
                     </div>
                   </div>
                 </form>

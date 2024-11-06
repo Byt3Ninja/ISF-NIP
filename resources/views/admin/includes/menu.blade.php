@@ -125,7 +125,7 @@
         </a>
       </li>
       @endif
-    @if (Auth::user()->hasanyRole('Registered'))
+    @if (Auth::user()->hasanyRole('Registered|Mentor|organizationManager'))
     <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
       <a class="menu-link" href="{{ route('users.companies') }}">
         <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
