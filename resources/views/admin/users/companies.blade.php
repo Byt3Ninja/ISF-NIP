@@ -217,9 +217,17 @@
                   style="height: 580px;"
                   onclick="window.location.href='/dashboard/companyProfile/{{ $company->id }}'"
                 >
+                @php
+                  $client = App\User::where('company_id',$company->id)->first();
+                @endphp
                   <div class="w-100 d-flex justify-content-between align-items-center">
                     <span class="text-muted text-sm fw-semibold">
-                      {{ $l == 'en' ? 'Startup' : 'الشركة' }} 
+                      {{ $l == 'en' ? 'Startup' : 'الشركة' }}
+                      
+                      <a 
+                      href="{{ route('users.edit', ['user' => $client->id]) }}"
+                      class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"
+                    ><i class="ti ti-user-circle"></i></a>
                     </span>
                     <a 
                       href="/dashboard/companyProfile/{{ $company->id }}"
