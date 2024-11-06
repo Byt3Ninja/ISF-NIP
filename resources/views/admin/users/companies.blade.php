@@ -361,8 +361,8 @@
                   <div class="mt-3">
                     <span class="text-muted text-xs fw-medium">{{ __('admin.Founders') }}</span>
                     <div class="d-flex align-items-center mt-1 gap-2">
-                      @if(!empty($fonders))
-                      @foreach($fonders as $founder)
+                      @if(!empty($founders))
+                      @foreach($founders as $founder)
                         <div class="col-md-4">
                           <div 
                             class="px-3 border redius-15 text-center radius-15 flex flex-column g-1" 
