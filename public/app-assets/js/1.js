@@ -740,7 +740,20 @@ $('.EditMilestone').click(function() {
   
 });
 
-
+$(".CreatedTax").change(function(){
+    var Create = $(this).val();
+    if(Create == 1){
+        $('.ShowCreatedTax').show();
+        $('.Country_Register').attr('required', 'required');
+        $('.Commercial_Register').attr('required', 'required');
+        $('.Tax_Card').attr('required', 'required');
+    }else{
+        $('.ShowCreatedTax').hide();
+        $('.Country_Register').removeAttr('required');
+        $('.Commercial_Register').removeAttr('required');
+        $('.Tax_Card').removeAttr('required');
+    }
+});
 
 
 

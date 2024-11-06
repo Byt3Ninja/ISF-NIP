@@ -855,6 +855,9 @@ return [
 	'Skill Development' => ' تطوير المهارات ',
 	'Shipping and Delivery' => 'الشحن والتوصيل',
 	'Request_successfully_added_Startup'=> 'تم تسجيل الطلب، سيتم ابلاغك فور الموافقة علي الطلب',
-	
+	'Commercial_Register'=>' رقم السجل التجاري',
+	'Tax_Card'=>' رقم البطاقة الضريبية ',
+	'Have_Rgister_Company'=>'هل تم تأسيس الشركة ؟',
+	'Country_Register'=>' البلد التى تم التأسيس فيها ',
 
 ];
