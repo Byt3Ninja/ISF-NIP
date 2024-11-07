@@ -654,7 +654,9 @@
 												{{-- <th>{{__('cycles.Company')}}</th> --}}
 												<th>{{__('cycles.User/Title')}}</th>
 												<th>{{__('cycles.Mentor')}}</th>
+                      @if (Auth::user()->hasRole('Admin'))
 												<th>{{__('cycles.Rate/Comment')}}</th>
+                      @endif
 												<th>{{__('cycles.Date/Time')}}</th>
 												<th>{{__('cycles.Approved')}}</th>
 												<th>{{__('cycles.Done')}}</th>
@@ -701,11 +703,13 @@
 															</div>
 														</div>
 													</td>
+                          @if (Auth::user()->hasRole('Admin'))
 													<td>
 														<small>{!!  $session->rate_comment?
 															 str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->rating).
 														'<br>'.$session->rate_comment:$session->comment  !!}</small>
 													</td>
+                          @endif
 													<td>
 														{{$session->zoom_date}}
 														<br>({{$session->period}}M)
