@@ -135,27 +135,14 @@
                               {{-- <i class="livicon-evo mr-2"
                                 data-options="name: {{ $svgs[$step->stype - 1] }}.svg; size: 50px; style: original;">
                               </i> --}}
-
                               <div class="d-flex align-items-center">
-
-                                <div class="bg-label-secondary rounded d-flex justify-content-center align-items-center"
-                                  style="width: 50px; height: 50px;">
-  
-                                  @if ($step->title === 'Application Test')
-                                    <i class="ti ti-notes ti-28px"></i>
-                                  @elseif($step->title === 'Rehearsals')
-                                    <i class="ti ti-notes ti-28px"></i>
-                                  @elseif($step->title === 'Ideation Bootcamp')
-                                    <i class="ti ti-notes ti-28px"></i>
-                                  @elseif($step->title === 'Final Evaluation')
-                                    <i class="ti ti-notes ti-28px"></i>
-                                  @elseif($step->title === 'Business Planning Bootcamp')
-                                    <i class="ti ti-notes ti-28px"></i>
-                                  @elseif($step->title === 'Audit')
-                                    <i class="ti ti-notes ti-28px"></i>
-                                  @else
-                                    <i class="ti ti-notes ti-28px"></i>
-                                  @endif
+                                <div class="bg-label-light rounded d-flex justify-content-center align-items-center"
+                                  style="width: 60px; height: 50px;">
+                                  <img 
+                                    src="/app-assets/fonts\LivIconsEvo/svg/loader-{{$step->stype}}.svg" 
+                                    alt="cycle-icon"
+                                    class="w-px-30 h-px-35"
+                                  />
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mx-6" style="width: 100%">
                                   <div>
@@ -467,6 +454,13 @@
 
 
 @section('pagescripts')
+  <script>
+    const steps = @json($steps);
+    console.log('$steps', steps);
+
+    
+  </script>
+
   @php($ccycle = \App\Cycle::find($id))
   <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
