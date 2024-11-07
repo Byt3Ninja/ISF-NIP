@@ -857,5 +857,6 @@ return [
 	'Tax_Card'=>'Tax Card No. ',
 	'Have_Rgister_Company'=>'Have Rgister Company',
 	'Country_Register'=>'Where you registered ?',
+	'organizationmanager'=>'Organization Manager',
 	
 ];

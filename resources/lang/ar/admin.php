@@ -859,5 +859,6 @@ return [
 	'Tax_Card'=>' رقم البطاقة الضريبية ',
 	'Have_Rgister_Company'=>'هل تم تأسيس الشركة ؟',
 	'Country_Register'=>' البلد التى تم التأسيس فيها ',
+	'organizationmanager'=>' مدير مؤسسه ',
 
 ];
