@@ -109,10 +109,21 @@
                       </div>
                     </td>
                     <td>
-                      <div class="d-flex align-items-center gap-1">
-                        <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
-                          <img src="/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}"
-                            alt="avatar" class="rounded-circle" height="40" width="40">
+                      <div class="d-flex align-items-center gap-2">
+                        <a 
+                          href="/dashboard/companyProfile/{{ $company->id }}"
+                          class="w-px-40 h-px-40 rounded-circle bg-label-light border d-flex align-items-center justify-content-center"
+                        >
+                          @if ($company->logo)
+                            <img 
+                              src="/191014/{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}" 
+                              onerror="this.src='/app-assets/images/logo_placeholder.png'"
+                              class="img-fluid" 
+                              alt="logo" 
+                            />
+                          @else
+                            <i class="ti ti-building text-secondary"></i>
+                          @endif
                         </a>
                         <a href="/dashboard/companyProfile/{{ $company->id }}">
                           <div class="d-flex align-items-center gap-1">
@@ -122,16 +133,29 @@
                       </div>
                     </td>
                     <td>
-                      <div class="d-flex align-items-center gap-1">
-                        <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
-                          <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}" alt="avatar"
-                            class="rounded-circle" height="40" width="40">
+                      <div class="d-flex align-items-center gap-2">
+                        <a 
+                          class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center" 
+                          href="/dashboard/users/{{ $company->user->id }}/edit"
+                        >
+                          @if ($company->user->img_url)
+                            <img 
+                              src="/191014/{{ $company->user->img_url }}" 
+                              onerror="this.src='/icons/account.svg'"
+                              alt="avatar"
+                              class="img-fluid"
+                            >
+                          @else
+                            <img src="/icons/account.svg" class="img-fluid" />
+                          @endif
                         </a>
                         <a href="/dashboard/users/{{ $company->user->id }}/edit">
-                          <div class="media-body">
-                            <h6 class="media-heading mb-0">{{ $company->user->{'first_name_' . $l} }}
-                              {{ $company->user->{'last_name_' . $l} }}</h6>
-                            <span class="font-small-2">{{ $company->user->{'title_' . $l} }}</span>
+                          <div class="text-black d-flex flex-column">
+                            <strong>
+                              {{ $company->user->{'first_name_' . $l} }}
+                              {{ $company->user->{'last_name_' . $l} }}
+                            </strong>
+                            <small class="text-muted">{{ $company->user->{'title_' . $l} }}</small>
                           </div>
                         </a>
                       </div>
