@@ -160,8 +160,8 @@
             <select id="CreatedTax"
               class="form-select border-light light-shadow px-10 CreatedTax" name="CreatedTax" required >
               
-                    <option value="0" {{ $client->company->CreatedTax == '0' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
-                    <option value="1" {{ $client->company->CreatedTax == '1' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
+                    <option value="0" {{ $client->company && $client->company->CreatedTax == '0' ? 'selected' : '' }}>{{ __('admin.No') }}</option>
+                    <option value="1" {{ $client->company && $client->company->CreatedTax == '1' ? 'selected' : '' }}>{{ __('admin.Yes') }}</option>
                   
             </select>
             <i class="ti ti-building-factory-2 fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
@@ -169,7 +169,7 @@
           </div>
         </div>
 
-      <div class="row ShowCreatedTax" style="{{ $client->company->CreatedTax == '1' ? '' : 'display: none;' }}" > 
+      <div class="row ShowCreatedTax" style="{{ $client->company && $client->company->CreatedTax == '1' ? '' : 'display: none;' }}" > 
 
         <div class="col-md-4 col-12 mb-3">
           <label for="Country_Register"
@@ -180,7 +180,7 @@
               <option value="">{{ __('admin.Country') }}</option>
               @foreach ($countries as $country)
                 <option value="{{ $country->id }}"
-                  {{ $country->id == $client->company->Country_Register_id ? 'selected' : '' }}>
+                  {{ $client->company && $country->id == $client->company->Country_Register_id ? 'selected' : '' }}>
                   {{ $country->{'name_' . $l} }}</option>
               @endforeach
             </select>
