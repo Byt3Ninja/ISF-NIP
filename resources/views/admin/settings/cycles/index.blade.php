@@ -454,13 +454,6 @@
 
 
 @section('pagescripts')
-  <script>
-    const steps = @json($steps);
-    console.log('$steps', steps);
-
-    
-  </script>
-
   @php($ccycle = \App\Cycle::find($id))
   <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
