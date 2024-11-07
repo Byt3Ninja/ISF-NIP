@@ -880,8 +880,8 @@
                       </tr>
                       <tr>
                         <td>{{ __('admin.Current Step') }}:</td>
-                        <td><b>{{ $company->stepdata->arr }}:</b>
-                          {{ $company->stepdata->title }}</td>
+                        <td><b>{{ $company->stepdata ? $company->stepdata->arr : '' }}:</b>
+                          {{ $company->stepdata ? $company->stepdata->title : '' }}</td>
                       </tr>
                       <tr>
                         <td>{{ __('admin.Screening result') }}:</td>
