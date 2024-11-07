@@ -112,13 +112,13 @@
                       <div class="d-flex align-items-center gap-2">
                         <a 
                           href="/dashboard/companyProfile/{{ $company->id }}"
-                          class="w-px-40 h-px-40 rounded-circle bg-label-light border d-flex align-items-center justify-content-center"
+                          class="w-px-40 h-px-40 rounded-circle bg-label-light border d-flex align-items-center justify-content-center overflow-hidden"
                         >
                           @if ($company->logo)
                             <img 
                               src="/191014/{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}" 
                               onerror="this.src='/app-assets/images/logo_placeholder.png'"
-                              class="img-fluid" 
+                              class="img-fluid w-100 h-100" 
                               alt="logo" 
                             />
                           @else
@@ -135,7 +135,7 @@
                     <td>
                       <div class="d-flex align-items-center gap-2">
                         <a 
-                          class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center" 
+                          class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center overflow-hidden" 
                           href="/dashboard/users/{{ $company->user->id }}/edit"
                         >
                           @if ($company->user->img_url)
@@ -143,7 +143,7 @@
                               src="/191014/{{ $company->user->img_url }}" 
                               onerror="this.src='/icons/account.svg'"
                               alt="avatar"
-                              class="img-fluid"
+                              class="img-fluid w-100 h-100"
                             >
                           @else
                             <img src="/icons/account.svg" class="img-fluid" />
