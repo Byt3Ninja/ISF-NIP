@@ -25,6 +25,14 @@
   <!-- Content -->
 
   <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row mb-6">
+      <div class="col-12">
+        <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+          <i class="ti ti-plus ti-16px me-2"></i>
+          <span class="align-middle">Add Task</span>
+        </button>
+      </div>
+    </div>
     <div class="app-kanban">
       <!-- Kanban Wrapper -->
       <div 
@@ -245,6 +253,97 @@
   <div class="content-backdrop fade"></div>
 </div>
 <!-- Content wrapper -->
+
+<!-- Add Task Modal -->
+  <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addTaskModalLabel">Add Task</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addTaskForm">
+            <div class="mb-3">
+              <label for="taskStatus" class="form-label">Status</label>
+              <select class="form-select" id="taskStatus" name="status" required>
+                <option value="pending">Pending</option>
+                <option value="in-review">In Review</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="taskTitle" class="form-label">Title</label>
+              <input type="text" class="form-control" id="taskTitle" name="title" required>
+            </div>
+            <div class="mb-3">
+              <label for="taskContent" class="form-label">Content</label>
+              <textarea class="form-control" id="taskContent" name="content" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Task</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- / Add Task Modal -->
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editTaskForm">
+          <div class="mb-3">
+            <label for="editTaskTitle" class="form-label">Title</label>
+            <input type="text" class="form-control" id="editTaskTitle" name="title" required>
+          </div>
+          <div class="mb-3">
+            <label for="editTaskContent" class="form-label">Content</label>
+            <textarea class="form-control" id="editTaskContent" name="content" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="editTaskStatus" class="form-label">Status</label>
+            <select class="form-select" id="editTaskStatus" name="status" required>
+              <option value="pending">Pending</option>
+              <option value="in-review">In Review</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editTaskLabel" class="form-label">Label</label>
+            <select class="form-select" id="editTaskLabel" name="label" required>
+              <option value="UX">UX</option>
+              <option value="Images">Images</option>
+              <option value="Info">Info</option>
+              <option value="Code Review">Code Review</option>
+              <option value="App">App</option>
+              <option value="Charts & Maps">Charts & Maps</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editTaskAssigned" class="form-label">Assigned To</label>
+            <select class="form-select" id="editTaskAssigned" name="assigned_to" required>
+              <option value="user1">User 1</option>
+              <option value="user2">User 2</option>
+              <option value="user3">User 3</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editTaskAttachments" class="form-label">Attachments</label>
+            <input type="file" class="form-control" id="editTaskAttachments" name="attachments[]" multiple>
+          </div>
+          <button type="submit" class="btn btn-primary">Update Task</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Edit Task Modal -->
 @stop
 
 @section('scripts')
@@ -293,8 +392,24 @@
           }
         ]
       }
-    }
+    };
+
     const tasks = restructureTasks();
+
+    // Kanban board
+    const kanban = new jKanban({
+      element: '.kanban-wrapper',
+      gutter: '15px',
+      widthBoard: '250px',
+      boards: tasks,
+      addItemButton: false,
+      dragBoards: true,
+      dragItems: true,
+      click: (el) => {
+        const taskId = el.getAttribute('data-eid');
+        // Open edit task modal
+        $('#editTaskModal').modal('show');
+      },
+    });
   </script>
-  <script src="/vuexy/assets/js/app-kanban.js"></script>
 @stop
