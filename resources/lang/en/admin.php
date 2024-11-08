@@ -858,5 +858,13 @@ return [
 	'Have_Rgister_Company'=>'Have Rgister Company',
 	'Country_Register'=>'Where you registered ?',
 	'organizationmanager'=>'Organization Manager',
+	'Add_Task'=>'Add Task ',
+	'Pending'=>' Pending ',
+	'In_Review'=>' In_Review ',
+	'Completed'=>' Completed ',
+	'Edit_Task'=>' Edit Task ',
+	'Due_Date'=>' Due Date ',
+	'Attachments'=>' Attachments ',
+	'Label'=>' Label ',
 	
 ];

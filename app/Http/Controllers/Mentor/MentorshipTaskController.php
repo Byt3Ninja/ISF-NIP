@@ -17,6 +17,7 @@ class MentorshipTaskController extends Controller
      */
     public function index(Request $request)
     {
+        
         $mentorship = MentorshipRequest::findOrFail($request->mentorship_id);
         $mentorshipTasks = $mentorship->mentorshipTasks;
         return view('mentor.mentorshipTasks.index',compact('mentorshipTasks','mentorship'));
@@ -36,17 +37,24 @@ class MentorshipTaskController extends Controller
      */
     public function store(TaskRequest $request)
     {
+        
         try{
 
             $mentorship = MentorshipRequest::find($request->mentorship_request_id);
+            
             $result = MentorshipTask::create($request->validated()+[
                     'mentor_id' => $mentorship->mentor_id,
                     'company_id' => $mentorship->user->company->id,
                     'user_id' => $mentorship->user_id,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'due_date' => $request->due_date,
+                    'status' => $request->status,
                 ]);
 
             if($result)
-                return  redirect(route('mentorshipTasks.index',['mentorship_id'=>$request->mentorship_request_id]))->with( ['message' => 'StoredSuccessfully'] );
+                return  redirect(route('mentorshipTasks.index',['mentorship_id'=>$request->mentorship_request_id]))->with( [
+            'message' => 'StoredSuccessfully'] );
             else
                 return back()->withInput()->with( ['message2' => 'FailedStore'] );
 

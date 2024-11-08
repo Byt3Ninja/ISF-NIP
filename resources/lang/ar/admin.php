@@ -860,5 +860,17 @@ return [
 	'Have_Rgister_Company'=>'هل تم تأسيس الشركة ؟',
 	'Country_Register'=>' البلد التى تم التأسيس فيها ',
 	'organizationmanager'=>' مدير مؤسسه ',
+	'Add_Task'=>' اضف مهمة جديدة ',
+	'Pending'=>' انتظار ',
+	'In_Review'=>' تحت المراجعة ',
+	'Completed'=>' اكتمل ',
+	'Edit_Task'=>' تعديل المهمة ',
+	'Due_Date'=>' وقت الانتهاء ',
+	'Attachments'=>' مرفقات ',
+	'Labels'=>' العلامات ',
+	'all_labels'=>' جميع العلامات ',
+	'Add_new_labels'=>' اضف علامة جديدة ',
+	'Labels_Name'=>' اسم العلامة ',
+	
 
 ];
