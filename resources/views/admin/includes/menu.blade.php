@@ -217,6 +217,13 @@
           <div>{{ __('admin.Tags') }}</div>
         </a>
       </li>
+
+      <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Labels.index') }}" class="menu-link">
+          <i class="ti ti-flag me-3 ti-md"></i>
+          <div>{{ __('admin.Labels') }}</div>
+        </a>
+      </li>
     @endif
 
     @can('edit_forms')

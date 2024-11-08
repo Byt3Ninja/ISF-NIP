@@ -152,6 +152,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('Mentors_Filter');
 
     Route::resource('Tags', 'TagsController');
+    Route::resource('Labels', 'LabelController');
     Route::resource('TimeSheet', 'TimeSheetController');
     Route::resource('Category', 'CatigoriesController'); // category in TimeSheet Folder
     Route::get('/show/FinanceTimeSheet', 'TimeSheetController@Finance')->name('show_finance_time_sheet');

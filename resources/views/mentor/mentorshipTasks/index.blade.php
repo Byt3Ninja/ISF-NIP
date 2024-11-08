@@ -29,7 +29,7 @@
       <div class="col-12">
         <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
           <i class="ti ti-plus ti-16px me-2"></i>
-          <span class="align-middle">Add Task</span>
+          <span class="align-middle">{{ __('admin.Add_Task') }}</span>
         </button>
       </div>
     </div>
@@ -39,11 +39,11 @@
         class="kanban-wrapper bg-white px-4 py-8" 
         style="border-radius: 1rem;">
       </div>
-
+      
       <!-- Edit Task/Task & Activities -->
-      <div class="offcanvas offcanvas-end kanban-update-item-sidebar">
+      {{-- <div class="offcanvas offcanvas-end kanban-update-item-sidebar">
         <div class="offcanvas-header border-bottom">
-          <h5 class="offcanvas-title">Edit Task</h5>
+          <h5 class="offcanvas-title">{{ __('admin.Edit_Task') }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body pt-0">
@@ -52,13 +52,13 @@
               <li class="nav-item">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-update">
                   <i class="ti ti-edit ti-18px me-1_5"></i>
-                  <span class="align-middle">Edit</span>
+                  <span class="align-middle">{{ __('admin.Edit') }}</span>
                 </button>
               </li>
               <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-activity">
                   <i class="ti ti-chart-pie-2 ti-18px me-1_5"></i>
-                  <span class="align-middle">Activity</span>
+                  <span class="align-middle">{{ __('admin.Activity') }}</span>
                 </button>
               </li>
             </ul>
@@ -68,15 +68,15 @@
             <div class="tab-pane fade show active" id="tab-update" role="tabpanel">
               <form>
                 <div class="mb-5">
-                  <label class="form-label" for="title">Title</label>
+                  <label class="form-label" for="title">{{ __('admin.Title') }}</label>
                   <input type="text" id="title" class="form-control" placeholder="Enter Title" />
                 </div>
                 <div class="mb-5">
-                  <label class="form-label" for="due-date">Due Date</label>
+                  <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
                   <input type="text" id="due-date" class="form-control" placeholder="Enter Due Date" />
                 </div>
                 <div class="mb-5">
-                  <label class="form-label" for="label"> Label</label>
+                  <label class="form-label" for="label">{{ __('admin.Label') }} </label>
                   <select class="select2 select2-label form-select" id="label">
                     <option data-color="bg-label-success" value="UX">UX</option>
                     <option data-color="bg-label-warning" value="Images">Images</option>
@@ -87,17 +87,17 @@
                   </select>
                 </div>
                 <div class="mb-5">
-                  <label class="form-label">Assigned</label>
+                  <label class="form-label">{{ __('admin.Assigned') }}</label>
                   <div class="assigned d-flex flex-wrap"></div>
                 </div>
                 <div class="mb-5">
-                  <label class="form-label" for="attachments">Attachments</label>
+                  <label class="form-label" for="attachments">{{ __('admin.Attachments') }}</label>
                   <div>
                     <input type="file" class="form-control" id="attachments" />
                   </div>
                 </div>
                 <div class="mb-5">
-                  <label class="form-label">Comment</label>
+                  <label class="form-label">{{ __('admin.Comment') }}</label>
                   <div class="comment-editor border-bottom-0"></div>
                   <div class="d-flex justify-content-end">
                     <div class="comment-toolbar">
@@ -114,10 +114,10 @@
                 <div>
                   <div class="d-flex flex-wrap">
                     <button type="button" class="btn btn-primary me-4" data-bs-dismiss="offcanvas">
-                      Update
+                      {{ __('admin.Update') }}
                     </button>
                     <button type="button" class="btn btn-label-danger" data-bs-dismiss="offcanvas">
-                      Delete
+                      {{ __('admin.Delete') }}
                     </button>
                   </div>
                 </div>
@@ -245,7 +245,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> --}}
     </div>
   </div>
   <!-- / Content -->
@@ -259,28 +259,39 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addTaskModalLabel">Add Task</h5>
+          <h5 class="modal-title" id="addTaskModalLabel">{{ __('admin.Add_Task') }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="addTaskForm">
+          <form class="form-horizontal form-bordered" id="basicForm" action= "{{ route('mentorshipTasks.store') }}" method="POST" enctype="multipart/form-data" >
+            {!! csrf_field() !!}
+            <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
+
+
             <div class="mb-3">
-              <label for="taskStatus" class="form-label">Status</label>
+              <label for="taskStatus" class="form-label">{{ __('admin.Status') }}</label>
               <select class="form-select" id="taskStatus" name="status" required>
-                <option value="pending">Pending</option>
-                <option value="in-review">In Review</option>
-                <option value="completed">Completed</option>
+                <option value="pending">{{ __('admin.Pending') }}</option>
+                <option value="in-review">{{ __('admin.In_Review') }}</option>
+                <option value="completed">{{ __('admin.Completed') }}</option>
               </select>
             </div>
             <div class="mb-3">
-              <label for="taskTitle" class="form-label">Title</label>
-              <input type="text" class="form-control" id="taskTitle" name="title" required>
+              <label for="taskTitle" class="form-label">{{ __('admin.Title') }}</label>
+              <input type="text"  class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title" value="{{ old('title') }}" id="title" required>
             </div>
+
             <div class="mb-3">
-              <label for="taskContent" class="form-label">Content</label>
-              <textarea class="form-control" id="taskContent" name="content" rows="3" required></textarea>
+              <label for="taskContent" class="form-label">{{ __('admin.Description') }}</label>
+              <textarea class="form-control" id="description"  name="description" required>{!! old('description') !!}</textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Add Task</button>
+
+            <div class="mb-5">
+              <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
+              <input type="text" id="due-date" name="due_date" class="form-control " placeholder="Enter Due Date" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">{{ __('admin.Add_Task') }}</button>
           </form>
         </div>
       </div>
@@ -293,29 +304,35 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+        <h5 class="modal-title" id="editTaskModalLabel">{{ __('admin.Edit_Task') }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+
         <form id="editTaskForm">
+        
           <div class="mb-3">
-            <label for="editTaskTitle" class="form-label">Title</label>
-            <input type="text" class="form-control" id="editTaskTitle" name="title" required>
+            <label for="editTaskTitle" class="form-label">{{ __('admin.Title') }}</label>
+            <input type="text"  class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title" value="{{ $mentorship->title }}" id="editTaskTitle" required>
           </div>
           <div class="mb-3">
-            <label for="editTaskContent" class="form-label">Content</label>
-            <textarea class="form-control" id="editTaskContent" name="content" rows="3" required></textarea>
+            <label for="editTaskContent" class="form-label">{{ __('admin.Description') }}</label>
+            <textarea class="form-control" id="description"  name="description" required>{!! old('description') !!}</textarea>
           </div>
           <div class="mb-3">
-            <label for="editTaskStatus" class="form-label">Status</label>
-            <select class="form-select" id="editTaskStatus" name="status" required>
-              <option value="pending">Pending</option>
-              <option value="in-review">In Review</option>
-              <option value="completed">Completed</option>
+            <label for="editTaskStatus" class="form-label">{{ __('admin.Status') }}</label>
+            <select class="form-select" id="taskStatus" name="status" required>
+              <option value="pending">{{ __('admin.Pending') }}</option>
+              <option value="in-review">{{ __('admin.In_Review') }}</option>
+              <option value="completed">{{ __('admin.Completed') }}</option>
             </select>
           </div>
           <div class="mb-3">
-            <label for="editTaskLabel" class="form-label">Label</label>
+            <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
+            <input type="text" id="due-date" name="due_date" class="form-control " placeholder="Enter Due Date" />
+          </div>
+          <div class="mb-3">
+            <label for="editTaskLabel" class="form-label">{{ __('admin.Label') }}</label>
             <select class="form-select" id="editTaskLabel" name="label" required>
               <option value="UX">UX</option>
               <option value="Images">Images</option>
@@ -325,19 +342,21 @@
               <option value="Charts & Maps">Charts & Maps</option>
             </select>
           </div>
-          <div class="mb-3">
-            <label for="editTaskAssigned" class="form-label">Assigned To</label>
+          
+          {{-- <div class="mb-3">
+            <label for="editTaskAssigned" class="form-label">{{ __('admin.Assigned_To') }}</label>
             <select class="form-select" id="editTaskAssigned" name="assigned_to" required>
               <option value="user1">User 1</option>
               <option value="user2">User 2</option>
               <option value="user3">User 3</option>
             </select>
-          </div>
+          </div> --}}
+
           <div class="mb-3">
-            <label for="editTaskAttachments" class="form-label">Attachments</label>
+            <label for="editTaskAttachments" class="form-label">{{ __('admin.Attachments') }}</label>
             <input type="file" class="form-control" id="editTaskAttachments" name="attachments[]" multiple>
           </div>
-          <button type="submit" class="btn btn-primary">Update Task</button>
+          <button type="submit" class="btn btn-primary">{{ __('admin.Update') }}</button>
         </form>
       </div>
     </div>
@@ -370,7 +389,7 @@
   <script>
     // Mentorship tasks data
     const mentorshipTasks = @json($mentorshipTasks);
-
+         
     // Restructure tasks
     const restructureTasks = () => {
       if (mentorshipTasks?.length > 0) {
@@ -393,7 +412,7 @@
         ]
       }
     };
-
+    
     const tasks = restructureTasks();
 
     // Kanban board
@@ -408,6 +427,8 @@
       click: (el) => {
         const taskId = el.getAttribute('data-eid');
         // Open edit task modal
+
+        
         $('#editTaskModal').modal('show');
       },
     });
