@@ -1,22 +1,23 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 @stop
 
 @section('style')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
-  <style>
-    .kanban-container {
-      display: flex;
-      width: max-content !important;
-      gap: 3rem;
-    }
-  </style>
+<link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
+<style>
+  .kanban-container {
+    display: flex;
+    width: max-content !important;
+    gap: 3rem;
+  }
+</style>
 @stop
 
 @section('content')
@@ -35,11 +36,9 @@
     </div>
     <div class="app-kanban">
       <!-- Kanban Wrapper -->
-      <div 
-        class="kanban-wrapper bg-white px-4 py-8" 
-        style="border-radius: 1rem;">
+      <div class="kanban-wrapper bg-white px-4 py-8" style="border-radius: 1rem;">
       </div>
-      
+
       <!-- Edit Task/Task & Activities -->
       {{-- <div class="offcanvas offcanvas-end kanban-update-item-sidebar">
         <div class="offcanvas-header border-bottom">
@@ -255,48 +254,62 @@
 <!-- Content wrapper -->
 
 <!-- Add Task Modal -->
-  <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addTaskModalLabel">{{ __('admin.Add_Task') }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form class="form-horizontal form-bordered" id="basicForm" action= "{{ route('mentorshipTasks.store') }}" method="POST" enctype="multipart/form-data" >
-            {!! csrf_field() !!}
-            <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addTaskModalLabel">{{ __('admin.Add_Task') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal form-bordered" id="basicForm" action="{{ route('mentorshipTasks.store') }}"
+          method="POST" enctype="multipart/form-data">
+          {!! csrf_field() !!}
+          <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
 
 
-            <div class="mb-3">
-              <label for="taskStatus" class="form-label">{{ __('admin.Status') }}</label>
-              <select class="form-select" id="taskStatus" name="status" required>
-                <option value="pending">{{ __('admin.Pending') }}</option>
-                <option value="in-review">{{ __('admin.In_Review') }}</option>
-                <option value="completed">{{ __('admin.Completed') }}</option>
-              </select>
+          <div class="mb-3">
+            <label for="taskStatus" class="form-label">{{ __('admin.Status') }}</label>
+            <select class="form-select" id="taskStatus" name="status" required>
+              <option value="pending">{{ __('admin.Pending') }}</option>
+              <option value="in-review">{{ __('admin.In_Review') }}</option>
+              <option value="completed">{{ __('admin.Completed') }}</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="taskTitle" class="form-label">{{ __('admin.Title') }}</label>
+            <input type="text" class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title"
+              value="{{ old('title') }}" id="title" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="taskContent" class="form-label">{{ __('admin.Description') }}</label>
+            <div style="height: 150px;" class="comment-editor border-bottom-0 form-control border mb-2 overflow-auto"
+              id="taskContent">
             </div>
-            <div class="mb-3">
-              <label for="taskTitle" class="form-label">{{ __('admin.Title') }}</label>
-              <input type="text"  class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title" value="{{ old('title') }}" id="title" required>
+            <div class="d-flex justify-content-end border-top">
+              <div class="comment-toolbar">
+                <span class="ql-formats me-0">
+                  <button class="ql-bold"></button>
+                  <button class="ql-italic"></button>
+                  <button class="ql-underline"></button>
+                  <button class="ql-link"></button>
+                  <button class="ql-image"></button>
+                </span>
+              </div>
             </div>
+          </div>
+          <div class="mb-5">
+            <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
+            <input type="text" placeholder="YYYY-MM-DD" id="flatpickr-date" name="due_date" class="form-control" />
+          </div>
 
-            <div class="mb-3">
-              <label for="taskContent" class="form-label">{{ __('admin.Description') }}</label>
-              <textarea class="form-control" id="description"  name="description" required>{!! old('description') !!}</textarea>
-            </div>
-
-            <div class="mb-5">
-              <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
-              <input type="text" id="due-date" name="due_date" class="form-control " placeholder="Enter Due Date" />
-            </div>
-
-            <button type="submit" class="btn btn-primary">{{ __('admin.Add_Task') }}</button>
-          </form>
-        </div>
+          <button type="submit" class="btn btn-primary">{{ __('admin.Add_Task') }}</button>
+        </form>
       </div>
     </div>
   </div>
+</div>
 <!-- / Add Task Modal -->
 
 <!-- Edit Task Modal -->
@@ -310,14 +323,28 @@
       <div class="modal-body">
 
         <form id="editTaskForm">
-        
+
           <div class="mb-3">
             <label for="editTaskTitle" class="form-label">{{ __('admin.Title') }}</label>
-            <input type="text"  class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title" value="{{ $mentorship->title }}" id="editTaskTitle" required>
+            <input type="text" class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title"
+              value="{{ $mentorship->title }}" id="editTaskTitle" required>
           </div>
           <div class="mb-3">
             <label for="editTaskContent" class="form-label">{{ __('admin.Description') }}</label>
-            <textarea class="form-control" id="description"  name="description" required>{!! old('description') !!}</textarea>
+            <div style="height: 150px;" class="comment-editor border-bottom-0 form-control border mb-2 overflow-auto"
+              id="editTaskContent">
+            </div>
+            <div class="d-flex justify-content-end border-top">
+              <div class="comment-toolbar">
+                <span class="ql-formats me-0">
+                  <button class="ql-bold"></button>
+                  <button class="ql-italic"></button>
+                  <button class="ql-underline"></button>
+                  <button class="ql-link"></button>
+                  <button class="ql-image"></button>
+                </span>
+              </div>
+            </div>
           </div>
           <div class="mb-3">
             <label for="editTaskStatus" class="form-label">{{ __('admin.Status') }}</label>
@@ -329,7 +356,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
-            <input type="text" id="due-date" name="due_date" class="form-control " placeholder="Enter Due Date" />
+            <input type="text" name="due_date" class="form-control " placeholder="YYYY-MM-DD" id="flatpickr-date" />
           </div>
           <div class="mb-3">
             <label for="editTaskLabel" class="form-label">{{ __('admin.Label') }}</label>
@@ -342,7 +369,7 @@
               <option value="Charts & Maps">Charts & Maps</option>
             </select>
           </div>
-          
+
           {{-- <div class="mb-3">
             <label for="editTaskAssigned" class="form-label">{{ __('admin.Assigned_To') }}</label>
             <select class="form-select" id="editTaskAssigned" name="assigned_to" required>
@@ -366,8 +393,8 @@
 @stop
 
 @section('scripts')
-  <script>
-    // Remove taskId from URL
+<script>
+  // Remove taskId from URL
     document.addEventListener('DOMContentLoaded', () => {
       const searchParams = new URLSearchParams(window.location.search);
       if (searchParams.has('taskId')) {
@@ -376,61 +403,96 @@
         window.history.pushState({}, '', newUrl);
       }
     });
-  </script>
-  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
-  <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
-  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+</script>
+<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+<script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
+<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+<script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
 @stop
 
 @section('pagescripts')
-  <script>
-    // Mentorship tasks data
-    const mentorshipTasks = @json($mentorshipTasks);
-         
-    // Restructure tasks
-    const restructureTasks = () => {
-      if (mentorshipTasks?.length > 0) {
-        return [
-          {
-            id: "board-in-progress",
-            title: "Pending",
-            item: mentorshipTasks.filter(task => task.status === 'pending'),
-          },
-          {
-            id: "board-in-review",
-            title: "In Review",
-            item: mentorshipTasks.filter(task => task.status === 'in-review'),
-          },
-          {
-            id: "board-done",
-            title: "Done",
-            item: mentorshipTasks.filter(task => task.status === 'completed'),
-          }
-        ]
-      }
-    };
-    
-    const tasks = restructureTasks();
-
-    // Kanban board
-    const kanban = new jKanban({
-      element: '.kanban-wrapper',
-      gutter: '15px',
-      widthBoard: '250px',
-      boards: tasks,
-      addItemButton: false,
-      dragBoards: true,
-      dragItems: true,
-      click: (el) => {
-        const taskId = el.getAttribute('data-eid');
-        // Open edit task modal
-
+<script src="/vuexy/assets/js/forms-pickers.js"></script>
+<script>
+  // Language
+  const lang = '{{ $l }}';
+  
+  // Mentorship tasks data
+  const mentorshipTasks = @json($mentorshipTasks);
+  // console.log('mentorshipTasks',mentorshipTasks)
         
-        $('#editTaskModal').modal('show');
-      },
-    });
-  </script>
+  // Restructure tasks
+  const restructureTasks = () => {
+    if (mentorshipTasks?.length > 0) {
+      return [
+        {
+          id: "board-in-pending",
+          title: "Pending",
+          item: mentorshipTasks.filter(task => task.status === 'pending'),
+        },
+        {
+          id: "board-in-review",
+          title: "In Review",
+          item: mentorshipTasks.filter(task => task.status === 'in-review'),
+        },
+        {
+          id: "board-completed",
+          title: "Completed",
+          item: mentorshipTasks.filter(task => task.status === 'completed'),
+        }
+      ]
+    }
+  };
+  
+  const tasks = restructureTasks();
+
+  // Kanban board
+  const kanban = new jKanban({
+    element: '.kanban-wrapper',
+    gutter: '15px',
+    widthBoard: '250px',
+    boards: tasks,
+    addItemButton: false,
+    dragBoards: true,
+    dragItems: true,
+    click: (el) => onClickTask(el),
+  });
+
+  let taskDetails;
+
+  const onClickTask = (el) => {
+    const elementId = el.getAttribute('data-eid');
+    const taskId = +elementId;
+
+    // Open edit task modal
+    $('#editTaskModal').modal('show');
+
+    // Get task details
+    const task = mentorshipTasks.find(task => task.id === taskId);
+    taskDetails = task;
+
+    if (task) {
+      // $('#editTaskForm').attr('action', `/mentorshipTasks/${task.id}`);
+      $('#editTaskTitle').val(task.title);
+      $('.comment-editor .ql-editor').html(task.description);
+      $('#editTaskStatus').val(task.status);
+      $('#editTaskLabel').val(task.label);
+      $('#editTaskAssigned').val(task.assigned_to);
+      $('#editTaskAttachments').val(task.attachments);
+      $('#due-date').val(task.due_date);
+    };
+  };
+
+  const commentEditor = new Quill('.comment-editor', {
+    modules: {
+      toolbar: '.comment-toolbar'
+    },
+    theme: 'snow',
+    placeholder: lang === 'ar' ? 'أدخل التعليق' : 'Enter description',
+    theme: 'snow',
+  });
+  commentEditor.root.innerHTML = taskDetails.description;
+</script>
 @stop
