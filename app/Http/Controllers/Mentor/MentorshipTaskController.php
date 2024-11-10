@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Mentor\MentorshipTask\TaskRequest;
+use App\Label;
 use App\MentorshipRequest;
 use App\MentorshipTask;
 use Illuminate\Http\Request;
@@ -20,7 +21,10 @@ class MentorshipTaskController extends Controller
         
         $mentorship = MentorshipRequest::findOrFail($request->mentorship_id);
         $mentorshipTasks = $mentorship->mentorshipTasks;
-        return view('mentor.mentorshipTasks.index',compact('mentorshipTasks','mentorship'));
+
+        $labels = Label::all();
+        
+        return view('mentor.mentorshipTasks.index',compact('mentorshipTasks','mentorship','labels'));
     }
 
     /**
@@ -142,4 +146,44 @@ class MentorshipTaskController extends Controller
 
         }
     }
+
+
+    public function updateWith(TaskRequest $request)
+    {
+        
+        try{
+            $mentorship = MentorshipRequest::find($request->mentorship_request_id);
+            $mentorshipTask = MentorshipTask::findOrFail($request->MTaskId);
+            
+            $result = $mentorshipTask->update($request->validated() + [
+                'mentor_id' => $mentorship->mentor_id,
+                'company_id' => $mentorship->user->company->id,
+                'user_id' => $mentorship->user_id,
+                'title' => $request->title,
+                'description' => $request->description,
+                'due_date' => $request->due_date,
+                'status' => $request->status,
+                'label_id' => $request->label,
+                'attached' => $request->attachments,
+            ]);
+
+if(!empty($request->comment)){
+            $result = $mentorshipTask->comments()->create(['user_id'=>auth()->id(),'comment'=>$request->comment]);
+}
+            if($result)
+                return  redirect(route('mentorshipTasks.index',['mentorship_id'=>$request->mentorship_request_id]))->with( [
+            'message' => 'StoredSuccessfully'] );
+            else
+                return back()->withInput()->with( ['message2' => 'FailedStore'] );
+
+        }catch (Exception $e){
+            //log what happend
+            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+            abort(500);
+
+        }
+
+    }
+
+
 }

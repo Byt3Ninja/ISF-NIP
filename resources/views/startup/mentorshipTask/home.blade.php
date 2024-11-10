@@ -73,7 +73,7 @@
               <li class="nav-item">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-update">
                   <i class="ti ti-edit ti-18px me-1_5"></i>
-                  <span class="align-middle">Edit</span>
+                  <span class="align-middle">{{ __('admin.Edit') }}</span>
                 </button>
               </li>
               <li class="nav-item">
@@ -89,7 +89,7 @@
             <div class="tab-pane fade show active" id="tab-update" role="tabpanel">
               <form>
                 <div class="mb-5">
-                  <label class="form-label">Comment</label>
+                  <label class="form-label">{{ __('admin.comment') }}</label>
                   <div class="comment-editor border-bottom-0"></div>
                   <div class="d-flex justify-content-end">
                     <div class="comment-toolbar">
