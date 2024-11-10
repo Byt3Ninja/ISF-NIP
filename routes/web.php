@@ -353,6 +353,7 @@ Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
         Route::get('meetingRedirect/{mentorship_request_id}','MentorshipController@meetingRedirect')->name('meetingRedirect');
         Route::resource('mentorshipTasks','MentorshipTaskController');
         Route::post('mentorshipTasks/send/comment','MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+        Route::post('mentorshipTasks/updateW','MentorshipTaskController@updateWith')->name('mentorshipTasks.updateWith');
 
     });
 

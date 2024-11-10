@@ -262,8 +262,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form class="form-horizontal form-bordered" id="basicForm" action="{{ route('mentorshipTasks.store') }}"
-          method="POST" enctype="multipart/form-data">
+        <form class="form-horizontal form-bordered" id="basicForm" action="{{ route('mentorshipTasks.store') }}" method="POST" enctype="multipart/form-data">
           {!! csrf_field() !!}
           <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
 
@@ -284,10 +283,11 @@
 
           <div class="mb-3">
             <label for="taskContent" class="form-label">{{ __('admin.Description') }}</label>
-            <div style="height: 150px;" class="comment-editor border-bottom-0 form-control border mb-2 overflow-auto"
+            {{-- <div style="height: 150px;" class="comment-editor border-bottom-0 form-control border mb-2 overflow-auto"
               id="taskContent">
-            </div>
-            <div class="d-flex justify-content-end border-top">
+            </div> --}}
+            <textarea class="form-control comment-editor" id="taskContent"  name="description" required>{{ old('description') }}</textarea>
+            {{-- <div class="d-flex justify-content-end border-top">
               <div class="comment-toolbar">
                 <span class="ql-formats me-0">
                   <button class="ql-bold"></button>
@@ -297,7 +297,7 @@
                   <button class="ql-image"></button>
                 </span>
               </div>
-            </div>
+            </div> --}}
           </div>
           <div class="mb-5">
             <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
@@ -322,51 +322,37 @@
       </div>
       <div class="modal-body">
 
-        <form id="editTaskForm">
-
+        <form class="form-horizontal form-bordered" id="editTaskForm" action="{{ route('mentorshipTasks.updateWith') }}" method="POST" enctype="multipart/form-data">
+          @csrf
+          <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
+          <input type="hidden" name="MTaskId" id="MTaskId">
           <div class="mb-3">
             <label for="editTaskTitle" class="form-label">{{ __('admin.Title') }}</label>
-            <input type="text" class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title"
-              value="{{ $mentorship->title }}" id="editTaskTitle" required>
+            <input type="text" class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title" value="" id="editTaskTitle" required>
           </div>
           <div class="mb-3">
             <label for="editTaskContent" class="form-label">{{ __('admin.Description') }}</label>
-            <div style="height: 150px;" class="comment-editor border-bottom-0 form-control border mb-2 overflow-auto"
-              id="editTaskContent">
-            </div>
-            <div class="d-flex justify-content-end border-top">
-              <div class="comment-toolbar">
-                <span class="ql-formats me-0">
-                  <button class="ql-bold"></button>
-                  <button class="ql-italic"></button>
-                  <button class="ql-underline"></button>
-                  <button class="ql-link"></button>
-                  <button class="ql-image"></button>
-                </span>
-              </div>
-            </div>
+            <textarea class="form-control" id="descriptionEdit"  name="description" required></textarea>
           </div>
           <div class="mb-3">
             <label for="editTaskStatus" class="form-label">{{ __('admin.Status') }}</label>
-            <select class="form-select" id="taskStatus" name="status" required>
-              <option value="pending">{{ __('admin.Pending') }}</option>
-              <option value="in-review">{{ __('admin.In_Review') }}</option>
-              <option value="completed">{{ __('admin.Completed') }}</option>
+            <select class="form-select" id="editTaskStatus" name="status" required>
+              <option value="" disabled  >{{ __('admin.Choose') }}</option>
+              <option value="pending"  >{{ __('admin.Pending') }}</option>
+              <option value="in-review" >{{ __('admin.In_Review') }}</option>
+              <option value="completed"  >{{ __('admin.Completed') }}</option>
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
-            <input type="text" name="due_date" class="form-control " placeholder="YYYY-MM-DD" id="flatpickr-date" />
+            <label class="form-label" for="due_date">{{ __('admin.Due_Date') }}</label>
+            <input type="text" name="due_date" class="form-control due_dateEdit" placeholder="YYYY-MM-DD" id="flatpickr-date due_date" />
           </div>
           <div class="mb-3">
-            <label for="editTaskLabel" class="form-label">{{ __('admin.Label') }}</label>
+            <label for="editTaskLabel" class="form-label">{{ __('admin.Labels') }}</label>
             <select class="form-select" id="editTaskLabel" name="label" required>
-              <option value="UX">UX</option>
-              <option value="Images">Images</option>
-              <option value="Info">Info</option>
-              <option value="Code Review">Code Review</option>
-              <option value="App">App</option>
-              <option value="Charts & Maps">Charts & Maps</option>
+              @foreach ($labels as $label)
+              <option value="{{ $label->id }}">{{ $label->name }}</option>
+              @endforeach
             </select>
           </div>
 
@@ -381,8 +367,20 @@
 
           <div class="mb-3">
             <label for="editTaskAttachments" class="form-label">{{ __('admin.Attachments') }}</label>
-            <input type="file" class="form-control" id="editTaskAttachments" name="attachments[]" multiple>
+            <input type="text" class="form-control d-none" id="file1"
+                name="attachments"  />
+            <div class="btn btn-success lfm" id="editTaskAttachments" data-input="file1" data-preview="holder" >{{ __('admin.Choose') }}</div>
+
           </div>
+
+          <div class="mb-3">
+            <label for="editTaskAttachments" class="form-label">{{ __('admin.comment') }}</label>
+            <div class="form-label-group">
+                <textarea class="form-control" id="summernote" name="comment"></textarea>
+            </div>
+          </div>
+
+
           <button type="submit" class="btn btn-primary">{{ __('admin.Update') }}</button>
         </form>
       </div>
@@ -476,12 +474,12 @@
     if (task) {
       // $('#editTaskForm').attr('action', `/mentorshipTasks/${task.id}`);
       $('#editTaskTitle').val(task.title);
-      $('.comment-editor .ql-editor').html(task.description);
+      $('#descriptionEdit').html(task.description);
       $('#editTaskStatus').val(task.status);
-      $('#editTaskLabel').val(task.label);
+      $('#editTaskLabel').val(task.label_id);
       $('#editTaskAssigned').val(task.assigned_to);
-      $('#editTaskAttachments').val(task.attachments);
-      $('#due-date').val(task.due_date);
+      $('#MTaskId').val(task.id);
+      $('.due_dateEdit').val(task.due_date);
     };
   };
 
