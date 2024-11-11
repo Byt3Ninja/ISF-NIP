@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html 
   lang="{{ $l }}" 
-  dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
+  dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
   data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
   class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
   data-theme="theme-default" 
