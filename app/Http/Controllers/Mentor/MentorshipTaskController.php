@@ -7,6 +7,7 @@ use App\Http\Requests\Mentor\MentorshipTask\TaskRequest;
 use App\Label;
 use App\MentorshipRequest;
 use App\MentorshipTask;
+use App\MentorshipTaskComment;
 use Illuminate\Http\Request;
 use Exception;
 use Log;
@@ -23,8 +24,16 @@ class MentorshipTaskController extends Controller
         $mentorshipTasks = $mentorship->mentorshipTasks;
 
         $labels = Label::all();
-        
-        return view('mentor.mentorshipTasks.index',compact('mentorshipTasks','mentorship','labels'));
+        $allComments = [];
+
+if (isset($mentorshipTasks)) {
+    foreach ($mentorshipTasks as $mentorshipTask) {
+        $comments = MentorshipTaskComment::where('mentorship_task_id', $mentorshipTask->id)->get();
+        $allComments[$mentorshipTask->id] = $comments;
+    }
+}
+
+return view('mentor.mentorshipTasks.index', compact('mentorshipTasks', 'mentorship', 'labels', 'allComments'));
     }
 
     /**
