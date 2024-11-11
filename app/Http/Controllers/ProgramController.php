@@ -72,7 +72,7 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return view('admin.programs.show');
     }
 
     /**

@@ -343,9 +343,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('final/delsession/{id}' ,'FinalscreeningController@delsession');
 
 
-//Program List
-Route::resource('programlist', 'ProgramController');
-Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
+    //Program List
+    Route::resource('programlist', 'ProgramController');
+    Route::get('programlist/show/{id}','ProgramController@show');
+    Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     // ===============> Mentor Dashboard Routes <===============
     Route::group(['prefix' => 'mentor','namespace'=>'Mentor'],function (){

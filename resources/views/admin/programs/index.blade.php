@@ -201,9 +201,9 @@
                       <div class="d-flex flex-column justify-content-between" style="flex: 1;">
                         <!-- Program Title -->
                         <div class="d-flex justify-content-between">
-                          <p class="text-primary fs-5 fw-bold">
+                          <a href="/dashboard/programlist/show/1" class="text-primary fs-5 fw-bold">
                             {{ $cycle->title }}
-                          </p>
+                          </a>
                           <div 
                             class="badge d-flex align-items-center justify-content-center
                             bg-label-light rounded mx-1 rounded-pill"
