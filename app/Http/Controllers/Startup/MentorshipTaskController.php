@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Startup;
 use App\Company;
 use App\Http\Controllers\Controller;
 use App\MentorshipRequest;
+use App\MentorshipTaskComment;
 use App\MentorshipTask;
 use Illuminate\Http\Request;
 use Exception;
@@ -15,6 +16,8 @@ class MentorshipTaskController extends Controller
     public function index($id){
         $mentorship= MentorshipRequest::findOrFail($id);
         $mentorshipTasks = $mentorship->mentorshipTasks;
+
+        
         return view('startup.mentorshipTask.index',compact('mentorshipTasks','mentorship'));
     }
     public function home(){
@@ -32,7 +35,17 @@ class MentorshipTaskController extends Controller
             // إذا لم يكن هناك شركة مرتبطة بالمستخدم
             $mentorshipTasks = ["NoCompany"];
         }
-        return view('startup.mentorshipTask.home',compact('mentorshipTasks'));
+
+        $allComments = [];
+
+if (isset($mentorshipTasks)) {
+    foreach ($mentorshipTasks as $mentorshipTask) {
+        $comments = MentorshipTaskComment::where('mentorship_task_id', $mentorshipTask->id)->get();
+        $allComments[$mentorshipTask->id] = $comments;
+    }
+}
+
+        return view('startup.mentorshipTask.home',compact('mentorshipTasks','allComments'));
         
     }
 
