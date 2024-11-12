@@ -864,7 +864,9 @@ return [
 	'Completed'=>' Completed ',
 	'Edit_Task'=>' Edit Task ',
 	'Due_Date'=>' Due Date ',
-	'Attachments'=>' Attachments ',
+	'CommentAttachments'=>' Comment Attachments ',
 	'Label'=>' Label ',
+	'comments'=>' Comments ',
+	'TaskAttachments'=>' Task Attachments',
 	
 ];
