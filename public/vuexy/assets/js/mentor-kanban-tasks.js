@@ -1,47 +1,51 @@
 // Language
 const lang = lng;
 
-  // Mentorship tasks data
-const mentorshipTasks = tasks;
-
 (async function () {
-  console.log('hello');
+  let mentorshipTasks;
 
-  const pendingTasks = mentorshipTasks.filter(task => task.status === 'pending');
-  const inReviewTasks = mentorshipTasks.filter(task => task.status === 'in-review');
-  const completedTasks = mentorshipTasks.filter(task => task.status === 'completed');
-  
-  // Restructure tasks
+  if (tasks) mentorshipTasks = tasks;
+
   const restructureTasks = () => {
-    if (mentorshipTasks?.length > 0) {
-      return [
-        {
-          id: 'board-in-pending',
-          title: pendingTasks?.length > 0 ? 'Pending' : '',
-          item: pendingTasks,
-        },
-        {
-          id: 'board-in-review',
-          title: inReviewTasks?.length > 0 ? 'In Review' : '',
-          item: inReviewTasks,
-        },
-        {
-          id: 'board-completed',
-          title: completedTasks?.length > 0 ? 'Completed' : '',
-          item: completedTasks,
+    if (mentorshipTasks) {
+      return mentorshipTasks.map(task => {
+        // console.log('taskkkkkkkkk', task)
+        // console.log('task?.comments?.length', task?.comments?.length)
+        // console.log('task attached', task?.attached)
+        return {
+          comments: task?.comments?.length || 0,
+          labels: task.label_ids,
+          badgeText: "UX",
+          badge: "primary",
+          assigned: task?.mentorshipTask?.attached ? [task?.mentorshipTask?.attached] : [],
+          ...task?.mentorshipTask,
         }
-      ];
+      });
     }
   };
 
-  const tasks = restructureTasks();
+  const restructuredTasks = restructureTasks();
 
+  const getModefiedTasks = () => {
+    const statusArr = ['pending', 'in-review', 'completed'];
+
+    if (restructuredTasks) {
+      return statusArr.map(status => ({
+        id: `board-${status}`,
+        title: status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' '),
+        item: restructuredTasks.filter(task => task.status === status),
+      }));
+    };
+  };
+  
+  const modefiedTasks = getModefiedTasks();
+  
   // Kanban board
   const kanban = new jKanban({
     element: '.kanban-wrapper',
     gutter: '15px',
     widthBoard: '250px',
-    boards: tasks,
+    boards: modefiedTasks,
     addItemButton: false,
     dragBoards: true,
     dragItems: true,
@@ -85,71 +89,38 @@ const mentorshipTasks = tasks;
 
   // Render header
   function renderHeader(color, text) {
-    return (
-      "<div class='d-flex justify-content-between flex-wrap align-items-center mb-2'>" +
-      "<div class='item-badges'> " +
-      "<div class='badge bg-label-" +
-      color +
-      "'> " +
-      text +
-      '</div>'
-    );
-  }
-
-  // Render avatar
-  function renderAvatar(images, pullUp, size, margin, members) {
-    var $transition = pullUp ? ' pull-up' : '',
-      $size = size ? 'avatar-' + size + '' : '',
-      member = members == undefined ? ' ' : members.split(',');
-
-    return images == undefined
-      ? ' '
-      : images
-          .split(',')
-          .map(function (img, index, arr) {
-            var $margin = margin && index !== arr.length - 1 ? ' me-' + margin + '' : '';
-
-            return (
-              "<div class='avatar " +
-              $size +
-              $margin +
-              "'" +
-              "data-bs-toggle='tooltip' data-bs-placement='top'" +
-              "title='" +
-              member[index] +
-              "'" +
-              '>' +
-              "<img src='" +
-              assetsPath +
-              'img/avatars/' +
-              img +
-              "' alt='Avatar' class='rounded-circle " +
-              $transition +
-              "'>" +
-              '</div>'
-            );
-          })
-          .join(' ');
+    return `
+      <div class='d-flex justify-content-between flex-wrap align-items-center mb-2'>
+        <div class='item-badges'>
+          <div id="label-badge" class='mb-2 badge bg-label-${color}'>
+            ${text}
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   // Render footer
   function renderFooter(attachments, comments, assigned, members) {
-    return (
-      "<div class='d-flex justify-content-between align-items-center flex-wrap mt-2'>" +
-      "<div class='d-flex'> <span class='d-flex align-items-center me-2'><i class='ti ti-paperclip me-1'></i>" +
-      "<span class='attachments'>" +
-      attachments +
-      '</span>' +
-      "</span> <span class='d-flex align-items-center ms-2'><i class='ti ti-message-2 me-1'></i>" +
-      '<span> ' +
-      comments +
-      ' </span>' +
-      '</span></div>' +
-      "<div class='avatar-group d-flex align-items-center assigned-avatar'>" +
-      renderAvatar(assigned, true, 'xs', null, members) +
-      '</div>' +
-      '</div>'
-    );
+    // console.log('assigned', assigned)
+    // console.log('comments', comments)
+    return `
+      <div class='d-flex justify-content-between align-items-center flex-wrap mt-2'>
+        <div class='d-flex'>
+          <span class='d-flex align-items-center me-2'>
+            <i class='ti ti-paperclip me-1'></i>
+            <span class='attachments'>${attachments ?? 1}</span>
+          </span>
+          <span class='d-flex align-items-center ms-2'>
+            <i class='ti ti-message-2 me-1'></i>
+            <span>${comments}</span>
+          </span>
+        </div>
+        <div class='avatar-group d-flex align-items-center assigned-avatar'>
+          <img src="${assigned}" class="rounded-circle" alt="avatar" height="26" width="26" />
+        </div>
+      </div>
+    `;
   }
 
   // Render custom items
@@ -166,10 +137,10 @@ const mentorshipTasks = tasks;
           "'>";
       }
       el.textContent = '';
-      if (el.getAttribute('data-badge') !== undefined && el.getAttribute('data-badge-text') !== undefined) {
+      if (el.getAttribute('data-badge') !== undefined && el.getAttribute('data-badgetext') !== undefined) {
         el.insertAdjacentHTML(
           'afterbegin',
-          renderHeader(el.getAttribute('data-badge'), el.getAttribute('data-badge-text')) + img + element
+          renderHeader(el.getAttribute('data-badge'), el.getAttribute('data-badgetext')) + img + element
         );
       }
       if (
@@ -204,10 +175,8 @@ const mentorshipTasks = tasks;
     $('.offcanvas-backdrop').css('display', 'block');
 
     // Get task details
-    const task = mentorshipTasks.find(task => task.id === taskId);
+    const task = restructuredTasks.find(task => task.id === taskId);
     taskDetails = task;
-
-    console.log('taskDetails', taskDetails); // Moved inside the function
 
     if (task) {
       $('#editTaskTitle').val(task.title);
