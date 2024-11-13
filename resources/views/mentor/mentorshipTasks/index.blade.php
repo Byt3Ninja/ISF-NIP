@@ -266,16 +266,16 @@
         </div>
         <!-- Activities -->
         <div class="tab-pane fade text-heading" id="tab-activity" role="tabpanel">
+          @foreach ($allComments as $comment )
           <div class="media mb-4 d-flex align-items-center">
-            {{-- @foreach ($comments as $comment)
-              <div class="media-body">
-                <p class="mb-0">
-                  {{ $comment->comment }}
-                </p>
-                <small class="text-muted">{{ $comment->create_at }}</small>
-              </div>
-            @endforeach --}}
+            <div class="media-body">
+              <p class="mb-0">
+                {{ $comment->comment }}
+              </p>
+              <small class="text-muted">{{ $comment->created_at }}</small>
+            </div>
           </div>
+          @endforeach
         </div>
       </div>
     </div>
