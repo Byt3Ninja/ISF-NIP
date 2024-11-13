@@ -1,6 +1,8 @@
 // Language
 const lang = lng;
 
+let labelsWhiteList = labels;
+
 (async function () {
   let mentorshipTasks;
 
@@ -198,20 +200,39 @@ const lang = lng;
   $('.offcanvas-backdrop').click(closeOffcanvas);
   $('.btn-close-offcanvas').click(closeOffcanvas);
 
-  const editTaskLabel = document.querySelector('#editTaskLabel');
+  const addTaskLabel = document.getElementById('#addTaskLabel');
+  const editTaskLabel = document.getElementById('#editTaskLabel');
 
-  const taskLabels = taskDetails?.label_id;
+  console.log('editTaskLabel', editTaskLabel)
 
-  const whitelist = ['A# .NET', 'A# (Axiom)', 'A-0 System', 'A+', 'A++', 'ABAP', 'ABC', 'ABC ALGOL', 'ABSET'];
+  // const whitelist = ['A# .NET', 'A# (Axiom)', 'A-0 System', 'A+', 'A++', 'ABAP', 'ABC', 'ABC ALGOL', 'ABSET'];
+  const whitelist = labelsWhiteList;
 
-  let TagifyCustomInlineSuggestion = new Tagify(editTaskLabel, {
-    whitelist: whitelist,
-    maxTags: 10,
-    dropdown: {
-      maxItems: 20,
-      classname: 'tags-inline',
-      enabled: 0,
-      closeOnSelect: false
-    }
-  });
+  console.log('whitelist', whitelist)
+
+  if (addTaskLabel) {
+    let TagifyCustomInlineSuggestion = new Tagify(addTaskLabel, {
+      whitelist: whitelist,
+      maxTags: 10,
+      dropdown: {
+        maxItems: 20,
+        classname: 'tags-inline',
+        enabled: 0,
+        closeOnSelect: false
+      }
+    });
+  };
+
+  if (editTaskLabel) {
+    let TagifyCustomInlineSuggestion = new Tagify(editTaskLabel, {
+      whitelist: whitelist,
+      maxTags: 10,
+      dropdown: {
+        maxItems: 20,
+        classname: 'tags-inline',
+        enabled: 0,
+        closeOnSelect: false
+      }
+    });
+  };
 })();
