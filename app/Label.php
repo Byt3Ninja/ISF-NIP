@@ -20,4 +20,9 @@ class Label extends Model
     {
         return $this->belongsTo(User::class,'user_id','id');
     }
+    
+    public function mentorshipTasks()
+    {
+        return $this->belongsToMany(MentorshipTask::class, 'label_taks', 'label_id', 'mentorship_tasks_id');
+    }
 }

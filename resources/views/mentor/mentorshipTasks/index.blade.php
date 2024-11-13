@@ -57,6 +57,32 @@
             method="POST" enctype="multipart/form-data">
             {!! csrf_field() !!}
             <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
+
+            <!-- Attached Tasks -->
+            <div class="mb-3 w-100">
+              <label for="editTaskAttachments" class="form-label">{{ __('admin.TaskAttachments') }}</label>
+              <div class="w-100 d-flex justify-content-between">
+                <div class="w-100">
+                  <input type="text" class="form-control d-none" id="file3" name="attachments" />
+                  <div class="btn btn-label-primary lfm w-100" id="editTaskAttachments" data-input="file3"
+                    data-preview="holder3">
+                    <i class="ti ti-upload me-2"></i>
+                    {{ __('admin.Choose') }}
+                  </div>
+                </div>
+                <div class="w-px-42 h-px-42 rounded border ms-3" id="holder3">
+                  <img
+                    src="/images/background/logo.png"
+                    alt=""
+                    style="object-fit: cover;" 
+                    class="img-fluid w-100 h-100"
+                   />
+                </div>
+                
+              </div>
+            </div>
+            <!-- Attached Tasks -->
+
             <div class="mb-3">
               <label for="taskStatus" class="form-label">{{ __('admin.Status') }}</label>
               <select class="form-select" id="taskStatus" name="status" required>
@@ -79,6 +105,21 @@
               <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
               <input type="text" placeholder="YYYY-MM-DD" id="flatpickr-date" name="due_date" class="form-control" />
             </div>
+
+
+            <div class="mb-3">
+              <div>
+                <label for="editTaskLabel" class="form-label">{{ __('admin.Labels') }}</label>
+                <input
+                  id="editTaskLabel"
+                  name="label"
+                  class="form-control"
+                  placeholder="{{ $l == 'en' ? 'Selecte labels' : 'اختر العلامات' }}"
+                />
+              </div>
+            </div>
+
+
             <button type="submit" class="btn btn-primary">{{ __('admin.Add_Task') }}</button>
           </form>
         </div>
@@ -105,7 +146,7 @@
           <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-activity">
               <i class="ti ti-chart-pie-2 ti-18px me-1_5"></i>
-              <span class="align-middle">{{ __('admin.Activity') }}</span>
+              <span class="align-middle">{{ __('admin.comments') }}</span>
             </button>
           </li>
         </ul>
@@ -118,6 +159,33 @@
             @csrf
             <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
             <input type="hidden" name="MTaskId" id="MTaskId">
+
+            <!-- Attached Tasks -->
+            <div class="mb-3 w-100">
+              <label for="editTaskAttachments" class="form-label">{{ __('admin.TaskAttachments') }}</label>
+              <div class="w-100 d-flex justify-content-between">
+                <div class="w-100">
+                  <input type="text" class="form-control d-none" id="file2" name="attachments" />
+                  <div class="btn btn-label-primary lfm w-100" id="editTaskAttachments" data-input="file2"
+                    data-preview="holder1">
+                    <i class="ti ti-upload me-2"></i>
+                    {{ __('admin.Choose') }}
+                  </div>
+                </div>
+                <div class="w-px-42 h-px-42 rounded border ms-3" id="holder1">
+                  <img
+                    src="/images/background/logo.png"
+                    alt=""
+                    style="object-fit: cover;" 
+                    class="img-fluid w-100 h-100"
+                   />
+                </div>
+                
+              </div>
+            </div>
+            <!-- Attached Tasks -->
+
+
             <div class="mb-3">
               <label for="editTaskTitle" class="form-label">{{ __('admin.Title') }}</label>
               <input type="text" class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title"
@@ -161,8 +229,10 @@
                 <option value="user3">User 3</option>
               </select>
             </div> --}}
+<hr>
+            <!-- Attached Comments -->
             <div class="mb-3 w-100">
-              <label for="editTaskAttachments" class="form-label">{{ __('admin.Attachments') }}</label>
+              <label for="editTaskAttachments" class="form-label">{{ __('admin.CommentAttachments') }}</label>
               <div class="w-100 d-flex justify-content-between">
                 <div class="w-100">
                   <input type="text" class="form-control d-none" id="file1" name="attachments" />
@@ -172,11 +242,18 @@
                     {{ __('admin.Choose') }}
                   </div>
                 </div>
-                <div class="w-px-42 h-px-42 rounded border ms-3">
-                  <img id="holder" style="object-fit: cover;" class="img-fluid w-100 h-100">
+                <div class="w-px-42 h-px-42 rounded border ms-3" id="holder">
+                  <img
+                    src="/images/background/logo.png"
+                    alt=""
+                    style="object-fit: cover;" 
+                    class="img-fluid w-100 h-100"
+                   />
                 </div>
+                
               </div>
             </div>
+            <!-- Attached Comments -->
             <div class="mb-3">
               <label for="editTaskAttachments" class="form-label">{{ __('admin.comment') }}</label>
               <div class="form-label-group">
@@ -196,14 +273,14 @@
         <!-- Activities -->
         <div class="tab-pane fade text-heading" id="tab-activity" role="tabpanel">
           <div class="media mb-4 d-flex align-items-center">
-            @foreach ($allComments as $comment)
+            
               <div class="media-body">
                 <p class="mb-0">
                   <!-- Comment text -->
                 </p>
                 <small class="text-muted">Today 11:00 AM</small>
               </div>
-            @endforeach
+            
           </div>
         </div>
       </div>

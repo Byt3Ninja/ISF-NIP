@@ -35,17 +35,8 @@ class MentorshipTaskController extends Controller
             // إذا لم يكن هناك شركة مرتبطة بالمستخدم
             $mentorshipTasks = ["NoCompany"];
         }
-
-        $allComments = [];
-
-if (isset($mentorshipTasks)) {
-    foreach ($mentorshipTasks as $mentorshipTask) {
-        $comments = MentorshipTaskComment::where('mentorship_task_id', $mentorshipTask->id)->get();
-        $allComments[$mentorshipTask->id] = $comments;
-    }
-}
-
-        return view('startup.mentorshipTask.home',compact('mentorshipTasks','allComments'));
+        
+        return view('startup.mentorshipTask.home',compact('mentorshipTasks'));
         
     }
 
