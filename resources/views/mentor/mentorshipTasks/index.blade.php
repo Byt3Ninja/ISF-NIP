@@ -57,32 +57,6 @@
             method="POST" enctype="multipart/form-data">
             {!! csrf_field() !!}
             <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
-
-            <!-- Attached Tasks -->
-            <div class="mb-3 w-100">
-              <label for="editTaskAttachments" class="form-label">{{ __('admin.TaskAttachments') }}</label>
-              <div class="w-100 d-flex justify-content-between">
-                <div class="w-100">
-                  <input type="text" class="form-control d-none" id="file3" name="attachments" />
-                  <div class="btn btn-label-primary lfm w-100" id="editTaskAttachments" data-input="file3"
-                    data-preview="holder3">
-                    <i class="ti ti-upload me-2"></i>
-                    {{ __('admin.Choose') }}
-                  </div>
-                </div>
-                <div class="w-px-42 h-px-42 rounded border ms-3" id="holder3">
-                  <img
-                    src="/images/background/logo.png"
-                    alt=""
-                    style="object-fit: cover;" 
-                    class="img-fluid w-100 h-100"
-                   />
-                </div>
-                
-              </div>
-            </div>
-            <!-- Attached Tasks -->
-
             <div class="mb-3">
               <label for="taskStatus" class="form-label">{{ __('admin.Status') }}</label>
               <select class="form-select" id="taskStatus" name="status" required>
@@ -105,22 +79,45 @@
               <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
               <input type="text" placeholder="YYYY-MM-DD" id="flatpickr-date" name="due_date" class="form-control" />
             </div>
-
-
             <div class="mb-3">
               <div>
-                <label for="editTaskLabel" class="form-label">{{ __('admin.Labels') }}</label>
+                <label for="addTaskLabel" class="form-label">{{ __('admin.Labels') }}</label>
                 <input
-                  id="editTaskLabel"
+                  id="addTaskLabel"
                   name="label"
                   class="form-control"
                   placeholder="{{ $l == 'en' ? 'Selecte labels' : 'اختر العلامات' }}"
                 />
               </div>
             </div>
-
-
-            <button type="submit" class="btn btn-primary">{{ __('admin.Add_Task') }}</button>
+            <!-- Attached Tasks -->
+            <div class="mb-8 w-100">
+              <label for="editTaskAttachments" class="form-label">{{ __('admin.TaskAttachments') }}</label>
+              <div class="w-100 d-flex flex-column gap-3">
+                <div class="w-50">
+                  <input type="text" class="form-control d-none" id="file3" name="attachments" />
+                  <div class="btn btn-label-secondary lfm w-100" id="editTaskAttachments" data-input="file3"
+                    data-preview="holder3">
+                    <i class="ti ti-upload me-2"></i>
+                    {{ __('admin.Choose') }}
+                  </div>
+                </div>
+                <div class="ms-3" id="holder3">
+                  <img
+                    src="/images/background/logo.png"
+                    class="rounded border shadow-sm"
+                    style="max-height: 50px; max-width: 50px; object-fit: cover;"
+                    height="50"
+                    width="50"
+                   />
+                </div>
+              </div>
+            </div>
+            <!-- / Attached Tasks -->
+            <button type="submit" class="btn btn-primary">
+              <i class="ti ti-plus ti-16px me-2"></i>
+              {{ __('admin.Add_Task') }}
+            </button>
           </form>
         </div>
       </div>
@@ -159,33 +156,30 @@
             @csrf
             <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
             <input type="hidden" name="MTaskId" id="MTaskId">
-
-            <!-- Attached Tasks -->
-            <div class="mb-3 w-100">
-              <label for="editTaskAttachments" class="form-label">{{ __('admin.TaskAttachments') }}</label>
-              <div class="w-100 d-flex justify-content-between">
-                <div class="w-100">
+             <!-- Attached Tasks -->
+             <div class="mb-8 w-100">
+              <label for="file2" class="form-label">{{ __('admin.TaskAttachments') }}</label>
+              <div class="w-100 d-flex flex-column gap-3">
+                <div class="w-50">
                   <input type="text" class="form-control d-none" id="file2" name="attachments" />
-                  <div class="btn btn-label-primary lfm w-100" id="editTaskAttachments" data-input="file2"
-                    data-preview="holder1">
+                  <div class="btn btn-label-secondary lfm w-100" id="editTaskAttachments" data-input="file2"
+                    data-preview="holder3">
                     <i class="ti ti-upload me-2"></i>
                     {{ __('admin.Choose') }}
                   </div>
                 </div>
-                <div class="w-px-42 h-px-42 rounded border ms-3" id="holder1">
+                <div class="ms-3" id="holder1">
                   <img
                     src="/images/background/logo.png"
-                    alt=""
-                    style="object-fit: cover;" 
-                    class="img-fluid w-100 h-100"
+                    class="rounded border shadow-sm"
+                    style="max-height: 50px; max-width: 50px; object-fit: cover;"
+                    height="50"
+                    width="50"
                    />
                 </div>
-                
               </div>
             </div>
-            <!-- Attached Tasks -->
-
-
+            <!-- / Attached Tasks -->
             <div class="mb-3">
               <label for="editTaskTitle" class="form-label">{{ __('admin.Title') }}</label>
               <input type="text" class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title"
@@ -216,7 +210,7 @@
                 <input
                   id="editTaskLabel"
                   name="label"
-                  class="form-control"
+                  class="form-control tagifyInput"
                   placeholder="{{ $l == 'en' ? 'Selecte labels' : 'اختر العلامات' }}"
                 />
               </div>
@@ -229,31 +223,31 @@
                 <option value="user3">User 3</option>
               </select>
             </div> --}}
-<hr>
-            <!-- Attached Comments -->
-            <div class="mb-3 w-100">
-              <label for="editTaskAttachments" class="form-label">{{ __('admin.CommentAttachments') }}</label>
-              <div class="w-100 d-flex justify-content-between">
-                <div class="w-100">
+            <hr>
+            <!-- Attached Tasks -->
+            <div class="mb-8 w-100">
+              <label for="file1" class="form-label">{{ __('admin.CommentAttachments') }}</label>
+              <div class="w-100 d-flex flex-column gap-3">
+                <div class="w-50">
                   <input type="text" class="form-control d-none" id="file1" name="attachments" />
-                  <div class="btn btn-label-primary lfm w-100" id="editTaskAttachments" data-input="file1"
-                    data-preview="holder">
+                  <div class="btn btn-label-secondary lfm w-100" id="editTaskAttachments" data-input="file1"
+                    data-preview="holder3">
                     <i class="ti ti-upload me-2"></i>
                     {{ __('admin.Choose') }}
                   </div>
                 </div>
-                <div class="w-px-42 h-px-42 rounded border ms-3" id="holder">
+                <div class="ms-3" id="holder">
                   <img
                     src="/images/background/logo.png"
-                    alt=""
-                    style="object-fit: cover;" 
-                    class="img-fluid w-100 h-100"
-                   />
+                    class="rounded border shadow-sm"
+                    style="max-height: 50px; max-width: 50px; object-fit: cover;"
+                    height="50"
+                    width="50"
+                    />
                 </div>
-                
               </div>
             </div>
-            <!-- Attached Comments -->
+            <!-- / Attached Tasks -->
             <div class="mb-3">
               <label for="editTaskAttachments" class="form-label">{{ __('admin.comment') }}</label>
               <div class="form-label-group">
@@ -273,14 +267,14 @@
         <!-- Activities -->
         <div class="tab-pane fade text-heading" id="tab-activity" role="tabpanel">
           <div class="media mb-4 d-flex align-items-center">
-            
+            {{-- @foreach ($comments as $comment)
               <div class="media-body">
                 <p class="mb-0">
-                  <!-- Comment text -->
+                  {{ $comment->comment }}
                 </p>
-                <small class="text-muted">Today 11:00 AM</small>
+                <small class="text-muted">{{ $comment->create_at }}</small>
               </div>
-            
+            @endforeach --}}
           </div>
         </div>
       </div>
@@ -312,6 +306,10 @@
 <script src="/vuexy/assets/js/forms-tagify.js"></script>
 <script>
   const tasks = @json($mentorshipTasks);
+  const labelsData = @json($labels);
+
+  const labels = labelsData.map(label => label?.name);
+
   const lng = '{{ $l }}';
 </script>
 <script src="/vuexy/assets/js/mentor-kanban-tasks.js"></script>
