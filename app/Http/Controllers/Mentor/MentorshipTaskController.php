@@ -22,33 +22,35 @@ class MentorshipTaskController extends Controller
     {
         
         $mentorship = MentorshipRequest::findOrFail($request->mentorship_id);
-$mentorshipTasks = $mentorship->mentorshipTasks;
+$mentorshipTasks = $mentorship->mentorshipTasks()->with(['labels', 'comments'])->get();
 
 $labels = Label::all();
 $allComments = collect();
+
+
 // تعديل محتوى المتغير $mentorshipTasks باستخدام map بحيث يتم تمرير التعليقات حتى لو كانت null
-$mentorshipTasks = $mentorshipTasks->map(function ($mentorshipTask) use (&$allComments) {
-    // جلب التعليقات الخاصة بكل مهمة
-    $comments = MentorshipTaskComment::where('mentorship_task_id', $mentorshipTask->id)->get();
+// $mentorshipTasks = $mentorshipTasks->map(function ($mentorshipTask) use (&$allComments) {
+//     // جلب التعليقات الخاصة بكل مهمة
+//     $comments = MentorshipTaskComment::where('mentorship_task_id', $mentorshipTask->id)->get();
     
-     // إضافة التعليقات إلى المصفوفة العامة
-     if (!$comments->isEmpty()) {
-        $allComments = $allComments->merge($comments);
-    }
+//      // إضافة التعليقات إلى المصفوفة العامة
+//      if (!$comments->isEmpty()) {
+//         $allComments = $allComments->merge($comments);
+//     }
 
-    // جلب معرّفات الملصقات المرتبطة بالمهمة
-    $labelIds = $mentorshipTask->labels()->pluck('labels.id'); // استخدام pluck لاستخراج المعرفات فقط
+//     // جلب معرّفات الملصقات المرتبطة بالمهمة
+//     $labelIds = $mentorshipTask->labels()->pluck('labels.id'); // استخدام pluck لاستخراج المعرفات فقط
 
-    $labelNames = Label::whereIn('id', $labelIds)->pluck('name');
+//     $labelNames = Label::whereIn('id', $labelIds)->pluck('name');
     
-    // التحقق من وجود تعليقات، وإذا كانت فارغة، يتم إرجاع مجموعة فارغة
-    return [
-        'mentorshipTask' => $mentorshipTask,
-        'comments' => $comments->isEmpty() ? collect() : $comments,
-        'label_ids' => $labelIds, // إضافة label_ids إلى البيانات
-        'label_names' => $labelNames, // إضافة أسماء الـ labels إلى البيانات
-    ];
-});
+//     // التحقق من وجود تعليقات، وإذا كانت فارغة، يتم إرجاع مجموعة فارغة
+//     return [
+//         'mentorshipTask' => $mentorshipTask,
+//         'comments' => $comments->isEmpty() ? collect() : $comments,
+//         'label_ids' => $labelIds, // إضافة label_ids إلى البيانات
+//         'label_names' => $labelNames->filter(), // إضافة أسماء الـ labels إلى البيانات
+//     ];
+// });
 
 
             
