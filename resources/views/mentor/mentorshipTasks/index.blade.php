@@ -29,17 +29,33 @@
   <!-- Content -->
 
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row mb-4">
-      <div class="col-12">
-        <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
-          <i class="ti ti-plus ti-16px me-2"></i>
-          <span class="align-middle">{{ __('admin.Add_Task') }}</span>
-        </button>
+    @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
+      <div class="row mb-4">
+        <div class="col-12">
+          <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="ti ti-plus ti-16px me-2"></i>
+            <span class="align-middle">{{ __('admin.Add_Task') }}</span>
+          </button>
+        </div>
       </div>
-    </div>
+    @endif
     <div class="app-kanban">
       <!-- Kanban Wrapper -->
-      <div class="kanban-wrapper bg-white px-4 py-8" style="border-radius: 1rem;"></div>
+      @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
+        <div class="kanban-wrapper bg-white px-4 py-8" style="border-radius: 1rem;">
+        </div>
+      @else
+        <div class="d-flex flex-column justify-content-center align-items-center gap-4 mt-10">
+          <img src="/icons/not-found.svg" width="337" height="234" />
+          <h4 class="mb-0 text-center">
+            {{ $l == 'en' ? 'You don’t have any tasks' : 'ليس لديك أي مهام' }}
+          </h4>
+          <button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal"       data-bs-target="#addTaskModal">
+            <i class="ti ti-plus ti-16px me-2"></i>
+            <span class="align-middle">{{ __('admin.Add_Task') }}</span>
+          </button>
+        </div>
+      @endif
     </div>
   </div>
   <!-- / Content -->
@@ -306,7 +322,6 @@
   const lng = '{{ $l }}';
   const tasks = @json($mentorshipTasks);
   const labels = @json($labels);
-
   const whitelist = labels.map(label => label?.name);
 </script>
 <script src="/vuexy/assets/js/mentor-kanban-tasks.js"></script>

@@ -142,7 +142,13 @@
       </li>
     @endif
     @role('Mentor')
-      <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
+      <li 
+        class="{{ 
+          Request::is(
+          'dashboard/mentor/mentorshipSessions*', 'dashboard/mentor/mentorshipTasks*') 
+          ? 'active' : '' 
+        }} menu-item"
+      >
         <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
           <i class="ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
