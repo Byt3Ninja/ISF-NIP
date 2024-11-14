@@ -29,17 +29,33 @@
   <!-- Content -->
 
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row mb-4">
-      <div class="col-12">
-        <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
-          <i class="ti ti-plus ti-16px me-2"></i>
-          <span class="align-middle">{{ __('admin.Add_Task') }}</span>
-        </button>
+    @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
+      <div class="row mb-4">
+        <div class="col-12">
+          <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+            <i class="ti ti-plus ti-16px me-2"></i>
+            <span class="align-middle">{{ __('admin.Add_Task') }}</span>
+          </button>
+        </div>
       </div>
-    </div>
+    @endif
     <div class="app-kanban">
       <!-- Kanban Wrapper -->
-      <div class="kanban-wrapper bg-white px-4 py-8" style="border-radius: 1rem;"></div>
+      @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
+        <div class="kanban-wrapper bg-white px-4 py-8" style="border-radius: 1rem;">
+        </div>
+      @else
+        <div class="d-flex flex-column justify-content-center align-items-center gap-4 mt-10">
+          <img src="/icons/not-found.svg" width="337" height="234" />
+          <h4 class="mb-0 text-center">
+            {{ $l == 'en' ? 'You don’t have any tasks' : 'ليس لديك أي مهام' }}
+          </h4>
+          <button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal"       data-bs-target="#addTaskModal">
+            <i class="ti ti-plus ti-16px me-2"></i>
+            <span class="align-middle">{{ __('admin.Add_Task') }}</span>
+          </button>
+        </div>
+      @endif
     </div>
   </div>
   <!-- / Content -->
@@ -81,7 +97,7 @@
             </div>
             <div class="mb-3">
               <div>
-                <label for="addTaskLabel" class="form-label">{{ __('admin.Labels') }}</label>
+                <label class="form-label">{{ __('admin.Labels') }}</label>
                 <input
                   id="addTaskLabel"
                   name="label"
@@ -206,7 +222,7 @@
             
             <div class="mb-3">
               <div>
-                <label for="editTaskLabel" class="form-label">{{ __('admin.Labels') }}</label>
+                <label class="form-label">{{ __('admin.Labels') }}</label>
                 <input
                   id="editTaskLabel"
                   name="label"
@@ -301,16 +317,42 @@
 @stop
 
 @section('pagescripts')
-<script src="/vuexy/assets/js/forms-pickers.js"></script>
 <script src="/vuexy/assets/js/forms-selects.js"></script>
-<script src="/vuexy/assets/js/forms-tagify.js"></script>
 <script>
-  const tasks = @json($mentorshipTasks);
-  const labelsData = @json($labels);
-
-  const labels = labelsData.map(label => label?.name);
-
   const lng = '{{ $l }}';
+  const tasks = @json($mentorshipTasks);
+  const labels = @json($labels);
+  const whitelist = labels.map(label => label?.name);
 </script>
 <script src="/vuexy/assets/js/mentor-kanban-tasks.js"></script>
+<script>
+  // Render Tagify inputs with suggestions
+  (() => {
+    const addTaskTagifyInput = document.querySelector('#addTaskLabel');
+    const editTaskTagifyInput = document.querySelector('#editTaskLabel');
+
+    const tagifyOptions = {
+      whitelist,
+      maxTags: 10,
+      dropdown: {
+        maxItems: 20,
+        classname: 'tags-inline',
+        enabled: 0,
+        closeOnSelect: false
+      }
+    };
+    let addTaskTagifySuggestions = new Tagify(addTaskTagifyInput, tagifyOptions);
+    let editTaskTagifySuggestions = new Tagify(editTaskTagifyInput, tagifyOptions);
+  })();
+
+  // Render flatpickr date inputs
+  (() => {
+    const flatpickrDate = document.querySelectorAll('#flatpickr-date');
+    if (flatpickrDate) {
+      flatpickrDate.flatpickr({
+        monthSelectorType: 'static'
+      });
+    };
+  })();
+</script>
 @stop

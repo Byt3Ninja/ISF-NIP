@@ -4,73 +4,53 @@
 
 'use strict';
 
-const url =  window.location.href;
-
-// Disable add task for startup page
-const disableAddTask = () => {
-  if (url && url.includes('startup')) {
-    return true;
-  };
-};
-
 (async function () {
-  let boards;
   const kanbanSidebar = document.querySelector('.kanban-update-item-sidebar'),
     kanbanWrapper = document.querySelector('.kanban-wrapper'),
-    commentEditor = document.querySelector('.comment-editor'),
-    // kanbanAddNewBoard = document.querySelector('.kanban-add-new-board'),
-    // kanbanAddNewInput = [].slice.call(document.querySelectorAll('.kanban-add-board-input')),
-    // kanbanAddBoardBtn = document.querySelector('.kanban-add-board-btn'),
-    datePicker = document.querySelector('#due-date'),
-    select2 = $('.select2'), // ! Using jquery vars due to select2 jQuery dependency
-    assetsPath = document.querySelector('html').getAttribute('data-assets-path');
+    commentEditor = document.querySelector('.comment-editor')
 
   // Init kanban Offcanvas
   const kanbanOffcanvas = new bootstrap.Offcanvas(kanbanSidebar);
 
-  // Get kanban data
-  const kanbanResponse = await fetch(assetsPath + 'json/kanban.json');
-  if (!kanbanResponse.ok) {
-    console.error('error', kanbanResponse);
-  }
+  let mentorshipTasks;
 
-  // boards = await kanbanResponse.json();
-  boards = tasks;
+  if (tasks) mentorshipTasks = tasks;
 
-  // datepicker init
-  if (datePicker) {
-    datePicker.flatpickr({
-      monthSelectorType: 'static',
-      altInput: true,
-      altFormat: 'j F, Y',
-      dateFormat: 'Y-m-d'
-    });
-  }
-
-  //! TODO: Update Event label and guest code to JS once select removes jQuery dependency
-  // select2
-  if (select2.length) {
-    function renderLabels(option) {
-      if (!option.id) {
-        return option.text;
-      }
-      var $badge = "<div class='badge " + $(option.element).data('color') + "'> " + option.text + '</div>';
-      return $badge;
-    }
-
-    select2.each(function () {
-      var $this = $(this);
-      $this.wrap("<div class='position-relative'></div>").select2({
-        placeholder: 'Select Label',
-        dropdownParent: $this.parent(),
-        templateResult: renderLabels,
-        templateSelection: renderLabels,
-        escapeMarkup: function (es) {
-          return es;
-        }
+  const restructureTasks = () => {
+    if (mentorshipTasks) {
+      return mentorshipTasks.map(task => {
+        return {
+          comments: task?.comments?.length || 0,
+          labels: task.label_ids,
+          badgeText: 'Label',
+          badge: 'primary',
+          assigned: task?.attached ? [task?.attached] : [],
+          ...task
+        };
       });
-    });
-  }
+    }
+  };
+
+  const restructuredTasks = restructureTasks();
+
+  const getModefiedTasks = () => {
+    const statusArr = ['pending', 'in-review', 'completed'];
+
+    if (restructuredTasks) {
+      return statusArr.map(status => {
+        const filteredTasks = restructuredTasks.filter(task => task.status === status);
+        const boardTitle = status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ');
+
+        return {
+          id: filteredTasks?.length > 0 ? `board-${status}` : '',
+          title: filteredTasks?.length > 0 ? boardTitle : '',
+          item: filteredTasks
+        };
+      });
+    }
+  };
+
+  const modefiedTasks = getModefiedTasks();
 
   // Comment editor
   if (commentEditor) {
@@ -96,92 +76,50 @@ const disableAddTask = () => {
       '</div>'
     );
   }
-  // Render item dropdown
-  function renderDropdown() {
-    return (
-      "<div class='dropdown kanban-tasks-item-dropdown'>" +
-      "<i class='dropdown-toggle ti ti-dots-vertical' id='kanban-tasks-item-dropdown' data-bs-toggle='dropdown' aria-haspopup='true' aria-expanded='false'></i>" +
-      "<div class='dropdown-menu dropdown-menu-end' aria-labelledby='kanban-tasks-item-dropdown'>" +
-      "<a class='dropdown-item' id='copy-task-link' href='javascript:void(0)'>Copy task link</a>" +
-      "<a class='dropdown-item' href='javascript:void(0)'>Duplicate task</a>" +
-      "<a class='dropdown-item delete-task' href='javascript:void(0)'>Delete</a>" +
-      '</div>' +
-      '</div>'
-    );
-  }
+
   // Render header
   function renderHeader(color, text) {
-    return (
-      "<div class='d-flex justify-content-between flex-wrap align-items-center mb-2'>" +
-      "<div class='item-badges'> " +
-      "<div class='badge bg-label-" +
-      color +
-      "'> " +
-      text +
-      '</div>' +
-      '</div>' +
-      renderDropdown() +
-      '</div>'
-    );
-  }
-
-  // Render avatar
-  function renderAvatar(images, pullUp, size, margin, members) {
-    var $transition = pullUp ? ' pull-up' : '',
-      $size = size ? 'avatar-' + size + '' : '',
-      member = members == undefined ? ' ' : members.split(',');
-
-    return images == undefined
-      ? ' '
-      : images
-          .split(',')
-          .map(function (img, index, arr) {
-            var $margin = margin && index !== arr.length - 1 ? ' me-' + margin + '' : '';
-
-            return (
-              "<div class='avatar " +
-              $size +
-              $margin +
-              "'" +
-              "data-bs-toggle='tooltip' data-bs-placement='top'" +
-              "title='" +
-              member[index] +
-              "'" +
-              '>' +
-              "<img src='" +
-              assetsPath +
-              'img/avatars/' +
-              img +
-              "' alt='Avatar' class='rounded-circle " +
-              $transition +
-              "'>" +
-              '</div>'
-            );
-          })
-          .join(' ');
+    return `
+      <div class='d-flex justify-content-between flex-wrap align-items-center mb-2'>
+        <div class='item-badges'>
+          <div id="label-badge" class='mb-2 badge bg-label-${color}'>
+            ${text}
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   // Render footer
   function renderFooter(attachments, comments, assigned, members) {
-    return (
-      "<div class='d-flex justify-content-between align-items-center flex-wrap mt-2'>" +
-      "<div class='d-flex'> <span class='d-flex align-items-center me-2'><i class='ti ti-paperclip me-1'></i>" +
-      "<span class='attachments'>" +
-      attachments +
-      '</span>' +
-      "</span> <span class='d-flex align-items-center ms-2'><i class='ti ti-message-2 me-1'></i>" +
-      '<span> ' +
-      comments +
-      ' </span>' +
-      '</span></div>' +
-      "<div class='avatar-group d-flex align-items-center assigned-avatar'>" +
-      renderAvatar(assigned, true, 'xs', null, members) +
-      '</div>' +
-      '</div>'
-    );
-  }
+    // console.log('assigned', assigned)
+    // console.log('comments', comments)
+    let img = '';
 
-  const isAddTaskDisabled = disableAddTask();
+    if (assigned) {
+      img = `
+        <div class='avatar-group d-flex align-items-center assigned-avatar'>
+          <img src="${assigned}" class="rounded-circle" alt="avatar" height="26" width="26" />
+        </div>
+      `;
+    }
+
+    return `
+      <div class='d-flex justify-content-between align-items-center flex-wrap mt-2'>
+        <div class='d-flex'>
+          <span class='d-flex align-items-center me-2'>
+            <i class='ti ti-paperclip me-1'></i>
+            <span class='attachments'>${attachments ?? 1}</span>
+          </span>
+          <span class='d-flex align-items-center ms-2'>
+            <i class='ti ti-message-2 me-1'></i>
+            <span>${comments}</span>
+          </span>
+        </div>
+        ${img}
+      </div>
+    `;
+  }
 
   // Init kanban
   const kanban = new jKanban({
@@ -189,40 +127,11 @@ const disableAddTask = () => {
     gutter: '12px',
     widthBoard: '250px',
     dragItems: true,
-    boards: boards,
+    boards: modefiedTasks,
     dragBoards: true,
-    addItemButton: !isAddTaskDisabled ? true : false,
-    buttonContent: isAddTaskDisabled ? '' : '+ Add Item',
-    itemAddOptions: isAddTaskDisabled ? {} :{
-      enabled: true, // add a button to board for easy item creation
-      content: '+ Add New Item', // text or html content of the board button
-      class: 'kanban-title-button btn', // default class of the button
-      footer: false // position the button on footer
-    },
     click: function (el) {
       let element = el;
       const taskId = element.getAttribute('data-eid');
-      const searchParams = new URLSearchParams(window.location.search);
-      searchParams.set('taskId', taskId);
-      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-      window.history.pushState({}, '', newUrl);
-
-      // Copy task link
-      const copyTaskLink = document.getElementById('copy-task-link');
-
-      // if (copyTaskLink) {
-      //   copyTaskLink.addEventListener('click', function () {
-      //     console.log('copyTaskLink', taskId);
-      //     searchParams.set('taskId', taskId);
-      //     const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-      //     window.history.pushState({}, '', newUrl);
-      //     setTimeout(() => {
-      //       if (searchParams.has('taskId')) {
-      //         navigator.clipboard.writeText(window.location.href);
-      //       }
-      //     }, 1000)
-      //   });
-      // }
 
       let title = element.getAttribute('data-eid')
           ? element.querySelector('.kanban-text').textContent
@@ -233,7 +142,7 @@ const disableAddTask = () => {
         dateToUse = date
           ? date + ', ' + year
           : dateObj.getDate() + ' ' + dateObj.toLocaleString('en', { month: 'long' }) + ', ' + year,
-        label = element.getAttribute('data-badge-text'),
+        label = element.getAttribute('data-badgeText'),
         avatars = element.getAttribute('data-assigned');
 
       // Show kanban offcanvas
@@ -258,66 +167,6 @@ const disableAddTask = () => {
             '</div>'
         );
     },
-
-    buttonClick: function (el, boardId) {
-      const addNew = document.createElement('form');
-      addNew.setAttribute('class', 'new-item-form');
-      addNew.innerHTML =
-        '<div class="mb-4">' +
-        '<textarea class="form-control add-new-item" rows="2" placeholder="Add Content" autofocus required></textarea>' +
-        '</div>' +
-        '<div class="mb-4">' +
-        '<button type="submit" class="btn btn-primary btn-sm me-4 waves-effect waves-light">Add</button>' +
-        '<button type="button" class="btn btn-label-secondary btn-sm cancel-add-item waves-effect waves-light">Cancel</button>' +
-        '</div>';
-      kanban.addForm(boardId, addNew);
-
-      addNew.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const currentBoard = [].slice.call(
-          document.querySelectorAll('.kanban-board[data-id=' + boardId + '] .kanban-item')
-        );
-        kanban.addElement(boardId, {
-          title: "<span class='kanban-text'>" + e.target[0].value + '</span>',
-          id: boardId + '-' + currentBoard.length + 1
-        });
-
-        // add dropdown in new boards
-        const kanbanText = [].slice.call(
-          document.querySelectorAll('.kanban-board[data-id=' + boardId + '] .kanban-text')
-        );
-        kanbanText.forEach(function (e) {
-          e.insertAdjacentHTML('beforebegin', renderDropdown());
-        });
-
-        // prevent sidebar to open onclick dropdown buttons of new tasks
-        const newTaskDropdown = [].slice.call(document.querySelectorAll('.kanban-item .kanban-tasks-item-dropdown'));
-        if (newTaskDropdown) {
-          newTaskDropdown.forEach(function (e) {
-            e.addEventListener('click', function (el) {
-              el.stopPropagation();
-            });
-          });
-        }
-
-        // delete tasks for new boards
-        const deleteTask = [].slice.call(
-          document.querySelectorAll('.kanban-board[data-id=' + boardId + '] .delete-task')
-        );
-        deleteTask.forEach(function (e) {
-          e.addEventListener('click', function () {
-            const id = this.closest('.kanban-item').getAttribute('data-eid');
-            kanban.removeElement(id);
-          });
-        });
-        addNew.remove();
-      });
-
-      // Remove form on clicking cancel button
-      addNew.querySelector('.cancel-add-item').addEventListener('click', function (e) {
-        addNew.remove();
-      });
-    }
   });
 
   // Kanban Wrapper scrollbar
@@ -343,10 +192,10 @@ const disableAddTask = () => {
           "'>";
       }
       el.textContent = '';
-      if (el.getAttribute('data-badge') !== undefined && el.getAttribute('data-badge-text') !== undefined) {
+      if (el.getAttribute('data-badge') !== undefined && el.getAttribute('data-badgeText') !== undefined) {
         el.insertAdjacentHTML(
           'afterbegin',
-          renderHeader(el.getAttribute('data-badge'), el.getAttribute('data-badge-text')) + img + element
+          renderHeader(el.getAttribute('data-badge'), el.getAttribute('data-badgeText')) + img + element
         );
       }
       if (
@@ -382,21 +231,6 @@ const disableAddTask = () => {
       });
     });
   }
-
-  // Toggle add new input and actions add-new-btn
-  // if (kanbanAddBoardBtn) {
-  //   kanbanAddBoardBtn.addEventListener('click', () => {
-  //     kanbanAddNewInput.forEach(el => {
-  //       el.value = '';
-  //       el.classList.toggle('d-none');
-  //     });
-  //   });
-  // }
-
-  // Render add new inline with boards
-  // if (kanbanContainer) {
-  //   kanbanContainer.appendChild(kanbanAddNewBoard);
-  // }
 
   // Makes kanban title editable for rendered boards
   if (kanbanTitleBoard) {
@@ -442,62 +276,15 @@ const disableAddTask = () => {
     });
   }
 
-  // Add new board
-  // if (kanbanAddNewBoard) {
-  //   kanbanAddNewBoard.addEventListener('submit', function (e) {
-  //     e.preventDefault();
-  //     const thisEle = this,
-  //       value = thisEle.querySelector('.form-control').value,
-  //       id = value.replace(/\s+/g, '-').toLowerCase();
-  //     kanban.addBoards([
-  //       {
-  //         id: id,
-  //         title: value
-  //       }
-  //     ]);
-
-  //     // Adds delete board option to new board, delete new boards & updates data-order
-  //     const kanbanBoardLastChild = document.querySelectorAll('.kanban-board:last-child')[0];
-  //     if (kanbanBoardLastChild) {
-  //       const header = kanbanBoardLastChild.querySelector('.kanban-title-board');
-  //       header.insertAdjacentHTML('afterend', renderBoardDropdown());
-
-  //       // To make newly added boards title editable
-  //       kanbanBoardLastChild.querySelector('.kanban-title-board').addEventListener('mouseenter', function () {
-  //         this.contentEditable = 'true';
-  //       });
-  //     }
-
-  //     // Add delete event to delete newly added boards
-  //     const deleteNewBoards = kanbanBoardLastChild.querySelector('.delete-board');
-  //     if (deleteNewBoards) {
-  //       deleteNewBoards.addEventListener('click', function () {
-  //         const id = this.closest('.kanban-board').getAttribute('data-id');
-  //         kanban.removeBoard(id);
-  //       });
-  //     }
-
-  //     // Remove current append new add new form
-  //     if (kanbanAddNewInput) {
-  //       kanbanAddNewInput.forEach(el => {
-  //         el.classList.add('d-none');
-  //       });
-  //     }
-
-  //     // To place inline add new btn after clicking add btn
-  //     if (kanbanContainer) {
-  //       kanbanContainer.appendChild(kanbanAddNewBoard);
-  //     }
-  //   });
-  // }
-
   // Clear comment editor on close
   kanbanSidebar.addEventListener('hidden.bs.offcanvas', function () {
     kanbanSidebar.querySelector('.ql-editor').firstElementChild.innerHTML = '';
     // Remove taskId from URL search params
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.delete('taskId');
-    const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname;
+    const newUrl = searchParams.toString()
+      ? `${window.location.pathname}?${searchParams.toString()}`
+      : window.location.pathname;
     window.history.pushState({}, '', newUrl);
   });
 

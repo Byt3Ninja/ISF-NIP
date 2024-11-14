@@ -1,7 +1,7 @@
 // Language
 const lang = lng;
 
-let labelsWhiteList = labels;
+let labelsWhiteList = whitelist;
 
 (async function () {
   let mentorshipTasks;
@@ -11,13 +11,10 @@ let labelsWhiteList = labels;
   const restructureTasks = () => {
     if (mentorshipTasks) {
       return mentorshipTasks.map(task => {
-        // console.log('taskkkkkkkkk', task)
-        // console.log('task?.comments?.length', task?.comments?.length)
-        // console.log('task attached', task?.attached)
         return {
           comments: task?.comments?.length || 0,
           labels: task.label_ids,
-          badgeText: "UX",
+          badgeText: labelsWhiteList?.length > 0 ? labelsWhiteList[0]?.toUpperCase() : '',
           badge: "primary",
           assigned: task?.mentorshipTask?.attached ? [task?.mentorshipTask?.attached] : [],
           ...task?.mentorshipTask,
@@ -32,11 +29,16 @@ let labelsWhiteList = labels;
     const statusArr = ['pending', 'in-review', 'completed'];
 
     if (restructuredTasks) {
-      return statusArr.map(status => ({
-        id: `board-${status}`,
-        title: status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' '),
-        item: restructuredTasks.filter(task => task.status === status),
-      }));
+      return statusArr.map(status => {
+        const filteredTasks = restructuredTasks.filter(task => task.status === status);
+        const boardTitle = status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ');
+        
+        return {
+          id: filteredTasks?.length > 0 ?`board-${status}` : '',
+          title: filteredTasks?.length > 0 ? boardTitle : '',
+          item: filteredTasks,
+        }
+      });
     };
   };
   
@@ -106,6 +108,16 @@ let labelsWhiteList = labels;
   function renderFooter(attachments, comments, assigned, members) {
     // console.log('assigned', assigned)
     // console.log('comments', comments)
+    let img = '';
+
+    if (assigned) {
+      img = `
+        <div class='avatar-group d-flex align-items-center assigned-avatar'>
+          <img src="${assigned}" class="rounded-circle" alt="avatar" height="26" width="26" />
+        </div>
+      `;
+    };
+
     return `
       <div class='d-flex justify-content-between align-items-center flex-wrap mt-2'>
         <div class='d-flex'>
@@ -118,9 +130,7 @@ let labelsWhiteList = labels;
             <span>${comments}</span>
           </span>
         </div>
-        <div class='avatar-group d-flex align-items-center assigned-avatar'>
-          <img src="${assigned}" class="rounded-circle" alt="avatar" height="26" width="26" />
-        </div>
+        ${img}
       </div>
     `;
   }
@@ -161,11 +171,7 @@ let labelsWhiteList = labels;
         );
       }
     });
-  }
-
-  // console.log('kanbanItem', kanbanItem);
-
-  let taskDetails; // Declare taskDetails variable here
+  };
 
   // Handle task click
   const onClickTask = el => {
@@ -178,7 +184,6 @@ let labelsWhiteList = labels;
 
     // Get task details
     const task = restructuredTasks.find(task => task.id === taskId);
-    taskDetails = task;
 
     if (task) {
       $('#editTaskTitle').val(task.title);
@@ -197,42 +202,6 @@ let labelsWhiteList = labels;
   };
 
   // Close offcanvas
-  $('.offcanvas-backdrop').click(closeOffcanvas);
-  $('.btn-close-offcanvas').click(closeOffcanvas);
-
-  const addTaskLabel = document.getElementById('#addTaskLabel');
-  const editTaskLabel = document.getElementById('#editTaskLabel');
-
-  console.log('editTaskLabel', editTaskLabel)
-
-  // const whitelist = ['A# .NET', 'A# (Axiom)', 'A-0 System', 'A+', 'A++', 'ABAP', 'ABC', 'ABC ALGOL', 'ABSET'];
-  const whitelist = labelsWhiteList;
-
-  console.log('whitelist', whitelist)
-
-  if (addTaskLabel) {
-    let TagifyCustomInlineSuggestion = new Tagify(addTaskLabel, {
-      whitelist: whitelist,
-      maxTags: 10,
-      dropdown: {
-        maxItems: 20,
-        classname: 'tags-inline',
-        enabled: 0,
-        closeOnSelect: false
-      }
-    });
-  };
-
-  if (editTaskLabel) {
-    let TagifyCustomInlineSuggestion = new Tagify(editTaskLabel, {
-      whitelist: whitelist,
-      maxTags: 10,
-      dropdown: {
-        maxItems: 20,
-        classname: 'tags-inline',
-        enabled: 0,
-        closeOnSelect: false
-      }
-    });
-  };
+  $('.offcanvas-backdrop').on('click', closeOffcanvas);
+  $('.btn-close-offcanvas').on('click', closeOffcanvas);
 })();

@@ -2,7 +2,6 @@
 
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
@@ -29,37 +28,21 @@
 
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="app-kanban">
-
-      @if (!empty($mentorshipTasks))
-      {{-- <!-- Add new board -->
-      <div class="row">
-        <div class="col-12">
-          <form class="kanban-add-new-board">
-            <label class="kanban-add-board-btn" for="kanban-add-board-input">
-              <i class="ti ti-plus"></i>
-              <span class="align-middle">Add new</span>
-            </label>
-            <input
-              type="text"
-              class="form-control w-px-250 kanban-add-board-input mb-4 d-none"
-              placeholder="Add Board Title"
-              id="kanban-add-board-input"
-              required />
-            <div class="mb-4 kanban-add-board-input d-none">
-              <button class="btn btn-primary btn-sm me-4">Add</button>
-              <button type="button" class="btn btn-label-secondary btn-sm kanban-add-board-cancel-btn">
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      </div> --}}
-
       <!-- Kanban Wrapper -->
-      <div 
-        class="kanban-wrapper bg-white px-4 py-8" 
-        style="border-radius: 1rem;">
-      </div>
+      @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
+        <div 
+          class="kanban-wrapper bg-white px-4 py-8" 
+          style="border-radius: 1rem;">
+        </div>
+      @else
+        <div class="d-flex flex-column justify-content-center align-items-center gap-4 mt-10">
+          <img src="/icons/not-found.svg" width="337" height="234" />
+          <h4 class="mb-0 text-center">
+            {{ $l == 'en' ? 'You don’t have any tasks' : 'ليس لديك أي مهام' }}
+          </h4>
+        </div>
+      @endif
+      <!-- / Kanban Wrapper -->
 
       <!-- Edit Task/Task & Activities -->
       <div class="offcanvas offcanvas-end kanban-update-item-sidebar">
@@ -238,21 +221,6 @@
           </div>
         </div>
       </div>
-      @else
-			<section class="row">
-				<div class="col-xl-12 col-md-12 col-sm-12">
-				  <div class="card px-4">
-					<div class="card-header border-bottom mb-4">
-					  <h4 class="card-title">{{ __('cycles.nosubscripe') }}</h4>
-					</div>
-	
-					<div class="card-body">
-					  {{ __('admin.No Quizzes added yet') }}, <a href="/dashboard">{{ __('cycles.Back') }}</a>.
-					</div>
-				  </div>
-				</div>
-			  </section>
-			@endif
     </div>
   </div>
   <!-- / Content -->
@@ -274,9 +242,6 @@
       }
     });
   </script>
-  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
@@ -285,189 +250,7 @@
 @section('pagescripts')
   <script>
     // Mentorship tasks data
-    const mentorshipTasks = @json($mentorshipTasks);
-
-    // Restructure tasks
-    const restructureTasks = () => {
-      if (mentorshipTasks?.length > 0) {
-        return [
-          {
-            id: "board-in-progress",
-            title: "Pending",
-            item: mentorshipTasks.filter(task => task.status === 'pending'),
-          },
-          {
-            id: "board-in-review",
-            title: "In Review",
-            item: mentorshipTasks.filter(task => task.status === 'in-review'),
-          },
-          {
-            id: "board-done",
-            title: "Done",
-            item: mentorshipTasks.filter(task => task.status === 'completed'),
-          }
-        ]
-      }
-    }
-    const tasks = restructureTasks();
+    const tasks = @json($mentorshipTasks);
   </script>
   <script src="/vuexy/assets/js/app-kanban.js"></script>
 @stop
-
-
-{{-- @extends('layouts.admin')
-
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-@stop
-
-@section('content')
-  <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-body">
-        <section id="multiple-column-form">
-          @if (session()->has('message'))
-            <div class="alert alert-success alert-dismissible mb-2" role="alert">
-              {{ __('admin.' . session()->get('message')) }}
-              <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-
-            </div>
-          @endif
-
-          @if (session()->has('message2') || !empty($errors->all()))
-            <div class="alert alert-danger alert-dismissible mb-2" role="alert">
-              <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-              <div class="d-flex align-items-center">
-                <i class="ti ti-error"></i>
-                <span>
-                  {{ __('admin.' . session()->get('message2')) }}
-                  @forelse($errors->all() as $message)
-                    {{ $message }}
-                  @empty
-                  @endforelse
-
-                </span>
-              </div>
-            </div>
-          @endif
-        </section>
-        <section class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card">
-              <div class="card-header border-bottom mb-4">
-                <h4 class="card-title align-items-center">
-                  <i class='bx bx-card font-medium-4 mr-1'></i>{{ __('mentor.mentorshipTasks.all') }}
-                </h4>
-              </div>
-              <div class="card-body">
-                <div class="card-text">
-                  <div class="table-responsive">
-                    <table class="table mb-0" id="userstable">
-                      <thead class="table-light">
-                        <tr>
-                          <th class="text-center">{{ __('mentor.mentorshipTasks.mentorship request') }}</th>
-                          <th class="text-center">{{ __('mentor.mentorshipTasks.title') }}</th>
-                          <th class="text-center">{{ __('cycles.Done') }}</th>
-                          <th class="text-center">{{ __('cycles.Actions') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @if (is_array($mentorshipTasks) && in_array('NoCompany', $mentorshipTasks))
-
-                          <tr>
-                            <td class="text-center">
-                              {{ __('mentor.mentorshipTasks.noCompany') }}
-                            </td>
-                            <td class="text-center">
-
-                            </td>
-                            <td class="text-center">
-
-                            </td>
-                          </tr>
-                        @else
-                          @foreach ($mentorshipTasks as $task)
-                            <tr>
-                              <td class="text-center">
-                                {{ $task->mentorshipRequest->zoom_date }}
-                              </td>
-                              <td class="text-center">
-                                {{ $task->title ?? '-----' }}
-                              </td>
-                              <td class="text-center">
-                                {{ $task->status == 'pending' ? __('No') : __('Yes') }}
-                              </td>
-                              <td class="text-center">
-                                <a href="{{ route('startup.mentorshipTasks.show', ['mentorshipTask' => $task->id]) }}"
-                                  title="Show" class="btn btn-icon rounded-circle btn-label-success">
-                                  <i class="bx bxs-comment-add"></i></a>
-                              </td>
-                            </tr>
-                          @endforeach
-                        @endif
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
-  </div>
-  <!-- END: Content-->
-@stop
-
-@section('pagescripts')
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      $('.table').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "columnDefs": [{
-          "orderable": false,
-          "targets": [7]
-        }, ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        @endif
-      });
-    });
-  </script>
-@stop --}}
