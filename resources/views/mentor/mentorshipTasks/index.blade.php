@@ -27,7 +27,7 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
   <!-- Content -->
-
+  
   <div class="container-xxl flex-grow-1 container-p-y">
     @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
       <div class="row mb-4">
@@ -38,7 +38,27 @@
           </button>
         </div>
       </div>
+<<<<<<< Updated upstream
     @endif
+=======
+    </div>
+    
+    @foreach ($mentorshipTasks as $taskat)
+------------<br>
+  {{ $taskat->id." - ".$taskat->title }}
+  <h4>Labels:</h4>
+  @foreach ($taskat->labels as $label)
+  <p>{{ $label->name }}</p>  <!-- عرض اسم التسمية (أو أي بيانات أخرى من الجدول) -->
+@endforeach
+
+<h4>Comments:</h4>
+
+  @foreach ($taskat->comments as $comment)
+    <p>{{ $comment->comment }}</p>  <!-- عرض محتوى التعليق -->
+  @endforeach
+
+  @endforeach
+>>>>>>> Stashed changes
     <div class="app-kanban">
       <!-- Kanban Wrapper -->
       @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
@@ -228,6 +248,7 @@
                   name="label"
                   class="form-control tagifyInput"
                   placeholder="{{ $l == 'en' ? 'Selecte labels' : 'اختر العلامات' }}"
+                  
                 />
               </div>
             </div>
@@ -319,6 +340,17 @@
 @section('pagescripts')
 <script src="/vuexy/assets/js/forms-selects.js"></script>
 <script>
+<<<<<<< Updated upstream
+=======
+  const tasks = @json($mentorshipTasks);
+ 
+
+  const labels = @json($mentorshipTasks->pluck('label_names')->flatten());
+
+  
+  // const labels = labelsData.map(label => label?.name);
+
+>>>>>>> Stashed changes
   const lng = '{{ $l }}';
   const tasks = @json($mentorshipTasks);
   const labels = @json($labels);
