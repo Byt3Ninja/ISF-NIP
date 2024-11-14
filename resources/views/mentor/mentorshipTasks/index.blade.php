@@ -81,7 +81,7 @@
             </div>
             <div class="mb-3">
               <div>
-                <label for="addTaskLabel" class="form-label">{{ __('admin.Labels') }}</label>
+                <label class="form-label">{{ __('admin.Labels') }}</label>
                 <input
                   id="addTaskLabel"
                   name="label"
@@ -206,7 +206,7 @@
             
             <div class="mb-3">
               <div>
-                <label for="editTaskLabel" class="form-label">{{ __('admin.Labels') }}</label>
+                <label class="form-label">{{ __('admin.Labels') }}</label>
                 <input
                   id="editTaskLabel"
                   name="label"
@@ -301,16 +301,43 @@
 @stop
 
 @section('pagescripts')
-<script src="/vuexy/assets/js/forms-pickers.js"></script>
 <script src="/vuexy/assets/js/forms-selects.js"></script>
-<script src="/vuexy/assets/js/forms-tagify.js"></script>
 <script>
-  const tasks = @json($mentorshipTasks);
-  const labelsData = @json($labels);
-
-  const labels = labelsData.map(label => label?.name);
-
   const lng = '{{ $l }}';
+  const tasks = @json($mentorshipTasks);
+  const labels = @json($labels);
+
+  const whitelist = labels.map(label => label?.name);
 </script>
 <script src="/vuexy/assets/js/mentor-kanban-tasks.js"></script>
+<script>
+  // Render Tagify inputs with suggestions
+  (() => {
+    const addTaskTagifyInput = document.querySelector('#addTaskLabel');
+    const editTaskTagifyInput = document.querySelector('#editTaskLabel');
+
+    const tagifyOptions = {
+      whitelist,
+      maxTags: 10,
+      dropdown: {
+        maxItems: 20,
+        classname: 'tags-inline',
+        enabled: 0,
+        closeOnSelect: false
+      }
+    };
+    let addTaskTagifySuggestions = new Tagify(addTaskTagifyInput, tagifyOptions);
+    let editTaskTagifySuggestions = new Tagify(editTaskTagifyInput, tagifyOptions);
+  })();
+
+  // Render flatpickr date inputs
+  (() => {
+    const flatpickrDate = document.querySelectorAll('#flatpickr-date');
+    if (flatpickrDate) {
+      flatpickrDate.flatpickr({
+        monthSelectorType: 'static'
+      });
+    };
+  })();
+</script>
 @stop

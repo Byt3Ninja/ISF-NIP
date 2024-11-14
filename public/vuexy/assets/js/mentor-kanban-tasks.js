@@ -1,7 +1,7 @@
 // Language
 const lang = lng;
 
-let labelsWhiteList = labels;
+let labelsWhiteList = whitelist;
 
 (async function () {
   let mentorshipTasks;
@@ -17,7 +17,7 @@ let labelsWhiteList = labels;
         return {
           comments: task?.comments?.length || 0,
           labels: task.label_ids,
-          badgeText: "UX",
+          badgeText: labelsWhiteList?.length > 0 ? labelsWhiteList[0]?.toUpperCase() : '',
           badge: "primary",
           assigned: task?.mentorshipTask?.attached ? [task?.mentorshipTask?.attached] : [],
           ...task?.mentorshipTask,
@@ -199,40 +199,4 @@ let labelsWhiteList = labels;
   // Close offcanvas
   $('.offcanvas-backdrop').click(closeOffcanvas);
   $('.btn-close-offcanvas').click(closeOffcanvas);
-
-  const addTaskLabel = document.getElementById('#addTaskLabel');
-  const editTaskLabel = document.getElementById('#editTaskLabel');
-
-  console.log('editTaskLabel', editTaskLabel)
-
-  // const whitelist = ['A# .NET', 'A# (Axiom)', 'A-0 System', 'A+', 'A++', 'ABAP', 'ABC', 'ABC ALGOL', 'ABSET'];
-  const whitelist = labelsWhiteList;
-
-  console.log('whitelist', whitelist)
-
-  if (addTaskLabel) {
-    let TagifyCustomInlineSuggestion = new Tagify(addTaskLabel, {
-      whitelist: whitelist,
-      maxTags: 10,
-      dropdown: {
-        maxItems: 20,
-        classname: 'tags-inline',
-        enabled: 0,
-        closeOnSelect: false
-      }
-    });
-  };
-
-  if (editTaskLabel) {
-    let TagifyCustomInlineSuggestion = new Tagify(editTaskLabel, {
-      whitelist: whitelist,
-      maxTags: 10,
-      dropdown: {
-        maxItems: 20,
-        classname: 'tags-inline',
-        enabled: 0,
-        closeOnSelect: false
-      }
-    });
-  };
 })();
