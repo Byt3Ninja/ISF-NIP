@@ -153,6 +153,51 @@
           </div>
         </div>
 
+        <hr>
+
+        <div class="col-md-6 col-12 mb-6">
+          <label for="financial_plan" class="form-label">{{ __('admin.financial_plan') }}
+            *</label>
+          <div class="position-relative">
+              <div class="mt-3" style="display: grid; place-items: center;">
+                  <input id="financial_plan" readonly
+                    class="form-control border-light light-shadow px-8 "
+                    type="text" name="financial_plan" value="">
+                  <a data-input="financial_plan" data-preview="financial_plan"
+                    href="#"
+                    class="lfm btn btn-outline-primary text-black fw-bold rounded-pill">
+                    <i
+                      class="ti ti-plus me-3"></i>{{ __('admin.Add new document') }}
+                  </a>
+                </div>
+          </div>
+        </div>
+
+        
+
+
+        <div class="col-md-6 col-12 mb-6">
+          <label for="financial_plan_description"
+            class="form-label">{{ __('admin.financial_plan_description') }}*</label>
+          <div class="position-relative">
+            <input type="text"
+              class="form-control border-light light-shadow px-10"
+              id="financial_plan_description" placeholder="{{ __('admin.financial_plan_description') }}*"
+              value="{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}"
+              name="financial_plan_description" required autocomplete="financial_plan_description">
+            <i class="ti ti-chart-bar fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
+              style="left: 7px;"></i>
+          </div>
+        </div>
+
+
+
+       
+
+
+
+
+
         <div class="col-12 d-flex justify-content-end">
           <button type="submit" class="btn btn-primary" id="submit-button">
             <span id="button-text">{{ __('admin.Update') }}</span>

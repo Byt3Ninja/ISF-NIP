@@ -388,6 +388,8 @@ if($data['CompanyN']==4){
         'stage' => 'required',
         'targeted_market.*' => 'required',
         'business_type' => 'required',
+        'financial_plan' => 'required',
+        'financial_plan_description' => 'required',
     ], [
         'Currency.required' => __('admin.Currency is required'),
     
@@ -400,6 +402,8 @@ if($data['CompanyN']==4){
         'stage.required' => __('admin.Stage is required'),
         'targeted_market.*.required' => __('admin.Targeted market is required'),
         'business_type.required' => __('admin.Business type is required'),
+        'financial_plan.required' => __('admin.financial_plan is required'),
+        'financial_plan_description.required' => __('admin.financial_plan_description is required'),
     ]);
     
             // $result = Company::updateOrCreate(['id' => $companyId], $data);
@@ -414,6 +418,8 @@ if($data['CompanyN']==4){
                     'stage' => $data['stage'],
                     'targeted_market' => json_encode($data['targeted_market']),
                     'business_type' => $data['business_type'],
+                    'financial_plan' => $data['financial_plan'],
+                    'financial_plan_description' => $data['financial_plan_description'],
                 ]);
 
 
@@ -428,6 +434,8 @@ if($data['CompanyN']==4){
                     'stage' => $data['stage'],
                     'targeted_market' => json_encode($data['targeted_market']),
                     'business_type' => $data['business_type'],
+                    'financial_plan' => $data['financial_plan'],
+                    'financial_plan_description' => $data['financial_plan_description'],
                 ]);
                 $msgtype = 'NewComp';
             }

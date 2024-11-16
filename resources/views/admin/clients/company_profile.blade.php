@@ -905,6 +905,54 @@
               </div>
             </div>
           </div>
+
+        </div>
+      </section>
+
+          <section class="mt-6">
+            <div class="row">
+              
+          <div class="col-md-6">
+            <div class="card shadow-sm"
+              style="border-radius: 15px; height: 220px;">
+              
+              <div
+                class="card-body d-flex flex-column h-100 justify-content-between">
+                <h4>{{ __('admin.financial_plan') }}</h4>
+                
+                <div class="d-flex justify-content-between py-4">
+                <div class="d-flex align-items-center">
+                  <i
+                    class="ti ti-flag ti-24px text-primary me-2"></i>
+                    {{ $company ? $company->financial_plan_description : '' }}
+                </div>
+                @php
+                $fileNamesf = basename($company->financial_plan);
+                @endphp
+                <div class="d-flex align-items-center">
+                  <div
+                            class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                              <i class="ti ti-file fs-1 text-warning"></i>
+                              <span>{{ $fileNamesf }}</span>
+                            </div>
+                            <a class="btn btn-transparent"
+                              href="{{ $company->financial_plan }}" target="_blank"
+                              download>
+                              <i class="ti ti-download fs-3 text-primary"></i>
+                            </a>
+                          </div>
+                </div>
+
+              </div>  
+ 
+               
+              </div>
+            </div>
+          </div>
+
+
+
         </div>
       </section>
       
