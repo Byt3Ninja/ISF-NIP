@@ -868,5 +868,10 @@ return [
 	'Label'=>' Label ',
 	'comments'=>' Comments ',
 	'TaskAttachments'=>' Task Attachments',
+	'about_problem'=>' About Problem ',
+	'about_market_opportunity'=>'About Market Opportunity',
+	'about_competitors'=>'About Competitors',
+	'about_monetize'=>' About Monetize ',
+	'about_challenges'=>' About Challenges ',
 	
 ];

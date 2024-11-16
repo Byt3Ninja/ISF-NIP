@@ -873,6 +873,11 @@ return [
 	'Labels_Name'=>' اسم العلامة ',
 	'comments'=>' التعليقات ',
 	'TaskAttachments'=>' مرفق المهمة ',
+	'about_problem'=>' حول المشكلة ',
+	'about_market_opportunity'=>' حول فرص السوق ',
+	'about_competitors'=>' حول المنافسين ',
+	'about_monetize'=>' حول الربح ',
+	'about_challenges'=>' حول التحديات ',
 	
 
 ];

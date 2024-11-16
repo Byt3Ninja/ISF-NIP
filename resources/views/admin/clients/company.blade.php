@@ -37,6 +37,7 @@
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
+      ['about_problem', 'ti-presentation', $l == 'en' ? 'about_problem' : ' حول المشكلة '],
   ])
       ->map(function ($tab) {
           return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
@@ -129,6 +130,9 @@
                 @break
                 @case('company-social')
                   @include('partials.forms.company.company-social', ['heading' => $tab['label']])
+                @break
+                @case('about_problem')
+                  @include('partials.forms.company.about_problem', ['heading' => $tab['label']])
                 @break
               @endswitch
             </div>
