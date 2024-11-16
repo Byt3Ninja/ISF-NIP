@@ -886,5 +886,9 @@ return [
 	'business_plan' => 'Business Plan',
 	'financial_plan' => 'Financial Plan',
 	'financial_plan_description' => 'Financial Plan Description',
-	
+	'Pre_seed_funding_stage' => 'Pre-seed funding stage',
+	'Seed_funding_stage' => 'Seed funding stage',
+	'Series_A_funding' => 'Series A funding',
+	'Series_B_funding' => 'Series B funding',
+	'Series_C_funding' => 'Series C funding',
 ];

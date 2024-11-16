@@ -271,7 +271,7 @@
                     <span
                       class="text-black fs-5">{{ __('admin.development_stage') }}</span>
                     <span
-                      class="text-primary">{{ $company->development_stage ?? __('admin.N/A') }}</span>
+                      class="text-primary">{{ __('admin.'. $company->development_stage) ?? __('admin.N/A') }}</span>
                   </div>
                 </div>
               </div>
