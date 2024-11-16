@@ -796,6 +796,62 @@
 
         </div>
       </section>
+
+      <section class="mt-6">
+        <div class="row">
+          
+          <div class="col-md-6 mt-6 mt-md-0">
+            <div class="card shadow-sm"
+              style="border-radius: 15px; height: 220px;">
+              
+              <div
+                class="card-body d-flex flex-column h-100 justify-content-between">
+                <h4>{{ __('admin.about_problem') }}</h4>
+                <div class="d-flex justify-content-between py-4">
+
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-alert-circle ti-24px text-primary me-2"></i>
+                    {{ $company ? $company->about_problem : '' }}
+                  </div>
+
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-chart-bar ti-24px text-primary me-2"></i>
+                    {{ $company ? $company->about_market_opportunity : '' }}
+                  </div>
+                  
+
+
+                </div>
+                
+                <div class="d-flex justify-content-between py-4">
+                <div class="d-flex align-items-center">
+                  <i
+                    class="ti ti-flag ti-24px text-primary me-2"></i>
+                    {{ $company ? $company->about_competitors : '' }}
+                </div>
+
+                <div class="d-flex align-items-center">
+                  <i class="ti ti-cash ti-28px text-primary me-2"></i>
+                  {{ $company ? $company->about_monetize : '' }}
+                </div>
+
+              </div>  
+
+              <div class="d-flex justify-content-between py-4">
+                <div class="d-flex align-items-center">
+                  <i
+                    class="ti ti-target ti-24px text-primary me-2"></i>
+                    {{ $company ? $company->about_challenges : '' }}
+                </div>
+
+              </div> 
+                  
+               
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       
       <section>
         <div class="row">

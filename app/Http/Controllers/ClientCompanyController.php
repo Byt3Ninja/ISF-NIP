@@ -653,6 +653,51 @@ if($data['CompanyN']==11){
             }
 
 }
+if($data['CompanyN']==12){
+  
+    $request->validate([
+        'about_problem' => 'required',
+        'about_market_opportunity' => 'required',
+        'about_competitors' => 'required',
+        'about_monetize' => 'required',
+        'about_challenges' => 'required',
+    ], [
+        'about_problem.required' => __('admin.about_problem is required'),
+        'about_market_opportunity.required' => __('admin.about_market_opportunity is required'),
+        'about_competitors.required' => __('admin.about_competitors is required'),
+        'about_monetize.required' => __('admin.about_monetize is required'),
+        'about_challenges.required' => __('admin.about_challenges is required'),
+    ]);
+            // $result = Company::updateOrCreate(['id' => $companyId], $data);
+            if ($companyId) {
+                // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
+                $result = Company::where('id', $companyId)->update([
+                    'about_problem' => $data['about_problem'],
+                    'about_market_opportunity' => $data['about_market_opportunity'],
+                    'about_competitors' => $data['about_competitors'],
+                    'about_monetize' => $data['about_monetize'],
+                    'about_challenges' => $data['about_challenges'],
+                ]);
+                $msgtype = 'UpdateComp';
+            } else {
+                // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
+                $result = Company::create([
+                    'about_problem' => $data['about_problem'],
+                    'about_market_opportunity' => $data['about_market_opportunity'],
+                    'about_competitors' => $data['about_competitors'],
+                    'about_monetize' => $data['about_monetize'],
+                    'about_challenges' => $data['about_challenges'],
+                ]);
+                $msgtype = 'NewComp';
+            }
+
+            $msgtype = 'UpdateComp';
+            if(!$companyId) {
+                User::where('id', Auth::id())->update(['company_id' => $result->id]);
+                $msgtype = 'NewComp';
+            }
+
+}
                
 
             if($result) {
