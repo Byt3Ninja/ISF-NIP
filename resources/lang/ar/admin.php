@@ -878,6 +878,17 @@ return [
 	'about_competitors'=>' حول المنافسين ',
 	'about_monetize'=>' حول الربح ',
 	'about_challenges'=>' حول التحديات ',
+	'business_model' => 'نموذج العمل',
+	'Marketplace_model' => 'نموذج السوق',
+	'On_demand_model' => 'نموذج الطلب حسب الحاجة',
+	'Disintermediation_model' => 'نموذج إزالة الوسيط',
+	'Subscription_model' => 'نموذج الاشتراك',
+	'Freemium_model' => 'نموذج الفريميوم',
+	'Virtual_good_model' => 'نموذج السلع الافتراضية',
+	'Reseller_model' => 'نموذج إعادة البيع',
+	'other_business_model' => 'نموذج عمل آخر',
+	'business_model_description' => 'وصف نموذج العمل',
+	'business_plan' => 'خطة العمل',
 	
 
 ];

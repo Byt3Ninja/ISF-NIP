@@ -755,7 +755,19 @@ $(".CreatedTax").change(function(){
     }
 });
 
-
+$(".business_model").change(function(){
+    
+    var business_model = $(this).val();
+    
+    if(business_model == 'Other'){
+        $('.IfOther').show();
+        $('.other_business_model').attr('required', 'required');
+    }else{
+        $('.IfOther').hide();
+        $('.other_business_model').removeAttr('required');
+        $('.other_business_model').val('');
+    }
+});
 
 
 

@@ -873,5 +873,16 @@ return [
 	'about_competitors'=>'About Competitors',
 	'about_monetize'=>' About Monetize ',
 	'about_challenges'=>' About Challenges ',
+	'business_model' => 'Business Model',
+	'Marketplace_model' => 'Marketplace Model',
+	'On_demand_model' => 'On-Demand Model',
+	'Disintermediation_model' => 'Disintermediation Model',
+	'Subscription_model' => 'Subscription Model',
+	'Freemium_model' => 'Freemium Model',
+	'Virtual_good_model' => 'Virtual Goods Model',
+	'Reseller_model' => 'Reseller Model',
+	'other_business_model' => 'Other Business Model',
+	'business_model_description' => 'Business Model Description',
+	'business_plan' => 'Business Plan',
 	
 ];
