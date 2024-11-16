@@ -891,6 +891,13 @@ return [
 	'business_plan' => 'خطة العمل',
 	'financial_plan' => 'خطة العمل الحسابية',
 	'financial_plan_description' => 'وصف خطة العمل الحسابية',
+	'Pre_seed_funding_stage' => 'مرحلة التمويل ما قبل البذرة',
+	'Seed_funding_stage' => 'مرحلة التمويل البذري',
+	'Series_A_funding' => 'التمويل من السلسلة أ',
+	'Series_B_funding' => 'التمويل من السلسلة ب',
+	'Series_C_funding' => 'التمويل من السلسلة ج',
+	'financial_plan is required' => ' خطة العمل الحسابية مطلوبة',
+	
 	
 
 ];

@@ -19,9 +19,6 @@ class CountryStateCitySeeder extends Seeder
         $json = File::get(base_path('database/dbFiles/countries+states+cities.json'));
         $data = json_decode($json);
 
-<<<<<<< Updated upstream
-        $counties[]=array_values(array_filter($data,function ($q){
-=======
         $countryCodes = [
             'AFG', 'ALB', 'DZA', 'ASM', 'AND', 'AGO', 'AIA', 'ATA', 'ATG', 'ARG',
             'ARM', 'ABW', 'AUS', 'AUT', 'AZE', 'BHS', 'BGD', 'BRB', 'BLR',
@@ -50,7 +47,6 @@ class CountryStateCitySeeder extends Seeder
         }));
 
         // $counties[]=array_values(array_filter($data,function ($q){
->>>>>>> Stashed changes
 
         //     return $q->iso3=='NGA' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         // }));

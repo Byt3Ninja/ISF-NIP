@@ -386,10 +386,9 @@ if($data['CompanyN']==4){
         'raised_fund' => 'required|numeric|min:0',
         'Funding_Target' => 'required|numeric|min:0',
         'stage' => 'required',
+        'development_stage' => 'required',
         'targeted_market.*' => 'required',
         'business_type' => 'required',
-        'financial_plan' => 'required',
-        'financial_plan_description' => 'required',
     ], [
         'Currency.required' => __('admin.Currency is required'),
     
@@ -400,10 +399,9 @@ if($data['CompanyN']==4){
         'raised_fund.numeric' => __('admin.Raised fund must be a number'),
         'raised_fund.min' => __('admin.Raised fund must be a positive number'),
         'stage.required' => __('admin.Stage is required'),
+        'development_stage.required' => __('admin.development_stage is required'),
         'targeted_market.*.required' => __('admin.Targeted market is required'),
         'business_type.required' => __('admin.Business type is required'),
-        'financial_plan.required' => __('admin.financial_plan is required'),
-        'financial_plan_description.required' => __('admin.financial_plan_description is required'),
     ]);
     
             // $result = Company::updateOrCreate(['id' => $companyId], $data);
@@ -416,6 +414,7 @@ if($data['CompanyN']==4){
                     'raised_fund' => $data['raised_fund'],
                     'Funding_Target' => $data['Funding_Target'],
                     'stage' => $data['stage'],
+                    'development_stage' => $data['development_stage'],
                     'targeted_market' => json_encode($data['targeted_market']),
                     'business_type' => $data['business_type'],
                     'financial_plan' => $data['financial_plan'],
@@ -432,6 +431,7 @@ if($data['CompanyN']==4){
                     'raised_fund' => $data['raised_fund'],
                     'Funding_Target' => $data['Funding_Target'],
                     'stage' => $data['stage'],
+                    'development_stage' => $data['development_stage'],
                     'targeted_market' => json_encode($data['targeted_market']),
                     'business_type' => $data['business_type'],
                     'financial_plan' => $data['financial_plan'],
