@@ -38,6 +38,7 @@
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
       ['about_problem', 'ti-presentation', $l == 'en' ? 'about_problem' : ' حول المشكلة '],
+      ['business_model', 'ti-presentation', $l == 'en' ? 'business_model' : ' نموذج الاعمال '],
   ])
       ->map(function ($tab) {
           return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
@@ -133,6 +134,9 @@
                 @break
                 @case('about_problem')
                   @include('partials.forms.company.about_problem', ['heading' => $tab['label']])
+                @break
+                @case('business_model')
+                  @include('partials.forms.company.business_model', ['heading' => $tab['label']])
                 @break
               @endswitch
             </div>

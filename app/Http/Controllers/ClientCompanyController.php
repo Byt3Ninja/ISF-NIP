@@ -698,6 +698,45 @@ if($data['CompanyN']==12){
             }
 
 }
+if($data['CompanyN']==13){
+  
+    $request->validate([
+        'business_model' => 'required',
+        'business_model_description' => 'required',
+        'business_plan' => 'required',
+    ], [
+        'business_model.required' => __('admin.business_model is required'),
+        'business_model_description.required' => __('admin.business_model_description is required'),
+        'business_plan.required' => __('admin.business_plan is required'),
+    ]);
+            // $result = Company::updateOrCreate(['id' => $companyId], $data);
+            if ($companyId) {
+                // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
+                $result = Company::where('id', $companyId)->update([
+                    'business_model' => $data['business_model'],
+                    'other_business_model' => $data['other_business_model'],
+                    'business_model_description' => $data['business_model_description'],
+                    'business_plan' => $data['business_plan'],
+                ]);
+                $msgtype = 'UpdateComp';
+            } else {
+                // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
+                $result = Company::create([
+                    'business_model' => $data['business_model'],
+                    'other_business_model' => $data['other_business_model'],
+                    'business_model_description' => $data['business_model_description'],
+                    'business_plan' => $data['business_plan'],
+                ]);
+                $msgtype = 'NewComp';
+            }
+
+            $msgtype = 'UpdateComp';
+            if(!$companyId) {
+                User::where('id', Auth::id())->update(['company_id' => $result->id]);
+                $msgtype = 'NewComp';
+            }
+
+}
                
 
             if($result) {
