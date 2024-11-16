@@ -889,6 +889,8 @@ return [
 	'other_business_model' => 'نموذج عمل آخر',
 	'business_model_description' => 'وصف نموذج العمل',
 	'business_plan' => 'خطة العمل',
+	'financial_plan' => 'خطة العمل الحسابية',
+	'financial_plan_description' => 'وصف خطة العمل الحسابية',
 	
 
 ];

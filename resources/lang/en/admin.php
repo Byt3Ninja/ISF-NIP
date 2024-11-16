@@ -884,5 +884,7 @@ return [
 	'other_business_model' => 'Other Business Model',
 	'business_model_description' => 'Business Model Description',
 	'business_plan' => 'Business Plan',
+	'financial_plan' => 'Financial Plan',
+	'financial_plan_description' => 'Financial Plan Description',
 	
 ];
