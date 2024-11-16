@@ -891,11 +891,11 @@ return [
 	'business_plan' => 'خطة العمل',
 	'financial_plan' => 'خطة العمل الحسابية',
 	'financial_plan_description' => 'وصف خطة العمل الحسابية',
-	'Pre_seed_funding_stage' => ' مرحلة التمويل التأسيسي الأولي ',
-	'Seed_funding_stage' => 'مرحلة التمويل الأولي ',
-	'Series_A_funding' => ' مرحلة التمويل من الفئة “أ”  ',
-	'Series_B_funding' => ' مرحلة التمويل من الفئة “ب” ',
-	'Series_C_funding' => ' مرحلة التمويل من الفئة “ج” ',
+	'Pre_seed_funding_stage' => ' مرحلة التمويل التأسيسي الأولي (Pre-seed) ',
+	'Seed_funding_stage' => 'مرحلة التمويل الأولي (Seed)',
+	'Series_A_funding' => ' مرحلة التمويل من الفئة “أ”  (Series A)',
+	'Series_B_funding' => ' مرحلة التمويل من الفئة “ب” (Series B)',
+	'Series_C_funding' => ' مرحلة التمويل من الفئة “ج” (Series C)',
 	'financial_plan is required' => ' خطة العمل الحسابية مطلوبة',
 	
 	
