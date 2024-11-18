@@ -11,37 +11,41 @@ use Carbon\Carbon;
 use App\Settings;
 use Google\Client;
 use Google\Service\Calendar as Google_Service_Calendar;
+use Illuminate\Support\Facades\Schema;
 
 class GoogleCalendarService
 {
     protected $client;
 
-    
+
 
     public function __construct()
     {
-        
-        $Setting = Settings::where('id', 1)->first();
-        if($Setting){
-        $GOOGLE_CLIENT_ID = $Setting->GOOGLE_CLIENT_ID;
-        $GOOGLE_CLIENT_SECRET= $Setting->GOOGLE_CLIENT_SECRET;
-        $CALENDER_GOOGLE_REDIRECT_URI= $Setting->GOOGLE_REDIRECT;
-        }else{
-            $GOOGLE_CLIENT_ID = '';
-            $GOOGLE_CLIENT_SECRET= '';
-            $CALENDER_GOOGLE_REDIRECT_URI= '';
+        if (Schema::hasTable('settings')) {
+            $Setting = Settings::where('id', 1)->first();
+
+            if ($Setting) {
+                $GOOGLE_CLIENT_ID = $Setting->GOOGLE_CLIENT_ID;
+                $GOOGLE_CLIENT_SECRET = $Setting->GOOGLE_CLIENT_SECRET;
+                $CALENDER_GOOGLE_REDIRECT_URI = $Setting->GOOGLE_REDIRECT;
+            } else {
+                $GOOGLE_CLIENT_ID = '';
+                $GOOGLE_CLIENT_SECRET = '';
+                $CALENDER_GOOGLE_REDIRECT_URI = '';
+            }
+
+
+            $this->client = new Google_Client();
+            $this->client->setClientId($GOOGLE_CLIENT_ID);
+            $this->client->setClientSecret($GOOGLE_CLIENT_SECRET);
+            $this->client->setRedirectUri($CALENDER_GOOGLE_REDIRECT_URI);
+            $this->client->addScope(Google_Service_Calendar::CALENDAR);
         }
-        
-        $this->client = new Google_Client();
-        $this->client->setClientId($GOOGLE_CLIENT_ID);
-        $this->client->setClientSecret($GOOGLE_CLIENT_SECRET);
-        $this->client->setRedirectUri($CALENDER_GOOGLE_REDIRECT_URI);
-        $this->client->addScope(Google_Service_Calendar::CALENDAR);
     }
 
     public function getAuthUrl()
     {
-        
+
         return $this->client->createAuthUrl();
     }
 
@@ -55,7 +59,7 @@ class GoogleCalendarService
             [
                 'provider' => 'google',
                 'access_token' => $token['access_token'],
-                'refresh_token' => $token['refresh_token']??'',
+                'refresh_token' => $token['refresh_token'] ?? '',
                 'expires_at' => now()->addSeconds($token['expires_in']),
             ]
         );
@@ -97,19 +101,19 @@ class GoogleCalendarService
         $s = new \DateTime($eventData['start_date_time']);
         $interval = new \DateInterval('PT3H');
         $s->sub($interval);
-        $e=new \DateTime($eventData['end_date_time']);
+        $e = new \DateTime($eventData['end_date_time']);
         $e->sub($interval);
         $event = new Google_Service_Calendar_Event(array(
             'summary' => $eventData['title'],
             'location' => $eventData['location'] ?? '',
             'description' => $eventData['description'] ?? '',
-            'start' =>[
-                'dateTime'=>$s->format(\DateTime::RFC3339),
-                'timeZone'=>'UTC'
-                ],
-            'end' =>[
-                'dateTime'=>$e->format(\DateTime::RFC3339),
-                'timeZone'=>'UTC'
+            'start' => [
+                'dateTime' => $s->format(\DateTime::RFC3339),
+                'timeZone' => 'UTC'
+            ],
+            'end' => [
+                'dateTime' => $e->format(\DateTime::RFC3339),
+                'timeZone' => 'UTC'
             ]
 
         ));
@@ -118,4 +122,3 @@ class GoogleCalendarService
         return $createdEvent; // Returns the link to the created Google Calendar event
     }
 }
-

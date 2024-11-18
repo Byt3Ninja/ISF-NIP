@@ -3,29 +3,31 @@
 namespace App\Services;
 
 use App\Settings; // تأكد من استخدام المسار الصحيح للموديل
+use Illuminate\Support\Facades\Schema;
 
 class BroadcastConfigService
 {
     public static function getPusherConfig()
     {
-        $settings = Settings::where('id', 1)->first();
+        if (Schema::hasTable('settings')) {
+            $settings = Settings::where('id', 1)->first();
 
-        if (!$settings) {
-            // إذا لم يتم العثور على السجل، استخدم القيم الافتراضية أو قم بإرجاع خطأ أو سجل الحدث
-            return [
-                'BROADCAST_DRIVER' => 'pusher', // قيمة افتراضية
-                'PUSHER_APP_KEY' => '', // ضع قيمة افتراضية هنا
-                'PUSHER_APP_SECRET' => '',
-                'PUSHER_APP_ID' => '',
-                'PUSHER_APP_CLUSTER' => '',
+            if (!$settings) {
+                // إذا لم يتم العثور على السجل، استخدم القيم الافتراضية أو قم بإرجاع خطأ أو سجل الحدث
+                return [
+                    'BROADCAST_DRIVER' => 'pusher', // قيمة افتراضية
+                    'PUSHER_APP_KEY' => '', // ضع قيمة افتراضية هنا
+                    'PUSHER_APP_SECRET' => '',
+                    'PUSHER_APP_ID' => '',
+                    'PUSHER_APP_CLUSTER' => '',
 
-                'GOOGLE_CLIENT_ID' => '',
-                'GOOGLE_CLIENT_SECRET' => '',
-                'GOOGLE_REDIRECT' => '',
+                    'GOOGLE_CLIENT_ID' => '',
+                    'GOOGLE_CLIENT_SECRET' => '',
+                    'GOOGLE_REDIRECT' => '',
 
-            ];
+                ];
+            }
         }
-    
         // إعادة القيم المأخوذة من السجل
         return [
             'BROADCAST_DRIVER' => $settings->BroadCast ?? 'pusher', // قم باستخدام القيمة أو قيمة افتراضية
@@ -38,7 +40,7 @@ class BroadcastConfigService
             'GOOGLE_CLIENT_SECRET' => $settings->GOOGLE_CLIENT_SECRET ?? '',
             'GOOGLE_REDIRECT' => $settings->GOOGLE_REDIRECT ?? '',
 
-            'MICROSOFT_CLIENT_ID' => $settings->MICROSOFT_CLIENT_ID ?? '',
+            'MICROSOFT_CLIENT_ID' => $settings->MICROSOFT_CLIENT_ID ?? '0',
             'MICROSOFT_CLIENT_SECRET_VALUE' => $settings->MICROSOFT_CLIENT_SECRET_VALUE ?? '',
             'MICROSOFT_TENANT_ID' => $settings->MICROSOFT_TENANT_ID ?? '',
             'MICROSOFT_CLIENT_SECRET_ID' => $settings->MICROSOFT_CLIENT_SECRET_ID ?? '',
@@ -46,7 +48,5 @@ class BroadcastConfigService
             'MICROSOFT_REDIRECT_URI' => $settings->MICROSOFT_REDIRECT_URI ?? '',
 
         ];
-
-        
     }
 }

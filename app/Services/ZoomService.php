@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Services;
 
-use GuzzleHttp\Client;
 use Log;
 use App\Settings;
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Schema;
+
 class ZoomService implements OnlineMeetingServiceInterface
 {
     const MEETING_TYPE_INSTANT = 1;
@@ -20,65 +23,70 @@ class ZoomService implements OnlineMeetingServiceInterface
         $this->client = new Client();
         $this->jwt = $this->generateZoomToken();
         $this->headers = [
-            'Authorization' => 'Bearer '.$this->jwt,
+            'Authorization' => 'Bearer ' . $this->jwt,
             'Content-Type'  => 'application/json',
             'Accept'        => 'application/json',
         ];
     }
 
-//    ===================> old function <=====================
-//    public function  getAccessToken()
-//    {
-//        $key = env('ZOOM_API_KEY', '');
-//        $secret = env('ZOOM_API_SECRET', '');
-//        $payload = [
-//            'iss' => $key,
-//            'exp' => strtotime('+1 minute'),
-//        ];
-//
-//        return \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
-//    }
+    //    ===================> old function <=====================
+    //    public function  getAccessToken()
+    //    {
+    //        $key = env('ZOOM_API_KEY', '');
+    //        $secret = env('ZOOM_API_SECRET', '');
+    //        $payload = [
+    //            'iss' => $key,
+    //            'exp' => strtotime('+1 minute'),
+    //        ];
+    //
+    //        return \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
+    //    }
     protected function generateZoomToken()
     {
-        $Setting = Settings::where('id', 1)->first();
-        if($Setting){
-        $ZOOM_CLIENT_ID = $Setting->ZOOM_CLIENT_ID;
-        $ZOOM_CLIENT_SECRET= $Setting->ZOOM_CLIENT_SECRET;
-        $ZOOM_ACCOUNT_ID= $Setting->ZOOM_ACCOUNT_ID;
-        }else{
-            $ZOOM_CLIENT_ID = '';
-            $ZOOM_CLIENT_SECRET= '';
-            $ZOOM_ACCOUNT_ID= '';
+        if (Schema::hasTable('settings')) {
+            $Setting = Settings::where('id', 1)->first();
+
+            if ($Setting) {
+                $ZOOM_CLIENT_ID = $Setting->ZOOM_CLIENT_ID;
+                $ZOOM_CLIENT_SECRET = $Setting->ZOOM_CLIENT_SECRET;
+                $ZOOM_ACCOUNT_ID = $Setting->ZOOM_ACCOUNT_ID;
+            } else {
+                $ZOOM_CLIENT_ID = '';
+                $ZOOM_CLIENT_SECRET = '';
+                $ZOOM_ACCOUNT_ID = '';
+            }
+            $client = new Client([
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode($ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
+                    'Host' => 'zoom.us',
+                ],
+            ]);
+
+            $response = $client->request('POST', "https://zoom.us/oauth/token", [
+                'form_params' => [
+                    'grant_type' => 'account_credentials',
+                    'account_id' => $ZOOM_ACCOUNT_ID,
+                ],
+            ]);
+
+            $responseBody = json_decode($response->getBody(), true);
+            return $responseBody['access_token'];
         }
-        $client = new Client([
-            'headers' => [
-                'Authorization' => 'Basic ' . base64_encode( $ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
-                'Host' => 'zoom.us',
-            ],
-        ]);
-
-        $response = $client->request('POST', "https://zoom.us/oauth/token", [
-            'form_params' => [
-                'grant_type' => 'account_credentials',
-                'account_id' => $ZOOM_ACCOUNT_ID,
-            ],
-        ]);
-
-        $responseBody = json_decode($response->getBody(), true);
-        return $responseBody['access_token'];
     }
 
     private function retrieveZoomUrl()
     {
-        $Setting = Settings::where('id', 1)->first();
-        $zoom_api_url = $Setting->ZOOM_API_URL;
-        if(!empty($Setting) && !empty($zoom_api_url)){
-        $ZOOM_API_URL = $Setting->ZOOM_API_URL;
-        }else{
-            $ZOOM_API_URL = 'https://api.zoom.us/v2/';
-        }
+        if (Schema::hasTable('settings')) {
+            $Setting = Settings::where('id', 1)->first();
+            $zoom_api_url = $Setting->ZOOM_API_URL;
+            if (!empty($Setting) && !empty($zoom_api_url)) {
+                $ZOOM_API_URL = $Setting->ZOOM_API_URL;
+            } else {
+                $ZOOM_API_URL = 'https://api.zoom.us/v2/';
+            }
 
-        return $ZOOM_API_URL;
+            return $ZOOM_API_URL;
+        }
     }
 
     public function toZoomTimeFormat(string $dateTime)
@@ -87,7 +95,7 @@ class ZoomService implements OnlineMeetingServiceInterface
             $date = new \DateTime($dateTime);
             return $date->format('Y-m-d\TH:i:s');
         } catch (\Exception $e) {
-            Log::error('ZoomJWT->toZoomTimeFormat : '.$e->getMessage());
+            Log::error('ZoomJWT->toZoomTimeFormat : ' . $e->getMessage());
             return '';
         }
     }
@@ -114,30 +122,30 @@ class ZoomService implements OnlineMeetingServiceInterface
             ]),
         ];
 
-        $response =  $this->client->post($url.$path, $body);
+        $response =  $this->client->post($url . $path, $body);
 
         // التأكد من أن الاستجابة ليست فارغة وأن الكود هو 201 (تم الإنشاء بنجاح)
-if ($response && $response->getStatusCode() === 201) {
-    $responseData = json_decode($response->getBody(), true);
-    return [
-        'success' => true,
-        'data'    => [
-            'id'        => $responseData['id'],
-            'start_url' => $responseData['start_url'],
-            'join_url'  => $responseData['join_url'],
-        ],
-    ];
-} else {
-    return [
-        'success' => false,
-        'data'    => null,
-    ];
-}
+        if ($response && $response->getStatusCode() === 201) {
+            $responseData = json_decode($response->getBody(), true);
+            return [
+                'success' => true,
+                'data'    => [
+                    'id'        => $responseData['id'],
+                    'start_url' => $responseData['start_url'],
+                    'join_url'  => $responseData['join_url'],
+                ],
+            ];
+        } else {
+            return [
+                'success' => false,
+                'data'    => null,
+            ];
+        }
     }
 
     public function update($id, $data)
     {
-        $path = 'meetings/'.$id;
+        $path = 'meetings/' . $id;
         $url = $this->retrieveZoomUrl();
 
         $body = [
@@ -156,7 +164,7 @@ if ($response && $response->getStatusCode() === 201) {
                 ],
             ]),
         ];
-        $response =  $this->client->patch($url.$path, $body);
+        $response =  $this->client->patch($url . $path, $body);
 
         return [
             'success' => $response->getStatusCode() === 204,
@@ -166,14 +174,14 @@ if ($response && $response->getStatusCode() === 201) {
 
     public function get($id)
     {
-        $path = 'meetings/'.$id;
+        $path = 'meetings/' . $id;
         $url = $this->retrieveZoomUrl();
         $this->jwt = $this->generateZoomToken();
         $body = [
             'headers' => $this->headers,
             'body'    => json_encode([]),
         ];
-        $response =  $this->client->get($url.$path, $body);
+        $response =  $this->client->get($url . $path, $body);
         return [
             'success' => $response->getStatusCode() === 204,
             'data'    => json_decode($response->getBody(), true),
@@ -182,14 +190,14 @@ if ($response && $response->getStatusCode() === 201) {
 
     public function getregistrants($id)
     {
-        $path = 'meetings/'.$id.'/registrants';
+        $path = 'meetings/' . $id . '/registrants';
         $url = $this->retrieveZoomUrl();
         $this->jwt = $this->generateZoomToken();
         $body = [
             'headers' => $this->headers,
             'body'    => json_encode([]),
         ];
-        $response =  $this->client->get($url.$path, $body);
+        $response =  $this->client->get($url . $path, $body);
         return [
             'success' => $response->getStatusCode() === 204,
             'data'    => json_decode($response->getBody(), true),
@@ -205,7 +213,7 @@ if ($response && $response->getStatusCode() === 201) {
             'headers' => $this->headers,
             'body'    => json_encode([]),
         ];
-        $response =  $this->client->get($url.$path, $body);
+        $response =  $this->client->get($url . $path, $body);
         return [
             'success' => $response->getStatusCode() === 204,
             'data'    => json_decode($response->getBody(), true),
@@ -219,16 +227,15 @@ if ($response && $response->getStatusCode() === 201) {
      */
     public function delete($id)
     {
-        $path = 'meetings/'.$id;
+        $path = 'meetings/' . $id;
         $url = $this->retrieveZoomUrl();
         $body = [
             'headers' => $this->headers,
             'body'    => json_encode([]),
         ];
-        $response =  $this->client->delete($url.$path, $body);
+        $response =  $this->client->delete($url . $path, $body);
         return [
             'success' => $response->getStatusCode() === 204,
         ];
     }
-
 }
