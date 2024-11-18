@@ -281,19 +281,11 @@
             </div>
           </form>
         </div>
-        <!-- Activities -->
+        <!-- Task Comments -->
         <div class="tab-pane fade text-heading" id="tab-activity" role="tabpanel">
-          @foreach ($allComments as $comment )
-          <div class="media mb-4 d-flex align-items-center">
-            <div class="media-body">
-              <p class="mb-0">
-                {{ $comment->comment }}
-              </p>
-              <small class="text-muted">{{ $comment->created_at }}</small>
-            </div>
-          </div>
-          @endforeach
+          <div id="activity"></div>
         </div>
+        <!-- / Task Comments -->
       </div>
     </div>
   </div>
@@ -320,8 +312,6 @@
 @section('pagescripts')
 <script src="/vuexy/assets/js/forms-selects.js"></script>
 <script>
-  // const tasks = @json($mentorshipTasks);
-  // const labels = @json($mentorshipTasks->pluck('label_names')->flatten());
   const lng = '{{ $l }}';
   const tasks = @json($mentorshipTasks);
   const labels = @json($labels);
@@ -332,7 +322,6 @@
   // Render Tagify inputs with suggestions
   (() => {
     const addTaskTagifyInput = document.querySelector('#addTaskLabel');
-    const editTaskTagifyInput = document.querySelector('#editTaskLabel');
 
     const tagifyOptions = {
       whitelist,
@@ -345,7 +334,6 @@
       }
     };
     let addTaskTagifySuggestions = new Tagify(addTaskTagifyInput, tagifyOptions);
-    let editTaskTagifySuggestions = new Tagify(editTaskTagifyInput, tagifyOptions);
   })();
 
   // Render flatpickr date inputs
