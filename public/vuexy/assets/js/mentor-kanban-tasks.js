@@ -1,24 +1,29 @@
 // Language
 const lang = lng;
 
-let labelsWhiteList = whitelist;
-
 (async function () {
   let mentorshipTasks;
 
-  if (tasks) mentorshipTasks = tasks;
+  if (tasks) {
+    mentorshipTasks = tasks;
+  }
 
   const restructureTasks = () => {
+    let colors = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark'];
+
     if (mentorshipTasks) {
-      return mentorshipTasks.map(task => {
+      return mentorshipTasks.map((task, index) => {
         return {
-          comments: task?.comments?.length || 0,
-          labels: task.label_ids,
-          badgeText: labelsWhiteList?.length > 0 ? labelsWhiteList[0]?.toUpperCase() : '',
-          badge: "primary",
-          assigned: task?.mentorshipTask?.attached ? [task?.mentorshipTask?.attached] : [],
-          ...task?.mentorshipTask,
-        }
+          ...task,
+          comments: task.comments.length || 0,
+          commentsData: task.comments,
+          badgeText:
+            task?.labels?.length > 0
+              ? task?.labels?.map(l => (!Array.isArray(l?.name) ? l.name : '')).join(', ')
+              : '',
+          badge: colors[index % colors.length],
+          assigned: task?.attached ? [task?.attached] : []
+        };
       });
     }
   };
@@ -32,18 +37,18 @@ let labelsWhiteList = whitelist;
       return statusArr.map(status => {
         const filteredTasks = restructuredTasks.filter(task => task.status === status);
         const boardTitle = status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ');
-        
+
         return {
-          id: filteredTasks?.length > 0 ?`board-${status}` : '',
+          id: filteredTasks?.length > 0 ? `board-${status}` : '',
           title: filteredTasks?.length > 0 ? boardTitle : '',
-          item: filteredTasks,
-        }
+          item: filteredTasks
+        };
       });
-    };
+    }
   };
-  
+
   const modefiedTasks = getModefiedTasks();
-  
+
   // Kanban board
   const kanban = new jKanban({
     element: '.kanban-wrapper',
@@ -57,7 +62,7 @@ let labelsWhiteList = whitelist;
     dragEl: (el, source) => {
       console.log('Task is being dragged:', el);
     },
-    dragendEl: (el) => {
+    dragendEl: el => {
       console.log('Task drag ended:', el);
       // Perform any additional actions here
     },
@@ -71,7 +76,6 @@ let labelsWhiteList = whitelist;
   // Function to send updated task to backend
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
-     
     } catch (error) {
       // console.error('Error updating task:', error);
     }
@@ -93,15 +97,19 @@ let labelsWhiteList = whitelist;
 
   // Render header
   function renderHeader(color, text) {
-    return `
-      <div class='d-flex justify-content-between flex-wrap align-items-center mb-2'>
-        <div class='item-badges'>
-          <div id="label-badge" class='mb-2 badge bg-label-${color}'>
-            ${text}
+    if (text) {
+      return `
+        <div class='d-flex justify-content-between flex-wrap align-items-center mb-2'>
+          <div class='item-badges'>
+            <div id="label-badge" class='mb-2 badge bg-label-${color}'>
+              ${text}
+            </div>
           </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      return '';
+    }
   }
 
   // Render footer
@@ -113,10 +121,10 @@ let labelsWhiteList = whitelist;
     if (assigned) {
       img = `
         <div class='avatar-group d-flex align-items-center assigned-avatar'>
-          <img src="${assigned}" class="rounded-circle" alt="avatar" height="26" width="26" />
+          <img src="${assigned}" class="rounded-circle border" alt="avatar" height="30" width="30" />
         </div>
       `;
-    };
+    }
 
     return `
       <div class='d-flex justify-content-between align-items-center flex-wrap mt-2'>
@@ -171,7 +179,7 @@ let labelsWhiteList = whitelist;
         );
       }
     });
-  };
+  }
 
   // Handle task click
   const onClickTask = el => {
@@ -190,9 +198,47 @@ let labelsWhiteList = whitelist;
       $('#descriptionEdit').html(task.description);
       $('#editTaskStatus').val(task.status);
       $('#editTaskLabel').val(task.label_id);
-      $('#editTaskAssigned').val(task.assigned_to);
+      // $('#editTaskAssigned').val(task.assigned_to);
       $('#MTaskId').val(task.id);
       $('.due_dateEdit').val(task.due_date);
+
+      renderTaskComments(task.commentsData);
+
+      const editTaskTagifyInput = document.querySelector('#editTaskLabel');
+
+      let editTaskTagifySuggestions = new Tagify(editTaskTagifyInput, {
+        whitelist: task?.labels?.map(l => l.name) || [],
+        maxTags: 10,
+        dropdown: {
+          maxItems: 20,
+          classname: 'tags-inline',
+          enabled: 0,
+          closeOnSelect: false
+        }
+      });
+    }
+  };
+
+  const renderTaskComments = comments => {
+    const activity = $('#tab-activity #activity');
+
+    if (comments) {
+      comments.forEach((comment) => {
+
+        let formattedDate = new Date(comment.created_at).toLocaleString();
+        comment.created_at = formattedDate;
+
+        return activity.append(`
+          <div class="media mb-4 d-flex align-items-center">
+            <div class="media-body">
+              <p class="mb-0 text-wrap text-break">
+                ${comment.comment}
+              </p>
+              <small class="text-muted">${comment.created_at}</small>
+            </div>
+          </div>
+        `);
+      });
     }
   };
 

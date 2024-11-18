@@ -22,12 +22,10 @@ class MentorshipTaskController extends Controller
     {
         
         $mentorship = MentorshipRequest::findOrFail($request->mentorship_id);
+// $mentorshipTasks = $mentorship->mentorshipTasks;
 $mentorshipTasks = $mentorship->mentorshipTasks()->with(['labels', 'comments'])->get();
-
 $labels = Label::all();
 $allComments = collect();
-
-
 // تعديل محتوى المتغير $mentorshipTasks باستخدام map بحيث يتم تمرير التعليقات حتى لو كانت null
 // $mentorshipTasks = $mentorshipTasks->map(function ($mentorshipTask) use (&$allComments) {
 //     // جلب التعليقات الخاصة بكل مهمة
@@ -48,7 +46,7 @@ $allComments = collect();
 //         'mentorshipTask' => $mentorshipTask,
 //         'comments' => $comments->isEmpty() ? collect() : $comments,
 //         'label_ids' => $labelIds, // إضافة label_ids إلى البيانات
-//         'label_names' => $labelNames->filter(), // إضافة أسماء الـ labels إلى البيانات
+//         'label_names' => $labelNames, // إضافة أسماء الـ labels إلى البيانات
 //     ];
 // });
 
