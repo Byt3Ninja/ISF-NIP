@@ -286,7 +286,7 @@ to group of users'];
         </div>
         <div class="modal-footer">
           <button type="submit" value="submit" class="btn btn-primary ml-1">
-            <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+            <span>{{ __('cycles.Submit') }}</span>
           </button>
         </div>
       </form>
@@ -325,7 +325,7 @@ to group of users'];
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary ml-1">
-            <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+            <span>{{ __('cycles.Submit') }}</span>
           </button>
         </div>
       </form>
@@ -363,7 +363,7 @@ to group of users'];
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary ml-1">
-            <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+            <span>{{ __('cycles.Submit') }}</span>
           </button>
         </div>
       </form>

@@ -1,8 +1,17 @@
 @extends('layouts.admin')
 
-@section('style')
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+@stop
+
+@section('style')
 <style>
   .radius-15 {
     border-radius: 15px;
@@ -22,6 +31,11 @@
   }
   .text-xs {
     font-size: 12px;
+  }
+  .custom-pill {
+    width: fit-content;
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.5rem;
   }
 </style>
 @stop
@@ -99,7 +113,9 @@ $mentortotal = [
 (object) ['id' => 3, 'name' => 'Mentor 3', 'image_url' => '/images/background/mentor3.jpg'],
 (object) ['id' => 4, 'name' => 'Mentor 4', 'image_url' => '/images/background/mentor4.jpg'],
 (object) ['id' => 5, 'name' => 'Mentor 5', 'image_url' => '/images/background/mentor5.jpg'],
-]
+];
+
+$screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assign-group-to-group-users'];
 @endphp
 
 @section('content')
@@ -271,7 +287,7 @@ $mentortotal = [
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                           <li>
-                            <button class="dropdown-item ccycle text-primary">
+                            <button id="editButton" class="dropdown-item ccycle text-primary">
                               <i class="ti ti-edit me-2"></i>
                               {{ __('cycles.Edit') }}
                             </button>
@@ -316,7 +332,8 @@ $mentortotal = [
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button class="dropdown-item ccycle text-primary">
+                          <button data-bs-toggle="modal" 
+                          data-bs-target="#customStepModal" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
@@ -412,7 +429,8 @@ $mentortotal = [
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button class="dropdown-item ccycle text-primary">
+                          <button data-bs-toggle="modal" 
+                          data-bs-target="#screeningStepModal" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
@@ -458,7 +476,7 @@ $mentortotal = [
                     </div>
                   </div>
                   <div class="col-4 col-md-3">
-                    <a id="private-link" href="#" class="d-flex align-items-center text-black">
+                    <a id="private-link" href="#" class="d-flex align-items-center text-nowrap">
                       Notify them <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
                     </a>
                   </div>
@@ -548,7 +566,8 @@ $mentortotal = [
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button class="dropdown-item ccycle text-primary">
+                          <button data-bs-toggle="modal" 
+                          data-bs-target="#mentorshipStepModal" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
@@ -673,7 +692,8 @@ $mentortotal = [
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button class="dropdown-item ccycle text-primary">
+                          <button data-bs-toggle="modal" 
+                          data-bs-target="#trainingStepModal" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
@@ -770,7 +790,8 @@ $mentortotal = [
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button class="dropdown-item ccycle text-primary">
+                          <button data-bs-toggle="modal" 
+                          data-bs-target="#finalScreeningModal" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
@@ -823,7 +844,7 @@ $mentortotal = [
                     </div>
                   </div>
                   <div class="col-4 col-md-3">
-                    <a id="private-link" href="#" class="d-flex align-items-center text-black">
+                    <a id="private-link" href="#" class="d-flex align-items-center text-nowrap">
                       Notify them <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
                     </a>
                   </div>
@@ -882,62 +903,567 @@ $mentortotal = [
     </div>
   </div>
   <div class="content-backdrop fade"></div>
-  <!-- Overlay -->
 </div>
-<div class="layout-overlay layout-menu-toggle"></div>
 
-<!-- Drag Target Area To SlideIn Menu On Small Screens -->
-<div class="drag-target"></div>
+<!-- Custom Step Modal -->
+  <div 
+    class="modal fade" 
+    id="customStepModal" 
+    tabindex="-1" 
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCenterTitle">Edit Step Information</h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            data-bs-toggle="modal" 
+            data-bs-target="#customStepModal" 
+            aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-step-form">
+            <fieldset class="row">
+              <div class="col-12 form-group mb-3">
+                <label class="form-label" for="select-step">Select Step</label>
+                <select class="form-select border light-shadow">
+                  <option>Step 1</option>
+                  <option>Step 2</option>
+                  <option>Step 3</option>
+                </select>
+              </div>
+              <div class="col-12 form-group mb-3">
+                <label class="form-label" for="step-name">Step Name</label>
+                <input 
+                  type="text" 
+                  class="form-control border light-shadow" 
+                  id="step-name" 
+                  placeholder="Step Name"
+                />
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">Start Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="Start Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">End Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="End Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 form-group mb-5">
+                <label class="form-label" form="step-desc">Description</label>
+                <textarea 
+                  class="form-control border light-shadow" 
+                  id="step-desc" 
+                  rows="3" 
+                  placeholder="Description"
+                ></textarea>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" value="submit" class="btn btn-primary">
+            <i class="ti ti-circle-check ti-24px me-2"></i>
+            {{ __('cycles.Submit') }}
+          </button>
+          <button 
+            type="button" 
+            data-bs-toggle="modal" 
+            data-bs-target="#customStepModal" 
+            class="btn btn-outline-primary ml-1">
+            <i class="ti ti-circle-x ti-24px me-2"></i>
+            {{ __('cycles.Close') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- / Custom Step Modal -->
+<!-- Screening Step Modal -->
+  <div 
+    class="modal fade" 
+    id="screeningStepModal" 
+    tabindex="-1" 
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCenterTitle">Edit Step Information</h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            data-bs-toggle="modal" 
+            data-bs-target="#screeningStepModal" 
+            aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-step-form">
+            <fieldset class="row">
+              <div class="col-12 form-group mb-3">
+                <label class="form-label" for="select-step">Select Step</label>
+                <select class="form-select border light-shadow">
+                  <option>Step 1</option>
+                  <option>Step 2</option>
+                  <option>Step 3</option>
+                </select>
+              </div>
+              <div class="col-12 form-group mb-3">
+                <label class="form-label" for="step-name">Step Name</label>
+                <input 
+                  type="text" 
+                  class="form-control border light-shadow" 
+                  id="step-name" 
+                  placeholder="Step Name"
+                />
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">Start Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="Start Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">End Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="End Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 form-group mb-5">
+                <label class="form-label" form="step-desc">Description</label>
+                <textarea 
+                  class="form-control border light-shadow" 
+                  id="step-desc" 
+                  rows="3" 
+                  placeholder="Description"
+                ></textarea>
+              </div>
+              <div class="col-12 form-group mb-5">
+                <label class="form-label" form="screening-type">Choose screening type</label>
+                <div class="d-flex flex-nowrap">
+                  @foreach ($screeningTypes as $type)
+                    <button 
+                      type="button" 
+                      class="custom-pill rounded-pill border light-shadow"
+                      style="width: 170px; height: 30px;"
+                      onclick="this.classList.toggle('btn-primary')"
+                    >
+                      <div style="font-size: 12px;" class="text-nowrap">{{ $type }}</div>
+                    </button>
+                  @endforeach
+                </div>
+              </div>
+              <div class="col-12 form-group mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <label for="TagifyUserList" class="form-label">Choose judges</label>
+                  <div class="d-flex form-check form-switch gap-12">
+                    <label for="userSwitch">Notify Them</label>
+                    <input class="form-check-input" type="checkbox" id="userSwitch">
+                  </div>
+                </div>
+                <input
+                  id="TagifyUserList"
+                  name="TagifyUserList"
+                  class="form-control"
+                  value="" 
+                  placeholder="Choose users"
+                />
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" value="submit" class="btn btn-primary">
+            <i class="ti ti-circle-check ti-24px me-2"></i>
+            {{ __('cycles.Submit') }}
+          </button>
+          <button 
+            type="button" 
+            data-bs-toggle="modal" 
+            data-bs-target="#screeningStepModal" 
+            class="btn btn-outline-primary ml-1">
+            <i class="ti ti-circle-x ti-24px me-2"></i>
+            {{ __('cycles.Close') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- / Screening Step Modal -->
+<!-- Mentorship Step Modal -->
+  <div 
+    class="modal fade" 
+    id="mentorshipStepModal" 
+    tabindex="-1" 
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCenterTitle">Edit Step Information</h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            data-bs-toggle="modal" 
+            data-bs-target="#mentorshipStepModal" 
+            aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-step-form">
+            <fieldset class="row">
+              <div class="col-12 form-group mb-3">
+                <label class="form-label" for="step-name">Mentorship Name</label>
+                <input 
+                  type="text" 
+                  class="form-control border light-shadow" 
+                  id="step-name" 
+                  placeholder="Step Name"
+                />
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">Start Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="Start Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">End Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="End Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 form-group mb-5">
+                <label class="form-label" form="step-desc">Description</label>
+                <textarea 
+                  class="form-control border light-shadow" 
+                  id="step-desc" 
+                  rows="3" 
+                  placeholder="Description"
+                ></textarea>
+              </div>
+              <div class="col-12 form-group mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <label for="TagifyUserList" class="form-label">Choose Mentors</label>
+                  <div class="d-flex form-check form-switch gap-12">
+                    <label for="userSwitch">Notify Them</label>
+                    <input class="form-check-input" type="checkbox" id="userSwitch">
+                  </div>
+                </div>
+                <input
+                  id="TagifyUserList"
+                  name="TagifyUserList"
+                  class="form-control"
+                  value="" 
+                  placeholder="Choose users"
+                />
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" value="submit" class="btn btn-primary">
+            <i class="ti ti-circle-check ti-24px me-2"></i>
+            {{ __('cycles.Submit') }}
+          </button>
+          <button 
+            type="button" 
+            data-bs-toggle="modal" 
+            data-bs-target="#mentorshipStepModal" 
+            class="btn btn-outline-primary ml-1">
+            <i class="ti ti-circle-x ti-24px me-2"></i>
+            {{ __('cycles.Close') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- / Mentorship Step Modal -->
+<!-- Training Step Modal -->
+  <div 
+    class="modal fade" 
+    id="trainingStepModal" 
+    tabindex="-1" 
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCenterTitle">Edit Step Information</h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            data-bs-toggle="modal" 
+            data-bs-target="#trainingStepModal" 
+            aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-step-form">
+            <fieldset class="row">
+              <div class="col-12 form-group mb-3">
+                <label class="form-label" for="step-name">Training Name</label>
+                <input 
+                  type="text" 
+                  class="form-control border light-shadow" 
+                  id="step-name" 
+                  placeholder="Step Name"
+                />
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">Start Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="Start Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">End Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="End Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 form-group mb-5">
+                <label class="form-label" form="step-desc">Description</label>
+                <textarea 
+                  class="form-control border light-shadow" 
+                  id="step-desc" 
+                  rows="3" 
+                  placeholder="Description"
+                ></textarea>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" value="submit" class="btn btn-primary">
+            <i class="ti ti-circle-check ti-24px me-2"></i>
+            {{ __('cycles.Submit') }}
+          </button>
+          <button 
+            type="button" 
+            data-bs-toggle="modal" 
+            data-bs-target="#trainingStepModal" 
+            class="btn btn-outline-primary ml-1">
+            <i class="ti ti-circle-x ti-24px me-2"></i>
+            {{ __('cycles.Close') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- / Training Step Modal -->
+<!-- Final Screening Step Modal -->
+  <div 
+    class="modal fade" 
+    id="finalScreeningModal" 
+    tabindex="-1" 
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCenterTitle">Edit Step Information</h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            data-bs-toggle="modal" 
+            data-bs-target="#finalScreeningModal" 
+            aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-step-form">
+            <fieldset class="row">
+              <div class="col-12 form-group mb-3">
+                <label class="form-label" for="step-name">Final screening name</label>
+                <input 
+                  type="text" 
+                  class="form-control border light-shadow" 
+                  id="step-name" 
+                  placeholder="Step Name"
+                />
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">Start Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="Start Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label class="form-label" for="flatpickr-date">End Date</label>
+                <div class="position-relative">
+                  <input 
+                    type="text" 
+                    class="form-control border light-shadow" 
+                    id="flatpickr-date"
+                    placeholder="End Date"
+                  />
+                  <div class="position-absolute top-0 end-0 mt-2 me-3">
+                    <i class="ti ti-calendar ti-24px text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 form-group mb-5">
+                <label class="form-label" form="step-desc">Description</label>
+                <textarea 
+                  class="form-control border light-shadow" 
+                  id="step-desc" 
+                  rows="3" 
+                  placeholder="Description"
+                ></textarea>
+              </div>
+              <div class="col-12 form-group mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <label for="TagifyUserList" class="form-label">Choose judges</label>
+                  <div class="d-flex form-check form-switch gap-12">
+                    <label for="userSwitch">Notify Them</label>
+                    <input class="form-check-input" type="checkbox" id="userSwitch">
+                  </div>
+                </div>
+                <input
+                  id="TagifyUserList"
+                  name="TagifyUserList"
+                  class="form-control"
+                  value="" 
+                  placeholder="Choose users"
+                />
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" value="submit" class="btn btn-primary">
+            <i class="ti ti-circle-check ti-24px me-2"></i>
+            {{ __('cycles.Submit') }}
+          </button>
+          <button 
+            type="button" 
+            data-bs-toggle="modal" 
+            data-bs-target="#finalScreeningModal" 
+            class="btn btn-outline-primary ml-1">
+            <i class="ti ti-circle-x ti-24px me-2"></i>
+            {{ __('cycles.Close') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- / Final Screening Step Modal -->
 @stop
 
 @section('scripts')
-<script>
-  const deleteButton = document.querySelector('#deleteButton');
-console.log('deleteButton', deleteButton)
-// Suspend User javascript
-if (deleteButton) {
-  deleteButton.onclick = function () {
-    console.log('clidked')
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert order!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Delete order!',
-      customClass: {
-        confirmButton: 'btn btn-primary me-2 waves-effect waves-light',
-        cancelButton: 'btn btn-label-secondary waves-effect waves-light'
-      },
-      buttonsStyling: false
-    }).then(function (result) {
-      if (result.value) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Deleted!',
-          text: 'Order has been removed.',
-          customClass: {
-            confirmButton: 'btn btn-success waves-effect waves-light'
-          }
-        });
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire({
-          title: 'Cancelled',
-          text: 'Cancelled Delete :)',
-          icon: 'error',
-          customClass: {
-            confirmButton: 'btn btn-success waves-effect waves-light'
-          }
-        });
-      }
-    });
-  };
-}
-</script>
+<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 @stop
 
 @section('pagescripts')
+<script src="/vuexy/assets/js/forms-pickers.js"></script>
+<script src="/vuexy/assets/js/forms-selects.js"></script>
+<script src="/vuexy/assets/js/forms-tagify.js"></script>
 <script>
-//sweet alert
+  document.addEventListener('DOMContentLoaded', () => {
+    const deleteButtons = document.querySelectorAll('#deleteButton');
 
+    deleteButtons.forEach(deleteButton => {
+      deleteButton.addEventListener('click', () => {
+        Swal.fire({
+          title: '{{ __('cycles.sure delete step') }}',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: '{{ __('admin.DYes') }}',
+          cancelButtonText: '{{ __('admin.No') }}'
+        }).then(function (result) {
+          if (result.value) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted!',
+              text: 'Step has been removed.',
+            });
+          }
+        });
+      });
+    });
+  });
 </script>
 @stop
