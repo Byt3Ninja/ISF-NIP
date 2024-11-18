@@ -198,6 +198,23 @@
           </div>
         </div>
         <!-- /Vertical Bar Charts -->
+
+         <!-- Development Pie Chart -->
+         <div class="col-md-6 col-12">
+          <div class="card h-100">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                      <i class="menu-icon tf-icons ti ti-trending-up ti-28px"></i>
+                      <h5 class="card-title mb-0">{{ __('admin.Development Stage') }}</h5>
+                  </div>
+              </div>
+              <div class="card-body">
+                 <div id="developmentPieChart"></div>
+              </div>
+          </div>
+         </div>
+         <!-- / Development Pie Chart -->
+
       </div>
     </div>
   </div>
@@ -222,6 +239,11 @@
     // Pie Chart
     const pieLabels = ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'];
     const pieData = {!! json_encode($usersgender->pluck('total')) !!};
+
+  // Pie Chart for Development Stage
+  const developmentStageLabels = {!! json_encode($development_stage_labels) !!};
+  const developmentData = {!! json_encode($development_stage_counts) !!};
+
   </script>
 
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
