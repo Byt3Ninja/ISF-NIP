@@ -189,7 +189,6 @@ class HomeController extends Controller
 
         $data['project_status'] = $projectStatus;
 
-        dd($data);
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
