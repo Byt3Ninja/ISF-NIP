@@ -572,7 +572,6 @@ return [
 	'quizInProgress' => 'يحدث اﻵن',
 	'quizPassed' => 'نجاح',
 	'quizFailed' => 'رسوب',
-	'hours' => 'ساعة',
 	'minutes' => 'دقيقة',
 	'quizStart' => 'بدأ الأختبار',
 	'quizResume' => 'استئناف الأختبار',
@@ -897,7 +896,7 @@ return [
 	'Series_B_funding' => ' مرحلة التمويل من الفئة “ب” (Series B)',
 	'Series_C_funding' => ' مرحلة التمويل من الفئة “ج” (Series C)',
 	'financial_plan is required' => ' خطة العمل الحسابية مطلوبة',
-	
+	'VerficationEmail'=>' تأكيد الايميل ',
 	
 
 ];
