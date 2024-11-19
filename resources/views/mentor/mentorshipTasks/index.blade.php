@@ -171,7 +171,7 @@
             action="{{ route('mentorshipTasks.updateWith') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
-            <input type="hidden" name="MTaskId" id="MTaskId">
+            <input type="hidden" name="MTaskId" id="MTaskId" value="">
              <!-- Attached Tasks -->
              <div class="mb-8 w-100">
               <label for="file2" class="form-label">{{ __('admin.TaskAttachments') }}</label>
@@ -179,7 +179,7 @@
                 <div class="w-50">
                   <input type="text" class="form-control d-none" id="file2" name="attachments" />
                   <div class="btn btn-label-secondary lfm w-100" id="editTaskAttachments" data-input="file2"
-                    data-preview="holder3">
+                    data-preview="holder1">
                     <i class="ti ti-upload me-2"></i>
                     {{ __('admin.Choose') }}
                   </div>
@@ -241,6 +241,16 @@
               </select>
             </div> --}}
             <hr>
+            
+            <div class="mb-3">
+              <label for="editTaskAttachments" class="form-label">{{ __('admin.comment') }}</label>
+              <div class="form-label-group">
+                <textarea class="form-control" id="summernote" name="comment"></textarea>
+              </div>
+            </div>
+
+
+
             <!-- Attached Tasks -->
             <div class="mb-8 w-100">
               <label for="file1" class="form-label">{{ __('admin.CommentAttachments') }}</label>
@@ -248,12 +258,12 @@
                 <div class="w-50">
                   <input type="text" class="form-control d-none" id="file1" name="attachments" />
                   <div class="btn btn-label-secondary lfm w-100" id="editTaskAttachments" data-input="file1"
-                    data-preview="holder3">
+                    data-preview="holder2">
                     <i class="ti ti-upload me-2"></i>
                     {{ __('admin.Choose') }}
                   </div>
                 </div>
-                <div class="ms-3" id="holder">
+                <div class="ms-3" id="holder2">
                   <img
                     src="/images/background/logo.png"
                     class="rounded border shadow-sm"
@@ -265,12 +275,8 @@
               </div>
             </div>
             <!-- / Attached Tasks -->
-            <div class="mb-3">
-              <label for="editTaskAttachments" class="form-label">{{ __('admin.comment') }}</label>
-              <div class="form-label-group">
-                <textarea class="form-control" id="summernote" name="comment"></textarea>
-              </div>
-            </div>
+
+            
             <div class="d-flex flex-wrap">
               <button type="submit" class="btn btn-primary me-4 btn-close-offcanvas">
                 {{ __('admin.Update') }}
@@ -345,5 +351,7 @@
       });
     };
   })();
+
+  
 </script>
 @stop
