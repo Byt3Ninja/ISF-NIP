@@ -891,4 +891,5 @@ return [
 	'Series_A_funding' => 'Series A funding',
 	'Series_B_funding' => 'Series B funding',
 	'Series_C_funding' => 'Series C funding',
+	'VerficationEmail'=>'Email Verfication',
 ];

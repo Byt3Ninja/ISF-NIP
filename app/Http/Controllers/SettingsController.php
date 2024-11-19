@@ -528,12 +528,19 @@ public function update_settingsLogin(Request $request){
     $GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
     $GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
     $GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
-    
+    $VFEmail = $request->input('VerficationEmail');
+    if($request->VerficationEmail == 'on'){
+        $VFEmail1 = '1';
+    }else{
+        $VFEmail1 = '0';
+    }
+
     $updateSittings = Settings::where('id', $id)->first();
         
         $updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
         $updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
         $updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
+        $updateSittings->VFEmail = $VFEmail1;
         $updateSittings->save();
 
 
