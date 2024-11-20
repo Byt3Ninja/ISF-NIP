@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Cycle;
+use App\Surveys;
+use App\SurveyScopes;
 use App\Expertise;
 use App\Factories\OnlineMeetingFactory;
 use App\Jobs\ExportTresultData;
@@ -819,6 +822,114 @@ DB::table('tag_training')->insert($tags);
 
         return view('admin/settings/training/newCours', compact('randomNumber','Tags','expertises','client','Quizzes', 'instructors'));
     }
+
+	public function list_surveys($id, Request $request)
+	{
+		$organization_id = auth()->user()->organization_id;
+		$cycle = Cycle::when( !is_null( $organization_id ), function ( $q ) use ( $organization_id ) {
+			return $q->where('organization_id', $organization_id);
+		})->find( $id );
+
+		if( !empty( $cycle ) )
+		{
+			$organization_id = $cycle->organization_id;
+			$surveys = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->with(['survey'])->get();
+			return view('admin.settings.training.surveys', compact('surveys', 'cycle'));
+		} else { abort(404); }
+	}
+
+	public function create_survey($id, Request $request)
+	{
+		$organization_id = auth()->user()->organization_id;
+		$cycle = Cycle::when( !is_null( $organization_id ), function ( $q ) use ( $organization_id ) {
+			return $q->where('organization_id', $organization_id);
+		})->find( $id );
+
+		if( !empty( $cycle ) )
+		{
+			$organization_id = $cycle->organization_id;
+			$surveys = Surveys::where('organization_id', $organization_id)->get();
+			return view('admin.settings.training.create_survey', compact('surveys', 'cycle'));
+		} else { abort(404); }
+	}
+
+	public function store_survey($id, Request $request)
+	{
+		$this->validate($request, [
+			'id' => 'exists:cycles,id',
+			'survey_id' => 'required|exists:surveys,id',
+		]);
+
+		$scope = new SurveyScopes;
+		$scope->survey_id = $request->survey_id;
+		$scope->cycle_id = $id;
+		$scope->organization_id = $request->organization_id;
+		$scope->scope = 'training';
+		$scope->trigger_by_session = $request->has('trigger_by_session') ? true : false;
+		$scope->trigger_by_due = $request->has('trigger_by_due') ? true : false;
+        $scope->trigger_by_quiz = $request->has('trigger_by_quiz') ? true : false;
+		$scope->save();
+		
+		return redirect()->route('training.surveys', ['id' => $id])->with('success', 'StoredSuccessfully');
+	}
+
+	public function edit_survey($id, $survey, Request $request)
+	{
+		$organization_id = auth()->user()->organization_id;
+		$cycle = Cycle::when( !is_null( $organization_id ), function ( $q ) use ( $organization_id ) {
+			return $q->where('organization_id', $organization_id);
+		})->find( $id );
+
+		if( !empty( $cycle ) )
+		{
+			$scope = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->find( $survey );
+			if( !empty( $cycle ) )
+			{
+				$organization_id = $cycle->organization_id;
+				$surveys = Surveys::where('organization_id', $organization_id)->get();
+				return view('admin.settings.training.edit_survey', compact('surveys', 'cycle', 'scope'));
+			} else { abort(404); }
+		} else { abort(404); }
+	}
+
+	public function update_survey($id, $survey, Request $request)
+	{
+		$organization_id = auth()->user()->organization_id;
+		$cycle = Cycle::when( !is_null( $organization_id ), function ( $q ) use ( $organization_id ) {
+			return $q->where('organization_id', $organization_id);
+		})->find( $id );
+
+		if( !empty( $cycle ) )
+		{
+			$scope = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->find( $survey );
+			if( !empty( $cycle ) )
+			{
+				$scope->survey_id = $request->survey_id;
+				$scope->trigger_by_session = $request->has('trigger_by_session') ? true : false;
+				$scope->trigger_by_due = $request->has('trigger_by_due') ? true : false;
+				$scope->trigger_by_quiz = $request->has('trigger_by_quiz') ? true : false;
+				$scope->save();
+				return back()->withInput()->with('success', 'StoredSuccessfully');
+			} else { abort(404); }
+		} else { abort(404); }
+	}
+
+	public function destroy_survey($id, $survey, Request $request)
+	{
+		$organization_id = auth()->user()->organization_id;
+		$cycle = Cycle::when( !is_null( $organization_id ), function ( $q ) use ( $organization_id ) {
+			return $q->where('organization_id', $organization_id);
+		})->find( $id );
+
+		if( !empty( $cycle ) )
+		{
+			$scope = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->find( $survey );
+			if( !empty( $cycle ) )
+			{
+				$scope->delete();
+			} else { abort(404); }
+		} else { abort(404); }
+	}
 
 
     public function editTR($id) {

@@ -25,36 +25,75 @@
   @endif
 
   @php
+    $user_id = Auth::id();
     $s_latest = \App\Service::orderBy('created_at', 'DESC')->take(5)->get();
-    $e_latest = \App\Calendar::where('start', '>=', now()->format('Y-m-d'))
-        ->where(function ($q) {
-            $q->orWhere('user_id', Auth::id())->orWhereNull('isPrivate');
+    $e_latest = \App\Calendar::where('start', '>=', now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
+            $q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
         })
         ->orderBy('start')
         ->take(5)
         ->get();
+    $circle_id = Auth::user()->company->cycle ?? 0;
     $s_count = \App\Service::count();
-    $s_r_count = \App\ServicesRequests::where('user_id', Auth::id())->count();
-    $nm_count = \App\Messenger::where('receiver', Auth::id())->whereNull('read')->count();
-    $mentors = \App\CyclesMentors::where('cycle_id', Auth::user()->company->cycle ?? 0)->get();
+    $s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
+    $nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
+    $mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
     $m_count = count($mentors);
+    $surveyEligible = [];
+    if( Auth::user()->company && $circle_id != 0 )
+    {
+      $steps = \App\Step::where('cycle_id', $circle_id)->orderBy('arr')->get();
+      foreach( $steps as $step )
+      {
+        if( $step->stype == 3 )
+        {
+          if( now() > $step->to->format('Y-m-d H:i:s') )
+          {
+            $surveyEligible[] = [
+              'triggered_on' => 'mentorship',
+              'triggered_at' => $step->id,
+              'triggered_by' => 'due'
+            ];
+          }
+        }
+      }
+    }
     /// Next session
-    $nextsession = \App\MentorshipRequest::where('user_id', Auth::id())
+    $nextsession = \App\MentorshipRequest::where('user_id', $user_id)
         ->where('approved', 'Yes')
         ->where('zoom_date', '>=', date('Y-m-d 00:00:00'))
         ->orderBy('zoom_date', 'ASC')
         ->first();
     /// Rating
-    $notrated_ser = \App\ServicesRequests::where('user_id', Auth::id())
+    $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)
         ->where('approved', 'Yes')
         ->where('date_time', '<', date('Y-m-d 17:00:00'))
         ->whereNull('rate')
         ->first();
-    $notrated_men = \App\MentorshipRequest::where('user_id', Auth::id())
+    $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)
         ->where('zoom_date', '<', date('Y-m-d 17:00:00'))
         ->where('approved', 'Yes')
         ->whereNull('rating')
         ->first();
+    $myMentorships = \App\MentorshipRequest::where('user_id', $user_id)->where('approved', 'Yes')->where('cycle_id', $circle_id)->get();
+    // $myTrainings = \App\TrainingCompleted::where('user_id', $user_id)->get();
+    foreach( $myMentorships as $mentorship )
+    {
+      if( empty( $mentorship->zoom_date ) || empty( $mentorship->period ) ) { continue; }
+      else
+      {
+        $endAt = Carbon\carbon::parse($mentorship->zoom_date)->addMinutes($mentorship->period)->format('Y-m-d H:i:s');
+        if( now() > $endAt )
+        {
+          $surveyEligible[] = [
+            'triggered_on' => 'mentorship',
+            'triggered_at' => $mentorship->id,
+            'triggered_by' => 'session'
+          ];
+        }
+      }
+    }
+    $surveyEligible = collect($surveyEligible)->groupBy('triggered_on')->toArray();
     /// My sessions
     if (!empty(Auth::user()->company)) {
         $sessions = \App\TrainingSession::where('step_id', Auth::user()->company->step)
@@ -97,20 +136,19 @@
     ];
 
 	$s_latest = \App\Service::orderBy('created_at','DESC')->take(5)->get();
-	$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) {
-		$q->orWhere('user_id',Auth::id())
-		->orWhereNull('isPrivate');
+	$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
+    $q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
 	})->orderBy('start')->take(5)->get();
 	$s_count = \App\Service::count();
-	$s_r_count = \App\ServicesRequests::where('user_id',Auth::id())->count();
-	$nm_count = \App\Messenger::where('receiver',Auth::id())->whereNull('read')->count();
-	$mentors = \App\CyclesMentors::where('cycle_id', Auth::user()->company->cycle??0)->get();
+	$s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
+	$nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
+	$mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
 	$m_count = count($mentors);
 	/// Next session
-	// $nextsession = \App\MentorshipRequest::where('user_id',Auth::id())->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
+	// $nextsession = \App\MentorshipRequest::where('user_id', $user_id)->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
 	$days = request()->query('days', 14);
 	
-	$nextSessions = \App\MentorshipRequest::where('user_id', Auth::id())
+	$nextSessions = \App\MentorshipRequest::where('user_id', $user_id)
     ->where(function ($query) {
         $query->where('approved', 'Yes')
               ->orWhereNull('approved');
@@ -124,8 +162,51 @@
 	
 	
 	/// Rating
-	$notrated_ser = \App\ServicesRequests::where('user_id',Auth::id())->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
-	$notrated_men = \App\MentorshipRequest::where('user_id',Auth::id())->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
+	$notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
+	$notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
+  $available_surveys = collect([]);
+  if( Auth::user()->hasRole('Registered') )
+  {
+    // load survey for startup
+    if( Auth::user()->company && $circle_id != 0 )
+    {
+      $surveysToAdd = [];
+      $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->with(['myResponses'])->get();
+      foreach( $surveys as $survey_scope )
+      {
+        $my_responses = $survey_scope->myResponses;
+        if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
+        {
+          $due = $survey_scope->trigger_by_due;
+          $session = $survey_scope->trigger_by_session;
+          $mentorship = collect($surveyEligible['mentorship']);
+          if( $due == true && $session == false ) { $mentorship = $mentorship->where('triggered_by', 'due'); }
+          elseif( $due == false && $session == true ) { $mentorship = $mentorship->where('triggered_by', 'session'); }
+          $mentorship = $mentorship->values();
+          foreach( $mentorship as $conditions )
+          {
+            $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+            if( empty( $checkResponse ) )
+            {
+              $surveysToAdd[] = [
+                'user_id' => $user_id,
+                'survey_id' => $survey_scope->survey_id, 
+                'cycle_id' => $circle_id,
+                'scope_id' => $survey_scope->id,
+                'triggered_on' => $conditions['triggered_on'],
+                'triggered_at' => $conditions['triggered_at'],
+                'triggered_by' => $conditions['triggered_by'],
+                'responses' => Null
+              ];
+            }
+          }
+          
+        }
+      }
+      if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
+      $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
+    }
+  }
 	/// My sessions
 	if( !empty( Auth::user()->company ) ) { $sessions = \App\TrainingSession::where("step_id", Auth::user()->company->step)->orderBy('datetime','ASC')->take(1)->get(); }
 	else { $sessions = []; }
@@ -134,6 +215,26 @@
   <!-- Content wrapper -->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
+      @if( session()->has('success') )
+        <div class="row">
+          <div class="col-md-12">
+            <div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+              {{ __('dashboard.'. session()->get('success')) }} 
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          </div>
+        </div>
+      @endif
+      @if( session()->has('error') )
+        <div class="row">
+          <div class="col-md-12">
+            <div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+              {{ __('dashboard.'.session()->get('error')) }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          </div>
+        </div>
+      @endif
       <div class="content-body">
         @if (session()->has('msg'))
           <div class="row">
@@ -218,11 +319,10 @@
             </div>
           </div>
         </div>
-		<!-- هناااااااااااااااااااااااااااااااااااااااااااااااا-->
-		
-		@if( $notrated_men or $notrated_ser )
+		@if( 1 == 2 )
+    @if( $notrated_men or $notrated_ser )
 		<div class="col-sm-6 col-12">
-			<div class="card">
+      <div class="card">
 				<div class="card-header border-bottom">
 					@if( $notrated_ser )
 					<h5 class="card-title"><i class="bx bx-calendar mr-1"></i>{{__('dashboard.Rate')}} {{__('dashboard.service')}}: "{{$notrated_ser->service->{'name_'.$l} }}" <span class="primary" id="rname"></span></h5>
@@ -348,7 +448,49 @@
 			</div>
 		</div>
 		@endif
-		<!-- هناااااااااااااااااااااااااااااااااااااااااااااااا-->
+    @endif
+    @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
+    <div class="col-sm-6 col-12">
+      <div class="card">
+        <div class="card-header border-bottom py-3">
+          <h5 class="card-title m-0">
+            <i class="ti ti-user-question mr-1"></i> {{ __('dashboard.availableSurveysList') }}
+          </h5>
+        </div>
+        <div class="card-body py-6">
+          <div class="container-fluid px-0">
+            @foreach( $available_surveys as $survey )
+            <div class="row my-3">
+              <div class="col-9 py-1">
+                @if( $survey->triggered_on == 'mentorship' )
+                <i class="ti ti-bulb mx-1"></i> 
+                @endif
+                {{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_by) ) }} 
+                @php
+                  $middleware = collect([]);
+                  if( $survey->triggered_on == 'mentorship' )
+                  {
+                    if( $survey->triggered_by == 'session' ) { $middleware = $survey->mentorship_session; }
+                    if( $survey->triggered_by == 'due' ) { $middleware = $survey->mentorship_step; }
+                  }
+                @endphp
+                @if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on) ) }} @endif
+                @if( $survey->triggered_on == 'mentorship' && $survey->triggered_by == 'session' )
+                {{ __('dashboard.with') }} 
+                @php $mentor = $middleware->mentor; @endphp
+                {{ $mentor->name }}
+                @endif
+              </div>
+              <div class="col-3 text-end">
+                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
+              </div>
+            </div>
+            @endforeach
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
         <!-- / Latest Services -->
 
         <!-- Latest Events -->
@@ -396,7 +538,7 @@
       </div>
 
       <!-- My Progress -->
-      @if (Auth::user()->company && Auth::user()->company->cycle)
+      @if( Auth::user()->company && $circle_id != 0 )
         <div class="card mt-10">
           <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">
@@ -424,7 +566,7 @@
                 </tr>
               </thead>
               <tbody>
-                @foreach (\App\Step::where('cycle_id', Auth::user()->company->cycle)->orderBy('arr')->get() as $step)
+                @foreach( $steps as $step )
                   @php
                     $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
                     $color = 'label-light';
@@ -443,7 +585,7 @@
                     if (Auth::user()->company->approved) {
                         $flink = 'my/' . $step->id;
                     } else {
-                        $flink = 'view/' . Auth::user()->company->cycle;
+                        $flink = 'view/' . $circle_id;
                     }
                     $links = [
                         '',
