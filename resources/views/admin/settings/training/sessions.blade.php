@@ -61,6 +61,9 @@
                         <a class="btn btn-label-success" href="/dashboard/cycles/{{ $step->id == $id ? $ccycle : '' }}">
                           <i class="ti ti-pencil"></i> <span class="mx-1">{{ __('cycles.Cycle') }}</span>
                         </a>
+                        <a class="btn btn-label-dark" href="/dashboard/training/{{ $step->cycle_id }}/surveys">
+                          <i class="ti ti-question-mark"></i> <span class="mx-1">{{ __('cycles.Manage Surveys') }}</span>
+                        </a>
                       </div>
                     </fieldset>
                   </div>

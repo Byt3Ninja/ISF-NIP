@@ -53,18 +53,31 @@ class QuestionsBankController extends Controller
 
 		$rules = [
 			'organization_id' => 'required|exists:organizations,id',
-			'category_id' => 'required|exists:question_categories,id',
-			'difficulty' => 'required|in:easy,medium,hard',
+			'category_id' => 'required_if:question_group,quiz|exists:question_categories,id',
+			'difficulty' => 'required_if:question_group,quiz|in:easy,medium,hard',
 			'question' => 'required|string',
 			'type' => 'required|in:mcq,tfq',
 			'question_group' => 'required|in:quiz,survey',
-			'correct' => 'required_if:type,tfq|in:tfq_true,tfq_false',
+			'correct' => 'required_if:question_group,quiz|required_if:type,tfq|in:tfq_true,tfq_false',
 			'explanation' => 'nullable|sometimes',
-			'quiz_answer_text' => 'required_if:type,mcq|array',
-			"quiz_answer_text.*" => "required_if:type,mcq|nullable|string",
-			'quiz_answer_status' => 'required_if:type,mcq|array',
-			"quiz_answer_status.*" => "required_if:type,mcq|boolean",
 		];
+		if( $request->question_group == 'quiz' )
+		{
+			$rules = array_merge( $rules, [
+				'quiz_answer_text' => 'required_if:type,mcq|array',
+				"quiz_answer_text.*" => "required_if:type,mcq|nullable|string",
+				'quiz_answer_status' => 'required_if:type,mcq|array',
+				"quiz_answer_status.*" => "required_if:type,mcq|boolean",
+			]);
+		}
+		if( $request->question_group == 'survey' )
+		{
+			$text_status = $request->survey_type != 'stars' ?  'required_if:type,mcq' : 'nullable';
+			$rules = array_merge( $rules, [
+				'quiz_answer_text' => 'required_if:type,mcq|array',
+				"quiz_answer_text.*" => "$text_status|string",
+			]);
+		}
 		$validator = Validator::make($request->all(), $rules);
 		$errors = [];
 		if( $validator->fails() ) { $errors = $validator->errors()->toArray(); }
@@ -79,12 +92,22 @@ class QuestionsBankController extends Controller
 		{
 			$correct = ( $request->has('correct') && $request->correct == 'tfq_true' ) ? true : false;
 		}
+		$type = null;
+		$surveyType = null;
+		$category_id = null;
 		$question = new QuestionsBank;
 		$question->organization_id = $request->organization_id;
-		$question->category_id = $request->category_id;
 		$question->group = $request->question_group;
+		if( $request->question_group == 'quiz' )
+		{
+			$type = $request->type;
+			$category_id = $request->category_id;
+		} else { $surveyType = $request->survey_type; }
+
+		$question->category_id = $request->category_id;
 		$question->question = $request->question;
-		$question->type = $request->type;
+		$question->type = $type;
+		$question->survey_type = $surveyType;
 		$question->correct = $correct;
 		$question->answers = $answers;
 		$question->explanation = $request->explanation;
@@ -136,20 +159,30 @@ class QuestionsBankController extends Controller
 
 			$rules = [
 				'organization_id' => 'required|exists:organizations,id',
-				'category_id' => 'required|exists:question_categories,id',
-				'difficulty' => 'required|in:easy,medium,hard',
+				'category_id' => 'required_if:question_group,quiz|exists:question_categories,id',
+				'difficulty' => 'required_if:question_group,quiz|in:easy,medium,hard',
 				'question' => 'required|string',
 				'type' => 'required|in:mcq,tfq',
 				'question_group' => 'required|in:quiz,survey',
-				'correct' => 'required_if:type,tfq|in:tfq_true,tfq_false',
+				'correct' => 'required_if:question_group,quiz|required_if:type,tfq|in:tfq_true,tfq_false',
 				'explanation' => 'nullable|sometimes',
-				'quiz_answer_text' => 'required_if:type,mcq|array',
-				'quiz_answer_status' => 'required_if:type,mcq|array',
 			];
-			if( $request->type == 'mcq' )
+			if( $request->question_group == 'quiz' )
 			{
-				$rules["quiz_answer_text.*"] = "required_if:type,mcq|string";
-				$rules["quiz_answer_status.*"] = "required_if:type,mcq|sometimes|boolean";
+				$rules = array_merge( $rules, [
+					'quiz_answer_text' => 'required_if:type,mcq|array',
+					"quiz_answer_text.*" => "required_if:type,mcq|nullable|string",
+					'quiz_answer_status' => 'required_if:type,mcq|array',
+					"quiz_answer_status.*" => "required_if:type,mcq|boolean",
+				]);
+			}
+			if( $request->question_group == 'survey' )
+			{
+				$text_status = $request->survey_type != 'stars' ?  'required_if:type,mcq' : 'nullable';
+				$rules = array_merge( $rules, [
+					'quiz_answer_text' => 'required_if:type,mcq|array',
+					"quiz_answer_text.*" => "$text_status|string",
+				]);
 			}
 			$this->validate($request, $rules);
 			$answers = [];
@@ -162,11 +195,20 @@ class QuestionsBankController extends Controller
 			{
 				$correct = ( $request->has('correct') && $request->correct == 'tfq_true' ) ? true : false;
 			}
+			$type = null;
+			$surveyType = null;
+			$category_id = null;
+			if( $request->question_group == 'quiz' )
+			{
+				$type = $request->type;
+				$category_id = $request->category_id;
+			} else { $surveyType = $request->survey_type; }
 			$question->organization_id = $request->organization_id;
 			$question->category_id = $request->category_id;
 			$question->group = $request->question_group;
 			$question->question = $request->question;
-			$question->type = $request->type;
+			$question->type = $type;
+			$question->survey_type = $surveyType;
 			$question->correct = $correct;
 			$question->answers = $answers;
 			$question->explanation = $request->explanation;

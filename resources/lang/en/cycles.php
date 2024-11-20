@@ -91,6 +91,7 @@ return [
     'Portal Cycles Users' => 'Portal Programs Users',
     'Manage Cycle' => 'Manage Program',
     'Manage sessions' => 'Manage sessions',
+    'Manage Surveys' => 'Manage Surveys',
     'Mentors' => 'Mentors',
     'Name/Title' => 'Name/Title',
     'Bio' => 'Bio',

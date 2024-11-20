@@ -11,9 +11,17 @@
 @section('subTitle', __('admin.Edit Question'))
 @section('style')
 	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 	<style type="text/css">
 		.btn i.fa { top: 0px !important; }
 		.btn { padding: 0px 10px !important; }
+		#quizAnswers .input-group:focus-within
+		{
+			box-shadow: none !important;
+		}
+		[dir="rtl"] .ajs-header { text-align: left !important; }
+		[dir="ltr"] .ajs-header { text-align: right !important; }
 	</style>
 @stop
 @section('content')
@@ -78,7 +86,7 @@
 									@endif
 									<form method="post" action="{{ route('questions-bank.update', ['questions_bank' => $question->id]) }}">
 										{!! csrf_field() !!}
-                                        <input name="_method" type="hidden" value="PATCH" />
+										<input name="_method" type="hidden" value="PATCH" />
 										<div class="row">
 											<div class="col-lg-4 col-md-4 col-sm-12">
 												<fieldset class="form-group">
@@ -100,12 +108,19 @@
 												</fieldset>
 											</div>
 											<div class="col-lg-4 col-md-4 col-sm-12">
-												<fieldset class="form-group">
+												<fieldset class="form-group questions-type">
 													<label for="category_id">{{ __('admin.questionCategory')}}</label>
 													<select class="form-control form-select" name="category_id" id="category_id" required>
 														@foreach( $organizations->first()->questionsCategories as $category )
 															<option value="{{ $category['id'] }}" {{ $question->category_id == $category['id'] ? 'selected' : '' }}>{{ $category['title'] }}</option>
 														@endforeach
+													</select>
+												</fieldset>
+												<fieldset class="form-group mb-4 survey-type">
+													<label class="fs-6 form-label mb-2" for="survey_type">{{ __('admin.surveyType') }}</label>
+													<select class="form-control form-select select2" name="survey_type" id="survey_type" required>
+														<option value="stars" {{ $question->survey_type == 'stars' ? 'selected' : '' }}> {{ __('admin.surveyTypeStarRating') }} </option>
+														<option value="radio" {{ $question->survey_type == 'radio' ? 'selected' : '' }}> {{ __('admin.surveyTypeRadioButtons') }} </option>
 													</select>
 												</fieldset>
 											</div>
@@ -116,7 +131,7 @@
 													<label for="question">{{ __('admin.question')}}</label>
 													<input value="{{ $question->question }}" name="question" type="text" class="form-control" id="question" placeholder="{{ __('admin.question') }}" required />
 												</fieldset>
-												<fieldset class="form-group">
+												<fieldset class="form-group questions-type">
 													<label for="type">{{ __('admin.question_Type')}}</label>
 													<select class="form-control form-select" name="type" id="type" required>
 														<option value="mcq" {{ $question->type == 'mcq' ? 'selected' : '' }}>{{ __('admin.type_mcq') }}</option>
@@ -126,7 +141,7 @@
 											</div>
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
-												<fieldset class="form-group">
+												<fieldset class="form-group questions-type">
 													<label for="difficulty">{{ __('admin.difficultyLevel')}}</label>
 													<select class="form-control form-select" name="difficulty" id="difficulty" required>
 														<option value="easy" {{ $question->difficulty == 'easy' ? 'selected' : '' }}>{{ __('admin.difficulty_easy') }}</option>
@@ -134,7 +149,7 @@
 														<option value="hard" {{ $question->difficulty == 'hard' ? 'selected' : '' }}>{{ __('admin.difficulty_hard') }}</option>
 													</select>
 												</fieldset>
-												<fieldset id="tfq-block" class="form-group {{ $question->type == 'tfq' ? '' : 'd-none'}}">
+												<fieldset id="tfq-block" class="form-group questions-type {{ $question->type == 'tfq' ? '' : 'd-none'}}">
 													<label for="correct">{{ __('admin.answerType')}}</label>
 													<select class="form-control form-select" name="correct" id="correct">
 														<option value="tfq_true" {{ $question->correct == true ? 'selected' : '' }}>{{ __('admin.tfq_statement_true') }}</option>
@@ -150,9 +165,9 @@
 														@foreach($question->answers as $key => $answer)
 															<div class="input-group mb-1">
 																<input value="{{ $answer['text'] }}" placeholder="Type the text of the answer" class="form-control" id="quiz_answer_{{ $key }}_text" name="quiz_answer_text[]">
-																<select class="form-control form-select" id="quiz_answer_{{ $key }}_status" name="quiz_answer_status[]">
-																	<option value="true" {{ $answer['status'] == true ? 'selected' : '' }}>Correct answer</option>
-																	<option value="false" {{ $answer['status'] == false ? 'selected' : '' }}>Wrong answer</option>
+																<select class="form-control form-select questions-type" id="quiz_answer_{{ $key }}_status" name="quiz_answer_status[]">
+																	<option value="true" {{ $answer['status'] == true ? 'selected' : '' }}>{{ __('admin.quizAnswerCorrect') }}</option>
+																	<option value="false" {{ $answer['status'] == false ? 'selected' : '' }}>{{ __('admin.quizAnswerWrong') }}</option>
 																</select>
 																<button class="btn btn-outline-danger remove-answer-btn"> <i class="fa fa-fw fa-sm fa-times align-middle"></i> </button>
 															</div>
@@ -162,7 +177,7 @@
 												</fieldset>
 											</div>
 										</div>
-										<div class="row">
+										<div class="row questions-type">
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
 													<label for="explanation">{{ __('admin.explanation')}}</label>
@@ -194,10 +209,28 @@
 </div>
 <!-- END: Content-->
 @stop
+
+@section('scripts')
+	<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+@stop
 @section('pagescripts')
 	<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
 	<script type="text/javascript">
+		alertify.defaults.transition = 'zoom';
+		alertify.defaults.theme = {
+			ok: 'btn btn-sm btn-success',
+			cancel: 'btn btn-sm btn-danger',
+			input: 'form-control'
+		};
 		var orgnizations = @json( $json_organizations );
+
+		function handleChangeQuestionType() {
+			$('.questions-type').addClass('d-none');
+			$('.survey-type').addClass('d-none');
+			if( $('#question_group').val() == 'quiz' ) { $('.questions-type').removeClass('d-none');  }
+			else if( $('#question_group').val() == 'survey' ) { $('.survey-type').removeClass('d-none'); $('#type').val('mcq').trigger('change'); }
+		}
 
 		function handleChangeType()
 		{
@@ -215,6 +248,7 @@
 		}
 
 		$(document).on('change', '#type', function (e) { handleChangeType(); });
+		$(document).on('change', '#question_group', function(e) { handleChangeQuestionType(); });
 		$(document).on('change', '#organization_id', function(e) {
 			var id = $('#organization_id').val();
 			var _orgnization = orgnizations.filter( org => org.id == id )[0];
@@ -228,15 +262,38 @@
 			} else { $("#category_id").html(""); }
 			
 		});
+		$(document).on('change', '#survey_type', function (e) {
+			if( $("#survey_type").val() == 'stars' )
+			{
+				var start = 1;
+				$("input[name='quiz_answer_text[]']").each(function(key, el) {
+					if( start > 5 ) { $(el).parent().remove(); }
+					start++;
+				});
+			}
+		});
 		$(document).on('click', '#addNewAnswer', function (e) {
 			e.preventDefault();
 			var count = $("#quizAnswers > div.input-group").length;
+			var is_quiz = $('#question_group').val() == 'quiz' ? true : false;
+			var class_control = is_quiz ? 'questions-type' : 'questions-type d-none';
+			if( !is_quiz )
+			{
+				if( $("#survey_type").val() == 'stars' )
+				{
+					if( $("input[name='quiz_answer_text[]']").length >= 5 )
+					{
+						alertify.alert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreFiveAllowed") }}');
+						return false;
+					}
+				}
+			}
 			var answer = `
 			<div class="input-group mb-1">
 				<input placeholder="Type the text of the answer" class="form-control" id="quiz_answer_` + count + `_text" name="quiz_answer_text[]">
-				<select class="form-control form-select" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
-					<option value="true">Correct answer</option>
-					<option value="false">Wrong answer</option>
+				<select class="form-control form-select select2 ` + class_control + `" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
+					<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
+					<option value="false">{{ __('admin.quizAnswerWrong') }}</option>
 				</select>
 				<button class="btn btn-outline-danger remove-answer-btn"> <i class="fa fa-fw fa-sm fa-times align-middle"></i> </button>
 			</div>`;
@@ -251,8 +308,6 @@
 			});
 		});
 
-		$(document).ready(function() {
-			handleChangeType();
-		});
+		$(document).ready(function() { handleChangeType(); handleChangeQuestionType(); });
 	</script>
 @stop
