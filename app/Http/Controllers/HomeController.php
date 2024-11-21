@@ -2,30 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\BuilderForm;
-use App\Calendar;
-use App\Cycle;
-use App\Documentation;
-use App\Events\WebMessage;
-use App\Finalscreening;
-use App\MentorshipRequest;
-use App\MentorshipTask;
-use App\Messages;
-use App\Messenger;
-use App\Organization;
-use App\Schedule;
-use App\Screening;
-use App\ServicesRequests;
 use App\Step;
-use App\TrainingSession;
-use Illuminate\Http\Request;
-
+use App\User;
+use App\Cycle;
+use App\Sector;
 use App\Company;
 use App\Service;
-use App\User;
+use App\Calendar;
+use App\Messages;
+use App\Schedule;
+use App\Messenger;
+use App\Screening;
+use App\TimeSheet;
+use App\BuilderForm;
+use App\Organization;
+use App\Documentation;
+use App\Finalscreening;
+use App\MentorshipTask;
+
+use App\SustainableIcon;
+use App\TrainingSession;
+use App\ServicesRequests;
+use App\Events\WebMessage;
+use App\MentorshipRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use DB;
+
 
 class HomeController extends Controller
 {
@@ -75,6 +79,7 @@ class HomeController extends Controller
     // ============> Functions of dashboards
     protected function adminDashboard()
     {
+        $l = app()->getLocale();
         $startups =   Company::count();
         $messages = Messenger::where('receiver', Auth::user()->id)->whereNull('read')->count();
         $servrequests = ServicesRequests::whereNull('approved')->count();
@@ -122,14 +127,68 @@ class HomeController extends Controller
             $data['cycles_startups_count'][] = (int)$key->companies()->count();
         }
 
-        $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
-            ->groupBy('development_stage')
+        // Target Market Analysis
+        $targetMarket = Company::select('targeted_market', DB::raw('count(*) as frequency'))
+            ->groupBy('targeted_market')
+            ->orderByDesc('frequency')
+            ->get();
+        $data['target_market_labels'] = $targetMarket->pluck('targeted_market');
+        $data['target_market_counts'] = $targetMarket->pluck('frequency');
+
+
+        // Sector Breakdown
+        $sectorBreakdown = Sector::withCount('children')->get();
+
+        $data['sector_labels'] = $sectorBreakdown->pluck('name_en');
+        $data['sector_counts'] = $sectorBreakdown->pluck('children_count');
+
+
+        // Project Type Distribution
+        $projectTypes = Company::select('business_type', DB::raw('count(*) as total'))
+            ->groupBy('business_type')
+            ->get();
+        $data['project_type_labels'] = $projectTypes->pluck('business_type');
+        $data['project_type_counts'] = $projectTypes->pluck('total');
+
+        // Total Jobs Created
+        $data['total_jobs_created'] = Company::sum('team_num');
+
+        // Total Founders
+        $data['total_founders'] = Company::whereNotNull('founder')->count();
+
+        // // Companies by SDG
+        $companySdg = Company::select('Sustainable_development', DB::raw('count(*) as total'))
+            ->groupBy('Sustainable_development')
+            ->get();
+        $data['total_sdg'] = $companySdg->pluck('total');
+
+        // Total Startups Per Organization
+
+        $organizationsData = User::whereNotNull('organization_id')
+            ->count();
+        $data['organization_counts'] = $organizationsData;
+
+        // Total Raised Funds
+        $data['total_raised_funds'] = Company::sum('raised_fund');
+
+        // User Distribution by Country
+        $countryData = User::join('countries', 'users.country_id', '=', 'countries.id')
+            ->select("countries.name_$l as country_name", DB::raw('count(users.id) as total'))
+            ->groupBy("countries.name_$l")
             ->get();
 
-        $data['development_stage_labels'] = $developmentStages->pluck('development_stage');
-        $data['development_stage_counts'] = $developmentStages->pluck('total');
+        $data['country_labels'] = $countryData->pluck('country_name');
+        $data['country_counts'] = $countryData->pluck('total');
 
-        // dd($data);
+        // Project Status
+
+        $projectStatus = TimeSheet::join('cycles', 'program_id', '=', 'cycles.id')
+            ->select('cycles.title as cycle_title', DB::raw('count(program_id) as total'))
+            ->groupBy('cycles.title')
+            ->get();
+
+        $data['project_status'] = $projectStatus;
+
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
