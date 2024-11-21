@@ -41,15 +41,38 @@
 @stop
 
 @php
+ $totalSteps = app(\App\Step::class)->where('cycle_id', '=', $program->id)->count();
+ $totalStepsFinish = app(\App\Step::class)->where('to', '>', Carbon\Carbon::now())->where('cycle_id', '=', $program->id)->count();
+ $totalcompany = app(\App\Company::class)->where('cycle', '=', $program->id)->count();
+ $orgid = App\Organization::where('id','=', $program->organization_id)->get();
+        foreach ($orgid as  $org) {
+          $mentortotals = App\User::where('id','=',$org->user_id)->get();
+          $mentor_Count = $mentortotals->count();
+        }
+  $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->count();
+  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->sum('period');
+  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->whereNotNull('rating')->avg('rating');
+  $totalStepsIdsCount = 0;
+  $totalDurationSum = 0;
+foreach ($steps as  $step) {
+  $TotalStepsIds = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->count();
+  $totalStepsIdsCount += $TotalStepsIds;
+
+  $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
+  $totalDurationSum += $TotalStepsDuration;
+}
+$mentors = $program->mentors()->distinct()->get();
+
+
 $orgCollection = collect([
-['startups', 'building-skyscraper', '5', 'primary'],
-['steps', 'stack-2', '5', 'info'],
-['mentors', 'user', '5', 'light'],
-['mentorship requests', 'report', '5', 'warning'],
-['mentorship sessions duration (hours)', 'clock-hour-5', '5', 'success'],
-['company attendance rate', 'heart-rate-monitor', '5', 'danger'],
-['training sessions', 'layers-subtract', '5', 'light'],
-['training sessions duration (hours)', 'clock-hour-5', '5', 'success'],
+['startups', 'building-skyscraper', $totalcompany, 'primary'],
+['steps', 'stack-2', $totalSteps, 'info'],
+['mentors', 'user', $mentor_Count, 'light'],
+['mentorship requests', 'report', $totalMentorRequest, 'warning'],
+['mentorship sessions duration (hours)', 'clock-hour-5', $totalMentorperiod, 'success'],
+['company attendance rate', 'heart-rate-monitor', number_format($totalMentorrating, 2), 'danger'],
+['training sessions', 'layers-subtract', $totalStepsIdsCount, 'light'],
+['training sessions duration (hours)', 'clock-hour-5', $totalDurationSum, 'success'],
 ['filtration', 'transform', '5', 'warning'],
 ['evaluation', 'presentation', '5', 'danger']
 ]);
@@ -107,34 +130,48 @@ $mentorshipCountList = $convertToArray($mentorshipCollection);
 $trainingCountList = $convertToArray($trainingCollection);
 $finalScreenCountList = $convertToArray($finalScreenCollection);
 
-$mentortotal = [
-(object) ['id' => 1, 'name' => 'Mentor 1', 'image_url' => '/images/background/mentor1.jpg'],
-(object) ['id' => 2, 'name' => 'Mentor 2', 'image_url' => '/images/background/mentor2.jpg'],
-(object) ['id' => 3, 'name' => 'Mentor 3', 'image_url' => '/images/background/mentor3.jpg'],
-(object) ['id' => 4, 'name' => 'Mentor 4', 'image_url' => '/images/background/mentor4.jpg'],
-(object) ['id' => 5, 'name' => 'Mentor 5', 'image_url' => '/images/background/mentor5.jpg'],
-];
+// $mentortotal = [
+// (object) ['id' => 1, 'name' => $mentordata['name'.$l], 'image_url' => '/images/background/mentor1.jpg'],
+// (object) ['id' => 2, 'name' => 'Mentor 2', 'image_url' => '/images/background/mentor2.jpg'],
+// (object) ['id' => 3, 'name' => 'Mentor 3', 'image_url' => '/images/background/mentor3.jpg'],
+// (object) ['id' => 4, 'name' => 'Mentor 4', 'image_url' => '/images/background/mentor4.jpg'],
+// (object) ['id' => 5, 'name' => 'Mentor 5', 'image_url' => '/images/background/mentor5.jpg'],
+// ];
 
 $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assign-group-to-group-users'];
+
+
+                   
+                 
+                  
 @endphp
 
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
+
+
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
             <div class="d-flex gap-6">
               <div class="d-none d-md-flex flex-shrink-0 w-px-100">
                 <div class="w-px-70 h-px-100">
-                  <img src="/images/background/logo.png" class="w-100 h-100 border radius-15"
+                  @if(!empty($program->organization->image_url))
+                  <img src="{{$program->organization->image_url}}" class="w-100 h-100 border radius-15"
                     style="object-fit: contain;" alt="Program Image" />
+                  @else
+                  <img src="/images/background/logo.png" class="w-100 h-100 border radius-15"
+                  style="object-fit: contain;" alt="Program Image" />
+
+                  @endif
+
                 </div>
               </div>
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between mb-2">
-                  <h4 class="text-primary mb-0">Program Name</h4>
+                  <h4 class="text-primary mb-0">{{ $program->title }}</h4>
                   <a href="#" class="btn btn-primary">
                     <i class="ti ti-file-analytics me-2"></i> Results
                   </a>
@@ -147,9 +184,18 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 </div>
                 <div class="d-flex justify-content-between mb-4">
                   <h5 class="mb-0">Organizations</h5>
-                  <a id="private-link" href="#" class="d-flex align-items-center text-muted">
-                    Private Link <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                  </a>
+                  
+                  @if(!empty($program->private))
+                        <a 
+                          href="cycles/view/{{ $program->private }}"
+                          class="d-flex align-items-center text-muted"
+                          target="_blank"
+                          id="private-link"
+                        >
+                        {{__('cycles.Private Link')}}
+                          <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
+                        </a>
+                        @endif
                 </div>
                 <div class="row border radius-15 py-3 mb-3">
                   <div class="col-md-3">
@@ -160,8 +206,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           <i class="ti ti-{{ $item['icon'] }} text-{{ $item['color'] }} ti-24px"></i>
                         </div>
                         <div class="d-flex align-items-center">
-                          <span class="me-2 fw-semibold text-capitalize">{{ $item['label'] }}</span>
-                          <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          <span class="me-2 fw-semibold text-capitalize ">{{ $item['label'] }}</span>
+                          <small class="bg-light text-secondary py-1 px-2 rounded-pill commanums">
                             {{ $item['count'] }}
                           </small>
                         </div>
@@ -178,7 +224,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         </div>
                         <div class="d-flex align-items-center">
                           <span class="me-2 fw-semibold text-capitalize">{{ $item['label'] }}</span>
-                          <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          <small class="bg-light text-secondary py-1 px-2 rounded-pill commanums">
                             {{ $item['count'] }}
                           </small>
                         </div>
@@ -195,7 +241,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         </div>
                         <div class="d-flex align-items-center">
                           <span class="me-2 fw-semibold text-capitalize">{{ $item['label'] }}</span>
-                          <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          <small class="bg-light text-secondary py-1 px-2 rounded-pill commanums">
                             {{ $item['count'] }}
                           </small>
                         </div>
@@ -212,7 +258,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-0">{{__('admin.Responsible')}}</span>
                       </div>
                       <div class="d-flex flex-wrap gap-1">
-                        @foreach($mentortotal as $mentor)
+                        @foreach($mentors as $mentor)
                         <a class="btn btn-sm btn-outline-primary rounded-pill" style="height: 30px;" target="_blank"
                           href="{{route('show_mentor_profile', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
@@ -224,18 +270,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           <span class="mx-1 fw-semibold">{{$mentor->name}}</span>
                         </a>
                         @endforeach
-                        @foreach($mentortotal as $mentor)
-                        <a class="btn btn-sm btn-outline-primary rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $mentor->id)}}">
-                          @if(!empty($mentor->image_url))
-                          <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
-                            onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
-                          @else
-                          <i class="ti ti-user"></i>
-                          @endif
-                          <span class="mx-1 fw-semibold">{{$mentor->name}}</span>
-                        </a>
-                        @endforeach
+                       
                       </div>
                     </div>
                     <div class="d-flex flex-column mt-3">
@@ -245,9 +280,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       </div>
                       <div class="d-flex flex-wrap align-items-center px-4" style="width: 85%;">
                         <p class="text-muted">
-                          Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias consequatur, at a magni
-                          natus vel doloremque, iusto deleniti maiores id veritatis. Consequuntur iure ab quos ratione,
-                          quaerat illum nostrum natus?
+                          @if(!empty($program->description))
+                              {{ $program->description }}
+                              @else
+                              {{__('cycles.NA')}}
+                              @endif
                         </p>
                       </div>
                     </div>
@@ -258,27 +295,31 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 text-center">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">20-10-2000</span>
+                          <span class="fw-bold text-black mx-2">{{ $program->start->format('Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">30-11-2024</span>
+                          <span class="fw-bold text-black mx-2">{{ $program->end->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+                @php
+                    // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
+                    $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
+                @endphp
                 <div class="row mt-4 mt-md-0">
                   <div class="col-12">
                     <div class="d-flex align-items-center">
-                      <span class="fw-bold mx-1">80%</span>
+                      <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
                       <div style="width: 100%; height: 7px;" class="progress rounded-pill">
                         <div role="progressbar" class="progress-bar" style="background: linear-gradient(to {{$l == 'en' ? 'right' : 'left'}},
-                          rgb(164, 157, 233), #857ce6, #7367f0); width: 80%;" aria-valuenow="80" aria-valuemin="0"
+                          rgb(164, 157, 233), #857ce6, #7367f0); width: {{ number_format($presSteps, 2) }}%;" aria-valuenow="{{ number_format($presSteps, 2) }}" aria-valuemin="0"
                           aria-valuemax="100">
                         </div>
                       </div>
-                      <span class="fw-bold mx-1">8/10</span>
+                      <span class="fw-bold mx-1">{{$totalSteps}}/{{$totalStepsFinish}}</span>
                       <div class="mx-2 position-relative">
                         <div class="dropdown"></div>
                         <button class="bg-transparent border-none" type="button" id="dropdownMenuButton"
@@ -311,6 +352,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         </div>
       </div>
       <!-- Custom Step -->
+      @foreach ($steps1 as  $step1)
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
@@ -350,8 +392,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     </div>
                   </div>
                 </div>
+                @php
+                  
+                @endphp
                 <div class="d-flex flex-grow-1 justify-content-between mb-2">
-                  <h5 class="text-primary mb-0">Custom Step</h5>
+                  <h5 class="text-primary mb-0">{{ $step1->title }}</h5>
                   <div class="d-flex align-items-center">
                     <div class="badge bg-label-primary me-2 p-2">
                       <i class="ti ti-building-skyscraper text-primary ti-24px"></i>
@@ -405,6 +450,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
           </div>
         </div>
       </div>
+      @endforeach
       <!-- / Custom step -->
       <!-- Screening Step -->
       <div class="col-12 mb-4">
@@ -483,7 +529,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-9">
                     <div class="d-flex flex-column">
                       <div class="d-flex flex-wrap gap-1">
-                        @foreach($mentortotal as $mentor)
+                        @foreach($mentors as $mentor)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
                           href="{{route('show_mentor_profile', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
@@ -612,7 +658,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-0">The mentors</span>
                       </div>
                       <div class="d-flex flex-wrap gap-1">
-                        @foreach($mentortotal as $mentor)
+                        @foreach($mentors as $mentor)
                         <a class="btn btn-outline-info rounded-pill" style="height: 40px;" target="_blank"
                           href="{{route('show_mentor_profile', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
@@ -851,7 +897,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-9">
                     <div class="d-flex flex-column">
                       <div class="d-flex flex-wrap gap-1">
-                        @foreach($mentortotal as $mentor)
+                        @foreach($mentors as $mentor)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
                           href="{{route('show_mentor_profile', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
@@ -900,6 +946,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         </div>
       </div>
       <!-- / Final screening step -->
+
+
     </div>
   </div>
   <div class="content-backdrop fade"></div>
