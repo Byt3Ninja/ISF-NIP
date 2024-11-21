@@ -11,11 +11,18 @@ class Sector extends Model
         'name_ar',
         'parent_id',
     ];
-    public function getNameAttribute($key){
-        return $this->attributes['name_'.app()->getLocale()];
+    public function getNameAttribute($key)
+    {
+        return $this->attributes['name_' . app()->getLocale()];
     }
 
-    public function children(){
-        return $this->hasMany(Sector::class,'parent_id');
+    public function children()
+    {
+        return $this->hasMany(Sector::class, 'parent_id');
+    }
+
+    public function company()
+    {
+        return $this->hasOne(Company::class);
     }
 }
