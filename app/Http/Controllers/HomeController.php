@@ -236,6 +236,15 @@ class HomeController extends Controller
         $data['mentorshipRequests'] = $mentorshipRequests->whereNull('approved')->latest()->limit(5)->get();
         $data['latest_cycles'] = $cycles->latest()->limit(10)->get();
 
+        // Development Stage
+        $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
+            ->groupBy('development_stage')
+            ->get();
+
+        $data['development_stage_labels'] = $developmentStages->pluck('development_stage');
+        $data['development_stage_counts'] = $developmentStages->pluck('total');
+
+
         return view('admin.organizations.dashboard', $data);
     }
 
