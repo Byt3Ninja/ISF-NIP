@@ -378,8 +378,11 @@
                     <div
                       class="d-flex align-items-center justify-content-center mt-2"
                       style="gap: 5px;">
+                      @php
+                        $sector = App\Sector::where('id',$company->sector)->first();
+                      @endphp
                       <button
-                        class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->sector ?? __('admin.N/A') }}</button>
+                        class="btn btn-outline-primary btn-xs rounded-pill">{{ $sector->name_en ?? __('admin.N/A') }}</button>
                     </div>
                   </div>
                 </div>
