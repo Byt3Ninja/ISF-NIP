@@ -25,8 +25,9 @@ class MentorshipTaskController extends Controller
         $user = auth()->user();
         if ($user && $user->company) {
             $companyId = $user->company->id;
-            $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
-            
+            $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->with(['labels', 'comments.user', 'user', 'mentor'])->get();
+
+
             // إذا كانت المهام فارغة، يمكنك أيضًا إرجاع الرسالة كعنصر في المصفوفة
             if ($mentorshipTasks->isEmpty()) {
                 $mentorshipTasks = ["NoCompany"];

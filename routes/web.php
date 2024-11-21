@@ -268,14 +268,20 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('mentorship/assign/{id?}','MentorsController@list');
     Route::post('mentorship/assign/{id}','MentorsController@assign');
     Route::get('mentorship/view/{id?}','MentorsController@index');
+    Route::get('mentorship/{id?}/surveys','MentorsController@list_surveys')->name('mentorship.surveys');
+    Route::get('mentorship/{id?}/surveys/create','MentorsController@create_survey')->name('mentorship.create_survey');
+    Route::post('mentorship/{id?}/surveys/store','MentorsController@store_survey')->name('mentorship.store_survey');
+    Route::get('mentorship/{id?}/surveys/{survey?}/edit','MentorsController@edit_survey')->name('mentorship.edit_survey');
+    Route::patch('mentorship/{id?}/surveys/{survey?}/update','MentorsController@update_survey')->name('mentorship.update_survey');
+    Route::delete('mentorship/{id?}/surveys/{survey?}/destroy','MentorsController@destroy_survey')->name('mentorship.destroy_survey');
     Route::get('mentorship/sessions','MentorsController@sessions');
-  	Route::post('mentorship/session','MentorsController@getsession');
-  	Route::post('mentorship/modify','MentorsController@modifysession');
-    Route::post('mentorship/addwait','MentorsController@addwait');
+  	Route::post('mentorship/session','MentorsController@getSession');
+  	Route::post('mentorship/modify','MentorsController@modifySession');
+    Route::post('mentorship/addwait','MentorsController@addWait');
     Route::get('mentorship/mine','MentorsController@mine');
     Route::post('mentorship/rate','MentorsController@rate');
-    Route::post('mentorship/delsession/{id}' ,'MentorsController@delsession');
-    Route::get('/export-mentorship', 'MentorsController@expormentorship');
+    Route::post('mentorship/delsession/{id}' ,'MentorsController@delSession');
+    Route::get('/export-mentorship', 'MentorsController@exportMentorship');
    
 
 
@@ -310,16 +316,28 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/export-Tresult', 'TrainingController@exportTresult');
     Route::post('trainings/change/Tresult','TrainingController@changAllTL');
     Route::get('training/create','TrainingController@create')->name('training.create');
-
+    Route::get('training/{id?}/surveys','TrainingController@list_surveys')->name('training.surveys');
+    Route::get('training/{id?}/surveys/create','TrainingController@create_survey')->name('training.create_survey');
+    Route::post('training/{id?}/surveys/store','TrainingController@store_survey')->name('training.store_survey');
+    Route::get('training/{id?}/surveys/{survey?}/edit','TrainingController@edit_survey')->name('training.edit_survey');
+    Route::patch('training/{id?}/surveys/{survey?}/update','TrainingController@update_survey')->name('training.update_survey');
+    Route::delete('training/{id?}/surveys/{survey?}/destroy','TrainingController@destroy_survey')->name('training.destroy_survey');
 
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
     Route::resource('questions-bank', 'QuestionsBankController');
-    Route::resource('quizzes', 'quizzesController')->except(['show']);;
+    Route::resource('quizzes', 'quizzesController')->except(['show']);
     Route::get('quizzes/{quiz}/questions', 'quizzesController@get_questions')->name('quizzes.questions');
     Route::post('quizzes/{quiz}/questions', 'quizzesController@save_questions')->name('quizzes.saveQuestions');
     Route::get('quizzes/my', 'quizzesController@my')->name('quizzes.dashboard');
+
+    Route::resource('surveys', 'surveysController')->except(['show']);
+    Route::get('surveys/{survey}/questions', 'surveysController@get_questions')->name('surveys.questions');
+    Route::get('surveys/{survey}/results', 'surveysController@get_results')->name('surveys.results');
+    Route::post('surveys/{survey}/questions', 'surveysController@save_questions')->name('surveys.saveQuestions');
+    Route::get('surveys/start/{id?}', 'surveysController@survey_taking')->name('surveys.taking');
+    Route::post('surveys/start/{id?}', 'surveysController@survey_submit')->name('surveys.submit');
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');

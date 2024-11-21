@@ -68,6 +68,7 @@
   <script src="/vuexy/assets/js/main.js"></script>
 
   <!-- Custom JS -->
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/app-assets/js/1.js"></script>
 
   <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>

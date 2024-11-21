@@ -70,29 +70,21 @@
           <div class="tab-content p-0">
             <!-- Update item/tasks -->
             <div class="tab-pane fade show active" id="tab-update" role="tabpanel">
-              <form>
-                <div class="mb-5">
-                  <label class="form-label">{{ __('admin.comment') }}</label>
-                  <div class="comment-editor border-bottom-0"></div>
-                  <div class="d-flex justify-content-end">
-                    <div class="comment-toolbar">
-                      <span class="ql-formats me-0">
-                        <button class="ql-bold"></button>
-                        <button class="ql-italic"></button>
-                        <button class="ql-underline"></button>
-                        <button class="ql-link"></button>
-                        <button class="ql-image"></button>
-                      </span>
-                    </div>
-                  </div>
+              <form class="form-horizontal form-bordered" id="basicForm" action= "{{ route('startup.mentorshipTasks.sendComment') }}" method="POST" enctype="multipart/form-data">
+                {!! csrf_field() !!}
+                <input type="hidden" name="mentorship_task_id" value="">
+                <div class="form-label-group">
+                    <textarea class="form-control" id="summernote" name="comment" required></textarea>
                 </div>
-                <div>
+                
+            
+                <div class="mt-8">
                   <div class="d-flex flex-wrap">
                     <button type="button" class="btn btn-primary me-4" data-bs-dismiss="offcanvas">
-                      Update
+                      {{__('settings.Send')}}
                     </button>
-                    <button type="button" class="btn btn-label-danger" data-bs-dismiss="offcanvas">
-                      Delete
+                    <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">
+                      {{__('admin.Delete')}}
                     </button>
                   </div>
                 </div>

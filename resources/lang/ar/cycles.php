@@ -91,6 +91,7 @@ return [
     'Portal Cycles Users' => 'مرشدي النظام',
     'Manage Cycle' => 'إدارة البرنامج',
     'Manage sessions' => 'إدارة الجلسات',
+    'Manage Surveys' => 'إدارة الاستطلاعات',
     'Mentors' => 'المرشدين',
     'Name/Title' => 'الاسم/ الوظيفة',
     'Bio' => 'السيرة الذاتية',

@@ -66,17 +66,27 @@
 														<td>{{ $question->question }}</td>
 														<td><a href="{{ URL::to('dashboard/organizations/' . $question->organization->id . '/edit') }}"> {{ $question->organization->{'name_'.$l} }}</a></td>
 														<td class="text-center">
+															@if( $question->group == 'quiz' )
 															<span class="badge text-bg-secondary rounded-pill">
 																{{ $question->type == 'mcq' ? __('admin.type_mcq') : ( $question->type == 'tfq' ? __('admin.type_tfq') : '-') }}
 															</span>
+															@else
+															<span class="badge text-bg-success rounded-pill">
+																{{ $question->survey_type == 'stars' ? __('admin.survey_type_stars') : ( $question->survey_type == 'radio' ? __('admin.survey_type_radio') : '-') }}
+															</span>
+															@endif
 														</td>
 														<td class="text-center">
-															@if( $question->difficulty == 'easy' )
-															<span class="badge text-bg-success rounded-pill"> {{ __('admin.difficulty_easy') }}</span>
-															@elseif( $question->difficulty == 'medium' )
-															<span class="badge text-bg-warning rounded-pill">{{ __('admin.difficulty_medium') }}</span>
-															@elseif( $question->difficulty == 'hard' )
-															<span class="badge text-bg-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
+															@if( $question->group == 'quiz' )
+																@if( $question->difficulty == 'easy' )
+																<span class="badge text-bg-success rounded-pill"> {{ __('admin.difficulty_easy') }}</span>
+																@elseif( $question->difficulty == 'medium' )
+																<span class="badge text-bg-warning rounded-pill">{{ __('admin.difficulty_medium') }}</span>
+																@elseif( $question->difficulty == 'hard' )
+																<span class="badge text-bg-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
+																@endif
+															@else
+																-
 															@endif
 														</td>
 														<td class="text-right">
