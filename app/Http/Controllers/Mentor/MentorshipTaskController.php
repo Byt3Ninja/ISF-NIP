@@ -23,7 +23,7 @@ class MentorshipTaskController extends Controller
         
         $mentorship = MentorshipRequest::findOrFail($request->mentorship_id);
 // $mentorshipTasks = $mentorship->mentorshipTasks;
-$mentorshipTasks = $mentorship->mentorshipTasks()->with(['labels', 'comments'])->get();
+$mentorshipTasks = $mentorship->mentorshipTasks()->with(['labels', 'comments.user','user', 'mentor'])->get();
 $labels = Label::all();
 $allComments = collect();
 // تعديل محتوى المتغير $mentorshipTasks باستخدام map بحيث يتم تمرير التعليقات حتى لو كانت null
@@ -52,7 +52,6 @@ $allComments = collect();
 
 
             
-
 
 
 // تمرير $mentorshipTasks حتى لو كانت التعليقات فارغة
@@ -248,7 +247,7 @@ if (!empty($labelIds)) {
             $labelNames = $request->label; // أسماء الـ labels المدخلة من الطلب
         if($labelNames != null){
             $jsonArray = $labelNames;
-
+            
             // تحويل النص JSON إلى مصفوفة PHP
             $array = json_decode($jsonArray, true);
             
@@ -256,20 +255,22 @@ if (!empty($labelIds)) {
             $values = array_map(function($item) {
                 return $item['value'];
             }, $array);
-
+           
             // تحويل إلى مصفوفة إذا لم يكن كذلك
             if (!is_array($values)) {
                 $values = [$values];
             }
-            
+           
             $labelIds = []; // مصفوفة لتخزين معرفات الـ labels
             
             if ($values) {
                 $user = auth()->user();
+                
                 foreach ($values as $labelName) {
+                    
                     // تحقق إذا كانت الـ label موجودة في جدول labels
                     $label = Label::where('name', $labelName)->first();
-            
+                    
                     // إذا لم تكن موجودة، قم بإنشائها في جدول labels
                     if (!$label) {
                         $label = new Label();
@@ -277,12 +278,13 @@ if (!empty($labelIds)) {
                         $label->user_id = $user->id;
                         $label->save(); // حفظ الـ label في جدول labels
                     }
-            
+                    
                     // أضف معرف الـ label إلى المصفوفة
                     $labelIds[] = $label->id;
                 }
             }
         }
+        
             // تحديث معلومات المهمة
             $result = $mentorshipTask->update($request->validated() + [
                 'mentor_id' => $mentorship->mentor_id,
@@ -293,10 +295,13 @@ if (!empty($labelIds)) {
                 'due_date' => $request->due_date,
                 'status' => $request->status, // ربط الـ label بالمهمة
             ]);
-            
+            // بعد التحديث، جلب الكائن المحدث من قاعدة البيانات
+$result = $mentorshipTask->fresh();
+          
           // ربط المعرفات من جدول label_tasks يدويًا
 if (!empty($labelIds)) {
     foreach ($labelIds as $labelId) {
+        
         // إضافة السجل إلى جدول label_tasks يدويًا
         DB::table('label_taks')->insert([
             'mentorship_tasks_id' => $result->id,
@@ -304,6 +309,7 @@ if (!empty($labelIds)) {
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        
     }
 }
             // إضافة تعليق إذا كان موجودًا
