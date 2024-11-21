@@ -75,8 +75,9 @@ class ProgramController extends Controller
     {
         $program = Cycle::where('id', $id)->first();
         $steps = Step::where('cycle_id', $program->id)->get();
+        $steps1 = Step::where('cycle_id', $program->id)->where('stype', 1)->get();
        
-        return view('admin.programs.show', compact('program','steps'));
+        return view('admin.programs.show', compact('program','steps','steps1'));
     }
 
     /**

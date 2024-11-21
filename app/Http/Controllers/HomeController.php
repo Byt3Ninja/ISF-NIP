@@ -189,6 +189,13 @@ class HomeController extends Controller
 
         $data['project_status'] = $projectStatus;
 
+        $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
+            ->groupBy('development_stage')
+            ->get();
+
+        $data['development_stage_labels'] = $developmentStages->pluck('development_stage');
+        $data['development_stage_counts'] = $developmentStages->pluck('total');
+
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()

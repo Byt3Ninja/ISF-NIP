@@ -150,6 +150,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
+
+
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
@@ -304,9 +306,9 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   </div>
                 </div>
                 @php
-    // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
-    $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
-@endphp
+                    // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
+                    $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
+                @endphp
                 <div class="row mt-4 mt-md-0">
                   <div class="col-12">
                     <div class="d-flex align-items-center">
@@ -350,6 +352,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         </div>
       </div>
       <!-- Custom Step -->
+      @foreach ($steps1 as  $step1)
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
@@ -389,8 +392,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     </div>
                   </div>
                 </div>
+                @php
+                  
+                @endphp
                 <div class="d-flex flex-grow-1 justify-content-between mb-2">
-                  <h5 class="text-primary mb-0">Custom Step</h5>
+                  <h5 class="text-primary mb-0">{{ $step1->title }}</h5>
                   <div class="d-flex align-items-center">
                     <div class="badge bg-label-primary me-2 p-2">
                       <i class="ti ti-building-skyscraper text-primary ti-24px"></i>
@@ -444,6 +450,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
           </div>
         </div>
       </div>
+      @endforeach
       <!-- / Custom step -->
       <!-- Screening Step -->
       <div class="col-12 mb-4">
@@ -939,6 +946,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         </div>
       </div>
       <!-- / Final screening step -->
+
+
     </div>
   </div>
   <div class="content-backdrop fade"></div>
