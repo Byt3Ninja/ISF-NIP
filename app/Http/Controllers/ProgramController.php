@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Cycle;
 use App\Jobs\ExportCycleData;
 use App\Organization;
+use App\Step;
 use Illuminate\Http\Request;
 
 
@@ -72,7 +73,10 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        return view('admin.programs.show');
+        $program = Cycle::where('id', $id)->first();
+        $steps = Step::where('cycle_id', $program->id)->get();
+       
+        return view('admin.programs.show', compact('program','steps'));
     }
 
     /**
