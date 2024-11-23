@@ -260,6 +260,7 @@ return [
 	'Training' => 'Training',
 	'Training courses' => 'Training courses',
 	'Training sessions' => 'Training sessions',
+	'Training sessions duration (hours)' => 'Training sessions duration (hours)',
 	'Final Screening' => 'Final Screening',
 	'Add Service' => 'Add Service',
 	'All Services' => 'All Services',
@@ -922,4 +923,5 @@ return [
 	'Series_B_funding' => 'Series B funding',
 	'Series_C_funding' => 'Series C funding',
 	'VerficationEmail'=>'Email Verfication',
+	'Total_sessions'=> 'Total Sessions',
 ];

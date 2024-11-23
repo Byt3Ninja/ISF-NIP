@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Cycle;
-use App\Jobs\ExportCycleData;
-use App\Organization;
 use App\Step;
+use App\User;
+use App\Cycle;
+use App\Company;
+use App\Organization;
 use Illuminate\Http\Request;
+use App\Jobs\ExportCycleData;
 
 
 class ProgramController extends Controller
@@ -74,10 +76,24 @@ class ProgramController extends Controller
     public function show(string $id)
     {
         $program = Cycle::where('id', $id)->first();
-        $steps = Step::where('cycle_id', $program->id)->get();
-        $steps1 = Step::where('cycle_id', $program->id)->where('stype', 1)->get();
-       
-        return view('admin.programs.show', compact('program','steps','steps1'));
+        $steps = Step::where('cycle_id', $program->id)->orderBy('arr','ASC')->get();
+        $id = $program->pluck('id')[0];
+                $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
+
+                $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
+                
+               $stepsData = [];
+                foreach ($steps as $step) {
+                    $stepsData[] = [
+                        'step_id' => $step->id,
+                        'total_companies' => Company::where('step', $step->id)->count(),
+                    ];
+                }
+
+
+
+
+        return view('admin.programs.show', compact('program','steps', 'judges', 'stepsData'));
     }
 
     /**
