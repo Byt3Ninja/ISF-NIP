@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 @section('content')
     <!-- BEGIN: Content-->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
+    <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">
                     <div class="row breadcrumbs-top">
@@ -27,11 +27,11 @@
                 <section id="multiple-column-form">
                     @if(session()->has('message'))
                         <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                             <div class="d-flex align-items-center">
-                                <i class="bx bx-like"></i>
+                                <i class="ti ti-check"></i>
                                 <span>
                                                     {{ __('admin.'.session()->get('message')) }}
                                                 </span>
@@ -41,11 +41,11 @@
 
                     @if(session()->has('message2')|| !empty($errors->all()))
                         <div class="alert alert-danger alert-dismissible mb-2" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                             <div class="d-flex align-items-center">
-                                <i class="bx bx-error"></i>
+                                <i class="ti ti-error"></i>
                                 <span>
                                                     {{ __('admin.'.session()->get('message2')) }}
                                     @forelse($errors->all() as $message)

@@ -12,9 +12,9 @@
         }
     </style>
     <!-- BEGIN: Content .users-view .table-borderless td -->
-    <div class="app-content content">
+    <div class="content-wrapper">
+      <div class="container-xxl flex-grow-1 container-p-y">
         <div class="content-overlay"></div>
-        <div class="content-wrapper">
             <div class="content-body">
                 <!-- users view start -->
                 <section class="users-view">
@@ -56,7 +56,7 @@
                                                                         <div class="media-left mr-50">
                                                                             <img src="{{$comment->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                         </div>
-                                                                        <div class="media align-items-center">
+                                                                        <div class="d-flex align-items-center gap-1">
                                                                             {{$comment->user->name }}
                                                                         </div>
 

@@ -52,7 +52,7 @@
             <div class="featured-service col-md-4 col-sm-6 col-xs-12">
                 <div class="inner-box wow fadeIn animated" data-wow-delay="0ms" data-wow-duration="1500ms" style="visibility: visible; animation-duration: 1500ms; animation-delay: 0ms; animation-name: fadeIn;">
                     <div class="image-box">
-                        <figure class="image"><a href="{{$wel->url}}"><img src="images/resource/{{$wel->img_url}}" alt=""></a></figure>
+                        <figure class="image"><a href="{{$wel->url}}"><img src="images/resource/{{$wel->img_url}}" alt="" style="height: 250px;"></a></figure>
                         <div class="caption-box">
                             <div class="icon"><span class="{{$wel->set2}}"></span></div>
                             <h4 class="title"><a href="{{$wel->url}}">{{$l=='ar'?$wel->ar_title:$wel->title}}</a></h4>

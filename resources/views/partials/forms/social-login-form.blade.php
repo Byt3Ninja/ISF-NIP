@@ -1,0 +1,28 @@
+<form class="form d-flex flex-column h-100" action="{{ route('updateSMLogin') }}" method="POST"
+  enctype="multipart/form-data">
+  {!! csrf_field() !!}
+  @method('PUT')
+  <input type="hidden" name="id" value="{{ $Title->id }}">
+
+  <div class="form-content flex-grow-1">
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="GOOGLE_CLIENT_ID">{{ __('settings.GOOGLE_CLIENT_ID') }}</label>
+      <input id="GOOGLE_CLIENT_ID" type="text" class="form-control" value="{{ $Title->GOOGLE_CLIENT_ID }}"
+        name="GOOGLE_CLIENT_ID">
+    </div>
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="GOOGLE_CLIENT_SECRET">{{ __('settings.GOOGLE_CLIENT_SECRET') }}</label>
+      <input type="text" class="form-control" value="{{ $Title->GOOGLE_CLIENT_SECRET }}" name="GOOGLE_CLIENT_SECRET"
+        id="GOOGLE_CLIENT_SECRET">
+    </div>
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="GOOGLE_REDIRECT">{{ __('settings.GOOGLE_REDIRECT') }}</label>
+      <input type="text" class="form-control" value="{{ $Title->GOOGLE_REDIRECT }}" name="GOOGLE_REDIRECT"
+        id="GOOGLE_REDIRECT">
+    </div>
+  </div>
+
+  <div class="form-group d-flex justify-content-end mt-auto">
+    <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
+  </div>
+</form>

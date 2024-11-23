@@ -17,11 +17,10 @@
       @if (session()->has('msg'))
         <div class="row">
           <div class="col-md-12">
-            <div class="alert alert-{{ session()->get('class') }} mb-2" role="alert">
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span
-                  aria-hidden="true">&times;</span> </button>
+            <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               <div class="d-flex align-items-center">
-                <i class="bx bx-error"></i>
+                <i class="ti ti-error"></i>
                 <span>
                   {{ __('admin.' . session()->get('msg')) }}
                   {{ Session::forget('msg') }}
@@ -106,13 +105,13 @@
                             <button type="button" id="msg" onclick="OpenModal({{ $getmsg->id }});"
                               class="btn btn-icon btn-label-info rounded-circle mx-4" data-bs-toggle="modal"
                               data-bs-target="#MessageModal">
-                              <i class="ti ti-hand-finger"></i>
+                              <i class="ti ti-eye"></i>
                             </button>
 
                             <a onclick="return confirm('{{ __('Are you sure?') }}');"
                               href="{{ URL::to('/dashboard/deletemsg/' . $getmsg->id ?? null) }}"
                               class="btn btn-icon btn-label-danger rounded-circle">
-                              <i class="ti ti-trash"></i>
+                              <i class="ti ti-trash text-danger"></i>
                             </a>
                           </div>
                         </div>
@@ -147,9 +146,7 @@
             <h5 class="modal-title" id="Title">
             </h5>
 
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <i class="bx bx-x"></i>
-            </button>
+            
           </div>
           <form action="{{ URL::to('dashboard/msgreply') }}" method="POST" enctype="multipart/form-data"
             autocomplete="off">
@@ -181,16 +178,16 @@
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary send-btn">
-                <i class="bx bx-x d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-inline"> {{ __('messages.Send') }}</span>
               </button>
               {{-- <a id="DelMe" onclick="return confirm('{{ __('Are you sure?') }}');" href="#">
                 <button type="button" class="btn btn-light-danger">
-                  <i class="bx bx-x d-block d-sm-none"></i>
+                  
                   <span class="d-none d-sm-block">{{ __('messages.Delete') }}</span>
                 </button></a>
-              <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
-                <i class="bx bx-x d-block d-sm-none"></i>
+              <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                
                 <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
               </button> --}}
             </div>

@@ -6,10 +6,10 @@
 @section('subTitle', __('cycles.Submit your opinion'))
 @section('content')
     <!-- BEGIN: Content-->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
-            @include('admin.includes.heading')
+    <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
+            
             <div class="content-body">
                     <section id="basic-input">
                         <div class="row">
@@ -24,17 +24,11 @@
                                             @if(session()->has('msg'))
                                                 <div class="row">
                                                     <div class="col-md-12">
-                                                        <div class="alert alert-{{Session::get('class')}} alert-dismissible  mb-2" role="alert">
-                                                            <button type="button" class="close" data-dismiss="alert"
-                                                                    aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
+                                                        <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                             <div class="d-flex align-items-center">
                                                                 <i class="bx bx-{{Session::get('class')=='success'?'check-circle':'error'}}"></i>
-                                                                <span>
-                                                        {{ __('admin.'.session()->get('msg')) }}
-                                                                    {{ Session::forget('msg') }}
-                                                    </span>
+                                                                <span> {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -44,12 +38,12 @@
                                                 @if(count($fields) > 0)
                                                     <div class="row">
                                                     <div class="col-md-12">
-                                                        <div class="media align-items-center">
+                                                        <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50">
                                                                 <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
                                                             <a href="/dashboard/companyProfile/{{$company->id}}">
-                                                                <div class="media align-items-center">
+                                                                <div class="d-flex align-items-center gap-1">
                                                                     {{$company->{'name_'.$l} }}
                                                                 </div>
                                                             </a>

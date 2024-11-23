@@ -33,7 +33,7 @@ return [
     'NewMessage' => 'New Message',
     'SelectUsers' => 'Select Users',
     'PortalManagers'=> 'Portal Managers',
-    'CycleUsers'=> 'Cycle companies',
+    'CycleUsers'=> 'Program companies',
     'yourMessage'=> 'Your message',
     'Mentors'=> 'Mentors',
     'SendMessages' => 'Send Message',

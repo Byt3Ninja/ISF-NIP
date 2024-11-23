@@ -8,9 +8,9 @@
 	</style>
 @endsection
 @section('content')
-	<div class="app-content content">
-		<div class="content-overlay"></div>
-		<div class="content-wrapper">
+	<div class="content-wrapper">
+		<div class="container-xxl flex-grow-1 container-p-y">
+			<div class="content-overlay"></div>
 			<div class="content-header row">
 				<div class="content-header-left col-12 mb-2 mt-1">
 					<div class="row breadcrumbs-top">
@@ -18,7 +18,7 @@
 							<h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.View training content')}}</h5>
 							<div class="breadcrumb-wrapper col-12">
 								<ol class="breadcrumb p-0 mb-0">
-									<li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a></li>
+									<li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home"></i></a></li>
 									<li class="breadcrumb-item"> <a href="/dashboard/training/my"> {{__('admin.My courses')}} </a> </li>
 									<li class="breadcrumb-item"> <a href="/dashboard/training/my/{{ $training->id }}"> {{ $training->title }} </a> </li>
 									<li class="breadcrumb-item active"> {{ $quiz->title }} </li>
@@ -32,12 +32,9 @@
 				@if( session()->has('msg') )
 				<div class="row">
 					<div class="col-md-12">
-						<div class="alert alert-{{ session()->get('class') ?? 'danger' }} mb-2" role="alert">
-							<button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-							<div class="d-flex align-items-center">
-								<i class="bx bx-error"></i>
-								<span> {{ session()->get('msg') }} {{ Session::forget('msg') }} </span>
-							</div>
+						<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span> {{ session()->get('msg') }} {{ Session::forget('msg') }} </span> </div>
 						</div>
 					</div>
 				</div>
@@ -58,7 +55,7 @@
 								<div class="card-header">
 									<span class="card-title"> {{ __('admin.quizDetails') }} </span>
 									@if( $available || !is_null( $active_now ) )
-										<span class="float-right">
+										<span class="float-end">
 											<form id="startQuizForm" method="post" action="{{ route('quiz.start', ['id' => $training->id, 'quiz_id' => $quiz->id]) }}">
 												{!! csrf_field() !!}
 												<button type="submit" id="quizStartBtn" class="btn btn-primary"> @if( !is_null( $active_now ) ) {{ __('admin.quizResume') }} @else {{ __('admin.quizStart') }} @endif </button>
@@ -103,7 +100,7 @@
 														<td class="w-15"> {{ __('admin.quizAvailableAfter') }} </td>
 														<td>
 															@if( $available == true )
-																<span class="badge badge-success"> {{ __('admin.availableNow') }} </span>
+																<span class="badge text-bg-success"> {{ __('admin.availableNow') }} </span>
 															@elseif( !is_null( $active_now )  )
 																{{ __('admin.quizInProgress') }}
 															@elseif( !empty( $time_remaining ) )
@@ -113,7 +110,7 @@
 															@elseif( $quiz->start > now() )
 																{{ __('admin.willAvailableAt') }} <span class="mx-2" id="timeRemain" data-value="{{ $time_remaining }}"> {{ $time_remaining }} </span>
 															@else
-																<span class="badge badge-danger"> {{ __('admin.notAvailable') }} </span>
+																<span class="badge text-bg-danger"> {{ __('admin.notAvailable') }} </span>
 															@endif
 														</td>
 													</tr>
@@ -145,7 +142,7 @@
 													@if( $allowActions ) <th class="text-center" style="width: 18%;"> {{ __('admin.Actions') }} </th> @endif
 												</thead>
 												<tbody>
-													@if( empty( $attempts ) )
+													@if( empty( $attempts ) || ( !empty( $attempts ) && $attempts->count() <= 0 ) )
 														<tr>
 															<td colspan="{{ $allowActions == true ? 6 : 5 }}" class="text-center">
 																{{ __('admin.quizNoResults') }}
@@ -158,11 +155,11 @@
 																<td class="text-center"> {{ $attempt->score . '%' }} </td>
 																<td class="text-center">
 																	@if( $attempt->score >= $quiz->passing_criteria )
-																		<span class="badge badge-success"> {{ __('admin.quizPassed') }} </span>
+																		<span class="badge text-bg-success"> {{ __('admin.quizPassed') }} </span>
 																	@elseif( $active_now == $attempt->id )
-																		<span class="badge badge-info"> {{ __('admin.quizInProgress') }} </span>
+																		<span class="badge text-bg-info"> {{ __('admin.quizInProgress') }} </span>
 																	@else
-																		<span class="badge badge-danger"> {{ __('admin.quizFailed') }} </span>
+																		<span class="badge text-bg-danger"> {{ __('admin.quizFailed') }} </span>
 																	@endif
 																</td>
 																<td> {{ $attempt->created_at->format('jS M. Y h:i A') }} </td>
@@ -198,10 +195,10 @@
 		$(document).on('click', '#quizStartBtn', function (e) {
 			e.preventDefault();
 			Swal.fire({
-				type: 'warning',
+				icon: 'warning',
 				title: '<strong> {{ __("admin.cautionPlease") }} </strong>',
 				html: '{!! __("admin.startQuizMsg") !!}',
-				buttonsStyling: false,
+				buttonsStyling: true,
 				showCancelButton: true,
 				confirmButtonText: "{!! __('admin.startQuizOk') !!}",
 				cancelButtonText: "{!! __('admin.startQuizCancel') !!}",
@@ -230,7 +227,7 @@
 				if( distance < 0 )
 				{
 					clearInterval(x);
-					timeRemain.parent().html('<span class="badge badge-success"> {{ __('admin.availableNow') }} </span>');
+					timeRemain.parent().html('<span class="badge text-bg-success"> {{ __('admin.availableNow') }} </span>');
 				}
 			}, 1000);
 			@endif

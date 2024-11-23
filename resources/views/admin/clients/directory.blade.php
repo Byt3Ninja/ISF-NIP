@@ -135,8 +135,8 @@
       <div class="modal-content">
         <div class="modal-header">
           <h3 class="modal-title" id="title"></h3>
-          <button type="button" class="close rounded-pill" data-dismiss="modal" aria-label="Close">
-            <i class="bx bx-x"></i>
+          <button type="button" class="close rounded-pill" data-bs-dismiss="modal" aria-label="Close">
+            
           </button>
         </div>
         <div class="modal-body">
@@ -171,8 +171,8 @@
         <div class="modal-footer">
           <button class="btn btn-success glow mr-auto ml-0" type="button"
             onclick="requestserv()">{{ __('admin.Make a request') }}</button>
-          <button type="button" class="btn btn-light-primary" data-dismiss="modal">
-            <i class="bx bx-x d-block d-sm-none"></i>
+          <button type="button" class="btn btn-light-primary" data-bs-dismiss="modal">
+            
             <span class="d-none d-sm-block">{{ __('admin.Close') }}</span>
           </button>
         </div>

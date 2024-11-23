@@ -250,7 +250,7 @@
                                       height="40" width="40">
                                   </a>
                                   <a href="/dashboard/screening/{{ $form->id }}/{{ $company->id }}" class="mx-3">
-                                    <div class="media align-items-center">
+                                    <div class="d-flex align-items-center gap-1">
                                       {{ $company->name }}
                                     </div>
                                   </a>
@@ -361,7 +361,7 @@
                                       class="rounded-circle" height="40" width="40">
                                   </a>
                                   <a href="/dashboard/companyProfile/{{ $fcompany->company_id }}" class="mx-3">
-                                    <div class="media align-items-center">
+                                    <div class="d-flex align-items-center gap-1">
                                       {{ $fcompany->company->name }}
                                     </div>
                                   </a>

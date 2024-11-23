@@ -102,7 +102,8 @@
           <div class="col-12">
             <div class="row">
               <div class="col-md-12">
-                <div class="alert alert-{{ Session::get('class') }} alert-dismissible mb-2" role="alert">
+                <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                       <i class="ti ti-{{ session()->get('class') == 'success' ? 'like' : 'error' }}"></i>
@@ -111,10 +112,6 @@
                         {{ Session::forget('msg') }}
                       </span>
                     </div>
-                    <button type="button" class="" data-dismiss="alert" aria-label="Close"
-                      style="background: transparent; border: none; outline: none; cursor: pointer;">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -356,12 +353,14 @@
                     </td>
                     <td>
                       @if (now()->format('Y-m-d') == date('Y-m-d', strtotime($session->zoom_date)))
+                      <a href="{{ $session->start_url }}" target="_blank">
                         <button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button"
                           class="btn btn-label-primary rounded">
                           <i class="ti ti-user"></i>
                         </button>
+                      </a>
                       @else
-                        <i class="ti ti-alarm"></i> Meeting will start at time
+                        <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
                       @endif
                     </td>
                   </tr>
@@ -432,7 +431,7 @@
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary">
-                <i class="bx bx-check d-block d-sm-none"></i>
+                
                 <span class="d-none d-sm-block">{{ __('dashboard.Submit') }}</span>
               </button>
             </div>

@@ -4,10 +4,10 @@
 @section('subTitle', __('admin.EditPermission'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-    <div class="content-wrapper">
-        @include('admin.includes.heading')
+        
         <div class="content-body">
             <!-- BuilderForm start -->
             <section id="basic-input">
@@ -23,12 +23,12 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                <button type="button" class="close" data-dismiss="alert"
+                                                <button type="button" class="close" data-bs-dismiss="alert"
                                                     aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
                                                 <div class="d-flex align-items-center">
-                                                    <i class="bx bx-error"></i>
+                                                    <i class="ti ti-error"></i>
                                                     <span>
                                                         {{ __('admin.'.session()->get('msg')) }}
                                                         {{ Session::forget('msg') }}
@@ -59,7 +59,7 @@
                                             <div class="col-md-12">
 
                                                 <fieldset class="form-group">
-                                                    <label for="basicInput">{{ __('admin.Title')}}</label>
+                                                    <label class="fs-6 mb-1" for="basicInput">{{ __('admin.Title')}}</label>
                                                     <input type="text" class="form-control" id="name" name='name'
                                                         required placeholder="{{__('admin.Title')}}" style="direction: ltr;"
                                                         value="{{ $permission->name }}" >
@@ -67,7 +67,7 @@
 
                                             </div>
                                         </div>
-                                        <div class="row">
+                                        <div class="row mt-4">
                                             <div class="col-12 d-flex justify-content-end">
                                                 <button type="submit"
                                                     class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>

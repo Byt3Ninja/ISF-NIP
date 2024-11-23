@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'Cycle' => 'دورة',
+    'Cycle' => 'برنامج',
     'join Cycle' => 'الإشتراك بالبرنامج',
-    'Cycles' => 'دورات',
+    'Cycles' => 'برامج',
     'Manage Cycles' => 'إدارة البرامج',
-    'Portal Cycles' => 'دورات النظام',
-    'Select cycle from list' => 'أختر دورة من القائمة',
+    'Portal Cycles' => 'برامج النظام',
+    'Select cycle from list' => 'أختر برنامج من القائمة',
     'Start' => 'تبدأ',
     'Users' => 'المستخدمين',
     'Edit' => 'تحرير',
@@ -26,7 +26,7 @@ return [
     'Step settings' => 'إعدادات المرحلة',
     'view step results' => 'عرض نتائج المرحلة',
     'Add new' => 'إضافة جديد',
-    'No records ... Add cycle first' => 'لا يوجد سجلات لعرضها ... أضف دورة جديدة',
+    'No records ... Add cycle first' => 'لا يوجد سجلات لعرضها ... أضف برنامج جديدة',
     'Cycle data' => 'معلومات البرنامج',
     'Cycle title' => 'عنوان البرنامج',
     'Start From'=> 'تبدأ من',
@@ -54,7 +54,7 @@ return [
     'Form title' => 'عنوان النموذج',
     'sure delete cycle' => 'هل بالتأكيد تريد حذف هذه البرنامج وكافة مراحلها وبياناتها',
     'sure delete step' => 'هل بالتأكيد ترغب في حذف هذه المرحلة وكافة بياناتها',
-    'Add cycle steps' => 'إضافة مراحل للدورة',
+    'Add cycle steps' => 'إضافة مراحل للبرنامج',
     'Choose form' => 'إختر نموذج',
     'Title' => 'العنوان',
     'Save' => 'حفظ',
@@ -89,7 +89,6 @@ return [
     'Cycles Mentors' => 'مرشدين البرنامج',
     'Manage Cycle mentors' => 'إدارة مرشدي البرنامج',
     'Portal Cycles Users' => 'مرشدي النظام',
-    'Select cycle from list' => 'إختر دورة من القائمة',
     'Manage Cycle' => 'إدارة البرنامج',
     'Manage sessions' => 'إدارة الجلسات',
     'Mentors' => 'المرشدين',
@@ -131,6 +130,7 @@ return [
     'Training courses' => 'البرامج التدريبية',
     'Select course' => 'إختيار كورس',
     'Add new content' => 'إضافة محتوى جديد',
+    'Add new Training' => 'إضافة تدريب جديد',
     'Created at' => 'أنشئ بتاريخ',
     'Added By' => 'إضيف بواسطة',
     'Edit/Delete' => 'تحرير/ حذف',
@@ -153,7 +153,7 @@ return [
     'Error' => 'خطأ',
     'NA' => 'غير متاح',
     'nosubscripe' => 'عفواً انت غير مشترك فى اى برامج تدريبية',
-    'No training courses into cycles' => 'لم يتم إضافة تدريبات للدورات',
+    'No training courses into cycles' => 'لم يتم إضافة تدريبات للبرامج',
     'Back to Manage cycles' => 'العودة لإدارة البرامج',
     'all online training sessions' => 'كافة جلسات التدريب المباشر',
     'view all' => 'عرض الكل',
@@ -246,5 +246,32 @@ return [
     'days'=>'ايام',
     'export_willsuccess'=>' بدأت عملية التصدير. ستتلقى بريدًا إلكترونيًا يحتوي على الملف المرفق بالتنزيل ',
     'export_Notsuccess'=>' لا يوجد بيانات لإستخراجها من الجدول ',
+    'ProgramCount'=>'عدد البرامج',
+    'Course Name'=>' اسم الكورس ',
+    'Code'=>' الكود ',
+    'CoursCategories'=>' القسم ',
+    'Tags'=>' الوسم ',
+    'CoursLevel'=>' مستوى الكورس ',
+    'Quizs'=>' الاسئلة ',
+    'Instractor'=>' المُحاضر ',
+    'CoursStart'=>' تاريخ البداية ',
+    'CoursEnd'=>' تاريخ الانتهاء ',
+    'Draft'=>' حفظ ',
+    'Published'=>' نشر ',
+    'SaveProgram'=>' حفظ البرنامج ',
+    'Cancel'=>' ألغاء ',
+    'Beginner'=>' مبتداء ',
+    'Intermediate'=>' متوسط ',
+    'Advanced'=>' متقدم ',
+    'PublishProgram'=>' نشر البرنامج ',
+
+
+
+
+
+
+
+
+
     ];
 

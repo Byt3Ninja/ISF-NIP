@@ -8,8 +8,8 @@
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
-      {{-- @include('admin.includes.heading')
-      <div class="invoice-create-btn mb-1">
+      {{-- 
+      <div class="invoice-create-btn mb-4">
       </div> --}}
       <div class="content-body">
         <section id="basic-datatable">
@@ -17,7 +17,10 @@
             <div class="col-12">
               <div class="card">
                 <div class="card-header">
-                  <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">{{ __('admin.Add New') }}</a>
+                  <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">
+                    <i class="ti ti-plus me-1"></i>
+                    {{ __('admin.Add New') }}
+                  </a>
                 </div>
                 <div class="card-content">
                   <div class="card-body card-dashboard">
@@ -56,17 +59,17 @@
                               <td>
                                 <a title="View" target="_blank" href="/dashboard/documentation/{{ $doc->id }}"
                                   class="btn btn-icon rounded-circle btn-label-primary">
-                                  <i class="ti ti-hand-finger"></i>
+                                  <i class="ti ti-eye"></i>
                                 </a>
                                 @can('manage_documentation')
                                   <a title="Edit" href="{{ route('documentation.edit', ['documentation' => $doc->id]) }}"
                                     class="btn btn-icon rounded-circle btn-label-info">
-                                    <i class="ti ti-edit"></i>
+                                    <i class="ti ti-edit text-info"></i>
                                   </a>
                                   <button id='deleteAction' data-id='{{ $doc->id }}'
                                     data-url="{{ route('documentation.destroy', ['documentation' => $doc->id]) }}"
                                     class="btn btn-icon rounded-circle btn-label-danger">
-                                    <i class="ti ti-trash"></i>
+                                    <i class="ti ti-trash text-danger"></i>
                                   </button>
                                 @endcan
                               </td>

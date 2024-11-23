@@ -54,7 +54,7 @@ class CalenderController extends Controller
 										<div class="media-left mr-50">
 											<img src="'.$mentorshipResquest->mentor->image_url.'" alt="avatar" class="rounded-circle" height="40" width="40">
 										</div>
-											<div class="media align-items-center">'.
+											<div class="d-flex align-items-center gap-1">'.
                                      __('admin.Mentor') .': '.$mentorshipResquest->mentor->name
 											.'</div>
 									</div>'.
@@ -62,7 +62,7 @@ class CalenderController extends Controller
 										<div class="media-left mr-50">
 											<img src="'.$mentorshipResquest->user->image_url.'" alt="avatar" class="rounded-circle" height="40" width="40">
 										</div>
-											<div class="media align-items-center">'.
+											<div class="d-flex align-items-center gap-1">'.
                         __('admin.Registered') .': '.$mentorshipResquest->user->name
                         .'</div>
 					</div>';

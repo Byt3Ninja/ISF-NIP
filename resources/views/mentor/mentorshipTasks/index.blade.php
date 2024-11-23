@@ -1,191 +1,300 @@
 @extends('layouts.admin')
+
+@section('vendorstyle')
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+@stop
+
 @section('style')
-    <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
+  <style>
+    .kanban-container {
+      display: flex;
+      width: max-content !important;
+      gap: 3rem;
+    }
+  </style>
 @stop
+
 @section('content')
+<!-- Content wrapper -->
+<div class="content-wrapper">
+  <!-- Content -->
 
-    <!-- BEGIN: Content-->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
-            <div class="content-header row">
-                <div class="content-header-left col-12 mb-2 mt-1">
-                    <div class="row breadcrumbs-top">
-                        <div class="col-12">
-                            <h5 class="content-header-title float-left pr-1 mb-0">{{__('mentor.mentorshipTasks.index')}}</h5>
-                            <div class="breadcrumb-wrapper col-12">
-                                <ol class="breadcrumb p-0 mb-0">
-                                    <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
-                                    </li>
-                                    <li class="breadcrumb-item active">
-                                        {{__('mentor.mentorshipTasks.all')}}
-                                    </li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="content-body">
-                <section id="multiple-column-form">
-                    @if(session()->has('message'))
-                        <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            <div class="d-flex align-items-center">
-                                <i class="bx bx-like"></i>
-                                <span>
-                                                    {{ __('admin.'.session()->get('message')) }}
-                                                </span>
-                            </div>
-                        </div>
-                    @endif
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="app-kanban">
+      <!-- Kanban Wrapper -->
+      <div 
+        class="kanban-wrapper bg-white px-4 py-8" 
+        style="border-radius: 1rem;">
+      </div>
 
-                    @if(session()->has('message2')|| !empty($errors->all()))
-                        <div class="alert alert-danger alert-dismissible mb-2" role="alert">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            <div class="d-flex align-items-center">
-                                <i class="bx bx-error"></i>
-                                <span>
-                                                    {{ __('admin.'.session()->get('message2')) }}
-                                    @forelse($errors->all() as $message)
-
-					                {{ $message }}
-                                    @empty
-                                    @endforelse
-
-                                                </span>
-                            </div>
-                        </div>
-                    @endif
-                </section>
-                <section class="row">
-                    <div class="col-xl-12 col-md-12 col-sm-12">
-                        <div class="card">
-                            <div class="card-header border-bottom">
-                                <h4 class="card-title align-items-center">
-                                    <i class='bx bx-card font-medium-4 mr-1'></i>{{__('mentor.mentorshipTasks.all')}}:
-                                    <a href="{{ route('mentorshipTasks.create',['mentorship_id'=>$mentorship->id]) }}" class="btn btn-icon  btn-success float-right" >
-                                        <i class="bx bx-plus"></i>{{__('mentor.mentorshipTasks.create')}}
-                                    </a>
-                                </h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="card-text">
-                                    <div class="table-responsive">
-                                        <table class="table mb-0" id="userstable">
-                                            <thead class="thead-dark">
-                                            <tr>
-
-                                                <th class="text-center">{{__('mentor.mentorshipTasks.mentorship request')}}</th>
-{{--                                                <th class="text-center">{{__('mentor.mentorshipTasks.type')}}</th>--}}
-                                                <th class="text-center">{{__('cycles.Company')}}</th>
-                                                <th class="text-center">{{__('cycles.User/Title')}}</th>
-                                                <th class="text-center">{{__('mentor.mentorshipTasks.title')}}</th>
-                                                <th class="text-center">{{__('cycles.Done')}}</th>
-                                                <th class="text-center">{{__('cycles.Actions')}}</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-
-                                            @foreach($mentorshipTasks as $task)
-                                                <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
-
-                                                    <td class="text-center">
-                                                        ({{ $task->mentorshipRequest->code }})
-                                                        <br>
-                                                        {{ $task->mentorshipRequest->zoom_date }}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div class="media align-items-center">
-                                                            <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
-                                                                <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
-                                                            </a>
-                                                            <a href="/dashboard/companyProfile/{{$task->company->id}}">
-                                                                <div class="media align-items-center">
-                                                                    {{$task->company->name }}
-                                                                </div>
-                                                            </a>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div class="media align-items-center">
-                                                            <a class="media-left mr-50" href="/dashboard/users/{{$task->user_id}}/edit">
-                                                                <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
-                                                            </a>
-                                                            <a href="/dashboard/users/{{$task->user_id}}/edit">
-                                                                <div class="media-body">
-                                                                    <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
-                                                                    <span class="font-small-2">{{$task->user->title}}</span>
-                                                                </div>
-                                                            </a>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        {{ $task->title??"-----" }}
-                                                    </td>
-                                                    <td class="text-center">
-                                                     {{ $task->status =='pending'?__('Uncompleted'):__('Completed') }}
-                                                    </td>
-                                                    <td class="text-center">
-                                                        @if(!is_null($task->title))
-                                                            <a href="{{ route('mentorshipTasks.show',['mentorshipTask'=>$task->id]) }}" title="Show" class="btn btn-icon rounded-circle btn-light-info">
-                                                                <i class="bx bxs-show"></i></a>
-                                                        @endif
-                                                        <a href="{{ route('mentorshipTasks.edit',['mentorshipTask'=>$task->id]) }}" title="Edit" class="btn btn-icon rounded-circle btn-light-primary">
-                                                            <i class="bx bxs-edit-alt"></i></a>
-                                                        <a onclick="sweet_delete( '{{ route('mentorshipTasks.destroy',['mentorshipTask' => $task->id ])  }} ' , '{{ trans('admin.deleted_msg_confirm') }}' ,{{ $task->id }} )" title="Delete" class="btn btn-icon rounded-circle btn-light-danger">
-                                                            <i class="bx bxs-x-square"></i></a>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                </section>
-            </div>
+      <!-- Edit Task/Task & Activities -->
+      <div class="offcanvas offcanvas-end kanban-update-item-sidebar">
+        <div class="offcanvas-header border-bottom">
+          <h5 class="offcanvas-title">Edit Task</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
+        <div class="offcanvas-body pt-0">
+          <div class="nav-align-top">
+            <ul class="nav nav-tabs mb-5 rounded-0">
+              <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-update">
+                  <i class="ti ti-edit ti-18px me-1_5"></i>
+                  <span class="align-middle">Edit</span>
+                </button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-activity">
+                  <i class="ti ti-chart-pie-2 ti-18px me-1_5"></i>
+                  <span class="align-middle">Activity</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+          <div class="tab-content p-0">
+            <!-- Update item/tasks -->
+            <div class="tab-pane fade show active" id="tab-update" role="tabpanel">
+              <form>
+                <div class="mb-5">
+                  <label class="form-label" for="title">Title</label>
+                  <input type="text" id="title" class="form-control" placeholder="Enter Title" />
+                </div>
+                <div class="mb-5">
+                  <label class="form-label" for="due-date">Due Date</label>
+                  <input type="text" id="due-date" class="form-control" placeholder="Enter Due Date" />
+                </div>
+                <div class="mb-5">
+                  <label class="form-label" for="label"> Label</label>
+                  <select class="select2 select2-label form-select" id="label">
+                    <option data-color="bg-label-success" value="UX">UX</option>
+                    <option data-color="bg-label-warning" value="Images">Images</option>
+                    <option data-color="bg-label-info" value="Info">Info</option>
+                    <option data-color="bg-label-danger" value="Code Review">Code Review</option>
+                    <option data-color="bg-label-secondary" value="App">App</option>
+                    <option data-color="bg-label-primary" value="Charts & Maps">Charts & Maps</option>
+                  </select>
+                </div>
+                <div class="mb-5">
+                  <label class="form-label">Assigned</label>
+                  <div class="assigned d-flex flex-wrap"></div>
+                </div>
+                <div class="mb-5">
+                  <label class="form-label" for="attachments">Attachments</label>
+                  <div>
+                    <input type="file" class="form-control" id="attachments" />
+                  </div>
+                </div>
+                <div class="mb-5">
+                  <label class="form-label">Comment</label>
+                  <div class="comment-editor border-bottom-0"></div>
+                  <div class="d-flex justify-content-end">
+                    <div class="comment-toolbar">
+                      <span class="ql-formats me-0">
+                        <button class="ql-bold"></button>
+                        <button class="ql-italic"></button>
+                        <button class="ql-underline"></button>
+                        <button class="ql-link"></button>
+                        <button class="ql-image"></button>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="d-flex flex-wrap">
+                    <button type="button" class="btn btn-primary me-4" data-bs-dismiss="offcanvas">
+                      Update
+                    </button>
+                    <button type="button" class="btn btn-label-danger" data-bs-dismiss="offcanvas">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <!-- Activities -->
+            <div class="tab-pane fade text-heading" id="tab-activity" role="tabpanel">
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <span class="avatar-initial bg-label-success rounded-circle">HJ</span>
+                </div>
+                <div class="media-body">
+                  <p class="mb-0"><span>Jordan</span> Left the board.</p>
+                  <small class="text-muted">Today 11:00 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <img src="/vuexy/assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
+                </div>
+                <div class="media-body">
+                  <p class="mb-0">
+                    <span>Dianna</span> mentioned <span class="text-primary">@bruce</span> in a comment.
+                  </p>
+                  <small class="text-muted">Today 10:20 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle" />
+                </div>
+                <div class="media-body">
+                  <p class="mb-0"><span>Martian</span> added moved Charts & Maps task to the done board.</p>
+                  <small class="text-muted">Today 10:00 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
+                </div>
+                <div class="media-body">
+                  <p class="mb-0"><span>Barry</span> Commented on App review task.</p>
+                  <small class="text-muted">Today 8:32 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <span class="avatar-initial bg-label-dark rounded-circle">BW</span>
+                </div>
+                <div class="media-body">
+                  <p class="mb-0"><span>Bruce</span> was assigned task of code review.</p>
+                  <small class="text-muted">Today 8:30 PM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <span class="avatar-initial bg-label-danger rounded-circle">CK</span>
+                </div>
+                <div class="media-body">
+                  <p class="mb-0">
+                    <span>Clark</span> assigned task UX Research to
+                    <span class="text-primary">@martian</span>
+                  </p>
+                  <small class="text-muted">Today 8:00 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <img src="/vuexy/assets/img/avatars/4.png" alt="Avatar" class="rounded-circle" />
+                </div>
+                <div class="media-body">
+                  <p class="mb-0">
+                    <span>Ray</span> Added moved <span>Forms & Tables</span> task from in progress to done.
+                  </p>
+                  <small class="text-muted">Today 7:45 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
+                </div>
+                <div class="media-body">
+                  <p class="mb-0"><span>Barry</span> Complete all the tasks assigned to him.</p>
+                  <small class="text-muted">Today 7:17 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <span class="avatar-initial bg-label-success rounded-circle">HJ</span>
+                </div>
+                <div class="media-body">
+                  <p class="mb-0"><span>Jordan</span> added task to update new images.</p>
+                  <small class="text-muted">Today 7:00 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <img src="/vuexy/assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
+                </div>
+                <div class="media-body">
+                  <p class="mb-0">
+                    <span>Dianna</span> moved task <span>FAQ UX</span> from in progress to done board.
+                  </p>
+                  <small class="text-muted">Today 7:00 AM</small>
+                </div>
+              </div>
+              <div class="media mb-4 d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <span class="avatar-initial bg-label-danger rounded-circle">CK</span>
+                </div>
+                <div class="media-body">
+                  <p class="mb-0"><span>Clark</span> added new board with name <span>Done</span>.</p>
+                  <small class="text-muted">Yesterday 3:00 PM</small>
+                </div>
+              </div>
+              <div class="media d-flex align-items-center">
+                <div class="avatar me-3 flex-shrink-0">
+                  <span class="avatar-initial bg-label-dark rounded-circle">BW</span>
+                </div>
+                <div class="media-body">
+                  <p class="mb-0"><span>Bruce</span> added new task in progress board.</p>
+                  <small class="text-muted">Yesterday 12:00 PM</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- END: Content-->
+  </div>
+  <!-- / Content -->
 
+  <div class="content-backdrop fade"></div>
+</div>
+<!-- Content wrapper -->
 @stop
+
+@section('scripts')
+  <script>
+    // Remove taskId from URL
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.has('taskId')) {
+        searchParams.delete('taskId');
+        const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname;
+        window.history.pushState({}, '', newUrl);
+      }
+    });
+  </script>
+  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+@stop
+
 @section('pagescripts')
-    <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-    <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-    <script src="/js/jquery.datetimepicker.full.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.table').DataTable({
-                "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,
-                "columnDefs": [
-                    {"orderable": false, "targets":  [7]},
-                ],
-                @if ($l=='ar')
-                "language": {
-                    "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
-                    "sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
-                    "sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
-                    "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                    "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-                    "sInfoPostFix":  "", "sSearch":       "ابحث:", "sUrl":          "",
-                    "oPaginate": {"sFirst":    "الأول", "sPrevious": "السابق", "sNext":     "التالي", "sLast":     "الأخير"},
-                    "oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}}
-                @endif
-            });
-        });
-    </script>
+  <script>
+    // Mentorship tasks data
+    const mentorshipTasks = @json($mentorshipTasks);
+
+    // Restructure tasks
+    const restructureTasks = () => {
+      if (mentorshipTasks?.length > 0) {
+        return [
+          {
+            id: "board-in-progress",
+            title: "Pending",
+            item: mentorshipTasks.filter(task => task.status === 'pending'),
+          },
+          {
+            id: "board-in-review",
+            title: "In Review",
+            item: mentorshipTasks.filter(task => task.status === 'in-review'),
+          },
+          {
+            id: "board-done",
+            title: "Done",
+            item: mentorshipTasks.filter(task => task.status === 'completed'),
+          }
+        ]
+      }
+    }
+    const tasks = restructureTasks();
+  </script>
+  <script src="/vuexy/assets/js/app-kanban.js"></script>
 @stop

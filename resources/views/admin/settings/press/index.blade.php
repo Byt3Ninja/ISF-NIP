@@ -6,11 +6,11 @@
 @section('subTitle', __('admin.press`s List'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
-    @include('admin.includes.heading')
-        <div class="invoice-create-btn mb-1">
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
+    
+        <div class="invoice-create-btn mb-4">
             <a href="{{route('press.create')}}" class="btn btn-primary glow">{{ __('admin.Add New')}}</a>
         </div>
         <div class="content-body">
@@ -19,6 +19,9 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
+                              <h4 class="card-title">
+                                {{ $l == 'en' ? 'Manage Press' : 'إدارة الصحافة' }}
+                              </h4>
                             </div>
                             <div class="card-content">
                                 <div class="card-body card-dashboard">
@@ -26,12 +29,12 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                                    <button type="button" class="close" data-dismiss="alert"
+                                                    <button type="button" class="close" data-bs-dismiss="alert"
                                                         aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                     <div class="d-flex align-items-center">
-                                                        <i class="bx bx-like"></i>
+                                                        <i class="ti ti-check"></i>
                                                         <span>
                                                             {{ __('admin.'.session()->get('msg')) }}
                                                             {{ Session::forget('msg') }}
@@ -67,11 +70,11 @@
                                                         <td>{{$press->created_at}}</td>
                                                         <td>
                                                             @can('edit_press')
-                                                                <a href="{{route('press.edit', ['press' => $press->id])}}" class="btn btn-outline-primary"><i class="bx bx-edit-alt"> </i></a>
+                                                                <a href="{{route('press.edit', ['press' => $press->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
                                                             @endcan
 
                                                             @can('delete_press')
-                                                                <button id='deleteAction' data-id='{{$press->id}}' data-url="{{route('press.destroy', ['press' => $press->id])}}" type="button" class="btn btn-outline-primary"><i class="bx bx-trash"> </i></button>
+                                                                <button id='deleteAction' data-id='{{$press->id}}' data-url="{{route('press.destroy', ['press' => $press->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>
                                                             @endcan
                                                         </td>
                                                     </tr>

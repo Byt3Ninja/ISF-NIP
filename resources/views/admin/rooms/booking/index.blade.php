@@ -6,9 +6,9 @@
 @section('subTitle', __('Rooms List'))
 @section('content')
     <!-- BEGIN: Content-->
-    <div class="app-content content">
-        <div class="content-overlay"></div>
-        <div class="content-wrapper">
+    <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">
                     <div class="row breadcrumbs-top">
@@ -31,12 +31,12 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                <button type="button" class="close" data-dismiss="alert"
+                                <button type="button" class="close" data-bs-dismiss="alert"
                                         aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                                 <div class="d-flex align-items-center">
-                                    <i class="bx bx-like"></i>
+                                    <i class="ti ti-check"></i>
                                     <span>
                                         {{ __(''.session()->get('msg')) }}
                                         {{ Session::forget('msg') }}
@@ -65,7 +65,7 @@
                                             {{__($room->type_trans)}}
                                             {!! substr($room->{'desc_'.$l},0,50-1) !!}
                                         </p>
-                                        <a style="float: left;"  href="{{route('rooms.edit', ['id' => $room->id])}}" type="submit"class="btn btn-outline-primary">المزيد</a>
+                                        <a style="float: left;"  href="{{route('rooms.edit', ['id' => $room->id])}}" type="submit"class="btn btn-label-primary">المزيد</a>
                                     </div>
                                 </div>
                             </div>

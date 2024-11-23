@@ -33,11 +33,10 @@
                 <div class="card-content">
                   <div class="card-body">
                     @if (session()->has('msg'))
-                      <div class="alert alert-{{ Session::get('class') }} alert-dismissible mb-2" role="alert">
+                      <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         {{ __('admin.' . session()->get('msg')) }}
                         {{ Session::forget('msg') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-                        </button>
                       </div>
                     @endif
                     <!-- Validation messages -->
@@ -108,36 +107,29 @@
                       </div>
                     </div>
                     <div class="col-md-12 col-12 " id="cyclesSelectSection" style="display: none;">
-                      <div class="form-group">
-                        <div class="card-content">
-                          <div class="card-body">
-                            <h6 id="selectTitle">{{ __('admin.SelectCycle') }}</h6>
-                            <p id="selectSubtitle">{{ __('admin.SelectOrSearchCycle') }}.</p>
-                            <div class="form-group">
-                              <select class="form-control select2" id="cyclesSelectOptions">
-                                @foreach ($cycles as $cycle)
-                                  <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
-                                @endforeach
-                              </select>
-                            </div>
-                          </div>
+                      <div class="form-group mt-4 px-2">
+                        <h5 id="selectTitle">{{ __('admin.SelectCycle') }}</h5>
+                        <p id="selectSubtitle">{{ __('admin.SelectOrSearchCycle') }}.</p>
+                        <div class="form-group">
+                          <select class="form-control select2" id="cyclesSelectOptions">
+                            @foreach ($cycles as $cycle)
+                              <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
+                            @endforeach
+                          </select>
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-12 col-12 " id="companiesSelectSection" style="display: none;">
-                      <div class="form-group">
-                        <div class="card-content">
-                          <div class="card-body">
-                            <h6>{{ __('admin.SelectCompany') }}</h6>
-                            <p>{{ __('admin.SelectOrSearchCompany') }}.</p>
-                            <div class="form-group">
-                              <select class="form-control select2" id="companiesSelectOptions">
-                                @foreach ($companies as $company)
-                                  <option value="{{ $company->id }}">{{ $company->name }}</option>
-                                @endforeach
-                              </select>
-                            </div>
-                          </div>
+
+                    <div id="companiesSelectSection" style="display: none;">
+                      <div class="form-group mt-4 px-2">
+                        <h5>{{ __('admin.SelectCompany') }}</h5>
+                        <p>{{ __('admin.SelectOrSearchCompany') }}.</p>
+                        <div class="form-group">
+                          <select class="form-control select2" id="companiesSelectOptions">
+                            @foreach ($companies as $company)
+                              <option value="{{ $company->id }}">{{ $company->name }}</option>
+                            @endforeach
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -146,7 +138,8 @@
                   <div class="row px-8 pb-8">
                     <div class="col-12 d-flex">
                       <button type="button" id="showReport"
-                        class="btn btn-primary mr-1 mb-1">{{ __('admin.ViewReport') }}</button>
+                        class="btn btn-primary mr-1 mb-1">{{ __('admin.ViewReport') }}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -160,7 +153,6 @@
 
           </div>
         </section>
-
       </div>
     </div>
   </div>
@@ -217,6 +209,5 @@
     }
   </script>
 
-<script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-
+  <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
 @stop

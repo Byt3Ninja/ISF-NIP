@@ -51,7 +51,7 @@
   <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
   <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
   <script src="/vuexy/assets/vendor/js/menu.js"></script>
-
+  <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <!-- endbuild -->
 
   <!-- Vendors JS -->
@@ -62,6 +62,13 @@
 
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
+
+  <!-- Custom JS -->
+  <script src="/app-assets/js/1.js"></script>
+
+  <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>
+  <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
+ 
 
   <!-- Main Page JS -->
   <!-- End Main JS-->

@@ -4,10 +4,10 @@
 @section('subTitle', __('admin.Edit service category'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-    <div class="content-overlay"></div>
-    <div class="content-wrapper">
-        @include('admin.includes.heading')
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="content-overlay"></div>
+        
         <div class="content-body">
             <!-- BuilderForm start -->
             <section id="basic-input">
@@ -23,12 +23,12 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                    <button type="button" class="close" data-dismiss="alert"
+                                                    <button type="button" class="close" data-bs-dismiss="alert"
                                                         aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                     <div class="d-flex align-items-center">
-                                                        <i class="bx bx-error"></i>
+                                                        <i class="ti ti-error"></i>
                                                         <span>
                                                             {{ __('admin.'.session()->get('msg')) }}
                                                             {{ Session::forget('msg') }}

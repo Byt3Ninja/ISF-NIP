@@ -113,10 +113,8 @@
           <div class="col-12">
             <div class="row">
               <div class="col-md-12">
-                <div class="alert alert-{{ session()->get('class') }} mb-2" role="alert">
-                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
+                <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   <div class="d-flex align-items-center">
                     <i class="bx bx-{{ session()->get('class') == 'success' ? 'like' : 'error' }}"></i>
                     <span>

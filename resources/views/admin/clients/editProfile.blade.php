@@ -16,6 +16,12 @@
     .content-section.active {
       display: block;
     }
+
+    .codeInputContainer {
+      width: 135px;
+      margin-left: {{$l == 'ar' ? '10px' : 0}};
+      margin-right: {{$l == 'en' ? '10px' : 0}};
+    }
   </style>
 @stop
 
@@ -37,16 +43,16 @@
                   Security</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-billing.html"><i class="ti-sm ti ti-bookmark me-1_5"></i>
-                  Billing & Plans</a>
+                <button class="nav-link"><i class="ti-sm ti ti-bookmark me-1_5"></i>
+                  Billing & Plans</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-notifications.html"><i
-                    class="ti-sm ti ti-bell me-1_5"></i> Notifications</a>
+                <button class="nav-link"><i
+                    class="ti-sm ti ti-bell me-1_5"></i> Notifications</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="pages-account-settings-connections.html"><i class="ti-sm ti ti-link me-1_5"></i>
-                  Connections</a>
+                <button class="nav-link"><i class="ti-sm ti ti-link me-1_5"></i>
+                  Connections</button>
               </li>
             </ul>
           </div>
@@ -57,19 +63,17 @@
                 @if (session()->has('msg'))
                   <div class="row">
                     <div class="col-md-12">
-                      <div class="alert alert-{{ Session::get('class') }} alert-dismissible mb-2" role="alert">
+                      <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
+                        role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         <div class="d-flex justify-content-between align-items-center">
                           <div class="d-flex align-items-center">
-                            <i class="bx bx-error"></i>
+                            <i class="ti ti-error"></i>
                             <span>
                               {{ __('admin.' . session()->get('msg')) }}
                               {{ Session::forget('msg') }}
                             </span>
                           </div>
-                          <button type="button" class="" data-dismiss="alert" aria-label="Close"
-                            style="background: transparent; border: none; outline: none; cursor: pointer;">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -96,13 +100,19 @@
                 {!! csrf_field() !!}
                 <div class="card-body">
                   <div class="d-flex align-items-start align-items-sm-center gap-6">
-                    <img src="/191014/{{ $client->img_url ?? '../images/placeholder.jpg' }}" alt="user-avatar"
-                      class="d-block w-px-100 h-px-100 rounded" id="uploadedAvatar" />
+                    <img 
+                      id="uploadedAvatar" 
+                      class="d-block w-px-100 h-px-100" 
+                      alt="user-avatar"
+                      src="{{ $client->image_url ? $client->image_url : '/images/user-placeholder.jpeg' }}"
+                      style="border-radius: 10px;"
+                      onerror="this.src='/images/user-placeholder.jpeg'" 
+                    />
                     <div class="button-wrapper">
                       <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
                         <span class="d-none d-sm-block">Upload new photo</span>
                         <i class="ti ti-upload d-block d-sm-none"></i>
-                        <input hidden type="file" name="img_url" class="account-file-input" id="upload" 
+                        <input hidden type="file" name="img_url" class="account-file-input" id="upload"
                           accept="image/*" />
                       </label>
                       <button type="button" class="btn btn-label-secondary account-image-reset mb-4">
@@ -165,16 +175,18 @@
                       id="title_en" style="direction: ltr;" placeholder="{{ __('admin.JobTitleEn') }}" required
                       autocomplete="title_en">
                   </div>
-                  <div class="mb-4 col-md-6">
-                    <label for="organization" class="form-label">Organization</label>
-                    <input type="text" class="form-control" id="organization" name="organization"
-                      value="Pixinvent" />
-                  </div>
+                  
                   <div class="mb-4 col-md-6">
                     <label for="phone" class="form-label">{{ __('admin.Phone') }}</label>
-                    <input type="text" class="form-control" id="phone" style="direction: ltr;"
-                      placeholder="{{ __('admin.Phone') }}" value="{{ $client->phone }}" name="phone" required
-                      autocomplete="new-phone" />
+                    <div class="input-group">
+                      <div class="codeInputContainer">
+                        <select id="country_code" name="country_code" class="form-select select2" required>
+                        </select>
+                      </div>
+                      <input type="text" class="form-control" id="phone" style="direction: ltr;"
+                        placeholder="{{ __('admin.Phone') }}" value="{{ $client->phone }}" name="phone" required
+                        autocomplete="new-phone" />
+                    </div>
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="address" class="form-label">Address</label>
@@ -231,46 +243,45 @@
 
                   <div class="mb-4 col-md-6">
                     <label for="language" class="form-label">Language</label>
-                    <select id="language" class="select2 form-select">
+                    <select id="language" name="language" class="select2 form-select">
                       <option value="">Select Language</option>
-                      <option value="en">English</option>
-                      <option value="fr">French</option>
-                      <option value="de">German</option>
-                      <option value="pt">Portuguese</option>
+                      <option value="en" {{ $client->language == 'en' ? 'selected' : '' }} >English</option>
+                      <option value="fr" {{ $client->language == 'fr' ? 'selected' : '' }} >French</option>
+                      <option value="de" {{ $client->language == 'de' ? 'selected' : '' }} >German</option>
+                      <option value="pt" {{ $client->language == 'pt' ? 'selected' : '' }} >Portuguese</option>
                     </select>
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="timeZones" class="form-label">Timezone</label>
-                    <select id="timeZones" class="select2 form-select">
+                    <select id="timeZones" name="timezone" class="select2 form-select">
                       <option value="">Select Timezone</option>
-                      <option value="-12">(GMT-12:00) International Date Line West</option>
-                      <option value="-11">(GMT-11:00) Midway Island, Samoa</option>
-                      <option value="-10">(GMT-10:00) Hawaii</option>
-                      <option value="-9">(GMT-09:00) Alaska</option>
-                      <option value="-8">(GMT-08:00) Pacific Time (US & Canada)</option>
-                      <option value="-8">(GMT-08:00) Tijuana, Baja California</option>
-                      <option value="-7">(GMT-07:00) Arizona</option>
-                      <option value="-7">(GMT-07:00) Chihuahua, La Paz, Mazatlan</option>
-                      <option value="-7">(GMT-07:00) Mountain Time (US & Canada)</option>
-                      <option value="-6">(GMT-06:00) Central America</option>
-                      <option value="-6">(GMT-06:00) Central Time (US & Canada)</option>
-                      <option value="-6">(GMT-06:00) Guadalajara, Mexico City, Monterrey</option>
-                      <option value="-6">(GMT-06:00) Saskatchewan</option>
-                      <option value="-5">(GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>
-                      <option value="-5">(GMT-05:00) Eastern Time (US & Canada)</option>
-                      <option value="-5">(GMT-05:00) Indiana (East)</option>
-                      <option value="-4">(GMT-04:00) Atlantic Time (Canada)</option>
-                      <option value="-4">(GMT-04:00) Caracas, La Paz</option>
+                      <option value="-12" {{ $client->timezone == '-12' ? 'selected' : '' }} >(GMT-12:00) International Date Line West</option>
+                      <option value="-11" {{ $client->timezone == '-11' ? 'selected' : '' }}>(GMT-11:00) Midway Island, Samoa</option>
+                      <option value="-10" {{ $client->timezone == '-10' ? 'selected' : '' }}>(GMT-10:00) Hawaii</option>
+                      <option value="-9" {{ $client->timezone == '-9' ? 'selected' : '' }}>(GMT-09:00) Alaska</option>
+                      <option value="-8" {{ $client->timezone == '-8' ? 'selected' : '' }}>(GMT-08:00) Pacific Time (US & Canada)</option>
+                      <option value="-8" {{ $client->timezone == '-8' ? 'selected' : '' }}>(GMT-08:00) Tijuana, Baja California</option>
+                      <option value="-7" {{ $client->timezone == '-7' ? 'selected' : '' }}>(GMT-07:00) Arizona</option>
+                      <option value="-7" {{ $client->timezone == '-7' ? 'selected' : '' }}>(GMT-07:00) Chihuahua, La Paz, Mazatlan</option>
+                      <option value="-7" {{ $client->timezone == '-7' ? 'selected' : '' }}>(GMT-07:00) Mountain Time (US & Canada)</option>
+                      <option value="-6" {{ $client->timezone == '-6' ? 'selected' : '' }}>(GMT-06:00) Central America</option>
+                      <option value="-6" {{ $client->timezone == '-6' ? 'selected' : '' }}>(GMT-06:00) Central Time (US & Canada)</option>
+                      <option value="-6" {{ $client->timezone == '-6' ? 'selected' : '' }}>(GMT-06:00) Guadalajara, Mexico City, Monterrey</option>
+                      <option value="-6" {{ $client->timezone == '-6' ? 'selected' : '' }}>(GMT-06:00) Saskatchewan</option>
+                      <option value="-5" {{ $client->timezone == '-5' ? 'selected' : '' }}>(GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>
+                      <option value="-5" {{ $client->timezone == '-5' ? 'selected' : '' }}>(GMT-05:00) Eastern Time (US & Canada)</option>
+                      <option value="-5" {{ $client->timezone == '-5' ? 'selected' : '' }}>(GMT-05:00) Indiana (East)</option>
+                      <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Atlantic Time (Canada)</option>
+                      <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Caracas, La Paz</option>
                     </select>
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="currency" class="form-label">Currency</label>
-                    <select id="currency" class="select2 form-select">
+                    <select id="currency" name="currency" class="select2 form-select">
                       <option value="">Select Currency</option>
-                      <option value="usd">USD</option>
-                      <option value="euro">Euro</option>
-                      <option value="pound">Pound</option>
-                      <option value="bitcoin">Bitcoin</option>
+                      @foreach ($Currencies as $Currency)
+                            <option value="{{ $Currency->currency_code }}" {{ $client->currency && $client->currency == $Currency->currency_code ? 'selected' : '' }}> {{ $Currency->currency_name }} </option>
+                            @endforeach
                     </select>
                   </div>
 
@@ -528,8 +539,27 @@
   <!-- Content wrapper -->
 @stop
 
-
 @section('scripts')
+  <!-- Get countries and phone codes -->
+  <script>
+    fetch('https://restcountries.com/v3.1/all')
+    .then(response => response.json())
+    .then(data => {
+        const select = document.getElementById('country_code');
+        data.forEach(country => {
+            const option = document.createElement('option');
+            const countryCode = `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
+            option.value = countryCode;
+            option.text = `${countryCode} (${country.cca2})`;
+            option.style.fontSize = '12px';
+            if (country.cca2 === 'EG') {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+    });
+  </script>
+
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -707,22 +737,22 @@
               break;
           } @endif
 
-                                                          $('.entrepreneurial_experience').change(function() {
-                                                            var value = $(this).val();
-                                                            switch (value) {
-                                                              case '1':
-                                                                $('#entrepreneurial_experience_brief').show();
-                                                                break;
-                                                              case '0':
-                                                                $('#entrepreneurial_experience_brief').hide();
-                                                                break;
-                                                              default:
-                                                                $('#entrepreneurial_experience_brief').hide();
-                                                                break;
-                                                            }
+                                                            $('.entrepreneurial_experience').change(function() {
+                                                              var value = $(this).val();
+                                                              switch (value) {
+                                                                case '1':
+                                                                  $('#entrepreneurial_experience_brief').show();
+                                                                  break;
+                                                                case '0':
+                                                                  $('#entrepreneurial_experience_brief').hide();
+                                                                  break;
+                                                                default:
+                                                                  $('#entrepreneurial_experience_brief').hide();
+                                                                  break;
+                                                              }
+                                                            });
                                                           });
-                                                        });
-                                                      </script>
+                                                        </script>
   @endrole
 
 @stop

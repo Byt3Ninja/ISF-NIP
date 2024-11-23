@@ -206,7 +206,7 @@
                           height="40" width="40">
                       </a>
                       <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                        <div class="media align-items-center">
+                        <div class="d-flex align-items-center gap-1">
                           {{ $session->user->company->name }}
                         </div>
                       </a>

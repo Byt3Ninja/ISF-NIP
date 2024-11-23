@@ -14,7 +14,7 @@ const NotifyBox = (props) => {
 					{props.formData}
 				</p> */}
 
-				<button type="button" className="close" data-dismiss="alert" aria-label="Close" onClick={() => props.onNotifMsgClose()}>
+				<button type="button" className="close" data-bs-dismiss="alert" aria-label="Close" onClick={() => props.onNotifMsgClose()}>
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>

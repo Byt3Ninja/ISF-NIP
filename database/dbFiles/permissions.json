@@ -277,6 +277,16 @@
 
     "name": "manage_documentation",
     "guard_name": "web"
+  },
+  {
+
+    "name": "manage_Courses",
+    "guard_name": "web"
+  },
+  {
+
+    "name": "view_Courses",
+    "guard_name": "web"
   }
 ]
 

@@ -7,9 +7,9 @@
 	</style>
 @endsection
 @section('content')
-	<div class="app-content content">
-		<div class="content-overlay"></div>
-		<div class="content-wrapper">
+	<div class="content-wrapper">
+		<div class="container-xxl flex-grow-1 container-p-y">
+			<div class="content-overlay"></div>
 			<div class="content-header row">
 				<div class="content-header-left col-12 mb-2 mt-1">
 					<div class="row breadcrumbs-top">
@@ -17,7 +17,7 @@
 							<h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.View training content')}}</h5>
 							<div class="breadcrumb-wrapper col-12">
 								<ol class="breadcrumb p-0 mb-0">
-									<li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a></li>
+									<li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home"></i></a></li>
 									<li class="breadcrumb-item"> <a href="/dashboard/training/my"> {{__('admin.My courses')}} </a> </li>
 									<li class="breadcrumb-item"> <a href="/dashboard/training/my/{{ $training->id }}"> {{ $training->title }} </a> </li>
 									<li class="breadcrumb-item"> <a href="/dashboard/training/my/{{ $training->id }}/quiz/{{ $quiz->id }}"> {{ $training->title }} </a> </li>
@@ -45,11 +45,11 @@
 												<div class="text-center">
 													{{__('admin.question_difficulty')}} : 
 													@if( $question->difficulty == 'easy' )
-													<span class="badge badge-success"> {{ __('admin.difficulty_easy') }}</span>
+													<span class="badge text-bg-success"> {{ __('admin.difficulty_easy') }}</span>
 													@elseif( $question->difficulty == 'medium' )
-													<span class="badge badge-warning">{{ __('admin.difficulty_medium') }}</span>
+													<span class="badge text-bg-warning">{{ __('admin.difficulty_medium') }}</span>
 													@elseif( $question->difficulty == 'hard' )
-													<span class="badge badge-danger">{{ __('admin.difficulty_hard') }}</span>
+													<span class="badge text-bg-danger">{{ __('admin.difficulty_hard') }}</span>
 													@endif
 												</div>
 											</div>
@@ -108,7 +108,7 @@
 			if( answer == null || !$.trim( $('#answer').val() ) )
 			{
 				Swal.fire({
-					type: 'warning',
+					icon: 'warning',
 					title: '<strong> {{ __("admin.cautionPlease") }} </strong>',
 					html: '{!! __("admin.quizSubmitNoAnswer") !!}',
 					confirmButtonText: "{!! __('admin.quizOk') !!}",
@@ -133,7 +133,7 @@
 				if( distance < 0 )
 				{
 					clearInterval(x);
-					timeRemain.parent().html('<span class="badge badge-success"> {{ __('admin.availableNow') }} </span>');
+					timeRemain.parent().html('<span class="badge text-bg-success"> {{ __('admin.availableNow') }} </span>');
 				}
 			}, 1000);
 			@endif

@@ -4,10 +4,10 @@
 @section('subTitle', __('admin.Add new organization'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-	<div class="content-overlay"></div>
-	<div class="content-wrapper">
-		@include('admin.includes.heading')
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="content-overlay"></div>
+		
 		<div class="content-body">
 			<!-- BuilderForm start -->
 			<section id="basic-input">
@@ -23,12 +23,12 @@
 									<div class="row">
 										<div class="col-md-12">
 											<div class="alert alert-warning alert-danger mb-2" role="alert">
-												<button type="button" class="close" data-dismiss="alert"
+												<button type="button" class="close" data-bs-dismiss="alert"
 													aria-label="Close">
 													<span aria-hidden="true">&times;</span>
 												</button>
 												<div class="d-flex align-items-center">
-													<i class="bx bx-error"></i>
+													<i class="ti ti-error"></i>
 													<span>
 														{{ __('admin.'.session()->get('msg')) }}
 														{{ Session::forget('msg') }}
@@ -75,20 +75,50 @@
 													<label for="name_en">{{ __('admin.color')}}</label>
 													<input value="{{old('color')}}" name="color" type="text" class="form-control" id="color" placeholder="{{ __('admin.color') }}" required />
 												</fieldset>
+
+												
 												<fieldset class="form-group">
-													<label for="basicInput">{{ __('admin.Image')}}</label>
+													
 													<div class="input-group">
-														<div class="input-group-prepend">
-                                                            <span class="input-group-text"
-																  id="inputGroupFileAddon01">{{ __('admin.Upload')}}</span>
-														</div>
-														<div class="custom-file">
-															<input type="file" class="custom-file-input" id="img_url"
-																   name="img_url" accept="image/*" style="direction: ltr;"
-																   aria-describedby="inputGroupFileAddon00">
-															<label class="custom-file-label"
-																   for="inputGroupFile00">{{ __('admin.SelectFile')}}</label>
-														</div>
+														
+														
+
+														<!-- Upload Company Logo -->
+        <div class="d-flex flex-column gap-1 justify-content-between align-items-center picker-container">
+		<span class="text-center text-black fw-medium">{{ __('admin.Image')}}</span>
+		<div class="position-relative">
+		  @if (isset($client->company->logo))
+		  <div id="holder">
+			<img 
+			  id="company-logo holder" 
+			  src="{{ $client->company->logo }}"
+			  alt="Company logo"
+			  class="mb-2 radius-15"
+			   
+			/>
+		  </div>
+		  @else
+		  <div id="holder">
+			<img 
+			  id="company-logo" 
+			  src="/images/background/logo.png"
+			  alt="Default logo"
+			  style="width: 90px; height: 90px; border-radius: 10px; cursor: pointer;"
+			  class="mb-2"
+			/>
+		  </div>
+		  @endif
+			<input type="text" class="form-control d-none" id="file1"
+			  name="img_url"  />
+		  <!-- right bottom-icon -->
+		  
+		</div>
+		<div 
+		  class="btn btn-outline-primary rounded-pill btn-sm lfm" data-input="file1" data-preview="holder" >
+		  {{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
+		</div>
+	  </div>
+	  <!-- / Upload Company Logo -->
 													</div>
 												</fieldset>
 											</div>
@@ -200,4 +230,8 @@
 @stop
 @section('pagescripts')
 <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+
+<script>
+    $('.lfm').filemanager('file');
+  </script>
 @stop

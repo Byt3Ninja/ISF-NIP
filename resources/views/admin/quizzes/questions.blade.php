@@ -21,24 +21,24 @@
 @stop
 @section('content')
 <!-- BEGIN: Content-->
-<div class="app-content content">
-	<div class="content-overlay"></div>
-	<div class="content-wrapper">
-		@include('admin.includes.heading')
+<div class="content-wrapper">
+	<div class="container-xxl flex-grow-1 container-p-y">
+		<div class="content-overlay"></div>
+		
 		<div class="content-header row">
 			@if( session()->has('success') )
 				<div class="col-md-12">
-					<div class="alert alert-success alert-dismissible mb-2" role="alert">
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-						<div class="d-flex align-items-center"> <i class="bx bx-like"></i> <span> {{ __('admin.'. session()->get('success')) }} </span> </div>
+					<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						<div class="d-flex align-items-center"> <i class="ti ti-thumb-up me-3 ti-md"></i> <span> {{ __('admin.'. session()->get('success')) }} </span> </div>
 					</div>
 				</div>
 			@endif
 			@if( session()->has('error') )
 				<div class="col-md-12">
-					<div class="alert alert-danger alert-dismissible mb-2" role="alert">
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
-						<div class="d-flex align-items-center"> <i class="bx bx-error"></i> <span>{{ __('admin.'.session()->get('error')) }} </span> </div>
+					<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span>{{ __('admin.'.session()->get('error')) }} </span> </div>
 					</div>
 				</div>
 			@endif
@@ -52,26 +52,17 @@
 							<div class="card-header row">
 								<div class="col-md-8 col-lg-8 col-sm-8"> <h4 class="card-title">{{__('admin.manageQuestions')}}</h4> </div>
 								<div class="col-md-4 col-lg-4 col-sm-4 text-right">
-									<button id="addQuizQuestions" class="btn btn-md btn-dark"> <i class="fa fa-plus-circle"></i> {{ __('admin.addQuestion') }} </button>
+									<button id="addQuizQuestions" class="btn btn-md btn-dark"> <i class="pt-1 pe-2 fa fa-plus-circle"></i> {{ __('admin.addQuestion') }} </button>
 								</div>
 							</div>
 							<div class="card-content">
 								<div class="card-body">
-									@if(session()->has('msg'))
+									@if( session()->has('msg') )
 									<div class="row">
 										<div class="col-md-12">
-											<div class="alert alert-warning alert-danger mb-2" role="alert">
-												<button type="button" class="close" data-dismiss="alert"
-													aria-label="Close">
-													<span aria-hidden="true">&times;</span>
-												</button>
-												<div class="d-flex align-items-center">
-													<i class="bx bx-error"></i>
-													<span>
-														{{ __('admin.'.session()->get('msg')) }}
-														{{ Session::forget('msg') }}
-													</span>
-												</div>
+											<div class="alert alert-danger mb-2" role="alert">
+												<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+												<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span> {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span> </div>
 											</div>
 										</div>
 									</div>
@@ -80,7 +71,7 @@
 									@if(count($errors) >0)
 									<div class="row">
 										<div class="col-md-12">
-											<div class="alert alert-danger">
+											<div class="alert alert-danger mb-2" role="alert">
 												<ul>
 													@foreach($errors->all() as $error)
 													<li>{{ $error }} </li>
@@ -105,7 +96,7 @@
 															<td> <i class="fa fa-sort"></i> {{ $question->question }} <input type="hidden" name="questions_ids[]" value="{{ $question->id }}" /> </td>
 															<td class="px-1">
 																<div class="btn-group w-100">
-																	<button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
+																	<button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																	<div class="dropdown-menu">
 																		<a href="#" data-id="{{ $question->id }}" class="preview-question dropdown-item"> <i class="fa fa-eye"></i> {{ __('admin.Preview') }} </a>
 																		<a href="{{ route('questions-bank.edit', ['questions_bank' => $question->id]) }}" target="_blank" data-id="{{ $question->id }}" class="edit-question dropdown-item"> <i class="fa fa-edit"></i> {{ __('admin.Edit') }} </a>
@@ -147,9 +138,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modalScrollableTitle"> {{ __('admin.questionPicker') }} </h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<i class="bx bx-x"></i>
-				</button>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
 				<div class="container-fluid">
@@ -163,7 +152,7 @@
 						<div class="col-sm-3">
 							<div class="form-group m-0">
 								<label for="filter_difficulty"> {{ __('admin.question_difficulty') }} </label>
-								<select class="custom-select" id="filter_difficulty" name="filter_difficulty">
+								<select class="form-control form-select" id="filter_difficulty" name="filter_difficulty">
 									<option value="all"> {{ __('admin.All') }} </option>
 									<option value="easy"> {{ __('admin.difficulty_easy') }} </option>
 									<option value="medium"> {{ __('admin.difficulty_medium') }} </option>
@@ -174,7 +163,7 @@
 						<div class="col-sm-3">
 							<div class="form-group m-0">
 								<label for="filter_type"> {{ __('admin.question_Type') }} </label>
-								<select class="custom-select" id="filter_type" name="filter_type">
+								<select class="form-control form-select" id="filter_type" name="filter_type">
 									<option value="all"> {{ __('admin.All') }} </option>
 									<option value="mcq"> {{ __('admin.type_mcq') }} </option>
 									<option value="tfq"> {{ __('admin.type_tfq') }} </option>
@@ -184,7 +173,7 @@
 						<div class="col-sm-3">
 							<div class="form-group m-0">
 								<label for="filter_tags"> {{ __('admin.questionTags') }} </label>
-								<select class="custom-select" id="filter_tags" name="filter_tags">
+								<select class="form-control form-select" id="filter_tags" name="filter_tags">
 									<option value="all"> {{ __('admin.All') }} </option>
 									@foreach($tags as $tag)
 										<option value="{{ trim( $tag ) }}"> {{ trim( $tag ) }} </option>
@@ -211,15 +200,15 @@
 											<td> {{ $question->question }} </td>
 											<td class="text-center">
 												@if( $question->difficulty == 'easy' )
-												<span class="badge badge-success rounded-pill"> {{ __('admin.difficulty_easy') }}</span>
+												<span class="badge text-bg-success rounded-pill"> {{ __('admin.difficulty_easy') }}</span>
 												@elseif( $question->difficulty == 'medium' )
-												<span class="badge badge-warning rounded-pill">{{ __('admin.difficulty_medium') }}</span>
+												<span class="badge text-bg-warning rounded-pill">{{ __('admin.difficulty_medium') }}</span>
 												@elseif( $question->difficulty == 'hard' )
-												<span class="badge badge-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
+												<span class="badge text-bg-danger rounded-pill">{{ __('admin.difficulty_hard') }}</span>
 												@endif
 											</td>
 											<td class="text-center">
-												<span class="badge badge-secondary rounded-pill">
+												<span class="badge text-bg-secondary rounded-pill">
 													{{ $question->type == 'mcq' ? __('admin.type_mcq') : ( $question->type == 'tfq' ? __('admin.type_tfq') : '-') }}
 												</span>
 											</td>
@@ -241,8 +230,8 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-md btn-dark" data-dismiss="modal">
-					<i class="bx bx-x d-block d-sm-none"></i>
+				<button type="button" class="btn btn-md btn-dark" data-bs-dismiss="modal">
+					
 					<span class="d-none d-sm-block">{{__('messages.Close')}}</span>
 				</button>
 			</div>
@@ -258,7 +247,7 @@
 		var selected_questions = @json( $quiz_questions );
 		$("#questions_table").sortable();
 
-		$(document).on('click', '#addQuizQuestions', function(e) { e.preventDefault(); handleFilterTable(); $("#questionsModal").modal(); });
+		$(document).on('click', '#addQuizQuestions', function(e) { e.preventDefault(); handleFilterTable(); $("#questionsModal").modal('show'); });
 		$(document).on('click', '.preview-question', function(e) {
 			e.preventDefault();
 			var questionId = $(this).data('id');
@@ -299,7 +288,7 @@
 					<td> <i class="fa fa-sort"></i> ` + question.question + ` <input type="hidden" name="questions_ids[]" value="` + question.id + `" /> </td>
 					<td class="px-1">
 						<div class="btn-group w-100">
-							<button class="btn btn-dark dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
+							<button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 							<div class="dropdown-menu">
 								<a href="#" data-id="` + question.id + `" class="preview-question dropdown-item"> <i class="fa fa-eye"></i> {{ __('admin.Preview') }} </a>
 								<a href="` + base_url + `/dashboard/questions-bank/` + question.id + `/edit" target="_blank" data-id="` + question.id + `" class="edit-question dropdown-item"> <i class="fa fa-edit"></i> {{ __('admin.Edit') }} </a>
@@ -363,14 +352,14 @@
 					if( question.type == 'mcq' ) { question_type = '{{ __("admin.type_mcq") }}'; }
 					if( question.type == 'tfq' ) { question_type = '{{ __("admin.type_tfq") }}'; }
 					var difficulty = '';
-					if( question.difficulty == 'easy' ) { difficulty = '<span class="badge badge-success rounded-pill"> {{ __("admin.difficulty_easy") }}</span>'; }
-					if( question.difficulty == 'medium' ) { difficulty = '<span class="badge badge-warning rounded-pill">{{ __("admin.difficulty_medium") }}</span>'; }
-					if( question.difficulty == 'hard' ) { difficulty = '<span class="badge badge-danger rounded-pill">{{ __("admin.difficulty_hard") }}</span>'; }
+					if( question.difficulty == 'easy' ) { difficulty = '<span class="badge text-bg-success rounded-pill"> {{ __("admin.difficulty_easy") }}</span>'; }
+					if( question.difficulty == 'medium' ) { difficulty = '<span class="badge text-bg-warning rounded-pill">{{ __("admin.difficulty_medium") }}</span>'; }
+					if( question.difficulty == 'hard' ) { difficulty = '<span class="badge text-bg-danger rounded-pill">{{ __("admin.difficulty_hard") }}</span>'; }
 	
 					html += `<tr class="question-picker-row" data-qid="` + question.id + `">
 								<td> ` + question.question + ` </td>
 								<td class="text-center"> ` + difficulty + ` </td>
-								<td class="text-center"> <span class="badge badge-secondary rounded-pill"> ` + question_type + ` </span> </td>
+								<td class="text-center"> <span class="badge text-bg-secondary rounded-pill"> ` + question_type + ` </span> </td>
 								<td class="text-center">
 									<button data-id="` + question.id + `" class="btn btn-sm btn-success add-quiz-question"> {{ __('admin.Add') }} </button>
 								</td>

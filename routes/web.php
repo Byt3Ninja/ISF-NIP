@@ -58,7 +58,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/', 'HomeController@index')->name('admin');
 	Route::get('/dashboard', 'HomeController@index')->name('dashboard');
 	Route::get('/dark','HomeController@dark');
-
+	Route::get('/import-users','UserController@showImportForm')->name('import.form');
+	Route::post('/import-users','UserController@import')->name('import.users');
 
     //Roles
     Route::get('documentation/view/{id?}','HomeController@help');
@@ -118,6 +119,9 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::put('settings/UpdateMail', 'SettingsController@update_settingsmail')->name('updateMail');
     Route::put('settings/UpdatePush', 'SettingsController@update_settingspush')->name('updatePush');
     Route::put('settings/UpdateMeeting', 'SettingsController@update_settingsMeeting')->name('updateMeeting');
+    Route::put('settings/UpdateLogin', 'SettingsController@update_settingsLogin')->name('updateSMLogin');
+    Route::put('settings/UpdateimgHome', 'SettingsController@update_settingsImgHome')->name('updateSMImgHome');
+    Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('updateSMAchiev');
 
 	//services categories Manager routes
 	Route::resource('serviceCategories', 'ServiceCategoryController');
@@ -144,10 +148,30 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
 	Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
 	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
+    Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
+    Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('Mentors_Filter');
+
+    Route::resource('Tags', 'TagsController');
+    Route::resource('TimeSheet', 'TimeSheetController');
+    Route::resource('Category', 'CatigoriesController'); // category in TimeSheet Folder
+    Route::get('/show/FinanceTimeSheet', 'TimeSheetController@Finance')->name('show_finance_time_sheet');
+    Route::get('/export-FinanceTS', 'TimeSheetController@exportFTS')->name('exportFTS');
+    Route::get('/UserTimeSheet', 'TimeSheetController@ClockUsers')->name('UserTimeSheet');
+    Route::post('/UserTimeSheet/{id}', 'TimeSheetController@updateClockUser')->name('UserClockUpdate');
+
+    
 	//Client's company
     Route::resource('organizations', 'organizationsController');
+    //Company profile
+	Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
 	Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
+	Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
+	Route::post('/AddCompanyEdit', 'ClientCompanyController@EditTeams')->name('EditTeams_Comp');
+	Route::post('/AddCompanyDelete', 'ClientCompanyController@DeleteTeams')->name('DeleteTeams_Comp');
+	Route::post('/AddCompanyMileStone', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
+	Route::post('/EditCompanyMileStone', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
+	Route::post('/DeleteCompanyMileStone', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
 	//like a service
 	Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');
 	//Users  Manager routes
@@ -157,8 +181,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	//Cities
 	Route::resource('cities', 'CityController');
     Route::get('get_states','CityController@states')->name('get_states_by_country');
-	//Company profile
-	Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
+	
 	//FileManager
     Route::get('/myFiles','FilemanagerController@index');
     Route::get('/uploads/files/{id}/{path}','FilemanagerController@showfile')->where('path', '.*');
@@ -171,7 +194,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/training/photos/{path}','FilemanagerController@trainingimage')->where('path', '.*');
     //SendMessage
     Route::post('/send_message','MessengerController@sendmsg');
-    Route::get('/sendmessage','MessengerController@sendmessage');
+    Route::get('/sendmessage','MessengerController@sendmessage')->name('sendmessage');
     Route::post('/sendmessage','MessengerController@savemessage');
     //ShowMessages
     Route::get('/inbox','MessengerController@index')->name('inbox');
@@ -272,6 +295,9 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('training/my/{id}/quiz/{quiz_id}','TrainingController@myQuiz')->name('quiz.overview');
     Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}','TrainingController@myQuizResponses')->name('quiz.response');
     Route::post('training/my/{id}/quiz/{quiz_id}','TrainingController@doQuiz')->name('quiz.start');
+    Route::get('training/EditTR/{id}','TrainingController@editTR');
+    Route::get('training/viewCourse/{id}','TrainingController@showCourse');
+
 
     Route::get('training/results/{id?}','TrainingController@results');
     Route::get('training/sessions/{id?}','TrainingController@sessions');
@@ -282,7 +308,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('trainings/getdsc/{id}' ,'TrainingController@getdsc');
     Route::get('/export-Tresult', 'TrainingController@exportTresult');
     Route::post('trainings/change/Tresult','TrainingController@changAllTL');
-
+    Route::get('training/create','TrainingController@create')->name('training.create');
 
 
 

@@ -17,7 +17,7 @@
                 <div class="sidebar">
                     <div class="todo-sidebar d-flex">
                         <span class="sidebar-close-icon">
-                            <i class="bx bx-x"></i>
+                            
                         </span>
                         <!-- todo app menu -->
                         <div class="todo-app-menu">
@@ -109,7 +109,7 @@
                                     </span>
                                 </div>
                                 <button type="button" class="close close-icon">
-                                    <i class="bx bx-x"></i>
+                                    
                                 </button>
                             </div>
                             <!-- form start -->
@@ -284,7 +284,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-1.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -304,7 +304,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-2.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75 warning'><i class="bx bx-star bxs-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -326,7 +326,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-3.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -349,7 +349,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-4.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75 warning'><i class="bx bx-star bxs-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -369,7 +369,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-5.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -389,7 +389,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-6.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -409,7 +409,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-7.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -432,7 +432,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-8.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -450,7 +450,7 @@
                                                         <div class="todo-badge-wrapper d-flex"></div>
                                                         <span class=" badge badge-circle badge-light-primary">DS</span>
                                                         <a class='todo-item-favorite ml-75 warning'><i class="bx bx-star bxs-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -476,7 +476,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-10.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -496,7 +496,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-11.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -518,7 +518,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-12.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -540,7 +540,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-13.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -558,7 +558,7 @@
                                                         <div class="todo-badge-wrapper d-flex"></div>
                                                         <span class="badge badge-circle badge-light-success">MR</span>
                                                         <a class='todo-item-favorite ml-75 warning'><i class="bx bx-star bxs-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -580,7 +580,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-1.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -600,7 +600,7 @@
                                                             <img src="/app-assets/images/portrait/small/avatar-s-2.jpg" alt="avatar" height="30" width="30">
                                                         </div>
                                                         <a class='todo-item-favorite ml-75'><i class="bx bx-star"></i></a>
-                                                        <a class='todo-item-delete ml-75'><i class="bx bx-trash"></i></a>
+                                                        <a class='todo-item-delete ml-75'><i class="ti ti-trash text-danger"></i></a>
                                                     </div>
                                                 </div>
                                             </li>

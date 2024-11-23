@@ -21,27 +21,43 @@ class CountryStateCitySeeder extends Seeder
 
         $counties[]=array_values(array_filter($data,function ($q){
 
-            return $q->iso3=='EGY' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+            return $q->iso3=='NGA' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         }));
         $counties[]=array_values(array_filter($data,function ($q){
 
-            return $q->iso3=='SAU' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+            return $q->iso3=='TCD' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         }));
         $counties[]=array_values(array_filter($data,function ($q){
 
-            return $q->iso3=='ARE' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+            return $q->iso3=='SDN' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         }));
         $counties[]=array_values(array_filter($data,function ($q){
 
-            return $q->iso3=='KWT' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+            return $q->iso3=='LBY' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         }));
         $counties[]=array_values(array_filter($data,function ($q){
 
-            return $q->iso3=='QAT' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+            return $q->iso3=='ZMB' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         }));
         $counties[]=array_values(array_filter($data,function ($q){
 
-            return $q->iso3=='BHR' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+            return $q->iso3=='TGO' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='NER' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='ZWE' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='MLI' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='TUN' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         }));
     foreach ($counties as $value){
         $country =  Country::create(['name_ar'=>$value[0]->native,'name_en'=>$value[0]->name,'iso3'=>$value[0]->iso3]);

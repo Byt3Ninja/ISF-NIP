@@ -20,9 +20,14 @@
               <img src="/vuexy/assets/img/pages/profile-banner.png" alt="Banner image" class="rounded-top" />
             </div>
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
-              <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                <img src="{{ $client->image_url }}" alt="user image" class="d-block ms-0 ms-sm-6 rounded user-profile-img"
-                  style="height: 130px" />
+              <div class="flex-shrink-0 mx-sm-0 mx-auto">
+                <img 
+                  src="{{ $client->image_url ? $client->image_url : '/images/user-placeholder.jpeg' }}" 
+                  alt="user image" 
+                  class="d-block ms-0 ms-sm-6 rounded user-profile-img"
+                  style="height: 130px" 
+                  onerror="this.src='/images/user-placeholder.jpeg';"
+                />
               </div>
               <div class="flex-grow-1 mt-3 mt-lg-5">
                 <div
@@ -32,6 +37,24 @@
                       {{ 
                         $l == 'ar' ? $client->first_name_ar . ' ' . $client->last_name_ar : $client->first_name_en . ' ' . $client->last_name_en
                       }}
+                      @role('Mentor')
+                      <a target="_blank" href="{{ $client->bio->linkedin }}">
+                        <i class="ti ti-brand-linkedin ti-lg"></i>
+                        </a>
+                        @endrole
+                        @php
+                        // جلب الأدوار كمجموعة
+                        $roles = $client->getRoleNames();
+                    
+                        // ترجمة الأدوار وإزالة الأقواس والدبل كوت
+                        $translatedRoles = $roles->map(function ($role) {
+                            return __('admin.' . strtolower($role)); // ترجمة الدور
+                        })->implode(', '); // دمج الأدوار في سلسلة واحدة
+                    
+                        // إزالة أي أقواس أو دبل كوت
+                        $cleanedRoles = str_replace(['[', ']', '"'], '', $translatedRoles);
+                    @endphp
+                                            <br><h5 class="fw-medium"><i class="ti ti-user ti-lg"></i> {{ $cleanedRoles }} </h5>
                     </h4>
                     <ul
                       class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
@@ -42,15 +65,22 @@
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
                         <i class="ti ti-map-pin ti-lg"></i><span
-                          class="fw-medium">{{ $client->city->{'name_' . $l} }}</span>
+                          class="fw-medium">
+                          @if($client->city != null)
+                          {{  $client->city->{'name_' . $l}  }}
+                          @endif
+                        </span>
                       </li>
                       <li class="list-inline-item d-flex gap-2 align-items-center">
-                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> Joined April 2021</span>
+                        <i class="ti ti-calendar ti-lg"></i><span class="fw-medium"> {{ __('admin.Joined') }} {{ $client->created_at->locale($l)->translatedFormat('M-Y') }}</span>
                       </li>
                     </ul>
                   </div>
-                  <a href="javascript:void(0)" class="btn btn-primary mb-1">
-                    <i class="ti ti-user-check ti-xs me-2"></i>Connected
+                  <a href="/dashboard/myProfile" class="btn btn-primary mb-1">
+                    <i class="ti ti-settings me-3 ti-md"></i>
+                    <span class="align-middle">
+                      {{$l=='ar'?'تعديل':'Edit'}}
+                    </span>
                   </a>
                 </div>
               </div>
@@ -66,27 +96,110 @@
           <div class="nav-align-top">
             <ul class="nav nav-pills flex-column flex-sm-row mb-6 gap-2 gap-lg-0">
               <li class="nav-item">
-                <a class="nav-link active" href="javascript:void(0);"><i class="ti-sm ti ti-user-check me-1_5"></i>
-                  Profile
+                <a class="nav-link active" id="Profile-tab" data-bs-toggle="tab" href="#Profile" role="tab" aria-controls="Profile" aria-selected="false">
+                  <i class="ti-sm ti ti-user-check me-1_5"></i>
+                  {{__('admin.Profile')}}
                 </a>
-              </li>
+            </li>
+
               <li class="nav-item">
-                <a class="nav-link" href="pages-profile-teams.html"><i class="ti-sm ti ti-users me-1_5"></i> Teams</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="pages-profile-projects.html"><i class="ti-sm ti ti-layout-grid me-1_5"></i>
-                  Projects</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="pages-profile-connections.html"><i class="ti-sm ti ti-link me-1_5"></i>
-                  Connections</a>
-              </li>
+                <a class="nav-link" id="Programms-tab" data-bs-toggle="tab" href="#Programms" role="tab" aria-controls="Programms" aria-selected="false">
+                  <i class="ti-sm ti ti-layout-grid me-1_5"></i>
+                  {{__('admin.Programms')}}
+                </a>
+            </li>
+
+             
+             
             </ul>
           </div>
         </div>
       </div>
+      <!-- Start Tabs Data -->
+      <div class="tab-content" id="settingsTabsContent">
+        <!-- general settings tab -->
+        <div class="tab-pane fade show active" id="Profile" role="tabpanel" aria-labelledby="Profile-tab">
       <!--/ Navbar pills -->
+      @role('Mentor')
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12">
+          <div class="card mb-6">
+            <div class="card-body">
+              
+              <small class="card-text text-uppercase text-muted small">
+          {{__('admin.ProfileSummary')}}
+              </small><br><br>
+          {{ $client->bio->bio }}
+          {{ 
+            $l == 'ar' 
+            ? $client->bio->bio_ar
+            : $client->bio->bio_en 
+            }}
+           
+        </div>
+    
+      </div>
+      <!-- Count cards -->
 
+ @if (auth()->user()->id == $client->id)
+ <div class="col-lg-3 col-sm-6" style="display: inline-block">
+ <a href="" class="col-lg-3 col-sm-6">
+   <div class="card card-border-shadow-primary h-100">
+     <div class="card-body">
+       <div class="d-flex justify-content-center align-items-center mb-2">
+         <div class="avatar me-4">
+           <span class="avatar-initial rounded bg-label-primary">
+             <i class="ti-brand-my-oppo text-primary ti-28px"></i>
+           </span>
+         </div>
+           <h4 class="mb-0 text-center">{{ $mentrequests_count }}</h4>
+       </div>
+       <p class="mb-1 text-center">{{ __('admin.Mentorship requests') }}</p>
+     </div>
+   </div>
+ </a>
+</div>
+<div class="col-lg-3 col-sm-6" style="display: inline-block">
+ <a href="" class="col-lg-3 col-sm-6">
+   <div class="card card-border-shadow-primary h-100">
+     <div class="card-body">
+       <div class="d-flex justify-content-center align-items-center mb-2">
+         <div class="avatar me-4">
+           <span class="avatar-initial rounded bg-label-primary">
+             <i class="ti-calendar-event text-primary ti-28px"></i>
+           </span>
+         </div>
+           <h4 class="mb-0 text-center">{{ $mentrequests_period }}</h4>
+       </div>
+       <p class="mb-1 text-center">{{ __('admin.Mentorship requests Duration') }}</p>
+     </div>
+   </div>
+ </a>
+</div>
+<div class="col-lg-3 col-sm-6" style="display: inline-block">
+ <a href="" class="col-lg-3 col-sm-6">
+   <div class="card card-border-shadow-primary h-100">
+     <div class="card-body">
+       <div class="d-flex justify-content-center align-items-center mb-2">
+         <div class="avatar me-4">
+           <span class="avatar-initial rounded bg-label-primary">
+             <i class="ti-calendar-event text-primary ti-28px"></i>
+           </span>
+         </div>
+           <h4 class="mb-0 text-center">{{ number_format($average_rating ?? 0, 1) }}</h4>
+       </div>
+       <p class="mb-1 text-center">{{ __('admin.Mentorship Avr Rating') }}</p>
+     </div>
+   </div>
+ </a>
+</div>
+@endif
+</div>
+<!-- / Count cards -->
+<br><br>
+      @endrole
+
+      
       <!-- User Profile Content -->
       <div class="row">
         <div class="col-xl-4 col-lg-5 col-md-5">
@@ -101,7 +214,7 @@
                   <i class="ti ti-user ti-lg"></i><span class="fw-medium mx-2">{{ $l == 'ar' ? 'الاسم:' : 'Full Name:' }}</span>
                   <span>{{ 
                   $l == 'ar' 
-                  ? $client->first_name_arز . ' ' . $client->last_name_ar 
+                  ? $client->first_name_ar . ' ' . $client->last_name_ar 
                   : $client->first_name_en . ' ' . $client->last_name_en
                   }}</span>
                 </li>
@@ -129,10 +242,7 @@
                 </li>
                 <li class="d-flex align-items-center mb-2">
                   <i class="ti ti-language ti-lg"></i><span class="fw-medium mx-2">
-                    {{ $l == 'ar'
-                        ? 'اللغات:'
-                        : '
-                                        Languages:' }}
+                    {{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}
                   </span>
                   <span>
                     {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
@@ -149,16 +259,7 @@
                   </span>
                   <span>{{ $client->phone }}</span>
                 </li>
-                {{-- @role('Mentor')
-                  <li class="d-flex align-items-center mb-4">
-                    <i class="ti ti-messages ti-lg"></i><span class="fw-medium mx-2">
-                      {{ $l == 'ar' ? 'ليتكدان' : 'linkedin' }}:
-                    </span>
-                    <span>
-                      {{ $client->linkedin }}
-                    </span>
-                  </li>
-                @endrole --}}
+                
 
                 <li class="d-flex align-items-center mb-4">
                   <i class="ti ti-mail ti-lg"></i><span class="fw-medium mx-2">
@@ -167,20 +268,27 @@
                   <span>{{ $client->email }}</span>
                 </li>
               </ul>
-              <small class="card-text text-uppercase text-muted small">Teams</small>
+
+              {{-- <small class="card-text text-uppercase text-muted small">{{__('admin.Orgnizations')}}</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
+                @foreach ($mentors as $cycleOrg) 
+                @php
+                  $Organizations = \App\Organization::where('id', $cycleOrg->cycle->organization_id ?? 0)->get();
+                  @endphp
+                @foreach ($Organizations as $org) 
                 <li class="d-flex flex-wrap mb-4">
-                  <span class="fw-medium me-2">Backend Developer</span><span>(126 Members)</span>
+
+                  - <span class="fw-medium me-2">{{ $org->{'name_' . $l} }}</span>
+
                 </li>
-                <li class="d-flex flex-wrap">
-                  <span class="fw-medium me-2">React Developer</span><span>(98 Members)</span>
-                </li>
-              </ul>
+                @endforeach
+                @endforeach
+              </ul> --}}
             </div>
           </div>
           <!--/ About User -->
           <!-- Profile Overview -->
-          <div class="card mb-6">
+          {{-- <div class="card mb-6">
             <div class="card-body">
               <small class="card-text text-uppercase text-muted small">Overview</small>
               <ul class="list-unstyled mb-0 mt-3 pt-1">
@@ -198,349 +306,67 @@
                 </li>
               </ul>
             </div>
-          </div>
+          </div> --}}
           <!--/ Profile Overview -->
         </div>
-        <div class="col-xl-8 col-lg-7 col-md-7">
-          <!-- Activity Timeline -->
-          <div class="card card-action mb-6">
-            <div class="card-header align-items-center">
-              <h5 class="card-action-title mb-0">
-                <i class="ti ti-chart-bar ti-lg text-body me-4"></i>Activity Timeline
-              </h5>
-            </div>
-            <div class="card-body pt-3">
-              <ul class="timeline mb-0">
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-primary"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">12 Invoices have been paid</h6>
-                      <small class="text-muted">12 min ago</small>
-                    </div>
-                    <p class="mb-2">Invoices have been paid to the company</p>
-                    <div class="d-flex align-items-center mb-2">
-                      <div class="badge bg-lighter rounded d-flex align-items-center">
-                        <img src="/vuexy/assets//img/icons/misc/pdf.png" alt="img" width="15"
-                          class="me-2" />
-                        <span class="h6 mb-0 text-body">invoices.pdf</span>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-success"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">Client Meeting</h6>
-                      <small class="text-muted">45 min ago</small>
-                    </div>
-                    <p class="mb-2">Project meeting with john @10:15am</p>
-                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
-                      <div class="d-flex flex-wrap align-items-center mb-50">
-                        <div class="avatar avatar-sm me-3">
-                          <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div>
-                          <p class="mb-0 small fw-medium">Lester McCarthy (Client)</p>
-                          <small>CEO of Pixinvent</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                <li class="timeline-item timeline-item-transparent">
-                  <span class="timeline-point timeline-point-info"></span>
-                  <div class="timeline-event">
-                    <div class="timeline-header mb-3">
-                      <h6 class="mb-0">Create a new project for client</h6>
-                      <small class="text-muted">2 Day Ago</small>
-                    </div>
-                    <p class="mb-2">6 team members in a project</p>
-                    <ul class="list-group list-group-flush">
-                      <li
-                        class="list-group-item d-flex justify-content-between align-items-center flex-wrap border-top-0 p-0">
-                        <div class="d-flex flex-wrap align-items-center">
-                          <ul class="list-unstyled users-list d-flex align-items-center avatar-group m-0 me-2">
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Vinnie Mostowy" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/1.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Allen Rieske" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/4.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-                              title="Julee Rossignol" class="avatar pull-up">
-                              <img class="rounded-circle" src="/vuexy/assets/img/avatars/2.png" alt="Avatar" />
-                            </li>
-                            <li class="avatar">
-                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip"
-                                data-bs-placement="bottom" title="3 more">+3</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!--/ Activity Timeline -->
-          <div class="row">
-            <!-- Connections -->
-            <div class="col-lg-12 col-xl-6">
-              <div class="card card-action mb-6">
-                <div class="card-header align-items-center">
-                  <h5 class="card-action-title mb-0">Connections</h5>
-                  <div class="card-action-element">
-                    <div class="dropdown">
-                      <button type="button"
-                        class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow p-0 text-muted"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots-vertical ti-md text-muted"></i>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="javascript:void(0);">Share connections</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
-                        <li>
-                          <hr class="dropdown-divider" />
-                        </li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <ul class="list-unstyled mb-0">
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Cecilia Payne</h6>
-                            <small>45 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/3.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Curtis Fletcher</h6>
-                            <small>1.32k Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-primary btn-icon"><i class="ti ti-user-x ti-md"></i></button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/10.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Alice Stone</h6>
-                            <small>125 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-primary btn-icon"><i class="ti ti-user-x ti-md"></i></button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Darrell Barnes</h6>
-                            <small>456 Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
 
-                    <li class="mb-6">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/avatars/12.png" alt="Avatar" class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Eugenia Moore</h6>
-                            <small>1.2k Connections</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <button class="btn btn-label-primary btn-icon">
-                            <i class="ti ti-user-check ti-md"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="text-center">
-                      <a href="javascript:;">View all connections</a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <!--/ Connections -->
-            <!-- Teams -->
-            <div class="col-lg-12 col-xl-6">
-              <div class="card card-action mb-6">
-                <div class="card-header align-items-center">
-                  <h5 class="card-action-title mb-0">Teams</h5>
-                  <div class="card-action-element">
-                    <div class="dropdown">
-                      <button type="button" class="btn btn-icon btn-text-secondary dropdown-toggle hide-arrow p-0"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots-vertical text-muted"></i>
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="javascript:void(0);">Share teams</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Suggest edits</a></li>
-                        <li>
-                          <hr class="dropdown-divider" />
-                        </li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Report bug</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <ul class="list-unstyled mb-0">
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/react-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">React Developers</h6>
-                            <small>72 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-danger">Developer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/support-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Support Team</h6>
-                            <small>122 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-primary">Support</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/figma-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">UI Designers</h6>
-                            <small>7 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-info">Designer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-4">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/vue-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-2">
-                            <h6 class="mb-0">Vue.js Developers</h6>
-                            <small>289 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-danger">Developer</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="mb-6">
-                      <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center">
-                          <div class="avatar me-2">
-                            <img src="/vuexy/assets/img/icons/brands/twitter-label.png" alt="Avatar"
-                              class="rounded-circle" />
-                          </div>
-                          <div class="me-w">
-                            <h6 class="mb-0">Digital Marketing</h6>
-                            <small>24 Members</small>
-                          </div>
-                        </div>
-                        <div class="ms-auto">
-                          <a href="javascript:;"><span class="badge bg-label-secondary">Marketing</span></a>
-                        </div>
-                      </div>
-                    </li>
-                    <li class="text-center">
-                      <a href="javascript:;">View all teams</a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <!--/ Teams -->
-          </div>
+        <div class="col-xl-8 col-lg-7 col-md-7">
+          
           <!-- Projects table -->
           <div class="card mb-4">
             <div class="card-datatable table-responsive">
-              <table class="datatables-projects table border-top">
+              <table class="zero-configuration table border-top">
                 <thead>
                   <tr>
-                    <th></th>
-                    <th></th>
-                    <th>Project</th>
-                    <th>Leader</th>
-                    <th>Team</th>
-                    <th class="w-px-200">Progress</th>
-                    <th>Action</th>
+                    <th class="text-center">{{__('cycles.User/Title')}}</th>
+                                                <th class="text-center">{{__('cycles.Company')}}</th>
+                                                <th class="text-center">{{__('mentor.mentorshipTasks.title')}}</th>
+                                                <th class="text-center">{{__('cycles.Done')}}</th>
                   </tr>
+
+                  
+                  <tbody>
+                    @foreach($mentorshipTasks as $task)
+                                                <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
+                                                    <td class="text-center">
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">
+                                                                <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                            </a>
+                                                            <a href="{{ route('show_mentor_profile', $task->user_id) }}">
+                                                                <div class="media-body">
+                                                                    <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
+                                                                    <span class="font-small-2">{{$task->user->title}}</span>
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                    
+                                                    <td class="text-center">
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
+                                                                <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                            </a>
+                                                            <a href="/dashboard/companyProfile/{{$task->company->id}}">
+                                                                <div class="d-flex align-items-center gap-1">
+                                                                    {{$task->company->name }}
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                    
+                                                    <td class="text-center">
+                                                        {{ $task->title??"-----" }}
+                                                    </td>
+                                                    <td class="text-center">
+                                                     {{ $task->status =='pending'?__('Uncompleted'):__('Completed') }}
+                                                    </td>
+                                                    
+                                                </tr>
+                                            @endforeach
+                  </tbody>
+
+
                 </thead>
               </table>
             </div>
@@ -550,9 +376,72 @@
       </div>
       <!--/ User Profile Content -->
     </div>
-    <!-- / Content -->
+  </div>
 
+<!-- Programms tab -->
+<div class="tab-pane fade" id="Programms" role="tabpanel" aria-labelledby="Programms-tab">
+
+  <div class="row">
+    <div class="col-xl-12 col-lg-12 col-md-12">
+      <div class="card mb-6">
+        <div class="card-body">
+          
+          <small class="card-text text-uppercase text-muted small">
+      {{__('admin.Programms')}}
+          </small>
+          <br><br>
+          
+           
+          <table class="table zero-configuration">
+            <thead>
+            <tr>
+                <th>{{__('admin.Title')}}</th>
+                <th>{{__('admin.Description')}}</th>
+                <th>{{__('admin.Start')}}</th>
+                <th>{{__('admin.End')}}</th>
+            </tr>
+            </thead>
+            <tbody>
+              @if (!@empty(Auth::user()->company->cycledata->title))
+              <tr>
+                <td>{{ Auth::user()->company->cycledata->title }}</td>
+                <td>{{ Auth::user()->company->cycledata->description }}</td>
+                <td>{{ Auth::user()->company->cycledata->start }}</td>
+                <td>{{ Auth::user()->company->cycledata->end }}</td>
+              </tr>
+              @else
+              @foreach ($mentorshipTasks as $item)
+              <tr>
+                <td>{{ $item->title }}</td>
+                <td>{{ $item->description }}</td>
+                <td>{{ $item->start }}</td>
+                <td>{{ $item->end }}</td>
+              </tr>
+              @endforeach
+              @endif
+        </tbody>
+      </table>
+
+
+    </div>
+  
+  </div>
+  
+
+</div>
+</div>
+
+
+<!-- Programms tab -->
+
+
+
+    </div>
+  </div>
+    <!-- / Content -->
+ 
     <div class="content-backdrop fade"></div>
+  
   </div>
   <!-- Content wrapper -->
 @stop
@@ -563,6 +452,35 @@
 
   <script>
     $(document).ready(function() {
+
+      $('.zero-configuration').DataTable({
+                    "language": {
+                        "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
+                        "sLoadingRecords": "جارٍ التحميل...",
+                        "sProcessing":   "جارٍ التحميل...",
+                        "sLengthMenu":   "أظهر _MENU_ مدخلات",
+                        "sZeroRecords":  "لم يعثر على أية سجلات",
+                        "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                        "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل",
+                        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                        "sInfoPostFix":  "",
+                        "sSearch":       "ابحث:",
+                        "sUrl":          "",
+                        "oPaginate": {
+                            "sFirst":    "الأول",
+                            "sPrevious": "السابق",
+                            "sNext":     "التالي",
+                            "sLast":     "الأخير"
+                        },
+                        "oAria": {
+                            "sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً",
+                            "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+                        }
+                    }
+                } );
+
+
+
       getStates($('#country_id').val());
       $('#country_id').change(function() {
         getStates($(this).val());
