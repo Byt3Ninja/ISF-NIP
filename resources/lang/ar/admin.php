@@ -258,6 +258,7 @@ return [
 	'Training' => 'التدريبات',
 	'Training courses' => 'المحتوى التدريبي',
 	'Training sessions' => 'الجلسات التدريبية',
+	'Training sessions duration (hours)' => 'مدة جلسات التدريب (بالساعات)',
 	'Final Screening' => 'التقييم النهائي',
 	'Add Service' => 'إضافة خدمة',
 	'All Services' => 'كافة الخدمات',
@@ -927,6 +928,7 @@ return [
 	'Series_C_funding' => ' مرحلة التمويل من الفئة “ج” (Series C)',
 	'financial_plan is required' => ' خطة العمل الحسابية مطلوبة',
 	'VerficationEmail'=>' تأكيد الايميل ',
+	'Total_sessions'=>'اجمالى الجلسات',
 	
 
 ];

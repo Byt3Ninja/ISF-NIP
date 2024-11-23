@@ -73,7 +73,7 @@ class RegisterController extends Controller
 
         $Settings = Settings::where('id', 1)->first();
 
-        if($Settings->VFEmail == 0){
+        if($Settings->VFEmail == 1){
         $user = User::create([
             'first_name_en' => $data['first_name_en'],
             'last_name_en' => $data['last_name_en'],
