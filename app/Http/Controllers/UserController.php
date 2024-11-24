@@ -23,12 +23,13 @@ use Illuminate\Support\Facades\Log as FacadesLog;
 
 class UserController extends Controller
 {
-     /**
+    /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(){
+    public function __construct()
+    {
         $this->middleware('auth');
     }
 
@@ -37,20 +38,19 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(){
+    public function index()
+    {
 
-        try{
+        try {
 
             $this->preProcessingCheck('view_user');
             $users = User::with('company')->with('roles')->get();
             return view('admin/users/index', compact('users'));
-
-        }catch (Exception $e){
+        } catch (Exception $e) {
 
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
-
         }
     }
 
@@ -62,18 +62,16 @@ class UserController extends Controller
      */
     public function create()
     {
-        try{
+        try {
 
             $this->preProcessingCheck('add_user');
             $roles = Role::all();
             return view('admin/users/create', compact('roles'));
-
-        }catch (Exception $e){
+        } catch (Exception $e) {
 
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
-
         }
     }
 
@@ -85,38 +83,37 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        try{
+        try {
 
             $this->preProcessingCheck('add_user');
 
             if ($request->hasFile('img_url')) {
-                 //store the image
+                //store the image
                 $img_url = $request->file('img_url');
                 //get the path of the stores image
                 $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-            }else{
+            } else {
                 $img_url = '';
             }
             $inputs = $request->except(['img_url']) + ['img_url' => $img_url];
-            $inputs['password'] = Hash::make( $inputs['password'] );
-            $inputs['password_confirmation'] = Hash::make( $inputs['password_confirmation'] );
-            $result = User::create( $inputs );
+            $inputs['password'] = Hash::make($inputs['password']);
+            $inputs['password_confirmation'] = Hash::make($inputs['password_confirmation']);
+            $result = User::create($inputs);
 
-        Storage::disk('UsersLFM')->makeDirectory("$result->id");
-        Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
-        Storage::disk('UsersLFM')->makeDirectory("$result->id/FinancialPlans");
-        Storage::disk('UsersLFM')->makeDirectory("$result->id/PitchDeck");
-        Storage::disk('UsersLFM')->makeDirectory("$result->id/Shared");
-        Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/FinancialPlans");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/PitchDeck");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/Shared");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
 
             $result->assignRole($request->role);
 
-            if($result)
-                return redirect()->route('users.index')->with( ['msg' => 'StoredSuccessfully'] );
+            if ($result)
+                return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
             else
-                return back()->withInput()->with( ['msg' => 'FailedStore'] );
-
-        }catch (Exception $e){
+                return back()->withInput()->with(['msg' => 'FailedStore']);
+        } catch (Exception $e) {
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
@@ -144,19 +141,17 @@ class UserController extends Controller
     public function edit(User $user)
     {
 
-        try{
+        try {
 
             $this->preProcessingCheck('edit_user');
             $roles = Role::all();
             $countries = Country::all();
-            return view('admin/users/edit', compact('user', 'roles','countries'));
-
-        }catch (Exception $e){
+            return view('admin/users/edit', compact('user', 'roles', 'countries'));
+        } catch (Exception $e) {
 
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(401);
-
         }
     }
 
@@ -169,45 +164,43 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        try{
+        try {
 
             $this->preProcessingCheck('edit_user');
-            if ($user->id==1){return back()->with( ['msg' => 'FailedStore'] );}
+            if ($user->id == 1) {
+                return back()->with(['msg' => 'FailedStore']);
+            }
             if ($request->hasFile('img_url')) {
                 //store the image
-               $img_url = $request->file('img_url');
-               //get the path of the stores image
-               $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-               //update
+                $img_url = $request->file('img_url');
+                //get the path of the stores image
+                $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                //update
                 $result = $user->update($request->except(['img_url']) + ['img_url' => $img_url]);
-
-            }else{
+            } else {
                 $result = $user->update($request->all());
             }
 
             $user->roles()->detach();
             $user->assignRole($request->role);
 
-            if($result)
-                return redirect()->route('users.index')->with( ['msg' => 'StoredSuccessfully'] );
+            if ($result)
+                return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
             else
-                return back()->withInput()->with( ['msg' => 'FailedStore'] );
+                return back()->withInput()->with(['msg' => 'FailedStore']);
+        } catch (Exception $e) {
 
-        }catch (Exception $e){
-            
             return back()->withInput()->with(['msg' => 'emailExist']);
-            
-            
+
+
             dd($e);
 
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
-
         }
-        
     }
-     /**
+    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -216,30 +209,31 @@ class UserController extends Controller
      */
     public function updatePassword(UpdateUserPasswordRequest $request)
     {
-        try{
-            if ($request->id==1){return back()->with( ['msg' => 'FailedStore', 'class' => 'danger']  );}
+        try {
+            if ($request->id == 1) {
+                return back()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+            }
             $this->preProcessingCheck('edit_user');
 
             $user = User::find($request->id);
             $password = Hash::make($request->password);
             $result = $user->where('id', $user->id)
-                            ->update(['password' => $password]);
+                ->update(['password' => $password]);
 
-            if($result)
-                return redirect()->route('users.index')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+            if ($result)
+                return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
             else
-                return back()->withInput()->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
-
-        }catch (Exception $e){dd($e);
+                return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+        } catch (Exception $e) {
+            dd($e);
 
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
-
         }
     }
 
-     /**
+    /**
      * Remove the specified resource from storage.
      *
      * @param  \App\User  $User
@@ -247,10 +241,12 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if ($user->id==1){return response()->json([
-            'state' => 'failed'
-        ], 500);}
-        try{
+        if ($user->id == 1) {
+            return response()->json([
+                'state' => 'failed'
+            ], 500);
+        }
+        try {
             $this->preProcessingCheck('delete_user');
             $user->roles()->detach();
             $user->delete();
@@ -258,145 +254,132 @@ class UserController extends Controller
             return response()->json([
                 'state' => 'success'
             ], 200);
-
-        }catch (Exception $e){
+        } catch (Exception $e) {
 
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             return response()->json([
                 'state' => 'failed'
             ], 500);
-
         }
     }
 
-    public function companies (Request $request) {
+    public function companies(Request $request)
+    {
         // $this->preProcessingCheck('view_user');
 
-        
+
 
         $l = app()->getLocale();
-        if (Auth::user()->hasRole('Registered')){
+        if (Auth::user()->hasRole('Registered')) {
 
-            $organization_id=auth()->user()->organization_id;
-            $cycle_id=auth()->user()->company->cycle;
+            $organization_id = auth()->user()->organization_id;
+            $cycle_id = auth()->user()->company->cycle ?? null;
             // $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->where('cycle', $cycle_id)->get();
             $name = ($l == 'ar') ? 'name_ar' : 'name_en';
-            $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)
-        ->where('cycle', $cycle_id)
-        ->when($request->search, function($query) use ($request, $name) {
-            $query->where($name, 'like', '%' . $request->search . '%');
-        })
-        ->when($request->sector, function($query) use ($request) {
-            $query->where('sector', 'like', '%' . $request->sector . '%');
-        })
-        ->when($request->stage, function($query) use ($request) {
-            $query->where('stage', 'like', '%' . $request->stage . '%');
-        })
-        ->get();
-
-
-            
-
-    }else if(Auth::user()->hasRole('organizationManager')){
-        
-        $organization_id = auth()->user()->organization_id;
-        $cycle_ids = Cycle::where('organization_id', $organization_id)->get();
-
-        // foreach ($cycle_ids as $cycle) {
-        //     $cycle_companies = Company::where('cycle', $cycle->id)->get();
-        //     $companies = $companies->merge($cycle_companies); // دمج المجموعات
-        // }
-
-        $companies = collect(); 
-        $name = ($l == 'ar') ? 'name_ar' : 'name_en';
-        foreach ($cycle_ids as $cycle) {
-            
-            $cycle_companies = Company::where('cycle', $cycle->id)
-                ->when($request->search, function($query) use ($request, $name) {
+            $companies = Company::when(!is_null($organization_id))->where('organization_id', $organization_id)
+                ->where('cycle', $cycle_id)
+                ->when($request->search, function ($query) use ($request, $name) {
                     $query->where($name, 'like', '%' . $request->search . '%');
                 })
-                ->when($request->sector, function($query) use ($request) {
+                ->when($request->sector, function ($query) use ($request) {
                     $query->where('sector', 'like', '%' . $request->sector . '%');
                 })
-                ->when($request->stage, function($query) use ($request) {
+                ->when($request->stage, function ($query) use ($request) {
                     $query->where('stage', 'like', '%' . $request->stage . '%');
                 })
                 ->get();
+        } else if (Auth::user()->hasRole('organizationManager')) {
 
-                
+            $organization_id = auth()->user()->organization_id;
+            $cycle_ids = Cycle::where('organization_id', $organization_id)->get();
+
+            // foreach ($cycle_ids as $cycle) {
+            //     $cycle_companies = Company::where('cycle', $cycle->id)->get();
+            //     $companies = $companies->merge($cycle_companies); // دمج المجموعات
+            // }
+
+            $companies = collect();
+            $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+            foreach ($cycle_ids as $cycle) {
+
+                $cycle_companies = Company::where('cycle', $cycle->id)
+                    ->when($request->search, function ($query) use ($request, $name) {
+                        $query->where($name, 'like', '%' . $request->search . '%');
+                    })
+                    ->when($request->sector, function ($query) use ($request) {
+                        $query->where('sector', 'like', '%' . $request->sector . '%');
+                    })
+                    ->when($request->stage, function ($query) use ($request) {
+                        $query->where('stage', 'like', '%' . $request->stage . '%');
+                    })
+                    ->get();
+
+
                 $companies = $companies->merge($cycle_companies);
-                
             }
-            
-            
-            
-            
+        } else if (Auth::user()->hasRole('Mentor')) {
 
-    }else if(Auth::user()->hasRole('Mentor')){
-        
-        $organization_id = auth()->user()->organization_id;
-        $cycle_ids = Cycle::where('organization_id', $organization_id)
-        ->whereHas('mentors', function($query) {
-            $query->where('user_id', auth()->id());
-        })
-        ->pluck('id');
-        
-        // foreach ($cycle_ids as $cycle) {
-        //     $cycle_companies = Company::where('cycle', $cycle->id)->get();
-        //     $companies = $companies->merge($cycle_companies); // دمج المجموعات
-        // }
+            $organization_id = auth()->user()->organization_id;
+            $cycle_ids = Cycle::where('organization_id', $organization_id)
+                ->whereHas('mentors', function ($query) {
+                    $query->where('user_id', auth()->id());
+                })
+                ->pluck('id');
 
-        $companies = collect(); 
-    $name = ($l == 'ar') ? 'name_ar' : 'name_en';
-    // استعراض الـ cycles للحصول على الشركات المرتبطة
-    foreach ($cycle_ids as $cycle_id) {
-        
-        $cycle_companies = Company::where('cycle', $cycle_id)
-            ->when($request->search, function($query) use ($request, $name) {
+            // foreach ($cycle_ids as $cycle) {
+            //     $cycle_companies = Company::where('cycle', $cycle->id)->get();
+            //     $companies = $companies->merge($cycle_companies); // دمج المجموعات
+            // }
+
+            $companies = collect();
+            $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+            // استعراض الـ cycles للحصول على الشركات المرتبطة
+            foreach ($cycle_ids as $cycle_id) {
+
+                $cycle_companies = Company::where('cycle', $cycle_id)
+                    ->when($request->search, function ($query) use ($request, $name) {
+                        $query->where($name, 'like', '%' . $request->search . '%');
+                    })
+                    ->when($request->sector, function ($query) use ($request) {
+                        $query->where('sector', 'like', '%' . $request->sector . '%');
+                    })
+                    ->when($request->stage, function ($query) use ($request) {
+                        $query->where('stage', 'like', '%' . $request->stage . '%');
+                    })
+                    ->get();
+
+                $companies = $companies->merge($cycle_companies);
+            }
+        } else {
+
+            // $organization_id=auth()->user()->organization_id;
+            // $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->get();
+            $l = app()->getLocale(); // أو أي طريقة أخرى للحصول على اللغة
+            $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+            $cycle_ids = Cycle::where('organization_id', $request->orgnization)->get();
+
+            $companies = Company::when($request->search, function ($query) use ($request, $name) {
                 $query->where($name, 'like', '%' . $request->search . '%');
             })
-            ->when($request->sector, function($query) use ($request) {
-                $query->where('sector', 'like', '%' . $request->sector . '%');
-            })
-            ->when($request->stage, function($query) use ($request) {
-                $query->where('stage', 'like', '%' . $request->stage . '%');
-            })
-            ->get();
-            
-        $companies = $companies->merge($cycle_companies);
-    }
-            
-    }else{
-
-        // $organization_id=auth()->user()->organization_id;
-        // $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->get();
-        $l = app()->getLocale(); // أو أي طريقة أخرى للحصول على اللغة
-        $name = ($l == 'ar') ? 'name_ar' : 'name_en';
-        $cycle_ids = Cycle::where('organization_id', $request->orgnization)->get();
-
-        $companies = Company::when($request->search, function($query) use ($request, $name) {
-                    $query->where($name, 'like', '%' . $request->search . '%');
-                })
-                ->when($request->sector, function($query) use ($request) {
+                ->when($request->sector, function ($query) use ($request) {
                     $query->where('sector', 'like', '%' . $request->sector . '%');
                 })
-                ->when($request->stage, function($query) use ($request) {
+                ->when($request->stage, function ($query) use ($request) {
                     $query->where('stage', 'like', '%' . $request->stage . '%');
                 })
                 ->get();
 
-                if(!empty($request->orgnization)){
+            if (!empty($request->orgnization)) {
                 // تصفية الشركات بناءً على الـ cycle_ids
-$companies = $companies->filter(function($company) use ($cycle_ids) {
-    return $cycle_ids->contains('id', $company->id);
-});
-                }
-    }
+                $companies = $companies->filter(function ($company) use ($cycle_ids) {
+                    return $cycle_ids->contains('id', $company->id);
+                });
+            }
+        }
 
-    
-
-        return view('admin/users/companies', compact('companies'));
+        $errorMessage = $cycle_id === null ? 'انت غير مشترك في البرامج الحالية' : null;
+        return view('admin/users/companies', compact('companies', 'errorMessage'));
     }
 
     public function showImportForm()
@@ -431,7 +414,7 @@ $companies = $companies->filter(function($company) use ($cycle_ids) {
                 'last_name_en'    => $row[3],   // تأكد من وجود العمود
                 'first_name_ar'    => $row[2],   // تأكد من وجود العمود
                 'last_name_ar'    => $row[3],   // تأكد من وجود العمود
-                'phone'         => $row[4]."".$row[5],   // تأكد من وجود العمود
+                'phone'         => $row[4] . "" . $row[5],   // تأكد من وجود العمود
                 'HaveCompany'    => (int)$row[8],   // تأكد من وجود العمود
                 'country_id'    => (int)$row[7],   // تأكد من وجود العمود
                 'organization_id'    => '18',   // تأكد من وجود العمود
@@ -461,13 +444,9 @@ $companies = $companies->filter(function($company) use ($cycle_ids) {
 
                 $user->company_id = $companyId->id;
                 $user->save();
-
-
             }
         }
 
         return redirect()->back()->with('success', 'تم رفع الشيت بنجاح!');
     }
-
-
 }

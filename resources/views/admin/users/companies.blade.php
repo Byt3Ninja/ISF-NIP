@@ -35,6 +35,11 @@
 
 @section('content')
   <!-- BEGIN: Content-->
+  @if (!empty($errorMessage))
+    <div class="alert alert-danger">
+        {{ $errorMessage }}
+    </div>
+  @endif
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
