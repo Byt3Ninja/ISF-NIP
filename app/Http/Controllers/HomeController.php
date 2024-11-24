@@ -272,7 +272,7 @@ class HomeController extends Controller
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
             ->select('sectors.name_' . $l, DB::raw('count(companies.id) as total'))
-            ->groupBy('sectors.name_en')
+            ->groupBy('sectors.name_' . $l)
             ->get();
 
         $data['sector_labels'] = $sectorBreakdown->pluck('name_en');
