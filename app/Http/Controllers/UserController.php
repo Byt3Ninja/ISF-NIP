@@ -268,9 +268,8 @@ class UserController extends Controller
     {
         // $this->preProcessingCheck('view_user');
 
-
-
         $l = app()->getLocale();
+        $cycle_id = null;
         if (Auth::user()->hasRole('Registered')) {
 
             $organization_id = auth()->user()->organization_id;
