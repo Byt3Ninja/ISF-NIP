@@ -270,24 +270,31 @@ class UserController extends Controller
 
         $l = app()->getLocale();
         $cycle_id = null;
+
         if (Auth::user()->hasRole('Registered')) {
 
             $organization_id = auth()->user()->organization_id;
-            $cycle_id = auth()->user()->company->cycle ?? null;
-            // $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->where('cycle', $cycle_id)->get();
-            $name = ($l == 'ar') ? 'name_ar' : 'name_en';
-            $companies = Company::when(!is_null($organization_id))->where('organization_id', $organization_id)
-                ->where('cycle', $cycle_id)
-                ->when($request->search, function ($query) use ($request, $name) {
-                    $query->where($name, 'like', '%' . $request->search . '%');
-                })
-                ->when($request->sector, function ($query) use ($request) {
-                    $query->where('sector', 'like', '%' . $request->sector . '%');
-                })
-                ->when($request->stage, function ($query) use ($request) {
-                    $query->where('stage', 'like', '%' . $request->stage . '%');
-                })
-                ->get();
+            if (auth()->user()->company && auth()->user()->company->cycle != null) {
+
+                $cycle_id = auth()->user()->company->cycle;
+                // $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->where('cycle', $cycle_id)->get();
+                $name = ($l == 'ar') ? 'name_ar' : 'name_en';
+                $companies = Company::when(!is_null($organization_id))->where('organization_id', $organization_id)
+                    ->where('cycle', $cycle_id)
+                    ->when($request->search, function ($query) use ($request, $name) {
+                        $query->where($name, 'like', '%' . $request->search . '%');
+                    })
+                    ->when($request->sector, function ($query) use ($request) {
+                        $query->where('sector', 'like', '%' . $request->sector . '%');
+                    })
+                    ->when($request->stage, function ($query) use ($request) {
+                        $query->where('stage', 'like', '%' . $request->stage . '%');
+                    })
+                    ->get();
+            } else {
+                $companies = [];
+                $errorMessage = $cycle_id === null ? 'انت غير مشترك في البرامج الحالية' : null;
+            }
         } else if (Auth::user()->hasRole('organizationManager')) {
 
             $organization_id = auth()->user()->organization_id;
@@ -313,10 +320,9 @@ class UserController extends Controller
                         $query->where('stage', 'like', '%' . $request->stage . '%');
                     })
                     ->get();
-
-
                 $companies = $companies->merge($cycle_companies);
             }
+            $errorMessage =  "";
         } else if (Auth::user()->hasRole('Mentor')) {
 
             $organization_id = auth()->user()->organization_id;
@@ -350,6 +356,7 @@ class UserController extends Controller
 
                 $companies = $companies->merge($cycle_companies);
             }
+            $errorMessage = $cycle_id === null ? 'انت غير مشترك في البرامج الحالية' : null;
         } else {
 
             // $organization_id=auth()->user()->organization_id;
@@ -377,7 +384,6 @@ class UserController extends Controller
             }
         }
 
-        $errorMessage = $cycle_id === null ? 'انت غير مشترك في البرامج الحالية' : null;
         return view('admin/users/companies', compact('companies', 'errorMessage'));
     }
 
