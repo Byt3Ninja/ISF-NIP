@@ -83,13 +83,13 @@ $orgCollection = collect([
   
 
 
-$screenCollection = collect([
-['the judges', 'gavel', '5', 'warning'],
-['startups', 'building-skyscraper', '5', 'primary'],
-  ['filtration', 'transform', '5', 'warning'],
-['filtration pending', 'rotate-clockwise-2', '5', 'info'],
-['filtration done', 'checkbox', '5', 'success'],
-]);
+// $screenCollection = collect([
+// ['the judges', 'gavel', '5', 'warning'],
+// ['startups', 'building-skyscraper', '5', 'primary'],
+//   ['filtration', 'transform', '5', 'warning'],
+// ['filtration pending', 'rotate-clockwise-2', '5', 'info'],
+// ['filtration done', 'checkbox', '5', 'success'],
+// ]);
 
 // $mentorshipCollection = collect([
 // ['mentors', 'user', '5', 'secondary'],
@@ -110,9 +110,9 @@ $screenCollection = collect([
 // ['online training', 'world', '5', 'warning'],
 // ['traditional training', 'home-2', '5', 'info'],
 // ]);
-$totalFinalscreenCount = 0;
-$totalDistinctCompanies = 0;
-$judgesDetails = collect(); // لتخزين بيانات المحكمين
+// $totalFinalscreenCount = 0;
+// $totalDistinctCompanies = 0;
+ $judgesDetails = collect(); // لتخزين بيانات المحكمين
 
 //   $finalScreenings = app(App\Finalscreening::class)->where('step_id', '=', $step->id)->get();
 //    // حساب عدد السجلات لكل step_id
@@ -158,7 +158,7 @@ return [
 };
 
 $orgCountList = $convertToArray($orgCollection);
-$screenCountList = $convertToArray($screenCollection);
+// $screenCountList = $convertToArray($screenCollection);
 // $mentorshipCountList = $convertToArray($mentorshipCollection);
 // $trainingCountList = $convertToArray($trainingCollection);
 // $finalScreenCountList = $convertToArray($finalScreenCollection);
@@ -205,7 +205,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between mb-2">
                   <h4 class="text-primary mb-0">{{ $program->title }}</h4>
-                  <a href="#" class="btn btn-primary">
+                  <a href="/dashboard/final/results/{{ $step->id }}" class="btn btn-primary">
                     <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                   </a>
                 </div>
@@ -554,12 +554,12 @@ foreach ($finalScreenings as $screening) {
             <div class="row mt-4 mt-md-0">
               <div class="col-12">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                  <a href="#" class="btn btn-outline-primary rounded-pill">
+                  <a href="/dashboard/{{ $step->id }}/screening" class="btn btn-outline-primary rounded-pill">
                     {{ __('cycles.Screening') }}
                   </a>
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
-                    <a href="#" class="btn btn-primary">
+                    <a href="/dashboard/final/results/{{ $step->id }}" class="btn btn-primary">
                       <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                     </a>
                     <div class="mx-2 position-relative">
@@ -778,16 +778,16 @@ foreach ($finalScreenings as $screening) {
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0 text-nowrap">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                      <a id="mentors" href="#" class="btn btn-primary">
+                      <a id="mentors" href="/dashboard/mentorship/sessions" class="btn btn-primary">
                         <i class="ti ti-user me-2"></i> {{ __('admin.Mentors') }}
                       </a>
-                      <a id="manage" href="#" class="btn btn-primary">
+                      <a id="manage" href="/dashboard/mentorship/assign/{{ $step->cycle_id }}" class="btn btn-primary">
                         <i class="ti ti-settings me-2"></i> {{ __('admin.Manage') }}
                       </a>
-                      <a id="sessions" href="#" class="btn btn-primary">
+                      <a id="sessions" href="/dashboard/training/sessions/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-cast me-2"></i> {{ __('admin.Sessions') }}
                       </a>
-                      <a id="results" href="#" class="btn btn-primary">
+                      <a id="results" href="/dashboard/final/results/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                       </a>
                     </div>
