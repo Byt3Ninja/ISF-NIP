@@ -98,7 +98,18 @@ class MentorsController extends Controller
 		if( !empty( $cycle ) )
 		{
 			$organization_id = $cycle->organization_id;
-			$surveys = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'mentorship')->with(['survey'])->get();
+			$surveys = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'mentorship')->with(['survey', 'responses'])->get();
+			$surveys = $surveys->map(function($survey) {
+				$responses = $survey->responses;
+				$eligibleUsers = $responses->count();
+				$engagedUsers = $responses->whereNotNull('responses')->count();
+				$notEngagedUsers = $responses->whereNull('responses')->count();
+				$survey->eligibleUsers = $eligibleUsers;
+				$survey->engagedUsers = $engagedUsers;
+				$survey->notEngagedUsers = $notEngagedUsers;
+				$survey->engagementRate = number_format( round( ($engagedUsers / $eligibleUsers * 100), 2 ), 2 );
+				return $survey;
+			});
 			return view('admin.settings.mentorship.surveys', compact('surveys', 'cycle'));
 		} else { abort(404); }
 	}

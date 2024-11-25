@@ -32,7 +32,10 @@ class surveysController extends Controller
 		$organizations = new Organization;
 		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organizations = $organizations->where('id', $user->organization_id); }
 		$organizations = $organizations->get();
-		return view('admin.surveys.create', compact('organizations'));
+		$questions = QuestionsBank::where('group', 'survey');
+		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $questions = $questions->where('organization_id', $user->organization_id); }
+		$questions = $questions->get();
+		return view('admin.surveys.create', compact('organizations', 'questions'));
 	}
 
 	public function store(Request $request)
@@ -49,6 +52,10 @@ class surveysController extends Controller
 		$survey->description = $request->description;
 		$survey->save();
 
+		$id = $survey->id;
+		$questions_ids = $request->has('questions_ids') ? $request->questions_ids : [];
+		SurveyQuestions::where('survey_id', $id)->delete();
+		$survey->questions()->sync( array_map(function($id, $key) { return ['row_no' => $key + 1, 'question_id' => $id]; }, $questions_ids, array_keys($questions_ids)) );
 		return redirect()->route('surveys.index')->with('success', 'StoredSuccessfully');
 	}
 
@@ -61,14 +68,18 @@ class surveysController extends Controller
 	public function edit( $id )
 	{
 		$user = auth()->user();
-		$survey = Surveys::find( $id );
+		$survey = Surveys::with(['questions'])->find( $id );
 		if( empty( $survey ) ) { return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']); }
 		else
 		{
 			$organizations = new Organization;
 			if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organizations = $organizations->where('id', $user->organization_id); }
 			$organizations = $organizations->get();
-			return view('admin.surveys.edit', compact('survey', 'organizations'));
+			$questions = QuestionsBank::where('group', 'survey');
+			if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $questions = $questions->where('organization_id', $user->organization_id); }
+			$questions = $questions->get();
+			$survey_questions = !empty( $survey->questions ) ? $survey->questions->pluck('id')->toArray() : [];
+			return view('admin.surveys.edit', compact('survey', 'organizations', 'questions', 'survey_questions'));
 		}
 	}
 
@@ -96,6 +107,9 @@ class surveysController extends Controller
 			$survey->organization_id = $request->organization_id;
 			$survey->description = $request->description;
 			$survey->save();
+			$questions_ids = $request->has('questions_ids') ? $request->questions_ids : [];
+			SurveyQuestions::where('survey_id', $id)->delete();
+			$survey->questions()->sync( array_map(function($id, $key) { return ['row_no' => $key + 1, 'question_id' => $id]; }, $questions_ids, array_keys($questions_ids)) );
 			return back()->withInput()->with('success', 'StoredSuccessfully');
 		}
 	}
