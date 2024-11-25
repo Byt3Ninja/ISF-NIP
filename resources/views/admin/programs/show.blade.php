@@ -65,14 +65,14 @@ $mentors = $program->mentors()->distinct()->get();
 
 
 $orgCollection = collect([
-['startups', 'building-skyscraper', $totalcompany, 'primary'],
-['steps', 'stack-2', $totalSteps, 'info'],
-['mentors', 'user', $mentor_Count, 'light'],
-['mentorship requests', 'report', $totalMentorRequest, 'warning'],
-['mentorship sessions duration (hours)', 'clock-hour-5', $totalMentorperiod, 'success'],
-['company attendance rate', 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
-['training sessions', 'layers-subtract', $totalStepsIdsCount, 'light'],
-['training sessions duration (hours)', 'clock-hour-5', $totalDurationSum, 'success'],
+[__('admin.Startups'), 'building-skyscraper', $totalcompany, 'primary'],
+[__('cycles.steps'), 'stack-2', $totalSteps, 'info'],
+[__('admin.Mentors'), 'user', $mentor_Count, 'light'],
+[__('cycles.All requests'), 'report', $totalMentorRequest, 'warning'],
+[__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5', $totalMentorperiod, 'success'],
+[__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
+[__('admin.Training sessions'), 'layers-subtract', $totalStepsIdsCount, 'light'],
+[__('admin.Training sessions duration (hours)'), 'clock-hour-5', $totalDurationSum, 'success'],
 ['filtration', 'transform', '5', 'warning'],
 ['evaluation', 'presentation', '5', 'danger']
 ]);
@@ -91,17 +91,17 @@ $screenCollection = collect([
 ['filtration done', 'checkbox', '5', 'success'],
 ]);
 
-$mentorshipCollection = collect([
-['mentors', 'user', '5', 'secondary'],
-['mentors in program', 'users', '5', 'success'],
-['mentorship sessions duration (hours)', 'clock', '5', 'danger'],
-['mentorship done requests count', 'check', '5', 'warning'],
-['mentorship requests', 'message', '5', 'info'],
-['new requests only', 'plus', '5', 'light'],
-['approved requests', 'checkbox', '5', 'dark'],
-['disapproved requests', 'trash-x', '5', 'primary'],
-['mentorship pending requests count', 'rotate-clockwise-2', '5', 'secondary'],
-]);
+// $mentorshipCollection = collect([
+// ['mentors', 'user', '5', 'secondary'],
+// ['mentors in program', 'users', '5', 'success'],
+// ['mentorship sessions duration (hours)', 'clock', '5', 'danger'],
+// ['mentorship done requests count', 'check', '5', 'warning'],
+// ['mentorship requests', 'message', '5', 'info'],
+// ['new requests only', 'plus', '5', 'light'],
+// ['approved requests', 'checkbox', '5', 'dark'],
+// ['disapproved requests', 'trash-x', '5', 'primary'],
+// ['mentorship pending requests count', 'rotate-clockwise-2', '5', 'secondary'],
+// ]);
 
 // $trainingCollection = collect([
 // ['training sessions', 'user-screen', $totalTrainingSessionCount, 'light'],
@@ -159,7 +159,7 @@ return [
 
 $orgCountList = $convertToArray($orgCollection);
 $screenCountList = $convertToArray($screenCollection);
-$mentorshipCountList = $convertToArray($mentorshipCollection);
+// $mentorshipCountList = $convertToArray($mentorshipCollection);
 // $trainingCountList = $convertToArray($trainingCollection);
 // $finalScreenCountList = $convertToArray($finalScreenCollection);
 
@@ -516,10 +516,11 @@ foreach ($finalScreenings as $screening) {
                         <i class="ti ti-message text-primary ti-20px me-2"></i>
                         <h6 class="mb-0">{{__('admin.Description')}}</span>
                       </div>
+                      @if($step->description != '')
                       <div class="d-flex flex-wrap px-4 py-1 bg-light text-black rounded-pill" style="max-width: 85%;">
                         {{ $step->description }}
                       </div>
-                      
+                      @endif
                     </div>
                   </div>
                   <div class="col-md-3 mt-6">
@@ -724,6 +725,43 @@ foreach ($finalScreenings as $screening) {
 
       <!-- Mentorship Step -->
       <div class="col-12 mb-4">
+
+        @php
+         
+        $mentoreCountRequest = app(App\MentorshipRequest::class)
+        ->where('cycle_id', '=', $step->cycle_id)
+        ->distinct()
+        ->count('mentor_id');
+
+
+        $totalsessionsMen = app(App\MentorshipRequest::class)
+        ->where('cycle_id', '=', $step->cycle_id)
+        ->where('approved', 'Yes')
+        ->sum('period');
+
+        $totalsessionsDoneMen = app(App\MentorshipRequest::class)
+        ->where('cycle_id', '=', $step->cycle_id)
+        ->whereNotNull('done')
+        ->count();
+
+        $mentorship_requests = app(App\MentorshipRequest::class)
+        ->where('cycle_id', '=', $step->cycle_id)
+        ->count();
+        $new_requests = app(App\MentorshipRequest::class)
+        ->where('cycle_id', '=', $step->cycle_id)
+        ->whereNull('approved')
+        ->count();
+        $approved_requests = app(App\MentorshipRequest::class)
+        ->where('cycle_id', '=', $step->cycle_id)
+        ->where('approved', 'Yes')
+        ->count();
+        $disapproved_requests = app(App\MentorshipRequest::class)
+        ->where('cycle_id', '=', $step->cycle_id)
+        ->where('approved', 'No')
+        ->count();
+
+
+        @endphp
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
             <div class="row mt-md-0">
@@ -778,21 +816,119 @@ foreach ($finalScreenings as $screening) {
                   <h5 class="text-primary mb-0">{{ $step->title }}</h5>
                 </div>
                 <div class="row border radius-15 p-3 mb-4">
-                  @foreach ($mentorshipCountList as $item)
+                  
                   <div class="col-md-4 mb-2">
                     <div class="d-flex align-items-center">
-                      <div class="badge bg-label-{{ $item['color'] }} me-2 p-2">
-                        <i class="ti ti-{{ $item['icon'] }} text-{{ $item['color'] }} ti-24px"></i>
+                      <div class="badge bg-label-success me-2 p-2">
+                        <i class="ti ti-users text-success ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ $item['label'] }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Mentors') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                          {{ $item['count'] }}
+                          {{ $mentoreCountRequest }}
                         </small>
                       </div>
                     </div>
                   </div>
-                  @endforeach
+                  
+                  <div class="col-md-4 mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="badge bg-label-danger me-2 p-2">
+                        <i class="ti ti-clock text-danger ti-24px"></i>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Mentorship_sessions_duration_(hours)') }}</span>
+                        <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          {{ $totalsessionsMen }}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4 mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="badge bg-label-warning me-2 p-2">
+                        <i class="ti ti-check text-warning ti-24px"></i>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Mentorship_done_requests_count') }}</span>
+                        <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          {{ $totalsessionsDoneMen }}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4 mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="badge bg-label-info me-2 p-2">
+                        <i class="ti ti-message text-info ti-24px"></i>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.All requests') }}</span>
+                        <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          {{ $mentorship_requests }}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4 mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="badge bg-label-light me-2 p-2">
+                        <i class="ti ti-plus text-light ti-24px"></i>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.New requests only') }}</span>
+                        <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          {{ $new_requests }}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4 mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="badge bg-label-dark me-2 p-2">
+                        <i class="ti ti-checkbox text-dark ti-24px"></i>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.approved requests') }}</span>
+                        <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          {{ $approved_requests }}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4 mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="badge bg-label-primary me-2 p-2">
+                        <i class="ti ti-trash-x text-primary ti-24px"></i>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.disapproved requests') }}</span>
+                        <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          {{ $disapproved_requests }}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {{-- <div class="col-md-4 mb-2">
+                    <div class="d-flex align-items-center">
+                      <div class="badge bg-label-secondary me-2 p-2">
+                        <i class="ti ti-rotate-clockwise-2 text-secondary ti-24px"></i>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">mentorship pending requests count</span>
+                        <small class="bg-light text-secondary py-1 px-2 rounded-pill">
+                          5
+                        </small>
+                      </div>
+                    </div>
+                  </div> --}}
+                  
                 </div>
                 <div class="row">
                   <div class="col-md-9">
@@ -1014,6 +1150,21 @@ foreach ($finalScreenings as $screening) {
       @if($step->stype == 5)
       <!-- Final screening Step -->
       <div class="col-12 mb-4">
+
+        @php
+
+          
+
+          $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
+          $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNull('screening')->orWhere('screening', '{}')->count();
+          $answersdone = app(App\Formdata::class)
+          ->where('step_id', $step->id)
+          ->whereNotNull('screening') // الحقل ليس NULL
+          ->where('screening', '!=', '{}') // الحقل ليس JSON فارغ
+          ->count();
+
+  
+        @endphp
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
             <div class="row mt-4 mt-md-0">
@@ -1090,7 +1241,7 @@ foreach ($finalScreenings as $screening) {
                     <div class="d-flex align-items-center">
                       <span class="me-2 fw-medium text-capitalize fs-6 text-black">evaluation</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $answers }}
                       </small>
                     </div>
                   </div>
@@ -1102,7 +1253,7 @@ foreach ($finalScreenings as $screening) {
                     <div class="d-flex align-items-center">
                       <span class="me-2 fw-medium text-capitalize fs-6 text-black">traditional pending</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $answerspinding }}
                       </small>
                     </div>
                   </div>
@@ -1114,7 +1265,7 @@ foreach ($finalScreenings as $screening) {
                     <div class="d-flex align-items-center">
                       <span class="me-2 fw-medium text-capitalize fs-6 text-black">evaluation done</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $answersdone }}
                       </small>
                     </div>
                   </div>

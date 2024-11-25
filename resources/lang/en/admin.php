@@ -929,6 +929,9 @@ return [
 	'Series_A_funding' => 'Series A funding',
 	'Series_B_funding' => 'Series B funding',
 	'Series_C_funding' => 'Series C funding',
-	'VerficationEmail' => 'Email Verfication',
-	'Total_sessions' => 'Total Sessions',
+	'VerficationEmail'=>'Email Verfication',
+	'Total_sessions'=> 'Total Sessions',
+	'Mentorship_sessions_duration_(hours)'=> ' Mentorship sessions duration (hours) ',
+	'Mentorship_done_requests_count'=> ' Mentorship Done Requests Count ',
+	'Company_Attendance_Rate'=> 'Company Attendance Rate',
 ];
