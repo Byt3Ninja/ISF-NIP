@@ -929,6 +929,9 @@ return [
 	'financial_plan is required' => ' خطة العمل الحسابية مطلوبة',
 	'VerficationEmail'=>' تأكيد الايميل ',
 	'Total_sessions'=>'اجمالى الجلسات',
+	'Mentorship_sessions_duration_(hours)'=> 'عدد ساعات الجلسات',
+	'Mentorship_done_requests_count'=> 'عدد الجلسات تم تنفذها',
+	'Company_Attendance_Rate'=> ' معدل حضور الشركات ',
 	
 
 ];
