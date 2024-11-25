@@ -448,7 +448,7 @@
       </li>
       <!-- End Questions Nav Item -->
 
-      <li class="{{ Request::is('*training*', '*quizzes*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <li class="{{ Request::is('*training*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           {{-- <i class="menu-livicon" data-icon="info-alt"></i> --}}
           <i class="ti ti-presentation me-3 ti-md"></i>
@@ -475,10 +475,24 @@
               <span class="menu-item">{{ __('admin.Results') }}</span>
             </a>
           </li>
+        </ul>
+      </li>
+      <li class="{{ Request::is('*quizzes*', '*surveys*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="ti ti-stack me-3 ti-md"></i>
+          <div>{{ __('admin.quizzesAndSurveys') }}</div>
+        </a>
+        <ul class="menu-sub">
           <li class="{{ Request::is('dashboard/quizzes*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/quizzes">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item"> {{ __('admin.quizzes') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/surveys*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/surveys">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.surveys') }}</span>
             </a>
           </li>
         </ul>
