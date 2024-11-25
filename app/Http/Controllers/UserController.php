@@ -382,6 +382,7 @@ class UserController extends Controller
                     return $cycle_ids->contains('id', $company->id);
                 });
             }
+            $errorMessage =  "";
         }
 
         return view('admin/users/companies', compact('companies', 'errorMessage'));
