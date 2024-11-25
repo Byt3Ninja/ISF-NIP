@@ -366,6 +366,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     //Program List
     Route::resource('programlist', 'ProgramController');
     Route::get('programlist/show/{id}','ProgramController@show');
+    Route::post('programlist/Email','ProgramController@SentEmail');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     // ===============> Mentor Dashboard Routes <===============
