@@ -663,9 +663,14 @@ foreach ($finalScreenings as $screening) {
                     </div>
                   </div>
                   <div class="col-4 col-md-3">
-                    <a id="private-link" href="#" class="d-flex align-items-center text-nowrap">
+                    {{-- <a id="private-link" href="#" class="d-flex align-items-center text-nowrap">
                       {{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                    </a>
+                    </a> --}}
+                    <form action="/dashboard/programlist/Email" method="post" >
+                      @csrf
+                      <input type="hidden" value="{{ $step->id }}" name="step">
+                      <button id="private-link" type="submit" class="d-flex align-items-center text-nowrap">{{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i></button>
+                    </form>
                   </div>
                   <div class="col-md-9">
                     <div class="d-flex flex-column">
@@ -1239,7 +1244,7 @@ foreach ($finalScreenings as $screening) {
                       <i class="ti ti-presentation text-danger ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">evaluation</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Evaluation') }}evaluation</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $answers }}
                       </small>
@@ -1251,7 +1256,7 @@ foreach ($finalScreenings as $screening) {
                       <i class="ti ti-rotate-clockwise-2 text-info ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">traditional pending</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Traditional_Evaluation_pending') }} </span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $answerspinding }}
                       </small>
@@ -1263,7 +1268,7 @@ foreach ($finalScreenings as $screening) {
                       <i class="ti ti-checkbox text-success ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">evaluation done</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Evaluation_done') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $answersdone }}
                       </small>
@@ -1288,9 +1293,16 @@ foreach ($finalScreenings as $screening) {
                     </div>
                   </div>
                   <div class="col-4 col-md-3">
-                    <a id="private-link" href="#" class="d-flex align-items-center text-nowrap">
+                    {{-- <a id="private-link" href="#" class="d-flex align-items-center text-nowrap">
                       {{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                    </a>
+                    </a> --}}
+                    <form action="/dashboard/programlist/Email" method="post" >
+                      @csrf
+                      <input type="hidden" value="{{ $step->id }}" name="step">
+                      <button id="private-link" type="submit" class="d-flex align-items-center text-nowrap">{{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i></button>
+                    </form>
+
+
                   </div>
                   <div class="col-md-9">
                     <div class="d-flex flex-column">

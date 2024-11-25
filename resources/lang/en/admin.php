@@ -934,4 +934,7 @@ return [
 	'Mentorship_sessions_duration_(hours)'=> ' Mentorship sessions duration (hours) ',
 	'Mentorship_done_requests_count'=> ' Mentorship Done Requests Count ',
 	'Company_Attendance_Rate'=> 'Company Attendance Rate',
+	'Evaluation'=> ' Evaluation ',
+	'Traditional_Evaluation_pending'=> 'Pinding Evaluation',
+	'Evaluation_done'=> 'Evaluation Done',
 ];

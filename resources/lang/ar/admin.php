@@ -939,6 +939,9 @@ return [
 	'Mentorship_sessions_duration_(hours)'=> 'عدد ساعات الجلسات',
 	'Mentorship_done_requests_count'=> 'عدد الجلسات تم تنفذها',
 	'Company_Attendance_Rate'=> ' معدل حضور الشركات ',
+	'Evaluation'=> ' التقييم ',
+	'Traditional_Evaluation_pending'=> ' انتظار التقييم ',
+	'Evaluation_done'=> ' تم التقييم ',
 	
 
 
