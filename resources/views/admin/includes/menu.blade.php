@@ -48,30 +48,62 @@
       </a>
     </li>
 
-
-
     @if (auth()->user()->HaveCompany == 1 && !auth()->user()->company)
       <li class="{{ Request::is('*companyProfile') ? 'active' : '' }} menu-item">
-        <a href="{{ route('my_company') }}" class="menu-link">
+        <a class="menu-link menu-toggle">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('dashboard/companyProfile') ? 'active' : '' }} menu-item">
+            <a href="{{ route('my_company') }}" class="menu-link">
+              <span class="menu-item">
+                {{ $l == 'en' ? 'Company Profile' :  'عرض شركتي' }}
+              </span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/analysis-assessment" class="menu-link">
+              <span class="menu-item">
+                {{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}
+              </span>
+            </a>
+          </li>
+        </ul>
       </li>
     @endif
-      @if (auth()->user()->HaveCompany != 0 &&auth()->user()->company)
-      <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">
-          <i class="ti ti-building me-3 ti-md"></i>
-          <div>{{ __('admin.My company') }}</div>
-        </a>
-      </li>
-      @endif
+    
+    @if (auth()->user()->HaveCompany != 0 &&auth()->user()->company)
+    <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
+      <a class="menu-link menu-toggle">
+        <i class="ti ti-building me-3 ti-md"></i>
+        <div>{{ __('admin.My company') }}</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="{{ Request::is('dashboard/companyProfile') ? 'active' : '' }} menu-item">
+          <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">
+            <span class="menu-item">
+              {{ $l == 'en' ? 'Company Profile' : ' عرض شركتي' }}
+            </span>
+          </a>
+        </li>
+        <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/analysis-assessment" class="menu-link">
+            <span class="menu-item">
+              {{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}
+            </span>
+          </a>
+        </li>
+      </ul>
+    </li>
+    @endif
 
     <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
-      <a href="{{ route('calendar') }}" class="menu-link">
+      <a href="{{ route('calendar') }}" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-calendar"></i>
         <div>{{ __('admin.Calendar') }}</div>
       </a>
+      <ul class="menu-sub"></ul>
     </li>
 
     <?php
@@ -416,7 +448,7 @@
       </li>
       <!-- End Questions Nav Item -->
 
-      <li class="{{ Request::is('*training*', '*quizzes*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <li class="{{ Request::is('*training*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           {{-- <i class="menu-livicon" data-icon="info-alt"></i> --}}
           <i class="ti ti-presentation me-3 ti-md"></i>
@@ -443,10 +475,24 @@
               <span class="menu-item">{{ __('admin.Results') }}</span>
             </a>
           </li>
+        </ul>
+      </li>
+      <li class="{{ Request::is('*quizzes*', '*surveys*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="ti ti-stack me-3 ti-md"></i>
+          <div>{{ __('admin.quizzesAndSurveys') }}</div>
+        </a>
+        <ul class="menu-sub">
           <li class="{{ Request::is('dashboard/quizzes*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/quizzes">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item"> {{ __('admin.quizzes') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/surveys*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/surveys">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.surveys') }}</span>
             </a>
           </li>
         </ul>

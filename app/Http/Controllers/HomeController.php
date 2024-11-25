@@ -156,14 +156,15 @@ class HomeController extends Controller
         // Total Founders
         $data['total_founders'] = Company::whereNotNull('founder')->count();
 
-        // // Companies by SDG
+        // Companies by SDG
         $companySdg = Company::select('Sustainable_development', DB::raw('count(*) as total'))
             ->groupBy('Sustainable_development')
             ->get();
-        $data['total_sdg'] = $companySdg->pluck('total');
+
+        $data['sdg_labels'] = $companySdg->pluck('Sustainable_development');
+        $data['sdg_counts'] = $companySdg->pluck('total');
 
         // Total Startups Per Organization
-
         $organizationsData = User::whereNotNull('organization_id')
             ->count();
         $data['organization_counts'] = $organizationsData;
@@ -181,7 +182,6 @@ class HomeController extends Controller
         $data['country_counts'] = $countryData->pluck('total');
 
         // Project Status
-
         $projectStatus = TimeSheet::join('cycles', 'program_id', '=', 'cycles.id')
             ->select('cycles.title as cycle_title', DB::raw('count(program_id) as total'))
             ->groupBy('cycles.title')
@@ -200,7 +200,7 @@ class HomeController extends Controller
     }
     protected function organizationDashboard()
     {
-
+        $l = app()->getLocale();
         $organization_id = Auth::user()->organization_id;
         $mentorshipRequests = MentorshipRequest::where('organization_id', $organization_id);
         $forms = BuilderForm::where('organization_id', $organization_id);
@@ -244,13 +244,110 @@ class HomeController extends Controller
         $data['latest_cycles'] = $cycles->latest()->limit(10)->get();
 
         // Development Stage
-        $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
-            ->groupBy('development_stage')
+        $data['development_stage_labels'] = [];
+        $data['development_stage_counts'] = [];
+        foreach ($cycles->get() as $cycle) {
+            $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
+                ->where('cycle', $cycle->id)
+                ->groupBy('development_stage')
+                ->get();
+
+            foreach ($developmentStages as $stage) {
+                $data['development_stage_labels'][] = $stage->development_stage;
+                $data['development_stage_counts'][] = $stage->total;
+            }
+        }
+
+        // Target Market Analysis
+        $targetMarket = Company::select('targeted_market', DB::raw('count(*) as frequency'))
+            ->groupBy('targeted_market')
+            ->orderByDesc('frequency')
+            ->get();
+        $data['target_market_labels'] = $targetMarket->pluck('targeted_market');
+        $data['target_market_counts'] = $targetMarket->pluck('frequency');
+
+        // Sector Breakdown
+        $sectorBreakdown = Sector::join('companies', 'companies.sector', '=', 'sectors.id')
+            ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
+            ->where('users.organization_id', $organization_id)
+            ->select('sectors.name_' . $l, DB::raw('count(companies.id) as total'))
+            ->groupBy('sectors.name_' . $l)
             ->get();
 
-        $data['development_stage_labels'] = $developmentStages->pluck('development_stage');
-        $data['development_stage_counts'] = $developmentStages->pluck('total');
+        $data['sector_labels'] = $sectorBreakdown->pluck('name_en');
+        $data['sector_counts'] = $sectorBreakdown->pluck('total');
 
+        // Project Type Distribution
+        $projectTypes = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
+            ->where('users.organization_id', $organization_id)
+            ->select('companies.business_type', DB::raw('count(companies.id) as total'))
+            ->groupBy('companies.business_type')
+            ->get();
+
+        $data['project_type_labels'] = $projectTypes->pluck('business_type');
+        $data['project_type_counts'] = $projectTypes->pluck('total');
+
+
+        // Total Jobs Created
+        $data['total_jobs_created'] = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
+            ->where('users.organization_id', $organization_id)
+            ->sum('companies.team_num');
+
+        // Total Founders
+        $data['total_founders'] = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
+            ->where('users.organization_id', $organization_id)
+            ->whereNotNull('companies.founder')
+            ->count();
+
+        // Companies by SDG
+        $companySdg = Company::whereHas('cycledata', function ($query) use ($organization_id) {
+            $query->where('organization_id', $organization_id);
+        })
+            ->select('Sustainable_development', DB::raw('count(*) as total'))
+            ->groupBy('Sustainable_development')
+            ->get();
+
+        $data['total_sdg'] = $companySdg->pluck('total');
+
+        // Total Startups Per Organization
+        $organizationsData = User::select('organization_id', DB::raw('count(*) as total'))
+            ->whereNotNull('organization_id')
+            ->groupBy('organization_id')
+            ->get();
+
+        $data['organization_counts'] = $organizationsData->mapWithKeys(function ($item) {
+            return [$item->organization_id => $item->total];
+        });
+
+        // Total Raised Funds
+        $data['total_raised_funds'] = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
+            ->where('users.organization_id', $organization_id)
+            ->sum('companies.raised_fund');
+
+
+        // User Distribution by Country
+        $countryData = User::join('countries', 'users.country_id', '=', 'countries.id')
+            ->where('organization_id', $organization_id)
+            ->select("countries.name_$l as country_name", DB::raw('count(users.id) as total'))
+            ->groupBy("countries.name_$l")
+            ->get();
+
+        $data['country_labels'] = $countryData->pluck('country_name');
+        $data['country_counts'] = $countryData->pluck('total');
+
+        // Project Status
+        $projectStatus = TimeSheet::join('cycles', 'time_sheets.program_id', '=', 'cycles.id')
+            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
+            ->where('users.organization_id', $organization_id)
+            ->select('cycles.title as cycle_title', DB::raw('count(time_sheets.program_id) as total'))
+            ->groupBy('cycles.title')
+            ->get();
+        $data['project_status'] = $projectStatus;
 
         return view('admin.organizations.dashboard', $data);
     }

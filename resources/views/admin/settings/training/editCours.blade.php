@@ -115,6 +115,7 @@
                 <div class="form-group mb-3">
                   <label class="fs-6 mb-1" class="form-label">{{ __('cycles.Quizs') }}</label>
                   <select class="form-select select2" name="Quizs">
+                    <option value="0" {{ $course->Quizs == 0 || is_null( $course->Quizs ) || empty( $course->Quizs ) ? 'selected' : '' }}>{{ __('admin.noQuiz') }}</option>
                     @foreach ($Quizzes as $Quizz)
                       <option value="{{ $Quizz->id }}" @if ($course->Quizs == $Quizz->id) selected @endif>
                         {{ $Quizz->title }}</option>
