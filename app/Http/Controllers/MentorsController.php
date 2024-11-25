@@ -107,7 +107,7 @@ class MentorsController extends Controller
 				$survey->eligibleUsers = $eligibleUsers;
 				$survey->engagedUsers = $engagedUsers;
 				$survey->notEngagedUsers = $notEngagedUsers;
-				$survey->engagementRate = number_format( round( ($engagedUsers / $eligibleUsers * 100), 2 ), 2 );
+				$survey->engagementRate = $eligibleUsers > 0 ? ( number_format( round( ($engagedUsers / $eligibleUsers * 100), 2 ), 2 ) ) : 0.00;
 				return $survey;
 			});
 			return view('admin.settings.mentorship.surveys', compact('surveys', 'cycle'));
