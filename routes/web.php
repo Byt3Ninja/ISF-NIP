@@ -165,6 +165,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::resource('organizations', 'organizationsController');
     //Company profile
 	Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
+	Route::get('/question-assessment', 'ClientCompanyController@assessment');
+	Route::get('/analysis-assessment', 'ClientCompanyController@analysisAssessment');
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
 	Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
 	Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
@@ -364,6 +366,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     //Program List
     Route::resource('programlist', 'ProgramController');
     Route::get('programlist/show/{id}','ProgramController@show');
+    Route::post('programlist/Email','ProgramController@SentEmail');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     // ===============> Mentor Dashboard Routes <===============

@@ -182,6 +182,7 @@
       <!--/ Latest Cycles Table -->
 
       <!-- Latest Mentorship Requests Table -->
+      @if (!empty($mentorshipRequests))
       <div class="card mt-6">
         <h5 class="card-header" style="text-transform: capitalize">
           <i class="ti ti-school ti-28px"></i>
@@ -262,6 +263,94 @@
         </div>
       </div>
       <!--/ Latest Mentorship Requests Table -->
+      @endif
+      <div class="row">
+        <!-- Projects Pie Chart -->
+        @if (!empty($project_type_labels) && !empty($project_type_counts))
+        <div class="col-md-6 mt-6">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-propeller ti-28px me-2"></i>
+                <h5 class="card-title mb-0">Projects Distribution</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="projectsPieChart"></div>
+            </div>
+          </div>
+        </div>
+        @endif
+        <!-- / Projects Pie Chart -->
+        <!-- Projects in development Stage Chart -->
+        @if (!empty($development_stage_labels) && !empty($development_stage_counts))
+        <div class="col-md-6 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-stack ti-28px me-2"></i>
+                <h5 class="card-title mb-0">Projects in development Stage</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="devStageStackedBarChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        @endif
+        <!-- / Projects in development Stage Chart -->
+        <!-- Target Market Analysis Chart -->
+        @if (!empty($target_market_labels) && !empty($target_market_counts))
+        <div class="col-md-6 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-target ti-28px me-2"></i>
+                <h5 class="card-title mb-0">Target Market Analysis</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="targetMarketChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        @endif
+        <!-- / Target Market Analysis Chart -->
+        <!-- User distribution by country -->
+        @if (!empty($country_labels) && !empty($country_counts))
+        <div class="col-md-6 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-chart-donut ti-28px me-2"></i>
+                <h5 class="card-title mb-0">User distribution by country</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="userDistributionChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        @endif
+        <!-- / User distribution by country -->
+        <!-- Project Status Over Time Chart -->
+        @if (!empty($project_status))
+        <div class="col-12 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-clock ti-28px me-2"></i>
+                <h5 class="card-title mb-0">Project Status Over Time</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="projectStatusOverTimeChart"></div>
+            </div>
+          </div>
+        </div>
+        @endif
+        <!-- / Project Status Over Time Chart -->
+      </div>
     </div>
   </div>
 @stop
@@ -273,6 +362,37 @@
 
 @section('pagescripts')
   <script>
+    // User distribution by country
+    const userDistributionLabels = @json($country_labels);
+    const userDistributionData = @json($country_counts);
+
+    // Project Distribution Pie Chart Data
+    const projectsPieLabels = @json($project_type_labels);
+    const projectsPieData = @json($project_type_counts);
+    
+    // Development Stage Chart Data
+    const devStageLabels = @json($development_stage_labels);
+    const devStageData = @json($development_stage_counts);
+
+    // Target Market Analysis Chart Data
+    const targetMarketLabels = @json($target_market_labels);
+    const targetMarketData = @json($target_market_counts);
+
+    // Project Status Over Time Chart Data
+    const projectStatus = @json($project_status);
+
+    // Total jobs created
+    const totalJobsCreated = @json($total_jobs_created);
+
+    // Total Founders
+    const totalFounders = @json($total_founders);
+
+    // Total Startups Per Organization
+    const totalStartupsPerOrganization = @json($organization_counts);
+
+    // Total Raised Funds
+    const totalRaisedFunds = @json($total_raised_funds);
+
     // Mentorship chart data
     const seriesName = '({{ __('admin.hours') }})';
     const barChartCategories = {!! json_encode($mentorship_labels) !!};
@@ -283,7 +403,8 @@
     const internshipBarChartCategories = {!! json_encode($sessions_labels) !!};
     const internshipSeriesData = {!! json_encode($sessions_durations) !!};
   </script>
-
+  
+  <script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
   <script src="/vuexy/assets/js/orgDashboard.js"></script>
 

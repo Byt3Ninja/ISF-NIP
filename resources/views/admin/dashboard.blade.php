@@ -249,7 +249,7 @@ $countCards = [
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
               <i class="ti ti-propeller ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Projects</h5>
+              <h5 class="card-title mb-0">Projects Distribution</h5>
             </div>
           </div>
           <div class="card-body">
@@ -265,53 +265,51 @@ $countCards = [
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
               <i class="ti ti-stack ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Projects in development state</h5>
+              <h5 class="card-title mb-0">Projects in development Stage</h5>
             </div>
           </div>
           <div class="card-body">
-            <div id="devStageStackedBarChart">
-            </div>
+            <canvas id="devStageStackedBarChart" class="chartjs" data-height="345"></canvas>
           </div>
         </div>
         <!-- /Vertical Bar Charts -->
-
-         <!-- Development Pie Chart -->
-         <div class="col-md-6 col-12">
-          <div class="card h-100">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center">
-                      <i class="menu-icon tf-icons ti ti-trending-up ti-28px"></i>
-                      <h5 class="card-title mb-0">{{ __('admin.Development Stage') }}</h5>
-                  </div>
-              </div>
-              <div class="card-body">
-                 <div id="developmentPieChart"></div>
-              </div>
-          </div>
-         </div>
-         <!-- / Development Pie Chart -->
-
       </div>
-
     </div>
-    <div class="row">
-      <!-- Target Market Analysis Chart -->
-      <div class="col-md-6 mt-6">
-        <div class="card">
+    <div class="row g-3 align-items-center mt-6">
+      <!-- SDG Companies Pie Chart -->
+      <div class="col-md-6 col-12">
+        <div class="card h-100">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="ti ti-target ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Target Market Analysis</h5>
+              <i class="ti ti-propeller ti-28px me-2"></i>
+              <h5 class="card-title mb-0">Total company by SDG</h5>
             </div>
           </div>
           <div class="card-body">
-            <div id="targetMarketChart"></div>
+            <div id="sdgCompaniesChart"></div>
           </div>
         </div>
       </div>
-      <!-- /Target Market Analysis Chart -->
+      <!-- / SDG Companies Pie Chart -->
 
-      <!-- Sector Breakdown Chart -->
+      <!-- Total companies by sectors -->
+      <div class="col-md-6 col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <i class="ti ti-stack ti-28px me-2"></i>
+              <h5 class="card-title mb-0">Total companies by sectors</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="companyBySectorChart" class="chartjs" data-height="345"></canvas>
+          </div>
+        </div>
+        <!-- / Total companies by sectors -->
+      </div>
+    </div>
+    <!-- Sector Breakdown Chart -->
+    <div class="row">
       <div class="col-md-6 mt-6">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
@@ -325,7 +323,37 @@ $countCards = [
           </div>
         </div>
       </div>
-      <!-- /Sector Breakdown Chart -->
+      <div class="col-md-6 mt-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <i class="ti ti-chart-donut ti-28px me-2"></i>
+              <h5 class="card-title mb-0">User distribution by country</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="userDistributionChart" class="chartjs" data-height="345"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /Sector Breakdown Chart -->
+    <div class="row">
+      <!-- Target Market Analysis Chart -->
+      <div class="col-md-6 mt-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <i class="ti ti-target ti-28px me-2"></i>
+              <h5 class="card-title mb-0">Target Market Analysis</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="targetMarketChart" class="chartjs" data-height="345"></canvas>
+          </div>
+        </div>
+      </div>
+      <!-- /Target Market Analysis Chart -->
     </div>
     <!-- Project Status Over Time Chart -->
     <div class="row g-3 align-items-center mt-6">
@@ -354,6 +382,45 @@ $countCards = [
 
   @section('pagescripts')
   <script>
+    // User distribution by country
+    const userDistributionLabels = @json($country_labels);
+    const userDistributionData = @json($country_counts);
+
+    // Sector Breakdown Chart Data
+    const sectorBreakdownLabels = @json($sector_labels);
+    const sectorBreakdownData = @json($sector_counts);
+
+    // Project Distribution Pie Chart Data
+    const projectsPieLabels = @json($project_type_labels);
+    const projectsPieData = @json($project_type_counts);
+    
+    // Development Stage Chart Data
+    const devStageLabels = @json($development_stage_labels);
+    const devStageData = @json($development_stage_counts);
+
+    // Target Market Analysis Chart Data
+    const targetMarketLabels = @json($target_market_labels);
+    const targetMarketData = @json($target_market_counts);
+
+    // Project Status Over Time Chart Data
+    const projectStatus = @json($project_status);
+
+    // Total jobs created
+    const totalJobsCreated = @json($total_jobs_created);
+
+    // Total Founders
+    const totalFounders = @json($total_founders);
+
+    // Companies by SDG Chart Data
+    const sdgLabels = @json($sdg_labels);
+    const sdgData = @json($sdg_counts);
+
+    // Total Startups Per Organization
+    const totalStartupsPerOrganization = @json($organization_counts);
+
+    // Total Raised Funds
+    const totalRaisedFunds = @json($total_raised_funds);
+
     // Horizontal Bar Chart
     const seriesName = '{{ __('admin.Registered') }}';
     const barChartCategories = {!! json_encode($cycles_labels) !!};
@@ -366,6 +433,43 @@ $countCards = [
     // Pie Chart
     const pieLabels = ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'];
     const pieData = {!! json_encode($usersgender->pluck('total')) !!};
+  </script>
+  <script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
+  <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+  <script src="/vuexy/assets/js/charts-apex.js"></script>
+  <script src="/vuexy/assets/js/charts-chartjs.js"></script>
+  @stop
+
+  {{-- @section('pagescripts')
+  <script>
+    // Horizontal Bar Chart
+    const seriesName = '{{ __('admin.Registered') }}';
+    const barChartCategories = {!! json_encode($cycles_labels) !!};
+    const seriesData = {!! json_encode($cycles_startups_count) !!};
+
+    // Vertical Bar Chart 
+    const verticalBarLabels = {!! json_encode($usersgov->pluck('state_' . $l)) !!};
+    const verticalBarData = {!! json_encode($usersgov->pluck('total')) !!};
+
+    // Pie Chart
+    const pieLabels = ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'];
+    const pieData = {!! json_encode($usersgender->pluck('total')) !!};
+    
+    // // Target Market Analysis
+    // $targetMarket = Company::select('targeted_market', DB::raw('count(*) as frequency'))
+    //     ->groupBy('targeted_market')
+    //     ->orderByDesc('frequency')
+    //     ->get();
+    // $data['target_market_labels'] = $targetMarket->pluck('targeted_market');
+    // $data['target_market_counts'] = $targetMarket->pluck('frequency');
+
+    const sectorBreakdownLabels = @json($sector_labels);
+    const sectorBreakdownLabels = '{{ $sector_labels }}'
+    const sctorBreakdownData = @json($sector_counts);
+
+    console.log('targetMarketLabels', targetMarketLabels);
+    console.log('targetMarketData', targetMarketData);
+
 
     (() => {
       // Projects Pie Chart data and labels
@@ -374,27 +478,7 @@ $countCards = [
       const legendColor = '#212529';
 
       // Projects Pie Chart
-      const projectsPieChartEl = document.querySelector('#projectsPieChart');
-      projectsPieChartConfig = {
-        chart: {height: 380, type: 'pie'},
-        labels: projectsPieLabels,
-        series: projectsPieData,
-        colors: ['#87CEEB', '#FFA500'],
-        stroke: {show: false, curve: 'smooth'},
-        legend: {
-          show: true,
-          position: 'bottom',
-          markers: { offsetX: -3 },
-          itemMargin: {vertical: 3, horizontal: 10},
-          labels: {colors: isDarkStyle ? '#c0c0c0' : '#515365', useSeriesColors: false}
-        },
-        plotOptions: {}
-      };
-      if (typeof projectsPieChartEl !== undefined && projectsPieChartEl !== null) {
-        const projectsPieChart = new ApexCharts(projectsPieChartEl, projectsPieChartConfig);
-        projectsPieChart.render();
-      }
-
+      
       // Development Stage Funnel Chart data and labels
       const devStageFunnelLabels = ['Idea', 'Prototype', 'MVP', 'Scaling', 'Established'];
       const devStageFunnelData = [100, 80, 60, 40, 20];
@@ -682,4 +766,5 @@ $countCards = [
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
   <script src="/vuexy/assets/js/charts-apex.js"></script>
   <script src="/vuexy/assets/js/charts-chartjs.js"></script>
-  @stop
+  <script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
+  @stop --}}
