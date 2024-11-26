@@ -132,23 +132,35 @@ class HomeController extends Controller
             ->groupBy('targeted_market')
             ->orderByDesc('frequency')
             ->get();
-        $data['target_market_labels'] = $targetMarket->pluck('targeted_market');
-        $data['target_market_counts'] = $targetMarket->pluck('frequency');
 
+        $data['target_market_data'] = $targetMarket->map(function ($item) {
+            return [
+                'label' => $item->targeted_market,
+                'count' => $item->frequency,
+            ];
+        });
 
         // Sector Breakdown
         $sectorBreakdown = Sector::withCount('children')->get();
 
-        $data['sector_labels'] = $sectorBreakdown->pluck('name_en');
-        $data['sector_counts'] = $sectorBreakdown->pluck('children_count');
-
+        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
+            return [
+                'label' => $item->name_en,
+                'count' => $item->children_count,
+            ];
+        });
 
         // Project Type Distribution
         $projectTypes = Company::select('business_type', DB::raw('count(*) as total'))
             ->groupBy('business_type')
             ->get();
-        $data['project_type_labels'] = $projectTypes->pluck('business_type');
-        $data['project_type_counts'] = $projectTypes->pluck('total');
+
+        $data['project_types'] = $projectTypes->map(function ($item) {
+            return [
+                'label' => $item->business_type,
+                'count' => $item->total,
+            ];
+        });
 
         // Total Jobs Created
         $data['total_jobs_created'] = Company::sum('team_num');
@@ -161,8 +173,12 @@ class HomeController extends Controller
             ->groupBy('Sustainable_development')
             ->get();
 
-        $data['sdg_labels'] = $companySdg->pluck('Sustainable_development');
-        $data['sdg_counts'] = $companySdg->pluck('total');
+        $data['sdg_data'] = $companySdg->map(function ($item) {
+            return [
+                'sdg' => $item->Sustainable_development,
+                'total' => $item->total,
+            ];
+        });
 
         // Total Startups Per Organization
         $organizationsData = User::whereNotNull('organization_id')
@@ -172,22 +188,38 @@ class HomeController extends Controller
         // Total Raised Funds
         $data['total_raised_funds'] = Company::sum('raised_fund');
 
+
         // User Distribution by Country
         $countryData = User::join('countries', 'users.country_id', '=', 'countries.id')
             ->select("countries.name_$l as country_name", DB::raw('count(users.id) as total'))
             ->groupBy("countries.name_$l")
             ->get();
 
-        $data['country_labels'] = $countryData->pluck('country_name');
-        $data['country_counts'] = $countryData->pluck('total');
+        $data['countries'] = $countryData->map(function ($item) {
+            return [
+                'label' => $item->country_name,
+                'count' => $item->total,
+            ];
+        });
 
         // Project Status
         $projectStatus = TimeSheet::join('cycles', 'program_id', '=', 'cycles.id')
-            ->select('cycles.title as cycle_title', DB::raw('count(program_id) as total'))
-            ->groupBy('cycles.title')
+            ->select(
+                'cycles.title as cycle_title',
+                DB::raw('count(time_sheets.program_id) as total_programs'),
+                'cycles.start as cycle_start_date',
+                'cycles.end as cycle_end_date'
+            )
+            ->groupBy('cycles.title', 'cycles.start', 'cycles.end')
             ->get();
-
-        $data['project_status'] = $projectStatus;
+        $data['project_status'] = $projectStatus->map(function ($item) {
+            return [
+                'cycle_title' => $item->cycle_title,
+                'total_programs' => $item->total_programs,
+                'cycle_start_date' => $item->cycle_start_date,
+                'cycle_end_date' => $item->cycle_end_date,
+            ];
+        });
 
         $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
             ->groupBy('development_stage')
