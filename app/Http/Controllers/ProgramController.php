@@ -157,11 +157,11 @@ class ProgramController extends Controller
                     " to ". $cstep->to->format('d-m-Y') .", Check your account for more details.","/dashboard"];
                 $user->notify($MSG); }
                  // تخزين رسالة نجاح في الجلسة
-    Session::flash('success', 'Emails have been successfully sent to all judges.');
+    Session::flash('message', 'Email_sent_notify');
 
 } catch (\Exception $e) {
     // تخزين رسالة خطأ في الجلسة إذا حدثت مشكلة
-    Session::flash('error', 'An error occurred while sending emails. Please try again.');
+    Session::flash('message2', 'An error occurred while sending emails. Please try again.');
 }
 
 // إعادة التوجيه إلى الصفحة المطلوبة

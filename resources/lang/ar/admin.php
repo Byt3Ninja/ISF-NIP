@@ -942,6 +942,7 @@ return [
 	'Evaluation'=> ' التقييم ',
 	'Traditional_Evaluation_pending'=> ' انتظار التقييم ',
 	'Evaluation_done'=> ' تم التقييم ',
+	'Email_sent_notify'=> ' تم ارسال الاخطار ',
 	
 
 

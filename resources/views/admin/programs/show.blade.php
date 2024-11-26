@@ -184,7 +184,20 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
 
+      @if (session()->has('message'))
+              <div class="alert alert-success alert-dismissible" role="alert">
+                {{ __('admin.' . session()->get('message')) }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            @endif
+            @if (session()->has('message2'))
+              <div class="alert alert-danger alert-dismissible" role="alert">
+                {{ __('admin.' . session()->get('message2')) }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            @endif
 
+      <input type="hidden" id="ccycleOrg" value="{{ $program->organization_id }}" >
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
@@ -205,7 +218,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between mb-2">
                   <h4 class="text-primary mb-0">{{ $program->title }}</h4>
-                  <a href="/dashboard/final/results/{{ $step->id }}" class="btn btn-primary">
+                  <a href="#" class="btn btn-primary">
                     <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                   </a>
                 </div>
@@ -470,15 +483,15 @@ foreach ($finalScreenings as $screening) {
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button data-bs-toggle="modal" 
-                          data-bs-target="#customStepModal" class="dropdown-item ccycle text-primary">
+                          <button onclick="ModifyStep(1,{{ $step->id }})"
+                          id="{{ $step->id }}" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
                         </li>
                         <li>
                           @can('delete_user')
-                          <button class="dropdown-item text-danger" id="deleteButton">
+                          <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
@@ -554,12 +567,12 @@ foreach ($finalScreenings as $screening) {
             <div class="row mt-4 mt-md-0">
               <div class="col-12">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                  <a href="/dashboard/{{ $step->id }}/screening" class="btn btn-outline-primary rounded-pill">
+                  <a href="#" class="btn btn-outline-primary rounded-pill">
                     {{ __('cycles.Screening') }}
                   </a>
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
-                    <a href="/dashboard/final/results/{{ $step->id }}" class="btn btn-primary">
+                    <a href="#" class="btn btn-primary">
                       <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                     </a>
                     <div class="mx-2 position-relative">
@@ -570,15 +583,15 @@ foreach ($finalScreenings as $screening) {
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button data-bs-toggle="modal" 
-                          data-bs-target="#screeningStepModal" class="dropdown-item ccycle text-primary">
+                          <button onclick="ModifyStep(1,{{ $step->id }})"
+                            id="{{ $step->id }}" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
                         </li>
                         <li>
                           @can('delete_user')
-                          <button class="dropdown-item text-danger" id="deleteButton">
+                          <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
@@ -787,7 +800,7 @@ foreach ($finalScreenings as $screening) {
                       <a id="sessions" href="/dashboard/training/sessions/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-cast me-2"></i> {{ __('admin.Sessions') }}
                       </a>
-                      <a id="results" href="/dashboard/final/results/{{ $step->id }}" class="btn btn-primary">
+                      <a id="results" href="#" class="btn btn-primary">
                         <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                       </a>
                     </div>
@@ -799,15 +812,15 @@ foreach ($finalScreenings as $screening) {
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button data-bs-toggle="modal" 
-                          data-bs-target="#mentorshipStepModal" class="dropdown-item ccycle text-primary">
+                          <button onclick="ModifyStep(1,{{ $step->id }})"
+                            id="{{ $step->id }}" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
                         </li>
                         <li>
                           @can('delete_user')
-                          <button class="dropdown-item text-danger" id="deleteButton">
+                          <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
@@ -1023,15 +1036,15 @@ foreach ($finalScreenings as $screening) {
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button data-bs-toggle="modal" 
-                          data-bs-target="#trainingStepModal" class="dropdown-item ccycle text-primary">
+                          <button onclick="ModifyStep(1,{{ $step->id }})"
+                            id="{{ $step->id }}" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
                         </li>
                         <li>
                           @can('delete_user')
-                          <button class="dropdown-item text-danger" id="deleteButton">
+                          <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
@@ -1192,15 +1205,15 @@ foreach ($finalScreenings as $screening) {
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <li>
-                          <button data-bs-toggle="modal" 
-                          data-bs-target="#finalScreeningModal" class="dropdown-item ccycle text-primary">
+                          <button onclick="ModifyStep(1,{{ $step->id }})"
+                            id="{{ $step->id }}" class="dropdown-item ccycle text-primary">
                             <i class="ti ti-edit me-2"></i>
                             {{ __('cycles.Edit') }}
                           </button>
                         </li>
                         <li>
                           @can('delete_user')
-                          <button class="dropdown-item text-danger" id="deleteButton">
+                          <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
@@ -1368,86 +1381,85 @@ foreach ($finalScreenings as $screening) {
 
     </div>
   </div>
-  <div class="content-backdrop fade"></div>
+  {{-- <div class="content-backdrop fade"></div> --}}
 </div>
 
 <!-- Custom Step Modal -->
   <div 
     class="modal fade" 
     id="customStepModal" 
-    tabindex="-1" 
+    tabindex="-1"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalCenterTitle">Edit Step Information</h5>
-          <button 
-            type="button" 
-            class="btn-close" 
-            data-bs-toggle="modal" 
-            data-bs-target="#customStepModal" 
-            aria-label="Close">
-          </button>
-        </div>
+        <form class="form" id="edit-step-form" action= "{{ URL::to('dashboard/cycles/modify') }}" method="POST"
+          enctype="multipart/form-data" autocomplete="off">
+          {!! csrf_field() !!}
+          
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Modify current step') }}</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
         <div class="modal-body">
-          <form id="edit-step-form">
+          <input type="hidden" name="sid" id="sid">
+            <input type="hidden" name="type" id="type7" value="8">
+          
             <fieldset class="row">
               <div class="col-12 form-group mb-3">
-                <label class="form-label" for="select-step">Select Step</label>
-                <select class="form-select border light-shadow">
-                  <option>Step 1</option>
-                  <option>Step 2</option>
-                  <option>Step 3</option>
+                <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}: </label>
+                <select class="select form-control" id="mFormSelect" name="mFormSelect" required>
+                  {{-- @foreach (\App\BuilderForm::all() as $form) --}}
+                  {{-- <option value="{{$form->id}}" >{{$form->form_name}}</option> --}}
+                  {{-- @endforeach --}}
                 </select>
               </div>
+
+              <div class="mb-2" id="mmenu2">
+                <label class="form-label">{{ __('cycles.Choose screening type') }}: </label>
+                <div>
+                  <select class="select2 form-control" id="mScreeningSelect" name="mScreeningSelect" required>
+                    <option selected disabled> {{ __('cycles.Select type') }}</option>
+                    <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
+                    <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
+                    <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
+                  </select>
+                </div>
+              </div>
+
+
               <div class="col-12 form-group mb-3">
-                <label class="form-label" for="step-name">Step Name</label>
-                <input 
-                  type="text" 
-                  class="form-control border light-shadow" 
-                  id="step-name" 
-                  placeholder="Step Name"
-                />
+                <label class="form-label" for="step-name">{{ __('cycles.Form title') }}:</label>
+                <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}"
+                class="form-control border light-shadow" required>
               </div>
               <div class="col-md-6 form-group mb-3">
-                <label class="form-label" for="flatpickr-date">Start Date</label>
+                <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid from') }}: </label>
                 <div class="position-relative">
-                  <input 
-                    type="text" 
-                    class="form-control border light-shadow" 
-                    id="flatpickr-date"
-                    placeholder="Start Date"
-                  />
+                  <input id='mfromDate' name='fromDate' type="text" class="form-control border light-shadow" required readonly>
                   <div class="position-absolute top-0 end-0 mt-2 me-3">
                     <i class="ti ti-calendar ti-24px text-primary"></i>
                   </div>
                 </div>
               </div>
               <div class="col-md-6 form-group mb-3">
-                <label class="form-label" for="flatpickr-date">End Date</label>
+                <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid to') }}:</label>
                 <div class="position-relative">
-                  <input 
-                    type="text" 
-                    class="form-control border light-shadow" 
-                    id="flatpickr-date"
-                    placeholder="End Date"
-                  />
+                  <input id='mtoDate' name='toDate' type="text" class="form-control border light-shadow" required readonly>
                   <div class="position-absolute top-0 end-0 mt-2 me-3">
                     <i class="ti ti-calendar ti-24px text-primary"></i>
                   </div>
                 </div>
               </div>
               <div class="col-12 form-group mb-5">
-                <label class="form-label" form="step-desc">Description</label>
-                <textarea 
-                  class="form-control border light-shadow" 
-                  id="step-desc" 
-                  rows="3" 
-                  placeholder="Description"
-                ></textarea>
+                <label class="form-label" form="step-desc">{{ __('cycles.Description') }}: </label>
+                <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control border light-shadow"></textarea>
+            
               </div>
             </fieldset>
-          </form>
+         
+            
+
         </div>
         <div class="modal-footer">
           <button type="submit" value="submit" class="btn btn-primary">
@@ -1463,12 +1475,14 @@ foreach ($finalScreenings as $screening) {
             {{ __('cycles.Close') }}
           </button>
         </div>
+
+        </form>
       </div>
     </div>
   </div>
 <!-- / Custom Step Modal -->
 <!-- Screening Step Modal -->
-  <div 
+  {{-- <div 
     class="modal fade" 
     id="screeningStepModal" 
     tabindex="-1" 
@@ -1592,10 +1606,10 @@ foreach ($finalScreenings as $screening) {
         </div>
       </div>
     </div>
-  </div>
+  </div> --}}
 <!-- / Screening Step Modal -->
 <!-- Mentorship Step Modal -->
-  <div 
+  {{-- <div 
     class="modal fade" 
     id="mentorshipStepModal" 
     tabindex="-1" 
@@ -1696,10 +1710,10 @@ foreach ($finalScreenings as $screening) {
         </div>
       </div>
     </div>
-  </div>
+  </div> --}}
 <!-- / Mentorship Step Modal -->
 <!-- Training Step Modal -->
-  <div 
+  {{-- <div 
     class="modal fade" 
     id="trainingStepModal" 
     tabindex="-1" 
@@ -1784,10 +1798,10 @@ foreach ($finalScreenings as $screening) {
         </div>
       </div>
     </div>
-  </div>
+  </div> --}}
 <!-- / Training Step Modal -->
 <!-- Final Screening Step Modal -->
-  <div 
+  {{-- <div 
     class="modal fade" 
     id="finalScreeningModal" 
     tabindex="-1" 
@@ -1888,7 +1902,7 @@ foreach ($finalScreenings as $screening) {
         </div>
       </div>
     </div>
-  </div>
+  </div> --}}
 <!-- / Final Screening Step Modal -->
 @stop
 
@@ -1932,4 +1946,272 @@ foreach ($finalScreenings as $screening) {
     });
   });
 </script>
+@section('pagescripts')
+  @php($ccycle = \App\Cycle::find($program->id))
+  <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
+  <script src="/js/jquery.datetimepicker.full.min.js"></script>
+  <script>
+    $('.date').datetimepicker({
+      timepicker: false,
+      format: 'Y-m-d'
+    });
+    $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
+      format: 'Y-m-d',
+      minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
+      maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
+      timepicker: false
+    });
+    $(document).ready(function() {
+      let drake = dragula([document.getElementById('basic-list-group')]);
+      drake.on('drop', function(el) {
+        let badges = document.getElementsByClassName('carr');
+        let ids = [];
+        for (let i = 0; i < badges.length - 1; ++i) {
+          badges[i].innerText = i + 1;
+          let id = badges[i].id.split('-');
+          ids.push(id[0]);
+        }
+        $.ajaxSetup({
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          }
+        });
+        $.ajax({
+          type: "POST",
+          url: "/dashboard/cycles/modify",
+          data: {
+            "steps": ids,
+            "type": 4,
+          },
+          success: function(response) {
+            console.log(response);
+          },
+          error: function(error) {
+            console.log(error);
+            alert("Error Occurred, arrange failed");
+          }
+        });
+      })
+    });
+
+    function DoChange(set) {
+      var cycle = $('#ccycle').find(":selected").val();
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      switch (set) {
+        case 1:
+          $.ajax({
+            type: "POST",
+            url: "/dashboard/cycles/modify",
+            data: {
+              "cycleid": cycle,
+            },
+            success: function(response) {
+              $('#title').val(response.title);
+              $('#description').val(response.description);
+              $('#cycleid').val(cycle);
+              $('#type').val(1);
+              $('#start').val(response.start);
+              $('#end').val(response.end);
+              $('#organization_id').val(response.organization_id)
+              if (response.private) {
+                $('#customSwitch3').attr('checked', 'checked');
+                $('#cyclelink').html('{{ __('cycles.Join URL') }}');
+                $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
+              }
+              $('#cycleForm').modal('show');
+            },
+            error: function(error) {
+              console.log(error);
+              alert("Error Occurred, Try again!");
+            }
+          });
+          break;
+        case 2:
+          $('#title').val('');
+          $('#description').val('');
+          $('#cycleid').val('');
+          $('#type').val(2);
+          $('#start').val('');
+          $('#end').val('');
+          $('#customSwitch3').removeAttr('checked');
+          $('#cycleForm').modal('show');
+          break;
+        case 3:
+          if (confirm('{{ __('cycles.sure delete cycle') }}?')) {
+            if (confirm('{{ __('cycles.cant undo') }}')) {
+              $.ajax({
+                type: "POST",
+                url: "/dashboard/cycles/modify",
+                data: {
+                  "cycleid": cycle,
+                  "type": 3,
+                },
+                success: function(response) {
+                  console.log(response);
+                  location.href = '/dashboard/cycles';
+                },
+                error: function(error) {
+                  console.log(error);
+                  alert("Error Occurred, Try again!");
+                }
+              });
+            }
+          }
+          break;
+        case 4:
+          let step = $('#StepSelect').find(":selected").val();
+          let steptxt = $('#StepSelect').find(":selected").text();
+          let menu = $('#menu' + step);
+          $('#menu1,#menu2').hide();
+          if (menu !== null) {
+            $.ajax({
+              url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle").val(),
+              success: function(response) {
+                $('#FormSelect').empty()
+                $('#FormSelect').append(response)
+                menu.show();
+              },
+              error: function(error) {
+                console.log(error);
+                alert("Error Occurred, Try again!");
+              }
+            });
+
+          }
+          if (step === '5') {
+            $.ajax({
+              url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected").data(
+                'organization'),
+              success: function(response) {
+                $('#FormSelect').empty()
+                $('#FormSelect').append(response)
+                $('#menu1').show();
+              },
+              error: function(error) {
+                console.log(error);
+                alert("Error Occurred, Try again!");
+              }
+            });
+          }
+          $('#stype').val(step);
+          $('#formtitle').text(steptxt);
+          $('#stepForm').modal('show');
+          break;
+      }
+    }
+
+    function ModifyStep(set, id) {
+      var cycle = $('#ccycle').find(":selected").val();
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      switch (set) {
+        case 1:
+          $.ajax({
+            type: "POST",
+            url: "/dashboard/cycles/modify",
+            data: {
+              "type": 7,
+              "sid": id,
+              "cycleid": 0,
+            },
+            success: function(response) {
+              step = response.stype;
+              let menu = $('#mmenu' + step);
+              $('#mmenu1,#mmenu2').hide();
+              if (response.data !== null) {
+                if (step == 1 || step == 5) {
+                  $('#mFormSelect').val(response.data);
+                }
+                if (step == 2) {
+                  $('#mScreeningSelect').val(response.data);
+                }
+              }
+              if (menu !== null) {
+                $.ajax({
+                  url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
+                  success: function(response) {
+                    $('#mFormSelect').empty()
+                    $('#mFormSelect').append(response)
+                    menu.show();
+                  },
+                  error: function(error) {
+                    console.log(error);
+                    alert("Error Occurred, Try again!");
+                  }
+                });
+
+              }
+              if (step == 5) {
+                $.ajax({
+                  url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
+                  success: function(response) {
+                    $('#mFormSelect').empty()
+                    $('#mFormSelect').append(response)
+                    $('#mmenu1').show();
+                  },
+                  error: function(error) {
+                    console.log(error);
+                    alert("Error Occurred, Try again!");
+                  }
+                });
+
+              }
+
+              $('#sid').val(response.id);
+              $('#mtitle').val(response.title);
+              $('#mdescription').val(response.description);
+              $('#mfromDate').val(response.from);
+              $('#mtoDate').val(response.to);
+              $('#customStepModal').modal('show');
+            },
+            error: function(error) {
+              console.log(error);
+              alert("Error Occurred, Try again!");
+            }
+          });
+          break;
+      }
+    }
+
+    function deleteStep(id) {
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      if (confirm('{{ __('cycles.sure delete step') }}?')) {
+        let badges = document.getElementsByClassName('carr');
+        let ids = [];
+        for (let a = 0; a < badges.length; ++a) {
+          badges[a].innerText = a + 1;
+          let id = badges[a].id.split('-');
+          ids.push(id[0]);
+        }
+        $.ajax({
+          type: "POST",
+          url: "/dashboard/cycles/modify",
+          data: {
+            "stepid": id,
+            "steps": ids,
+            "type": 6,
+          },
+          success: function(response) {
+            console.log(response);
+            location.href = '/dashboard/cycles/' + $('#ccycle').find(":selected").val();
+          },
+          error: function(error) {
+            console.log(error);
+            alert("Error Occurred, Try again!");
+          }
+        });
+      }
+    }
+  </script>
 @stop
