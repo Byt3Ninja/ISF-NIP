@@ -937,4 +937,5 @@ return [
 	'Evaluation'=> ' Evaluation ',
 	'Traditional_Evaluation_pending'=> 'Pinding Evaluation',
 	'Evaluation_done'=> 'Evaluation Done',
+	'Email_sent_notify'=> ' Email Sent Notify ',
 ];
