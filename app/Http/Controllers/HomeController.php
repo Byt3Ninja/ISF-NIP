@@ -222,8 +222,6 @@ class HomeController extends Controller
             ];
         });
 
-
-        dd($data);
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
