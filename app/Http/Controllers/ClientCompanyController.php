@@ -1285,10 +1285,13 @@ if ($validator->fails()) {
     }
 
     public function assessment() {
-      return view('admin/clients/assessment');
+      return view('admin/clients/assessment/assessment');
     }
     public function analysisAssessment() {
-      return view('admin/clients/analysis-assessment');
+      return view('admin/clients/assessment/analysis-assessment');
+    }
+    public function historyAssessment() {
+      return view('admin/clients/assessment/assessment-history');
     }
 
 
