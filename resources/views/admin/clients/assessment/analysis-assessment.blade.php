@@ -104,7 +104,7 @@ $assessmentPhases = [
           <ul class="nav nav-pills flex-nowrap px-2 py-3">
             @foreach($pills as $key => $pill)
             <li class="nav-item me-1">
-              <a href="/dashboard/{{ $pill }}" class="nav-link {{ $key == 0 ? 'active' : '' }}">
+              <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}" class="nav-link {{ $key == 0 ? 'active' : '' }}">
                 <span class="fs-6">{{ str_replace('-', ' ', $pill) }}</span>
               </a>
             </li>
@@ -183,7 +183,7 @@ $assessmentPhases = [
       <div class="col-12">
         <div class="card shadow-sm">
           <div class="card-body">
-            <div id="chart"></div>
+            <div id="chart" style="display: grid; place-items: center; overflow-x: auto;"></div>
           </div>
         </div>
       </div>
@@ -314,7 +314,7 @@ $assessmentPhases = [
           name: {
             textStyle: {
               color: config.colors.dark,
-              fontSize: 16,
+                fontSize: window.innerWidth < 768 ? 12 : 16,
             },
           },
           indicator: [
