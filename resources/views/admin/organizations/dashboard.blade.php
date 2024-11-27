@@ -363,23 +363,22 @@
 @section('pagescripts')
   <script>
     // User distribution by country
-    const userDistributionLabels = @json($country_labels);
-    const userDistributionData = @json($country_counts);
+    const userDistribution = @json($countries);  
 
     // Project Distribution Pie Chart Data
-    const projectsPieLabels = @json($project_type_labels);
-    const projectsPieData = @json($project_type_counts);
+    const projectTypes = @json($project_types);    
     
     // Development Stage Chart Data
-    const devStageLabels = @json($development_stage_labels);
-    const devStageData = @json($development_stage_counts);
+    const developmentStages = @json($development_stages);
 
     // Target Market Analysis Chart Data
-    const targetMarketLabels = @json($target_market_labels);
-    const targetMarketData = @json($target_market_counts);
+    const targetMarketAnalysis = @json($target_market_data);    
+
+     // Sector Breakdown
+     const sectorBreakdown = @json($sector_data);
 
     // Project Status Over Time Chart Data
-    const projectStatus = @json($project_status);
+     const projectStatus = @json($project_status);
 
     // Total jobs created
     const totalJobsCreated = @json($total_jobs_created);

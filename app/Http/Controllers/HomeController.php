@@ -280,8 +280,7 @@ class HomeController extends Controller
         $data['latest_cycles'] = $cycles->latest()->limit(10)->get();
 
         // Development Stage
-        $data['development_stage_labels'] = [];
-        $data['development_stage_counts'] = [];
+        $data['development_stages'] = [];
         foreach ($cycles->get() as $cycle) {
             $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
                 ->where('cycle', $cycle->id)
@@ -289,18 +288,28 @@ class HomeController extends Controller
                 ->get();
 
             foreach ($developmentStages as $stage) {
-                $data['development_stage_labels'][] = $stage->development_stage;
-                $data['development_stage_counts'][] = $stage->total;
+                $data['development_stages'][] = [
+                    'label' => $stage->development_stage,
+                    'count' => $stage->total,
+                ];
             }
         }
 
         // Target Market Analysis
-        $targetMarket = Company::select('targeted_market', DB::raw('count(*) as frequency'))
+        $targetMarket = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
+            ->where('users.organization_id', $organization_id)
+            ->select('targeted_market', DB::raw('count(*) as frequency'))
             ->groupBy('targeted_market')
             ->orderByDesc('frequency')
             ->get();
-        $data['target_market_labels'] = $targetMarket->pluck('targeted_market');
-        $data['target_market_counts'] = $targetMarket->pluck('frequency');
+
+        $data['target_market_data'] = $targetMarket->map(function ($item) {
+            return [
+                'label' => $item->targeted_market,
+                'count' => $item->frequency,
+            ];
+        });
 
         // Sector Breakdown
         $sectorBreakdown = Sector::join('companies', 'companies.sector', '=', 'sectors.id')
@@ -311,8 +320,12 @@ class HomeController extends Controller
             ->groupBy('sectors.name_' . $l)
             ->get();
 
-        $data['sector_labels'] = $sectorBreakdown->pluck('name_en');
-        $data['sector_counts'] = $sectorBreakdown->pluck('total');
+        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
+            return [
+                'label' => $item->name_en,
+                'count' => $item->total,
+            ];
+        });
 
         // Project Type Distribution
         $projectTypes = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
@@ -322,8 +335,12 @@ class HomeController extends Controller
             ->groupBy('companies.business_type')
             ->get();
 
-        $data['project_type_labels'] = $projectTypes->pluck('business_type');
-        $data['project_type_counts'] = $projectTypes->pluck('total');
+        $data['project_types'] = $projectTypes->map(function ($item) {
+            return [
+                'label' => $item->business_type,
+                'count' => $item->total,
+            ];
+        });
 
 
         // Total Jobs Created
@@ -331,6 +348,7 @@ class HomeController extends Controller
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
             ->sum('companies.team_num');
+
 
         // Total Founders
         $data['total_founders'] = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
@@ -347,7 +365,12 @@ class HomeController extends Controller
             ->groupBy('Sustainable_development')
             ->get();
 
-        $data['total_sdg'] = $companySdg->pluck('total');
+        $data['sdg_data'] = $companySdg->map(function ($item) {
+            return [
+                'sdg' => $item->Sustainable_development,
+                'total' => $item->total,
+            ];
+        });
 
         // Total Startups Per Organization
         $organizationsData = User::select('organization_id', DB::raw('count(*) as total'))
@@ -373,17 +396,33 @@ class HomeController extends Controller
             ->groupBy("countries.name_$l")
             ->get();
 
-        $data['country_labels'] = $countryData->pluck('country_name');
-        $data['country_counts'] = $countryData->pluck('total');
+        $data['countries'] = $countryData->map(function ($item) {
+            return [
+                'label' => $item->country_name,
+                'count' => $item->total,
+            ];
+        });
 
         // Project Status
         $projectStatus = TimeSheet::join('cycles', 'time_sheets.program_id', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
-            ->select('cycles.title as cycle_title', DB::raw('count(time_sheets.program_id) as total'))
-            ->groupBy('cycles.title')
+            ->select(
+                'cycles.title as cycle_title',
+                DB::raw('count(time_sheets.program_id) as total_programs'),
+                'cycles.start as cycle_start_date',
+                'cycles.end as cycle_end_date'
+            )
+            ->groupBy('cycles.title', 'cycles.start', 'cycles.end')
             ->get();
-        $data['project_status'] = $projectStatus;
+        $data['project_status'] = $projectStatus->map(function ($item) {
+            return [
+                'cycle_title' => $item->cycle_title,
+                'total_programs' => $item->total_programs,
+                'cycle_start_date' => $item->cycle_start_date,
+                'cycle_end_date' => $item->cycle_end_date,
+            ];
+        });
 
         return view('admin.organizations.dashboard', $data);
     }
