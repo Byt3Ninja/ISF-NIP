@@ -152,19 +152,17 @@ $countCards = [
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-body">
       @if (session()->has('msg'))
-      <div class="col-12">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
-              role="alert">
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              <div class="d-flex align-items-center">
-                <i class="bx bx-{{ session()->get('class') == 'success' ? 'like' : 'error' }}"></i>
-                <span>
-                  {{ __('admin.' . session()->get('msg')) }}
-                  {{ Session::forget('msg') }}
-                </span>
-              </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
+            role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="d-flex align-items-center">
+              <i class="bx bx-{{ session()->get('class') == 'success' ? 'like' : 'error' }}"></i>
+              <span>
+                {{ __('admin.' . session()->get('msg')) }}
+                {{ Session::forget('msg') }}
+              </span>
             </div>
           </div>
         </div>
@@ -193,29 +191,26 @@ $countCards = [
       <!-- / Count cards -->
     </div>
 
-    <!-- Horizontal Bar Chart -->
-    <div class="col-12 mt-6">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <i class="ti ti-device-laptop ti-28px"></i>
-            <h5 class="card-title mb-0 mx-2">{{ __('admin.Cycle Startups Statistics') }}</h5>
+    <div class="row mt-6">
+      <!-- Horizontal Bar Chart -->
+      <div class="col-12 mt-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <h5 class="card-title mb-0 mx-2">{{ __('admin.Cycle Startups Statistics') }}</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="horizontalBarChart"></div>
           </div>
         </div>
-        <div class="card-body">
-          <div id="horizontalBarChart"></div>
-        </div>
       </div>
-    </div>
-    <!-- /Horizontal Bar Chart -->
-
-    <div class="row g-3 align-items-center mt-6">
+      <!-- /Horizontal Bar Chart -->
       <!-- Pie Chart -->
-      <div class="col-md-6 col-12">
+      <div class="col-md-6 col-12 mt-6">
         <div class="card h-100">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="menu-icon tf-icons ti ti-user ti-28px"></i>
               <h5 class="card-title mb-0">{{ __('admin.totalusersmf') }}</h5>
             </div>
           </div>
@@ -225,13 +220,11 @@ $countCards = [
         </div>
       </div>
       <!-- /Pie Chart -->
-
       <!-- Vertical Bar Charts -->
-      <div class="col-md-6 col-12">
+      <div class="col-md-6 col-12 mt-6">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="ti ti-id ti-28px"></i>
               <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5>
             </div>
           </div>
@@ -241,15 +234,12 @@ $countCards = [
         </div>
       </div>
       <!-- /Vertical Bar Charts -->
-    </div>
-    <div class="row g-3 align-items-center mt-6">
       <!-- Projects Pie Chart -->
-      <div class="col-md-6 col-12">
+      <div class="col-md-6 col-12 mt-6">
         <div class="card h-100">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="ti ti-propeller ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Projects Distribution</h5>
+              <h5 class="card-title mb-0">{{__('admin.Project_Status_Over_Time')}}</h5>
             </div>
           </div>
           <div class="card-body">
@@ -258,31 +248,26 @@ $countCards = [
         </div>
       </div>
       <!-- / Projects Pie Chart -->
-
       <!-- Vertical Bar Charts -->
-      <div class="col-md-6 col-12">
+      <div class="col-md-6 col-12 mt-6">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="ti ti-stack ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Projects in development Stage</h5>
+              <h5 class="card-title mb-0">{{__('admin.Development_Stage')}}</h5>
             </div>
           </div>
           <div class="card-body">
             <canvas id="devStageStackedBarChart" class="chartjs" data-height="345"></canvas>
           </div>
         </div>
-        <!-- /Vertical Bar Charts -->
       </div>
-    </div>
-    <div class="row g-3 align-items-center mt-6">
+      <!-- /Vertical Bar Charts -->
       <!-- SDG Companies Pie Chart -->
-      <div class="col-md-6 col-12">
+      <div class="col-md-6 col-12 mt-6">
         <div class="card h-100">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="ti ti-propeller ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Total company by SDG</h5>
+              <h5 class="card-title mb-0">{{__('admin.Total_company_by_SDG')}}</h5>
             </div>
           </div>
           <div class="card-body">
@@ -291,31 +276,12 @@ $countCards = [
         </div>
       </div>
       <!-- / SDG Companies Pie Chart -->
-
-      <!-- Total companies by sectors -->
-      <div class="col-md-6 col-12">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-              <i class="ti ti-stack ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Total companies by sectors</h5>
-            </div>
-          </div>
-          <div class="card-body">
-            <canvas id="companyBySectorChart" class="chartjs" data-height="345"></canvas>
-          </div>
-        </div>
-        <!-- / Total companies by sectors -->
-      </div>
-    </div>
-    <!-- Sector Breakdown Chart -->
-    <div class="row">
+      <!-- Sector Breakdown Chart -->
       <div class="col-md-6 mt-6">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="ti ti-chart-donut ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Sector Breakdown</h5>
+              <h5 class="card-title mb-0">{{__('admin.Sector_Breakdown')}} </h5>
             </div>
           </div>
           <div class="card-body">
@@ -323,12 +289,13 @@ $countCards = [
           </div>
         </div>
       </div>
+      <!-- / Sector Breakdown Chart -->
+      <!-- /User Distribution Chart -->
       <div class="col-md-6 mt-6">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="ti ti-chart-donut ti-28px me-2"></i>
-              <h5 class="card-title mb-0">User distribution by country</h5>
+              <h5 class="card-title mb-0">{{__('admin.User_distribution_by_country')}}</h5>
             </div>
           </div>
           <div class="card-body">
@@ -336,16 +303,13 @@ $countCards = [
           </div>
         </div>
       </div>
-    </div>
-    <!-- /Sector Breakdown Chart -->
-    <div class="row">
+      <!-- /User Distribution Chart -->
       <!-- Target Market Analysis Chart -->
       <div class="col-md-6 mt-6">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <i class="ti ti-target ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Target Market Analysis</h5>
+              <h5 class="card-title mb-0">{{__('admin.Target_Market_Analysis')}}</h5>
             </div>
           </div>
           <div class="card-body">
@@ -354,24 +318,38 @@ $countCards = [
         </div>
       </div>
       <!-- /Target Market Analysis Chart -->
-    </div>
-    <!-- Project Status Over Time Chart -->
-    <div class="row g-3 align-items-center mt-6">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-              <i class="ti ti-clock ti-28px me-2"></i>
-              <h5 class="card-title mb-0">Project Status Over Time</h5>
+      <!-- Project Status Over Time Chart -->
+      <div class="row g-3 align-items-center mt-6">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">{{__('admin.Project_Status_Over_Time')}}</h5>
+              </div>
             </div>
-          </div>
-          <div class="card-body">
-            <div id="projectStatusOverTimeChart"></div>
+            <div class="card-body">
+              <div id="projectStatusOverTimeChart"></div>
+            </div>
           </div>
         </div>
       </div>
+      <!-- /Project Status Over Time Chart -->
+
+      <!-- Total companies by sectors -->
+      {{-- <div class="col-md-6 col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <h5 class="card-title mb-0">Total companies by sectors</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="companyBySectorChart" class="chartjs" data-height="345"></canvas>
+          </div>
+        </div>
+        <!-- / Total companies by sectors -->
+      </div> --}}
     </div>
-    <!-- /Project Status Over Time Chart -->
   </div>
   @stop
 
@@ -396,7 +374,7 @@ $countCards = [
 
     // Target Market Analysis Chart Data
     const targetMarketData = @json($target_market_data);
-    
+
     // Project Status Over Time Chart Data
     const projectStatusData = @json($project_status);
 
@@ -409,7 +387,7 @@ $countCards = [
     // Companies by SDG Chart Data
     const sdgData = @json($sdg_data);
 
-    // Total Startups Per Organization
+    // Total Startups Per Organization (Count)
     const totalStartupsPerOrganization = @json($organization_counts);
 
     // Total Raised Funds

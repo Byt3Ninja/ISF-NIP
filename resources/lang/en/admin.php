@@ -938,4 +938,11 @@ return [
 	'Traditional_Evaluation_pending'=> 'Pinding Evaluation',
 	'Evaluation_done'=> 'Evaluation Done',
 	'Email_sent_notify'=> ' Email Sent Notify ',
+  'Project_Status_Over_Time' => 'Project Status Over Time',
+  'Target_Market_Analysis' => 'Target Market Analysis',
+  'User_distribution_by_country' => 'User Distribution by Country',
+  'Sector_Breakdown' => 'Sector Breakdown',
+  'Total_company_by_SDG' => 'Total Companies by SDG',
+  'Development_Stage' => 'Projects in Development Stage',
+  'Projects_Distribution_by_Sector' => 'Projects Distribution by Sector',
 ];

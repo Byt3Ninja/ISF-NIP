@@ -3,14 +3,14 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderSectorBreakdownChart();
-  renderProjectDistributionChart();
   renderDevStageChart();
-  renderTargetMarketChart();
-  renderProjectOverTimeStatusChart();
+  renderProjectDistributionChart();
   renderCompanySdgChart();
   renderUserDistributionChart();
-  renderTotalCompaniesBySectorChart();
+  renderSectorBreakdownChart();
+  renderTargetMarketChart();
+  renderProjectOverTimeStatusChart();
+  // renderTotalCompaniesBySectorChart();
 });
 
 let cardColor, headingColor, labelColor, borderColor, legendColor;
@@ -42,90 +42,99 @@ const getChartData = (labels, data) => {
 };
 
 // Render Total Companies By Sector Chart
-const renderTotalCompaniesBySectorChart = () => {
-  const sectors = ['Technology', 'Healthcare', 'Finance', 'Education'];
-  const companies = [4, 9, 5, 7];
-  const chartDom = document.querySelector('#companyBySectorChart');
-  if (chartDom) {
-    const chart = new Chart(chartDom, {
-      type: 'bar',
-      data: {
-        labels: sectors,
-        datasets: [
-          {
-            data: companies,
-            backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'],
-            borderColor: 'transparent',
-            maxBarThickness: 15,
-            borderRadius: {
-              topRight: 15,
-              topLeft: 15
-            }
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 500
-        },
-        plugins: {
-          tooltip: {
-            rtl: isRtl,
-            backgroundColor: cardColor,
-            titleColor: headingColor,
-            bodyColor: legendColor,
-            borderWidth: 1,
-            borderColor: borderColor
-          },
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              color: borderColor,
-              drawBorder: false,
-              borderColor: borderColor
-            },
-            ticks: {
-              color: labelColor
-            }
-          },
-          y: {
-            min: 2,
-            max: 12,
-            grid: {
-              color: borderColor,
-              drawBorder: false,
-              borderColor: borderColor
-            },
-            ticks: {
-              stepSize: 2,
-              color: labelColor
-            }
-          }
-        }
-      }
-    });
-  }
-}
+// const renderTotalCompaniesBySectorChart = () => {
+//   const chartData = totalStartupsPerOrganization ? totalStartupsPerOrganization?.filter(
+//     data => data.label !== null && data.count > 0
+//   ) : [];
+//   const chartDataLabels = chartData.map(data => data.label);
+//   const chartDataValues = chartData.map(data => data.count);
+//   console.log('chartDataLabels', chartDataLabels)
+//   console.log('chartDataValues', chartDataValues)
+  // const chartDom = document.querySelector('#companyBySectorChart');
+  // if (chartDom) {
+  //   const chart = new Chart(chartDom, {
+  //     type: 'bar',
+  //     data: {
+  //       labels: sectors,
+  //       datasets: [
+  //         {
+  //           data: companies,
+  //           backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'],
+  //           borderColor: 'transparent',
+  //           maxBarThickness: 15,
+  //           borderRadius: {
+  //             topRight: 15,
+  //             topLeft: 15
+  //           }
+  //         }
+  //       ]
+  //     },
+  //     options: {
+  //       responsive: true,
+  //       maintainAspectRatio: false,
+  //       animation: {
+  //         duration: 500
+  //       },
+  //       plugins: {
+  //         tooltip: {
+  //           rtl: isRtl,
+  //           backgroundColor: cardColor,
+  //           titleColor: headingColor,
+  //           bodyColor: legendColor,
+  //           borderWidth: 1,
+  //           borderColor: borderColor
+  //         },
+  //         legend: {
+  //           display: false
+  //         }
+  //       },
+  //       scales: {
+  //         x: {
+  //           grid: {
+  //             color: borderColor,
+  //             drawBorder: false,
+  //             borderColor: borderColor
+  //           },
+  //           ticks: {
+  //             color: labelColor
+  //           }
+  //         },
+  //         y: {
+  //           min: 2,
+  //           max: 12,
+  //           grid: {
+  //             color: borderColor,
+  //             drawBorder: false,
+  //             borderColor: borderColor
+  //           },
+  //           ticks: {
+  //             stepSize: 2,
+  //             color: labelColor
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
+// }
 
 // Render User Distribution Chart
 const renderUserDistributionChart = () => {
-  const { labels, data } = getChartData(userDistributionLabels, userDistributionData);
-  // console.log('labels', labels);
+  const chartData = userDistributionData ? userDistributionData?.filter(
+    data => data.label !== null && data.count > 0
+  ) : [];
+  const chartDataLabels = chartData.map(data => data.label);
+  const chartDataValues = chartData.map(data => data.count);
+
   const chartDom = document.querySelector('#userDistributionChart');
   if (chartDom) {
     const chart = new Chart(chartDom, {
       type: 'bar',
       data: {
-        labels: labels,
+        labels: chartDataLabels,
         datasets: [
           {
-            data,
+            data: chartDataValues,
             backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'],
             borderColor: 'transparent',
             maxBarThickness: 15,
@@ -167,7 +176,7 @@ const renderUserDistributionChart = () => {
             }
           },
           y: {
-            min: 2,
+            min: 0,
             max: 100,
             grid: {
               color: borderColor,
@@ -187,8 +196,17 @@ const renderUserDistributionChart = () => {
 
 // Render Target Market Chart
 const renderProjectOverTimeStatusChart = () => {
-  const projectStatusLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-  const projectStatusData = [10, 20, 15, 25, 30, 35, 40];
+  const labels = projectStatusData ? projectStatusData.map(pro => pro.cycle_title) : [];
+  const values = projectStatusData ? projectStatusData.map(pro => pro.total_programs * 10) : [];
+  const dates = projectStatusData ? projectStatusData.map(
+    pro => {
+      const date = new Date(pro.cycle_start_date);
+      return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
+  ) : [];
+  console.log('values', values)
+  console.log('labels', labels)
+  console.log('dates', dates)
 
   // Project Status Over Time curve Chart
   const projectStatusChartEl = document.querySelector('#projectStatusOverTimeChart');
@@ -206,7 +224,7 @@ const renderProjectOverTimeStatusChart = () => {
     },
     series: [
       {
-        data: [280, 200, 220, 180, 270, 250, 70, 90, 200, 150, 160, 100, 150, 100, 50]
+        data: values,
       }
     ],
     markers: {
@@ -216,7 +234,15 @@ const renderProjectOverTimeStatusChart = () => {
       colors: [config.colors.warning]
     },
     dataLabels: {
-      enabled: false
+      enabled: true,
+      style: {
+        colors: [isDarkStyle ? '#c0c0c0' : '#515365'],
+        fontSize: '12px',
+        fontWeight: 'bold'
+      },
+      formatter: function (val, opts) {
+        return labels[opts.dataPointIndex] || ''; // Display cycle title as label
+      }
     },
     stroke: {
       curve: 'straight'
@@ -239,23 +265,7 @@ const renderProjectOverTimeStatusChart = () => {
       }
     },
     xaxis: {
-      categories: [
-        '7/12',
-        '8/12',
-        '9/12',
-        '10/12',
-        '11/12',
-        '12/12',
-        '13/12',
-        '14/12',
-        '15/12',
-        '16/12',
-        '17/12',
-        '18/12',
-        '19/12',
-        '20/12',
-        '21/12'
-      ],
+      categories: dates,
       axisBorder: {
         show: false
       },
@@ -277,7 +287,7 @@ const renderProjectOverTimeStatusChart = () => {
         }
       }
     }
-  };
+  };  
 
   if (typeof projectStatusChartEl !== undefined && projectStatusChartEl !== null) {
     const projectStatusChart = new ApexCharts(projectStatusChartEl, projectStatusChartConfig);
@@ -287,19 +297,50 @@ const renderProjectOverTimeStatusChart = () => {
 
 // Render Target Market Chart
 const renderTargetMarketChart = () => {
-  const { labels, data } = getChartData(targetMarketLabels, targetMarketData);
-  const finalLabels = JSON.parse(labels[1]);
-  const chartDom = document.querySelector('#targetMarketChart');
 
+  const chartData = targetMarketData ? targetMarketData?.filter(
+    data => data.label !== null
+  ) : [];
+  // const chartDataLabels = chartData.map(data => data.label);
+  // console.log('chartDataLabels', chartDataLabels)
+  // const chartDataLabelsArr = chartDataLabels ? JSON.parse(chartDataLabels) : [];
+  // const chartDataValues = chartData.map(data => data.count)[0];
+  // const values = Array.from({
+  //   length: chartDataLabelsArr?.length
+  // }, () => chartDataValues);
+  const allLabels = chartData.reduce((acc, data) => {
+    if (data.label) {
+      const labels = JSON.parse(data.label);
+      labels.forEach(label => {
+        acc.push(label);
+      });
+    }
+    return acc;
+  }, []);
+
+  const allValues = chartData.reduce((acc, data) => {
+    if (data.label) {
+      const labels = JSON.parse(data.label);
+      labels.forEach(() => {
+        acc.push(data.count * 10);
+      });
+    }
+    return acc;
+  }, []);
+
+  const chartDom = document.querySelector('#targetMarketChart');
   if (chartDom) {
     const chart = new Chart(chartDom, {
       type: 'bar',
       data: {
-        labels: finalLabels,
+        labels: allLabels,
         datasets: [
           {
-            data: data,
-            backgroundColor: ['green', 'yellow'],
+            data: allValues,
+            backgroundColor: [
+              '#808390', '#7367f0', '#00bad1', '#007bff', '#FFC300',
+              '#f8d7da', '#cce5ff', '#d4edda', '#fff3cd', '#d1ecf1',
+            ],
             borderColor: 'transparent',
             maxBarThickness: 15,
             borderRadius: {
@@ -340,15 +381,15 @@ const renderTargetMarketChart = () => {
             }
           },
           y: {
-            min: 2,
-            max: 12,
+            min: 0,
+            max: 100,
             grid: {
               color: borderColor,
               drawBorder: false,
               borderColor: borderColor
             },
             ticks: {
-              stepSize: 2,
+              stepSize: 10,
               color: labelColor
             }
           }
@@ -360,19 +401,21 @@ const renderTargetMarketChart = () => {
 
 // Render Development Stage Chart
 const renderDevStageChart = () => {
-  const { labels, data } = getChartData(devStageLabels, devStageData);
-  const finalLabels = labels.map(label => (!label ? 'others' : label));
-  console.log('finalLabels', finalLabels);
-  console.log('data', data);
+  const chartData = devStageData ? devStageData?.filter(
+    data => data.label !== null && data.count > 0
+  ) : [];
+  const chartDataLabels = chartData.map(data => data.label);
+  const chartDataValues = chartData.map(data => data.count * 10);
+
   const charDom = document.querySelector('#devStageStackedBarChart');
   if (charDom) {
     const chart = new Chart(charDom, {
       type: 'bar',
       data: {
-        labels: finalLabels,
+        labels: chartDataLabels,
         datasets: [
           {
-            data: data,
+            data: chartDataValues,
             backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'],
             borderColor: 'transparent',
             maxBarThickness: 15,
@@ -414,15 +457,15 @@ const renderDevStageChart = () => {
             }
           },
           y: {
-            min: 2,
-            max: 12,
+            min: 0,
+            max: 100,
             grid: {
               color: borderColor,
               drawBorder: false,
               borderColor: borderColor
             },
             ticks: {
-              stepSize: 2,
+              stepSize: 10,
               color: labelColor
             }
           }
@@ -434,13 +477,21 @@ const renderDevStageChart = () => {
 
 // Render Company SDG Chart
 const renderCompanySdgChart = () => {
-  const { labels, data } = getChartData(sdgLabels, sdgData);
-  const finalLabels = JSON.parse(labels[1]);
+  const chartData = sdgData ? sdgData?.filter(
+    data => data.sdg !== null
+  ) : [];
+  const chartDataLabels = chartData.map(data => data.sdg);
+  const chartDataLabelsArr = chartDataLabels ? JSON.parse(chartDataLabels) : [];
+  const chartDataValues = chartData.map(data => data.total)[0];
+  const values = Array.from({
+    length: chartDataLabelsArr?.length
+  }, () => chartDataValues);
+
   const chartDom = document.querySelector('#sdgCompaniesChart'),
   chartConfig = {
     chart: { height: 380, type: 'pie' },
-    labels: finalLabels,
-    series: [10, 20, 15, 25, 30, 35, 40, 12, 56, 41, 11, 12, 23, 46, 68, 79, 89],
+    labels: chartDataLabelsArr,
+    series: values,
     colors: ['#ffd9b4', '#ff7f50', '#ff6347', '#ff4500', '#ff0000', '#dc143c', '#b22222', '#8b0000', '#ff1493', '#ff69b4', '#ffb6c1', '#ffc0cb', '#db7093', '#c71585', '#ff00ff', '#ee82ee', '#dda0dd'],
     stroke: { show: false, curve: 'smooth' },
     legend: {
@@ -460,13 +511,17 @@ const renderCompanySdgChart = () => {
 
 // Render Project Distribution Pie Chart
 const renderProjectDistributionChart = () => {
-  const { labels, data } = getChartData(projectsPieLabels, projectsPieData);
-  const finalLabels = labels.map(label => (!label ? 'others' : label)),
-    chartDom = document.querySelector('#projectsPieChart'),
+  const chartData = projectsPieData ? projectsPieData?.filter(
+    data => data.label !== null && data.count > 0
+  ) : [];
+  const chartDataLabels = chartData.map(data => data.label);
+  const chartDataValues = chartData.map(data => data.count);
+
+  const chartDom = document.querySelector('#projectsPieChart'),
     chartConfig = {
       chart: { height: 380, type: 'pie' },
-      labels: finalLabels,
-      series: data,
+      labels: chartDataLabels,
+      series: chartDataValues,
       colors: ['#87CEEB', '#FFA500', '#33FF57', '#3357FF', '#FF33A1', '#FFC300'],
       stroke: { show: false, curve: 'smooth' },
       legend: {
@@ -486,16 +541,20 @@ const renderProjectDistributionChart = () => {
 
 // Render Sector Breakdown Chart
 const renderSectorBreakdownChart = () => {
-  const { labels, data } = getChartData(sectorBreakdownLabels, sectorBreakdownData);
+  const chartData = sectorBreakdownData ? sectorBreakdownData?.filter(
+    data => data.label !== null && data.count > 0
+  ) : [];
+  const chartDataLabels = chartData.map(data => data.label);
+  const chartDataValues = chartData.map(data => data.count);
 
   const chartDom = document.querySelector('#sectorBreakdownChart'),
     colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFC300'],
     chartConfig = {
       chart: { height: 380, type: 'donut' },
-      labels: labels.slice(0, 5),
-      series: data.slice(0, 5).map(d => d * 10),
+      labels: chartDataLabels,
+      series: chartDataValues,
       colors,
-      stroke: { show: true, width: 2, colors: ['#fff'] },
+      stroke: { show: true, width: 5, colors: ['#fff'] },
       legend: {
         show: true,
         position: 'bottom',
@@ -506,7 +565,8 @@ const renderSectorBreakdownChart = () => {
       plotOptions: {
         pie: {
           donut: {
-            size: '85%'
+            height: 500, // Increase this value
+            size: '75%' // Change this to a smaller value, e.g., '75%' or '70%'
           }
         }
       }
