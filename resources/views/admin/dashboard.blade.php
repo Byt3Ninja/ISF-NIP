@@ -383,27 +383,22 @@ $countCards = [
   @section('pagescripts')
   <script>
     // User distribution by country
-    const userDistributionLabels = @json($country_labels);
-    const userDistributionData = @json($country_counts);
+    const userDistributionData = @json($countries);
 
     // Sector Breakdown Chart Data
-    const sectorBreakdownLabels = @json($sector_labels);
-    const sectorBreakdownData = @json($sector_counts);
+    const sectorBreakdownData = @json($sector_data);
 
     // Project Distribution Pie Chart Data
-    const projectsPieLabels = @json($project_type_labels);
-    const projectsPieData = @json($project_type_counts);
-    
+    const projectsPieData = @json($project_types);
+
     // Development Stage Chart Data
-    const devStageLabels = @json($development_stage_labels);
-    const devStageData = @json($development_stage_counts);
+    const devStageData = @json($development_stages);
 
     // Target Market Analysis Chart Data
-    const targetMarketLabels = @json($target_market_labels);
-    const targetMarketData = @json($target_market_counts);
-
+    const targetMarketData = @json($target_market_data);
+    
     // Project Status Over Time Chart Data
-    const projectStatus = @json($project_status);
+    const projectStatusData = @json($project_status);
 
     // Total jobs created
     const totalJobsCreated = @json($total_jobs_created);
@@ -412,8 +407,7 @@ $countCards = [
     const totalFounders = @json($total_founders);
 
     // Companies by SDG Chart Data
-    const sdgLabels = @json($sdg_labels);
-    const sdgData = @json($sdg_counts);
+    const sdgData = @json($sdg_data);
 
     // Total Startups Per Organization
     const totalStartupsPerOrganization = @json($organization_counts);

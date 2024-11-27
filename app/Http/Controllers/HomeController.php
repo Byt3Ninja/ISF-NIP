@@ -225,8 +225,12 @@ class HomeController extends Controller
             ->groupBy('development_stage')
             ->get();
 
-        $data['development_stage_labels'] = $developmentStages->pluck('development_stage');
-        $data['development_stage_counts'] = $developmentStages->pluck('total');
+        $data['development_stages'] = $developmentStages->map(function ($item) {
+            return [
+                'label' => $item->development_stage,
+                'count' => $item->total,
+            ];
+        });
 
         return view('admin.dashboard', $data);
     }
