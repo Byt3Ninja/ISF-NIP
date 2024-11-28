@@ -128,15 +128,17 @@ class HomeController extends Controller
         }
 
         // Target Market Analysis
-        $targetMarket = Company::select('targeted_market', DB::raw('count(*) as frequency'))
-            ->groupBy('targeted_market')
-            ->orderByDesc('frequency')
+        $targetMarket = DB::table('countries')
+            ->select('countries.name_' . $l . ' as country_name', DB::raw('COUNT(companies.id) as company_count'))
+            ->leftJoin('companies', DB::raw('JSON_CONTAINS(companies.targeted_market, CONCAT(\'"\', countries.id, \'"\'), "$")'), '=', DB::raw('1'))
+            ->groupBy('countries.id', 'countries.name_' . $l)
+            ->orderByDesc('company_count')
             ->get();
 
         $data['target_market_data'] = $targetMarket->map(function ($item) {
             return [
-                'label' => $item->targeted_market,
-                'count' => $item->frequency,
+                'label' => $item->country_name,
+                'count' => $item->company_count,
             ];
         });
 
@@ -231,7 +233,6 @@ class HomeController extends Controller
                 'count' => $item->total,
             ];
         });
-
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
