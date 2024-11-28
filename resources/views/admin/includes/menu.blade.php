@@ -256,6 +256,21 @@
         </a>
       </li>
 
+      <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Category.index') }}" class="menu-link">
+          <i class="ti ti-flag me-3 ti-md"></i>
+          <div>{{ __('admin.Categories') }}</div>
+        </a>
+      </li>
+
+      <li class="{{ Request::is('dashboard/subcategories*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('subcategories.index') }}" class="menu-link">
+          <i class="ti ti-flag me-3 ti-md"></i>
+          <div>{{ __('admin.SubCategories') }}</div>
+        </a>
+      </li>
+
+
       <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
         <a href="{{ route('Labels.index') }}" class="menu-link">
           <i class="ti ti-flag me-3 ti-md"></i>
@@ -331,18 +346,44 @@
             </a>
           </li>
 
-          <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
-            <a href="{{ route('Category.index') }}" class="menu-link">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Category') }}</span>
-            </a>
-          </li>
+          
         </ul>
       </li>
 
       <!-- End Time Sheets -->
 
+<!-- Start Assessments -->
+<li
+class="{{ Request::is('dashboard/question-assessment*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
+<a class="menu-link menu-toggle">
+  <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
+  <div>{{ __('admin.Assessments') }}</div>
+</a>
+<ul class="menu-sub">
+  <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('question-assessment') }}" class="menu-link">
+      <span class="menu-item">{{ __('admin.Question_Assessment') }}</span>
+      <i class="bx bx-message"></i>
+    </a>
+  </li>
+  <li class="{{ Request::is('dashboard/analysis-assessment*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('analysis-assessment') }}" class="menu-link">
+      <span class="menu-item">{{ __('admin.Analysis_Assessment') }}</span>
+      <i class="bx bx-message"></i>
+    </a>
+  </li>
 
+  <li class="{{ Request::is('dashboard/history-assessment*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('history-assessment') }}" class="menu-link">
+      <span class="menu-item">{{ __('admin.History_Assessment') }}</span>
+      <i class="bx bx-message"></i>
+    </a>
+  </li>
+
+</ul>
+</li>
+
+<!-- End Assessment -->
 
 
 
