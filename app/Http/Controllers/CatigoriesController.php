@@ -36,10 +36,13 @@ class CatigoriesController extends Controller
         $request->validate([
             'category_name_ar' => 'required',
             'category_name_en' => 'required',
+            'category_type' => 'required',
         ]);
         $tags = new Category();
         $tags->category_name_ar = $request->category_name_ar;
         $tags->category_name_en = $request->category_name_en;
+        $tags->category_description = $request->category_description;
+        $tags->category_type = $request->category_type;
         $tags->save();
     
         // إرجاع استجابة ناجحة (يمكن تعديلها حسب الحاجة)
@@ -70,11 +73,14 @@ class CatigoriesController extends Controller
         $request->validate([
             'category_name_ar' => 'required',
             'category_name_en' => 'required',
+            'category_type' => 'required',
         ]);
         
         $tags = Category::find($id);
         $tags->category_name_ar = $request->category_name_ar;
         $tags->category_name_en = $request->category_name_en;
+        $tags->category_description = $request->category_description;
+        $tags->category_type = $request->category_type;
         $tags->save();
         // إرجاع استجابة ناجحة (يمكن تعديلها حسب الحاجة)
         return back()->with(['class'=>'success','message'=>__('StoredSuccessfully')]);

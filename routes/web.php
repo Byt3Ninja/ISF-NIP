@@ -155,19 +155,24 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::resource('Labels', 'LabelController');
     Route::resource('TimeSheet', 'TimeSheetController');
     Route::resource('Category', 'CatigoriesController'); // category in TimeSheet Folder
+    Route::resource('subcategories', 'SubCategoryController');
+    
     Route::get('/show/FinanceTimeSheet', 'TimeSheetController@Finance')->name('show_finance_time_sheet');
     Route::get('/export-FinanceTS', 'TimeSheetController@exportFTS')->name('exportFTS');
     Route::get('/UserTimeSheet', 'TimeSheetController@ClockUsers')->name('UserTimeSheet');
     Route::post('/UserTimeSheet/{id}', 'TimeSheetController@updateClockUser')->name('UserClockUpdate');
 
     
+    //Assessments
+    Route::get('/question-assessment', 'ClientCompanyController@assessment')->name('question-assessment');
+	Route::get('/analysis-assessment', 'ClientCompanyController@analysisAssessment')->name('analysis-assessment');;
+	Route::get('/history-assessment', 'ClientCompanyController@historyAssessment')->name('history-assessment');;
+	Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');;
+
 	//Client's company
     Route::resource('organizations', 'organizationsController');
     //Company profile
 	Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
-	Route::get('/question-assessment', 'ClientCompanyController@assessment');
-	Route::get('/analysis-assessment', 'ClientCompanyController@analysisAssessment');
-	Route::get('/history-assessment', 'ClientCompanyController@historyAssessment');
 	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
 	Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
 	Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
@@ -215,6 +220,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('openonemsg/{id}', 'SettingsController@openonemsg');
     //products categories Manager routes
     Route::resource('productsCategories', 'ProductCategoryController');
+    
     //products Manager routes
     Route::resource('products', 'ProductController');
     //publish

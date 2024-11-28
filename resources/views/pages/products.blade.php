@@ -68,7 +68,7 @@
                 <div class="border-bottom"></div>
                 <br>
                 <div style="text-align: center;">
-                    {!! $products->appends(request()->input())->links(); !!}
+                    {!! $products->appends(request()->input())->links() !!}
                 </div>
             </div>
             @include('includes.products_side')
