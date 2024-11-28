@@ -128,24 +128,26 @@ class HomeController extends Controller
         }
 
         // Target Market Analysis
-        $targetMarket = Company::select('targeted_market', DB::raw('count(*) as frequency'))
-            ->groupBy('targeted_market')
-            ->orderByDesc('frequency')
+        $targetMarket = DB::table('countries')
+            ->select('countries.name_' . $l . ' as country_name', DB::raw('COUNT(companies.id) as company_count'))
+            ->leftJoin('companies', DB::raw('JSON_CONTAINS(companies.targeted_market, CONCAT(\'"\', countries.id, \'"\'), "$")'), '=', DB::raw('1'))
+            ->groupBy('countries.id', 'countries.name_' . $l)
+            ->orderByDesc('company_count')
             ->get();
 
         $data['target_market_data'] = $targetMarket->map(function ($item) {
             return [
-                'label' => $item->targeted_market,
-                'count' => $item->frequency,
+                'label' => $item->country_name,
+                'count' => $item->company_count,
             ];
         });
 
         // Sector Breakdown
         $sectorBreakdown = Sector::withCount('children')->get();
 
-        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
+        $data['sector_data'] = $sectorBreakdown->map(function ($item) use ($l) {
             return [
-                'label' => $item->name_en,
+                'label' => $item->{'name_' . $l},
                 'count' => $item->children_count,
             ];
         });
@@ -173,12 +175,18 @@ class HomeController extends Controller
             ->groupBy('Sustainable_development')
             ->get();
 
-        $data['sdg_data'] = $companySdg->map(function ($item) {
-            return [
-                'sdg' => $item->Sustainable_development,
-                'total' => $item->total,
-            ];
+        $data['sdg_data'] = $companySdg->flatMap(function ($item) {
+            $sdgs = json_decode($item->Sustainable_development); // تحويل النص إلى مصفوفة
+
+            return collect($sdgs)->map(function ($sdg) use ($item) {
+                return [
+                    'sdg' => __('admin.' . $sdg),
+                    'total' => $item->total, // نستخدم نفس العدد لجميع العناصر في هذه المصفوفة
+                ];
+            });
         });
+
+
 
         // Total Startups Per Organization
         $organizationsData = User::whereNotNull('organization_id')
@@ -202,7 +210,7 @@ class HomeController extends Controller
             ];
         });
 
-        // Project Status
+        // Program Status
         $projectStatus = TimeSheet::join('cycles', 'program_id', '=', 'cycles.id')
             ->select(
                 'cycles.title as cycle_title',
@@ -221,17 +229,16 @@ class HomeController extends Controller
             ];
         });
 
-        $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
-            ->groupBy('development_stage')
-            ->get();
+        $developmentStages = Company::whereNotNull('development_stage')->get();
+        $uniqueDevelopmentStages = $developmentStages->unique('development_stage');
 
-        $data['development_stages'] = $developmentStages->map(function ($item) {
+        $data['development_stages'] = $uniqueDevelopmentStages->map(function ($item) use ($developmentStages) {
+            $count = $developmentStages->where('development_stage', $item->development_stage)->count();  // حساب عدد العناصر في نفس المرحلة
             return [
-                'label' => $item->development_stage,
-                'count' => $item->total,
+                'label' => __('admin.' . $item->development_stage),
+                'count' => $count,
             ];
         });
-
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()

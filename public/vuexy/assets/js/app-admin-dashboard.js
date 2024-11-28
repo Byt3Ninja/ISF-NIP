@@ -204,9 +204,6 @@ const renderProjectOverTimeStatusChart = () => {
       return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
     }
   ) : [];
-  console.log('values', values)
-  console.log('labels', labels)
-  console.log('dates', dates)
 
   // Project Status Over Time curve Chart
   const projectStatusChartEl = document.querySelector('#projectStatusOverTimeChart');
@@ -297,17 +294,10 @@ const renderProjectOverTimeStatusChart = () => {
 
 // Render Target Market Chart
 const renderTargetMarketChart = () => {
-
   const chartData = targetMarketData ? targetMarketData?.filter(
     data => data.label !== null
   ) : [];
-  // const chartDataLabels = chartData.map(data => data.label);
-  // console.log('chartDataLabels', chartDataLabels)
-  // const chartDataLabelsArr = chartDataLabels ? JSON.parse(chartDataLabels) : [];
-  // const chartDataValues = chartData.map(data => data.count)[0];
-  // const values = Array.from({
-  //   length: chartDataLabelsArr?.length
-  // }, () => chartDataValues);
+
   const allLabels = chartData.reduce((acc, data) => {
     if (data.label) {
       const labels = JSON.parse(data.label);
@@ -477,35 +467,55 @@ const renderDevStageChart = () => {
 
 // Render Company SDG Chart
 const renderCompanySdgChart = () => {
-  const chartData = sdgData ? sdgData?.filter(
-    data => data.sdg !== null
-  ) : [];
-  const chartDataLabels = chartData.map(data => data.sdg);
-  const chartDataLabelsArr = chartDataLabels ? JSON.parse(chartDataLabels) : [];
-  const chartDataValues = chartData.map(data => data.total)[0];
-  const values = Array.from({
-    length: chartDataLabelsArr?.length
-  }, () => chartDataValues);
+  if (sdgData) {
+    const chartData = sdgData ? sdgData?.filter(
+      data => data.sdg !== null
+    ) : [];
+  const chartDataLabels = chartData.reduce((acc, data) => {
+    if (data.sdg) {
+      let labels = [];
+      try {
+        labels = JSON.parse(data.sdg);
+      } catch (e) {
+        console.error('Invalid JSON string in data.sdg:', data.sdg);
+      }
+      labels.forEach(label => {
+        acc.push(label);
+      });
+    }
+    return acc;
+  }, []);
 
-  const chartDom = document.querySelector('#sdgCompaniesChart'),
-  chartConfig = {
-    chart: { height: 380, type: 'pie' },
-    labels: chartDataLabelsArr,
-    series: values,
-    colors: ['#ffd9b4', '#ff7f50', '#ff6347', '#ff4500', '#ff0000', '#dc143c', '#b22222', '#8b0000', '#ff1493', '#ff69b4', '#ffb6c1', '#ffc0cb', '#db7093', '#c71585', '#ff00ff', '#ee82ee', '#dda0dd'],
-    stroke: { show: false, curve: 'smooth' },
-    legend: {
-      show: true,
-      position: 'bottom',
-      markers: { offsetX: -3 },
-      itemMargin: { vertical: 3, horizontal: 10 },
-      labels: { colors: isDarkStyle ? '#c0c0c0' : '#515365', useSeriesColors: false }
-    },
-    plotOptions: {}
-  };
-  if (typeof chartDom !== undefined && chartDom !== null) {
-    const chart = new ApexCharts(chartDom, chartConfig);
-    chart.render();
+  const chartDataValues = chartData.reduce((acc, data) => {
+    if (data.sdg) {
+      const labels = JSON.parse(data.sdg);
+      labels.forEach(() => {
+        acc.push(data.total);
+      });
+    }
+    return acc;
+  }, []);
+  
+    const chartDom = document.querySelector('#sdgCompaniesChart'),
+    chartConfig = {
+      chart: { height: 380, type: 'pie' },
+      labels: chartDataLabels,
+      series: chartDataValues,
+      colors: ['#ffd9b4', '#ff7f50', '#ff6347', '#ff4500', '#ff0000', '#dc143c', '#b22222', '#8b0000', '#ff1493', '#ff69b4', '#ffb6c1', '#ffc0cb', '#db7093', '#c71585', '#ff00ff', '#ee82ee', '#dda0dd'],
+      stroke: { show: false, curve: 'smooth' },
+      legend: {
+        show: true,
+        position: 'bottom',
+        markers: { offsetX: -3 },
+        itemMargin: { vertical: 3, horizontal: 10 },
+        labels: { colors: isDarkStyle ? '#c0c0c0' : '#515365', useSeriesColors: false }
+      },
+      plotOptions: {}
+    };
+    if (typeof chartDom !== undefined && chartDom !== null) {
+      const chart = new ApexCharts(chartDom, chartConfig);
+      chart.render();
+    }
   }
 };
 
