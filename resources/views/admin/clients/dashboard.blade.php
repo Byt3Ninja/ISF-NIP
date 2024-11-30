@@ -34,6 +34,8 @@
         ->take(5)
         ->get();
     $circle_id = Auth::user()->company->cycle ?? 0;
+    $organization_id = Auth::user()->organization_id ?? 0;
+    if( $organization_id == 0 ) { $organization_id = Auth::user()->company->cycledata->organization_id ?? 0; }
     $s_count = \App\Service::count();
     $s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
     $nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
@@ -45,12 +47,12 @@
       $steps = \App\Step::where('cycle_id', $circle_id)->orderBy('arr')->get();
       foreach( $steps as $step )
       {
-        if( $step->stype == 3 )
+        if( $step->stype == 3 || $step->stype == 4 )
         {
           if( now() > $step->to->format('Y-m-d H:i:s') )
           {
             $surveyEligible[] = [
-              'triggered_on' => 'mentorship',
+              'triggered_on' => $step->stype == 3 ? 'mentorship' : 'training',
               'triggered_at' => $step->id,
               'triggered_by' => 'due'
             ];
@@ -76,7 +78,10 @@
         ->whereNull('rating')
         ->first();
     $myMentorships = \App\MentorshipRequest::where('user_id', $user_id)->where('approved', 'Yes')->where('cycle_id', $circle_id)->get();
-    // $myTrainings = \App\TrainingCompleted::where('user_id', $user_id)->get();
+    $myTrainings = \App\TrainingSession::whereHas('step', function( $query ) use ( $circle_id ) {
+      $query->where('cycle_id', $circle_id);
+    })->get();
+    $quizzes = \App\Quizzes::where('status', 'published')->where('organization_id', $organization_id)->with(['myAttempts'])->get();
     foreach( $myMentorships as $mentorship )
     {
       if( empty( $mentorship->zoom_date ) || empty( $mentorship->period ) ) { continue; }
@@ -89,6 +94,60 @@
             'triggered_on' => 'mentorship',
             'triggered_at' => $mentorship->id,
             'triggered_by' => 'session'
+          ];
+        }
+      }
+    }
+    foreach( $myTrainings as $trainingSession )
+    {
+      if( $trainingSession->type == 'sessions' )
+      {
+        if( empty( $trainingSession->datetime ) || empty( $trainingSession->duration ) ) { continue; }
+        else
+        {
+          $endAt = Carbon\carbon::parse($trainingSession->datetime)->addMinutes($trainingSession->duration)->format('Y-m-d H:i:s');
+          if( now() > $endAt )
+          {
+            $surveyEligible[] = [
+              'triggered_on' => 'training',
+              'triggered_at' => $trainingSession->id,
+              'triggered_by' => 'session'
+            ];
+          }
+        }
+      }
+      elseif( in_array($trainingSession->type, ['online', 'offline']) )
+      {
+        if( empty( $trainingSession->datetime ) ) { continue; }
+        else
+        {
+          $endAt = Carbon\carbon::parse($trainingSession->datetime)->format('Y-m-d H:i:s');
+          if( now() > $endAt )
+          {
+            $surveyEligible[] = [
+              'triggered_on' => 'training',
+              'triggered_at' => $trainingSession->id,
+              'triggered_by' => 'session'
+            ];
+          }
+        }
+      }
+    }
+    foreach( $quizzes as $myQuiz )
+    {
+      $attempts = $myQuiz->myAttempts;
+      if( $attempts->count() > 0 )
+      {
+        if (
+          $attempts->where('score', '>=', $myQuiz->passing_criteria)->count() >= 1 || 
+          $attempts->where('score', '<', $myQuiz->passing_criteria)->count() >= $myQuiz->attempts || 
+          now()->format('Y-m-d H:i:s') > $myQuiz->end->format('Y-m-d H:i:s')
+        )
+        {
+          $surveyEligible[] = [
+            'triggered_on' => 'training',
+            'triggered_at' => $myQuiz->id,
+            'triggered_by' => 'quiz'
           ];
         }
       }
@@ -180,8 +239,12 @@
           $due = $survey_scope->trigger_by_due;
           $session = $survey_scope->trigger_by_session;
           $mentorship = collect($surveyEligible['mentorship']);
-          if( $due == true && $session == false ) { $mentorship = $mentorship->where('triggered_by', 'due'); }
-          elseif( $due == false && $session == true ) { $mentorship = $mentorship->where('triggered_by', 'session'); }
+          $triggers = [];
+          if( $due == true ) { $triggers[] = 'due';  }
+          if( $session == true ) { $triggers[] = 'session'; }
+          $triggers = array_unique( $triggers );
+          if( count( $triggers ) == 0 ) { $mentorship = $mentorship->where('triggered_at', null); }
+          else { $mentorship = $mentorship->whereIn('triggered_by', $triggers); }
           $mentorship = $mentorship->values();
           foreach( $mentorship as $conditions )
           {
@@ -200,7 +263,37 @@
               ];
             }
           }
-          
+        }
+        elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
+        {
+          $due = $survey_scope->trigger_by_due;
+          $quiz = $survey_scope->trigger_by_quiz;
+          $session = $survey_scope->trigger_by_session;
+          $training = collect($surveyEligible['training']);
+          if( $due == true ) { $triggers[] = 'due';  }
+          if( $quiz == true ) { $triggers[] = 'quiz'; }
+          if( $session == true ) { $triggers[] = 'session'; }
+          $triggers = array_unique( $triggers );
+          if( count( $triggers ) == 0 ) { $training = $training->where('triggered_at', null); }
+          else { $training = $training->whereIn('triggered_by', $triggers); }
+          $training = $training->values();
+          foreach( $training as $conditions )
+          {
+            $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+            if( empty( $checkResponse ) )
+            {
+              $surveysToAdd[] = [
+                'user_id' => $user_id,
+                'survey_id' => $survey_scope->survey_id, 
+                'cycle_id' => $circle_id,
+                'scope_id' => $survey_scope->id,
+                'triggered_on' => $conditions['triggered_on'],
+                'triggered_at' => $conditions['triggered_at'],
+                'triggered_by' => $conditions['triggered_by'],
+                'responses' => Null
+              ];
+            }
+          }
         }
       }
       if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
@@ -464,8 +557,10 @@
               <div class="col-9 py-1">
                 @if( $survey->triggered_on == 'mentorship' )
                 <i class="ti ti-bulb mx-1"></i> 
+                @elseif( $survey->triggered_on == 'training' )
+                <i class="ti ti-presentation mx-1"></i> 
                 @endif
-                {{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_by) ) }} 
+                {{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on) . ucFirst($survey->triggered_by) ) }} 
                 @php
                   $middleware = collect([]);
                   if( $survey->triggered_on == 'mentorship' )
@@ -473,12 +568,34 @@
                     if( $survey->triggered_by == 'session' ) { $middleware = $survey->mentorship_session; }
                     if( $survey->triggered_by == 'due' ) { $middleware = $survey->mentorship_step; }
                   }
+                  elseif( $survey->triggered_on == 'training' )
+                  {
+                    if( $survey->triggered_by == 'session' ) { $middleware = $survey->training_session; }
+                    if( $survey->triggered_by == 'due' ) { $middleware = $survey->training_step; }
+                    if( $survey->triggered_by == 'quiz' ) { $middleware = $survey->training_quiz; }
+                  }
                 @endphp
                 @if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on) ) }} @endif
-                @if( $survey->triggered_on == 'mentorship' && $survey->triggered_by == 'session' )
-                {{ __('dashboard.with') }} 
-                @php $mentor = $middleware->mentor; @endphp
-                {{ $mentor->name }}
+                @if( $survey->triggered_on == 'mentorship' )
+                  @if( $survey->triggered_by == 'session' )
+                  {{ __('dashboard.with') }} 
+                    @php $mentor = $middleware->mentor; @endphp
+                    {{ $mentor->name }}
+                  @elseif( $survey->triggered_by == 'due' )
+                    - {{ $middleware->title }}
+                  @else
+                    -
+                  @endif
+                @elseif( $survey->triggered_on == 'training' )
+                  @if( $survey->triggered_by == 'session' )
+                    {{ '(' . __('cycles.' . $middleware->type ) . ')' }} {{ $middleware->title }}
+                  @elseif( $survey->triggered_by == 'due' )
+                    - {{ $middleware->title }}
+                  @elseif( $survey->triggered_by == 'quiz' )
+                    - {{ $middleware->title }}
+                  @else
+                    -
+                  @endif
                 @endif
               </div>
               <div class="col-3 text-end">

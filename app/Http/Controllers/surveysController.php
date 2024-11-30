@@ -163,13 +163,16 @@ class surveysController extends Controller
 		if( empty( $survey ) ) { return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']); }
 		else
 		{
+			$target = '';
 			$responses = SurveyResponses::where('survey_id', $id);
 			if( $request->has('target') )
 			{
+				$target = ucfirst( $request->input('target') );
 				if( $request->target == 'mentorship' ) { $responses = $responses->where('triggered_on', 'mentorship'); }
+				elseif( $request->target == 'training' ) { $responses = $responses->where('triggered_on', 'training'); }
 			}
 			$responses = $responses->with(['user', 'survey', 'cycle', 'survey_scope'])->get();
-			return view('admin.surveys.results', compact('survey', 'responses'));
+			return view('admin.surveys.results', compact('survey', 'responses', 'target'));
 		}
 	}
 
