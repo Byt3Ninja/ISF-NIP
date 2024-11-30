@@ -643,13 +643,13 @@
                         class="img-fluid">
                         <p>Your browser does not support iframes.</p>
                       </iframe>
-                      <div class="mt-auto d-flex flex-column mb-6">
+                      {{-- <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">To get analysis for your pitch
                           deck please</span>
                         <a href="{{ route('my_company') }}"
                           class="text-primary fw-medium text-decoration-underline mt-1">Click
                           here</a>
-                      </div>
+                      </div> --}}
                     </div>
                   </div>
                 @else
@@ -802,7 +802,7 @@
 
       <section class="mt-6">
         <div class="row">
-          
+          @if($company->business_model != null)
           <div class="col-md-6">
             <div class="card shadow-sm"
               style="border-radius: 15px; height: 220px;">
@@ -811,7 +811,7 @@
                 class="card-body d-flex flex-column h-100 justify-content-between">
                 <h4>{{ __('admin.business_model') }}</h4>
                 <div class="d-flex justify-content-between py-4">
-
+                  
                   <div class="d-flex align-items-center">
                     <i class="ti ti-alert-circle ti-24px text-primary me-2"></i>
                     {{ $company ? __('admin.' . $company->business_model) : '' }}
@@ -822,7 +822,7 @@
                     {{ $company ? $company->other_business_model : '' }}
                   </div>
                   @endif
-
+                  
 
                 </div>
                 
@@ -849,15 +849,12 @@
                             </a>
                           </div>
                 </div>
-
-              </div>  
- 
-               
+              </div>    
               </div>
             </div>
           </div>
-
-
+          @endif
+          @if($company->about_problem != null)
           <div class="col-md-6 mt-6 mt-md-0">
             <div class="card shadow-sm"
               style="border-radius: 15px; height: 220px;">
@@ -908,13 +905,13 @@
               </div>
             </div>
           </div>
-
+          @endif
         </div>
       </section>
 
           <section class="mt-6">
             <div class="row">
-              
+              @if($company->financial_plan != null)
           <div class="col-md-6">
             <div class="card shadow-sm"
               style="border-radius: 15px; height: 220px;">
@@ -953,7 +950,7 @@
               </div>
             </div>
           </div>
-
+          @endif
 
 
         </div>

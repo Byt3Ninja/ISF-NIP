@@ -363,7 +363,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
   <div>{{ __('admin.Assessments') }}</div>
 </a>
 <ul class="menu-sub">
-  <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
+  {{-- <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
     <a href="{{ route('questions.index') }}" class="menu-link">
       <i class="bx bx-message"></i>
       <div>{{ __('admin.AddQuestions') }}</div>
@@ -374,7 +374,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
       <i class="bx bx-message"></i>
       <div>{{ __('admin.AddAnswerOption') }}</div>
     </a>
-  </li>
+  </li> --}}
 
 
 

@@ -30,7 +30,7 @@ $models = ['Marketplace_model', 'On_demand_model', 'Disintermediation_model', 'S
               </div>
 
        
-              <div class="col-md-6 col-12 mb-6 IfOther" @if($client->company->business_model != 'Other')  style="display: none;" @endif >
+              <div class="col-md-6 col-12 mb-6 IfOther" @if(optional($client->company)->business_model != 'Other')  style="display: none;" @endif >
                 <label for="other_business_model"
                   class="form-label">{{ __('admin.other_business_model') }}*</label>
                 <div class="position-relative">
@@ -64,10 +64,32 @@ $models = ['Marketplace_model', 'On_demand_model', 'Disintermediation_model', 'S
             <label for="business_plan" class="form-label">{{ __('admin.business_plan') }}
               *</label>
             <div class="position-relative">
+
+              @if (optional($client->company)->business_plan != null)
+                      <div class="card shadow-sm"
+                        style="border-radius: 15px; max-height: 300px;  overflow-y: auto;">
+                        <div class="card-body">
+                          <div
+                            class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                              <i class="ti ti-file fs-1 text-warning"></i>
+                              <span>{{ basename($client->company->business_plan) }}</span>
+                            </div>
+                            <a class="btn btn-transparent"
+                              href="{{ $client->company->business_plan }}" target="_blank"
+                              download>
+                              <i class="ti ti-download fs-3 text-primary"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    @endif
+
                 <div class="mt-3" style="display: grid; place-items: center;">
                     <input id="business_plan" readonly
-                      class="form-control border-light light-shadow px-8 "
-                      type="text" name="business_plan" value="">
+                      class="form-control border-light light-shadow px-8"
+                      type="text" name="business_plan" value="{{ old('business_plan') }}">
+                      <br>
                     <a data-input="business_plan" data-preview="business_plan"
                       href="#"
                       class="lfm btn btn-outline-primary text-black fw-bold rounded-pill">
@@ -75,6 +97,9 @@ $models = ['Marketplace_model', 'On_demand_model', 'Disintermediation_model', 'S
                         class="ti ti-plus me-3"></i>{{ __('admin.Add new document') }}
                     </a>
                   </div>
+
+                  
+
             </div>
           </div>
 
