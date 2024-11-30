@@ -70,4 +70,19 @@ class SurveyResponses extends Model
 	{
 		return $this->belongsTo(Step::class, 'triggered_at', 'id' );
 	}
+
+	public function training_session()
+	{
+		return $this->belongsTo(TrainingSession::class, 'triggered_at', 'id' );
+	}
+
+	public function training_step()
+	{
+		return $this->belongsTo(Step::class, 'triggered_at', 'id' );
+	}
+
+	public function training_quiz()
+	{
+		return $this->belongsTo(Quizzes::class, 'triggered_at', 'id' );
+	}
 }

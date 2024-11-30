@@ -130,7 +130,7 @@
 											</table>
 										</div>
 										<hr class="hr" />
-										<div class="table-responsive">
+										<div class="table-responsive pb-10">
 											<div class="card-title my-1"> {{ __('admin.quizResults') }} </div>
 											<table class="table table-bordered table-hover">
 												<thead>

@@ -75,21 +75,45 @@
 															<td>
 																@if( $response->triggered_on == 'mentorship' )
 																<i class="ti ti-bulb mx-1"></i> 
+																@elseif( $response->triggered_on == 'training' )
+																<i class="ti ti-presentation mx-1"></i> 
 																@endif
-																{{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($response->triggered_by) ) }} 
+																{{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . $target . ucFirst($response->triggered_by) ) }} 
 																@php
-																$middleware = collect([]);
-																if( $response->triggered_on == 'mentorship' )
-																{
+																	$middleware = collect([]);
+																	if( $response->triggered_on == 'mentorship' )
+																	{
 																	if( $response->triggered_by == 'session' ) { $middleware = $response->mentorship_session; }
 																	if( $response->triggered_by == 'due' ) { $middleware = $response->mentorship_step; }
-																}
+																	}
+																	elseif( $response->triggered_on == 'training' )
+																	{
+																	if( $response->triggered_by == 'session' ) { $middleware = $response->training_session; }
+																	if( $response->triggered_by == 'due' ) { $middleware = $response->training_step; }
+																	if( $response->triggered_by == 'quiz' ) { $middleware = $response->training_quiz; }
+																	}
 																@endphp
 																@if( $response->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($response->triggered_on) ) }} @endif
-																@if( $response->triggered_on == 'mentorship' && $response->triggered_by == 'session' )
-																{{ __('dashboard.with') }} 
-																@php $mentor = $middleware->mentor; @endphp
-																{{ $mentor->name }}
+																@if( $response->triggered_on == 'mentorship' )
+																	@if( $response->triggered_by == 'session' )
+																	{{ __('dashboard.with') }} 
+																	@php $mentor = $middleware->mentor; @endphp
+																	{{ $mentor->name }}
+																	@elseif( $response->triggered_by == 'due' )
+																	- {{ $middleware->title }}
+																	@else
+																	-
+																	@endif
+																@elseif( $response->triggered_on == 'training' )
+																	@if( $response->triggered_by == 'session' )
+																	{{ '(' . __('cycles.' . $middleware->type ) . ')' }} {{ $middleware->title }}
+																	@elseif( $response->triggered_by == 'due' )
+																	- {{ $middleware->title }}
+																	@elseif( $response->triggered_by == 'quiz' )
+																	- {{ $middleware->title }}
+																	@else
+																	-
+																	@endif
 																@endif
 															</td>
 															<td class="text-center">
