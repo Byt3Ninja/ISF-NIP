@@ -16,7 +16,7 @@ class QuestionController extends Controller
     {
         $questions = Question::with('category', 'subcategory')->get();
         $categories = Category::where('category_type', 'Assesment')->get();
-        $subcategories = Subcategory::where('Type', 'Assesment')->get();
+        $subcategories = SubCategory::where('Type', 'Assesment')->get();
        
         return view('admin.questions.index', compact('questions','categories','subcategories'));
     }
