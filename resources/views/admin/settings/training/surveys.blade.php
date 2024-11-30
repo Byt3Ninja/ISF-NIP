@@ -76,6 +76,7 @@
 												<th class="text-center">{{ __('admin.surveyTriggerAfterSession') }}</th>
 												<th class="text-center">{{ __('admin.surveyTriggerAfterCycle') }}</th>
 												<th class="text-center">{{ __('admin.surveyTriggerAfterQuiz') }}</th>
+												<th class="text-center">{{ __('admin.engagementRate') }}</th>
 												<th style="width: 100px;" class="text-center">{{__('admin.Actions')}}</th>
 											</tr>
 											</thead>
@@ -106,6 +107,11 @@
 															@else
 															<span class="btn btn-xs btn-outline-danger"> <i class="ti ti-x me-1"></i> {{ __('admin.surveyTriggerDenied') }} </span>
 															@endif
+														</td>
+														<td class="text-center">
+															<span class="cursor-pointer" title="{{ __('admin.total') . ' : ' . $survey_scope->eligibleUsers ?? 0 }} | {{ __('admin.engaged') . ' : ' . $survey_scope->engagedUsers ?? 0 }} | {{ __('admin.notEngaged') . ' : ' . $survey_scope->notEngagedUsers ?? 0 }}" data-toggle="tooltip" data-placement="top">
+																{{ ($survey_scope->engagementRate ?? '0.00') . '%' }}
+															</span>
 														</td>
 														<td class="text-center">
 															<div class="btn-group w-100">
