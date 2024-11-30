@@ -960,4 +960,9 @@ return [
 	'SubCategory_updated_successfully'=>'SubCategory Updated Successfully',
 	'SubCategory_stored_successfully'=>'SubCategory Added Successfully',
 	'SubCategory_deleted_successfully'=>'SubCategory Deleted Successfully',
+	'AddQuestions'=>' Questions ',
+	'all Questions'=>'all Questions',
+	'Question'=>' Question ',
+	'Question_Info'=>' Info Question ',
+	'AddAnswerOption'=>'Add Answer',
 ];

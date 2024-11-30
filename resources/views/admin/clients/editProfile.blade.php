@@ -203,7 +203,7 @@
                       maxlength="6" />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="state_id" class="form-label">{{ __('admin.Country') }}</label>
+                    <label for="country_id" class="form-label">{{ __('admin.Country') }}</label>
                     <select id="country_id" name='country_id' class="select2 form-select" required>
                       <option value="">{{ __('admin.Country') }}</option>
                       @foreach ($countries as $country)

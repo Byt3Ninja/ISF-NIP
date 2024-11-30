@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Category;
+use App\SubCategory;
 use Illuminate\Http\Request;
 
 class CatigoriesController extends Controller
@@ -75,13 +76,25 @@ class CatigoriesController extends Controller
             'category_name_en' => 'required',
             'category_type' => 'required',
         ]);
-        
         $tags = Category::find($id);
+        if($tags->category_type != $request->category_type){
+            $subCategories = SubCategory::where('category_id', $tags->id)->get();
+            foreach($subCategories as $subCat){
+            $subCat->update([
+                'Type' => $request->category_type ?? null, // في حال لم يتم العثور على نوع
+            ]);
+            }
+        }
+        
+        
+        
         $tags->category_name_ar = $request->category_name_ar;
         $tags->category_name_en = $request->category_name_en;
         $tags->category_description = $request->category_description;
         $tags->category_type = $request->category_type;
         $tags->save();
+
+        
         // إرجاع استجابة ناجحة (يمكن تعديلها حسب الحاجة)
         return back()->with(['class'=>'success','message'=>__('StoredSuccessfully')]);
     }
