@@ -271,6 +271,9 @@
       </li>
 
 
+      
+
+
       <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
         <a href="{{ route('Labels.index') }}" class="menu-link">
           <i class="ti ti-flag me-3 ti-md"></i>
@@ -354,12 +357,28 @@
 
 <!-- Start Assessments -->
 <li
-class="{{ Request::is('dashboard/question-assessment*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
+class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
 <a class="menu-link menu-toggle">
   <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
   <div>{{ __('admin.Assessments') }}</div>
 </a>
 <ul class="menu-sub">
+  <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('questions.index') }}" class="menu-link">
+      <i class="bx bx-message"></i>
+      <div>{{ __('admin.AddQuestions') }}</div>
+    </a>
+  </li>
+  <li class="{{ Request::is('dashboard/answerOption*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('answerOption.index') }}" class="menu-link">
+      <i class="bx bx-message"></i>
+      <div>{{ __('admin.AddAnswerOption') }}</div>
+    </a>
+  </li>
+
+
+
+
   <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
     <a href="{{ route('question-assessment') }}" class="menu-link">
       <span class="menu-item">{{ __('admin.Question_Assessment') }}</span>
