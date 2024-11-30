@@ -101,8 +101,8 @@
 															@endif
 														</td>
 														<td class="text-center">
-															<span class="cursor-pointer" title="{{ __('admin.total') . ' : ' . $survey_scope->eligibleUsers }} | {{ __('admin.engaged') . ' : ' . $survey_scope->engagedUsers }} | {{ __('admin.notEngaged') . ' : ' . $survey_scope->notEngagedUsers }}" data-toggle="tooltip" data-placement="top">
-																{{ $survey_scope->engagementRate . '%' }}
+															<span class="cursor-pointer" title="{{ __('admin.total') . ' : ' . $survey_scope->eligibleUsers ?? 0 }} | {{ __('admin.engaged') . ' : ' . $survey_scope->engagedUsers ?? 0 }} | {{ __('admin.notEngaged') . ' : ' . $survey_scope->notEngagedUsers ?? 0 }}" data-toggle="tooltip" data-placement="top">
+																{{ ($survey_scope->engagementRate ?? '0.00') . '%' }}
 															</span>
 														</td>
 														<td class="text-center">

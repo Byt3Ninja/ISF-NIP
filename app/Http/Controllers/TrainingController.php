@@ -834,6 +834,17 @@ DB::table('tag_training')->insert($tags);
 		{
 			$organization_id = $cycle->organization_id;
 			$surveys = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'training')->with(['survey'])->get();
+			$surveys = $surveys->map(function($survey) {
+				$responses = $survey->responses;
+				$eligibleUsers = $responses->count();
+				$engagedUsers = $responses->whereNotNull('responses')->count();
+				$notEngagedUsers = $responses->whereNull('responses')->count();
+				$survey->eligibleUsers = $eligibleUsers;
+				$survey->engagedUsers = $engagedUsers;
+				$survey->notEngagedUsers = $notEngagedUsers;
+				$survey->engagementRate = $eligibleUsers > 0 ? ( number_format( round( ($engagedUsers / $eligibleUsers * 100), 2 ), 2 ) ) : 0.00;
+				return $survey;
+			});
 			return view('admin.settings.training.surveys', compact('surveys', 'cycle'));
 		} else { abort(404); }
 	}
