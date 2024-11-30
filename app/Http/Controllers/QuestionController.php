@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Question;
 use App\Category;
-use App\Subcategory;
+use App\SubCategory;
 use Illuminate\Http\Request;
 
 class QuestionController extends Controller
