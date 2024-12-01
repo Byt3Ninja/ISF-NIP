@@ -42,4 +42,9 @@ class Surveys extends Model
 	{
 		return $this->hasMany(SurveyResponses::class, 'survey_id');
 	}
+
+	public function scopes()
+	{
+		return $this->hasMany(SurveyScopes::class, 'survey_id');
+	}
 }
