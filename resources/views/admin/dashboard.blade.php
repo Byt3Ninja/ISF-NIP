@@ -327,19 +327,19 @@ $countCards = [
       <!-- /Project Status Over Time Chart -->
 
       <!-- Total companies by sectors -->
-      {{-- <div class="col-md-6 col-12">
+      <div class="col-md-6 col-12 mt-6">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <h5 class="card-title mb-0">Total companies by sectors</h5>
+              <h5 class="card-title mb-0">{{__('admin.Total_companies_by_sector')}}</h5>
             </div>
           </div>
           <div class="card-body">
             <canvas id="companyBySectorChart" class="chartjs" data-height="345"></canvas>
           </div>
         </div>
-        <!-- / Total companies by sectors -->
-      </div> --}}
+      </div>
+      <!-- / Total companies by sectors -->
     </div>
   </div>
   @stop
@@ -351,8 +351,6 @@ $countCards = [
 
   @section('pagescripts')
   <script>
-    const total = @json($organization_counts);
-    console.log('total organization_counts', total);
     // User distribution by country
     const userDistributionData = @json($countries);
 
@@ -379,6 +377,9 @@ $countCards = [
 
     // Companies by SDG Chart Data
     const sdgData = @json($sdg_data);
+    
+    // Companies by sector
+    const companiesBySectorData = @json($sector_distribution);
 
     // Horizontal Bar Chart
     const seriesName = '{{ __('admin.Registered') }}';

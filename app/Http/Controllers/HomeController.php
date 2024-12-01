@@ -510,8 +510,8 @@ class HomeController extends Controller
             ->first();
 
         $data['organization_counts'] = [
-            'organization_name' => $organizationStartups->organization_name,
-            'total_startups' => $organizationStartups->total_startups,
+            'organization_name' => $organizationStartups ? $organizationStartups->organization_name : null,
+            'total_startups' => $organizationStartups ? $organizationStartups->total_startups : 0,
         ];
 
 
