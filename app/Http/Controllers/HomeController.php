@@ -155,7 +155,6 @@ class HomeController extends Controller
         // Project Type Distribution
         $projectTypes = Company::select('business_type', DB::raw('count(*) as total'))
             ->groupBy('business_type')
-            ->whereNotNull('business_type')
             ->get();
 
         $data['project_types'] = $projectTypes->map(function ($item) {
@@ -166,60 +165,10 @@ class HomeController extends Controller
         });
 
         // Total Jobs Created
-        $totalJobsCreated = Company::sum('team_num');
-
-        $companyData = Company::select('name_' . $l, 'team_num')
-            ->whereNotNull('team_num')
-            ->get();
-
-        $companies = $companyData->map(function ($company) use ($l) {
-            return [
-                'company_name' => $company->{'name_' . $l},
-                'team_members' => $company->team_num,
-            ];
-        });
-
-        $data['total_jobs_created'] = [
-            'total' => $totalJobsCreated,
-            'companies' => $companies,
-        ];
-
+        $data['total_jobs_created'] = Company::sum('team_num');
 
         // Total Founders
-
-        $totalFounders = DB::table('team_members')->where('TeamMember', 'Founder')->count();
-
-        $teamMembersData = DB::table('team_members')
-            ->select('TeamMember', DB::raw('count(*) as count'))
-            ->groupBy('TeamMember')
-            ->get();
-
-
-        $foundersData = $teamMembersData->map(function ($item) {
-            return [
-                'team_member' => $item->TeamMember,
-                'count' => $item->count,
-            ];
-        });
-
-        $data['total_founders'] = [
-            'total' => $totalFounders,
-            'team_members' => $foundersData,
-        ];
-
-
-        // Companies By Sector
-        $sectorData = Company::select('sector', DB::raw('count(*) as total'))
-            ->whereNotNull('sector')
-            ->groupBy('sector')
-            ->get();
-        $data['sector_distribution'] = $sectorData->map(function ($item) {
-            return [
-                'sector' => __('admin.' . $item->sector),
-                'count' => $item->total,
-            ];
-        });
-
+        $data['total_founders'] = Company::whereNotNull('founder')->count();
 
         // Companies by SDG
         $companySdg = Company::select('Sustainable_development', DB::raw('count(*) as total'))
@@ -227,48 +176,25 @@ class HomeController extends Controller
             ->get();
 
         $data['sdg_data'] = $companySdg->flatMap(function ($item) {
-            $sdgs = json_decode($item->Sustainable_development);
+            $sdgs = json_decode($item->Sustainable_development); // تحويل النص إلى مصفوفة
 
             return collect($sdgs)->map(function ($sdg) use ($item) {
                 return [
                     'sdg' => __('admin.' . $sdg),
-                    'total' => $item->total,
+                    'total' => $item->total, // نستخدم نفس العدد لجميع العناصر في هذه المصفوفة
                 ];
             });
         });
 
+
+
         // Total Startups Per Organization
-        $organizationsData = User::join('organizations', 'users.organization_id', '=', 'organizations.id')
-            ->join('cycles', 'users.organization_id', '=', 'cycles.organization_id')
-            ->join('companies', 'companies.cycle', '=', 'cycles.id')
-            ->select('organizations.name_' . $l . ' as organization_name', DB::raw('count(companies.id) as total_startups'))
-            ->groupBy('organizations.name_' . $l)
-            ->get();
-
-        $data['organization_counts'] = $organizationsData->map(function ($item) {
-            return [
-                'organization_name' => $item->organization_name,
-                'total_startups' => $item->total_startups,
-            ];
-        });
-
+        $organizationsData = User::whereNotNull('organization_id')
+            ->count();
+        $data['organization_counts'] = $organizationsData;
 
         // Total Raised Funds
-        $totalRaisedFunds = Company::sum('raised_fund');
-        $companyData = Company::select('name_' . $l, 'raised_fund')->whereNotNull('raised_fund')
-            ->get();
-
-        $companies = $companyData->map(function ($company) use ($l) {
-            return [
-                'company_name' => $company->{'name_' . $l},
-                'raised_fund' => $company->raised_fund,
-            ];
-        });
-
-        $data['total_raised_funds'] = [
-            'total' => $totalRaisedFunds,
-            'companies' => $companies,
-        ];
+        $data['total_raised_funds'] = Company::sum('raised_fund');
 
 
         // User Distribution by Country
@@ -303,20 +229,16 @@ class HomeController extends Controller
             ];
         });
 
-        // Development Stage
         $developmentStages = Company::whereNotNull('development_stage')->get();
         $uniqueDevelopmentStages = $developmentStages->unique('development_stage');
 
         $data['development_stages'] = $uniqueDevelopmentStages->map(function ($item) use ($developmentStages) {
             $count = $developmentStages->where('development_stage', $item->development_stage)->count();  // حساب عدد العناصر في نفس المرحلة
             return [
-                // 'label' => __('admin.' . $item->development_stage),
-                'label' => $item->development_stage,
+                'label' => __('admin.' . $item->development_stage),
                 'count' => $count,
             ];
         });
-
-
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
@@ -364,41 +286,35 @@ class HomeController extends Controller
         $data['mentorshipRequests'] = $mentorshipRequests->whereNull('approved')->latest()->limit(5)->get();
         $data['latest_cycles'] = $cycles->latest()->limit(10)->get();
 
-
-        // Development Stage  
-
+        // Development Stage
         $data['development_stages'] = [];
-
         foreach ($cycles->get() as $cycle) {
-            $developmentStages = Company::where('cycle', $cycle->id)
-                ->whereNotNull('development_stage')
-                ->select('development_stage', DB::raw('count(*) as total'))
+            $developmentStages = Company::select('development_stage', DB::raw('count(*) as total'))
+                ->where('cycle', $cycle->id)
                 ->groupBy('development_stage')
                 ->get();
 
             foreach ($developmentStages as $stage) {
                 $data['development_stages'][] = [
-                    'label' => __('admin.' . $stage->development_stage),
+                    'label' => $stage->development_stage,
                     'count' => $stage->total,
                 ];
             }
         }
 
         // Target Market Analysis
-        $targetMarket = DB::table('countries')
-            ->select('countries.name_' . $l . ' as country_name', DB::raw('COUNT(companies.id) as company_count'))
-            ->leftJoin('companies', DB::raw('JSON_CONTAINS(companies.targeted_market, CONCAT(\'"\', countries.id, \'"\'), "$")'), '=', DB::raw('1'))
-            ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        $targetMarket = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
-            ->groupBy('countries.id', 'countries.name_' . $l)
-            ->orderByDesc('company_count')
+            ->select('targeted_market', DB::raw('count(*) as frequency'))
+            ->groupBy('targeted_market')
+            ->orderByDesc('frequency')
             ->get();
 
         $data['target_market_data'] = $targetMarket->map(function ($item) {
             return [
-                'label' => $item->country_name,
-                'count' => $item->company_count,
+                'label' => $item->targeted_market,
+                'count' => $item->frequency,
             ];
         });
 
@@ -411,9 +327,9 @@ class HomeController extends Controller
             ->groupBy('sectors.name_' . $l)
             ->get();
 
-        $data['sector_data'] = $sectorBreakdown->map(function ($item) use ($l) {
+        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
             return [
-                'label' => $item->{'name_' . $l},
+                'label' => $item->name_en,
                 'count' => $item->total,
             ];
         });
@@ -423,7 +339,6 @@ class HomeController extends Controller
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
             ->select('companies.business_type', DB::raw('count(companies.id) as total'))
-            ->whereNotNull('business_type')
             ->groupBy('companies.business_type')
             ->get();
 
@@ -436,50 +351,18 @@ class HomeController extends Controller
 
 
         // Total Jobs Created
-        $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
+        $data['total_jobs_created'] = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
-            ->select('companies.name_' . $l, 'companies.team_num')
-            ->whereNotNull('companies.team_num')
-            ->get();
-
-        $companies = $companyData->map(function ($company) use ($l) {
-            return [
-                'company_name' => $company->{'name_' . $l},
-                'team_members' => $company->team_num,
-            ];
-        });
-
-        $totalJobsCreated = $companyData->sum('team_num');
-
-        $data['total_jobs_created'] = [
-            'total' => $totalJobsCreated,
-            'companies' => $companies,
-        ];
+            ->sum('companies.team_num');
 
 
         // Total Founders
-        $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
+        $data['total_founders'] = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
             ->whereNotNull('companies.founder')
-            ->select('companies.name_' . $l, 'companies.founder')
-            ->get();
-
-        $companies = $companyData->map(function ($company) use ($l) {
-            return [
-                'company_name' => $company->{'name_' . $l},
-                'founder' => $company->founder,
-            ];
-        });
-
-        $totalFounders = $companyData->count();
-
-        $data['total_founders'] = [
-            'total' => $totalFounders,
-            'companies' => $companies,
-        ];
-
+            ->count();
 
         // Companies by SDG
         $companySdg = Company::whereHas('cycledata', function ($query) use ($organization_id) {
@@ -489,58 +372,28 @@ class HomeController extends Controller
             ->groupBy('Sustainable_development')
             ->get();
 
-        $data['sdg_data'] = $companySdg->flatMap(function ($item) {
-            $sdgs = json_decode($item->Sustainable_development, true);
-
-            return collect($sdgs)->map(function ($sdg) use ($item) {
-                return [
-                    'sdg' => __('admin.' . $sdg),
-                    'total' => $item->total,
-                ];
-            });
-        });
-
-        // Total Startups Per Organization
-        $organizationStartups = User::join('organizations', 'users.organization_id', '=', 'organizations.id')
-            ->join('cycles', 'users.organization_id', '=', 'cycles.organization_id')
-            ->join('companies', 'companies.cycle', '=', 'cycles.id')
-            ->where('users.organization_id', $organization_id)
-            ->select('organizations.name_' . $l . ' as organization_name', DB::raw('count(companies.id) as total_startups'))
-            ->groupBy('organizations.name_' . $l)
-            ->first();
-
-        $data['organization_counts'] = [
-            'organization_name' => $organizationStartups ? $organizationStartups->organization_name : null,
-            'total_startups' => $organizationStartups ? $organizationStartups->total_startups : 0,
-        ];
-
-
-        // Total Raised Funds
-
-        $totalRaisedFunds = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
-            ->sum('companies.raised_fund');
-
-        $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
-            ->select('companies.name_' . $l, 'companies.raised_fund')
-            ->whereNotNull('companies.raised_fund')
-            ->get();
-
-        $companies = $companyData->map(function ($company) use ($l) {
+        $data['sdg_data'] = $companySdg->map(function ($item) {
             return [
-                'company_name' => $company->{'name_' . $l},
-                'raised_fund' => $company->raised_fund,
+                'sdg' => $item->Sustainable_development,
+                'total' => $item->total,
             ];
         });
 
+        // Total Startups Per Organization
+        $organizationsData = User::select('organization_id', DB::raw('count(*) as total'))
+            ->whereNotNull('organization_id')
+            ->groupBy('organization_id')
+            ->get();
 
-        $data['total_raised_funds'] = [
-            'total' => $totalRaisedFunds,
-            'companies' => $companies,
-        ];
+        $data['organization_counts'] = $organizationsData->mapWithKeys(function ($item) {
+            return [$item->organization_id => $item->total];
+        });
+
+        // Total Raised Funds
+        $data['total_raised_funds'] = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
+            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
+            ->where('users.organization_id', $organization_id)
+            ->sum('companies.raised_fund');
 
 
         // User Distribution by Country
@@ -557,7 +410,7 @@ class HomeController extends Controller
             ];
         });
 
-        // Program Status
+        // Project Status
         $projectStatus = TimeSheet::join('cycles', 'time_sheets.program_id', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
@@ -575,22 +428,6 @@ class HomeController extends Controller
                 'total_programs' => $item->total_programs,
                 'cycle_start_date' => $item->cycle_start_date,
                 'cycle_end_date' => $item->cycle_end_date,
-            ];
-        });
-
-        // Companies By Sector
-        $sectorData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
-            ->select('companies.sector', DB::raw('count(companies.id) as total'))
-            ->whereNotNull('companies.sector')
-            ->groupBy('companies.sector')
-            ->get();
-
-        $data['sector_distribution'] =   $sectorData->map(function ($sector) {
-            return [
-                'sector' => __('admin.' . $sector->sector),
-                'count' => $sector->total,
             ];
         });
 

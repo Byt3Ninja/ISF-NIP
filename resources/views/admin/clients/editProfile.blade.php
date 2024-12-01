@@ -189,8 +189,8 @@
                     </div>
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" name="address" placeholder="Address" />
+                    <label for="address" class="form-label">{{ __('admin.Address') }}</label>
+                    <input type="text" class="form-control" id="address" name="address" placeholder="{{ __('admin.Address') }}" value="{{ $client->address }}" />
                   </div>
                   {{-- <div class="mb-4 col-md-6">
                     <label for="state" class="form-label">State</label>
@@ -198,9 +198,9 @@
                       placeholder="California" />
                   </div> --}}
                   <div class="mb-4 col-md-6">
-                    <label for="zipCode" class="form-label">Zip Code</label>
-                    <input type="text" class="form-control" id="zipCode" name="zipCode" placeholder="231465"
-                      maxlength="6" />
+                    <label for="zip_code" class="form-label">{{ __('admin.Zip_Code') }}</label>
+                    <input type="text" class="form-control" id="zip_code" name="zip_code" placeholder="231465"
+                      maxlength="6" value="{{ $client->zip_code }}" />
                   </div>
                   <div class="mb-4 col-md-6">
                     <label for="country_id" class="form-label">{{ __('admin.Country') }}</label>

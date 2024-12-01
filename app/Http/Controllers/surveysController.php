@@ -22,7 +22,7 @@ class surveysController extends Controller
 	public function index()
 	{
 		$user = auth()->user();
-		$surveys = Surveys::with(['scopes'])->get();
+		$surveys = Surveys::get();
 		return view('admin.surveys.index', compact('surveys'));
 	}
 
@@ -151,21 +151,6 @@ class surveysController extends Controller
 			$survey->questions()->sync( array_map(function($id, $key) { return ['row_no' => $key + 1, 'question_id' => $id]; }, $questions_ids, array_keys($questions_ids)) );
 
 			return redirect()->route('surveys.questions', ['survey' => $id])->with('success', 'StoredSuccessfully');
-		}
-	}
-
-	public function results( $id, Request $request )
-	{
-		$user = auth()->user();
-		$organization_id = null;
-		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organization_id = $user->organization_id; }
-		$survey = Surveys::when( !is_null( $organization_id ), function ( $query ) use ( $organization_id ) {
-			return $query->where('organization_id', $organization_id);
-		})->with(['questions', 'scopes', 'responses'])->find( $id );
-		if( empty( $survey ) ) { return redirect()->route('surveys.index')->with(['error' => 'surveyNotFound']); }
-		else
-		{
-			return view('admin.surveys.results_details', compact('survey'));
 		}
 	}
 

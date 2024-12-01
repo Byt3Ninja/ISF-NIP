@@ -102,41 +102,48 @@ $countCards = [
 'text' => __('admin.Training sessions Duration'),
 'count' => $sessions_period,
 ],
-// [
-// 'color' => 'primary',
-// 'href' => '#',
-// 'icon' => 'ti-briefcase',
-// 'text' => 'Total Company Jobs created (Total Team members)',
-// 'count' => $total_jobs_created['total'],
-// ],
-// [
-// 'color' => 'primary',
-// 'href' => '#',
-// 'icon' => 'ti-crown',
-// 'text' => 'Total company Founders',
-// 'count' => $total_founders['total'],
-// ],
-// [
-// 'color' => 'success',
-// 'href' => '#',
-// 'icon' => 'ti-report-analytics',
-// 'text' => 'Total company by SDG',
-// 'count' => 21,
-// ],
-// [
-// 'color' => 'info',
-// 'href' => '#',
-// 'icon' => 'ti-building-skyscraper',
-// 'text' => 'Admin - total Number of Startup Per organisation',
-// 'count' => $organization_counts,
-// ],
-// [
-// 'color' => 'danger',
-// 'href' => '#',
-// 'icon' => 'ti-coin',
-// 'text' => 'Total raised funds',
-// 'count' => $total_raised_funds['total'],
-// ],
+[
+'color' => 'primary',
+'href' => '#',
+'icon' => 'ti-briefcase',
+'text' => 'Total Company Jobs created (Total Team members)',
+'count' => 15,
+],
+[
+'color' => 'primary',
+'href' => '#',
+'icon' => 'ti-crown',
+'text' => 'Total company Founders',
+'count' => 20,
+],
+[
+'color' => 'success',
+'href' => '#',
+'icon' => 'ti-report-analytics',
+'text' => 'Total company by SDG',
+'count' => 21,
+],
+[
+'color' => 'info',
+'href' => '#',
+'icon' => 'ti-building-skyscraper',
+'text' => 'Admin - total Number of Startup Per organisation',
+'count' => 36,
+],
+[
+'color' => 'warning',
+'href' => '#',
+'icon' => 'ti-vector-bezier-circle',
+'text' => 'Company per Sector',
+'count' => 46,
+],
+[
+'color' => 'danger',
+'href' => '#',
+'icon' => 'ti-coin',
+'text' => 'Total raised funds',
+'count' => 65,
+],
 ];
 @endphp
 
@@ -199,20 +206,6 @@ $countCards = [
         </div>
       </div>
       <!-- /Horizontal Bar Chart -->
-      <!-- / Total companies by sdg chart -->
-      <div class="col-12 mt-6">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-              <h5 class="card-title mb-0">{{__('admin.Total_company_by_SDG')}}</h5>
-            </div>
-          </div>
-          <div class="card-body">
-            <canvas id="sdgCompaniesChart" class="chartjs" data-height="345"></canvas>
-          </div>
-        </div>
-      </div>
-      <!-- / Total companies by sdg chart -->
       <!-- Pie Chart -->
       <div class="col-md-6 col-12 mt-6">
         <div class="card h-100">
@@ -269,6 +262,20 @@ $countCards = [
         </div>
       </div>
       <!-- /Vertical Bar Charts -->
+      <!-- SDG Companies Pie Chart -->
+      <div class="col-md-6 col-12 mt-6">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <h5 class="card-title mb-0">{{__('admin.Total_company_by_SDG')}}</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="sdgCompaniesChart"></div>
+          </div>
+        </div>
+      </div>
+      <!-- / SDG Companies Pie Chart -->
       <!-- Sector Breakdown Chart -->
       <div class="col-md-6 mt-6">
         <div class="card">
@@ -312,7 +319,8 @@ $countCards = [
       </div>
       <!-- /Target Market Analysis Chart -->
       <!-- Project Status Over Time Chart -->
-        <div class="col-12 col-md-6 mt-6">
+      <div class="row g-3 align-items-center mt-6">
+        <div class="col-12">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <div class="d-flex align-items-center">
@@ -324,22 +332,23 @@ $countCards = [
             </div>
           </div>
         </div>
+      </div>
       <!-- /Project Status Over Time Chart -->
 
       <!-- Total companies by sectors -->
-      <div class="col-md-6 col-12 mt-6">
+      {{-- <div class="col-md-6 col-12">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <h5 class="card-title mb-0">{{__('admin.Total_companies_by_sector')}}</h5>
+              <h5 class="card-title mb-0">Total companies by sectors</h5>
             </div>
           </div>
           <div class="card-body">
             <canvas id="companyBySectorChart" class="chartjs" data-height="345"></canvas>
           </div>
         </div>
-      </div>
-      <!-- / Total companies by sectors -->
+        <!-- / Total companies by sectors -->
+      </div> --}}
     </div>
   </div>
   @stop
@@ -377,9 +386,12 @@ $countCards = [
 
     // Companies by SDG Chart Data
     const sdgData = @json($sdg_data);
-    
-    // Companies by sector
-    const companiesBySectorData = @json($sector_distribution);
+
+    // Total Startups Per Organization (Count)
+    const totalStartupsPerOrganization = @json($organization_counts);
+
+    // Total Raised Funds
+    const totalRaisedFunds = @json($total_raised_funds);
 
     // Horizontal Bar Chart
     const seriesName = '{{ __('admin.Registered') }}';
