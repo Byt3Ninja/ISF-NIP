@@ -310,7 +310,8 @@ class HomeController extends Controller
         $data['development_stages'] = $uniqueDevelopmentStages->map(function ($item) use ($developmentStages) {
             $count = $developmentStages->where('development_stage', $item->development_stage)->count();  // حساب عدد العناصر في نفس المرحلة
             return [
-                'label' => __('admin.' . $item->development_stage),
+                // 'label' => __('admin.' . $item->development_stage),
+                'label' => $item->development_stage,
                 'count' => $count,
             ];
         });
