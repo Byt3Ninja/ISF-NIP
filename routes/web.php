@@ -348,6 +348,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('quizzes/my', 'quizzesController@my')->name('quizzes.dashboard');
 
     Route::resource('surveys', 'surveysController')->except(['show']);
+    Route::get('surveys/{survey}/results-details', 'surveysController@results')->name('surveys.results-details');
     Route::get('surveys/{survey}/questions', 'surveysController@get_questions')->name('surveys.questions');
     Route::get('surveys/{survey}/results', 'surveysController@get_results')->name('surveys.results');
     Route::post('surveys/{survey}/questions', 'surveysController@save_questions')->name('surveys.saveQuestions');

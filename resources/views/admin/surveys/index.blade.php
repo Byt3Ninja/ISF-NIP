@@ -74,6 +74,7 @@
 												<th>#</th>
 												<th>{{__('admin.surveyTitle')}}</th>
 												<th class="text-center">{{__('admin.Organization')}}</th>
+												<th class="text-center">{{__('admin.createdSurveys')}}</th>
 												<th style="width: 100px;" class="text-center">{{__('admin.Actions')}}</th>
 											</tr>
 											</thead>
@@ -83,10 +84,12 @@
 														<td><a href="{{ URL::to('dashboard/surveys/' . $survey->id . '/edit') }}">{{ $survey->id }}</a></td>
 														<td>{!! $survey->title !!}</td>
 														<td class="text-center"><a href="{{ URL::to('dashboard/organizations/' . $survey->organization->id . '/edit') }}"> {{ $survey->organization->{'name_'.$l} }}</a></td>
+														<td class="text-center"> {!! $survey->scopes->count() !!} </td>
 														<td class="text-center">
 															<div class="btn-group w-100">
 																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																<div class="dropdown-menu">
+																	<a href="{{ route('surveys.results-details', ['survey' => $survey->id]) }}" class="dropdown-item"> <i class="ti ti-presentation"></i> {{ __('admin.surveyResults') }} </a>
 																	<a href="{{ route('surveys.questions', ['survey' => $survey->id]) }}" class="dropdown-item"> <i class="ti ti-list-check"></i> {{ __('admin.manageQuestions') }} </a>
 																	<a href="{{ route('surveys.edit', ['survey' => $survey->id]) }}" class="dropdown-item"> <i class="ti ti-edit"></i> {{ __('admin.Edit') }}</a>
 																	<a id='deleteAction' data-id='{{ $survey->id }}' data-url="{{ route('surveys.destroy', ['survey' => $survey->id]) }}" href="{{ route('surveys.destroy', ['survey' => $survey->id]) }}" class="dropdown-item bg-danger text-white"> <i class="ti ti-trash text-white"></i> {{ __('admin.Delete') }} </a>
