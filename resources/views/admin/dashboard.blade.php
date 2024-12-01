@@ -102,20 +102,20 @@ $countCards = [
 'text' => __('admin.Training sessions Duration'),
 'count' => $sessions_period,
 ],
-[
-'color' => 'primary',
-'href' => '#',
-'icon' => 'ti-briefcase',
-'text' => 'Total Company Jobs created (Total Team members)',
-'count' => $total_jobs_created['total'],
-],
-[
-'color' => 'primary',
-'href' => '#',
-'icon' => 'ti-crown',
-'text' => 'Total company Founders',
-'count' => $total_founders['total'],
-],
+// [
+// 'color' => 'primary',
+// 'href' => '#',
+// 'icon' => 'ti-briefcase',
+// 'text' => 'Total Company Jobs created (Total Team members)',
+// 'count' => $total_jobs_created['total'],
+// ],
+// [
+// 'color' => 'primary',
+// 'href' => '#',
+// 'icon' => 'ti-crown',
+// 'text' => 'Total company Founders',
+// 'count' => $total_founders['total'],
+// ],
 // [
 // 'color' => 'success',
 // 'href' => '#',
@@ -130,13 +130,13 @@ $countCards = [
 // 'text' => 'Admin - total Number of Startup Per organisation',
 // 'count' => $organization_counts,
 // ],
-[
-'color' => 'danger',
-'href' => '#',
-'icon' => 'ti-coin',
-'text' => 'Total raised funds',
-'count' => $total_raised_funds['total'],
-],
+// [
+// 'color' => 'danger',
+// 'href' => '#',
+// 'icon' => 'ti-coin',
+// 'text' => 'Total raised funds',
+// 'count' => $total_raised_funds['total'],
+// ],
 ];
 @endphp
 
