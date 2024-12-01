@@ -116,34 +116,10 @@ $countCards = [
 'text' => 'Total company Founders',
 'count' => 20,
 ],
-[
-'color' => 'success',
-'href' => '#',
-'icon' => 'ti-report-analytics',
-'text' => 'Total company by SDG',
-'count' => 21,
-],
-[
-'color' => 'info',
-'href' => '#',
-'icon' => 'ti-building-skyscraper',
-'text' => 'Admin - total Number of Startup Per organisation',
-'count' => 36,
-],
-[
-'color' => 'warning',
-'href' => '#',
-'icon' => 'ti-vector-bezier-circle',
-'text' => 'Company per Sector',
-'count' => 46,
-],
-[
-'color' => 'danger',
-'href' => '#',
-'icon' => 'ti-coin',
-'text' => 'Total raised funds',
-'count' => 65,
-],
+
+
+
+
 ];
 @endphp
 
