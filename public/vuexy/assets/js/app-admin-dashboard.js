@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderUserDistributionChart();
   renderTargetMarketChart();
   renderProjectOverTimeStatusChart();
-  // renderTotalCompaniesBySectorChart();
+  renderTotalCompaniesBySectorChart();
 });
 
 const colors = [
@@ -132,81 +132,22 @@ const getBarChartConfig = (labels, data, precentage = false, max) => {
 };
 
 // Render Total Companies By Sector Chart
-// const renderTotalCompaniesBySectorChart = () => {
-//   const chartData = totalStartupsPerOrganization ? totalStartupsPerOrganization?.filter(
-//     data => data.label !== null && data.count > 0
-//   ) : [];
-//   const chartDataLabels = chartData.map(data => data.label);
-//   const chartDataValues = chartData.map(data => data.count);
-//   console.log('chartDataLabels', chartDataLabels)
-//   console.log('chartDataValues', chartDataValues)
-  // const chartDom = document.querySelector('#companyBySectorChart');
-  // if (chartDom) {
-  //   const chart = new Chart(chartDom, {
-  //     type: 'bar',
-  //     data: {
-  //       labels: sectors,
-  //       datasets: [
-  //         {
-  //           data: companies,
-  //           backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'],
-  //           borderColor: 'transparent',
-  //           maxBarThickness: 15,
-  //           borderRadius: {
-  //             topRight: 15,
-  //             topLeft: 15
-  //           }
-  //         }
-  //       ]
-  //     },
-  //     options: {
-  //       responsive: true,
-  //       maintainAspectRatio: false,
-  //       animation: {
-  //         duration: 500
-  //       },
-  //       plugins: {
-  //         tooltip: {
-  //           rtl: isRtl,
-  //           backgroundColor: cardColor,
-  //           titleColor: headingColor,
-  //           bodyColor: legendColor,
-  //           borderWidth: 1,
-  //           borderColor: borderColor
-  //         },
-  //         legend: {
-  //           display: false
-  //         }
-  //       },
-  //       scales: {
-  //         x: {
-  //           grid: {
-  //             color: borderColor,
-  //             drawBorder: false,
-  //             borderColor: borderColor
-  //           },
-  //           ticks: {
-  //             color: labelColor
-  //           }
-  //         },
-  //         y: {
-  //           min: 2,
-  //           max: 12,
-  //           grid: {
-  //             color: borderColor,
-  //             drawBorder: false,
-  //             borderColor: borderColor
-  //           },
-  //           ticks: {
-  //             stepSize: 2,
-  //             color: labelColor
-  //           }
-  //         }
-  //       }
-  //     }
-  //   });
-  // }
-// }
+const renderTotalCompaniesBySectorChart = () => {
+  const chartData = companiesBySectorData ? companiesBySectorData?.filter(
+    data => data.label !== null && data.count > 0
+  ) : [];
+
+  const labels = chartData.map(data => data.sector);
+  const values = chartData.map(data => data.count);
+  console.log('labels', labels)
+  console.log('values', values)
+  const chartDom = document.querySelector('#companyBySectorChart');
+  const chartConfig = getBarChartConfig(labels, values, false, 50);
+
+  if (chartDom) {
+    new Chart(chartDom, chartConfig);
+  }
+}
 
 // Render User Distribution Chart
 const renderUserDistributionChart = () => {

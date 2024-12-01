@@ -946,6 +946,7 @@ return [
 	'Total_company_by_SDG' => 'Total Companies by SDG',
 	'Development_Stage' => 'Projects in Development Stage',
 	'Projects_Distribution_by_Sector' => 'Projects Distribution by Sector',
+	'Total_companies_by_sector' => 'Total Companies by Sector',
 	'Assessments' => ' Assessments ',
 	'Question_Assessment' => 'Question Assessment ',
 	'Analysis_Assessment' => 'Analysis Assessment',
