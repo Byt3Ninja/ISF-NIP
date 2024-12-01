@@ -37,8 +37,8 @@
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
-      ['about_problem', 'ti-presentation', $l == 'en' ? 'about_problem' : ' حول المشكلة '],
-      ['business_model', 'ti-presentation', $l == 'en' ? 'business_model' : ' نموذج الاعمال '],
+      ['about_problem', 'ti-presentation', $l == 'en' ? 'About Problem' : ' حول المشكلة '],
+      ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
   ])
       ->map(function ($tab) {
           return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];

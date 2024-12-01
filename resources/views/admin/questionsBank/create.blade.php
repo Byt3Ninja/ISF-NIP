@@ -123,9 +123,62 @@
 														<select class="form-control form-select select2" name="question_group" id="question_group" required>
 															<option value="quiz" {{ !empty(old('question_group')) && old('question_group') == 'quiz' ? 'selected' : '' }}> {{ __('admin.question_type_quiz') }} </option>
 															<option value="survey" {{ !empty(old('question_group')) && old('question_group') == 'survey' ? 'selected' : '' }}> {{ __('admin.question_type_survey') }}</option>
+															<option value="assessment" {{ !empty(old('question_group')) && old('question_group') == 'assessment' ? 'selected' : '' }}> {{ __('admin.question_type_assessment') }}</option>
 														</select>
 													</fieldset>
 												</div>
+
+												<div class="col-lg-3 col-md-3 col-sm-12 assessment-type">
+													<label class="form-label fs-6">
+													  {{ __('admin.Category') }}
+													  
+													</label>
+													<select class="ascategory_id form-select" name="ascategory_id">
+													  <option value="" disabled selected>
+														{{ $l == 'en' ? 'Choose category' : 'اختر القسم' }}
+													  </option>
+													  @foreach ($categories as $category)
+														<option value="{{ $category->id }}"  >{{ $category->{'category_name_'. $l} }}</option>
+													  @endforeach
+													</select>
+												  </div>
+
+												<div class="col-lg-3 col-md-3 col-sm-12 assessment-type">
+													<label class="form-label fs-6">
+													  {{ __('admin.SubName') }}
+													  
+													</label>
+													<select class="subcategory_id form-select" name="subcategory_id">
+													  <option value="" disabled selected>
+														{{ $l == 'en' ? 'Choose category' : 'اختر القسم الفرعي' }}
+													  </option>
+													  @foreach ($subcategories as $subcategory)
+													  
+														<option value="{{ $subcategory->id }}"  >{{ $subcategory->{'name_'. $l} }} {{ $subcategory->id }}</option>
+													  @endforeach
+													</select>
+												  </div>
+
+												  <fieldset class="col-lg-6 col-md-6 col-sm-12 assessment-type">
+													<label class="fs-6 form-label mb-2" for ="explanation_QA_ar">{{ __('admin.explanation_QA_ar') }}</label>
+													<textarea class="form-control" id="explanation_QA_ar" name="explanation_QA_ar" rows="2" name="explanation_QA_ar">{{ old('explanation_QA_ar') }}</textarea>
+												</fieldset>
+
+												<fieldset class="col-lg-6 col-md-6 col-sm-12 assessment-type">
+													<label class="fs-6 form-label mb-2" for ="explanation_QA_en">{{ __('admin.explanation_QA_en') }}</label>
+													<textarea class="form-control" id="explanation_QA_en" name="explanation_QA_en" rows="2" name="explanation_QA_en">{{ old('explanation_QA_en') }}</textarea>
+												</fieldset>
+
+												<fieldset class="col-lg-6 col-md-6 col-sm-12 assessment-type">
+													<label class="fs-6 form-label mb-2" for ="explanation_AA_ar">{{ __('admin.explanation_AA_ar') }}</label>
+													<textarea class="form-control" id="explanation_AA_ar" name="explanation_AA_ar" rows="2" name="explanation_AA_ar">{{ old('explanation_AA_ar') }}</textarea>
+												</fieldset>
+
+												<fieldset class="col-lg-6 col-md-6 col-sm-12 assessment-type">
+													<label class="fs-6 form-label mb-2" for ="explanation_AA_en">{{ __('admin.explanation_AA_en') }}</label>
+													<textarea class="form-control" id="explanation_AA_en" name="explanation_AA_en" rows="2" name="explanation_AA_en">{{ old('explanation_AA_en') }}</textarea>
+												</fieldset>
+
 												<div class="col-lg-6 col-md-6 col-sm-12">
 													<fieldset class="form-group mb-4 questions-type">
 														<label class="fs-6 form-label mb-2" for="category_id">{{ __('admin.questionCategory') }}</label>
@@ -137,6 +190,9 @@
 															@endforeach
 														</select>
 													</fieldset>
+
+													
+
 													<fieldset class="form-group mb-4 survey-type">
 														<label class="fs-6 form-label mb-2" for="survey_type">{{ __('admin.surveyType') }}</label>
 														<select class="form-control form-select select2" name="survey_type" id="survey_type" required>
@@ -144,6 +200,7 @@
 															<option value="radio"> {{ __('admin.surveyTypeRadioButtons') }} </option>
 														</select>
 													</fieldset>
+
 												</div>
 											</div>
 
@@ -191,6 +248,7 @@
 													</fieldset>
 												</div>
 											</div>
+
 											<fieldset id="mcq-block" class="form-group mb-4 mt-3" style="max-width: 400px;">
 												<label class="fs-6 form-label mb-2" class ="w-100" for="answers">{{ __('admin.answers') }}
 													<button id="addNewAnswer" style="padding: 0px 10px !important;" class="btn btn-xs btn-label-success float-right rounded-pill py-1">
@@ -200,6 +258,7 @@
 												<div class="mt-1" id="quizAnswers">
 													<div class="input-group mb-1">
 														<input placeholder="{{ $l == 'en' ? 'Answer text' : 'اكتب نص الاجابة' }}" class="form-control" id="quiz_answer_0_text" name="quiz_answer_text[]" style="max-width:300px">
+														<input placeholder="{{ $l == 'en' ? 'Answer Score' : 'اكتب النسبه ' }}" class="form-control assessment-type" id="quiz_answer_0_score" name="quiz_answer_score[]" style="max-width:100px">
 														<select class="form-control form-select questions-type" id="quiz_answer_0_status" name="quiz_answer_status[]">
 															<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
 															<option value="false">{{ __('admin.quizAnswerWrong') }}</option>
@@ -260,8 +319,9 @@
 		function handleChangeQuestionType() {
 			$('.questions-type').addClass('d-none');
 			$('.survey-type').addClass('d-none');
-			if( $('#question_group').val() == 'quiz' ) { $('.questions-type').removeClass('d-none');  }
-			else if( $('#question_group').val() == 'survey' ) { $('.survey-type').removeClass('d-none'); $('#type').val('mcq').trigger('change'); }
+			if( $('#question_group').val() == 'quiz' ) { $('.questions-type').removeClass('d-none');$('.assessment-type').addClass('d-none');  }
+			else if( $('#question_group').val() == 'survey' ) { $('.survey-type').removeClass('d-none'); $('#type').val('mcq').trigger('change');$('.assessment-type').addClass('d-none'); }
+			else if( $('#question_group').val() == 'assessment' ) { $('.survey-type').addClass('d-none');$('.questions-type').addClass('d-none');$('.assessment-type').removeClass('d-none'); }
 		}
 
 		function handleChangeType() {
@@ -292,6 +352,7 @@
 				$("#category_id").html(categoriesOptions);
 			} else { $("#category_id").html(""); }
 		});
+
 		$(document).on('change', '#survey_type', function (e) {
 			if( $("#survey_type").val() == 'stars' )
 			{
@@ -301,7 +362,9 @@
 					start++;
 				});
 			}
+			
 		});
+
 		$(document).on('click', '#addNewAnswer', function(e) {
 			e.preventDefault();
 			var count = $("#quizAnswers > div.input-group").length;
@@ -317,12 +380,24 @@
 						return false;
 					}
 				}
+
+				if( $("#question_group").val() == 'assessment' )
+				{
+					if( $("input[name='quiz_answer_text[]']").length >= 3 )
+					{
+						alertify.alert('{{ __("admin.maxReached") }}', '{{ __("admin.noMoreThreeAllowed") }}');
+						return false;
+					}
+				}
+
+
 			}
 			var answer =
 				`
 			<div class="input-group mb-1">
 				<input placeholder="{{ $l == 'en' ? 'Answer text' : 'اكتب نص الاجابة' }}" class="form-control" style="max-width:300px" id="quiz_answer_` +
-				count + `_text" name="quiz_answer_text[]">
+				count + `_text" name="quiz_answer_text[]">` +
+				`<input placeholder="{{ $l == 'en' ? 'Answer Score' : 'اكتب النسبه ' }}" class="form-control" id="quiz_answer_`+count+`_score" name="quiz_answer_score[]" style="max-width:100px">
 				<select class="form-control form-select select2 ` + class_control + `" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
 					<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
 					<option value="false">{{ __('admin.quizAnswerWrong') }}</option>
@@ -331,6 +406,7 @@
 			</div>`;
 			$('#quizAnswers').append(answer);
 		});
+
 		$(document).on('click', '.remove-answer-btn', function(e) {
 			e.preventDefault();
 			$(this).parent().remove();
@@ -341,5 +417,46 @@
 		});
 
 		$(document).ready(function() { handleChangeType(); handleChangeQuestionType(); });
+
+
+
+		$(document).ready(function() {
+
+			$('#question_group').change(function() {
+				var selectedValue = $(this).val(); // الحصول على القيمة المحددة في question_group
+					if (selectedValue === 'assessment') {
+						var start = 1;
+						$("input[name='quiz_answer_text[]']").each(function(key, el) {
+							if( start > 3 ) { $(el).parent().remove(); }
+							start++;
+						});		
+					}
+			});
+
+		$('.ascategory_id').change(function() {
+                var category_id = $(this).val();
+                var $state = $('.subcategory_id');
+                $.ajax({
+                    url: "{{ route('get_subcategory_by_category') }}",
+                    method: 'GET', // إضافة طريقة الطلب
+                    data: {
+                        category_id: category_id
+                    },
+                    success: function(data) {
+                        $state.html('<option value="">{{ __('admin.SubName') }}</option>'); // إعادة تعيين الخيارات
+
+                        $.each(data, function(id, value) {
+                             // تعيين الخيار إذا كان مطابقًا
+                            $state.append('<option value="' + id + '" >' + value + '</option>');
+                        });
+
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error); // معالجة الأخطاء
+                    }
+                });
+            });
+		});
+
 	</script>
 @stop

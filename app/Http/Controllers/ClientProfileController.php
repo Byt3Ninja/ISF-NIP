@@ -129,6 +129,7 @@ class ClientProfileController extends Controller
 
             }else{
                 $result = $user->update($request->except(['password']));
+                
             }
             if($result)
                 return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );

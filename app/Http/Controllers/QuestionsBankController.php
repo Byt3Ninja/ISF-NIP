@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Category;
+use App\SubCategory;
 use App\Organization;
 use App\QuestionsBank;
 use App\QuestionCategories;
@@ -27,6 +29,9 @@ class QuestionsBankController extends Controller
 			else { $questions = $questions->where('organization_id', $organization_id); }
 		}
 		$questions = $questions->get();
+
+		$categories = Category::where('category_type', 'Assesment')->get();
+        $subcategories = SubCategory::where('Type', 'Assesment')->get();
 		return view('admin.questionsBank.index', compact('questions'));
 	}
 
@@ -36,11 +41,16 @@ class QuestionsBankController extends Controller
 		$organizations = new Organization;
 		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organizations = $organizations->where('id', $user->organization_id); }
 		$organizations = $organizations->with(['questionsCategories'])->get();
-		return view('admin.questionsBank.create', compact('organizations'));
+
+		$categories = Category::where('category_type', 'Assesment')->get();
+        $subcategories = SubCategory::where('Type', 'Assesment')->get();
+
+		return view('admin.questionsBank.create', compact('organizations','categories', 'subcategories'));
 	}
 
 	public function store(Request $request)
 	{
+		if($request->question_group !='assessment'){
 		if( $request->has('quiz_answer_status') )
 		{
 			$quiz_answer_status = [];
@@ -114,6 +124,43 @@ class QuestionsBankController extends Controller
 		$question->difficulty = $request->difficulty;
 		$question->tags = $request->has('tags') && !empty( $request->tags ) ? explode(',', $request->tags) : [];
 		$question->save();
+	}else{
+
+		$rules = [
+			'ascategory_id' => 'required|exists:categories,id',
+			'subcategory_id' => 'required|exists:sub_categories,id',
+			'question' => 'required|string',
+			'question_group' => 'required',
+		];
+		
+		$validator = Validator::make($request->all(), $rules);
+		$errors = [];
+		if( $validator->fails() ) { $errors = $validator->errors()->toArray(); }
+		if( count( $errors ) ) { return back()->withInput( $request->all() )->with('success', false)->withErrors( $errors ); }
+
+		$answers = [];
+		$correct = null;
+		if( ( $request->has('quiz_answer_text') ) && ( $request->has('quiz_answer_score') )  )
+		{
+			foreach( $request->quiz_answer_text as $key => $answer ) { $answers[] = ['text' => $answer, 'score' => $request->quiz_answer_score[$key]]; }
+		}
+
+		$question = new QuestionsBank;
+		$question->group = $request->question_group;
+		$question->ascategory_id = $request->ascategory_id;
+		$question->subcategory_id = $request->subcategory_id;
+		$question->question = $request->question;
+		$question->answers = $answers;
+		$question->explanation_QA_ar = $request->explanation_QA_ar;
+		$question->explanation_QA_en = $request->explanation_QA_en;
+		$question->explanation_AA_ar = $request->explanation_AA_ar;
+		$question->explanation_AA_en = $request->explanation_AA_en;
+		$question->save();
+
+
+
+
+	}
 
 		return redirect()->route('questions-bank.index')->with('success', 'StoredSuccessfully');
 	}
@@ -131,7 +178,9 @@ class QuestionsBankController extends Controller
 		$organizations = new Organization;
 		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $organizations = $organizations->where('id', $user->organization_id); }
 		$organizations = $organizations->with(['questionsCategories'])->get();
-		return view('admin.questionsBank.edit', compact('organizations', 'question'));
+		$categories = Category::where('category_type', 'Assesment')->get();
+        $subcategories = SubCategory::where('Type', 'Assesment')->get();
+		return view('admin.questionsBank.edit', compact('organizations', 'question','categories', 'subcategories'));
 	}
 
 	/**
@@ -216,8 +265,17 @@ class QuestionsBankController extends Controller
 			$question->tags = $request->has('tags') && !empty( $request->tags ) ? explode(',', $request->tags) : [];
 			$question->save();
 	
+
+
+
+			
 			return back()->withInput()->with('success', 'StoredSuccessfully');
 		}
+
+
+
+
+
 	}
 
 	public function destroy( $id )
