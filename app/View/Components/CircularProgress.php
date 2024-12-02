@@ -10,11 +10,13 @@ class CircularProgress extends Component
 {
     public $size;
     public $color;
+    public $progress;
 
-    public function __construct($size, $color)
+    public function __construct($size, $color, $progress)
     {
         $this->size = $size;
         $this->color = $color;
+        $this->progress = $progress;
     }
 
     public function render(): View|Closure|string

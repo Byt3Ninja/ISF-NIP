@@ -44,23 +44,32 @@ $questions = [
   .active-cat {
     border: 1px solid #000;
   }
+  .btn {
+    border-radius: 15px !important;
+  }
 </style>
 
 <div class="d-flex flex-column gap-6">
   <div class="d-flex flex-wrap gap-2">
     @foreach($categories as $key => $category)
     <div 
-      onclick="showQuestions('{{ $category['title'] }}');"
+      onclick="showBusinessConceptQues('{{ $category['title'] }}', {{ $key }});"
       class="card shadow-sm cursor-pointer {{ $key == 0 ? 'active-cat' : '' }}" 
-      id="category-tab"
+      id="bus-category-tab-{{ $key }}"
     >
-      <div class="px-3 py-5 d-flex flex-column gap-2">
+      <div class="px-3 py-5 d-flex flex-column gap-2 text-center">
         <span class="text-capitalize fw-bold text-sm">
           {{ str_replace('-', ' ', $category['title']) }}
         </span>
-        <span class="text-secondary" style="font-size: 10px;">
-          {{ $category['answered'] }}/5 questions answered
-        </span>
+        @if ($key == 0)
+          <span class="text-success fw-bold">
+            Done All
+          </span>
+        @else
+          <span class="text-secondary" style="font-size: 10px;">
+            {{ $category['answered'] }}/5 questions answered
+          </span>
+        @endif
       </div>
     </div>
     @endforeach
@@ -68,7 +77,7 @@ $questions = [
   <div class="row">
     @foreach($questions as $key => $question)
     <div 
-      class="col-12 question-card mb-3"
+      class="col-12 question-card-bus-con mb-3"
       data-category="{{ $question['category'] }}"
       style="display: {{ $question['category'] == 'business-idea' ? 'block' : 'none' }}" 
     >
@@ -98,5 +107,45 @@ $questions = [
     </div>
     @endforeach
   </div>
+  <div class="d-flex justify-content-between">
+    {{-- <button class="btn btn-secondary btn-prev" onclick="changeCategory(-1)">Prev</button> --}}
+    <button class="btn btn-primary btn-next-bus-concept ms-auto" onclick="changeCategory(1)">Submit</button>
+  </div>
 </div>
+
+<script>
+  let currentCategoryIndexForBus = 0;
+
+  const showBusinessConceptQues = (category, index) => {
+    document.querySelectorAll('.question-card-bus-con').forEach(card => {
+      card.style.display = card.getAttribute('data-category') === category ? 'block' : 'none';
+    });
+    document.querySelectorAll('.card').forEach(card => {
+      card.classList.remove('active-cat');
+    });
+    document.getElementById(`bus-category-tab-${index}`).classList.add('active-cat');
+    currentCategoryIndexForBus = index;
+    updateNavigationButtons();
+  }
+
+  const changeCategory = (direction) => {
+    const categories = @json($categories);
+    let newIndex = currentCategoryIndexForBus + direction;
+    if (newIndex < 0) newIndex = categories.length - 1;
+    if (newIndex >= categories.length) newIndex = 0;
+    showBusinessConceptQues(categories[newIndex].title, newIndex);
+  }
+
+  // const updateNavigationButtons = () => {
+  //   const categories = @json($categories);
+  //   // console.log('currentCategoryIndexForBus', currentCategoryIndexForBus)
+  //   // let curIndex = currentCategoryIndexForBus;
+  //   // document.querySelector('.btn-prev').classList.add(curIndex === 0 ? 'd-none' : 'd-block')
+  //   // document.querySelector('.btn-next-bus-concept').classList.add(curIndex === categories.length - 1 ? 'd-none' : 'd-block')
+  // }
+
+  // document.addEventListener('DOMContentLoaded', () => {
+  //   updateNavigationButtons();
+  // });
+</script>
 
