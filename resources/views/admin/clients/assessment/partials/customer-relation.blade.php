@@ -50,10 +50,10 @@ $questions = [
   <div class="d-flex flex-wrap gap-2">
     @foreach($categories as $key => $category)
     <div 
-      onclick="showQuestions('{{ $category['title'] }}');"
+      onclick="showCustomerRelQuestions('{{ $category['title'] }}', {{ $key }});"
       class="card shadow-sm cursor-pointer {{ $key == 0 ? 'active-cat' : '' }}" 
-      id="category-tab"
-    > 
+      id="category-tab-{{ $key }}"
+    >
       <div class="px-3 py-5 d-flex flex-column gap-2">
         <span class="text-capitalize fw-bold text-sm">
           {{ str_replace('-', ' ', $category['title']) }}
@@ -68,7 +68,7 @@ $questions = [
   <div class="row">
     @foreach($questions as $key => $question)
     <div 
-      class="col-12 question-card mb-3"
+      class="col-12 question-card-cust-rel mb-3"
       data-category="{{ $question['category'] }}"
       style="display: {{ $question['category'] == 'Ownergroup & Board' ? 'block' : 'none' }}"
     >
@@ -98,28 +98,44 @@ $questions = [
     </div>
     @endforeach
   </div>
+  <div class="d-flex justify-content-between">
+    {{-- <button class="btn btn-secondary btn-prev" onclick="changeCategoryForCustRel(-1)">Prev</button> --}}
+    <button class="btn btn-primary btn-next-cust-rel ms-auto" onclick="changeCategoryForCustRel(1)">Submit</button>
+  </div>
 </div>
 
 <script>
+  let currentCategoryIndex = 0;
+
+  const showCustomerRelQuestions = (category, index) => {
+    document.querySelectorAll('.question-card-cust-rel').forEach(card => {
+      card.style.display = card.getAttribute('data-category') === category ? 'block' : 'none';
+    });
+    document.querySelectorAll('.card').forEach(card => {
+      card.classList.remove('active-cat');
+    });
+    document.getElementById(`category-tab-${index}`).classList.add('active-cat');
+    currentCategoryIndex = index;
+    updateNavigationButtonsForCustRel();
+  }
+
+  const changeCategoryForCustRel = (direction) => {
+    const categories = @json($categories);
+    let newIndex = currentCategoryIndex + direction;
+    if (newIndex < 0) newIndex = categories.length - 1;
+    if (newIndex >= categories.length) newIndex = 0;
+    showCustomerRelQuestions(categories[newIndex].title, newIndex);
+  }
+
+  const updateNavigationButtonsForCustRel = () => {
+    const categories = @json($categories);
+    console.log('currentCategoryIndex', currentCategoryIndex)
+    let curIndex = currentCategoryIndex;
+    // document.querySelector('.btn-prev').classList.add(curIndex === 0 ? 'd-none' : 'd-block')
+    document.querySelector('.btn-next-cust-rel').classList.add(curIndex === categories.length - 1 ? 'd-none' : 'd-block')
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    const categoryTab = document.querySelectorAll('#category-tab');
-
-    // Handle category tab click
-    categoryTab.forEach(tab => {
-      tab.addEventListener('click', () => {
-        categoryTab.forEach(tab => {
-          tab.classList.remove('active-cat');
-        });
-
-        tab.classList.add('active-cat');
-      });
-    })
-
-    // Handle show questions
-    const showQuestions = (category) => {
-      document.querySelectorAll('.question-card').forEach(card => {
-        card.style.display = card.getAttribute('data-category') === category ? 'block' : 'none';
-      });
-    }
+    updateNavigationButtonsForCustRel();
   });
 </script>

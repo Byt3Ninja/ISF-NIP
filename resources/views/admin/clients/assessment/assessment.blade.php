@@ -142,11 +142,5 @@ $assessments = [
     })
 
   });
-  // Handle show questions
-  const showQuestions = (category) => {
-    document.querySelectorAll('.question-card').forEach(card => {
-      card.style.display = card.getAttribute('data-category') === category ? 'block' : 'none';
-    });
-  }
 </script>
 @stop
