@@ -54,13 +54,19 @@ $questions = [
       class="card shadow-sm cursor-pointer {{ $key == 0 ? 'active-cat' : '' }}" 
       id="category-tab-{{ $key }}"
     >
-      <div class="px-3 py-5 d-flex flex-column gap-2">
+      <div class="px-3 py-5 d-flex flex-column gap-2 text-center">
         <span class="text-capitalize fw-bold text-sm">
           {{ str_replace('-', ' ', $category['title']) }}
         </span>
+        @if ($key == 0)
+        <span class="text-success fw-bold">
+          Done All
+        </span>
+      @else
         <span class="text-secondary" style="font-size: 10px;">
           {{ $category['answered'] }}/5 questions answered
         </span>
+      @endif
       </div>
     </div>
     @endforeach
@@ -127,15 +133,15 @@ $questions = [
     showCustomerRelQuestions(categories[newIndex].title, newIndex);
   }
 
-  const updateNavigationButtonsForCustRel = () => {
-    const categories = @json($categories);
-    console.log('currentCategoryIndex', currentCategoryIndex)
-    let curIndex = currentCategoryIndex;
-    // document.querySelector('.btn-prev').classList.add(curIndex === 0 ? 'd-none' : 'd-block')
-    document.querySelector('.btn-next-cust-rel').classList.add(curIndex === categories.length - 1 ? 'd-none' : 'd-block')
-  }
+  // const updateNavigationButtonsForCustRel = () => {
+  //   const categories = @json($categories);
+  //   console.log('currentCategoryIndex', currentCategoryIndex)
+  //   let curIndex = currentCategoryIndex;
+  //   // document.querySelector('.btn-prev').classList.add(curIndex === 0 ? 'd-none' : 'd-block')
+  //   document.querySelector('.btn-next-cust-rel').classList.add(curIndex === categories.length - 1 ? 'd-none' : 'd-block')
+  // }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    updateNavigationButtonsForCustRel();
-  });
+  // document.addEventListener('DOMContentLoaded', () => {
+  //   updateNavigationButtonsForCustRel();
+  // });
 </script>

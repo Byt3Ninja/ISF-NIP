@@ -54,13 +54,19 @@ $questions = [
       class="card card-org shadow-sm cursor-pointer {{ $key == 0 ? 'active-cat' : '' }}" 
       id="org-category-tab-{{ $key }}"
     >
-      <div class="px-3 py-5 d-flex flex-column gap-2">
+      <div class="px-3 py-5 d-flex flex-column gap-2 text-center">
         <span class="text-capitalize fw-bold text-sm">
           {{ str_replace('-', ' ', $category['title']) }}
         </span>
-        <span class="text-secondary" style="font-size: 10px;">
-          {{ $category['answered'] }}/5 questions answered
-        </span>
+        @if ($key == 0)
+          <span class="text-success fw-bold">
+            Done All
+          </span>
+        @else
+          <span class="text-secondary" style="font-size: 10px;">
+            {{ $category['answered'] }}/5 questions answered
+          </span>
+        @endif
       </div>
     </div>
     @endforeach
@@ -129,17 +135,17 @@ $questions = [
     showOrganizationQuestions(categories[newIndex].title, newIndex);
   }
 
-  const updateNavigationButtonsForOrg = () => {
-    const categories = @json($categories);
-    console.log('currentCategoryIndexForOrg', currentCategoryIndexForOrg)
-    let curIndex = currentCategoryIndexForOrg;
-    // document.querySelector('.btn-prev').classList.add(curIndex === 0 ? 'd-none' : 'd-block')
-    document.querySelector('.btn-next-org').classList.add(curIndex === categories.length - 1 ? 'd-none' : 'd-block')
-  }
+  // const updateNavigationButtonsForOrg = () => {
+  //   const categories = @json($categories);
+  //   console.log('currentCategoryIndexForOrg', currentCategoryIndexForOrg)
+  //   let curIndex = currentCategoryIndexForOrg;
+  //   // document.querySelector('.btn-prev').classList.add(curIndex === 0 ? 'd-none' : 'd-block')
+  //   document.querySelector('.btn-next-org').classList.add(curIndex === categories.length - 1 ? 'd-none' : 'd-block')
+  // }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    updateNavigationButtonsForOrg();
-  });
+  // document.addEventListener('DOMContentLoaded', () => {
+  //   updateNavigationButtonsForOrg();
+  // });
 </script>
 
 

@@ -76,33 +76,52 @@ $assessments = [
     </div>
     <!-- / Pills -->
     <div class="row">
-      <div class="col-md-3 col-12">
+      <div class="col-md-3 col-12 position-relative" style="height: fit-content;">
         @foreach($assessments as $key => $assessment)
-        <div id="tab{{ $key + 1 }}" class="assessment-tab card shadow-sm mb-3 {{$key == 0 ? 'border border-dark' : ''}}">
+        <div id="tab{{ $key + 1 }}" class="assessment-tab card shadow-sm mb-3 {{$key == 0 ? 'border border-dark' : ''}} position-relative">
           <div class="d-flex justify-content-between align-items-center p-4">
             <div class="d-flex flex-column">
               <h6 class="mb-0 text-capitalize">
                 {{ str_replace('-', ' ', $assessment['title']) }}
               </h6>
-              <span class="text-xs text-secondary">20/25 questions answered</span>
+              @if ($key == 0)
+                <span class="text-success fw-bold text-sm">
+                  Done All
+                </span>
+              @else
+                <span class="text-secondary" style="font-size: 10px;">
+                  20/25 questions answered
+                </span>
+              @endif
             </div>
-            <x-circular-progress size="40" color="success" />
+            <x-circular-progress size="40" color="#28c76f" progress="{{ $assessment['progress'] }}" />
           </div>
+          @if ($assessment['status'] == 'completed' || $assessment['progress'] == 100)
+            <div 
+              style="position: absolute; left: -1rem; top: 50%; transform: translateY(-50%); z-index: 1;"
+              class="w-px-20 h-px-20 rounded-circle bg-success justify-content-center align-items-center d-flex">
+              <i class="ti ti-check text-white fs-6"></i>
+            </div>
+          @else
+            <div 
+              style="position: absolute; left: -1rem; top: 50%; transform: translateY(-50%); z-index: 1;"
+              class="w-px-20 h-px-20 rounded-circle bg-light border border-secondary">
+            </div>
+          @endif
         </div>
         @endforeach
+        <div style="position: absolute; left: 0.35rem; top: 0; height: 100%; border-left: 2px dashed rgb(120, 108, 163);"></div>
       </div>
       <div class="col-md-9 col-12">
         @foreach($assessments as $key => $assessment)
         <section id="tab-content-{{ $key + 1 }}" class="{{ $key == 0 ? 'd-block' : 'd-none' }}">
           @if ($assessment['title'] == 'business-concept')
             @include('admin.clients.assessment.partials.business-concept')
-            @elseif ($assessment['title'] == 'organization')
+          @elseif ($assessment['title'] == 'organization')
             @include('admin.clients.assessment.partials.organization')
           @elseif ($assessment['title'] == 'operations')
-          {{-- <h1>Operations</h1> --}}
             @include('admin.clients.assessment.partials.operations')
           @elseif ($assessment['title'] == 'customer-relation')
-          {{-- <h1>customer-relation</h1> --}}
             @include('admin.clients.assessment.partials.customer-relation')
           @endif
         </section>
