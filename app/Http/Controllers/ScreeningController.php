@@ -176,6 +176,10 @@ class ScreeningController extends Controller
                 $query->where('organization_id',$organization_id);
             });
         })->where('stype', 2)->orderBy('from')->get();
+        $getStep = Step::find($id);
+        $companies = Company::where('cycle', $getStep->cycle_id)->get();
+        $uniqueCycleIds = $companies->pluck('cycle')->unique();
+        $_steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
             $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
@@ -195,9 +199,9 @@ class ScreeningController extends Controller
         if ($cstep) {
             $form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr',$cstep->arr-1)->first();
         }
-//        dd( $form);
+        // dd( $form);
         $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
-        return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs'));
+        return view('admin.settings.screening.results', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs'));
     }
 
     public function changestep(Request $request)
