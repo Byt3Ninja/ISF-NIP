@@ -270,6 +270,7 @@ class UserController extends Controller
 
         $l = app()->getLocale();
         $cycle_id = null;
+        $errorMessage = '';
 
         if (Auth::user()->hasRole('Registered')) {
 
