@@ -971,4 +971,5 @@ return [
 	'explanation_QA_en' => 'Explanation of the question in English',
 	'explanation_AA_ar' => 'Explanation of the answer in Arabic',
 	'explanation_AA_en' => 'Explanation of the answer in English',
+	'WaitingYourRedirect' => 'Waiting for you to redirect',
 ];
