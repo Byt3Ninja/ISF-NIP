@@ -951,6 +951,7 @@ return [
 	'Total_company_by_SDG' => 'إجمالي الشركات حسب الأهداف الإنمائية المستدامة',
 	'Development_Stage' => 'المشاريع في مرحلة التطوير',
 	'Projects_Distribution_by_Sector' => 'توزيع المشاريع حسب القطاع',
+	'Total_companies_by_sector' => 'إجمالي الشركات حسب القطاع',
 	'Assessments' => ' التقيمات ',
 	'Question_Assessment' => ' اسئلة التقييم ',
 	'Analysis_Assessment' => ' تحليل التقييم ',

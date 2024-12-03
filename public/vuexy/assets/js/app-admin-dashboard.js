@@ -6,12 +6,25 @@ document.addEventListener('DOMContentLoaded', () => {
   renderDevStageChart();
   renderProjectDistributionChart();
   renderCompanySdgChart();
-  renderUserDistributionChart();
   renderSectorBreakdownChart();
+  renderUserDistributionChart();
   renderTargetMarketChart();
   renderProjectOverTimeStatusChart();
-  // renderTotalCompaniesBySectorChart();
+  renderTotalCompaniesBySectorChart();
 });
+
+const colors = [
+  '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFC300', 
+  '#87CEEB', '#FFA500', '#FF6347', '#FF4500', '#FF0000', 
+  '#FF1493', '#FF69B4', '#FFB6C1', '#FFC0CB', '#DB7093', 
+  '#C71585', '#FF00FF', '#8A2BE2', '#4B0082', '#800080',
+  '#9370DB', '#7B68EE', '#6A5ACD', '#483D8B', '#0000FF',
+  '#0000CD', '#00008B', '#000080', '#4169E1', '#6495ED',
+  '#1E90FF', '#4682B4', '#87CEFA', '#87CEEB', '#00BFFF',
+  '#ADD8E6', '#DC143C', '#B22222', '#8B0000', '#FF00FF',
+];
+
+const shuffledColors = colors.sort(() => 0.5 - Math.random());
 
 let cardColor, headingColor, labelColor, borderColor, legendColor;
 
@@ -34,167 +47,126 @@ chartList.forEach(function (chartListItem) {
   chartListItem.height = chartListItem.dataset.height;
 });
 
+const getPieChartConfig = (labels, data) => {
+  return {
+    chart: { height: 380, type: 'pie' },
+    labels,
+    series: data,
+    colors: shuffledColors,
+    stroke: { show: false, curve: 'smooth' },
+    legend: {
+      show: true,
+      position: 'bottom',
+      markers: { offsetX: -3 },
+      itemMargin: { vertical: 3, horizontal: 10 },
+      labels: { colors: isDarkStyle ? '#c0c0c0' : '#515365', useSeriesColors: false }
+    },
+    plotOptions: {}
+  };
+};
 
-const getChartData = (labels, data) => {
-  if (labels && data) {
-    return { labels, data };
-  }
+const getBarChartConfig = (labels, data, precentage = false, max) => {
+  return {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          data,
+          backgroundColor: shuffledColors,
+          borderColor: 'transparent',
+          maxBarThickness: 15,
+          borderRadius: {
+            topRight: 15,
+            topLeft: 15
+          }
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 500
+      },
+      plugins: {
+        tooltip: {
+          rtl: isRtl,
+          backgroundColor: cardColor,
+          titleColor: headingColor,
+          bodyColor: legendColor,
+          borderWidth: 1,
+          borderColor: borderColor
+        },
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            color: borderColor,
+            drawBorder: false,
+            borderColor: borderColor
+          },
+          ticks: {
+            color: labelColor
+          }
+        },
+        y: {
+          min: 0,
+          max: precentage ? 100 : max ? max : 20,
+          grid: {
+            color: borderColor,
+            drawBorder: false,
+            borderColor: borderColor
+          },
+          ticks: {
+            stepSize: precentage ? 10 : 1,
+            color: labelColor
+          }
+        }
+      }
+    }
+  };
 };
 
 // Render Total Companies By Sector Chart
-// const renderTotalCompaniesBySectorChart = () => {
-//   const chartData = totalStartupsPerOrganization ? totalStartupsPerOrganization?.filter(
-//     data => data.label !== null && data.count > 0
-//   ) : [];
-//   const chartDataLabels = chartData.map(data => data.label);
-//   const chartDataValues = chartData.map(data => data.count);
-//   console.log('chartDataLabels', chartDataLabels)
-//   console.log('chartDataValues', chartDataValues)
-  // const chartDom = document.querySelector('#companyBySectorChart');
-  // if (chartDom) {
-  //   const chart = new Chart(chartDom, {
-  //     type: 'bar',
-  //     data: {
-  //       labels: sectors,
-  //       datasets: [
-  //         {
-  //           data: companies,
-  //           backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'],
-  //           borderColor: 'transparent',
-  //           maxBarThickness: 15,
-  //           borderRadius: {
-  //             topRight: 15,
-  //             topLeft: 15
-  //           }
-  //         }
-  //       ]
-  //     },
-  //     options: {
-  //       responsive: true,
-  //       maintainAspectRatio: false,
-  //       animation: {
-  //         duration: 500
-  //       },
-  //       plugins: {
-  //         tooltip: {
-  //           rtl: isRtl,
-  //           backgroundColor: cardColor,
-  //           titleColor: headingColor,
-  //           bodyColor: legendColor,
-  //           borderWidth: 1,
-  //           borderColor: borderColor
-  //         },
-  //         legend: {
-  //           display: false
-  //         }
-  //       },
-  //       scales: {
-  //         x: {
-  //           grid: {
-  //             color: borderColor,
-  //             drawBorder: false,
-  //             borderColor: borderColor
-  //           },
-  //           ticks: {
-  //             color: labelColor
-  //           }
-  //         },
-  //         y: {
-  //           min: 2,
-  //           max: 12,
-  //           grid: {
-  //             color: borderColor,
-  //             drawBorder: false,
-  //             borderColor: borderColor
-  //           },
-  //           ticks: {
-  //             stepSize: 2,
-  //             color: labelColor
-  //           }
-  //         }
-  //       }
-  //     }
-  //   });
-  // }
-// }
+const renderTotalCompaniesBySectorChart = () => {
+  const chartData = companiesBySectorData ? companiesBySectorData?.filter(
+    data => data.label !== null && data.count > 0
+  ) : [];
+
+  const labels = chartData.map(data => data.sector);
+  const values = chartData.map(data => data.count);
+  console.log('labels', labels)
+  console.log('values', values)
+  const chartDom = document.querySelector('#companyBySectorChart');
+  const chartConfig = getBarChartConfig(labels, values, false, 50);
+
+  if (chartDom) {
+    new Chart(chartDom, chartConfig);
+  }
+}
 
 // Render User Distribution Chart
 const renderUserDistributionChart = () => {
   const chartData = userDistributionData ? userDistributionData?.filter(
     data => data.label !== null && data.count > 0
   ) : [];
-  const chartDataLabels = chartData.map(data => data.label);
-  const chartDataValues = chartData.map(data => data.count);
+
+  const labels = chartData.map(data => data.label);
+  const values = chartData.map(data => data.count);
 
   const chartDom = document.querySelector('#userDistributionChart');
+  const chartConfig = getBarChartConfig(labels, values, false, 50);
+
   if (chartDom) {
-    const chart = new Chart(chartDom, {
-      type: 'bar',
-      data: {
-        labels: chartDataLabels,
-        datasets: [
-          {
-            data: chartDataValues,
-            backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'],
-            borderColor: 'transparent',
-            maxBarThickness: 15,
-            borderRadius: {
-              topRight: 15,
-              topLeft: 15
-            }
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 500
-        },
-        plugins: {
-          tooltip: {
-            rtl: isRtl,
-            backgroundColor: cardColor,
-            titleColor: headingColor,
-            bodyColor: legendColor,
-            borderWidth: 1,
-            borderColor: borderColor
-          },
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              color: borderColor,
-              drawBorder: false,
-              borderColor: borderColor
-            },
-            ticks: {
-              color: labelColor
-            }
-          },
-          y: {
-            min: 0,
-            max: 100,
-            grid: {
-              color: borderColor,
-              drawBorder: false,
-              borderColor: borderColor
-            },
-            ticks: {
-              stepSize: 2,
-              color: labelColor
-            }
-          }
-        }
-      }
-    });
+    new Chart(chartDom, chartConfig);
   }
 }
 
-// Render Target Market Chart
+// Render Project Over Time Status Chart
 const renderProjectOverTimeStatusChart = () => {
   const labels = projectStatusData ? projectStatusData.map(pro => pro.cycle_title) : [];
   const values = projectStatusData ? projectStatusData.map(pro => pro.total_programs * 10) : [];
@@ -209,7 +181,7 @@ const renderProjectOverTimeStatusChart = () => {
   const projectStatusChartEl = document.querySelector('#projectStatusOverTimeChart');
   const projectStatusChartConfig = {
     chart: {
-      height: 400,
+      height: 345,
       type: 'line',
       parentHeightOffset: 0,
       zoom: {
@@ -295,97 +267,17 @@ const renderProjectOverTimeStatusChart = () => {
 // Render Target Market Chart
 const renderTargetMarketChart = () => {
   const chartData = targetMarketData ? targetMarketData?.filter(
-    data => data.label !== null
+    data => data.label !== null && data.count > 0
   ) : [];
 
-  const allLabels = chartData.reduce((acc, data) => {
-    if (data.label) {
-      const labels = JSON.parse(data.label);
-      labels.forEach(label => {
-        acc.push(label);
-      });
-    }
-    return acc;
-  }, []);
-
-  const allValues = chartData.reduce((acc, data) => {
-    if (data.label) {
-      const labels = JSON.parse(data.label);
-      labels.forEach(() => {
-        acc.push(data.count * 10);
-      });
-    }
-    return acc;
-  }, []);
+  const labels = chartData ? chartData.map(data => data.label) : [];
+  const values = chartData ? chartData.map(data => data.count) : [];
 
   const chartDom = document.querySelector('#targetMarketChart');
+  const chartConfig = getBarChartConfig(labels, values, false, null);
+
   if (chartDom) {
-    const chart = new Chart(chartDom, {
-      type: 'bar',
-      data: {
-        labels: allLabels,
-        datasets: [
-          {
-            data: allValues,
-            backgroundColor: [
-              '#808390', '#7367f0', '#00bad1', '#007bff', '#FFC300',
-              '#f8d7da', '#cce5ff', '#d4edda', '#fff3cd', '#d1ecf1',
-            ],
-            borderColor: 'transparent',
-            maxBarThickness: 15,
-            borderRadius: {
-              topRight: 15,
-              topLeft: 15
-            }
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 500
-        },
-        plugins: {
-          tooltip: {
-            rtl: isRtl,
-            backgroundColor: cardColor,
-            titleColor: headingColor,
-            bodyColor: legendColor,
-            borderWidth: 1,
-            borderColor: borderColor
-          },
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              color: borderColor,
-              drawBorder: false,
-              borderColor: borderColor
-            },
-            ticks: {
-              color: labelColor
-            }
-          },
-          y: {
-            min: 0,
-            max: 100,
-            grid: {
-              color: borderColor,
-              drawBorder: false,
-              borderColor: borderColor
-            },
-            ticks: {
-              stepSize: 10,
-              color: labelColor
-            }
-          }
-        }
-      }
-    });
+    new Chart(chartDom, chartConfig);
   }
 };
 
@@ -394,129 +286,30 @@ const renderDevStageChart = () => {
   const chartData = devStageData ? devStageData?.filter(
     data => data.label !== null && data.count > 0
   ) : [];
-  const chartDataLabels = chartData.map(data => data.label);
-  const chartDataValues = chartData.map(data => data.count * 10);
+
+  const labels = chartData.map(data => data.label);
+  const values = chartData.map(data => data.count);
 
   const charDom = document.querySelector('#devStageStackedBarChart');
+  const chartConfig = getBarChartConfig(labels, values, false, null);
+
   if (charDom) {
-    const chart = new Chart(charDom, {
-      type: 'bar',
-      data: {
-        labels: chartDataLabels,
-        datasets: [
-          {
-            data: chartDataValues,
-            backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'],
-            borderColor: 'transparent',
-            maxBarThickness: 15,
-            borderRadius: {
-              topRight: 15,
-              topLeft: 15
-            }
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 500
-        },
-        plugins: {
-          tooltip: {
-            rtl: isRtl,
-            backgroundColor: cardColor,
-            titleColor: headingColor,
-            bodyColor: legendColor,
-            borderWidth: 1,
-            borderColor: borderColor
-          },
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              color: borderColor,
-              drawBorder: false,
-              borderColor: borderColor
-            },
-            ticks: {
-              color: labelColor
-            }
-          },
-          y: {
-            min: 0,
-            max: 100,
-            grid: {
-              color: borderColor,
-              drawBorder: false,
-              borderColor: borderColor
-            },
-            ticks: {
-              stepSize: 10,
-              color: labelColor
-            }
-          }
-        }
-      }
-    });
+    new Chart(charDom, chartConfig);
   }
 };
 
 // Render Company SDG Chart
 const renderCompanySdgChart = () => {
-  if (sdgData) {
-    const chartData = sdgData ? sdgData?.filter(
-      data => data.sdg !== null
-    ) : [];
-  const chartDataLabels = chartData.reduce((acc, data) => {
-    if (data.sdg) {
-      let labels = [];
-      try {
-        labels = JSON.parse(data.sdg);
-      } catch (e) {
-        console.error('Invalid JSON string in data.sdg:', data.sdg);
-      }
-      labels.forEach(label => {
-        acc.push(label);
-      });
-    }
-    return acc;
-  }, []);
+  const labels = sdgData ? sdgData.map(data => data.sdg) : [];
+  const series = sdgData ? sdgData.map(data => data.total) : [];
 
-  const chartDataValues = chartData.reduce((acc, data) => {
-    if (data.sdg) {
-      const labels = JSON.parse(data.sdg);
-      labels.forEach(() => {
-        acc.push(data.total);
-      });
-    }
-    return acc;
-  }, []);
-  
-    const chartDom = document.querySelector('#sdgCompaniesChart'),
-    chartConfig = {
-      chart: { height: 380, type: 'pie' },
-      labels: chartDataLabels,
-      series: chartDataValues,
-      colors: ['#ffd9b4', '#ff7f50', '#ff6347', '#ff4500', '#ff0000', '#dc143c', '#b22222', '#8b0000', '#ff1493', '#ff69b4', '#ffb6c1', '#ffc0cb', '#db7093', '#c71585', '#ff00ff', '#ee82ee', '#dda0dd'],
-      stroke: { show: false, curve: 'smooth' },
-      legend: {
-        show: true,
-        position: 'bottom',
-        markers: { offsetX: -3 },
-        itemMargin: { vertical: 3, horizontal: 10 },
-        labels: { colors: isDarkStyle ? '#c0c0c0' : '#515365', useSeriesColors: false }
-      },
-      plotOptions: {}
-    };
-    if (typeof chartDom !== undefined && chartDom !== null) {
-      const chart = new ApexCharts(chartDom, chartConfig);
-      chart.render();
-    }
-  }
+  const chartDom = document.querySelector('#sdgCompaniesChart');
+
+  const chartConfig = getBarChartConfig(labels, series);
+
+  if (chartDom) {
+    new Chart(chartDom, chartConfig);
+  };
 };
 
 // Render Project Distribution Pie Chart
@@ -524,25 +317,13 @@ const renderProjectDistributionChart = () => {
   const chartData = projectsPieData ? projectsPieData?.filter(
     data => data.label !== null && data.count > 0
   ) : [];
-  const chartDataLabels = chartData.map(data => data.label);
-  const chartDataValues = chartData.map(data => data.count);
+  
+  const labels = chartData.map(data => data.label);
+  const values = chartData.map(data => data.count);
+  
+  const chartDom = document.querySelector('#projectsPieChart');
+  const chartConfig = getPieChartConfig(labels, values);
 
-  const chartDom = document.querySelector('#projectsPieChart'),
-    chartConfig = {
-      chart: { height: 380, type: 'pie' },
-      labels: chartDataLabels,
-      series: chartDataValues,
-      colors: ['#87CEEB', '#FFA500', '#33FF57', '#3357FF', '#FF33A1', '#FFC300'],
-      stroke: { show: false, curve: 'smooth' },
-      legend: {
-        show: true,
-        position: 'bottom',
-        markers: { offsetX: -3 },
-        itemMargin: { vertical: 3, horizontal: 10 },
-        labels: { colors: isDarkStyle ? '#c0c0c0' : '#515365', useSeriesColors: false }
-      },
-      plotOptions: {}
-    };
   if (typeof chartDom !== undefined && chartDom !== null) {
     const chart = new ApexCharts(chartDom, chartConfig);
     chart.render();
@@ -551,37 +332,17 @@ const renderProjectDistributionChart = () => {
 
 // Render Sector Breakdown Chart
 const renderSectorBreakdownChart = () => {
+  
   const chartData = sectorBreakdownData ? sectorBreakdownData?.filter(
     data => data.label !== null && data.count > 0
   ) : [];
-  const chartDataLabels = chartData.map(data => data.label);
-  const chartDataValues = chartData.map(data => data.count);
 
-  const chartDom = document.querySelector('#sectorBreakdownChart'),
-    colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFC300'],
-    chartConfig = {
-      chart: { height: 380, type: 'donut' },
-      labels: chartDataLabels,
-      series: chartDataValues,
-      colors,
-      stroke: { show: true, width: 5, colors: ['#fff'] },
-      legend: {
-        show: true,
-        position: 'bottom',
-        markers: { offsetX: -3 },
-        itemMargin: { vertical: 3, horizontal: 10 },
-        labels: { colors: labelColor, useSeriesColors: false }
-      },
-      plotOptions: {
-        pie: {
-          donut: {
-            height: 500, // Increase this value
-            size: '75%' // Change this to a smaller value, e.g., '75%' or '70%'
-          }
-        }
-      }
-    };
-
+  const labels = chartData.map(data => data.label);
+  const values = chartData.map(data => data.count);
+  
+  const chartDom = document.querySelector('#sectorBreakdownChart');
+  const chartConfig = getPieChartConfig(labels, values);
+  
   if (typeof chartDom !== undefined && chartDom !== null) {
     const chart = new ApexCharts(chartDom, chartConfig);
     chart.render();
