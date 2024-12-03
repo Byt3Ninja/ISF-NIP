@@ -269,7 +269,7 @@
                         src="/icons/development-stages.svg" alt="icon" />
                     </div>
                     <span
-                      class="text-black fs-5">{{ __('admin.development_stage') }}</span>
+                      class="text-black fs-5">{{ __('admin.Funding_Stage') }}</span>
                     <span
                       class="text-primary">{{ __('admin.'. $company->development_stage) ?? __('admin.N/A') }}</span>
                   </div>

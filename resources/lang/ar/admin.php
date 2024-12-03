@@ -473,7 +473,7 @@ return [
 	'revenue_generating' => 'توليد الإيرادات',
 	'currently_fundraising' => 'يجري جمع التمويل حالياً',
 	'desired_funding_amount' => 'المبلغ المطلوب للتمويل',
-	'Funding Stage' => 'مرحلة التمويل',
+	'Funding_Stage' => 'مرحلة التمويل',
 	'Amount' => 'المبلغ',
 	'Post Money Valuation' => 'التقييم بعد التمويل',
 	'Date Raised' => 'تاريخ جمع التمويل',
