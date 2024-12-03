@@ -166,8 +166,8 @@ to group of users'];
                             </div>
                           </td>
                           <td>
-                            <div class="d-flex align-items-center">
-                              <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
+                            <div class="d-flex align-items-center gap-2">
+                              <a class="" href="/dashboard/users/{{ $company->user->id }}/edit">
                                 <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
@@ -182,9 +182,9 @@ to group of users'];
                           <td>
                             @foreach (\App\User::whereIn('id', $company->finals($cstep->id))->get() as $judge)
                             <div class="chip mr-1">
-                              <div class="d-flex align-items-center">
+                              <div class="d-flex align-items-center gap-2">
                                 <div class="avatar">
-                                  <img class="img-fluid" src="{{ $judge->image_url }}" alt="click to view" height="20"
+                                  <img class="img-fluid rounded-circle" src="{{ $judge->image_url }}" alt="click to view" height="20"
                                     width="20">
                                 </div>
                                 <span class="chip-text">{{ $judge->name }}</span>

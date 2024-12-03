@@ -178,7 +178,7 @@ return [
     'No records Add final' => 'No records, Add final screening first from',
     'Judges list' => 'Judges list',
     'Assign to selected users' => 'Assign to selected users',
-    'Add new zoom session' => 'Add new zoom session',
+    'Add new zoom session' => 'Add new session',
     'Before submit review' => 'Before submit, review judges list, and meeting date/time',
     'Submit your opinion' => 'Submit your opinion',
     'answer submit' => 'Add your answers about this company below and submit',
