@@ -50,7 +50,7 @@
               @foreach ($countries as $country)
                 <option value="{{ $country->id }}"
                   {{ $country->id == $client->country_id ? 'selected' : '' }}>
-                  {{ $country->{'name_' . $l} }}</option>
+                  {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
               @endforeach
             </select>
             <i class="ti ti-map-2 fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
@@ -181,7 +181,7 @@
               @foreach ($countries as $country)
                 <option value="{{ $country->id }}"
                   {{ $client->company && $country->id == $client->company->Country_Register_id ? 'selected' : '' }}>
-                  {{ $country->{'name_' . $l} }}</option>
+                  {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
               @endforeach
             </select>
             <i class="ti ti-map-2 fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"

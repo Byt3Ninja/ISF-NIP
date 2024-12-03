@@ -20,10 +20,7 @@ use App\Settings;
 use App\Stage;
 use App\SustainableIcon;
 use \Illuminate\Validation\ValidationException;
-use DB;
-use Exception;
-use Session;
-use Storage;
+use URL, File, DB, Exception, Session, Storage;
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -137,10 +134,22 @@ if(!empty($company->Sustainable_development)){
             }
 
             $Currencies = Currency::all(); // جلب جميع الأعضاء
-            $Stages = Stage::all(); // جلب جميع الأعضاء
-
+            $json = File::get(base_path('database/dbFiles/countries.json'));
+            $_countries = json_decode($json, true);
+            $_countries = collect( $_countries )->map(function ($country) {
+                $country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
+                return $country;
+            });
+            $countries = $countries->map(function ( $country ) use ( $_countries ) {
+                $getCountry = $_countries->where('iso3', $country->iso3)->first();
+                $flag = null; $emoji = null;
+                if( !empty( $getCountry ) ) { $flag = $getCountry['flag']; $emoji = $getCountry['emoji']; }
+                $country->flag = $flag;
+                $country->emoji = $emoji;
+                return $country;
+            });
             return view('admin/clients/company', compact(
-                'client', 'Stages', 'fonders', 'Shareholders', 'Investors', 'Currencies', 'Achieveds', 'Planneds', 'Archiveds', 'teamMembers', 'states', 'cities','countries','sectors','funding_rounds','Setting'
+                'client', '_countries', 'fonders', 'Shareholders', 'Investors', 'Currencies', 'Achieveds', 'Planneds', 'Archiveds', 'teamMembers', 'states', 'cities','countries','sectors','funding_rounds','Setting'
             ));
         }catch (Exception $e){
             //log what happend

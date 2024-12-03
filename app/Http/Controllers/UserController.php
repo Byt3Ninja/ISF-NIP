@@ -14,10 +14,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Hash;
 use App\User;
 use Illuminate\Support\Facades\Auth;
-use DB;
-use Log;
-use Exception;
-use Session;
+use DB, Log, Exception, Session, URL, File;
 use App\Team_member;
 use Illuminate\Support\Facades\Log as FacadesLog;
 
@@ -146,6 +143,20 @@ class UserController extends Controller
             $this->preProcessingCheck('edit_user');
             $roles = Role::all();
             $countries = Country::all();
+            $json = File::get(base_path('database/dbFiles/countries.json'));
+            $_countries = json_decode($json, true);
+            $_countries = collect( $_countries )->map(function ($country) {
+                $country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
+                return $country;
+            });
+            $countries = $countries->map(function ( $country ) use ( $_countries ) {
+                $getCountry = $_countries->where('iso3', $country->iso3)->first();
+                $flag = null; $emoji = null;
+                if( !empty( $getCountry ) ) { $flag = $getCountry['flag']; $emoji = $getCountry['emoji']; }
+                $country->flag = $flag;
+                $country->emoji = $emoji;
+                return $country;
+            });
             return view('admin/users/edit', compact('user', 'roles', 'countries'));
         } catch (Exception $e) {
 

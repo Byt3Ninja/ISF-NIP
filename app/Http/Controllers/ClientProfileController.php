@@ -9,12 +9,8 @@ use App\Http\Requests\UpdateClientProfileRequest;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
 use App\User;
 use App\UsersBio;
-use Storage;
+use Storage, Hash, DB, Exception, Session, URL, File;
 use Intervention\Image\ImageManagerStatic as Image;
-use Hash;
-use DB;
-use Exception;
-use Session;
 use App\CyclesMentors;
 use App\Schedule;
 use App\MentorshipRequest;
@@ -39,16 +35,32 @@ class ClientProfileController extends Controller
      * @param  \App\User  $Type
      * @return \Illuminate\Http\Response
      */
-    public function edit(){
-//        dd(auth()->id());
-        try{
+    public function edit()
+    {
+        try
+        {
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id',null)->get();
             $Currencies = Currency::all();
+            $json = File::get(base_path('database/dbFiles/countries.json'));
+            $_countries = json_decode($json, true);
+            $_countries = collect( $_countries )->map(function ($country) {
+                $country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
+                return $country;
+            });
+            $countries = $countries->map(function ( $country ) use ( $_countries ) {
+                $getCountry = $_countries->where('iso3', $country->iso3)->first();
+                $flag = null; $emoji = null;
+                if( !empty( $getCountry ) ) { $flag = $getCountry['flag']; $emoji = $getCountry['emoji']; }
+                $country->flag = $flag;
+                $country->emoji = $emoji;
+                return $country;
+            });
             return view('admin/clients/editProfile', compact('client','Currencies', 'countries','expertises'));
-        }catch (Exception $e){
-            //log what happend
+        }
+        catch (Exception $e)
+        {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }

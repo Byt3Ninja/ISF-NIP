@@ -9,7 +9,7 @@ Use App\Settings;
 Use App\Messages;
 use App\User;
 use Illuminate\Http\Request;
-use DB;
+use DB, File, URL;
 use Carbon\Carbon;
 use Auth;
 use App\Event;
@@ -23,21 +23,38 @@ class SettingsController extends Controller
     {
         $this->middleware('auth');
     }
-	public function get_settings(Request $request){
-            $this->preProcessingCheck('edit_settings');
-			$Title = Settings::findOrfail('1');
-			$Icons = Settings::where('type','2')->get();
-			$Img1 =  Settings::findOrfail('7');
-			$Img2 =  Settings::findOrfail('8');
-			$Img3 =  Settings::findOrfail('9');
-			$Counters = Settings::where('type','6')->get();
-            $countries = Country::all();
-            $states= State::all();
-            return view('admin.settings.editegeneral')
-                ->with('Title',$Title)->with('Icons',$Icons)->with('Img1',$Img1)
+
+	public function get_settings( Request $request )
+	{
+		$this->preProcessingCheck('edit_settings');
+		$Title = Settings::findOrfail('1');
+		$Icons = Settings::where('type','2')->get();
+		$Img1 =  Settings::findOrfail('7');
+		$Img2 =  Settings::findOrfail('8');
+		$Img3 =  Settings::findOrfail('9');
+		$Counters = Settings::where('type','6')->get();
+		$countries = Country::all();
+		$states= State::all();
+		$json = File::get(base_path('database/dbFiles/countries.json'));
+		$_countries = json_decode($json, true);
+		$_countries = collect( $_countries )->map(function ($country) {
+			$country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
+			return $country;
+		});
+		$countries = $countries->map(function ( $country ) use ( $_countries ) {
+			$getCountry = $_countries->where('iso3', $country->iso3)->first();
+			$flag = null; $emoji = null;
+			if( !empty( $getCountry ) ) { $flag = $getCountry['flag']; $emoji = $getCountry['emoji']; }
+			$country->flag = $flag;
+			$country->emoji = $emoji;
+			return $country;
+		});
+		return view('admin.settings.editegeneral')
+				->with('Title',$Title)->with('Icons',$Icons)->with('Img1',$Img1)
 				->with('Img2',$Img2)->with('Img3',$Img3)->with('Counters',$Counters)
-                ->with('countries',$countries)->with('states',$states);
-    }
+				->with('countries',$countries)->with('states',$states);
+	}
+
     public function update_settings(Request $request){
             $this->preProcessingCheck('edit_settings');
 			$Title = Settings::findOrfail('1');
