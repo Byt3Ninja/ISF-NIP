@@ -84,11 +84,11 @@
       <div class="d-flex justify-content-start w-100 mb-6">
         <nav 
           class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
-          style="height: 440px; min-width: 15%; max-width: 15%;">
+          style="height: auto; min-width: 15%; max-width: 15%;">
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
+              <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
                 <a href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
                   data-bs-toggle="tab" role="tab">
