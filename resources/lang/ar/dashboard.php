@@ -5,6 +5,7 @@ return [
     'Final screening'=>'التقييمات',
     'Services' => 'الخدمات',
     'newmessages' => 'الرسائل الجديدة',
+    'cantAccessAllCompanies' => 'لا يمكنك الوصول لكل الشركات',
     'Latest services' => 'آخر الخدمات',
     'No services added' => 'لا توجد خدمات حاليا',
     'Latest Events' => 'آخر الأحداث',
