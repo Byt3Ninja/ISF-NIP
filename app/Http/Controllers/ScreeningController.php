@@ -176,10 +176,6 @@ class ScreeningController extends Controller
                 $query->where('organization_id',$organization_id);
             });
         })->where('stype', 2)->orderBy('from')->get();
-        $getStep = Step::find($id);
-        $companies = Company::where('cycle', $getStep->cycle_id)->get();
-        $uniqueCycleIds = $companies->pluck('cycle')->unique();
-        $_steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
             $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
@@ -194,6 +190,10 @@ class ScreeningController extends Controller
                 });
             })->where('stype', 2)->where('id', $id)->first();
         }
+        $getStep = Step::find($id);
+        $companies = Company::where('cycle', $getStep->cycle_id)->get();
+        $uniqueCycleIds = $companies->pluck('cycle')->unique();
+        $_steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
         $judges = User::join('screenings', 'user_id', 'users.id')->where('step_id', $id)->get();
         $form = null;
         if ($cstep) {
