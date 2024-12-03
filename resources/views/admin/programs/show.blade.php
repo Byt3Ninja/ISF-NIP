@@ -1,12 +1,17 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+<!-- Vendors CSS -->
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
+
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @stop
@@ -182,21 +187,21 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Alert -->
+    @if (session()->has('message'))
+      <div class="alert alert-success alert-dismissible" role="alert">
+        {{ __('admin.' . session()->get('message')) }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    @endif
+    @if (session()->has('message2'))
+      <div class="alert alert-danger alert-dismissible" role="alert">
+        {{ __('admin.' . session()->get('message2')) }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    @endif
+    <!-- / Alert -->
     <div class="row">
-
-      @if (session()->has('message'))
-              <div class="alert alert-success alert-dismissible" role="alert">
-                {{ __('admin.' . session()->get('message')) }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            @endif
-            @if (session()->has('message2'))
-              <div class="alert alert-danger alert-dismissible" role="alert">
-                {{ __('admin.' . session()->get('message2')) }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            @endif
-
       <input type="hidden" id="ccycleOrg" value="{{ $program->organization_id }}" >
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
@@ -234,7 +239,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   @if(!empty($program->private))
                         <a 
                           href="cycles/view/{{ $program->private }}"
-                          class="d-flex align-items-center text-muted"
+                          class="btn btn-transparent"
                           target="_blank"
                           id="private-link"
                         >
@@ -403,59 +408,59 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
       @foreach ($steps as  $step)
 
       @php
-  $TotalscreenStepsIds = \App\Company::where('step', $step->id)->count();
-  $TrainingSession = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->get();
-// حساب عدد السجلات لكل step_id
-$totalTrainingSessionCount = app(App\TrainingSession::class)
-        ->where('step_id', '=', $step->id)
-        ->count();
+      $TotalscreenStepsIds = \App\Company::where('step', $step->id)->count();
+      $TrainingSession = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->get();
+        // حساب عدد السجلات لكل step_id
+        $totalTrainingSessionCount = app(App\TrainingSession::class)
+                ->where('step_id', '=', $step->id)
+                ->count();
 
-    // حساب عدد company_id الفريدة لكل step_id
-    $totaldurationTr = app(App\TrainingSession::class)
-        ->where('step_id', '=', $step->id)
-        ->sum('duration');
+            // حساب عدد company_id الفريدة لكل step_id
+            $totaldurationTr = app(App\TrainingSession::class)
+                ->where('step_id', '=', $step->id)
+                ->sum('duration');
 
-// حساب عدد company_id الفريدة لكل step_id
-$totalsessions = app(App\TrainingSession::class)
-        ->where('step_id', '=', $step->id)
-        ->where('type', 'sessions')
-        ->count();
-$totalonline = app(App\TrainingSession::class)
-        ->where('step_id', '=', $step->id)
-        ->where('type', 'online')
-        ->count();
-$totaloffline = app(App\TrainingSession::class)
-        ->where('step_id', '=', $step->id)
-        ->where('type', 'offline')
-        ->count();
-
-
-  // Filter Screening
-  $finalScreenings = app(App\Finalscreening::class)->where('step_id', '=', $step->id)->get();
-   // حساب عدد السجلات لكل step_id
-    // حساب عدد السجلات لكل step_id
-    $totalFinalscreenCount = app(App\Finalscreening::class)
-        ->where('step_id', '=', $step->id)
-        ->count();
-
-    // حساب عدد company_id الفريدة لكل step_id
-    $totalDistinctCompanies = app(App\Finalscreening::class)
-        ->where('step_id', '=', $step->id)
-        ->distinct()
-        ->count('company_id');
-
-// حساب عدد المحكمين
-foreach ($finalScreenings as $screening) {
-  $finaljudges = is_string($screening->judges) ? json_decode($screening->judges, true) : $screening->judges;
-    $judgeData = app(App\User::class)->whereIn('id', $finaljudges)->get();
-    // إضافة بيانات المحكمين إلى المصفوفة
-    $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
+        // حساب عدد company_id الفريدة لكل step_id
+        $totalsessions = app(App\TrainingSession::class)
+                ->where('step_id', '=', $step->id)
+                ->where('type', 'sessions')
+                ->count();
+        $totalonline = app(App\TrainingSession::class)
+                ->where('step_id', '=', $step->id)
+                ->where('type', 'online')
+                ->count();
+        $totaloffline = app(App\TrainingSession::class)
+                ->where('step_id', '=', $step->id)
+                ->where('type', 'offline')
+                ->count();
 
 
+        // Filter Screening
+        $finalScreenings = app(App\Finalscreening::class)->where('step_id', '=', $step->id)->get();
+        // حساب عدد السجلات لكل step_id
+          // حساب عدد السجلات لكل step_id
+          $totalFinalscreenCount = app(App\Finalscreening::class)
+              ->where('step_id', '=', $step->id)
+              ->count();
+
+          // حساب عدد company_id الفريدة لكل step_id
+          $totalDistinctCompanies = app(App\Finalscreening::class)
+              ->where('step_id', '=', $step->id)
+              ->distinct()
+              ->count('company_id');
+
+          // حساب عدد المحكمين
+          foreach ($finalScreenings as $screening) {
+            $finaljudges = is_string($screening->judges) ? json_decode($screening->judges, true) : $screening->judges;
+              $judgeData = app(App\User::class)->whereIn('id', $finaljudges)->get();
+              // إضافة بيانات المحكمين إلى المصفوفة
+              $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
 
 
-}
-@endphp
+
+
+        }
+        @endphp
 
 
       @if($step->stype == 1)
@@ -682,7 +687,7 @@ foreach ($finalScreenings as $screening) {
                     <form action="/dashboard/programlist/Email" method="post" >
                       @csrf
                       <input type="hidden" value="{{ $step->id }}" name="step">
-                      <button id="private-link" type="submit" class="d-flex align-items-center text-nowrap">{{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i></button>
+                      <button id="private-link" type="submit" class="btn btn-transparent text-nowrap">{{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i></button>
                     </form>
                   </div>
                   <div class="col-md-9">
@@ -1312,7 +1317,7 @@ foreach ($finalScreenings as $screening) {
                     <form action="/dashboard/programlist/Email" method="post" >
                       @csrf
                       <input type="hidden" value="{{ $step->id }}" name="step">
-                      <button id="private-link" type="submit" class="d-flex align-items-center text-nowrap">{{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i></button>
+                      <button id="private-link" type="submit" class="btn-btn-transparent text-nowrap">{{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i></button>
                     </form>
 
 
@@ -1436,7 +1441,7 @@ foreach ($finalScreenings as $screening) {
               <div class="col-md-6 form-group mb-3">
                 <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid from') }}: </label>
                 <div class="position-relative">
-                  <input id='mfromDate' name='fromDate' type="text" class="form-control border light-shadow" required readonly>
+                  <input id='mfromDate' name='fromDate' type="text" class="form-control border light-shadow flatpickr-date" required>
                   <div class="position-absolute top-0 end-0 mt-2 me-3">
                     <i class="ti ti-calendar ti-24px text-primary"></i>
                   </div>
@@ -1445,7 +1450,7 @@ foreach ($finalScreenings as $screening) {
               <div class="col-md-6 form-group mb-3">
                 <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid to') }}:</label>
                 <div class="position-relative">
-                  <input id='mtoDate' name='toDate' type="text" class="form-control border light-shadow" required readonly>
+                  <input id='mtoDate' name='toDate' type="text" class="form-control border light-shadow flatpickr-date" required>
                   <div class="position-absolute top-0 end-0 mt-2 me-3">
                     <i class="ti ti-calendar ti-24px text-primary"></i>
                   </div>
@@ -1907,20 +1912,44 @@ foreach ($finalScreenings as $screening) {
 @stop
 
 @section('scripts')
-<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+{{-- <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script> --}}
+{{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
+{{-- <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script> --}}
+<!-- Vendors JS -->
+<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
-<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+<script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
 @stop
 
 @section('pagescripts')
-<script src="/vuexy/assets/js/forms-pickers.js"></script>
-<script src="/vuexy/assets/js/forms-selects.js"></script>
-<script src="/vuexy/assets/js/forms-tagify.js"></script>
-<script>
+  @php($ccycle = \App\Cycle::find($program->id))
+  {{-- <script src="/vuexy/assets/js/forms-selects.js"></script> --}}
+  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
+
+  <script>
+    (() => {
+      console.log('loaded');
+      const flatpickerData = document.querySelectorAll('.flatpickr-date');
+
+      flatpickerData.forEach(flatpicker => {
+        flatpickr(flatpicker, {
+          altInput: true,
+          altFormat: 'F j, Y',
+          dateFormat: 'Y-m-d',
+          defaultDate: '{{ now()->format('Y-m-d') }}',
+          minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
+          maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
+        });
+      });
+    })();
+
+  </script>
+
+{{-- <script>
   document.addEventListener('DOMContentLoaded', () => {
     const deleteButtons = document.querySelectorAll('#deleteButton');
 
@@ -1945,22 +1974,17 @@ foreach ($finalScreenings as $screening) {
       });
     });
   });
-</script>
-@section('pagescripts')
-  @php($ccycle = \App\Cycle::find($program->id))
-  <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
+</script> --}}
+
   <script>
-    $('.date').datetimepicker({
-      timepicker: false,
-      format: 'Y-m-d'
-    });
-    $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
-      format: 'Y-m-d',
-      minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
-      maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
-      timepicker: false
-    });
+    // $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
+    //   format: 'Y-m-d',
+    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
+    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
+    //   timepicker: false
+    // });
+
+
     $(document).ready(function() {
       let drake = dragula([document.getElementById('basic-list-group')]);
       drake.on('drop', function(el) {
