@@ -472,7 +472,7 @@ return [
 	'revenue_generating' => 'Revenue Generating',
 	'currently_fundraising' => 'Currently Fundraising',
 	'desired_funding_amount' => 'Desired Funding Amount',
-	'Funding Stage' => 'Funding Stage',
+	'Funding_Stage' => 'Funding Stage',
 	'Amount' => 'Amount',
 	'Post Money Valuation' => 'Post Money Valuation',
 	'Date Raised' => 'Date Raised',
