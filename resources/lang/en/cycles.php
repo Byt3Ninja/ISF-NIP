@@ -179,6 +179,7 @@ return [
     'Judges list' => 'Judges list',
     'Assign to selected users' => 'Assign to selected users',
     'Add new zoom session' => 'Add new session',
+    'Modify Final Screen' => 'Modify Final Screen',
     'Before submit review' => 'Before submit, review judges list, and meeting date/time',
     'Submit your opinion' => 'Submit your opinion',
     'answer submit' => 'Add your answers about this company below and submit',

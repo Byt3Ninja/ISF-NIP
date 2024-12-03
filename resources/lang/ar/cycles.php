@@ -177,6 +177,7 @@ return [
     'No records Add final' => 'لا يوجد سجلات لعرضها، أضف تقييم أولاً من',
     'Assign to selected users' => 'إضافة للمستخدمين المحددين',
     'Add new zoom session' => 'إضافة اجتماع',
+    'Modify Final Screen' => 'تعديل التقييم النهائي',
     'Before submit review' => 'قبل الحفظ برجاء مراجعة كافة البيانات وتاريخ الاجتماع',
     'Submit your opinion' => 'أضف رأيك',
     'answer submit' => 'برجاء إضافة اجاباتك حول هذه الشركة، ثم إضغط حفظ',
