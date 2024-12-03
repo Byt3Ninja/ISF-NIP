@@ -272,12 +272,15 @@ class UserController extends Controller
         $cycle_id = null;
         $errorMessage = '';
 
-        if (Auth::user()->hasRole('Registered')) {
-
+        if( Auth::user()->hasRole('Registered') )
+        {
+            return redirect()->route('dashboard')->with(['error' => 'cantAccessAllCompanies']);
             $organization_id = auth()->user()->organization_id;
-            if (auth()->user()->company && auth()->user()->company->cycle != null) {
-
-                $cycle_id = auth()->user()->company->cycle;
+            $company = auth()->user()->company;
+            if( $company && $company->cycle != null )
+            {
+                $company_id = $company->id;
+                $cycle_id = $company->cycle;
                 // $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->where('cycle', $cycle_id)->get();
                 $name = ($l == 'ar') ? 'name_ar' : 'name_en';
                 $companies = Company::when(!is_null($organization_id))->where('organization_id', $organization_id)
@@ -291,6 +294,7 @@ class UserController extends Controller
                     ->when($request->stage, function ($query) use ($request) {
                         $query->where('stage', 'like', '%' . $request->stage . '%');
                     })
+                    ->where('id', $company_id)
                     ->get();
             } else {
                 $companies = [];

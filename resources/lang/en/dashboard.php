@@ -5,6 +5,7 @@ return [
     'Final screening'=>'Evaluation',
     'Services' => 'Services',
     'newmessages' => 'New Messages',
+    'cantAccessAllCompanies' => 'You can not access all companies',
     'Latest services' => 'Latest services',
     'No services added' => 'No services added',
     'Latest Events' => 'Latest Events',
