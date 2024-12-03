@@ -141,6 +141,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::resource('types', 'TypeController');
   	//Partners Manager routes
     Route::resource('partners', 'PartnersController');
+    Route::resource('stages', 'StageController');
     //Press Manger routes
     Route::resource('press', 'PressController');
 	//Client's Profile

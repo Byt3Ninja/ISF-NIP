@@ -158,6 +158,12 @@ class Company extends Model
     {
         return $this->belongsTo(Cycle::class, 'cycle');
     }
+
+    public function stage()
+{
+    return $this->belongsTo(Stage::class, 'stage');
+}
+
     public function companyWeight($c, $f, $u)
     {
         $weight = Formdata::where('company_id', $c)->where('form_id', $f)->pluck("screening");

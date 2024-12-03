@@ -270,7 +270,12 @@
         </a>
       </li>
 
-
+      <li class="{{ Request::is('*stages') ? 'active' : '' }} menu-item">
+        <a href="{{ route('stages.index') }}" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-settings"></i>
+          <div>{{ __('admin.Stages') }}</div>
+        </a>
+      </li>
       
 
 

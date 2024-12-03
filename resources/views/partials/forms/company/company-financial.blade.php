@@ -75,27 +75,19 @@
 
         <div class="col-6 mb-3">
           <label for="stage"
-            class="form-label">{{ __('admin.stage') }}*</label>
+            class="form-label">{{ __('admin.development_stage') }}*</label>
           <div class="position-relative">
             <select class="form-select border-light light-shadow px-10" required
               id="stage" name="stage">
               <option value="">{{ __('admin.stage') }}</option>
-              <option value="idea"
-                {{ !empty($client->company) && $client->company->stage == 'idea' ? 'selected' : '' }}>
-                {{ __('admin.stage_idea') }}
-              </option>
-              <option value="prototype"
-                {{ !empty($client->company) && $client->company->stage == 'prototype' ? 'selected' : '' }}>
-                {{ __('admin.stage_prototype') }}
-              </option>
-              <option value="ready_product"
-                {{ !empty($client->company) && $client->company->stage == 'ready_product' ? 'selected' : '' }}>
-                {{ __('admin.stage_ready_product') }}
-              </option>
-              <option value="company_in_market"
-                {{ !empty($client->company) && $client->company->stage == 'company_in_market' ? 'selected' : '' }}>
-                {{ __('admin.stage_company_in_market') }}
-              </option>
+
+              @foreach ($Stages as $Stage)
+              <option value="{{ $Stage->id }}"
+              {{ !empty($client->company) && $client->company->stage == $Stage->id ? 'selected' : '' }}>
+              {{ $Stage->{'name_' . $l} }}
+            </option>
+              @endforeach
+              
             </select>
             <i class="ti ti-flag fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
               style="left: 7px;"></i>
@@ -105,7 +97,7 @@
 
         <div class="col-6 mb-3">
           <label for="development_stage"
-            class="form-label">{{ __('admin.development_stage') }}*</label>
+            class="form-label">{{ __('admin.Funding_Stage') }}*</label>
           <div class="position-relative">
             <select class="form-select border-light light-shadow px-10" required
               id="development_stage" name="development_stage">

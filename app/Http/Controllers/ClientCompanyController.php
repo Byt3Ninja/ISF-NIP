@@ -17,6 +17,7 @@ use App\Currency;
 use App\Like;
 use App\Milestone;
 use App\Settings;
+use App\Stage;
 use App\SustainableIcon;
 use \Illuminate\Validation\ValidationException;
 use DB;
@@ -42,6 +43,7 @@ class ClientCompanyController extends Controller
             $company = Company::with('state')
                                 ->with('city')
                                 ->with('user')
+                                ->with('stage')
                                 ->findorfail($id);
 if(!empty($company->Sustainable_development)){
                                 $sustainableDevelopment = json_decode($company->Sustainable_development, true);
@@ -73,7 +75,7 @@ if(!empty($company->Sustainable_development)){
     $fileExists = file_exists($pathToFile);
 
     
-    
+  
 
             return view('admin/clients/company_profile', compact('company','Currencies','Achieved_Milestones', 'Planned_Milestones', 'icons','fonders','Shareholders','Investors', 'fileExists', 'pathToFile'));
         }catch (Exception $e){
@@ -135,9 +137,10 @@ if(!empty($company->Sustainable_development)){
             }
 
             $Currencies = Currency::all(); // جلب جميع الأعضاء
+            $Stages = Stage::all(); // جلب جميع الأعضاء
 
             return view('admin/clients/company', compact(
-                'client', 'fonders', 'Shareholders', 'Investors', 'Currencies', 'Achieveds', 'Planneds', 'Archiveds', 'teamMembers', 'states', 'cities','countries','sectors','funding_rounds','Setting'
+                'client', 'Stages', 'fonders', 'Shareholders', 'Investors', 'Currencies', 'Achieveds', 'Planneds', 'Archiveds', 'teamMembers', 'states', 'cities','countries','sectors','funding_rounds','Setting'
             ));
         }catch (Exception $e){
             //log what happend

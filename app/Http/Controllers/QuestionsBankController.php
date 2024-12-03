@@ -153,8 +153,6 @@ class QuestionsBankController extends Controller
 		$question->answers = $answers;
 		$question->explanation_QA_ar = $request->explanation_QA_ar;
 		$question->explanation_QA_en = $request->explanation_QA_en;
-		$question->explanation_AA_ar = $request->explanation_AA_ar;
-		$question->explanation_AA_en = $request->explanation_AA_en;
 		$question->save();
 
 
@@ -295,8 +293,6 @@ class QuestionsBankController extends Controller
 			$question->answers = $answers;
 			$question->explanation_QA_ar = $request->explanation_QA_ar;
 			$question->explanation_QA_en = $request->explanation_QA_en;
-			$question->explanation_AA_ar = $request->explanation_AA_ar;
-			$question->explanation_AA_en = $request->explanation_AA_en;
 			$question->save();
 	
 	
