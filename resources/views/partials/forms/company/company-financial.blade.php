@@ -140,7 +140,7 @@
                 autocomplete="targeted_market">
                 @foreach($countries as $country)
                 <option value="{{$country->id}}" @if($client->company) @if ($client->company->targeted_market !=null)
-                 {{ in_array($country->id, json_decode($client->company ? $client->company->targeted_market : old('Targeted Market', '[]'))) ? 'selected' : '' }} @endif @endif> {{$country->{'name_'.$l} }} </option>
+                 {{ in_array($country->id, json_decode($client->company ? $client->company->targeted_market : old('Targeted Market', '[]'))) ? 'selected' : '' }} @endif @endif> {{$country->emoji . ' ' . $country->{'name_'.$l} }} </option>
             @endforeach
                 <!-- Add more options as needed -->
               </select>

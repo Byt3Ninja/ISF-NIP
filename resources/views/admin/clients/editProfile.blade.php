@@ -209,7 +209,7 @@
                       @foreach ($countries as $country)
                         <option value="{{ $country->id }}"
                           {{ $country->id == $client->country_id ? 'selected' : '' }}>
-                          {{ $country->{'name_' . $l} }}</option>
+                          {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
                       @endforeach
                     </select>
                   </div>
