@@ -196,6 +196,7 @@ class QuestionsBankController extends Controller
 		if( empty( $question ) ) { return back()->withInput()->with(['error' => 'questionNotFound']); }
 		else
 		{
+			if($request->question_group !='assessment'){
 			if( $request->has('quiz_answer_status') )
 			{
 				$quiz_answer_status = [];
@@ -266,7 +267,42 @@ class QuestionsBankController extends Controller
 			$question->save();
 	
 
+		}else{
 
+			$rules = [
+				'ascategory_id' => 'required|exists:categories,id',
+				'subcategory_id' => 'required|exists:sub_categories,id',
+				'question' => 'required|string',
+				'question_group' => 'required',
+			];
+			
+			$validator = Validator::make($request->all(), $rules);
+			$errors = [];
+			if( $validator->fails() ) { $errors = $validator->errors()->toArray(); }
+			if( count( $errors ) ) { return back()->withInput( $request->all() )->with('success', false)->withErrors( $errors ); }
+	
+			$answers = [];
+			$correct = null;
+			if( ( $request->has('quiz_answer_text') ) && ( $request->has('quiz_answer_score') )  )
+			{
+				foreach( $request->quiz_answer_text as $key => $answer ) { $answers[] = ['text' => $answer, 'score' => $request->quiz_answer_score[$key]]; }
+			}
+	
+			$question->group = $request->question_group;
+			$question->ascategory_id = $request->ascategory_id;
+			$question->subcategory_id = $request->subcategory_id;
+			$question->question = $request->question;
+			$question->answers = $answers;
+			$question->explanation_QA_ar = $request->explanation_QA_ar;
+			$question->explanation_QA_en = $request->explanation_QA_en;
+			$question->explanation_AA_ar = $request->explanation_AA_ar;
+			$question->explanation_AA_en = $request->explanation_AA_en;
+			$question->save();
+	
+	
+	
+	
+		}
 
 			
 			return back()->withInput()->with('success', 'StoredSuccessfully');
