@@ -271,9 +271,16 @@
                     <div class="text-center">
                       <img class="card-icon mb-2" src="/icons/coin.svg" alt="icon" />
                     </div>
-                    <span class="text-black fs-5">{{ __('admin.Stage') }}</span>
-                    <span
-                      class="text-primary">{{ $company->stage ? __('admin.stage_' . $company->stage) : __('admin.N/A') }}</span>
+                    @php
+                      $stage = App\Stage::where('id', $company->stage)->first();
+                    @endphp
+                    <span class="text-black fs-5">{{ __('admin.development_stage') }}</span>
+                
+                    @if(!is_numeric($company->stage))
+                    <span class="text-primary">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
+                    @else
+                    <span class="text-primary">{{ $stage->{'name_' . $l} }}</span>
+                    @endif
                   </div>
                 </div>
               </div>

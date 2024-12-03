@@ -973,4 +973,13 @@ return [
 	'explanation_AA_ar' => 'Explanation of the answer in Arabic',
 	'explanation_AA_en' => 'Explanation of the answer in English',
 	'WaitingYourRedirect' => 'Waiting for you to redirect',
+	'Stages'=>'Stages',
+	'StageName'=>'Stage Name',
+	'StageDescription'=>'Stage Description',
+	'all Stages'=>'all Stages',
+	'Add new Stage'=>'Add new Stage',
+	'Stage_updated_successfully'=>'Stage Updated Successfully',
+	'Stage_deleted_successfully'=>'Stage Deleted Successfully',
+	'Stage_stored_successfully'=>'Stage Added Successfully',
+
 ];

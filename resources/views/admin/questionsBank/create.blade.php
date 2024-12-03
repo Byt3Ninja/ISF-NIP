@@ -258,7 +258,7 @@
 												<div class="mt-1" id="quizAnswers">
 													<div class="input-group mb-1">
 														<input placeholder="{{ $l == 'en' ? 'Answer text' : 'اكتب نص الاجابة' }}" class="form-control" id="quiz_answer_0_text" name="quiz_answer_text[]" style="max-width:300px">
-														<input placeholder="{{ $l == 'en' ? 'Answer Score' : 'اكتب النسبه ' }}" class="form-control assessment-type" id="quiz_answer_0_score" name="quiz_answer_score[]" style="max-width:100px">
+														<input placeholder="{{ $l == 'en' ? 'Answer Suggestion' : 'اكتب المقترح ' }}" class="form-control assessment-type" id="quiz_answer_0_score" name="quiz_answer_score[]" style="max-width:100px">
 														<select class="form-control form-select questions-type" id="quiz_answer_0_status" name="quiz_answer_status[]">
 															<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
 															<option value="false">{{ __('admin.quizAnswerWrong') }}</option>
@@ -397,7 +397,7 @@
 			<div class="input-group mb-1">
 				<input placeholder="{{ $l == 'en' ? 'Answer text' : 'اكتب نص الاجابة' }}" class="form-control" style="max-width:300px" id="quiz_answer_` +
 				count + `_text" name="quiz_answer_text[]">` +
-				`<input placeholder="{{ $l == 'en' ? 'Answer Score' : 'اكتب النسبه ' }}" class="form-control" id="quiz_answer_`+count+`_score" name="quiz_answer_score[]" style="max-width:100px">
+				`<input placeholder="{{ $l == 'en' ? 'Answer Suggestion' : 'اكتب المقترحات ' }}" class="form-control assessment-type" id="quiz_answer_`+count+`_score" name="quiz_answer_score[]" style="max-width:100px">
 				<select class="form-control form-select select2 ` + class_control + `" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
 					<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
 					<option value="false">{{ __('admin.quizAnswerWrong') }}</option>

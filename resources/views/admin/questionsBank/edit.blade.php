@@ -88,7 +88,7 @@
 										{!! csrf_field() !!}
 										<input name="_method" type="hidden" value="PATCH" />
 										<div class="row">
-											@if(isset($answer['status']) && $answer['status'] == '')
+											
 											<div class="col-lg-4 col-md-4 col-sm-12">
 												<fieldset class="form-group">
 													<label for="organization_id">{{ __('admin.Organization')}}</label>
@@ -99,7 +99,7 @@
 													</select>
 												</fieldset>
 											</div>
-											@endif
+											
 
 											<div class="col-lg-4 col-md-4 col-sm-12">
 												<fieldset class="form-group">
@@ -111,6 +111,7 @@
 													</select>
 												</fieldset>
 											</div>
+											
 												<div class="col-lg-3 col-md-3 col-sm-12 assessment-type">
 													<label class="form-label fs-6">
 													  {{ __('admin.Category') }}
@@ -145,7 +146,7 @@
 
 
 											<div class="col-lg-4 col-md-4 col-sm-12">
-												@if(isset($answer['status']) && $answer['status'] == '')
+												
 												<fieldset class="form-group questions-type">
 													<label for="category_id">{{ __('admin.questionCategory')}}</label>
 													<select class="form-control form-select" name="category_id" id="category_id" required>
@@ -162,7 +163,7 @@
 														<option value="radio" {{ $question->survey_type == 'radio' ? 'selected' : '' }}> {{ __('admin.surveyTypeRadioButtons') }} </option>
 													</select>
 												</fieldset>
-												@endif
+												
 											</div>
 										</div>
 										<div class="row">
@@ -171,7 +172,7 @@
 													<label for="question">{{ __('admin.question')}}</label>
 													<input value="{{ $question->question }}" name="question" type="text" class="form-control" id="question" placeholder="{{ __('admin.question') }}" required />
 												</fieldset>
-												@if(isset($answer['status']) && $answer['status'] == '')
+												
 												<fieldset class="form-group questions-type">
 													<label for="type">{{ __('admin.question_Type')}}</label>
 													<select class="form-control form-select" name="type" id="type" required>
@@ -179,11 +180,11 @@
 														<option value="tfq" {{ $question->type == 'tfq' ? 'selected' : '' }}>{{ __('admin.type_tfq') }}</option>
 													</select>
 												</fieldset>
-												@endif
+												
 											</div>
 
 											<div class="col-lg-6 col-md-6 col-sm-12">
-												@if(isset($answer['status']) && $answer['status'] == '')
+												
 												<fieldset class="form-group questions-type">
 													<label for="difficulty">{{ __('admin.difficultyLevel')}}</label>
 													<select class="form-control form-select" name="difficulty" id="difficulty" required>
@@ -200,7 +201,7 @@
 														<option value="tfq_false" {{ $question->correct != true ? 'selected' : '' }}>{{ __('admin.tfq_statement_false') }}</option>
 													</select>
 												</fieldset>
-												@endif
+												
 												<fieldset id="mcq-block" class="form-group {{ $question->type == 'mcq' ? '' : 'd-none'}}">
 													<label class="w-100" for="answers">{{ __('admin.answers')}}
 														<button id="addNewAnswer" style="padding: 0px 10px !important;" class="btn btn-xs btn-success float-right"> <i class="fa fa-plus-circle fa-fw fa-sm align-middle"></i> Add Answer</button>
@@ -210,21 +211,21 @@
 														@foreach($question->answers as $key => $answer)
 															<div class="input-group mb-1">
 																@php
-																if (isset($answer['status']) && $answer['status'] == '') {
+																if($question['group'] != 'assessment') {
 																	$status = $answer['status'];
 																}else{
 																	$status = $answer['score'];
 																}
 																@endphp
-																<input value="{{ $answer['text'] }}" placeholder="Type the text of the answer" class="form-control" id="quiz_answer_{{ $key }}_text" name="quiz_answer_text[]">
-																@if(isset($answer['status']) && $answer['status'] == '')
+																<input value="{{ $answer['text'] }}" placeholder="{{ $l == 'en' ? 'Answer text' : 'اكتب نص الاجابة' }}" class="form-control" id="quiz_answer_{{ $key }}_text" name="quiz_answer_text[]">
+																<input value="{{ $status }}" placeholder="{{ $l == 'en' ? 'Answer Suggestion' : 'اكتب المقترح ' }}" class="form-control assessment-type" id="quiz_answer_{{ $key }}_score" name="quiz_answer_score[]">
 																<select class="form-control form-select questions-type" id="quiz_answer_{{ $key }}_status" name="quiz_answer_status[]">
 																	<option value="true" {{ $status == true ? 'selected' : '' }}>{{ __('admin.quizAnswerCorrect') }}</option>
 																	<option value="false" {{ $status == false ? 'selected' : '' }}>{{ __('admin.quizAnswerWrong') }}</option>
 																</select>
-																@else
-																<input value="{{ $status }}" placeholder="Type the text of the answer" class="form-control" id="quiz_answer_{{ $key }}_score" name="quiz_answer_score[]">
-																@endif
+																
+																
+																
 																<button class="btn btn-outline-danger remove-answer-btn"> <i class="fa fa-fw fa-sm fa-times align-middle"></i> </button>
 															</div>
 														@endforeach
@@ -234,7 +235,7 @@
 											</div>
 										</div>
 										
-											@if(isset($answer['status']) && $answer['status'] == '')
+										
 											<div class="row questions-type">
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												
@@ -244,7 +245,7 @@
 												</fieldset>
 											</div>
 										</div>
-												@else
+											
 											<div class="row assessment-type">
 												<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
@@ -258,30 +259,20 @@
 													<textarea class="form-control" id="explanation_QA_en" name="explanation_QA_en" rows="2" name="explanation_QA_en">{{ $question->explanation_QA_en }}</textarea>
 												</fieldset>
 											</div>
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<fieldset class="form-group">
-													<label class="fs-6 form-label mb-2" for ="explanation_AA_ar">{{ __('admin.explanation_AA_ar') }}</label>
-													<textarea class="form-control" id="explanation_AA_ar" name="explanation_AA_ar" rows="2" name="explanation_AA_ar">{{ $question->explanation_AA_ar }}</textarea>
-												</fieldset>
-											</div>
-											<div class="col-lg-6 col-md-6 col-sm-12">
-												<fieldset class="form-group">
-													<label class="fs-6 form-label mb-2" for ="explanation_AA_en">{{ __('admin.explanation_AA_en') }}</label>
-													<textarea class="form-control" id="explanation_AA_en" name="explanation_AA_en" rows="2" name="explanation_AA_en">{{ $question->explanation_AA_en }}</textarea>
-												</fieldset>
-											</div>
+											
+											
 										</div>
 									
-												@endif
+												
 											
 											<div class="col-lg-6 col-md-6 col-sm-12">
-												@if(isset($answer['status']) && $answer['status'] == '')
-												<fieldset class="form-group">
+											
+												<fieldset class="form-group questions-type">
 													<label for="tags">{{ __('admin.questionTags')}}</label>
 													<input value="{{ optional($question->tags)->implode(',') }}" name="tags" type="text" class="form-control" id="tags" placeholder="{{ __('admin.questionTagsPlaceholder') }}" />
 												</fieldset>
 											
-												@endif
+												
 
 
 
@@ -326,8 +317,9 @@
 		function handleChangeQuestionType() {
 			$('.questions-type').addClass('d-none');
 			$('.survey-type').addClass('d-none');
-			if( $('#question_group').val() == 'quiz' ) { $('.questions-type').removeClass('d-none');  }
-			else if( $('#question_group').val() == 'survey' ) { $('.survey-type').removeClass('d-none'); $('#type').val('mcq').trigger('change'); }
+			if( $('#question_group').val() == 'quiz' ) { $('.questions-type').removeClass('d-none');$('.assessment-type').addClass('d-none');  }
+			else if( $('#question_group').val() == 'survey' ) { $('.survey-type').removeClass('d-none'); $('#type').val('mcq').trigger('change');$('.assessment-type').addClass('d-none'); }
+			else if( $('#question_group').val() == 'assessment' ) { $('.survey-type').addClass('d-none');$('.questions-type').addClass('d-none');$('.assessment-type').removeClass('d-none'); }
 		}
 
 		function handleChangeType()
