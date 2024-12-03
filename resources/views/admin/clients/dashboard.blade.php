@@ -21,7 +21,9 @@
 
 @section('content')
   @if (!Auth::user()->first_name_ar)
-    {!! redirect()->route('my_profile')->with(['msg' => 'FailedStore', 'class' => 'danger']) !!}
+  <div class="d-none">
+    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+  </div>
   @endif
 
   @php
