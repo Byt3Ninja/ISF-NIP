@@ -68,7 +68,11 @@ class organizationsController extends Controller
 		$organization->color = $request->color;
         
             //store the image
-            $img_url = $request->input('img_url');
+			if($request->input('img_url') != null){
+				$img_url = $request->input('img_url');
+			}else{
+				$img_url = '/images/background/logo.png';
+			}
             //update
              $organization->img_url= $img_url;
         
@@ -126,7 +130,11 @@ class organizationsController extends Controller
         
 
             //store the image
-            $img_url = $request->input('img_url');
+			if($request->input('img_url') != null){
+				$img_url = $request->input('img_url');
+			}else{
+				$img_url = $organization->img_url;
+			}
             //update
             $organization->img_url= $img_url;
         
