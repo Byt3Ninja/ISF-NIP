@@ -129,15 +129,25 @@ class HomeController extends Controller
 
         // Target Market Analysis
         $targetMarket = DB::table('countries')
-            ->select('countries.name_' . $l . ' as country_name', DB::raw('COUNT(companies.id) as company_count'))
-            ->leftJoin('companies', DB::raw('JSON_CONTAINS(companies.targeted_market, CONCAT(\'"\', countries.id, \'"\'), "$")'), '=', DB::raw('1'))
-            ->groupBy('countries.id', 'countries.name_' . $l)
+            ->select(
+                'countries.name_en as country_name_en',
+                'countries.name_ar as country_name_ar',
+                DB::raw('COUNT(companies.id) as company_count')
+            )
+            ->leftJoin(
+                'companies',
+                DB::raw('JSON_CONTAINS(companies.targeted_market, CONCAT(\'"\', countries.id, \'"\'), "$")'),
+                '=',
+                DB::raw('1')
+            )
+            ->groupBy('countries.id', 'countries.name_en', 'countries.name_ar')
             ->orderByDesc('company_count')
             ->get();
 
         $data['target_market_data'] = $targetMarket->map(function ($item) {
             return [
-                'label' => $item->country_name,
+                'label_en' => $item->country_name_en,
+                'label_ar' => $item->country_name_ar,
                 'count' => $item->company_count,
             ];
         });
@@ -145,12 +155,14 @@ class HomeController extends Controller
         // Sector Breakdown
         $sectorBreakdown = Sector::withCount('children')->get();
 
-        $data['sector_data'] = $sectorBreakdown->map(function ($item) use ($l) {
+        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
             return [
-                'label' => $item->{'name_' . $l},
+                'label_en' => $item->name_en,
+                'label_ar' => $item->name_ar,
                 'count' => $item->children_count,
             ];
         });
+
 
         // Project Type Distribution
         $projectTypes = Company::select('business_type', DB::raw('count(*) as total'))
@@ -166,15 +178,16 @@ class HomeController extends Controller
         });
 
         // Total Jobs Created
-        $totalJobsCreated = Company::sum('team_num');
+        $totalJobsCreated = Company::count('team_num');
 
-        $companyData = Company::select('name_' . $l, 'team_num')
+        $companyData = Company::select('name_en', 'name_ar', 'team_num')
             ->whereNotNull('team_num')
             ->get();
 
-        $companies = $companyData->map(function ($company) use ($l) {
+        $companies = $companyData->map(function ($company) {
             return [
-                'company_name' => $company->{'name_' . $l},
+                'company_name_en' => $company->name_en,
+                'company_name_ar' => $company->name_ar,
                 'team_members' => $company->team_num,
             ];
         });
@@ -184,9 +197,7 @@ class HomeController extends Controller
             'companies' => $companies,
         ];
 
-
         // Total Founders
-
         $totalFounders = DB::table('team_members')->where('TeamMember', 'Founder')->count();
 
         $teamMembersData = DB::table('team_members')
@@ -213,54 +224,68 @@ class HomeController extends Controller
             ->whereNotNull('sector')
             ->groupBy('sector')
             ->get();
+
         $data['sector_distribution'] = $sectorData->map(function ($item) {
             return [
-                'sector' => __('admin.' . $item->sector),
+                'sector_en' => __('admin.' . $item->sector, [], 'en'),
+                'sector_ar' => __('admin.' . $item->sector, [], 'ar'),
                 'count' => $item->total,
             ];
         });
 
 
         // Companies by SDG
-        $companySdg = Company::select('Sustainable_development', DB::raw('count(*) as total'))
-            ->groupBy('Sustainable_development')
+        $companySdg = Company::select('Sustainable_development')
+            ->whereNotNull('Sustainable_development')
             ->get();
 
-        $data['sdg_data'] = $companySdg->flatMap(function ($item) {
-            $sdgs = json_decode($item->Sustainable_development);
-
-            return collect($sdgs)->map(function ($sdg) use ($item) {
+        $data['sdg_data'] = $companySdg
+            ->flatMap(function ($item) {
+                $sdgs = json_decode($item->Sustainable_development, true);
+                return is_array($sdgs) ? $sdgs : [];
+            })
+            ->countBy()
+            ->map(function ($count, $sdg) {
                 return [
-                    'sdg' => __('admin.' . $sdg),
-                    'total' => $item->total,
+                    'sdg_en' => __('admin.' . $sdg, [], 'en'),
+                    'sdg_ar' => __('admin.' . $sdg, [], 'ar'),
+                    'total' => $count,
                 ];
-            });
-        });
+            })
+            ->values();
+
 
         // Total Startups Per Organization
         $organizationsData = User::join('organizations', 'users.organization_id', '=', 'organizations.id')
             ->join('cycles', 'users.organization_id', '=', 'cycles.organization_id')
             ->join('companies', 'companies.cycle', '=', 'cycles.id')
-            ->select('organizations.name_' . $l . ' as organization_name', DB::raw('count(companies.id) as total_startups'))
-            ->groupBy('organizations.name_' . $l)
+            ->select(
+                'organizations.name_en as organization_name_en',
+                'organizations.name_ar as organization_name_ar',
+                DB::raw('count(companies.id) as total_startups')
+            )
+            ->groupBy('organizations.name_en', 'organizations.name_ar')
             ->get();
 
         $data['organization_counts'] = $organizationsData->map(function ($item) {
             return [
-                'organization_name' => $item->organization_name,
+                'organization_name_en' => $item->organization_name_en,
+                'organization_name_ar' => $item->organization_name_ar,
                 'total_startups' => $item->total_startups,
             ];
         });
 
-
         // Total Raised Funds
         $totalRaisedFunds = Company::sum('raised_fund');
-        $companyData = Company::select('name_' . $l, 'raised_fund')->whereNotNull('raised_fund')
+
+        $companyData = Company::select('name_en', 'name_ar', 'raised_fund')
+            ->whereNotNull('raised_fund')
             ->get();
 
-        $companies = $companyData->map(function ($company) use ($l) {
+        $companies = $companyData->map(function ($company) {
             return [
-                'company_name' => $company->{'name_' . $l},
+                'company_name_en' => $company->name_en,
+                'company_name_ar' => $company->name_ar,
                 'raised_fund' => $company->raised_fund,
             ];
         });
@@ -270,16 +295,16 @@ class HomeController extends Controller
             'companies' => $companies,
         ];
 
-
         // User Distribution by Country
         $countryData = User::join('countries', 'users.country_id', '=', 'countries.id')
-            ->select("countries.name_$l as country_name", DB::raw('count(users.id) as total'))
-            ->groupBy("countries.name_$l")
+            ->select('countries.name_en as country_name_en', 'countries.name_ar as country_name_ar', DB::raw('count(users.id) as total'))
+            ->groupBy('countries.name_en', 'countries.name_ar')
             ->get();
 
         $data['countries'] = $countryData->map(function ($item) {
             return [
-                'label' => $item->country_name,
+                'label_en' => $item->country_name_en,
+                'label_ar' => $item->country_name_ar,
                 'count' => $item->total,
             ];
         });
@@ -308,13 +333,13 @@ class HomeController extends Controller
         $uniqueDevelopmentStages = $developmentStages->unique('development_stage');
 
         $data['development_stages'] = $uniqueDevelopmentStages->map(function ($item) use ($developmentStages) {
-            $count = $developmentStages->where('development_stage', $item->development_stage)->count();  // حساب عدد العناصر في نفس المرحلة
+            $count = $developmentStages->where('development_stage', $item->development_stage)->count();
             return [
-                'label' => __('admin.' . $item->development_stage),
+                'label_en' => __('admin.' . $item->development_stage, [], 'en'),
+                'label_ar' => __('admin.' . $item->development_stage, [], 'ar'),
                 'count' => $count,
             ];
         });
-
 
         return view('admin.dashboard', $data);
     }
@@ -377,7 +402,8 @@ class HomeController extends Controller
 
             foreach ($developmentStages as $stage) {
                 $data['development_stages'][] = [
-                    'label' => __('admin.' . $stage->development_stage),
+                    'label_en' => __('admin.' . $stage->development_stage, [], 'en'), // English label
+                    'label_ar' => __('admin.' . $stage->development_stage, [], 'ar'), // Arabic label
                     'count' => $stage->total,
                 ];
             }
@@ -385,18 +411,19 @@ class HomeController extends Controller
 
         // Target Market Analysis
         $targetMarket = DB::table('countries')
-            ->select('countries.name_' . $l . ' as country_name', DB::raw('COUNT(companies.id) as company_count'))
+            ->select('countries.name_en as country_name_en', 'countries.name_ar as country_name_ar', DB::raw('COUNT(companies.id) as company_count'))
             ->leftJoin('companies', DB::raw('JSON_CONTAINS(companies.targeted_market, CONCAT(\'"\', countries.id, \'"\'), "$")'), '=', DB::raw('1'))
             ->join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
-            ->groupBy('countries.id', 'countries.name_' . $l)
+            ->groupBy('countries.id', 'countries.name_en', 'countries.name_ar')
             ->orderByDesc('company_count')
             ->get();
 
         $data['target_market_data'] = $targetMarket->map(function ($item) {
             return [
-                'label' => $item->country_name,
+                'label_en' => $item->country_name_en,
+                'label_ar' => $item->country_name_ar,
                 'count' => $item->company_count,
             ];
         });
@@ -406,13 +433,14 @@ class HomeController extends Controller
             ->join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
-            ->select('sectors.name_' . $l, DB::raw('count(companies.id) as total'))
-            ->groupBy('sectors.name_' . $l)
+            ->select('sectors.name_en as sector_name_en', 'sectors.name_ar as sector_name_ar', DB::raw('count(companies.id) as total'))
+            ->groupBy('sectors.name_en', 'sectors.name_ar')
             ->get();
 
-        $data['sector_data'] = $sectorBreakdown->map(function ($item) use ($l) {
+        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
             return [
-                'label' => $item->{'name_' . $l},
+                'label_en' => $item->sector_name_en,
+                'label_ar' => $item->sector_name_ar,
                 'count' => $item->total,
             ];
         });
@@ -438,36 +466,37 @@ class HomeController extends Controller
         $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
-            ->select('companies.name_' . $l, 'companies.team_num')
+            ->select('companies.name_en as company_name_en', 'companies.name_ar as company_name_ar', 'companies.team_num')
             ->whereNotNull('companies.team_num')
             ->get();
 
-        $companies = $companyData->map(function ($company) use ($l) {
+        $companies = $companyData->map(function ($company) {
             return [
-                'company_name' => $company->{'name_' . $l},
+                'company_name_en' => $company->company_name_en,
+                'company_name_ar' => $company->company_name_ar,
                 'team_members' => $company->team_num,
             ];
         });
 
-        $totalJobsCreated = $companyData->sum('team_num');
+        $totalJobsCreated = $companyData->count('team_num');
 
         $data['total_jobs_created'] = [
             'total' => $totalJobsCreated,
             'companies' => $companies,
         ];
 
-
         // Total Founders
         $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
             ->whereNotNull('companies.founder')
-            ->select('companies.name_' . $l, 'companies.founder')
+            ->select('companies.name_en as company_name_en', 'companies.name_ar as company_name_ar', 'companies.founder')
             ->get();
 
-        $companies = $companyData->map(function ($company) use ($l) {
+        $companies = $companyData->map(function ($company) {
             return [
-                'company_name' => $company->{'name_' . $l},
+                'company_name_en' => $company->company_name_en,
+                'company_name_ar' => $company->company_name_ar,
                 'founder' => $company->founder,
             ];
         });
@@ -484,38 +513,48 @@ class HomeController extends Controller
         $companySdg = Company::whereHas('cycledata', function ($query) use ($organization_id) {
             $query->where('organization_id', $organization_id);
         })
-            ->select('Sustainable_development', DB::raw('count(*) as total'))
-            ->groupBy('Sustainable_development')
+            ->select('Sustainable_development')
+            ->whereNotNull('Sustainable_development')
             ->get();
 
-        $data['sdg_data'] = $companySdg->flatMap(function ($item) {
-            $sdgs = json_decode($item->Sustainable_development, true);
-
-            return collect($sdgs)->map(function ($sdg) use ($item) {
+        $data['sdg_data'] = $companySdg
+            ->flatMap(function ($item) {
+                $sdgs = json_decode($item->Sustainable_development, true);
+                return is_array($sdgs) ? $sdgs : [];
+            })
+            ->countBy()
+            ->map(function ($count, $sdg) {
                 return [
-                    'sdg' => __('admin.' . $sdg),
-                    'total' => $item->total,
+                    'sdg_en' => __('admin.' . $sdg, [], 'en'),
+                    'sdg_ar' => __('admin.' . $sdg, [], 'ar'),
+                    'total' => $count,
                 ];
-            });
-        });
+            })
+            ->values();
 
         // Total Startups Per Organization
+
         $organizationStartups = User::join('organizations', 'users.organization_id', '=', 'organizations.id')
             ->join('cycles', 'users.organization_id', '=', 'cycles.organization_id')
             ->join('companies', 'companies.cycle', '=', 'cycles.id')
             ->where('users.organization_id', $organization_id)
-            ->select('organizations.name_' . $l . ' as organization_name', DB::raw('count(companies.id) as total_startups'))
-            ->groupBy('organizations.name_' . $l)
+            ->select(
+                'organizations.name_en as organization_name_en',
+                'organizations.name_ar as organization_name_ar',
+                DB::raw('count(companies.id) as total_startups')
+            )
+            ->groupBy('organizations.name_en', 'organizations.name_ar')
             ->first();
 
         $data['organization_counts'] = $organizationStartups ? [
-            'organization_name' => $organizationStartups->organization_name,
+            'organization_name_en' => $organizationStartups->organization_name_en,
+            'organization_name_ar' => $organizationStartups->organization_name_ar,
             'total_startups' => $organizationStartups->total_startups,
         ] : [
-            'organization_name' => null,
+            'organization_name_en' => null,
+            'organization_name_ar' => null,
             'total_startups' => 0,
         ];
-
 
         // Total Raised Funds
 
@@ -527,34 +566,38 @@ class HomeController extends Controller
         $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
-            ->select('companies.name_' . $l, 'companies.raised_fund')
+            ->select('companies.name_en as company_name_en', 'companies.name_ar as company_name_ar', 'companies.raised_fund')
             ->whereNotNull('companies.raised_fund')
             ->get();
 
         $companies = $companyData->map(function ($company) use ($l) {
             return [
-                'company_name' => $company->{'name_' . $l},
+                'company_name_en' => $company->company_name_en,
+                'company_name_ar' => $company->company_name_ar,
                 'raised_fund' => $company->raised_fund,
             ];
         });
-
 
         $data['total_raised_funds'] = [
             'total' => $totalRaisedFunds,
             'companies' => $companies,
         ];
 
-
         // User Distribution by Country
         $countryData = User::join('countries', 'users.country_id', '=', 'countries.id')
-            ->where('organization_id', $organization_id)
-            ->select("countries.name_$l as country_name", DB::raw('count(users.id) as total'))
-            ->groupBy("countries.name_$l")
+            ->where('users.organization_id', $organization_id)
+            ->select(
+                "countries.name_en as country_name_en",
+                "countries.name_ar as country_name_ar",
+                DB::raw('count(users.id) as total')
+            )
+            ->groupBy('countries.name_en', 'countries.name_ar')
             ->get();
 
         $data['countries'] = $countryData->map(function ($item) {
             return [
-                'label' => $item->country_name,
+                'country_name_en' => $item->country_name_en,
+                'country_name_ar' => $item->country_name_ar,
                 'count' => $item->total,
             ];
         });
@@ -589,10 +632,12 @@ class HomeController extends Controller
             ->groupBy('companies.sector')
             ->get();
 
-        $data['sector_distribution'] =   $sectorData->map(function ($sector) {
+
+        $data['sector_distribution'] = $sectorData->map(function ($item) {
             return [
-                'sector' => __('admin.' . $sector->sector),
-                'count' => $sector->total,
+                'sector_en' => __('admin.' . $item->sector, [], 'en'),
+                'sector_ar' => __('admin.' . $item->sector, [], 'ar'),
+                'count' => $item->total,
             ];
         });
 
