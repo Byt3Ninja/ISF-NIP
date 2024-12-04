@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App;
+
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
 
@@ -24,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
         view()->composer('*', function ($view) {
             if (session()->has('locale')) {
                 \App::setLocale(session()->get('locale'));
+            } elseif (auth()->check()) {
+                $userLanguage = auth()->user()->language;
+                if ($userLanguage) {
+                    App::setLocale($userLanguage);
+                }
             }
             $l = App::getLocale();
             $organization_id = null;
