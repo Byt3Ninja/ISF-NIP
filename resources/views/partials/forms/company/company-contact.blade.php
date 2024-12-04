@@ -13,10 +13,18 @@
             class="form-label">{{ __('admin.Phone') }}*</label>
           <div class="d-flex align-items-center gap-1">
             <div class="codeInputContainer">
-              <select id="country_code" name="country_code"
+              @php
+                    $phone_codes = App\Country::all();
+                    @endphp
+              <select id="" name="country_code"
                 class="form-select border-light light-shadow" required
                 style="width: 130px;"
                 >
+                @foreach ($phone_codes as $phone_code)
+                        <option value="{{ $phone_code->phone_code }}">
+                          {{ $phone_code->phone_code }}+
+                        </option>
+                      @endforeach
               </select>
             </div>
             <div class="position-relative">

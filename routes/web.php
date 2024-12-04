@@ -168,7 +168,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/question-assessment', 'ClientCompanyController@assessment')->name('question-assessment');
 	Route::get('/analysis-assessment', 'ClientCompanyController@analysisAssessment')->name('analysis-assessment');;
 	Route::get('/history-assessment', 'ClientCompanyController@historyAssessment')->name('history-assessment');;
-	Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');;
+	Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
+
+
+    Route::get('/LFMGet/{files?}', 'organizationsController@GetLFM')->name('LFMGet');
 
 	//Client's company
     Route::resource('organizations', 'organizationsController');
