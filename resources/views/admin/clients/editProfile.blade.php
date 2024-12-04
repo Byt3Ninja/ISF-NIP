@@ -246,9 +246,7 @@
                     <select id="language" name="language" class="select2 form-select">
                       <option value="">Select Language</option>
                       <option value="en" {{ $client->language == 'en' ? 'selected' : '' }} >English</option>
-                      <option value="fr" {{ $client->language == 'fr' ? 'selected' : '' }} >French</option>
-                      <option value="de" {{ $client->language == 'de' ? 'selected' : '' }} >German</option>
-                      <option value="pt" {{ $client->language == 'pt' ? 'selected' : '' }} >Portuguese</option>
+                      <option value="ar" {{ $client->language == 'ar' ? 'selected' : '' }} >Arabic</option>
                     </select>
                   </div>
                   <div class="mb-4 col-md-6">
