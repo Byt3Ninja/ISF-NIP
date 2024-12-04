@@ -479,7 +479,7 @@ class ClientCompanyController extends Controller
             if ($data['CompanyN'] == 5) {
 
                 $request->validate([
-                    'team_num' => 'numeric',
+                    'team_num' => 'required|string',
                 ], [
                     'team_num.numeric' => __('admin.Raised fund must be a number'),
                 ]);
