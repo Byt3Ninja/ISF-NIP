@@ -11,8 +11,13 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
+      
       @if (!is_null(auth()->user()->organization))
-          <img src="{{ auth()->user()->organization->image_url }}" alt="avatar" class="logo-img">
+      @php
+    $fileN = pathinfo(auth()->user()->organization->image_url, PATHINFO_BASENAME);
+    @endphp
+          <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar" class="logo-img">
+         
       @else
           <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
       @endif
@@ -221,12 +226,14 @@
           <div>{{ __('admin.My Quizzes') }}</div>
         </a>
       </li>
+      @if (!app()->environment('production'))
       <li class="{{ Request::is('dashboard/startup/mentorshipTasks*') ? 'active' : '' }} menu-item">
         <a href="{{ route('startup.mentorshipTasks.home') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
+      @endif
     @endrole
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
       <a href="/dashboard/myFiles" class="menu-link">

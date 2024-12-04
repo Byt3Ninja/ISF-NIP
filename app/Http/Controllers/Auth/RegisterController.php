@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Country;
 use App\User;
 use App\Settings;
 use App\UsersBio;
@@ -70,7 +71,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-
+        
         $Settings = Settings::where('id', 1)->first();
 
         if($Settings->VFEmail == 1){

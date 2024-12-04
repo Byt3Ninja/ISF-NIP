@@ -291,7 +291,16 @@
                 <label class="form-label" for="phone">{{ __('auth.Phone') }}</label>
                 <div class="input-group">
                   <div class="codeInputContainer">
-                    <select id="country_code" name="country_code" class="form-select select2" required>
+                    @php
+                    $phone_codes = App\Country::all();
+                    @endphp
+                    <select id="" name="country_code" class="form-select select2" required>
+                      
+                      @foreach ($phone_codes as $phone_code)
+                        <option value="{{ $phone_code->phone_code }}">
+                          {{ $phone_code->phone_code }}+
+                        </option>
+                      @endforeach
                     </select>
                   </div>
                   <input type="text" class="form-control mx-2 rounded" id="phone"
