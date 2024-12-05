@@ -237,6 +237,7 @@ class ClientCompanyController extends Controller
                     'address_en' => 'required|string|max:500',
                     'address_ar' => 'required|string|max:500',
                     'est_date' => 'required|date',
+                    'years_of_operations' => 'required|string|in:0-2,2-5,5-10,10+',
                 ], [
                     'name_en.required' => __('admin.English Name is required'),
                     'name_ar.required' => __('admin.Arabic Name is required'),
@@ -250,6 +251,8 @@ class ClientCompanyController extends Controller
                     'address_en.required' => __('admin.English Address is required'),
                     'address_ar.required' => __('admin.Arabic Address is required'),
                     'est_date.required' => __('admin.Established Date must be a valid date'),
+                    'years_of_operations.required' => __('admin.Years of Operations is required'),
+                    'years_of_operations.in' => __('admin.Invalid Years of Operations selection'),
                 ]);
 
                 // $result = Company::updateOrCreate(['id' => $companyId], values: $data);
@@ -283,6 +286,7 @@ class ClientCompanyController extends Controller
                         'address_en' => $data['address_en'],
                         'address_ar' => $data['address_ar'],
                         'est_date' => $data['est_date'],
+                        'years_of_operations' => $data['years_of_operations'],
                         'CreatedTax' => $CreatedTax,
                         'Commercial_Register' => $Commercial_Register,
                         'Tax_Card' => $Tax_Card,
@@ -307,6 +311,7 @@ class ClientCompanyController extends Controller
                         'address_en' => $data['address_en'],
                         'address_ar' => $data['address_ar'],
                         'est_date' => $data['est_date'],
+                        'years_of_operations' => $data['years_of_operations'],
                         'CreatedTax' => $CreatedTax,
                         'Commercial_Register' => $Commercial_Register,
                         'Tax_Card' => $Tax_Card,
