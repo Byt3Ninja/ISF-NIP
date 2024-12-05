@@ -165,7 +165,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 
     
     //Assessments
-    Route::get('/question-assessment', 'ClientCompanyController@assessment')->name('question-assessment');
+    Route::get('/question-assessment', 'AssessmentController@assessment')->name('question-assessment');
 	Route::get('/analysis-assessment', 'ClientCompanyController@analysisAssessment')->name('analysis-assessment');;
 	Route::get('/history-assessment', 'ClientCompanyController@historyAssessment')->name('history-assessment');;
 	Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
@@ -179,8 +179,10 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     //Assessment
     Route::resource('questions', 'QuestionController');
     Route::resource('weights', 'WeightController');
+    Route::resource('assessments', 'AssessmentController');
+
     Route::get('get_subcategory','QuestionController@category')->name('get_subcategory_by_category');
-    Route::resource('answerOption', 'AnswerOptionController');
+    // Route::resource('answerOption', 'AnswerOptionController');
 
     //Company profile
 	Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');

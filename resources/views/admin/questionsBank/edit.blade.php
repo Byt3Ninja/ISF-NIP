@@ -214,7 +214,7 @@
 																if($question['group'] != 'assessment') {
 																	$status = $answer['status'];
 																}else{
-																	$status = $answer['score'];
+																	$status = $answer['suggestion'];
 																}
 																@endphp
 																<input value="{{ $answer['text'] }}" placeholder="{{ $l == 'en' ? 'Answer text' : 'اكتب نص الاجابة' }}" class="form-control" id="quiz_answer_{{ $key }}_text" name="quiz_answer_text[]">
@@ -366,7 +366,9 @@
 			e.preventDefault();
 			var count = $("#quizAnswers > div.input-group").length;
 			var is_quiz = $('#question_group').val() == 'quiz' ? true : false;
+			var is_assessment = $('#question_group').val() == 'assessment' ? true : false;
 			var class_control = is_quiz ? 'questions-type' : 'questions-type d-none';
+			var class_control2 = is_assessment ? 'assessment-type' : 'assessment-type d-none';
 			if( !is_quiz )
 			{
 				if( $("#survey_type").val() == 'stars' )
@@ -391,6 +393,7 @@
 			var answer = `
 			<div class="input-group mb-1">
 				<input placeholder="Type the text of the answer" class="form-control" id="quiz_answer_` + count + `_text" name="quiz_answer_text[]">
+				<input placeholder="{{ $l == 'en' ? 'Answer Suggestion' : 'اكتب المقترح ' }}" class="form-control ` + class_control2 + `" id="quiz_answer_` + count + `_score" name="quiz_answer_score[]">
 				<select class="form-control form-select select2 ` + class_control + `" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
 					<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
 					<option value="false">{{ __('admin.quizAnswerWrong') }}</option>

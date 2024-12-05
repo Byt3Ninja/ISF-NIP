@@ -142,7 +142,16 @@ class QuestionsBankController extends Controller
 		$correct = null;
 		if( ( $request->has('quiz_answer_text') ) && ( $request->has('quiz_answer_score') )  )
 		{
-			foreach( $request->quiz_answer_text as $key => $answer ) { $answers[] = ['text' => $answer, 'score' => $request->quiz_answer_score[$key]]; }
+			
+			foreach( $request->quiz_answer_text as $key => $answer ) { 
+				if ($key == 0) {
+					$score = 1; // للقيمة الأولى
+				} elseif ($key == 1) {
+					$score = 3; // للقيمة الثانية
+				} elseif ($key == 2) {
+					$score = 5; // للقيمة الثالثة
+				}
+				$answers[] = ['text' => $answer, 'suggestion' => $request->quiz_answer_score[$key], 'score' => $score ]; }
 		}
 
 		$question = new QuestionsBank;
@@ -283,7 +292,15 @@ class QuestionsBankController extends Controller
 			$correct = null;
 			if( ( $request->has('quiz_answer_text') ) && ( $request->has('quiz_answer_score') )  )
 			{
-				foreach( $request->quiz_answer_text as $key => $answer ) { $answers[] = ['text' => $answer, 'score' => $request->quiz_answer_score[$key]]; }
+				foreach( $request->quiz_answer_text as $key => $answer ) { 
+					if ($key == 0) {
+						$score = 1; // للقيمة الأولى
+					} elseif ($key == 1) {
+						$score = 3; // للقيمة الثانية
+					} elseif ($key == 2) {
+						$score = 5; // للقيمة الثالثة
+					}
+					$answers[] = ['text' => $answer, 'suggestion' => $request->quiz_answer_score[$key], 'score' => $score]; }
 			}
 	
 			$question->group = $request->question_group;
