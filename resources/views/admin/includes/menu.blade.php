@@ -263,6 +263,8 @@
         </a>
       </li>
 
+      
+
       <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
         <a href="{{ route('Category.index') }}" class="menu-link">
           <i class="ti ti-flag me-3 ti-md"></i>
@@ -498,7 +500,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
 
       <!-- Questions Nav Item -->
       <li
-        class="{{ Request::is('*question-categories*', '*questions-bank*') ? 'sidebar-group-active open' : '' }} menu-item">
+        class="{{ Request::is('*question-categories*', '*questions-bank*', '*weights*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-question-mark me-3 ti-md"></i>
           <div>{{ __('admin.Questions') }}</div>
@@ -516,6 +518,15 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item"> {{ __('admin.Questions Bank') }}</span>
             </a>
           </li>
+
+          <li class="{{ Request::is('*weights') ? 'active' : '' }} menu-item">
+            <a href="{{ route('weights.index') }}" class="menu-link">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Weight') }}</span>
+            </a>
+          </li>
+
+
         </ul>
       </li>
       <!-- End Questions Nav Item -->

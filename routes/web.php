@@ -178,6 +178,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 
     //Assessment
     Route::resource('questions', 'QuestionController');
+    Route::resource('weights', 'WeightController');
     Route::get('get_subcategory','QuestionController@category')->name('get_subcategory_by_category');
     Route::resource('answerOption', 'AnswerOptionController');
 
