@@ -181,7 +181,26 @@
               </select>
               <i class="ti ti-calendar-time fs-5 position-absolute top-50 translate-middle-y me-3 text-primary" style="left: 7px;"></i>
           </div>
-      </div>
+        </div>
+
+        <div class="col-md-6 col-12 mb-3">
+          <label for="product_or_service" class="form-label">{{ __('admin.Product or Service') }} *</label>
+          <div class="position-relative">
+              <select class="form-select border-light light-shadow px-10" id="product_or_service" name="product_or_service" required>
+                  <option value="">{{ __('admin.Select Product or Service') }}</option>
+                  <option value="Product" {{ optional($client->company)->product_or_service === 'Product' ? 'selected' : '' }}>
+                      {{ __('admin.Product') }}
+                  </option>
+                  <option value="Service" {{ optional($client->company)->product_or_service === 'Service' ? 'selected' : '' }}>
+                      {{ __('admin.Service') }}
+                  </option>
+                  <option value="Product + Service" {{ optional($client->company)->product_or_service === 'Product + Service' ? 'selected' : '' }}>
+                      {{ __('admin.Product + Service') }}
+                  </option>
+              </select>
+              <i class="ti ti-box fs-5 position-absolute top-50 translate-middle-y me-3 text-primary" style="left: 7px;"></i>
+          </div>
+        </div>
 
       <div class="row ShowCreatedTax" style="{{ $client->company && $client->company->CreatedTax == '1' ? '' : 'display: none;' }}" > 
 
