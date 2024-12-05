@@ -238,6 +238,7 @@ class ClientCompanyController extends Controller
                     'address_ar' => 'required|string|max:500',
                     'est_date' => 'required|date',
                     'years_of_operations' => 'required|string|in:0-2,2-5,5-10,10+',
+                    'product_or_service' => 'required|string|in:Product,Service,Product + Service',
                 ], [
                     'name_en.required' => __('admin.English Name is required'),
                     'name_ar.required' => __('admin.Arabic Name is required'),
@@ -253,6 +254,8 @@ class ClientCompanyController extends Controller
                     'est_date.required' => __('admin.Established Date must be a valid date'),
                     'years_of_operations.required' => __('admin.Years of Operations is required'),
                     'years_of_operations.in' => __('admin.Invalid Years of Operations selection'),
+                    'product_or_service.required' => __('admin.Product or Service is required'),
+                    'product_or_service.in' => __('admin.Invalid Product or Service selection'),
                 ]);
 
                 // $result = Company::updateOrCreate(['id' => $companyId], values: $data);
@@ -287,6 +290,7 @@ class ClientCompanyController extends Controller
                         'address_ar' => $data['address_ar'],
                         'est_date' => $data['est_date'],
                         'years_of_operations' => $data['years_of_operations'],
+                        'product_or_service' => $data['product_or_service'],
                         'CreatedTax' => $CreatedTax,
                         'Commercial_Register' => $Commercial_Register,
                         'Tax_Card' => $Tax_Card,
@@ -312,6 +316,7 @@ class ClientCompanyController extends Controller
                         'address_ar' => $data['address_ar'],
                         'est_date' => $data['est_date'],
                         'years_of_operations' => $data['years_of_operations'],
+                        'product_or_service' => $data['product_or_service'],
                         'CreatedTax' => $CreatedTax,
                         'Commercial_Register' => $Commercial_Register,
                         'Tax_Card' => $Tax_Card,
