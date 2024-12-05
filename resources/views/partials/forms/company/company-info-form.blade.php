@@ -111,6 +111,51 @@
               style="left: 7px;"></i>
           </div>
         </div>
+        <div class="mb-3">
+          <label for="categories" class="form-label">{{ __('admin.Categories') }} *</label>
+          <div class="row">
+              @php
+                  // Define the categories
+                  $categories = [
+                      'Food & Beverage',
+                      'Technology',
+                      'App / Website',
+                      'Housewares / Home Design',
+                      'Health / Wellness / Nutrition',
+                      'Fitness',
+                      'Sports',
+                      'Beauty',
+                      'Clothing / Fashion',
+                      'Toys / Games',
+                      'Children',
+                      'Entertainment / Experiential',
+                      'Pets',
+                      'Music',
+                      'Holiday',
+                      'Other',
+                  ];
+                  
+                  $selectedCategories = old('business_categories', $client->company->business_categories ?? []);
+              @endphp
+              
+              @foreach ($categories as $category)
+                  <div class="col-md-4 col-6">
+                      <div class="form-check">
+                          <input 
+                              class="form-check-input" 
+                              type="checkbox" 
+                              name="business_categories[]" 
+                              id="category_{{ $loop->index }}" 
+                              value="{{ $category }}"
+                              {{ in_array($category, $selectedCategories) ? 'checked' : '' }}>
+                          <label class="form-check-label" for="category_{{ $loop->index }}">
+                              {{ $category }}
+                          </label>
+                      </div>
+                  </div>
+              @endforeach
+          </div>
+      </div>
         <div class="col-md-12 col-12 mb-3">
           <label for="address_en"
             class="form-label">{{ __('admin.English Address') }} *</label>

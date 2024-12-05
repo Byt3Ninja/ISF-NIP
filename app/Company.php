@@ -19,7 +19,10 @@ class Company extends Model
         'name_ar',
         'address_en',
         'sector',
+        'business_categories',
         'address_ar',
+        'years_of_operations',
+        'product_or_service',
         'phone',
         'fax',
         'email',
@@ -72,6 +75,10 @@ class Company extends Model
         'Country_Register_id'
     ];
 
+
+    protected $casts = [
+        'business_categories' => 'array',
+    ];
     // ===========> Attributes <==============
     public function getLogoUrlAttribute()
     {
@@ -160,9 +167,9 @@ class Company extends Model
     }
 
     public function stage()
-{
-    return $this->belongsTo(Stage::class, 'stage');
-}
+    {
+        return $this->belongsTo(Stage::class, 'stage');
+    }
 
     public function companyWeight($c, $f, $u)
     {
