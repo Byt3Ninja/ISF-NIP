@@ -169,6 +169,20 @@
           </div>
         </div>
 
+        <div class="col-6 mb-3">
+          <label for="years_of_operations" class="form-label">{{ __('admin.Years of Operations') }} *</label>
+          <div class="position-relative">
+              <select class="form-select border-light light-shadow px-10" id="years_of_operations" name="years_of_operations" required>
+                  <option value="">{{ __('admin.Select Years of Operations') }}</option>
+                  <option value="0-2" {{ optional($client->company)->years_of_operations === '0-2' ? 'selected' : '' }}>0-2</option>
+                  <option value="2-5" {{ optional($client->company)->years_of_operations === '2-5' ? 'selected' : '' }}>2-5</option>
+                  <option value="5-10" {{ optional($client->company)->years_of_operations === '5-10' ? 'selected' : '' }}>5-10</option>
+                  <option value="10+" {{ optional($client->company)->years_of_operations === '10+' ? 'selected' : '' }}>10+</option>
+              </select>
+              <i class="ti ti-calendar-time fs-5 position-absolute top-50 translate-middle-y me-3 text-primary" style="left: 7px;"></i>
+          </div>
+      </div>
+
       <div class="row ShowCreatedTax" style="{{ $client->company && $client->company->CreatedTax == '1' ? '' : 'display: none;' }}" > 
 
         <div class="col-md-4 col-12 mb-3">
@@ -189,7 +203,7 @@
           </div>
         </div>
 
-<div class="col-md-4 col-12 mb-3">
+        <div class="col-md-4 col-12 mb-3">
           <label for="Commercial_Register" class="form-label">{{ __('admin.Commercial_Register') }}
             *</label>
           <div class="position-relative">
@@ -216,7 +230,7 @@
               style="left: 7px;"></i>
           </div>
         </div>
-    </div>
+      </div>
 
         <div class="col-12 d-flex justify-content-end">
           <button type="submit" class="btn btn-primary" id="submit-button">
