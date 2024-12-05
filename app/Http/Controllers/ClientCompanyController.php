@@ -1297,10 +1297,7 @@ class ClientCompanyController extends Controller
         return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
     }
 
-    public function assessment()
-    {
-        return view('admin/clients/assessment/assessment');
-    }
+    
     public function analysisAssessment()
     {
         return view('admin/clients/assessment/analysis-assessment');

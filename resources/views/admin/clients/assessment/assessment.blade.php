@@ -77,12 +77,13 @@ $assessments = [
     <!-- / Pills -->
     <div class="row">
       <div class="col-md-3 col-12 position-relative" style="height: fit-content;">
-        @foreach($assessments as $key => $assessment)
-        <div id="tab{{ $key + 1 }}" class="assessment-tab card shadow-sm mb-3 {{$key == 0 ? 'border border-dark' : ''}} position-relative">
+       
+        @foreach($categories as $key => $category)
+        <div id="tab{{ $key + 1 }}" class="assessment-tab card shadow-sm mb-3 {{ $key == 0 ? 'border border-dark' : ''}} position-relative">
           <div class="d-flex justify-content-between align-items-center p-4">
             <div class="d-flex flex-column">
               <h6 class="mb-0 text-capitalize">
-                {{ str_replace('-', ' ', $assessment['title']) }}
+                {{ $category->{'category_name_' . $l} }}
               </h6>
               @if ($key == 0)
                 <span class="text-success fw-bold text-sm">
@@ -94,9 +95,9 @@ $assessments = [
                 </span>
               @endif
             </div>
-            <x-circular-progress size="40" color="#28c76f" progress="{{ $assessment['progress'] }}" />
+            <x-circular-progress size="40" color="#28c76f" progress="{{ $category['progress'] }}" />
           </div>
-          @if ($assessment['status'] == 'completed' || $assessment['progress'] == 100)
+          {{-- @if ($assessment['status'] == 'completed' || $assessment['progress'] == 100)
             <div 
               style="position: absolute; left: -1rem; top: 50%; transform: translateY(-50%); z-index: 1;"
               class="w-px-20 h-px-20 rounded-circle bg-success justify-content-center align-items-center d-flex">
@@ -107,7 +108,7 @@ $assessments = [
               style="position: absolute; left: -1rem; top: 50%; transform: translateY(-50%); z-index: 1;"
               class="w-px-20 h-px-20 rounded-circle bg-light border border-secondary">
             </div>
-          @endif
+          @endif --}}
         </div>
         @endforeach
         <div style="position: absolute; left: 0.35rem; top: 0; height: 100%; border-left: 2px dashed rgb(120, 108, 163);"></div>

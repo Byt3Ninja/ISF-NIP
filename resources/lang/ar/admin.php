@@ -1012,5 +1012,7 @@ return [
 	'Weight'=>'الوزن',
 	'all Weights'=>'جميع الوزن',
 	'UpdatedSuccessfully'=> 'تم التعديل بنجاح',
+	'Add new Assessment'=> 'اضافة تقييم جديد',
+	'all Assessments'=>'جميع التقييمات',
 
 ];

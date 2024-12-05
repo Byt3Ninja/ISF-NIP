@@ -72,7 +72,8 @@
                 <div class="d-flex align-items-center">
                   <div class="border d-flex radius-15 flex-shrink-0"
                     style="width: 80px; height: 80px;">
-                    <img src="/images/background/logo.png"
+                    
+                    <img src="{{optional($client->company)->logo_url}}"
                       class="img-fluid m-auto" alt="logo" />
                   </div>
                   <div
@@ -464,7 +465,7 @@
                     <div class="d-flex align-items-center">
                       <div class="border d-flex radius-15 d-flex flex-shrink-0"
                         style="width: 80px; height: 80px;">
-                        <img src="/images/background/logo.png"
+                        <img src="{{optional($client->company)->logo_url}}"
                           class="img-fluid m-auto" alt="logo" />
                       </div>
                       <div
