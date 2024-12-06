@@ -995,5 +995,5 @@ return [
 	'Weight'=>'Weight',
 	'all Weights'=>'all Weights',
 	'UpdatedSuccessfully'=> 'Updated Successfully',
-
+	'Shipping and Delivery' => 'Shipping and Delivery',
 ];

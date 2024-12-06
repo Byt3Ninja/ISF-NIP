@@ -3,9 +3,9 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
+  renderCompanySdgChart();
   renderDevStageChart();
   renderProjectDistributionChart();
-  renderCompanySdgChart();
   renderSectorBreakdownChart();
   renderUserDistributionChart();
   renderTargetMarketChart();
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTotalCompaniesBySectorChart();
 });
 
+const lang = document.documentElement.lang;
 const colors = [
   '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFC300', 
   '#87CEEB', '#FFA500', '#FF6347', '#FF4500', '#FF0000', 
@@ -137,10 +138,9 @@ const renderTotalCompaniesBySectorChart = () => {
     data => data.label !== null && data.count > 0
   ) : [];
 
-  const labels = chartData.map(data => data.sector);
+  const labels = chartData.map(data => lang == 'ar' ? data.sector_ar : data.sector_en);
   const values = chartData.map(data => data.count);
-  console.log('labels', labels)
-  console.log('values', values)
+  
   const chartDom = document.querySelector('#companyBySectorChart');
   const chartConfig = getBarChartConfig(labels, values, false, 50);
 
@@ -155,7 +155,7 @@ const renderUserDistributionChart = () => {
     data => data.label !== null && data.count > 0
   ) : [];
 
-  const labels = chartData.map(data => data.label);
+  const labels = chartData.map(data => lang == 'ar' ? data.label_ar : data.label_en);
   const values = chartData.map(data => data.count);
 
   const chartDom = document.querySelector('#userDistributionChart');
@@ -270,7 +270,7 @@ const renderTargetMarketChart = () => {
     data => data.label !== null && data.count > 0
   ) : [];
 
-  const labels = chartData ? chartData.map(data => data.label) : [];
+  const labels = chartData ? chartData.map(data => lang == 'ar' ? data.label_ar : data.label_en) : [];
   const values = chartData ? chartData.map(data => data.count) : [];
 
   const chartDom = document.querySelector('#targetMarketChart');
@@ -287,7 +287,7 @@ const renderDevStageChart = () => {
     data => data.label !== null && data.count > 0
   ) : [];
 
-  const labels = chartData.map(data => data.label);
+  const labels = chartData.map(data => lang == 'ar' ? data.label_ar : data.label_en);
   const values = chartData.map(data => data.count);
 
   const charDom = document.querySelector('#devStageStackedBarChart');
@@ -300,7 +300,7 @@ const renderDevStageChart = () => {
 
 // Render Company SDG Chart
 const renderCompanySdgChart = () => {
-  const labels = sdgData ? sdgData.map(data => data.sdg) : [];
+  const labels = sdgData ? sdgData.map(data => lang == 'ar' ? data.sdg_ar : data.sdg_en) : [];
   const series = sdgData ? sdgData.map(data => data.total) : [];
 
   const chartDom = document.querySelector('#sdgCompaniesChart');
@@ -332,12 +332,11 @@ const renderProjectDistributionChart = () => {
 
 // Render Sector Breakdown Chart
 const renderSectorBreakdownChart = () => {
-  
   const chartData = sectorBreakdownData ? sectorBreakdownData?.filter(
     data => data.label !== null && data.count > 0
   ) : [];
 
-  const labels = chartData.map(data => data.label);
+  const labels = chartData.map(data => lang == 'ar' ? data.label_ar : data.label_en);
   const values = chartData.map(data => data.count);
   
   const chartDom = document.querySelector('#sectorBreakdownChart');
