@@ -334,13 +334,26 @@ class HomeController extends Controller
 
         $data['development_stages'] = $uniqueDevelopmentStages->map(function ($item) use ($developmentStages) {
             $count = $developmentStages->where('development_stage', $item->development_stage)->count();
-            return [
-                'label_en' => __('admin.' . $item->development_stage, [], 'en'),
-                'label_ar' => __('admin.' . $item->development_stage, [], 'ar'),
-                'count' => $count,
-            ];
-        });
 
+            if (is_numeric($item->development_stage)) {
+                $stage = DB::table('stages')
+                    ->where('id', $item->development_stage)
+                    ->select('name_en', 'name_ar')
+                    ->first();
+
+                return [
+                    'label_en' => $stage ? $stage->name_en : null,
+                    'label_ar' => $stage ? $stage->name_ar : null,
+                    'count' => $count,
+                ];
+            } else {
+                return [
+                    'label_en' => __('admin.' . $item->development_stage, [], 'en'),
+                    'label_ar' => __('admin.' . $item->development_stage, [], 'ar'),
+                    'count' => $count,
+                ];
+            }
+        });
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
@@ -401,11 +414,24 @@ class HomeController extends Controller
                 ->get();
 
             foreach ($developmentStages as $stage) {
-                $data['development_stages'][] = [
-                    'label_en' => __('admin.' . $stage->development_stage, [], 'en'), // English label
-                    'label_ar' => __('admin.' . $stage->development_stage, [], 'ar'), // Arabic label
-                    'count' => $stage->total,
-                ];
+                if (is_numeric($stage->development_stage)) {
+                    $stageDetails = DB::table('stages')
+                        ->where('id', $stage->development_stage)
+                        ->select('name_en', 'name_ar')
+                        ->first();
+
+                    $data['development_stages'][] = [
+                        'label_en' => $stageDetails ? $stageDetails->name_en : __('admin.undefined', [], 'en'), // Fallback to 'undefined' if not found
+                        'label_ar' => $stageDetails ? $stageDetails->name_ar : __('admin.undefined', [], 'ar'), // Fallback to 'undefined' if not found
+                        'count' => $stage->total,
+                    ];
+                } else {
+                    $data['development_stages'][] = [
+                        'label_en' => __('admin.' . $stage->development_stage, [], 'en'),
+                        'label_ar' => __('admin.' . $stage->development_stage, [], 'ar'),
+                        'count' => $stage->total,
+                    ];
+                }
             }
         }
 
