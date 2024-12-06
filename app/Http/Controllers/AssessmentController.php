@@ -152,9 +152,6 @@ class AssessmentController extends Controller
         }
         
 
-       dd($user_scores);
-        
-
         return view('admin/clients/assessment/assessment',compact('user_scores','answers'));
     }
 
