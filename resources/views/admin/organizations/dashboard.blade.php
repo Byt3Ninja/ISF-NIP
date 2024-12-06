@@ -464,6 +464,9 @@
     // Companies by SDG Chart Data
     const sdgData = @json($sdg_data);
 
+    // Companies by sector
+    const companiesBySectorData = @json($sector_distribution);
+
     // Mentorship chart data
     const seriesName = '({{ __('admin.hours') }})';
     const barChartCategories = {!! json_encode($mentorship_labels) !!};
