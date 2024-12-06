@@ -985,21 +985,6 @@ return [
 	'explanation_AA_ar' => 'Explanation of the answer in Arabic',
 	'explanation_AA_en' => 'Explanation of the answer in English',
 	'WaitingYourRedirect' => 'Waiting for you to redirect',
-<<<<<<< Updated upstream
-	'Stages' => 'Stages',
-	'StageName' => 'Stage Name',
-	'StageDescription' => 'Stage Description',
-	'all Stages' => 'all Stages',
-	'Add new Stage' => 'Add new Stage',
-	'Stage_updated_successfully' => 'Stage Updated Successfully',
-	'Stage_deleted_successfully' => 'Stage Deleted Successfully',
-	'Stage_stored_successfully' => 'Stage Added Successfully',
-	'Add new Weights' => 'Add new Weights',
-	'Weight' => 'Weight',
-	'all Weights' => 'all Weights',
-	'UpdatedSuccessfully' => 'Updated Successfully',
-	'Shipping and Delivery' => 'Shipping and Delivery',
-=======
 	'Stages'=>'Stages',
 	'StageName'=>'Stage Name',
 	'StageDescription'=>'Stage Description',
@@ -1018,5 +1003,4 @@ return [
 	'Make_a_new_assessment'=>'Make a new assessment',
 	'questions_answered'=> 'Questions Answered',
 	'done_all'=> 'Done All',
->>>>>>> Stashed changes
 ];

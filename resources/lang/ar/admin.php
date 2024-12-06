@@ -1002,23 +1002,6 @@ return [
 	'explanation_AA_ar' => 'شرح الاجابات باللغة العربية',
 	'explanation_AA_en' => 'شرح الاجابات باللغة الانجليزية',
 	'WaitingYourRedirect' => 'انتظر لتحويلك',
-<<<<<<< Updated upstream
-	'Stages' => 'المراحل',
-	'StageName' => 'اسم المرحلة',
-	'StageDescription' => 'وصف المرحلة',
-	'all Stages' => 'جميع المراحل',
-	'Add new Stage' => 'اضافة مرحلة جديدة',
-	'Stage_updated_successfully' => 'تم تعديل المرحلة',
-	'Stage_deleted_successfully' => 'تم مسح المرحلة',
-	'Stage_stored_successfully' => 'تم اضافة المرحلة',
-	'Add new Weights' => 'اضافة وزن جديدة',
-	'Weight' => 'الوزن',
-	'all Weights' => 'جميع الوزن',
-	'UpdatedSuccessfully' => 'تم التعديل بنجاح',
-	'Add new Assessment' => 'اضافة تقييم جديد',
-	'all Assessments' => 'جميع التقييمات',
-
-=======
 	'Stages'=>'المراحل',
 	'StageName'=>'اسم المرحلة',
 	'StageDescription'=>'وصف المرحلة',
@@ -1039,5 +1022,4 @@ return [
 	'Make_a_new_assessment'=> 'انشاء تقييم جديد',
 	'questions_answered'=> 'الاسئلة المجابة',
 	'done_all'=> 'تم الانتهاء من جميع الاسئلة',
->>>>>>> Stashed changes
 ];
