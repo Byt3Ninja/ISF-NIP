@@ -113,19 +113,49 @@ class AssessmentController extends Controller
         // }
         // // تنفيذ الاستعلام
         // $user_scores = $query->get();
-
+        $user_scores = [];
         $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
             ->where('user_id', $userid)
             ->where('assessment_id', $assessment_user->id)->get();
-        
+
+            
+
+            foreach($user_scores as $user_score){
+                $answers = json_decode($user_score->Answers, true);
+                $countansweredSub = UserScore::where('subcategory_id', $user_score->subcategory_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNotNull('Result_assessment')->count();
+              $countNotansweredSub = UserScore::where('subcategory_id', $user_score->subcategory_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNull('Result_assessment')->count();
+              $countplusSub = $countansweredSub + $countNotansweredSub;
+
+
+              $countansweredCat = UserScore::where('category_id', $user_score->category_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNotNull('Result_assessment')->count();
+              $countNotansweredCat = UserScore::where('category_id', $user_score->category_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNull('Result_assessment')->count();
+              $countplusCat = $countansweredCat + $countNotansweredCat;
+            }
+
+
+
+            $user_scores['countSubCategory'] = [
+                'countansweredSub' => $countansweredSub,
+                'countNotansweredSub' => $countNotansweredSub,
+                'countplusSub' => $countplusSub,
+            ];
+
+
+
+            $user_scores['countCategory'] = [
+                'countansweredCat' => $countansweredCat,
+                'countNotansweredCat' => $countNotansweredCat,
+                'countplusCat' => $countplusCat,
+            ];
         }else{
             return redirect()->route('analysis-assessment');
         }
         
-       
 
+       dd($user_scores);
+        
 
-        return view('admin/clients/assessment/assessment',compact('user_scores'));
+        return view('admin/clients/assessment/assessment',compact('user_scores','answers'));
     }
 
 public function MakeAssessment()
