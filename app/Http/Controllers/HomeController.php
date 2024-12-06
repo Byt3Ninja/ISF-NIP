@@ -622,8 +622,8 @@ class HomeController extends Controller
 
         $data['countries'] = $countryData->map(function ($item) {
             return [
-                'country_name_en' => $item->country_name_en,
-                'country_name_ar' => $item->country_name_ar,
+                'label_en' => $item->country_name_en,
+                'label_ar' => $item->country_name_ar,
                 'count' => $item->total,
             ];
         });
