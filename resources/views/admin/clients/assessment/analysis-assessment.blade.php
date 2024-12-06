@@ -139,11 +139,23 @@ $assessmentPhases = [
                 </div>
               </div>
               <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
-                <button 
-                  onclick="window.location.href='/dashboard/question-assessment'"
+                @php
+                $userid = auth()->user()->id;
+                $assessment_user = App\Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+                @endphp
+                @if($assessment_user == null)
+                <a 
+                  href="{{ route('make_new_assessment_to_user') }}"
                   class="btn btn-sm btn-primary light-shadow radius-10">
-                  Make a new assessment
-                </button>
+                  {{ __('admin.Make_a_new_assessment') }}
+              </a>
+              @else
+              <a 
+                 
+                  class="btn  btn-default light-shadow radius-10">
+                  {{ __('admin.Make_a_new_assessment') }}
+              </a>
+                @endif
               </div>
             </div>
             <div class="d-flex flex-grow-1 align-items-center gap-3">
