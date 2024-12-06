@@ -377,7 +377,7 @@ $countCards = [
 
     // Companies by SDG Chart Data
     const sdgData = @json($sdg_data);
-    
+
     // Companies by sector
     const companiesBySectorData = @json($sector_distribution);
 
