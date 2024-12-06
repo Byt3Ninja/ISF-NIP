@@ -17,12 +17,15 @@ return new class extends Migration
             $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('subcategory_id');
             $table->unsignedBigInteger('stage_id');
-            $table->decimal('score', 8, 2);
-            $table->decimal('weight', 8, 2);
-            $table->decimal('weighted_score', 8, 2);
+            $table->decimal('score', 8, 2)->default(0);
+            $table->decimal('weight', 8, 2)->default(0);
+            $table->decimal('weighted_score', 8, 2)->default(0);
             $table->unsignedBigInteger('assessment_id');
-            $table->unsignedBigInteger('QuestionBank_id');
-            $table->integer('Result_assessment');
+            $table->text('QuestionBank')->nullable();
+            $table->longText('explanation_QA_ar')->nullable();
+            $table->longText('explanation_QA_en')->nullable();
+            $table->longText('Answers')->nullable();
+            $table->tinyText('Result_assessment')->nullable();
             $table->unsignedBigInteger('company_id');
             $table->timestamps();
 
@@ -32,7 +35,6 @@ return new class extends Migration
             $table->foreign('subcategory_id')->references('id')->on('sub_categories')->onDelete('cascade');
             $table->foreign('assessment_id')->references('id')->on('assessments')->onDelete('cascade');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->foreign('QuestionBank_id')->references('id')->on('Questions_bank')->onDelete('cascade');
             $table->foreign('stage_id')->references('id')->on('stages')->onDelete('cascade');
 
         });
