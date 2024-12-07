@@ -1,24 +1,60 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 @stop
 
 @section('style')
-<link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
 <style>
-  .kanban-container {
+  #card-header {
     display: flex;
-    width: max-content !important;
-    gap: 3rem;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .text-xs {
+    font-size: 12px;
+  }
+
+  @media screen and (min-width: 768px) {
+    #card-header {
+      width: 50%;
+    }
+  }
+  .kanban-container, .kanban-wrapper {
+    display: flex !important;
+    width: 100% !important;
+    flex-grow: 1 !important;
+    padding-inline-start: 0.7rem;
+  }
+
+  .kanban-item, .kanban-board {
+    padding: 0 !important;
+    width: 300px !important;
+  }
+
+  .kanban-board-header {
+    padding: 0 !important;
+    background-color: var(--bs-light) !important;
+    margin-bottom: 1rem !important;
+    width: 100% !important;
+    border-radius: 0.25rem !important;
+  }
+
+  .kanban-title-board {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    padding: 0.3rem 1rem !important;
+    letter-spacing: 0.5px !important;
   }
 </style>
 @stop
@@ -27,35 +63,30 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
   <!-- Content -->
-  
   <div class="container-xxl flex-grow-1 container-p-y">
-    @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
-      <div class="row mb-4">
-        <div class="col-12">
-          <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
-            <i class="ti ti-plus ti-16px me-2"></i>
-            <span class="align-middle">{{ __('admin.Add_Task') }}</span>
-          </button>
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-end w-100 border-bottom pb-3">
+          <div id="card-header">
+            <div class="ms-md-8 d-flex flex-grow-1 position-relative">
+              <input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
+              <i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
+            </div>
+            <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+              <span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
+              <i class="ti ti-plus ti-16px"></i>
+            </button>
+          </div>
         </div>
       </div>
-    @endif
-    <div class="app-kanban">
-      <!-- Kanban Wrapper -->
-      @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
-        <div class="kanban-wrapper bg-white px-4 py-8" style="border-radius: 1rem;">
+      <div class="app-kanban">
+        <div class="kanban-wrapper"></div>
+      </div>
+      {{-- <div class="px-8 row">
+        <div class="col-4">
+          
         </div>
-      @else
-        <div class="d-flex flex-column justify-content-center align-items-center gap-4 mt-10">
-          <img src="/icons/not-found.svg" width="337" height="234" />
-          <h4 class="mb-0 text-center">
-            {{ $l == 'en' ? 'You don’t have any tasks' : 'ليس لديك أي مهام' }}
-          </h4>
-          <button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal"       data-bs-target="#addTaskModal">
-            <i class="ti ti-plus ti-16px me-2"></i>
-            <span class="align-middle">{{ __('admin.Add_Task') }}</span>
-          </button>
-        </div>
-      @endif
+      </div> --}}
     </div>
   </div>
   <!-- / Content -->
@@ -304,54 +335,127 @@
 @stop
 
 @section('scripts')
-<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
-<script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
-<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
-<script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
 @stop
 
 @section('pagescripts')
-<script src="/vuexy/assets/js/forms-selects.js"></script>
-<script>
-  const lng = '{{ $l }}';
-  const tasks = @json($mentorshipTasks);
-  const labels = @json($labels);
-  const whitelist = labels.map(label => label?.name);
-</script>
-<script src="/vuexy/assets/js/mentor-kanban-tasks.js"></script>
-<script>
-  // Render Tagify inputs with suggestions
-  (() => {
-    const addTaskTagifyInput = document.querySelector('#addTaskLabel');
-
-    const tagifyOptions = {
-      whitelist,
-      maxTags: 10,
-      dropdown: {
-        maxItems: 20,
-        classname: 'tags-inline',
-        enabled: 0,
-        closeOnSelect: false
+  <script>
+    const boards = [
+      {
+        id: 'board-1',
+        title: 'Pending',
+        item: [
+          {id: 1, name: "first task pending", title: 'Pending Task 1', content: 'Task 1 content', due_date: '2021-09-01', label: 'Label 1'},
+        ]
+      },
+      {
+        id: 'board-2',
+        title: 'In Review',
+        item: [
+          {id: 1, name: 'InReview Task 1', content: 'Task 1 content', due_date: '2021-09-01', label: 'Label 1'},
+        ]
+      },
+      {
+        id: 'board-3',
+        title: 'Completed',
+        item: [
+          {id: 1, name: 'Completed Task 1', content: 'Task 1 content', due_date: '2021-09-01', label: 'Label 1'},
+        ]
       }
-    };
-    let addTaskTagifySuggestions = new Tagify(addTaskTagifyInput, tagifyOptions);
-  })();
+    ]
 
-  // Render flatpickr date inputs
-  (() => {
-    const flatpickrDate = document.querySelectorAll('#flatpickr-date');
-    if (flatpickrDate) {
-      flatpickrDate.flatpickr({
-        monthSelectorType: 'static'
+    // Render Kanban board
+    const renderKanabanBoard = () => {
+      const kanban = new jKanban({
+        element: '.kanban-wrapper',
+        gutter: '15px',
+        widthBoard: '250px',
+        boards,
+        addItemButton: false,
+        dragBoards: true,
+        dragItems: true,
+        // click: el => onClickTask(el),
+        dragEl: (el, source) => {
+          console.log('Task is being dragged:', el);
+        },
+        dragendEl: el => {
+          console.log('Task drag ended:', el);
+          // Perform any additional actions here
+        },
+        dropEl: (el, target, source, sibling) => {
+          console.log('Task dropped:', el);
+          console.log('New parent board:', target.parentElement.dataset.id);
+          console.log('Previous parent board:', source.parentElement.dataset.id);
+          // Perform any additional actions here
+        }
       });
     };
-  })();
 
-  
-</script>
+    // Render kanban item
+    const renderKanbanItem = () => {
+      const tasks = document.querySelectorAll('.kanban-item');
+      console.log('tasks', tasks)
+      tasks.forEach(item => {
+        let taskContent = item.getAttribute('data-content');
+        let taskName = item.getAttribute('data-name');
+        // console.log('taskName', taskName);
+        console.log('item', item);
+        let content = `
+          <div class="card shadow-sm p-3 d-flex flex-column">
+            <div class="d-flex align-items-center gap-1 mb-2">
+              <div class="badge bg-label-info">
+                <div class="fw-bold" style="font-size: 11px;">Marketing</div>
+              </div>
+              <div class="badge bg-label-danger d-flex align-items-center justify-content-center">
+                <div style="width: 7px; height: 7px;" class="bg-danger rounded-circle me-1"></div>
+                <div class="fw-bold" style="font-size: 11px;">Medium</div>
+              </div>
+            </div>
+            <div class="d-flex flex-column gap-2 border-bottom mb-2">
+              <h6 class="mb-0 fw-bold">${taskName}</h6>
+              <p class="text-muted mb-1 text-xs">${taskContent}</p>
+            </div>
+            <div class="d-flex justify-content-between">
+              <div class="d-flex justify-content-center align-items-center">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 1" width="24" height="24" style="{{$l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;'}}">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 2" width="24" height="24" style="{{$l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;'}}">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 3" width="24" height="24" style="{{$l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;'}}">
+              </div>
+              <div class="d-flex justify-content-center align-items-center gap-2">
+                <span class="text-xs"><i class='ti ti-paperclip ti-16px me-1'></i>4</span>
+                <span class="text-xs"><i class="ti ti-clock ti-16px me-1"></i>24 Feb</span>
+                <span class="text-xs"><i class="ti ti-message-2 ti-16px me-1"></i>12</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        item.innerHTML = content;
+      })
+    };
+
+    // Filter tasks on search
+    const searchTask = () => {
+      const searchInput = document.getElementById('search-task');
+      console.log('searchInput', searchInput);
+      searchInput.addEventListener('input', (e) => {
+        const searchValue = e.target.value;
+        console.log('searchValue', searchValue);
+        const tasks = document.querySelectorAll('.kanban-item');
+        tasks.forEach(task => {
+          const title = task.getAttribute('data-name');
+          console.log('title', title)
+          if (title.toLowerCase().includes(searchValue.toLowerCase())) {
+            task.style.display = 'block';
+          } else {
+            task.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    renderKanabanBoard();
+    renderKanbanItem();
+    searchTask();
+  </script>
 @stop
