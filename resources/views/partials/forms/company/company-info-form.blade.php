@@ -115,7 +115,6 @@
           <label for="categories" class="form-label">{{ __('admin.Categories') }} *</label>
           <div class="row">
               @php
-                  // Define the categories
                   $categories = [
                       'Food & Beverage',
                       'Technology',
@@ -139,23 +138,39 @@
               @endphp
               
               @foreach ($categories as $category)
-                  <div class="col-md-4 col-6">
-                      <div class="form-check">
-                          <input 
-                              class="form-check-input" 
-                              type="checkbox" 
-                              name="business_categories[]" 
-                              id="category_{{ $loop->index }}" 
-                              value="{{ $category }}"
-                              {{ in_array($category, $selectedCategories) ? 'checked' : '' }}>
-                          <label class="form-check-label" for="category_{{ $loop->index }}">
-                              {{ $category }}
-                          </label>
-                      </div>
+              <div class="col-md-4 col-6">
+                  <div class="form-check">
+                      <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          name="business_categories[]" 
+                          id="category_{{ $loop->index }}" 
+                          value="{{ $category }}"
+                          {{ in_array($category, $selectedCategories) ? 'checked' : '' }}
+                          @if ($category === 'Other') onclick="toggleOtherCategoryInput(this)" @endif>
+                      <label class="form-check-label" for="category_{{ $loop->index }}">
+                          {{ $category }}
+                      </label>
                   </div>
-              @endforeach
+              </div>
+          @endforeach
           </div>
-      </div>
+       </div>
+
+       <div class="mb-3">
+    <div id="otherCategoryInput" class="mt-3" 
+    style="display: {{ !is_array($client->company->business_categories) || in_array('Other', old('business_categories', $client->company->business_categories ?? [])) ? 'block' : 'none' }};">
+    <label for="other_category" class="form-label">{{ __('admin.other? Please Specify') }}</label>
+    <input 
+        type="text" 
+        class="form-control" 
+        id="other_category" 
+        name="other_category" 
+        value="{{ !is_array($client->company->business_categories) ? old('other_category', $client->company->business_categories) : '' }}" 
+        placeholder="{{ __('admin.other? Please Specify') }}">
+</div>
+       </div>
+
         <div class="col-md-12 col-12 mb-3">
           <label for="address_en"
             class="form-label">{{ __('admin.English Address') }} *</label>
@@ -308,3 +323,33 @@
     </form>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const checkboxes = document.querySelectorAll('.category-checkbox');
+    const otherCheckbox = document.querySelector('input[value="Other"]');
+    const otherCategoryInput = document.getElementById('otherCategoryInput');
+    const otherCategoryTextbox = document.getElementById('other_category');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            toggleOtherCategoryInput(this);
+        });
+    });
+
+    if (otherCategoryTextbox.value.trim() !== '' && !Array.isArray(JSON.parse(otherCategoryTextbox.value))) {
+        otherCategoryInput.style.display = 'block';
+    }
+});
+
+
+function toggleOtherCategoryInput(checkbox) {
+    const otherInput = document.getElementById('otherCategoryInput');
+    if (checkbox.value === 'Other' && checkbox.checked) {
+        otherInput.style.display = 'block';
+    } else if (checkbox.value === 'Other' && !checkbox.checked) {
+        otherInput.style.display = 'none';
+        document.getElementById('other_category').value = '';
+    }
+}
+</script>

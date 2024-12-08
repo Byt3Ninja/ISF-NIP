@@ -226,11 +226,24 @@ class HomeController extends Controller
             ->get();
 
         $data['sector_distribution'] = $sectorData->map(function ($item) {
-            return [
-                'sector_en' => __('admin.' . $item->sector, [], 'en'),
-                'sector_ar' => __('admin.' . $item->sector, [], 'ar'),
-                'count' => $item->total,
-            ];
+            if (is_numeric($item->sector)) {
+                $sectorDetails = DB::table('sectors')
+                    ->where('id', $item->sector)
+                    ->select('name_en', 'name_ar')
+                    ->first();
+
+                return [
+                    'sector_en' => $sectorDetails ? $sectorDetails->name_en : __('admin.undefined', [], 'en'),
+                    'sector_ar' => $sectorDetails ? $sectorDetails->name_ar : __('admin.undefined', [], 'ar'),
+                    'count' => $item->total,
+                ];
+            } else {
+                return [
+                    'sector_en' => __('admin.' . $item->sector, [], 'en'),
+                    'sector_ar' => __('admin.' . $item->sector, [], 'ar'),
+                    'count' => $item->total,
+                ];
+            }
         });
 
 
@@ -658,13 +671,25 @@ class HomeController extends Controller
             ->groupBy('companies.sector')
             ->get();
 
-
         $data['sector_distribution'] = $sectorData->map(function ($item) {
-            return [
-                'sector_en' => __('admin.' . $item->sector, [], 'en'),
-                'sector_ar' => __('admin.' . $item->sector, [], 'ar'),
-                'count' => $item->total,
-            ];
+            if (is_numeric($item->sector)) {
+                $sectorDetails = DB::table('sectors')
+                    ->where('id', $item->sector)
+                    ->select('name_en', 'name_ar')
+                    ->first();
+
+                return [
+                    'sector_en' => $sectorDetails ? $sectorDetails->name_en : __('admin.undefined', [], 'en'), // Fallback to 'undefined' if not found
+                    'sector_ar' => $sectorDetails ? $sectorDetails->name_ar : __('admin.undefined', [], 'ar'), // Fallback to 'undefined' if not found
+                    'count' => $item->total,
+                ];
+            } else {
+                return [
+                    'sector_en' => __('admin.' . $item->sector, [], 'en'),
+                    'sector_ar' => __('admin.' . $item->sector, [], 'ar'),
+                    'count' => $item->total,
+                ];
+            }
         });
 
         return view('admin.organizations.dashboard', $data);
