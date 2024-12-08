@@ -25,48 +25,49 @@ class ScreeningController extends Controller
     public function index($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $organization_id=auth()->user()->organization_id;
-        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->whereHas('cycle',function ($query) use ($organization_id){
-                $query->where('organization_id',$organization_id);
+        $organization_id = auth()->user()->organization_id;
+        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->where('organization_id', $organization_id);
             });
         })->where('stype', 2)->orderBy('from')->get();
         $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
-            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+            $cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
                 });
             })->where('stype', 2)->where('id', $id)->first();
         } else {
-            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+            $cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
                 });
             })->where('stype', 2)->where('id', $id)->first();
         }
         if ($cstep) {
-            $form = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+            $form = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
                 });
             })->where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
+        } else {
+            $form = [];
         }
-        else {$form=[];}
         $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
         return view('admin.settings.screening.index', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs'));
     }
 
     public function update(Request $request)
     {
-        if (!$request->judges){
+        if (!$request->judges) {
             return Redirect::back()->with('message2', 'برجاء اختيار المحكممين');
         }
         if ($request->step) {
             $type = Step::where('id', $request->step)->pluck('data')->first();
             $list = $request->judges;
-            $notifylist = User::whereIn('id',array_values($list))->get();
+            $notifylist = User::whereIn('id', array_values($list))->get();
             Step::where('id', $request->step)->update(['list' => json_encode($list)]);
             Screening::where('step_id', $request->step)->delete();
             Formdata::where('form_id', $request->fid)->update(['step_id' => $request->step, 'screening' => '{}', 'comments' => '{}']);
@@ -75,11 +76,11 @@ class ScreeningController extends Controller
                     foreach ($list as $key => $panel) {
                         $cpanel = $key;
                         foreach ($panel as $user) {
-                            $users = json_decode($request->{'panel'.$cpanel});
-                            if ($users=="") {
-                                Screening::create(['step_id' => $request->step,'user_id' => $user, 'panel' => $cpanel ]);
+                            $users = json_decode($request->{'panel' . $cpanel});
+                            if ($users == "") {
+                                Screening::create(['step_id' => $request->step, 'user_id' => $user, 'panel' => $cpanel]);
                             } else {
-                                Screening::create(['step_id' => $request->step,'user_id' => $user, 'panel' => $cpanel,'users'=> json_encode($users) ]);
+                                Screening::create(['step_id' => $request->step, 'user_id' => $user, 'panel' => $cpanel, 'users' => json_encode($users)]);
                             }
                         }
                     }
@@ -90,16 +91,17 @@ class ScreeningController extends Controller
                 }
                 /// notify user via Mail if notify enabled
                 if ($request->notify) {
-                $cstep = Step::findOrFail($request->step);
-                foreach ($notifylist as $rname) {
-                $user = new User();
-                $user->email = $rname->email;
-                $user->id = $rname->id;
-                $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
-                $MSG = new TemplateEmail;
-                $MSG->Message=["New judging - VI portal","Dear ".$rfullname.",","Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from ".$cstep->from->format('d-m-Y').
-                    " to ". $cstep->to->format('d-m-Y') .", Check your account for more details.","/dashboard"];
-                $user->notify($MSG); }
+                    $cstep = Step::findOrFail($request->step);
+                    foreach ($notifylist as $rname) {
+                        $user = new User();
+                        $user->email = $rname->email;
+                        $user->id = $rname->id;
+                        $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
+                        $MSG = new TemplateEmail;
+                        $MSG->Message = ["New judging - VI portal", "Dear " . $rfullname . ",", "Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') .
+                            " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.", "/dashboard"];
+                        $user->notify($MSG);
+                    }
                 }
                 /// End of mail send
             }
@@ -114,8 +116,8 @@ class ScreeningController extends Controller
 
         // Insure answers belong to Judger first
         $answers = Formdata::where('form_id', $fid)->where('company_id', $cid)->orderBy('field_id', 'ASC')->get();
-        if (count($answers)==0){
-            return redirect()->back()->with('message2','startup not complete the form');
+        if (count($answers) == 0) {
+            return redirect()->back()->with('message2', 'startup not complete the form');
         }
         $company = Company::where('id', $answers->pluck(['company_id'])->first())->first();
         return view('admin.settings.screening.form', compact('answers', 'company'));
@@ -150,10 +152,10 @@ class ScreeningController extends Controller
     {
         $list = Screening::where('step_id', $sid)->where('panel', $pid)->first(['users']);
         $outlist = Screening::where('step_id', $sid)->where('panel', '<>', $pid)->pluck('users');
-        $outlist ? $outlist = ('['.str_replace(['[',']'],'',json_encode($outlist)).']') : $outlist = [];
+        $outlist ? $outlist = ('[' . str_replace(['[', ']'], '', json_encode($outlist)) . ']') : $outlist = [];
         $menu = $selected = '';
         $l = session()->get('locale') ?? 'ar';
-        foreach (Company::whereIn('step', [$fid,$sid])->get() as $comp) {
+        foreach (Company::whereIn('step', [$fid, $sid])->get() as $comp) {
             if (in_array($comp->id,  $list['users'] ?? [])) {
                 $selected = " selected ";
             }
@@ -169,24 +171,24 @@ class ScreeningController extends Controller
     public function results($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
-        $organization_id=auth()->user()->organization_id;
+        $organization_id = auth()->user()->organization_id;
 
-        $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->whereHas('cycle',function ($query) use ($organization_id){
-                $query->where('organization_id',$organization_id);
+        $steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                $query->where('organization_id', $organization_id);
             });
         })->where('stype', 2)->orderBy('from')->get();
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
-            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+            $cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
                 });
             })->where('stype', 2)->where('id', $id)->first();
         } else {
-            $cstep = Step::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->whereHas('cycle',function ($query) use ($organization_id){
-                    $query->where('organization_id',$organization_id);
+            $cstep = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->whereHas('cycle', function ($query) use ($organization_id) {
+                    $query->where('organization_id', $organization_id);
                 });
             })->where('stype', 2)->where('id', $id)->first();
         }
@@ -197,7 +199,7 @@ class ScreeningController extends Controller
         $judges = User::join('screenings', 'user_id', 'users.id')->where('step_id', $id)->get();
         $form = null;
         if ($cstep) {
-            $form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr',$cstep->arr-1)->first();
+            $form = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
         }
         // dd( $form);
         $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
@@ -206,19 +208,22 @@ class ScreeningController extends Controller
 
     public function changestep(Request $request)
     {
-            $this->preProcessingCheck('edit_cycles');
-            $approved = $by = null;
-            $company = Company::where('id',$request->company)->first();
-            $data['last_step']= Step::findOrFail($company->step)->title;
-            if ($request->step==0) {
+        $this->preProcessingCheck('edit_cycles');
+        $approved = $by = null;
+        $company = Company::where('id', $request->company)->first();
+        $data['last_step'] = Step::findOrFail($company->step)->title;
+        if ($request->step == 0) {
+            $by = Auth::id();
+        } else {
+            $cstep = Step::findOrFail($request->step);
+            if ($cstep->arr > 1) {
+                $approved = 1;
                 $by = Auth::id();
-            } else {
-                $cstep = Step::findOrFail($request->step);
-                if ($cstep->arr > 1) {$approved=1;$by=Auth::id();}
-                $data['new_step']=$cstep->title;
             }
-            $update = $company->update(['step'=>$request->step, 'approved'=>$approved, 'approved_by'=>$by]);
-            if ($request->step!=0) {
+            $data['new_step'] = $cstep->title;
+        }
+        $update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);
+        if ($request->step != 0) {
             /// notify Company Owner via Mail
             $company_owner = $company->user;
             $data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;
@@ -229,23 +234,27 @@ class ScreeningController extends Controller
             $data['organization_name_en'] = $cstep->cycle->organization->name_en;
 
             $mail = new ChangeCycle($data);
-//            $MSG = new TemplateEmail;
-//            $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
+            //            $MSG = new TemplateEmail;
+            //            $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
             $company_owner->notify($mail);
-             }
-            /// End of mail send
-            if ($update) {
-            return response()->json(['state' => 'success'], 200);
-            } else {
-            return response()->json(['state' => 'failed'], 500);
+            $admins = User::all();
+            foreach ($admins as $admin) {
+                $admin->notify(new ChangeCycle($data));
             }
+        }
+        /// End of mail send
+        if ($update) {
+            return response()->json(['state' => 'success'], 200);
+        } else {
+            return response()->json(['state' => 'failed'], 500);
+        }
     }
 
 
     public function exportresultScreen(Request $request)
     {
         // تحقق من أن البريد الإلكتروني موجود
-       
+
         $data1 = [
             'step' => $request->input('step'),
             'formid' => $request->input('formid'),
@@ -258,6 +267,4 @@ class ScreeningController extends Controller
 
         return response()->json(['message' => __('cycles.export_success')]);
     }
-
-
 }
