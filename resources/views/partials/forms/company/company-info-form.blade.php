@@ -158,17 +158,18 @@
        </div>
 
        <div class="mb-3">
-    <div id="otherCategoryInput" class="mt-3" 
-    style="display: {{ !is_array($client->company->business_categories) || in_array('Other', old('business_categories', $client->company->business_categories ?? [])) ? 'block' : 'none' }};">
+    
+     <div id="otherCategoryInput" class="mt-3" 
+      style="display: {{ !is_array($client->company->business_categories ?? []) || in_array('Other', old('business_categories', $client->company->business_categories ?? [])) ? 'block' : 'none' }};">
     <label for="other_category" class="form-label">{{ __('admin.other? Please Specify') }}</label>
     <input 
         type="text" 
         class="form-control" 
         id="other_category" 
         name="other_category" 
-        value="{{ !is_array($client->company->business_categories) ? old('other_category', $client->company->business_categories) : '' }}" 
+        value="{{ is_array($client->company->business_categories ?? []) ? '' : old('other_category', $client->company->business_categories) }}" 
         placeholder="{{ __('admin.other? Please Specify') }}">
-</div>
+      </div>
        </div>
 
         <div class="col-md-12 col-12 mb-3">
