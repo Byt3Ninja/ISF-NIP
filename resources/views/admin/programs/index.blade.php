@@ -191,8 +191,13 @@
                         style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
                       >
                       @php
-    $fileN = pathinfo(auth()->user()->organization->image_url, PATHINFO_BASENAME);
-    @endphp
+                      $fileN = null;
+
+                       if (auth()->check() && auth()->user()->organization) {
+                          $fileN = pathinfo(auth()->user()->organization->image_url, PATHINFO_BASENAME);
+                       }
+                      @endphp
+
                         <img 
                             src="{{ asset('dashboard/LFMGet/' . $fileN) }}"
                             alt="Logo"
