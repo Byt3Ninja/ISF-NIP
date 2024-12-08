@@ -241,6 +241,7 @@ class ClientCompanyController extends Controller
                     'product_or_service' => 'required|string|in:Product,Service,Product + Service',
                     'business_categories' => 'nullable|array',
                     'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
+                    'other_category' => 'nullable|string|max:255',
                 ], [
                     'name_en.required' => __('admin.English Name is required'),
                     'name_ar.required' => __('admin.Arabic Name is required'),
@@ -259,6 +260,16 @@ class ClientCompanyController extends Controller
                     'product_or_service.required' => __('admin.Product or Service is required'),
                     'product_or_service.in' => __('admin.Invalid Product or Service selection'),
                 ]);
+
+                // Handle "Other" category logic
+                if (in_array('Other', $validatedData['business_categories'] ?? [])) {
+                    $validatedData['business_categories'] = array_diff($validatedData['business_categories'], ['Other']);
+                    if (!empty($validatedData['other_category'])) {
+                        $validatedData['business_categories'][] = $validatedData['other_category'];
+                    }
+                }
+
+                $validatedData['business_categories'] = json_encode($validatedData['business_categories']);
 
                 // $result = Company::updateOrCreate(['id' => $companyId], values: $data);
 
@@ -293,7 +304,7 @@ class ClientCompanyController extends Controller
                         'est_date' => $data['est_date'],
                         'years_of_operations' => $data['years_of_operations'],
                         'product_or_service' => $data['product_or_service'],
-                        'business_categories' => json_encode($validatedData['business_categories']),
+                        'business_categories' => $validatedData['business_categories'],
                         'CreatedTax' => $CreatedTax,
                         'Commercial_Register' => $Commercial_Register,
                         'Tax_Card' => $Tax_Card,
@@ -315,7 +326,7 @@ class ClientCompanyController extends Controller
                         'state_id' => $data['state_id'],
                         'city_id' => $data['city_id'],
                         'sector' => $data['sector'],
-                        'business_categories' => json_encode($validatedData['business_categories']),
+                        'business_categories' => $validatedData['business_categories'],
                         'address_en' => $data['address_en'],
                         'address_ar' => $data['address_ar'],
                         'est_date' => $data['est_date'],
@@ -792,7 +803,6 @@ class ClientCompanyController extends Controller
         } catch (Exception $e) {
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            dd($e);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later.'), 'class' => 'danger']);
         }
     }
@@ -1297,7 +1307,7 @@ class ClientCompanyController extends Controller
         return redirect()->route('my_company')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
     }
 
-    
+
     public function analysisAssessment()
     {
         return view('admin/clients/assessment/analysis-assessment');
