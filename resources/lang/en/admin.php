@@ -959,6 +959,7 @@ return [
 	'Projects_Distribution_by_Sector' => 'Projects Distribution by Sector',
 	'Total_companies_by_sector' => 'Total Companies by Sector',
 	'Assessments' => ' Assessments ',
+	'Assessment' => ' Assessment ',
 	'Question_Assessment' => 'Question Assessment ',
 	'Analysis_Assessment' => 'Analysis Assessment',
 	'History_Assessment' => 'History Assessment',

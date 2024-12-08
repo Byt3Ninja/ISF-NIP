@@ -70,9 +70,14 @@
 															<span class="badge text-bg-secondary rounded-pill">
 																{{ $question->type == 'mcq' ? __('admin.type_mcq') : ( $question->type == 'tfq' ? __('admin.type_tfq') : '-') }}
 															</span>
-															@else
+															@elseif( $question->group == 'survey' )
 															<span class="badge text-bg-success rounded-pill">
 																{{ $question->survey_type == 'stars' ? __('admin.survey_type_stars') : ( $question->survey_type == 'radio' ? __('admin.survey_type_radio') : '-') }}
+															</span>
+
+															@elseif( $question->group == 'assessment' )
+															<span class="badge text-bg-success rounded-pill">
+																{{ ( $question->survey_type == null ? __('admin.Assessment') : '-') }}
 															</span>
 															@endif
 														</td>

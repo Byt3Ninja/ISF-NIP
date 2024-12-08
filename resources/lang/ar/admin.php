@@ -966,6 +966,7 @@ return [
 	'Projects_Distribution_by_Sector' => 'توزيع المشاريع حسب القطاع',
 	'Total_companies_by_sector' => 'إجمالي الشركات حسب القطاع',
 	'Assessments' => ' التقيمات ',
+	'Assessment' => ' تقييم ',
 	'Question_Assessment' => ' اسئلة التقييم ',
 	'Analysis_Assessment' => ' تحليل التقييم ',
 	'History_Assessment' => ' تاريخ التقييم ',

@@ -279,7 +279,7 @@
                     @if(!is_numeric($company->stage))
                     <span class="text-primary">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
                     @else
-                    <span class="text-primary">{{ $stage->{'name_' . $l} }}</span>
+                    <span class="text-primary">{{ $stage != null ? $stage->{'name_' . $l} : __('admin.N/A') }}</span>
                     @endif
                   </div>
                 </div>
