@@ -759,12 +759,18 @@
 									@php( $workingcycles = App\Cycle::whereNull('private')->whereRaw('? between start and end', [now()->format('Y-m-d')])->get() )
 									@if (count($workingcycles)>0)
 										@foreach($workingcycles as $cycle)
+                    
 											<div class="border-bottom">
 												<div class="card-header">
 													<h4 class="primary"><i class="bx bxs-bell"></i>  {{$cycle->title}}</h4>
 													<div class="d-flex align-items-center mt-2">
 														<div class="media-left">
-															<img src="{{$cycle->organization->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                              @if (!is_null($cycle->organization->image_url))
+                    @php( $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME) )
+    
+    
+															<img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar" class="rounded-circle" height="40" width="40">
+                              @endif
 														</div>
 														<div class="mx-2">
 															{{$cycle->organization->name }}
