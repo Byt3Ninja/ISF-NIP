@@ -46,7 +46,6 @@
                           <th>{{ __('admin.StageName') }}</th>
                           <th>{{ __('admin.Category') }}</th>
                           <th>{{ __('admin.subCategory_Name') }}</th>
-                          <th>{{ __('admin.Questions') }}</th>
                           <th>{{ __('admin.Weight') }}</th>
                           <th>{{ __('admin.Created at') }}</th>
                           <th>{{ __('cycles.Edit/Delete') }}</th>
@@ -62,7 +61,6 @@
                           <td>{{$weight->stage->{'name_'.$l} }}</td>
                           <td>{{$weight->category->{'category_name_' . $l} }}</td>
                           <td>{{$weight->subcategory->{'name_' . $l} }}</td>
-                          <td>{{$weight->question->question}}</td>
                           <td>{{$weight->weight}}</td>
                           <td>{{$weight->created_at}}</td>
                           <td>

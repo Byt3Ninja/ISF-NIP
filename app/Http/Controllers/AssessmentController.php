@@ -19,7 +19,7 @@ class AssessmentController extends Controller
      */
     public function index()
     {
-        $assessments = Assessment::with('user');
+        $assessments = Assessment::with('user')->get();
         $users = User::role('Registered')->get();
         return view('admin.assessment', compact('assessments', 'users'));
     }

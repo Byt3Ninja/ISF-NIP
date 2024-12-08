@@ -22,5 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DocumentationSeeder::class);
         $this->call(ServiceCategorySeeder::class);
         $this->call(ExpertiseSeeder::class);
+        $this->call(StagesTableSeeder::class);
+        $this->call(QuestionsBankSeeder::class);
     }
 }
