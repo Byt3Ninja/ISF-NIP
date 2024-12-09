@@ -62,7 +62,6 @@
                           <td>{{$assessment->user->name }}</td>
                           <td>{{$assessment->created_at}}</td>
                           <td>
-                            <div class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ShowAssessment{{ $assessment->id }}" >{{__('admin.Show')}}</div>
                             <div class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#EditAssessment{{ $assessment->id }}">{{__('admin.Edit')}}</div>
                             <form action="{{ route('assessments.destroy', $assessment->id) }}" method="POST" style="display: inline-block;">
                               @csrf
@@ -79,7 +78,7 @@
                                   <div class="modal-body">
                                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                       <div class="text-center mb-6">
-                                          <h4 class="mb-2">{{__('admin.Edit')}} ({{$assessment->name}})</h4>
+                                          <h4 class="mb-2">{{__('admin.Edit')}} ({{$assessment->user->name}})</h4>
                                       </div>
 
                                       <form class="add-new-user pt-0" action="{{ route('assessments.update', $assessment->id) }}" method="POST">
@@ -92,18 +91,44 @@
                         
                                                   <div class="mb-6 width49">
                                                     <label class="form-label fs-6">
-                                                      {{ __('admin.Question') }}
+                                                      {{ __('admin.Name') }}
                                                       
                                                     </label>
-                                                    <select class=" form-select" name="question_id">
+                                                    <select class=" form-select" name="user_id">
                                                       <option value="" disabled selected>
-                                                        {{ $l == 'en' ? 'Choose Question' : 'اختر السؤال ' }}
+                                                        {{ $l == 'en' ? 'Choose User' : 'اختر المستخدم ' }}
                                                       </option>
                                                       @foreach ($users as $user)
                                                         <option value="{{ $user->id }}"  {{ $user->id == $assessment->user_id ? 'selected' : '' }}  >{{ $user->name }}</option>
                                                       @endforeach
                                                     </select>
                                                   </div>
+
+                                                  <div class="mb-6 width49">
+                                                    <div>
+                                                        <label for="start_date" class="form-label" >{{__('admin.start_date')}}</label>
+                                                    </div>
+                                                    <input
+                                                        id="start_date"
+                                                        class="form-control date"
+                                                        type="text"
+                                                        name="start_date"
+                                                        autocomplete="off"
+                                                        value="{{ $assessment->start_date }}" />
+                                                </div>
+
+                                                <div class="mb-6 width49">
+                                                  <div>
+                                                      <label for="end_date" class="form-label" >{{__('admin.end_date')}}</label>
+                                                  </div>
+                                                  <input
+                                                      id="end_date"
+                                                      class="form-control date"
+                                                      type="text"
+                                                      name="end_date"
+                                                      autocomplete="off"
+                                                      value="{{ $assessment->end_date }}" />
+                                              </div>
                         
 
                                               </div>
@@ -134,56 +159,6 @@
             </div>
           </div>
         </section>
-
- <!-- Create JobOrder Modal -->
- <div class="modal fade" id="CreateWeights" tabindex="-1" aria-hidden="true" dir="rtl">
-  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-      <div class="modal-content">
-          <div class="modal-body">
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              <div class="text-center mb-6">
-                  <h4 class="mb-2">{{__('admin.Assessments')}}</h4>
-              </div>
-
-              <form method="POST" action="{{route('assessments.store')}}" class="pt-0" >
-                  @csrf
-
-                  <div class="ecommerce-customer-add-basic mb-4" >
-
-                      <div class="col-md-12">
-
-                          <div class="mb-6 width49">
-                            <label class="form-label fs-6">
-                              {{ __('admin.user') }}
-                              
-                            </label>
-                            <select class=" form-select" name="user_id">
-                              <option value="" disabled selected>
-                                {{ $l == 'en' ? 'Choose User' : 'اختر مستخدم ' }}
-                              </option>
-                              @foreach ($users as $user)
-                                <option value="{{ $user->id }}"  >{{ $user->name }}</option>
-                              @endforeach
-                            </select>
-                          </div>
-
-
-                      </div>
-                  </div>
-
-
-
-                  <div>
-                      <button type="submit" class="btn btn-primary me-sm-4 data-submit">{{__('admin.submit')}}</button>
-                      <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
-                  </div>
-              </form>
-
-          </div>
-      </div>
-  </div>
-</div>
-<!--/ Create JobOrder Modal -->
 
 
       </div>
@@ -223,6 +198,18 @@
                           </div>
 
 
+                          <div class="mb-6 width49">
+                            <div>
+                                <label for="start_date" class="form-label" >{{__('admin.start_date')}}</label>
+                            </div>
+                            <input
+                                id="start_date"
+                                class="form-control date"
+                                type="text"
+                                name="start_date"
+                                autocomplete="off" />
+                        </div>
+
                       </div>
                   </div>
 
@@ -259,6 +246,10 @@
     <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
     <script src="/js/jquery.datetimepicker.full.min.js"></script>
     <script>
+      $('.date').datetimepicker({
+      timepicker: false,
+      format: 'Y-m-d'
+    });
         $(document).ready(function() {
             $('#userstable').DataTable({
                 "responsive": true, "searching": true, "lengthChange": false, "paging": true, "bInfo": false,

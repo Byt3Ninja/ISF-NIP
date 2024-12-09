@@ -105,6 +105,20 @@ $userid = auth()->user()->id;
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Alert -->
+    @if (session()->has('message'))
+      <div class="alert alert-success alert-dismissible" role="alert">
+        {{ __('admin.' . session()->get('message')) }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    @endif
+    @if (session()->has('message2'))
+      <div class="alert alert-danger alert-dismissible" role="alert">
+        {{ __('admin.' . session()->get('message2')) }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    @endif
+    <!-- / Alert -->
     <!-- Pills (Mobile) -->
      <div class="row mb-4 d-block d-md-none">
       <div class="col-12">

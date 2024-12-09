@@ -1032,4 +1032,9 @@ return [
 	'Questions_answered' => 'الاسئلة المجابة',
 	'Answers' => 'الاجابات',
 	'Done_All'=>'تم الانتهاء من جميع الاسئلة',
+	'start_date'=> 'تاريخ البدء',
+	'end_date'=> 'تاريخ الانتهاء',
+	'NotStage'=>  'لا يوجد مرحلة',
+	'Assessment_Created_successfully'=> 'تم انشاء التقييم بنجاح',
+	'Assessment_updated_successfully' => 'تم تعديل التقييم بنجاح',
 ];
