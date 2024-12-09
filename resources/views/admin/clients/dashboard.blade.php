@@ -1207,6 +1207,7 @@
 @stop
 
 @section('scripts')
+<script src="{{ mix('js/app.js') }}"></script>
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -1287,6 +1288,7 @@ window.location.href = url;
 @endif
 
 <script>
+
 	$(document).ready(function() {
 		$("#mentorstable").DataTable({
 			"responsive": true,

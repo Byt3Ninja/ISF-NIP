@@ -40,7 +40,7 @@
               ? optional($client->company)->state_id
               : 0;
         @endphp
-        <div class="col-md-4 col-12 mb-3">
+        <div class="col-md-6 mb-3">
           <label for="country_id"
             class="form-label">{{ __('admin.Country') }}</label>
           <div class="position-relative">
@@ -57,7 +57,7 @@
               style="left: 7px;"></i>
           </div>
         </div>
-        <div class="col-md-4 col-12 mb-3">
+        <div class="col-md-6 mb-6">
           <label for="state_id" class="form-label">{{ __('admin.State') }}
             *</label>
           <div class="position-relative">
@@ -74,23 +74,8 @@
               style="left: 7px;"></i>
           </div>
         </div>
-        <div class="col-md-4 col-12 mb-3">
-          <label for="city_id" class="form-label">{{ __('admin.City') }}
-            *</label>
-          <div class="position-relative">
-            <select class="form-select border-light light-shadow px-10"
-              id="city_id" name="city_id" required>
-              <option value="">{{ __('admin.City') }}</option>
-              @if (isset($client->company) && $client->company->city_id != null)
-                <option value="{{ $client->company->city_id }}" selected>
-                  {{ $client->company->city->{$name} }}</option>
-              @endif
-            </select>
-            <i class="ti ti-current-location fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-              style="left: 7px;"></i>
-          </div>
-        </div>
-        <div class="col-md-12 col-12 mb-3">
+        
+        <div class="col-md-12 col-12 mb-6">
           <label for="sector" class="form-label">{{ __('admin.Sector') }}
             *</label>
           <div class="position-relative">

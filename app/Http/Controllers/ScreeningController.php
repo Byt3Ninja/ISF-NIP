@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Step;
+use App\User;
 use App\Company;
 use App\Formdata;
 use App\Formfield;
+use App\Screening;
+use App\Events\ChangeStep;
+use Illuminate\Http\Request;
+use App\Jobs\ExportScreeneData;
 use App\Jobs\ExportResScreenData;
 use App\Notifications\ChangeCycle;
-use App\Notifications\TemplateEmail;
-use App\Screening;
-use App\Step;
-use App\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
+use App\Notifications\TemplateEmail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
-use App\Jobs\ExportScreeneData;
 
 
 class ScreeningController extends Controller
@@ -233,13 +234,16 @@ class ScreeningController extends Controller
             $data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
             $data['organization_name_en'] = $cstep->cycle->organization->name_en;
 
-            $mail = new ChangeCycle($data);
-            //            $MSG = new TemplateEmail;
-            //            $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
-            $company_owner->notify($mail);
-            $admins = User::all();
-            foreach ($admins as $admin) {
-                $admin->notify(new ChangeCycle($data));
+            // Broadcast Event //
+            ChangeStep::dispatch($data);
+
+            $recipients = collect([$company_owner])
+                ->merge(User::role("Mentor")->get())
+                ->merge(User::role("Registered")->get());
+
+            // Notify all recipients
+            foreach ($recipients as $recipient) {
+                $recipient->notify(new ChangeCycle($data));
             }
         }
         /// End of mail send

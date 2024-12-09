@@ -103,7 +103,6 @@ class ClientCompanyController extends Controller
             }
             $countries = Country::all();
             $states = State::all();
-            $cities = City::all();
             $Setting = Settings::where('id', 1)->first();
             $sectors = Sector::whereNull('parent_id')->get();
             $funding_rounds = auth()->user()->company ? auth()->user()->company->fundingRounds : [];
@@ -169,7 +168,6 @@ class ClientCompanyController extends Controller
                 'Archiveds',
                 'teamMembers',
                 'states',
-                'cities',
                 'countries',
                 'sectors',
                 'funding_rounds',
@@ -179,7 +177,6 @@ class ClientCompanyController extends Controller
         } catch (Exception $e) {
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
-            dd($e);
             abort(500);
         }
     }
@@ -232,7 +229,6 @@ class ClientCompanyController extends Controller
                     'name_ar' => 'required|string|max:255',
                     'country_id' => 'required|exists:countries,id',
                     'state_id' => 'required|exists:states,id',
-                    'city_id' => 'required|exists:cities,id',
                     'sector' => 'required|string|max:255',
                     'address_en' => 'required|string|max:500',
                     'address_ar' => 'required|string|max:500',
@@ -249,8 +245,6 @@ class ClientCompanyController extends Controller
                     'country_id.exists' => __('admin.Invalid Country selected'),
                     'state_id.required' => __('admin.State is required'),
                     'state_id.exists' => __('admin.Invalid State selected'),
-                    'city_id.required' => __('admin.City is required'),
-                    'city_id.exists' => __('admin.Invalid City selected'),
                     'sector.required' => __('admin.Sector is required'),
                     'address_en.required' => __('admin.English Address is required'),
                     'address_ar.required' => __('admin.Arabic Address is required'),
@@ -297,7 +291,6 @@ class ClientCompanyController extends Controller
                         'name_ar' => $data['name_ar'],
                         'country_id' => $data['country_id'],
                         'state_id' => $data['state_id'],
-                        'city_id' => $data['city_id'],
                         'sector' => $data['sector'],
                         'address_en' => $data['address_en'],
                         'address_ar' => $data['address_ar'],
@@ -324,7 +317,6 @@ class ClientCompanyController extends Controller
                         'name_ar' => $data['name_ar'],
                         'country_id' => $data['country_id'],
                         'state_id' => $data['state_id'],
-                        'city_id' => $data['city_id'],
                         'sector' => $data['sector'],
                         'business_categories' => $validatedData['business_categories'],
                         'address_en' => $data['address_en'],
