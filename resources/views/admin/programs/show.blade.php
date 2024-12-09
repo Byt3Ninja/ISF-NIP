@@ -209,9 +209,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
             <div class="d-flex gap-6">
               <div class="d-none d-md-flex flex-shrink-0 w-px-100">
                 <div class="w-px-70 h-px-100">
-                  @if(!empty($program->organization->image_url))
+                  @if(!empty(auth()->user()->organization->image_url))
                   @php
-    $fileN = pathinfo(auth()->user()->organization->image_url, PATHINFO_BASENAME);
+                  $fileN = null;
+                      if (auth()->check() && auth()->user()->organization) {
+                          $fileN = pathinfo(auth()->user()->organization->image_url, PATHINFO_BASENAME);
+                       }
     @endphp
                   <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" class="w-100 h-100 border radius-15"
                     style="object-fit: contain;" alt="Program Image" />
