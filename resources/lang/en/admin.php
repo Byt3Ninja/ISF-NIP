@@ -1014,4 +1014,9 @@ return [
 	'Questions_answered' =>  'Questions Answered',
 	'Answers' => 'Answers',
 	'Done_All'=> 'Done All',
+	'start_date'=>  'Start Date',
+	'end_date'=> 'End Date',
+	'NotStage'=>  'Not Stage',
+	'Assessment_Created_successfully'=> 'Assessment Created Successfully',
+	'Assessment_updated_successfully' => 'Assessment Updated Successfully',
 ];
