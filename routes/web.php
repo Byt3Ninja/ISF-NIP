@@ -167,12 +167,12 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     //Assessments
     Route::get('/question-assessment', 'AssessmentController@assessment')->name('question-assessment');
     Route::get('/assessment-create', 'AssessmentController@MakeAssessment')->name('make_new_assessment_to_user');
-	Route::get('/analysis-assessment', 'ClientCompanyController@analysisAssessment')->name('analysis-assessment');;
+	Route::get('/analysis-assessment', 'AssessmentController@analysisAssessment')->name('analysis-assessment');;
 	Route::get('/history-assessment', 'ClientCompanyController@historyAssessment')->name('history-assessment');;
 	Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
 
 
-
+    // LFM File Manager Imges
     Route::get('/LFMGet/{files?}', 'organizationsController@GetLFM')->name('LFMGet');
 
 	//Client's company

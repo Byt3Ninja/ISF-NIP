@@ -191,11 +191,7 @@
                         style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
                       >
                       @php
-                      $fileN = null;
-
-                       if (auth()->check() && auth()->user()->organization) {
-                          $fileN = pathinfo(auth()->user()->organization->image_url, PATHINFO_BASENAME);
-                       }
+                          $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME);
                       @endphp
 
                         <img 

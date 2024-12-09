@@ -1024,4 +1024,12 @@ return [
 	'Make_a_new_assessment' => 'انشاء تقييم جديد',
 	'questions_answered' => 'الاسئلة المجابة',
 	'done_all' => 'تم الانتهاء من جميع الاسئلة',
+	'Created'=>'تم الانشاء',
+	'Overall_Recommendation'=> 'التقييم العام',
+	'Overall_Weighted_Score'=> 'نسبة التقييم العام',
+    'Question_assessment' => 'تقييم الأسئلة',
+    'History' => 'التاريخ',
+	'Questions_answered' => 'الاسئلة المجابة',
+	'Answers' => 'الاجابات',
+	'Done_All'=>'تم الانتهاء من جميع الاسئلة',
 ];

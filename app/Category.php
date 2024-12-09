@@ -11,4 +11,16 @@ class Category extends Model
 
     protected $fillable = ['category_name_ar','category_name_en','weight','type'
                         ];
+
+
+    public function subcategory()
+    {
+        return $this->hasMany(SubCategory::class, 'category_id');
+    }
+    public function question()
+    {
+        return $this->hasMany(UserScore::class, 'category_id');
+    }
+
+
 }
