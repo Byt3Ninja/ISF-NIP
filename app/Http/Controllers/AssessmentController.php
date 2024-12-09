@@ -75,11 +75,25 @@ class AssessmentController extends Controller
     public function assessment(Request $request)
     {
         
+         
         $l = app()->getLocale();
         $userid = auth()->user()->id;
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
 
-         $categories = Category::where('category_type', 'Assesment')->get();
+         $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
+
+         $user_scores = $categories->map(function ($category) {
+             $questions = $category->question;
+             $subcategories = $category->subcategory;
+             $subcategories = $subcategories->map(function ($subcategory) use ($questions) {
+                 $subcategory->questions = $questions->where('subcategory_id', $subcategory->id);
+                 return $subcategory;
+             });
+             $category->subcategories = $subcategories;
+             return $category;
+         });
+        
+        
         // $subcategories1 = SubCategory::where('Type', 'Assesment');
         // if ($request->has('category')) {
         //     $subcategories1->where('category_id', $request->category);
@@ -113,40 +127,31 @@ class AssessmentController extends Controller
         // }
         // // تنفيذ الاستعلام
         // $user_scores = $query->get();
-        $user_scores = [];
-        $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-            ->where('user_id', $userid)
-            ->where('assessment_id', $assessment_user->id)->get();
+
+
+    // استخراج الإجابات
+    $answers = $user_scores->pluck('Answers')->map(function ($answer) {
+        return json_decode($answer, true);
+    })->filter()->toArray();
+
+    $countanswered = $user_scores->whereNotNull('Result_assessment')->count();
+    $countNotanswered = $user_scores->whereNull('Result_assessment')->count();
+    $totalQuestions = $countanswered + $countNotanswered;
+
+    $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+    
+    // return [
+    //     'title' => $user_scores->first()->category_name_ar ?? 'N/A',
+    //     'progress' => round($progress, 2),
+    //     'answered' => $countanswered,
+    //     'status' => $progress == 100 ? 'completed' : ($progress > 0 ? 'in-progress' : 'not-started'),
+    // ];
+            
+        
+           
 
             
-
-            foreach($user_scores as $user_score){
-                $answers = json_decode($user_score->Answers, true);
-                $countansweredSub = UserScore::where('subcategory_id', $user_score->subcategory_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNotNull('Result_assessment')->count();
-              $countNotansweredSub = UserScore::where('subcategory_id', $user_score->subcategory_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNull('Result_assessment')->count();
-              $countplusSub = $countansweredSub + $countNotansweredSub;
-
-
-              $countansweredCat = UserScore::where('category_id', $user_score->category_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNotNull('Result_assessment')->count();
-              $countNotansweredCat = UserScore::where('category_id', $user_score->category_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNull('Result_assessment')->count();
-              $countplusCat = $countansweredCat + $countNotansweredCat;
-            }
-
-
-
-            $user_scores['countSubCategory'] = [
-                'countansweredSub' => $countansweredSub,
-                'countNotansweredSub' => $countNotansweredSub,
-                'countplusSub' => $countplusSub,
-            ];
-
-
-
-            $user_scores['countCategory'] = [
-                'countansweredCat' => $countansweredCat,
-                'countNotansweredCat' => $countNotansweredCat,
-                'countplusCat' => $countplusCat,
-            ];
+    
         }else{
             return redirect()->route('analysis-assessment');
         }
@@ -212,6 +217,27 @@ public function MakeAssessment()
             return redirect()->route('question-assessment')->with(['class'=>'danger', 'message'=>__('AlreadyHaveAssessment')]);
         }
     }
+
+
+    public function analysisAssessment()
+    {
+        $l = app()->getLocale();
+        $userid = auth()->user()->id;
+        $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+
+         $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
+
+        $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+        ->where('user_id', $userid)
+        ->where('assessment_id', $assessment_user->id)->get();
+        return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
+    }
+
+
+
+
+
+
 
 
 }

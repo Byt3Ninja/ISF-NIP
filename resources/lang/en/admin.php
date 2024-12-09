@@ -1006,4 +1006,12 @@ return [
 	'Make_a_new_assessment' => 'Make a new assessment',
 	'questions_answered' => 'Questions Answered',
 	'done_all' => 'Done All',
+	'Created'=>'Created',
+	'Overall_Recommendation'=> 'Overall Recommendation',
+	'Overall_Weighted_Score'=> 'Overall Weighted Score',
+    'Question_assessment' => 'Question Assessment',
+    'History' => 'History',
+	'Questions_answered' =>  'Questions Answered',
+	'Answers' => 'Answers',
+	'Done_All'=> 'Done All',
 ];
