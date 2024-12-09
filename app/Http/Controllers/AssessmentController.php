@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\QuestionsBank;
 use App\User;
+use App\Weight;
 use App\Company;
 use App\Category;
 use App\UserScore;
 use App\Assessment;
 use App\SubCategory;
-use App\Weight;
+use App\QuestionsBank;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AssessmentController extends Controller
 {
@@ -75,7 +76,7 @@ class AssessmentController extends Controller
     public function assessment(Request $request)
     {
         
-         
+        if (Auth::user()->hasRole('Registered')) {
         $l = app()->getLocale();
         $userid = auth()->user()->id;
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
@@ -158,10 +159,15 @@ class AssessmentController extends Controller
         
 
         return view('admin/clients/assessment/assessment',compact('user_scores','answers'));
+
+    }else{
+        return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+    }
     }
 
 public function MakeAssessment()
     {
+        if (Auth::user()->hasRole('Registered')) {
         $l = app()->getLocale();
         $userid = auth()->user()->id;
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
@@ -216,11 +222,15 @@ public function MakeAssessment()
         }else{
             return redirect()->route('question-assessment')->with(['class'=>'danger', 'message'=>__('AlreadyHaveAssessment')]);
         }
+    }else{
+        return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+    }
     }
 
 
     public function analysisAssessment()
     {
+        if (Auth::user()->hasRole('Registered')) {
         $l = app()->getLocale();
         $userid = auth()->user()->id;
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
@@ -231,6 +241,9 @@ public function MakeAssessment()
         ->where('user_id', $userid)
         ->where('assessment_id', $assessment_user->id)->get();
         return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
+        }else{
+            return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+        }
     }
 
 
