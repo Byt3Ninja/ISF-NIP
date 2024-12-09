@@ -14,324 +14,263 @@
 
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
-<style>
-  #card-header {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .text-xs {
-    font-size: 12px;
-  }
-
-  @media screen and (min-width: 768px) {
+  <style>
     #card-header {
-      width: 50%;
+      display: flex;
+      gap: 10px;
+      width: 100%;
     }
-  }
-  .kanban-container, .kanban-wrapper {
-    display: flex !important;
-    width: 100% !important;
-    flex-grow: 1 !important;
-    padding-inline-start: 0.7rem;
-  }
 
-  .kanban-item, .kanban-board {
-    padding: 0 !important;
-    width: 300px !important;
-  }
+    .text-xs {
+      font-size: 12px;
+    }
 
-  .kanban-board-header {
-    padding: 0 !important;
-    background-color: var(--bs-light) !important;
-    margin-bottom: 1rem !important;
-    width: 100% !important;
-    border-radius: 0.25rem !important;
-  }
+    @media screen and (min-width: 768px) {
+      #card-header {
+        width: 50%;
+      }
+    }
 
-  .kanban-title-board {
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    padding: 0.3rem 1rem !important;
-    letter-spacing: 0.5px !important;
-  }
-</style>
+    .kanban-container,
+    .kanban-wrapper {
+      display: flex !important;
+      width: 100% !important;
+      flex-grow: 1 !important;
+      padding-inline-start: 0.7rem;
+    }
+
+    .kanban-item,
+    .kanban-board {
+      padding: 0 !important;
+      width: 300px !important;
+    }
+
+    .kanban-board-header {
+      padding: 0 !important;
+      background-color: var(--bs-light) !important;
+      margin-bottom: 1rem !important;
+      width: 100% !important;
+      border-radius: 0.25rem !important;
+    }
+
+    .kanban-title-board {
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+      padding: 0.3rem 1rem !important;
+      letter-spacing: 0.5px !important;
+    }
+
+    p,
+    span {
+      font-size: 12px;
+    }
+  </style>
 @stop
 
 @section('content')
-<!-- Content wrapper -->
-<div class="content-wrapper">
-  <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="card">
-      <div class="card-body">
-        <div class="d-flex justify-content-end w-100 border-bottom pb-3">
-          <div id="card-header">
-            <div class="ms-md-8 d-flex flex-grow-1 position-relative">
-              <input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
-              <i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
+  <!-- Content wrapper -->
+  <div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-end w-100 border-bottom pb-3">
+            <div id="card-header">
+              <div class="ms-md-8 d-flex flex-grow-1 position-relative">
+                <input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
+                <i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
+              </div>
+              <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                <span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
+                <i class="ti ti-plus ti-16px"></i>
+              </button>
             </div>
-            <button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
-              <span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
-              <i class="ti ti-plus ti-16px"></i>
-            </button>
+          </div>
+        </div>
+        <div class="app-kanban">
+          <div class="kanban-wrapper"></div>
+        </div>
+      </div>
+    </div>
+    <!-- / Content -->
+
+    <!-- View Task Modal -->
+    <div class="modal fade" id="viewTaskModal" tabindex="-1" aria-labelledby="viewTaskModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
+          <div class="mb-4 p-4 p-md-0">
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <div class="d-flex align-items-center gap-3">
+                <div class="cursor-pointer">
+                  <i class="ti ti-edit text-primary ti-20px"></i>
+                </div>
+                <div class="cursor-pointer" id="warningDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="ti ti-trash text-danger ti-20px"></i>
+                </div>
+                <div class="dropdown-menu border" aria-labelledby="warningDropdown" style="background-color: #ebebed; width: 300px;">
+                  <div class="d-flex justify-content-between align-items-center p-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="ti ti-alert-square-rounded ti-20px"></i>
+                      <h6 class="fw-medium mb-0">Warning</h6>
+                    </div>
+                    <div id="closeViewTask" class="cursor-pointer" data-bs-toggle="dropdown" aria-label="Close">
+                      <i class="ti ti-x ti-20px text-primary"></i>
+                    </div>
+                  </div>
+                  <div class="bg-white rounded border border-secondary mb-2">
+                    <p class="text-muted p-2" style="font-size: 13px;">Are you sure you want to delete this task?</p>
+                  </div>
+                  <button class="btn btn-danger" style="width: 100%;">
+                    <i class="ti ti-trash ti-20px me-2"></i>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+              <h6 class="modal-title" id="viewTaskModalLabel">View Task</h6>
+              <div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
+                <i class="ti ti-x ti-20px text-primary"></i>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded border border-light p-2 p-md-4">
+            <h4 class="fw-medium">Task Name</h4>
+            <div class="bg-label-secondary p-2 rounded mb-3">
+              <h6 class="fw-semibold mb-1">Description</h6>
+              <p class="text-secondary">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ab quod dolores debitis
+                autem officiis odio. Alias eaque itaque, quidem nostrum dolorum illo rerum ea ad? Facere dignissimos id
+                recusandae deserunt.</p>
+            </div>
+            <div
+              class="mb-3 w-100 d-flex flex-wrap flex-md-nowrap justify-content-between gap-2 align-items-center pb-2 border-bottom">
+              <div class="d-flex justify-content-center align-items-center gap-2">
+                <div class="d-flex justify-content-center align-items-center gap-1">
+                  <i class="ti ti-flag text-primary ti-24px"></i>
+                  <span class="text-dark">Priority:</span>
+                </div>
+                <div class="badge bg-label-warning d-flex align-items-center justify-content-center">
+                  <div style="width: 9px; height: 9px;" class="bg-warning rounded-circle me-1"></div>
+                  <span class="fw-semibold">Medium</span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-center align-items-center gap-2">
+                <div class="p-2 border rounded d-flex flex-column">
+                  <span class="text-dark fw-bold">Created</span>
+                  <span class="text-muted"><i class="ti ti-clock me-1 ti-16px"></i>24 Feb 04:20 PM</span>
+                </div>
+                <div class="p-2 border rounded d-flex flex-column">
+                  <span class="text-dark fw-bold">Updated</span>
+                  <span class="text-muted"><i class="ti ti-clock me-1 ti-16px"></i>24 Feb 04:20 PM</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-label-secondary p-2 rounded mb-3 border">
+              <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>Attachments</h6>
+                  <h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
+                </div>
+                <input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" />
+                <button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
+                  onclick="document.getElementById('fileInput').click();">
+                  <i class="ti ti-plus ti-16px"></i>
+                </button>
+              </div>
+              <div class="d-flex flex-wrap gap-2" id="fileList"></div>
+            </div>
+            <div class="d-flex gap-10 mb-3 pb-3">
+              <div class="d-flex flex-column gap-4">
+                <h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-circle-dot text-primary ti-20px me-2"></i>Comments</h6>
+                <h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-users text-primary ti-20px me-2"></i>Assigness</h6>
+                <h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-calendar text-primary ti-20px me-2"></i>Due date</h6>
+                <h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-tag text-primary ti-20px me-2"></i>Tags</h6>
+              </div>
+              <div class="d-flex flex-column gap-3 overflow-x-auto">
+                <div class="badge bg-label-secondary d-flex align-items-center" style="width:fit-content;">
+                  <div style="width:10px;height:10px;background:#fd7e14;" class="rounded-circle me-2"></div>
+                  <span>In Progress</span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 1" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
+                  <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 2" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
+                  <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 3" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="badge bg-label-secondary radius-10 date">
+                    <i class="ti ti-calendar-time ti-18px text-info"></i>
+                    <span class="fw-semibold text-xs text-dark mx-2">2024-03-01</span>
+                  </div>
+                  <div class="badge bg-label-secondary radius-10 date">
+                    <i class="ti ti-calendar-time ti-18px text-info"></i>
+                    <span class="fw-semibold text-xs text-dark mx-2">2024-03-01</span>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center justif-content-center gap-3">
+                  <h6 class="mb-0"><span class="badge bg-label-info">Marketing</span></h6>
+                  <h6 class="mb-0"><span class="badge bg-label-success">Grahics</span></h6>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
+              <div id="commentsTab" class="pb-2 border-bottom border-primary">
+                <button id="commentsButton" style="border-radius: 15px" class="btn btn-outline-primary">
+                  Comments
+                </button>
+              </div>
+              <div id="activityTab" class="pb-2 ">
+                <button id="activityButton" style="border-radius: 15px" class="btn">
+                  Activity
+                </button>
+              </div>
+            </div>
+            <div id="commentsContainer">
+              <div id="commentList" class="">
+                <!-- Rendered comments will appear here -->
+              </div>
+              <div class="bg-label-secondary p-2 rounded mb-3 border">
+                <div class="d-flex align-items-center gap-2">
+                  <input type="text" id="commentInput" class="form-control bg-white" placeholder="Add a comment" />
+                  <button type="button" class="btn btn-info" onclick="addComment()">Publish</button>
+                </div>
+              </div>
+            </div>
+            <div id="activityContainer" class="d-none">
+              <div id="activityList" class="bg-label-secondary p-2 rounded mb-3 border">
+                <div class="border rounded p-2 mb-2 bg-white">
+                  <div class="d-flex justify-content-between">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User" width="34" height="34">
+                      <div class="d-flex align-items-center gap-2">
+                        <h6 class="mb-0 text-dark fw-bold">User Name</h6>
+                        <span class="text-secondary text-xs">2 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-muted mb-0" style="font-size: 14px;">Activity text goes here.</p>
+                </div>
+                <div class="border rounded p-2 mb-2 bg-white">
+                  <div class="d-flex justify-content-between">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User" width="34" height="34">
+                      <div class="d-flex align-items-center gap-2">
+                        <h6 class="mb-0 text-dark fw-bold">User Name</h6>
+                        <span class="text-secondary text-xs">3 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-muted mb-0" style="font-size: 14px;">Another activity text goes here.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="app-kanban">
-        <div class="kanban-wrapper"></div>
-      </div>
-      {{-- <div class="px-8 row">
-        <div class="col-4">
-          
-        </div>
-      </div> --}}
     </div>
+    <!-- / View Task Modal -->
+
+    <div class="content-backdrop fade"></div>
+    <div style="display: none;" class="offcanvas-backdrop fade show"></div>
   </div>
-  <!-- / Content -->
-
-  <!-- Add Task Modal -->
-  <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addTaskModalLabel">{{ __('admin.Add_Task') }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form class="form-horizontal form-bordered" id="basicForm" action="{{ route('mentorshipTasks.store') }}"
-            method="POST" enctype="multipart/form-data">
-            {!! csrf_field() !!}
-            <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
-            <div class="mb-3">
-              <label for="taskStatus" class="form-label">{{ __('admin.Status') }}</label>
-              <select class="form-select" id="taskStatus" name="status" required>
-                <option value="pending">{{ __('admin.Pending') }}</option>
-                <option value="in-review">{{ __('admin.In_Review') }}</option>
-                <option value="completed">{{ __('admin.Completed') }}</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="taskTitle" class="form-label">{{ __('admin.Title') }}</label>
-              <input type="text" class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title"
-                value="{{ old('title') }}" id="title" required>
-            </div>
-            <div class="mb-3">
-              <label for="taskContent" class="form-label">{{ __('admin.Description') }}</label>
-              <textarea class="form-control comment-editor" id="taskContent" name="description"
-                required>{{ old('description') }}</textarea>
-            </div>
-            <div class="mb-5">
-              <label class="form-label" for="due-date">{{ __('admin.Due_Date') }}</label>
-              <input type="text" placeholder="YYYY-MM-DD" id="flatpickr-date" name="due_date" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <div>
-                <label class="form-label">{{ __('admin.Labels') }}</label>
-                <input
-                  id="addTaskLabel"
-                  name="label"
-                  class="form-control"
-                  placeholder="{{ $l == 'en' ? 'Selecte labels' : 'اختر العلامات' }}"
-                />
-              </div>
-            </div>
-            <!-- Attached Tasks -->
-            <div class="mb-8 w-100">
-              <label for="editTaskAttachments" class="form-label">{{ __('admin.TaskAttachments') }}</label>
-              <div class="w-100 d-flex flex-column gap-3">
-                <div class="w-50">
-                  <input type="text" class="form-control d-none" id="file3" name="attachments" />
-                  <div class="btn btn-label-secondary lfm w-100" id="editTaskAttachments" data-input="file3"
-                    data-preview="holder3">
-                    <i class="ti ti-upload me-2"></i>
-                    {{ __('admin.Choose') }}
-                  </div>
-                </div>
-                <div class="ms-3" id="holder3">
-                  <img
-                    src="/images/background/logo.png"
-                    class="rounded border shadow-sm"
-                    style="max-height: 50px; max-width: 50px; object-fit: cover;"
-                    height="50"
-                    width="50"
-                   />
-                </div>
-              </div>
-            </div>
-            <!-- / Attached Tasks -->
-            <button type="submit" class="btn btn-primary">
-              <i class="ti ti-plus ti-16px me-2"></i>
-              {{ __('admin.Add_Task') }}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- / Add Task Modal -->
-
-  <!-- Edit Task offcanvas -->
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
-    <div class="offcanvas-header border-bottom">
-      <h5 class="offcanvas-title">{{ __('admin.Edit_Task') }}</h5>
-      <button type="button" class="btn-close btn-close-offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body pt-0">
-      <div class="nav-align-top">
-        <ul class="nav nav-tabs mb-5 rounded-0">
-          <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-update">
-              <i class="ti ti-edit ti-18px me-1_5"></i>
-              <span class="align-middle">{{ __('admin.Edit') }}</span>
-            </button>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-activity">
-              <i class="ti ti-chart-pie-2 ti-18px me-1_5"></i>
-              <span class="align-middle">{{ __('admin.comments') }}</span>
-            </button>
-          </li>
-        </ul>
-      </div>
-      <div class="tab-content p-0">
-        <!-- Update item/tasks -->
-        <div class="tab-pane fade show active" id="tab-update" role="tabpanel">
-          <form class="form-horizontal form-bordered" id="editTaskForm"
-            action="{{ route('mentorshipTasks.updateWith') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <input type="hidden" name="mentorship_request_id" value="{{ $mentorship->id }}">
-            <input type="hidden" name="MTaskId" id="MTaskId" value="">
-             <!-- Attached Tasks -->
-             <div class="mb-8 w-100">
-              <label for="file2" class="form-label">{{ __('admin.TaskAttachments') }}</label>
-              <div class="w-100 d-flex flex-column gap-3">
-                <div class="w-50">
-                  <input type="text" class="form-control d-none" id="file2" name="attachments" />
-                  <div class="btn btn-label-secondary lfm w-100" id="editTaskAttachments" data-input="file2"
-                    data-preview="holder1">
-                    <i class="ti ti-upload me-2"></i>
-                    {{ __('admin.Choose') }}
-                  </div>
-                </div>
-                <div class="ms-3" id="holder1">
-                  <img
-                    src="/images/background/logo.png"
-                    class="rounded border shadow-sm"
-                    style="max-height: 50px; max-width: 50px; object-fit: cover;"
-                    height="50"
-                    width="50"
-                   />
-                </div>
-              </div>
-            </div>
-            <!-- / Attached Tasks -->
-            <div class="mb-3">
-              <label for="editTaskTitle" class="form-label">{{ __('admin.Title') }}</label>
-              <input type="text" class="form-control" placeholder="{{__('mentor.mentorshipTasks.title')}}" name="title"
-                value="" id="editTaskTitle" required>
-            </div>
-            <div class="mb-3">
-              <label for="editTaskContent" class="form-label">{{ __('admin.Description') }}</label>
-              <textarea class="form-control" id="descriptionEdit" name="description" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="editTaskStatus" class="form-label">{{ __('admin.Status') }}</label>
-              <select class="form-select" id="editTaskStatus" name="status" required>
-                <option value="" disabled>{{ __('admin.Choose') }}</option>
-                <option value="pending">{{ __('admin.Pending') }}</option>
-                <option value="in-review">{{ __('admin.In_Review') }}</option>
-                <option value="completed">{{ __('admin.Completed') }}</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="due_date">{{ __('admin.Due_Date') }}</label>
-              <input type="text" name="due_date" class="form-control due_dateEdit" placeholder="YYYY-MM-DD"
-                id="flatpickr-date" />
-            </div>
-            
-            <div class="mb-3">
-              <div>
-                <label class="form-label">{{ __('admin.Labels') }}</label>
-                <input
-                  id="editTaskLabel"
-                  name="label"
-                  class="form-control tagifyInput"
-                  placeholder="{{ $l == 'en' ? 'Selecte labels' : 'اختر العلامات' }}"
-                  
-                />
-              </div>
-            </div>
-            {{-- <div class="mb-3">
-              <label for="editTaskAssigned" class="form-label">{{ __('admin.Assigned_To') }}</label>
-              <select class="form-select" id="editTaskAssigned" name="assigned_to" required>
-                <option value="user1">User 1</option>
-                <option value="user2">User 2</option>
-                <option value="user3">User 3</option>
-              </select>
-            </div> --}}
-            <hr>
-            
-            <div class="mb-3">
-              <label for="editTaskAttachments" class="form-label">{{ __('admin.comment') }}</label>
-              <div class="form-label-group">
-                <textarea class="form-control" id="summernote" name="comment"></textarea>
-              </div>
-            </div>
-
-
-
-            <!-- Attached Tasks -->
-            <div class="mb-8 w-100">
-              <label for="file1" class="form-label">{{ __('admin.CommentAttachments') }}</label>
-              <div class="w-100 d-flex flex-column gap-3">
-                <div class="w-50">
-                  <input type="text" class="form-control d-none" id="file1" name="attachments" />
-                  <div class="btn btn-label-secondary lfm w-100" id="editTaskAttachments" data-input="file1"
-                    data-preview="holder2">
-                    <i class="ti ti-upload me-2"></i>
-                    {{ __('admin.Choose') }}
-                  </div>
-                </div>
-                <div class="ms-3" id="holder2">
-                  <img
-                    src="/images/background/logo.png"
-                    class="rounded border shadow-sm"
-                    style="max-height: 50px; max-width: 50px; object-fit: cover;"
-                    height="50"
-                    width="50"
-                    />
-                </div>
-              </div>
-            </div>
-            <!-- / Attached Tasks -->
-
-            
-            <div class="d-flex flex-wrap">
-              <button type="submit" class="btn btn-primary me-4 btn-close-offcanvas">
-                {{ __('admin.Update') }}
-              </button>
-              <button type="button" class="btn btn-label-danger btn-close-offcanvas">
-                {{ __('admin.Delete') }}
-              </button>
-            </div>
-          </form>
-        </div>
-        <!-- Task Comments -->
-        <div class="tab-pane fade text-heading" id="tab-activity" role="tabpanel">
-          <div id="activity"></div>
-        </div>
-        <!-- / Task Comments -->
-      </div>
-    </div>
-  </div>
-  <!-- /Edit Task offcanvas -->
-
-  <div class="content-backdrop fade"></div>
-  <div style="display: none;" class="offcanvas-backdrop fade show"></div>
-</div>
-<!-- Content wrapper -->
+  <!-- Content wrapper -->
 @stop
 
 @section('scripts')
@@ -340,27 +279,39 @@
 
 @section('pagescripts')
   <script>
-    const boards = [
-      {
+    const boards = [{
         id: 'board-1',
         title: 'Pending',
-        item: [
-          {id: 1, name: "first task pending", title: 'Pending Task 1', content: 'Task 1 content', due_date: '2021-09-01', label: 'Label 1'},
-        ]
+        item: [{
+          id: 1,
+          name: "first task pending",
+          title: 'Pending Task 1',
+          content: 'Task 1 content',
+          due_date: '2021-09-01',
+          label: 'Label 1'
+        }, ]
       },
       {
         id: 'board-2',
         title: 'In Review',
-        item: [
-          {id: 1, name: 'InReview Task 1', content: 'Task 1 content', due_date: '2021-09-01', label: 'Label 1'},
-        ]
+        item: [{
+          id: 1,
+          name: 'InReview Task 1',
+          content: 'Task 1 content',
+          due_date: '2021-09-01',
+          label: 'Label 1'
+        }, ]
       },
       {
         id: 'board-3',
         title: 'Completed',
-        item: [
-          {id: 1, name: 'Completed Task 1', content: 'Task 1 content', due_date: '2021-09-01', label: 'Label 1'},
-        ]
+        item: [{
+          id: 1,
+          name: 'Completed Task 1',
+          content: 'Task 1 content',
+          due_date: '2021-09-01',
+          label: 'Label 1'
+        }, ]
       }
     ]
 
@@ -374,7 +325,9 @@
         addItemButton: false,
         dragBoards: true,
         dragItems: true,
-        // click: el => onClickTask(el),
+        click: (el) => {
+          $('#viewTaskModal').modal('show');
+        },
         dragEl: (el, source) => {
           console.log('Task is being dragged:', el);
         },
@@ -417,9 +370,9 @@
             </div>
             <div class="d-flex justify-content-between">
               <div class="d-flex justify-content-center align-items-center">
-                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 1" width="24" height="24" style="{{$l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;'}}">
-                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 2" width="24" height="24" style="{{$l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;'}}">
-                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 3" width="24" height="24" style="{{$l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;'}}">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 1" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 2" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 3" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
               </div>
               <div class="d-flex justify-content-center align-items-center gap-2">
                 <span class="text-xs"><i class='ti ti-paperclip ti-16px me-1'></i>4</span>
@@ -457,5 +410,88 @@
     renderKanabanBoard();
     renderKanbanItem();
     searchTask();
+  </script>
+  <script>
+    function handleFileUpload(event) {
+      const files = event.target.files;
+      console.log('files length', files?.length);
+      const fileList = document.getElementById('fileList');
+      const attachmentCount = document.getElementById('attachmentCount');
+      fileList.innerHTML = '';
+      Array.from(files).forEach(file => {
+      const fileDiv = document.createElement('div');
+      fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
+      fileDiv.innerHTML = `
+        <i class="ti ti-file text-info ti-20px me-2"></i>
+        <span class="text-dark fw-bold">${file.name}</span>
+        <div class="cursor-pointer" 
+          onclick="this.parentElement.remove(); attachmentCount.textContent = fileList.children.length;"
+        >
+          <i class="ti ti-trash text-danger ti-16px ms-2"></i>
+        </div>
+      `;
+      document.getElementById('fileInput').value = '';
+      fileList.appendChild(fileDiv);
+      });
+      attachmentCount.textContent = fileList.children.length;
+    }
+  </script>
+  <script>
+    function addComment() {
+      const commentInput = document.getElementById('commentInput');
+      const commentList = document.getElementById('commentList');
+      const commentText = commentInput.value.trim();
+
+      if (commentText) {
+        commentList.classList.add('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border');
+        const commentDiv = document.createElement('div');
+        commentDiv.className = 'border rounded p-2 mb-2 bg-white';
+        commentDiv.innerHTML = `
+          <div class="d-flex justify-content-between">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User" width="34" height="34">
+              <div class="d-flex align-items-center gap-2">
+                <h6 class="mb-0 text-dark fw-bold">User Name</h6>
+                <span class="text-secodnary text-xs">2 hours ago</span>
+              </div>
+            </div>
+            <div class="cursor-pointer" onclick="this.parentElement.parentElement.remove();commentList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border');">
+              <i class="ti ti-trash text-danger ti-16px"></i>
+            </div>
+          </div>
+          <p class="text-muted mb-0" style="font-size: 14px;">${commentText}</p>
+        `;
+        commentList.appendChild(commentDiv);
+        commentInput.value = '';
+      }
+    }
+  </script>
+  <script>
+    const commentsTab = document.getElementById('commentsTab');
+    const activityTab = document.getElementById('activityTab');
+
+    const commentsContainer = document.getElementById('commentsContainer');
+    const activityContainer = document.getElementById('activityContainer');
+
+    const commentsButton = document.getElementById('commentsButton');
+    const activityButton = document.getElementById('activityButton');
+
+    commentsButton.addEventListener('click', () => {
+      activityButton.classList.remove('btn-outline-primary');
+      commentsButton.classList.add('btn-outline-primary');
+      commentsTab.classList.add('border-bottom', 'border-primary');
+      activityTab.classList.remove('border-bottom', 'border-primary');
+      commentsContainer.classList.remove('d-none');
+      activityContainer.classList.add('d-none');
+    });
+
+    activityButton.addEventListener('click', () => {
+      activityButton.classList.add('btn-outline-primary');
+      commentsButton.classList.remove('btn-outline-primary');
+      activityTab.classList.add('border-bottom', 'border-primary');
+      commentsTab.classList.remove('border-bottom', 'border-primary');
+      activityContainer.classList.remove('d-none');
+      commentsContainer.classList.add('d-none');
+    });
   </script>
 @stop
