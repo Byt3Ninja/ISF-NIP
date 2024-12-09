@@ -1003,7 +1003,7 @@ return [
 	'explanation_QA_en' => 'شرح السؤال باللغة الانجليزية',
 	'explanation_AA_ar' => 'شرح الاجابات باللغة العربية',
 	'explanation_AA_en' => 'شرح الاجابات باللغة الانجليزية',
-	'WaitingYourRedirect' => 'انتظر لتحويلك',
+	'WaitingYourRedirect' => 'يرجي استكمال الملف الشخصي',
 	'Stages' => 'المراحل',
 	'StageName' => 'اسم المرحلة',
 	'StageDescription' => 'وصف المرحلة',
