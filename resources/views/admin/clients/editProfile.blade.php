@@ -223,16 +223,7 @@
                       @endif
                     </select>
                   </div>
-                  <div class="mb-4 col-md-6">
-                    <label for="city_id" class="form-label">{{ __('admin.City') }}</label>
-                    <select class="select2 form-select" required id="city_id" name='city_id'>
-                      <option value="">{{ __('admin.City') }}</option>
-                      @php $name = 'name_'.$l; @endphp
-                      @if ($client->city_id)
-                        <option value="{{ $client->city_id }}" selected>{{ $client->city->{'name_' . $l} }}</option>
-                      @endif
-                    </select>
-                  </div>
+    
                   <div class="mb-4 col-md-6">
                     <label for="HaveCompany" class="form-label">{{ __('auth.DoYouHaveCompany') }}</label>
                     <select name="HaveCompany" id="HaveCompany" class="select2 form-select">
@@ -273,7 +264,7 @@
                       <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Caracas, La Paz</option>
                     </select>
                   </div>
-                  <div class="mb-4 col-md-6">
+                  <div class="mb-4 col-md-12">
                     <label for="currency" class="form-label">Currency</label>
                     <select id="currency" name="currency" class="select2 form-select">
                       <option value="">Select Currency</option>

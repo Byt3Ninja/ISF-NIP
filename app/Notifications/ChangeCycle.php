@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ChangeCycle extends Notification implements ShouldQueue
+class ChangeCycle extends Notification
 {
     use Queueable;
     public $data;
@@ -27,7 +27,7 @@ class ChangeCycle extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['database'];
     }
 
     /**

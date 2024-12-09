@@ -389,7 +389,7 @@
             location.href = '/dashboard/cycles/{{ $id }}/registered';
           },
           error: function(error) {
-            console.log(error);
+            console.log("Error details:", JSON.stringify(error.responseJSON, null, 2));
             alert("Error Occurred, arrange failed");
           }
         });
