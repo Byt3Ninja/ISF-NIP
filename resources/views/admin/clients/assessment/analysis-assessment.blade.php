@@ -77,11 +77,49 @@ $assessmentPhases = [
 ['title' => 'branding', 'progress' => 100, 'score' => 980, 'color' => 'success'],
 ]],
 ];
+
+$userid = auth()->user()->id;
+                  $assessment = App\Assessment::where('user_id', $userid)->orderBy('id', 'desc')->first();
+
+
+                  
+                  // $assessment_user = App\Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+                  
+                  if($assessment != null){
+                    
+                    $scoresTotal = App\UserScore::where('user_id', $userid)
+                    ->where('assessment_id', $assessment->id)
+                    ->get();
+                    
+                    $scoresTotals = $scoresTotal->sum('score');
+                    
+                  }else{
+                    $scoresTotals = 0;
+                  }
+
+
+
+
+
 @endphp
 
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Alert -->
+    @if (session()->has('message'))
+      <div class="alert alert-success alert-dismissible" role="alert">
+        {{ __('admin.' . session()->get('message')) }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    @endif
+    @if (session()->has('message2'))
+      <div class="alert alert-danger alert-dismissible" role="alert">
+        {{ __('admin.' . session()->get('message2')) }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    @endif
+    <!-- / Alert -->
     <!-- Pills (Mobile) -->
      <div class="row mb-4 d-block d-md-none">
       <div class="col-12">
@@ -89,7 +127,15 @@ $assessmentPhases = [
           @foreach($mobilePills as $key => $pill)
           <li class="nav-item me-1">
             <a href="/dashboard/{{ $pill }}" class="nav-link {{ $key == 0 ? 'active' : '' }}">
-              <span>{{ $pill }}</span>
+              <span>
+                @if($pill == 'analysis-assessment')
+                {{ __('admin.Analysis_Assessment') }}
+            @elseif($pill == 'question-assessment')
+                {{ __('admin.Question_assessment') }}
+            @else
+                {{ __('admin.History') }}
+            @endif
+          </span>
             </a>
           </li>
           @endforeach
@@ -105,7 +151,15 @@ $assessmentPhases = [
             @foreach($pills as $key => $pill)
             <li class="nav-item me-1">
               <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}" class="nav-link {{ $key == 0 ? 'active' : '' }}">
-                <span class="fs-6">{{ str_replace('-', ' ', $pill) }}</span>
+                <span class="fs-6">
+                  @if($pill == 'analysis-assessment')
+                {{ __('admin.Analysis_Assessment') }}
+            @elseif($pill == 'question-assessment')
+                {{ __('admin.Question_assessment') }}
+            @else
+                {{ __('admin.History') }}
+            @endif
+                </span>
               </a>
             </li>
             @endforeach
@@ -121,29 +175,26 @@ $assessmentPhases = [
         <div class="card shadow-sm w-100">
           <div class="w-100 d-flex flex-column gap-3 p-4">
             <div class="d-flex flex-grow-1 justify-content-between align-items-center">
-              <h4 class="mb-0">Analysis Startup Assessment</h4>
+              <h4 class="mb-0">{{ __('admin.Analysis_Assessment') }}</h4>
               <div class="d-flex align-items-center gap-2">
-                <span class="text-xs text-secondary">Create</span>
+                <span class="text-xs text-secondary">{{ __('admin.Created') }}</span>
                 <div class="badge bg-label-secondary radius-10">
                   <i class="ti ti-calendar ti-18px text-info"></i>
-                  <span class="fw-semibold text-xs text-dark mx-2">2024-03-01</span>
+                  <span class="fw-semibold text-xs text-dark mx-2">{{ $assessment == null ? 'None' : $assessment->created_at }}</span>
                 </div>
               </div>
             </div>
             <div
               class="d-flex flex-column flex-md-row gap-2 flex-grow-1 justify-content-between align-items-md-center mb-2">
               <div class="d-flex flex-column flex-md-row gap-3">
-                <h6 class="text-sm text-muted mb-0 text-nowrap">Overall Recommendation</h6>
+                <h6 class="text-sm text-muted mb-0 text-nowrap">{{ __('admin.Overall_Recommendation') }}</h6>
                 <div class="badge bg-label-secondary text-dark radius-10 py-2 fs-6">
                   Good progress, but room for scaling
                 </div>
               </div>
               <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
-                @php
-                $userid = auth()->user()->id;
-                $assessment_user = App\Assessment::where('user_id', $userid)->whereNull('end_date')->first();
-                @endphp
-                @if($assessment_user == null)
+                
+                @if($assessment == null)
                 <a 
                   href="{{ route('make_new_assessment_to_user') }}"
                   class="btn btn-sm btn-primary light-shadow radius-10">
@@ -159,24 +210,58 @@ $assessmentPhases = [
               </div>
             </div>
             <div class="d-flex flex-grow-1 align-items-center gap-3">
-              <h6 class="text-sm text-muted mb-0">Overall Weighted Score</h6>
+              <h6 class="text-sm text-muted mb-0">{{ __('admin.Overall_Weighted_Score') }}</h6>
               <div class="badge bg-label-info text-dark radius-10">
-                980
+                {{ $scoresTotals > 0 ? $scoresTotals : 0 }}
               </div>
             </div>
             <div class="row">
-              @foreach($assessmentPhases as $phase)
+              @php
+                  $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary']; // مصفوفة الألوان
+              @endphp
+              @foreach($categories as $key => $phase)
+              @php
+                  $color = $colors[$key % count($colors)]; // تعيين لون بناءً على المفتاح
+                  $userid = auth()->user()->id;
+
+                  if($assessment != null){
+                    
+                    $scoresTotal = App\UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                    ->where('user_id', $userid)
+                    ->where('assessment_id', $assessment->id)
+                    ->where('category_id', $phase->id)
+                    ->get();
+                    $scores = $scoresTotal->sum('score');
+                    
+                    if(!empty($scoresTotal)){
+                      // إجمالي عدد الأسئلة
+                      $totalQuestions = $scoresTotal->count();
+                      // عدد الأسئلة المحلولة (التي ليست null)
+                      $answeredQuestions = $scoresTotal->whereNotNull('Result_assessment')->count();
+                      // حساب النسبة المئوية
+                      $percentage = $totalQuestions > 0 ? ($answeredQuestions / $totalQuestions) * 100 : 0;
+                    }else{
+                      $percentage = 0;
+                      
+                    }
+                  }else{
+                    $scores = 0;
+                    $percentage = 0;
+                  }
+
+              @endphp
+              
               <div class="col-12 col-md-3 mb-2">
                 <div class="card shadow-sm p-4">
-                  <div class="badge bg-label-{{ $phase['color'] }} mb-3 radius-10">
-                    <h6 class="mb-0 text-{{ $phase['color'] }} text-uppercase">{{ $phase['title'] }}</h6>
+                  <div class="badge bg-label-{{ $color }} mb-3 radius-10">
+                    <h6 class="mb-0 text-{{ $color }} text-uppercase">{{ $phase->{'category_name_'. $l} }}</h6>
                   </div>
                   <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">{{ $phase['progress'] }}%</h4>
+                    <h4 class="mb-0">{{ number_format($percentage, 2) }}%</h4>
                     <div class="d-flex flex-column align-items-center gap-1">
-                      <span class="text-xs text-secodnary">Score</span>
+                      <span class="text-xs text-secodnary">{{ __('admin.Score') }}</span>
                       <div class="badge bg-label-info text-xs radius-10">
-                        {{ $phase['score'] }}
+                        {{ $scores }}
                       </div>
                     </div>
                   </div>
@@ -204,27 +289,77 @@ $assessmentPhases = [
 
     <!-- Analysis Assessment Row -->
     <div class="row">
-      @foreach($assessmentPhases as $phase)
+      @foreach($categories as $key => $category)
+
+      @php
+      $color = $colors[$key % count($colors)];
+        $userid = auth()->user()->id;
+                  if($assessment != null){
+                    
+                    $scoresTotalsub = App\UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                    ->where('user_id', $userid)
+                    ->where('assessment_id', $assessment->id)
+                    ->where('category_id', $category->id)
+                    ->get();
+                    $scoresTotalssub = $scoresTotalsub->sum('score');
+
+                    $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
+                    $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
+                    $totalQuestions = $countanswered + $countNotanswered;
+                    $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+
+
+                  }else{
+                    $scoresTotalssub = 0;
+                    $progress = 0;
+                  }
+
+                  
+
+      @endphp
+
       <div class="col-12 col-md-4 col-lg-3 mb-2">
         <div class="card shadow-sm p-4">
           <div class="badge bg-label-secondary mb-3 radius-10">
-            <h6 class="mb-0 text-dark text-uppercase">{{ $phase['title'] }}</h6>
+            <h6 class="mb-0 text-dark text-uppercase">{{ $category->{'category_name_'. $l} }}</h6>
           </div>
-          @foreach($phase['categories'] as $category)
+          @foreach($category['subcategory'] as $subcategory)
+
+          @php
+                  if($assessment != null){
+                    
+                    $scoresTotalsub = App\UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                    ->where('user_id', $userid)
+                    ->where('assessment_id', $assessment->id)
+                    ->where('subcategory_id', $subcategory->id)
+                    ->get();
+                    $scoresTotalssub = $scoresTotalsub->sum('score');
+
+                    $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
+                    $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
+                    $totalQuestions = $countanswered + $countNotanswered;
+                    $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+
+
+                  }else{
+                    $scoresTotalssub = 0;
+                    $progress = 0;
+                  }
+          @endphp
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="badge bg-label-{{ $phase['color'] }} radius-10 me-2">
-              <span class="text-{{ $phase['color'] }} text-capitalize text-xs fw-bold">
-                {{ $category['title'] }}
+            <div class="badge bg-label-{{ $color }} radius-10 me-2">
+              <span class="text-{{ $color }} text-capitalize text-xs fw-bold">
+                {{ $subcategory->{'name_'. $l} }}
               </span>
             </div>
             <div class="d-flex align-items-center gap-1">
               <div class="d-flex flex-column align-items-center gap-1">
-                <span class="text-xs text-secodnary">Score</span>
+                <span class="text-xs text-secodnary">{{ __('admin.Score') }}</span>
                 <div class="badge bg-label-info radius-10">
-                  <span class="text-xs">{{ $category['score'] }}</span>
+                  <span class="text-xs">{{ $scoresTotalssub }}</span>
                 </div>
               </div>
-              <div class="text-sm fw-bold">{{ $category['progress'] }}%</div>
+              <div class="text-sm fw-bold">{{ $progress }}%</div>
             </div>
           </div>
           @endforeach

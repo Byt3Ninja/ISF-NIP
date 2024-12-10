@@ -131,7 +131,7 @@
                           name="business_categories[]" 
                           id="category_{{ $loop->index }}" 
                           value="{{ $category }}"
-                          {{ in_array($category, $selectedCategories) ? 'checked' : '' }}
+                          {{-- {{ in_array($category, $selectedCategories) ? 'checked' : '' }} --}}
                           @if ($category === 'Other') onclick="toggleOtherCategoryInput(this)" @endif>
                       <label class="form-check-label" for="category_{{ $loop->index }}">
                           {{ $category }}

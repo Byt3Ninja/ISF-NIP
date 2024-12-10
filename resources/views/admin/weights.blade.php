@@ -194,33 +194,43 @@
                           <div class="modal-body">
                               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               <div class="text-center mb-6">
-                                  <h4 class="mb-2">{{__('admin.Show')}} ({{$weight->name}})</h4>
+                                  <h4 class="mb-2">{{__('admin.Show')}} ({{$weight->weight}})</h4>
                               </div>
 
 
                               <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
                                   <div class="d-flex gap-4 align-items-center">
-                                      <h6 class="m-0">{{ $weight->name }}</h6>
+                                      <h6 class="m-0">{{ $weight->stage->{'name_'.$l} }}</h6>
                                   </div>
-                                  <p class="m-0 d-none d-sm-block">{{__('admin.Tags Name')}}</p>
+                                  <p class="m-0 d-none d-sm-block">{{__('admin.StageName')}}</p>
                               </div>
 
                               <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                                  <div class="d-flex gap-4 align-items-center">
-                                    @if ($weight->user)
-                                    <h6 class="m-0">{{ $weight->user->name }}</h6>
-                                    @else
-                                    <h6 class="m-0">{{ __('cycles.NA') }}</h6>  <!-- أو أي نص آخر مناسب -->
-                                    @endif
-                                  </div>
-                                  <p class="m-0 d-none d-sm-block">{{__('admin.Tags Created By')}}</p>
+                                <div class="d-flex gap-4 align-items-center">
+                                    <h6 class="m-0">{{ $weight->category->{'category_name_' . $l} }}</h6>
+                                </div>
+                                <p class="m-0 d-none d-sm-block">{{__('admin.Category')}}</p>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                              <div class="d-flex gap-4 align-items-center">
+                                  <h6 class="m-0">{{ $weight->subcategory->{'name_' . $l} }}</h6>
                               </div>
+                              <p class="m-0 d-none d-sm-block">{{__('admin.subCategory_Name')}}</p>
+                          </div>
+
+                          <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                            <div class="d-flex gap-4 align-items-center">
+                                <h6 class="m-0">{{ $weight->weight }}</h6>
+                            </div>
+                            <p class="m-0 d-none d-sm-block">{{__('admin.Weight')}}</p>
+                        </div>
 
                               <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
                                   <div class="d-flex gap-4 align-items-center">
                                       <h6 class="m-0">{{ $weight->created_at}}</h6>
                                   </div>
-                                  <p class="m-0 d-none d-sm-block">{{__('admin.Tags Created At')}}</p>
+                                  <p class="m-0 d-none d-sm-block">{{__('admin.Created At')}}</p>
                               </div>
 
                           </div>

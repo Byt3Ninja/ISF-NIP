@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\QuestionsBank;
 use App\User;
+use App\Weight;
 use App\Company;
 use App\Category;
 use App\UserScore;
 use App\Assessment;
 use App\SubCategory;
-use App\Weight;
+use App\QuestionsBank;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AssessmentController extends Controller
 {
@@ -37,7 +38,76 @@ class AssessmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+       
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id', // يجب أن يكون موجودًا في جدول المستخدمين
+            'start_date' => 'required|date', // تاريخ صالح وأقل أو يساوي end_date
+        ]);
+        
+        $userid = $request->user_id;
+        $l = app()->getLocale();
+        $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+        
+        if($assessment_user != null){
+            $user_score = UserScore::where('user_id', $userid)->where('assessment_id', $assessment_user->id)->get();
+        }else{
+            $user_score = '';
+        }
+        
+        if(empty($user_score)){
+            $user = User::find($userid);
+            if($user->HaveCompany != null){
+                $companyid = $user->company_id;
+                $company = Company::find($companyid);
+                
+                $title = $company->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
+               
+                $assessment = Assessment::create([
+                    'user_id' => $userid,
+                    'title' => $title,
+                    'start_date' => $request->start_date,
+                    'is_published' => 0,
+                ]);
+
+                $assessmentId = $assessment->id;
+                
+                $questions = QuestionsBank::where('group', 'assessment')->get();
+
+                if($company->stage == null){
+                    $assessment = Assessment::find($assessmentId);
+                    $assessment->delete();
+                    return redirect()->back()->with(['class'=>'danger', 'message'=>__('NotStage')]);
+                }
+
+                foreach($questions as $question){
+                    $weight = Weight::where('stage_id', $company->stage)->where('category_id', $question->ascategory_id)->where('subcategory_id', $question->subcategory_id)->first();
+                   
+                    $userscoreadded = UserScore::create([
+                        'user_id' => $userid,
+                        'category_id' => $question->ascategory_id,
+                        'subcategory_id' => $question->subcategory_id,
+                        'stage_id' => $company->stage,
+                        'weight' => $weight->weight,
+                        'assessment_id' => $assessmentId,
+                        'QuestionBank' => $question->question,
+                        'explanation_QA_ar' => $question->explanation_QA_ar,
+                        'explanation_QA_en' => $question->explanation_QA_en,
+                        'Answers' => $question->answers,
+                        'company_id' => $companyid,
+                    ]);
+                }
+
+
+                return redirect()->back()->with('class', 'success')->with('message', 'Assessment_Created_successfully');
+            }else{
+                return redirect()->back()->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]);
+            }
+
+            }else{
+                return redirect()->back()->with(['class'=>'danger', 'message'=>__('AlreadyHaveAssessment')]);
+            }
+
+        
     }
 
     /**
@@ -61,7 +131,18 @@ class AssessmentController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id', // يجب أن يكون موجودًا في جدول المستخدمين
+            'start_date' => 'required|date', // تاريخ صالح وأكبر أو يساوي start_date
+        ]);
+        
+        $assessment = Assessment::find($id);
+        $assessment->user_id = $request->user_id;
+        $assessment->start_date = $request->start_date;
+        $assessment->end_date = $request->end_date;
+        $assessment->save();
+
+        return redirect()->back()->with('class', 'success')->with('message', 'Assessment_updated_successfully');
     }
 
     /**
@@ -69,111 +150,89 @@ class AssessmentController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $assessment = Assessment::find($id);
+        $assessment->delete();
+
+        $user_scores = UserScore::where('assessment_id', $id)->get();
+        foreach ($user_scores as $user_score) {
+            $user_score->delete();
+        }
+
+        return redirect()->back()->with('class', 'success')->with('message', 'Assessment_deleted_successfully');
     }
 
     public function assessment(Request $request)
     {
         
+        if (Auth::user()->hasRole('Registered')) {
         $l = app()->getLocale();
         $userid = auth()->user()->id;
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
 
-         $categories = Category::where('category_type', 'Assesment')->get();
-        // $subcategories1 = SubCategory::where('Type', 'Assesment');
-        // if ($request->has('category')) {
-        //     $subcategories1->where('category_id', $request->category);
-        // }else{
-        //     $category4 = Category::where('category_type', 'Assesment')->first();
-        //     $subcategories1->where('category_id', $category4->id);
-        // }
-        // $subcategories = $subcategories1->get();
-
-
         if($assessment_user != null){
-        //     $query = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-        //     ->where('user_id', $userid)
-        //     ->where('assessment_id', $assessment_user->id);
-        // // إضافة فلترة الفئة إذا تم تمرير category_id
-        // if ($request->has('category')) {
-        //     $query->where('category_id', $request->category);
-        // }else{
-        //     $category2 = Category::where('category_type', 'Assesment')->orderBy('id', 'asc')->first();
-        //     $query->where('category_id', $category2->id);
-        // }
-        // // إضافة فلترة الفئة الفرعية إذا تم تمرير subcategory_id
-        // if ($request->has('subcategory')) {
-        //     $query->where('subcategory_id', $request->subcategory);
-        // }else{
-        //     $category3 = Category::where('category_type', 'Assesment')->orderBy('id', 'asc')->first();
-        //     $subcategories21 = SubCategory::where('Type', 'Assesment');
-        //     $subcategories21->where('category_id', $category3->id)->orderBy('id', 'asc');
-        //     $subcategories2 = $subcategories21->first();
-        //     $query->where('subcategory_id', $subcategories2->id);
-        // }
-        // // تنفيذ الاستعلام
-        // $user_scores = $query->get();
-        $user_scores = [];
-        $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-            ->where('user_id', $userid)
-            ->where('assessment_id', $assessment_user->id)->get();
 
-            
+         $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
 
-            foreach($user_scores as $user_score){
-                $answers = json_decode($user_score->Answers, true);
-                $countansweredSub = UserScore::where('subcategory_id', $user_score->subcategory_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNotNull('Result_assessment')->count();
-              $countNotansweredSub = UserScore::where('subcategory_id', $user_score->subcategory_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNull('Result_assessment')->count();
-              $countplusSub = $countansweredSub + $countNotansweredSub;
+         $user_scores = $categories->map(function ($category) {
+             $questions = $category->question;
+             $subcategories = $category->subcategory;
+             $subcategories = $subcategories->map(function ($subcategory) use ($questions) {
+                 $subcategory->questions = $questions->where('subcategory_id', $subcategory->id);
+                 return $subcategory;
+             });
+             $category->subcategories = $subcategories;
+             return $category;
+         });
 
+    // استخراج الإجابات
+    $answers = $user_scores->pluck('Answers')->map(function ($answer) {
+        return json_decode($answer, true);
+    })->filter()->toArray();
 
-              $countansweredCat = UserScore::where('category_id', $user_score->category_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNotNull('Result_assessment')->count();
-              $countNotansweredCat = UserScore::where('category_id', $user_score->category_id)->where('user_id', auth()->user()->id)->where('assessment_id', $assessment_user->id)->whereNull('Result_assessment')->count();
-              $countplusCat = $countansweredCat + $countNotansweredCat;
-            }
+    $countanswered = $user_scores->whereNotNull('Result_assessment')->count();
+    $countNotanswered = $user_scores->whereNull('Result_assessment')->count();
+    $totalQuestions = $countanswered + $countNotanswered;
 
-
-
-            $user_scores['countSubCategory'] = [
-                'countansweredSub' => $countansweredSub,
-                'countNotansweredSub' => $countNotansweredSub,
-                'countplusSub' => $countplusSub,
-            ];
-
-
-
-            $user_scores['countCategory'] = [
-                'countansweredCat' => $countansweredCat,
-                'countNotansweredCat' => $countNotansweredCat,
-                'countplusCat' => $countplusCat,
-            ];
+    $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+         
+    
         }else{
             return redirect()->route('analysis-assessment');
         }
         
 
         return view('admin/clients/assessment/assessment',compact('user_scores','answers'));
+
+    }else{
+        return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+    }
     }
 
 public function MakeAssessment()
     {
+        if (Auth::user()->hasRole('Registered')) {
         $l = app()->getLocale();
         $userid = auth()->user()->id;
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
-        
+       
         if($assessment_user != null){
             $user_score = UserScore::where('user_id', $userid)->where('assessment_id', $assessment_user->id)->get();
         }else{
             $user_score = '';
         }
-        
+       
         if(empty($user_score)){
             $user = User::find($userid);
             if($user->HaveCompany != null){
+                
                 $companyid = $user->company_id;
                 $company = Company::find($companyid);
+              
+                if($company == null){
+                    return redirect()->route('my_company')->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]);
+                }
                 $title = $company->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
-               
+                
                 $assessment = Assessment::create([
                     'user_id' => $userid,
                     'title' => $title,
@@ -184,6 +243,13 @@ public function MakeAssessment()
                 $assessmentId = $assessment->id;
                 
                 $questions = QuestionsBank::where('group', 'assessment')->get();
+
+                if($company->stage == null){
+                    $assessment = Assessment::find($assessmentId);
+                    $assessment->delete();
+                    return redirect()->route('my_company')->with(['class'=>'danger', 'msg'=>__('NotStage')]);
+                }
+
                 foreach($questions as $question){
                     $weight = Weight::where('stage_id', $company->stage)->where('category_id', $question->ascategory_id)->where('subcategory_id', $question->subcategory_id)->first();
                     
@@ -211,7 +277,57 @@ public function MakeAssessment()
         }else{
             return redirect()->route('question-assessment')->with(['class'=>'danger', 'message'=>__('AlreadyHaveAssessment')]);
         }
+    }else{
+        return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
     }
+    }
+
+
+    public function analysisAssessment()
+    {
+        if (Auth::user()->hasRole('Registered')) {
+        $l = app()->getLocale();
+        $userid = auth()->user()->id;
+        $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+        if($assessment_user != null){
+         $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
+
+        $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+        ->where('user_id', $userid)
+        ->where('assessment_id', $assessment_user->id)->get();
+        return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
+        }else{
+            $user_scores = [];
+            $categories = [];
+            return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
+        }
+
+        }else{
+            return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+        }
+    }
+
+
+    public function historyAssessment()
+    {
+        if (Auth::user()->hasRole('Registered')) {
+            $l = app()->getLocale();
+            $userid = auth()->user()->id;
+            $assessmentsopen = Assessment::where('user_id', $userid)->whereNull('end_date')->get();
+            $assessments = Assessment::where('user_id', $userid)->whereNotNull('end_date')->get();
+            
+            return view('admin/clients/assessment/assessment-history', compact('assessmentsopen', 'assessments'));
+            
+    
+            }else{
+                return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+            }
+
+        
+    }
+
+
+
 
 
 }
