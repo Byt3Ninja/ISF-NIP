@@ -152,7 +152,13 @@ class AssessmentController extends Controller
     {
         $assessment = Assessment::find($id);
         $assessment->delete();
-        return redirect()->back();
+
+        $user_scores = UserScore::where('assessment_id', $id)->get();
+        foreach ($user_scores as $user_score) {
+            $user_score->delete();
+        }
+
+        return redirect()->back()->with('class', 'success')->with('message', 'Assessment_deleted_successfully');
     }
 
     public function assessment(Request $request)
@@ -241,7 +247,7 @@ public function MakeAssessment()
                 if($company->stage == null){
                     $assessment = Assessment::find($assessmentId);
                     $assessment->delete();
-                    return redirect()->route('my_company')->with(['class'=>'danger', 'message2'=>__('NotStage')]);
+                    return redirect()->route('my_company')->with(['class'=>'danger', 'msg'=>__('NotStage')]);
                 }
 
                 foreach($questions as $question){
@@ -302,7 +308,23 @@ public function MakeAssessment()
     }
 
 
+    public function historyAssessment()
+    {
+        if (Auth::user()->hasRole('Registered')) {
+            $l = app()->getLocale();
+            $userid = auth()->user()->id;
+            $assessmentsopen = Assessment::where('user_id', $userid)->whereNull('end_date')->get();
+            $assessments = Assessment::where('user_id', $userid)->whereNotNull('end_date')->get();
+            
+            return view('admin/clients/assessment/assessment-history', compact('assessmentsopen', 'assessments'));
+            
+    
+            }else{
+                return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+            }
 
+        
+    }
 
 
 

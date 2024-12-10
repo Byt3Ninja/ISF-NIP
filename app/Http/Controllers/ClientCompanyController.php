@@ -1300,12 +1300,5 @@ class ClientCompanyController extends Controller
     }
 
 
-    public function analysisAssessment()
-    {
-        return view('admin/clients/assessment/analysis-assessment');
-    }
-    public function historyAssessment()
-    {
-        return view('admin/clients/assessment/assessment-history');
-    }
+    
 }

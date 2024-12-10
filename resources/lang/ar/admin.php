@@ -1037,4 +1037,8 @@ return [
 	'NotStage'=>  'لا يوجد مرحلة',
 	'Assessment_Created_successfully'=> 'تم انشاء التقييم بنجاح',
 	'Assessment_updated_successfully' => 'تم تعديل التقييم بنجاح',
+	'Ended' => 'انتهت',
+	'Compare'=> 'مقارنة',
+	'Assessment_deleted_successfully'=> 'تم مسح التقييم',
+	
 ];

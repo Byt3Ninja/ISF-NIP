@@ -83,15 +83,16 @@ $userid = auth()->user()->id;
 
 
                   
-                  $assessment_user = App\Assessment::where('user_id', $userid)->whereNotNull('end_date')->first();
+                  // $assessment_user = App\Assessment::where('user_id', $userid)->whereNull('end_date')->first();
                   
-                  if($assessment_user != null){
+                  if($assessment != null){
                     
-                    $scoresTotal = App\UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-                    ->where('user_id', $userid)
-                    ->where('assessment_id', $assessment_user->id)
+                    $scoresTotal = App\UserScore::where('user_id', $userid)
+                    ->where('assessment_id', $assessment->id)
                     ->get();
+                    
                     $scoresTotals = $scoresTotal->sum('score');
+                    
                   }else{
                     $scoresTotals = 0;
                   }
@@ -192,11 +193,8 @@ $userid = auth()->user()->id;
                 </div>
               </div>
               <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
-                @php
-                $userid = auth()->user()->id;
-                $assessment_user = App\Assessment::where('user_id', $userid)->whereNull('end_date')->first();
-                @endphp
-                @if($assessment_user == null)
+                
+                @if($assessment == null)
                 <a 
                   href="{{ route('make_new_assessment_to_user') }}"
                   class="btn btn-sm btn-primary light-shadow radius-10">
@@ -225,32 +223,27 @@ $userid = auth()->user()->id;
               @php
                   $color = $colors[$key % count($colors)]; // تعيين لون بناءً على المفتاح
                   $userid = auth()->user()->id;
-                  $assessment_user = App\Assessment::where('user_id', $userid)->whereNotNull('end_date')->first();
 
-                  if($assessment_user != null){
+                  if($assessment != null){
                     
                     $scoresTotal = App\UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
                     ->where('user_id', $userid)
-                    ->where('assessment_id', $assessment_user->id)
+                    ->where('assessment_id', $assessment->id)
                     ->where('category_id', $phase->id)
                     ->get();
                     $scores = $scoresTotal->sum('score');
                     
-                    if($scoresTotal != null){
+                    if(!empty($scoresTotal)){
                       // إجمالي عدد الأسئلة
-                      $totalQuestions = $scores->count();
-
+                      $totalQuestions = $scoresTotal->count();
                       // عدد الأسئلة المحلولة (التي ليست null)
-                      $answeredQuestions = $scores->whereNotNull('Result_assessment')->count();
-
+                      $answeredQuestions = $scoresTotal->whereNotNull('Result_assessment')->count();
                       // حساب النسبة المئوية
                       $percentage = $totalQuestions > 0 ? ($answeredQuestions / $totalQuestions) * 100 : 0;
                     }else{
                       $percentage = 0;
+                      
                     }
-
-                    
- 
                   }else{
                     $scores = 0;
                     $percentage = 0;
@@ -266,7 +259,7 @@ $userid = auth()->user()->id;
                   <div class="d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">{{ number_format($percentage, 2) }}%</h4>
                     <div class="d-flex flex-column align-items-center gap-1">
-                      <span class="text-xs text-secodnary">Score</span>
+                      <span class="text-xs text-secodnary">{{ __('admin.Score') }}</span>
                       <div class="badge bg-label-info text-xs radius-10">
                         {{ $scores }}
                       </div>
@@ -301,12 +294,12 @@ $userid = auth()->user()->id;
       @php
       $color = $colors[$key % count($colors)];
         $userid = auth()->user()->id;
-                  $assessment_user = App\Assessment::where('user_id', $userid)->whereNotNull('end_date')->first();
-                  if($assessment_user != null){
+                  if($assessment != null){
                     
                     $scoresTotalsub = App\UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
                     ->where('user_id', $userid)
-                    ->where('assessment_id', $assessment_user->id)
+                    ->where('assessment_id', $assessment->id)
+                    ->where('category_id', $category->id)
                     ->get();
                     $scoresTotalssub = $scoresTotalsub->sum('score');
 
@@ -331,6 +324,28 @@ $userid = auth()->user()->id;
             <h6 class="mb-0 text-dark text-uppercase">{{ $category->{'category_name_'. $l} }}</h6>
           </div>
           @foreach($category['subcategory'] as $subcategory)
+
+          @php
+                  if($assessment != null){
+                    
+                    $scoresTotalsub = App\UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                    ->where('user_id', $userid)
+                    ->where('assessment_id', $assessment->id)
+                    ->where('subcategory_id', $subcategory->id)
+                    ->get();
+                    $scoresTotalssub = $scoresTotalsub->sum('score');
+
+                    $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
+                    $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
+                    $totalQuestions = $countanswered + $countNotanswered;
+                    $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+
+
+                  }else{
+                    $scoresTotalssub = 0;
+                    $progress = 0;
+                  }
+          @endphp
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="badge bg-label-{{ $color }} radius-10 me-2">
               <span class="text-{{ $color }} text-capitalize text-xs fw-bold">
@@ -339,7 +354,7 @@ $userid = auth()->user()->id;
             </div>
             <div class="d-flex align-items-center gap-1">
               <div class="d-flex flex-column align-items-center gap-1">
-                <span class="text-xs text-secodnary">Score</span>
+                <span class="text-xs text-secodnary">{{ __('admin.Score') }}</span>
                 <div class="badge bg-label-info radius-10">
                   <span class="text-xs">{{ $scoresTotalssub }}</span>
                 </div>
