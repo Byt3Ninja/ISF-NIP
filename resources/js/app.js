@@ -31,8 +31,9 @@ const app = new Vue({
     el: '#app',
 });
 
-window.Echo.channel('step-changes')
-    .listen('ChangeStep', function (event) {
-        console.log(event);
-    });
 
+
+window.Echo.channel('step-changes')
+    .listen('ChangeStep', (e) => {
+        console.log(`The step has been changed for ${e.company_name} from "${e.last_step}" to "${e.new_step}" by ${e.organization_name}.`);
+    });

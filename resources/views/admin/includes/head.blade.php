@@ -23,6 +23,7 @@
 <meta name="author" content="GrowthLab">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{{ config('app.name') }}-V2</title>
+<link rel="stylesheet" href="{{ mix('css/app.css') }}">
 <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
 
 <!-- Favicon -->

@@ -28,11 +28,14 @@ class ChangeStep implements ShouldBroadcast
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    public function broadcastOn(): array
+    public function broadcastOn()
     {
-        return [
-            new Channel('step-changes'),
-        ];
+        return new Channel('step-changes');
+    }
+
+    public function broadcastAs()
+    {
+        return 'ChangeStep';
     }
 
 

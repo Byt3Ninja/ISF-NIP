@@ -21,7 +21,7 @@
         "macsidigital/laravel-zoom": ">=3",
         "microsoft/microsoft-graph": "^1.28",
         "phpoffice/phpspreadsheet": "^2.2",
-        "pusher/pusher-php-server": "^5.0",
+        "pusher/pusher-php-server": "^7.2",
         "sentry/sentry-laravel": "^4.4",
         "spatie/laravel-permission": ">=4",
         "stichoza/google-translate-php": "^5.1",
