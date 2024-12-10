@@ -1019,4 +1019,7 @@ return [
 	'NotStage'=>  'Not Stage',
 	'Assessment_Created_successfully'=> 'Assessment Created Successfully',
 	'Assessment_updated_successfully' => 'Assessment Updated Successfully',
+	'Ended' => 'Ended',
+	'Compare'=> 'Compare',
+	'Assessment_deleted_successfully'=> 'Assessment Deleted Successfully',
 ];
