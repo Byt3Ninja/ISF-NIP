@@ -45,7 +45,7 @@
 
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->
-
+  <script src="{{ mix('js/app.js') }}"></script>
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
   <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
@@ -96,7 +96,7 @@
         var audio = new Audio('{{ asset('/notification-sound.mp3') }}');
 
         // Enable pusher logging - don't include this in production
-        Pusher.logToConsole = false;
+        Pusher.logToConsole = true;
         var pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
           // cluster: 'eu'
           encrypted: true

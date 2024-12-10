@@ -15,6 +15,7 @@ use App\Jobs\ExportResScreenData;
 use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
@@ -209,6 +210,7 @@ class ScreeningController extends Controller
 
     public function changestep(Request $request)
     {
+
         $this->preProcessingCheck('edit_cycles');
         $approved = $by = null;
         $company = Company::where('id', $request->company)->first();
@@ -235,7 +237,8 @@ class ScreeningController extends Controller
             $data['organization_name_en'] = $cstep->cycle->organization->name_en;
 
             // Broadcast Event //
-            ChangeStep::dispatch($data);
+            broadcast(new ChangeStep($data));
+
 
             $recipients = collect([$company_owner])
                 ->merge(User::role("Mentor")->get())
