@@ -10,6 +10,7 @@
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 @stop
 
 @php $user = auth()->user(); @endphp
@@ -22,7 +23,6 @@
 			gap: 10px;
 			width: 100%;
 		}
-
 		.text-xs {
 			font-size: 12px;
 		}
@@ -32,7 +32,6 @@
 				width: 50%;
 			}
 		}
-
 		.kanban-container,
 		.kanban-wrapper {
 			display: flex !important;
@@ -61,7 +60,6 @@
 			padding: 0.3rem 1rem !important;
 			letter-spacing: 0.5px !important;
 		}
-
 		p,
 		span {
 			font-size: 12px;
@@ -82,7 +80,7 @@
 								<input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
 								<i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
 							</div>
-							<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+							<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
 								<span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
 								<i class="ti ti-plus ti-16px"></i>
 							</button>
@@ -103,7 +101,7 @@
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
 							<div class="d-flex align-items-center gap-3">
-								<div class="cursor-pointer">
+								<div class="cursor-pointer" id="editTakButton" data-id="1" data-bs-toggle="modal" data-bs-target="#editTaskModal">
 									<i class="ti ti-edit text-primary ti-20px"></i>
 								</div>
 								<div class="cursor-pointer" id="warningDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -240,6 +238,268 @@
 		</div>
 		<!-- / View Task Modal -->
 
+		<!-- Add Task Modal -->
+		<div class="modal fade" id="formTaskModal" tabindex="-1" aria-labelledby="formTaskModal" aria-hidden="true">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
+					<div class="mb-4 p-4 p-md-0">
+						<div class="d-flex justify-content-between align-items-center w-100">
+							<h6 class="modal-title" id="form-modal-title"></h6>
+							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
+								<i class="ti ti-x ti-20px text-primary"></i>
+							</div>
+						</div>
+					</div>
+					<div class="bg-white rounded border border-light p-2 p-md-4">
+						<form action="#" method="POST">
+							<div class="mb-3">
+								<label for="task-name" class="form-label">Task Name</label>
+								<input type="text" class="form-control" id="task-name" name="task-name" />
+							</div>
+							<div class="mb-3">
+								<label for="task-content" class="form-label">Discription</label>
+								<textarea class="form-control" id="task-content" name="task-content" rows="3"></textarea>
+							</div>
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="task-status" class="form-label">
+										<i class="ti ti-flag text-primary ti-24px"></i>
+										Priority
+									</label>
+								</div>
+								<div class="col-4">
+									<select class="form-select select2" id="task-priority" name="task-priority">
+										<option value="low">Low</option>
+										<option value="medium">Medium</option>
+										<option value="high">High</option>
+									</select>
+								</div>
+							</div>
+							<div class="bg-label-secondary p-2 rounded mb-4 border">
+								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
+									<div class="d-flex align-items-center justify-content-center gap-2">
+										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>Attachments</h6>
+										<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
+									</div>
+									<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" />
+									<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
+										onclick="document.getElementById('fileInput').click();">
+										<i class="ti ti-plus ti-16px"></i>
+									</button>
+								</div>
+								<div class="d-flex flex-wrap gap-2" id="fileList"></div>
+							</div>
+							
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="task-status" class="form-label">
+										<i class="ti ti-circle-dot text-primary ti-20px me-2"></i>
+										Status
+									</label>
+								</div>
+								<div class="col-4">
+									<select class="form-select select2" id="task-status" name="task-status">
+										<option value="pending">Pending</option>
+										<option value="progress">In Progress</option>
+										<option value="review">Review</option>
+										<option value="completed">Completed</option>
+									</select>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="task-assignee" class="form-label">
+										<i class="ti ti-users text-primary ti-20px me-2"></i>
+										Assignee
+									</label>
+								</div>
+								<div class="col-9">
+									{{-- <select class="form-select select2" id="task-assignee" name="task-assignee">
+										<option value="1">User 1</option>
+										<option value="2">User 2</option>
+										<option value="3">User 3</option>
+									</select> --}}
+									<input
+										id="AssigneeInput"
+										name="AssigneeInput"
+										class="form-control"
+										placeholder="select users"
+										value=""
+									/>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="task-due-date" class="form-label">
+										<i class="ti ti-calendar text-primary ti-20px me-2"></i>
+										Due Date
+									</label>
+								</div>
+								<div class="col-4">
+									<input type="date" class="form-control" id="task-due-date" name="task-due-date" />
+								</div>
+								<div class="col-4">
+									<input type="date" class="form-control" id="task-due-date" name="task-due-date" />
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="tags" class="form-label">
+										<i class="ti ti-tag text-primary ti-20px me-2"></i>
+										Tags
+									</label>
+								</div>
+								<div class="col-9">
+									<input
+										id="TagifyTags"
+										name="TagifyTags"
+										class="form-control"
+										placeholder="select tags"
+										value=""
+									/>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="mt-4 d-flex align-items-center gap-3">
+						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary">Create</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Edit Task Modal -->
+		<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
+					<div class="mb-4 p-4 p-md-0">
+						<div class="d-flex justify-content-between align-items-center w-100">
+							<h6 class="modal-title" id="form-modal-title">Edit task</h6>
+							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
+								<i class="ti ti-x ti-20px text-primary"></i>
+							</div>
+						</div>
+					</div>
+					<div class="bg-white rounded border border-light p-2 p-md-4">
+						<form action="#" method="POST" id="editTaskForm">
+							<div class="mb-3">
+								<label for="task-name" class="form-label">Task Name</label>
+								<input type="text" class="form-control" id="task-name" name="task-name" />
+							</div>
+							<div class="mb-3">
+								<label for="task-content" class="form-label">Discription</label>
+								<textarea class="form-control" id="task-content" name="task-content" rows="3"></textarea>
+							</div>
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="task-status" class="form-label">
+										<i class="ti ti-flag text-primary ti-24px"></i>
+										Priority
+									</label>
+								</div>
+								<div class="col-4">
+									<select class="form-select select2" id="task-priority" name="task-priority">
+										<option value="low">Low</option>
+										<option value="medium">Medium</option>
+										<option value="high">High</option>
+									</select>
+								</div>
+							</div>
+							<div class="bg-label-secondary p-2 rounded mb-4 border">
+								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
+									<div class="d-flex align-items-center justify-content-center gap-2">
+										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>Attachments</h6>
+										<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
+									</div>
+									<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" />
+									<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
+										onclick="document.getElementById('fileInput').click();">
+										<i class="ti ti-plus ti-16px"></i>
+									</button>
+								</div>
+								<div class="d-flex flex-wrap gap-2" id="fileList"></div>
+							</div>
+							
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="task-status" class="form-label">
+										<i class="ti ti-circle-dot text-primary ti-20px me-2"></i>
+										Status
+									</label>
+								</div>
+								<div class="col-4">
+									<select class="form-select select2" id="task-status" name="task-status">
+										<option value="pending">Pending</option>
+										<option value="progress">In Progress</option>
+										<option value="review">Review</option>
+										<option value="completed">Completed</option>
+									</select>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="task-assignee" class="form-label">
+										<i class="ti ti-users text-primary ti-20px me-2"></i>
+										Assignee
+									</label>
+								</div>
+								<div class="col-9">
+									{{-- <select class="form-select select2" id="task-assignee" name="task-assignee">
+										<option value="1">User 1</option>
+										<option value="2">User 2</option>
+										<option value="3">User 3</option>
+									</select> --}}
+									<input
+										id="AssigneeInput"
+										name="AssigneeInput"
+										class="form-control"
+										placeholder="select users"
+										value=""
+									/>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="task-due-date" class="form-label">
+										<i class="ti ti-calendar text-primary ti-20px me-2"></i>
+										Due Date
+									</label>
+								</div>
+								<div class="col-4">
+									<input type="date" class="form-control" id="task-due-date" name="task-due-date" />
+								</div>
+								<div class="col-4">
+									<input type="date" class="form-control" id="task-due-date" name="task-due-date" />
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-3 d-flex align-items-center">
+									<label for="tags" class="form-label">
+										<i class="ti ti-tag text-primary ti-20px me-2"></i>
+										Tags
+									</label>
+								</div>
+								<div class="col-9">
+									<input
+										id="TagifyTags"
+										name="TagifyTags"
+										class="form-control"
+										placeholder="select tags"
+										value=""
+									/>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="mt-4 d-flex align-items-center gap-3">
+						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary">Edit</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<div class="content-backdrop fade"></div>
 		<div style="display: none;" class="offcanvas-backdrop fade show"></div>
 	</div>
@@ -248,11 +508,23 @@
 
 @section('scripts')
 	<script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
+	<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+	<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+	<script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+	<script src="/vuexy/assets/vendor/libs/bloodhound/bloodhound.js"></script>
 @stop
 
 @section('pagescripts')
+	<script src="/vuexy/assets/js/forms-selects.js"></script>
+	{{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
+	<script src="/vuexy/assets/js/forms-typeahead.js"></script>
 	<script>
 		var boards = @json($kanban);
+
+		var lang = '{{ $l }}';
+
+		// console.log('boards', boards)
 		var board_tasks = @json($tasks);
 		function getElement(el) { 
 			let id = $(el).data('eid');
@@ -357,7 +629,9 @@
 										<i class="ti ti-trash text-danger ti-16px"></i>
 									</div>
 								</div>
-								<div class="text-muted mb-0" style="font-size: 14px; direction: {{ $lang == 'ar' ? 'rtl' : 'ltr' }};">${comment.comment}</div>
+								<div class="text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
+									${comment.comment}
+								</div>
 							</div>
 						`;
 					});
@@ -406,9 +680,27 @@
 		// Render kanban item
 		const renderKanbanItem = () => {
 			const tasks = document.querySelectorAll('.kanban-item');
-			console.log('tasks', board_tasks)
+			// console.log('tasks', board_tasks)
 			tasks.forEach(item => {
 				var element = getElement(item);
+
+				const labels = element?.labels.map(label => {
+				// Check if `name` is a valid JSON string or a simple string
+				if (label.name.startsWith("[") && label.name.endsWith("]")) {
+					try {
+						const parsed = JSON.parse(label.name); // Parse the stringified JSON
+						return parsed.map(item => item.value); // Extract `value` properties
+					} catch (e) {
+						console.error("Error parsing JSON:", e);
+						return []; // Handle invalid JSON gracefully
+					}
+				} else {
+					// If `name` is a simple string, wrap it in an array
+					return [label.name];
+				}
+			}).flat(); // Flatten the result into a single array if needed
+
+				console.log('labels', labels)
 
 				let taskContent = element.content;
 				let taskName = element.name;
@@ -427,8 +719,8 @@
 				let content = `
 					<div class="card shadow-sm p-3 d-flex flex-column">
 						<div class="d-flex align-items-center gap-1 mb-2">
-							${element.labels.map(label => `<div class="badge bg-label-info">
-								<div class="fw-bold" style="font-size: 11px;">${label.name}</div>
+							${labels?.slice(0, 2)?.map(label => `<div class="badge bg-label-info">
+								<div class="fw-bold" style="font-size: 11px;">${label}</div>
 							</div>`).join('')}
 							<div class="badge bg-label-${bg} d-flex align-items-center justify-content-center">
 								<div style="width: 7px; height: 7px;" class="bg-${bg} rounded-circle me-1"></div>
@@ -526,7 +818,9 @@
 							<i class="ti ti-trash text-danger ti-16px"></i>
 						</div>
 					</div>
-					<p class="text-muted mb-0" style="font-size: 14px; direction: {{ $lang == 'ar' ? 'rtl' : 'ltr' }};">${commentText}</p>
+					<div class="text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
+						${commentText}
+					</div>
 				`;
 				commentList.appendChild(commentDiv);
 				commentInput.value = '';
@@ -559,6 +853,59 @@
 			commentsTab.classList.remove('border-bottom', 'border-primary');
 			activityContainer.classList.remove('d-none');
 			commentsContainer.classList.add('d-none');
+		});
+	</script>
+	<script>
+		const lang = document.documentElement.lang;
+		const addTaskButton = document.getElementById('addTaskButton');
+
+		addTaskButton.addEventListener('click', () => {
+			console.log('addTaskButton clicked');
+			console.log('lang', lang);
+			const formModalTitle = document.getElementById('form-modal-title');
+			formModalTitle.textContent = lang == 'en' ? 'Create New Task' : 'إضافة مهمة جديدة';
+		});
+		
+		editTakButton.addEventListener('click', () => {
+			console.log('editTakButton clicked');
+			console.log('lang', lang);
+			const formModalTitle = document.getElementById('form-modal-title');
+			const formModal = document.getElementById('formTaskModal');
+			
+			setTimeout(() => {
+				$('formTaskModal').modal('show');
+			}, 1000);
+			
+			formModalTitle.textContent = lang == 'en' ? 'Edit Task' : 'تعديل المهمة';
+		});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const tagsInput = document.getElementById('TagifyTags');
+			const assigneeInput = document.getElementById('AssigneeInput');
+			console.log('tagsInput', tagsInput);
+			console.log('assigneeInput', assigneeInput);
+			let TagifyCustomInlineSuggestion = new Tagify(tagsInput, {
+				whitelist: ['html', 'css'],
+				maxTags: 10,
+				dropdown: {
+					maxItems: 20,
+					classname: 'tags-inline',
+					enabled: 0,
+					closeOnSelect: false
+				}
+			});
+
+			let AssigneeCustomInlineSuggestion = new Tagify(assigneeInput, {
+				whitelist: ['ahmed', 'mohamed'],
+				maxTags: 10,
+				dropdown: {
+					maxItems: 20,
+					classname: 'tags-inline',
+					enabled: 0,
+					closeOnSelect: false
+				}
+			});
 		});
 	</script>
 @stop
