@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Mentor\MentorshipTaskController;
 /* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
 
 Route::get('test',function(){
@@ -210,6 +211,7 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/myFiles','FilemanagerController@index');
     Route::get('/uploads/files/{id}/{path}','FilemanagerController@showfile')->where('path', '.*');
     Route::get('/uploads/photos/{id}/{path}','FilemanagerController@showimage')->where('path', '.*');
+    Route::get('/uploads/mentorship_tasks/{id}/cards/{card_id}/{path}', [MentorshipTaskController::class, 'attachments'])->where('path', '.*');
     //Explore private files
     Route::get('/private/{id}/{path}','FilemanagerController@showprivate')->where('path', '.*');
     //FileManager for training

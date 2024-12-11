@@ -110,6 +110,12 @@ return [
             'url' => env('APP_URL').'/dashboard/uploads',
             'visibility' => 'private',
         ],
+        'mentorship_tasks' => [
+            'driver' => 'local',
+            'root' => storage_path('app/mentorship_tasks'),
+            'url' => env('APP_URL').'/dashboard/uploads',
+            'visibility' => 'private',
+        ]
 
     ],
 
