@@ -1047,5 +1047,8 @@ return [
 	'Ended' => 'انتهت',
 	'Compare'=> 'مقارنة',
 	'Assessment_deleted_successfully'=> 'تم مسح التقييم',
+	'EmailUpdatedSuccessfully'=> 'تم تحديث البريد الالكتروني بنجاح',
+	'WrongLink'=> 'الرابط غير صالح',
+	'UpdateEmailSent'=> 'تم ارسال البريد الالكتروني للتأكيد',
 	
 ];

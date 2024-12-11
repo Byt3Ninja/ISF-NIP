@@ -152,6 +152,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('Mentors_Filter');
+    Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('email.confirm');
+
 
     Route::resource('Tags', 'TagsController');
     Route::resource('Labels', 'LabelController');
