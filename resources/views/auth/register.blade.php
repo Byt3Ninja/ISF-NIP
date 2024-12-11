@@ -347,7 +347,7 @@
                       <select name="Expertise[]" class="select2 form-control" multiple="multiple"
                         id="Expertise">
                         @php
-                          $expertises = App\Expertise::all();
+                          $expertises = App\Expertise::where('parent_id',null)->get();
                         @endphp
                         @foreach ($expertises as $expertise_group)
                           <optgroup label="{{ $expertise_group->title }}">
