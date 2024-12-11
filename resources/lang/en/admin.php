@@ -1029,4 +1029,7 @@ return [
 	'Ended' => 'Ended',
 	'Compare'=> 'Compare',
 	'Assessment_deleted_successfully'=> 'Assessment Deleted Successfully',
+	'EmailUpdatedSuccessfully'=> 'Email Updated Successfully',
+	'WrongLink'=> 'Wrong Link',
+	'UpdateEmailSent'=> 'Update Email Sent',
 ];
