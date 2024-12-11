@@ -30,7 +30,12 @@ class UpdateClientProfileRequest extends FormRequest
             'first_name_en' => ['required', 'string', 'max:255'],
             'last_name_en' => ['required', 'string', 'max:255'],
             'phone' => ['required'],
-            'email' => 'email|required|unique:users,email,'.$id ,
+            'email' => [
+                            'required',
+                            'email',
+                            'unique:users,email,' . $id,
+                            'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
+                        ],
             'HaveCompany'=>['nullable','max:1'],
 
         ];
