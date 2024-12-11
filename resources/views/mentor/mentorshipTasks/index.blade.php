@@ -73,23 +73,39 @@
 		<!-- Content -->
 		<div class="container-xxl flex-grow-1 container-p-y">
 			<div class="card">
-				<div class="card-body">
-					<div class="d-flex justify-content-end w-100 border-bottom pb-3">
-						<div id="card-header">
-							<div class="ms-md-8 d-flex flex-grow-1 position-relative">
-								<input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
-								<i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
+				@if (!empty($tasks) && count($tasks) > 0)
+					<div class="card-body">
+						<div class="d-flex justify-content-end w-100 border-bottom pb-3">
+							<div id="card-header">
+								<div class="ms-md-8 d-flex flex-grow-1 position-relative">
+									<input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
+									<i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
+								</div>
+								<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
+									<span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
+									<i class="ti ti-plus ti-16px"></i>
+								</button>
 							</div>
-							<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
-								<span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
-								<i class="ti ti-plus ti-16px"></i>
-							</button>
 						</div>
 					</div>
-				</div>
+				@endif
 				<div class="app-kanban">
-					<div class="kanban-wrapper"></div>
-				</div>
+					<!-- Kanban Wrapper -->
+					@if (!empty($tasks) && count($tasks) > 0)
+						<div class="kanban-wrapper"></div>
+					@else
+						<div class="d-flex flex-column justify-content-center align-items-center gap-4 my-10">
+							<img src="/icons/not-found.svg" width="337" height="234" />
+							<h4 class="mb-0 text-center">
+								{{ $l == 'en' ? 'You don’t have any tasks' : 'ليس لديك أي مهام' }}
+							</h4>
+							<button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
+								<i class="ti ti-plus ti-16px me-2"></i>
+								<span class="align-middle">{{ __('admin.Add_Task') }}</span>
+							</button>
+						</div>
+					@endif
+				</div>		
 			</div>
 		</div>
 		<!-- / Content -->
@@ -244,7 +260,7 @@
 				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
-							<h6 class="modal-title" id="form-modal-title"></h6>
+							<h6 class="modal-title" id="form-modal-title">Create New task</h6>
 							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
 								<i class="ti ti-x ti-20px text-primary"></i>
 							</div>
@@ -853,30 +869,6 @@
 			commentsTab.classList.remove('border-bottom', 'border-primary');
 			activityContainer.classList.remove('d-none');
 			commentsContainer.classList.add('d-none');
-		});
-	</script>
-	<script>
-		const lang = document.documentElement.lang;
-		const addTaskButton = document.getElementById('addTaskButton');
-
-		addTaskButton.addEventListener('click', () => {
-			console.log('addTaskButton clicked');
-			console.log('lang', lang);
-			const formModalTitle = document.getElementById('form-modal-title');
-			formModalTitle.textContent = lang == 'en' ? 'Create New Task' : 'إضافة مهمة جديدة';
-		});
-		
-		editTakButton.addEventListener('click', () => {
-			console.log('editTakButton clicked');
-			console.log('lang', lang);
-			const formModalTitle = document.getElementById('form-modal-title');
-			const formModal = document.getElementById('formTaskModal');
-			
-			setTimeout(() => {
-				$('formTaskModal').modal('show');
-			}, 1000);
-			
-			formModalTitle.textContent = lang == 'en' ? 'Edit Task' : 'تعديل المهمة';
 		});
 	</script>
 	<script>
