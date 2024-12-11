@@ -13,7 +13,7 @@ class Label extends Model
 
     public function trainings()
     {
-        return $this->belongsToMany(MentorshipTask::class, 'label_taks','label_id', 'mentorship_tasks_id');
+        return $this->belongsToMany(MentorshipTask::class, 'mentorship_task_labels','label_id', 'mentorship_tasks_id');
     }
 
     public function user()
@@ -23,6 +23,6 @@ class Label extends Model
     
     public function mentorshipTasks()
     {
-        return $this->belongsToMany(MentorshipTask::class, 'label_taks', 'label_id', 'mentorship_tasks_id');
+        return $this->belongsToMany(MentorshipTask::class, 'mentorship_task_labels', 'label_id', 'mentorship_tasks_id');
     }
 }

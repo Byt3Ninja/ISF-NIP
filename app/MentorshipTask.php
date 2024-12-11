@@ -32,7 +32,7 @@ class MentorshipTask extends Model
 
     public function labels()
     {
-        return $this->belongsToMany(Label::class, 'label_taks', 'mentorship_tasks_id', 'label_id');
+        return $this->belongsToMany(Label::class, 'mentorship_task_labels', 'mentorship_tasks_id', 'label_id');
     }
 
     

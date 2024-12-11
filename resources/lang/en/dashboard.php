@@ -136,5 +136,13 @@ return [
     'Show all' => 'Show all',
     'Final pending screening'=>'Pending Evaluation Session',
     'screening pending sessions'=>'Pending Filtration Session',
-
+    'logTaskCreated' => '<a target="_blank" href=":url">:user</a> created the task',
+    'logTaskUpdateTitle' => '<a target="_blank" href=":url">:user</a> changed task title from ":old" to ":new"',
+    'logTaskUpdateDescription' => '<a target="_blank" href=":url">:user</a> changed task description from ":old" to ":new"',
+    'logTaskUpdateDue_date' => '<a target="_blank" href=":url">:user</a> changed task due date from ":old" to ":new"',
+    'logTaskUpdateStatus' => '<a target="_blank" href=":url">:user</a> moved task from ":old" to ":new"',
+    'logTaskUpdatePriority' => '<a target="_blank" href=":url">:user</a> changed task priority from ":old" to ":new"',
+    'logTaskUpdateUserChange' => '<a target="_blank" href=":url">:user</a> assigned <a target="_blank" href=":new_url">:new_user</a> to the task instead of <a target="_blank" href=":old_url">:old_user</a>',
+    'logTaskUpdateUserAdd' => '<a target="_blank" href=":url">:user</a> assigned <a target="_blank" href=":new_url">:new_user</a> to the task',
+    'logTaskUpdateUserRemove' => '<a target="_blank" href=":url">:user</a> released <a target="_blank" href=":old_url">:old_user</a> from the task'
 ];
