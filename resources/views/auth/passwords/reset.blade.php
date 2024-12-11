@@ -69,7 +69,7 @@
                                                 <label class="text-bold-600" for="email">{{ __('auth.E-Mail') }}</label>
 
 
-                                                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus>
+                                                    <input id="email" type="email" readonly class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus>
 
                                                     @error('email')
                                                     <span class="invalid-feedback" role="alert">
