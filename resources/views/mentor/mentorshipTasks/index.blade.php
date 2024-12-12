@@ -4,9 +4,6 @@
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
