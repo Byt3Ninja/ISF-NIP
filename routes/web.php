@@ -1,11 +1,11 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
-/* Disable frontend */// Route::get('/', 'HomeController@index')->name('admin'); ///
+/* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
-Route::get('test',function(){
-    
-});
+Route::get('test', function () {});
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -35,70 +35,70 @@ Route::get('test',function(){
 
 
 /// Frontend routes ///
-Route::get('lang/{locale}','IndexController@lang');
-Route::get('/','IndexController@home');
-Route::get('home','IndexController@home');
-Route::get('about','IndexController@home');
-Route::get('faqs','IndexController@home');
-Route::get('contact','IndexController@home');
-Route::get('events','IndexController@home');
-Route::get('csr-events','IndexController@home');
-Route::get('blog','IndexController@home');
-Route::get('blog/{id}','IndexController@post');
-Route::post('message','IndexController@message');
-Route::post('sendmsg','IndexController@sendmsg');
-Route::get('page/{id}','IndexController@page');
-Route::get('search','IndexController@search');
-Route::get('event/{id}','IndexController@event');
-Route::post('eventregister','IndexController@eventregister');
+Route::get('lang/{locale}', 'IndexController@lang');
+Route::get('/', 'IndexController@home');
+Route::get('home', 'IndexController@home');
+Route::get('about', 'IndexController@home');
+Route::get('faqs', 'IndexController@home');
+Route::get('contact', 'IndexController@home');
+Route::get('events', 'IndexController@home');
+Route::get('csr-events', 'IndexController@home');
+Route::get('blog', 'IndexController@home');
+Route::get('blog/{id}', 'IndexController@post');
+Route::post('message', 'IndexController@message');
+Route::post('sendmsg', 'IndexController@sendmsg');
+Route::get('page/{id}', 'IndexController@page');
+Route::get('search', 'IndexController@search');
+Route::get('event/{id}', 'IndexController@event');
+Route::post('eventregister', 'IndexController@eventregister');
 
 Auth::routes(['verify' => true]);
-Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],function(){
-####################### Overall System Admin Routes ###############
-	// All Logged users
-	Route::get('/', 'HomeController@index')->name('admin');
-	Route::get('/dashboard', 'HomeController@index')->name('dashboard');
-	Route::get('/dark','HomeController@dark');
-	Route::get('/import-users','UserController@showImportForm')->name('import.form');
-	Route::post('/import-users','UserController@import')->name('import.users');
+Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], function () {
+    ####################### Overall System Admin Routes ###############
+    // All Logged users
+    Route::get('/', 'HomeController@index')->name('admin');
+    Route::get('/dashboard', 'HomeController@index')->name('dashboard');
+    Route::get('/dark', 'HomeController@dark');
+    Route::get('/import-users', 'UserController@showImportForm')->name('import.form');
+    Route::post('/import-users', 'UserController@import')->name('import.users');
 
     //Roles
-    Route::get('documentation/view/{id?}','HomeController@help');
+    Route::get('documentation/view/{id?}', 'HomeController@help');
     Route::resource('documentation', 'DocumentationController');
 
 
-    Route::get('calendar/{id}/edit','SettingsController@editcal');
-    Route::post('calendar/{id}/update','SettingsController@updatecal');
-    Route::get('calendar/{id}/delete','SettingsController@delcal');
-    Route::post('calendar/view','SettingsController@viewcal');
-	// Sliders Routes
+    Route::get('calendar/{id}/edit', 'SettingsController@editcal');
+    Route::post('calendar/{id}/update', 'SettingsController@updatecal');
+    Route::get('calendar/{id}/delete', 'SettingsController@delcal');
+    Route::post('calendar/view', 'SettingsController@viewcal');
+    // Sliders Routes
     Route::get('add_slide', 'SlidersController@add_slide');
     Route::post('store_slide', 'SlidersController@store_slide');
-	Route::any('slides', 'SlidersController@slides');
-	Route::get('edit_slide/{id}', 'SlidersController@editslide');
-	Route::post('update_slide/{id}', 'SlidersController@updateslide');
-	Route::get('delete_slide/{id}', 'SlidersController@deleteslide');
+    Route::any('slides', 'SlidersController@slides');
+    Route::get('edit_slide/{id}', 'SlidersController@editslide');
+    Route::post('update_slide/{id}', 'SlidersController@updateslide');
+    Route::get('delete_slide/{id}', 'SlidersController@deleteslide');
     // Menus Routes
     Route::get('add_menu', 'MenusController@add_menu');
     Route::post('store_menu', 'MenusController@store_menu');
-	Route::any('menus', 'MenusController@myMenus');
-	Route::get('edit_menu/{id}', 'MenusController@editMenu');
-	Route::post('update_menu/{id}', 'MenusController@updatemenu');
-	Route::get('delete_menu/{id}', 'MenusController@deleteMenu');
-	// Posts Routes
+    Route::any('menus', 'MenusController@myMenus');
+    Route::get('edit_menu/{id}', 'MenusController@editMenu');
+    Route::post('update_menu/{id}', 'MenusController@updatemenu');
+    Route::get('delete_menu/{id}', 'MenusController@deleteMenu');
+    // Posts Routes
     Route::get('addpost', 'PostsController@add_post');
     Route::post('storepost', 'PostsController@store_post');
-	Route::any('posts', 'PostsController@myposts');
-	Route::get('editpost/{id}', 'PostsController@editpost');
-	Route::post('updatepost/{id}', 'PostsController@updatepost');
-	Route::get('deletepost/{id}', 'PostsController@deletepost');
-	// Pages Routes
+    Route::any('posts', 'PostsController@myposts');
+    Route::get('editpost/{id}', 'PostsController@editpost');
+    Route::post('updatepost/{id}', 'PostsController@updatepost');
+    Route::get('deletepost/{id}', 'PostsController@deletepost');
+    // Pages Routes
     Route::get('addpage', 'PagesController@add_page');
     Route::post('storepage', 'PagesController@store_page');
-	Route::any('pages', 'PagesController@mypages');
-	Route::get('editpage/{id}', 'PagesController@editpage');
-	Route::post('updatepage/{id}', 'PagesController@updatepage');
-	Route::get('deletepage/{id}', 'PagesController@deletepage');
+    Route::any('pages', 'PagesController@mypages');
+    Route::get('editpage/{id}', 'PagesController@editpage');
+    Route::post('updatepage/{id}', 'PagesController@updatepage');
+    Route::get('deletepage/{id}', 'PagesController@deletepage');
     Route::get('editmypage', 'PagesController@editmypage');
     // Pages Events
     Route::get('addevent', 'EventsController@add_event');
@@ -107,13 +107,13 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('editevent/{id}', 'EventsController@editevent');
     Route::post('updateevent/{id}', 'EventsController@updateevent');
     Route::get('deleteevent/{id}', 'EventsController@deleteevent');
-	// Settings Routes
-	Route::any('settings', 'SettingsController@get_settings');
-	Route::post('update_settings', 'SettingsController@update_settings');
-	Route::any('setaboutus', 'SettingsController@get_aboutus');
-	Route::post('updateaboutus', 'SettingsController@update_aboutus');
-	Route::any('setcontactus', 'SettingsController@get_contactus');
-	Route::post('updatecontactus', 'SettingsController@update_contactus');
+    // Settings Routes
+    Route::any('settings', 'SettingsController@get_settings');
+    Route::post('update_settings', 'SettingsController@update_settings');
+    Route::any('setaboutus', 'SettingsController@get_aboutus');
+    Route::post('updateaboutus', 'SettingsController@update_aboutus');
+    Route::any('setcontactus', 'SettingsController@get_contactus');
+    Route::post('updatecontactus', 'SettingsController@update_contactus');
     Route::put('settings/Updateone', 'SettingsController@update_settingsone')->name('updateone');
     Route::put('settings/Updatelogo', 'SettingsController@update_settinglogo')->name('updatelogo');
     Route::put('settings/Updatetwo', 'SettingsController@update_settingstwo')->name('updatetwo');
@@ -124,32 +124,32 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::put('settings/UpdateimgHome', 'SettingsController@update_settingsImgHome')->name('updateSMImgHome');
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('updateSMAchiev');
 
-	//services categories Manager routes
-	Route::resource('serviceCategories', 'ServiceCategoryController');
-	//Services Manager routes
-	Route::resource('services', 'ServiceController');
-	//Services requests
+    //services categories Manager routes
+    Route::resource('serviceCategories', 'ServiceCategoryController');
+    //Services Manager routes
+    Route::resource('services', 'ServiceController');
+    //Services requests
     Route::get('requests/all', 'ServiceController@requests')->name('requests');
     Route::get('requests/old', 'ServiceController@oldrequests')->name('oldrequests');
     Route::post('requests/approve', 'ServiceController@approve');
-    Route::get('requests/mine','ServiceController@myrequests')->name('myrequests');
-	//Services Directory
-    Route::get('directory','HomeController@directory')->name('directory');
-    Route::post('directory/{id}','HomeController@showone');
-    Route::post('directory/{id}/rate','HomeController@rateservice');
-    Route::post('servicerequest','HomeController@servicereq');
-	//Types Manager routes
-	Route::resource('types', 'TypeController');
-  	//Partners Manager routes
+    Route::get('requests/mine', 'ServiceController@myrequests')->name('myrequests');
+    //Services Directory
+    Route::get('directory', 'HomeController@directory')->name('directory');
+    Route::post('directory/{id}', 'HomeController@showone');
+    Route::post('directory/{id}/rate', 'HomeController@rateservice');
+    Route::post('servicerequest', 'HomeController@servicereq');
+    //Types Manager routes
+    Route::resource('types', 'TypeController');
+    //Partners Manager routes
     Route::resource('partners', 'PartnersController');
     Route::resource('stages', 'StageController');
     //Press Manger routes
     Route::resource('press', 'PressController');
-	//Client's Profile
-	Route::get('/myProfile', 'ClientProfileController@edit')->name('my_profile');
-	Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
-	Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
-	Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
+    //Client's Profile
+    Route::get('/myProfile', 'ClientProfileController@edit')->name('my_profile');
+    Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
+    Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
+    Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('Mentors_Filter');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('email.confirm');
@@ -166,19 +166,19 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/UserTimeSheet', 'TimeSheetController@ClockUsers')->name('UserTimeSheet');
     Route::post('/UserTimeSheet/{id}', 'TimeSheetController@updateClockUser')->name('UserClockUpdate');
 
-    
+
     //Assessments
     Route::get('/question-assessment', 'AssessmentController@assessment')->name('question-assessment');
     Route::get('/assessment-create', 'AssessmentController@MakeAssessment')->name('make_new_assessment_to_user');
-	Route::get('/analysis-assessment', 'AssessmentController@analysisAssessment')->name('analysis-assessment');;
-	Route::get('/history-assessment', 'AssessmentController@historyAssessment')->name('history-assessment');;
-	Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
+    Route::get('/analysis-assessment', 'AssessmentController@analysisAssessment')->name('analysis-assessment');;
+    Route::get('/history-assessment', 'AssessmentController@historyAssessment')->name('history-assessment');;
+    Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
 
 
     // LFM File Manager Imges
     Route::get('/LFMGet/{files?}', 'organizationsController@GetLFM')->name('LFMGet');
 
-	//Client's company
+    //Client's company
     Route::resource('organizations', 'organizationsController');
 
     //Assessment
@@ -186,66 +186,66 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::resource('weights', 'WeightController');
     Route::resource('assessments', 'AssessmentController');
 
-    Route::get('get_subcategory','QuestionController@category')->name('get_subcategory_by_category');
+    Route::get('get_subcategory', 'QuestionController@category')->name('get_subcategory_by_category');
     // Route::resource('answerOption', 'AnswerOptionController');
 
     //Company profile
-	Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
-	Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
-	Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
-	Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
-	Route::post('/AddCompanyEdit', 'ClientCompanyController@EditTeams')->name('EditTeams_Comp');
-	Route::post('/AddCompanyDelete', 'ClientCompanyController@DeleteTeams')->name('DeleteTeams_Comp');
-	Route::post('/AddCompanyMileStone', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
-	Route::post('/EditCompanyMileStone', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
-	Route::post('/DeleteCompanyMileStone', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
-	//like a service
-	Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');
-	//Users  Manager routes
-	Route::resource('users', 'UserController');
-	Route::post('/users/password', 'UserController@updatePassword')->name('update_account_password');
-	Route::get('/companies','UserController@companies')->name('users.companies');
-	//Cities
-	Route::resource('cities', 'CityController');
-    Route::get('get_states','CityController@states')->name('get_states_by_country');
-	
-	//FileManager
-    Route::get('/myFiles','FilemanagerController@index');
-    Route::get('/uploads/files/{id}/{path}','FilemanagerController@showfile')->where('path', '.*');
-    Route::get('/uploads/photos/{id}/{path}','FilemanagerController@showimage')->where('path', '.*');
+    Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
+    Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
+    Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
+    Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
+    Route::post('/AddCompanyEdit', 'ClientCompanyController@EditTeams')->name('EditTeams_Comp');
+    Route::post('/AddCompanyDelete', 'ClientCompanyController@DeleteTeams')->name('DeleteTeams_Comp');
+    Route::post('/AddCompanyMileStone', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
+    Route::post('/EditCompanyMileStone', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
+    Route::post('/DeleteCompanyMileStone', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
+    //like a service
+    Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');
+    //Users  Manager routes
+    Route::resource('users', 'UserController');
+    Route::post('/users/password', 'UserController@updatePassword')->name('update_account_password');
+    Route::get('/companies', 'UserController@companies')->name('users.companies');
+    //Cities
+    Route::resource('cities', 'CityController');
+    Route::get('get_states', 'CityController@states')->name('get_states_by_country');
+
+    //FileManager
+    Route::get('/myFiles', 'FilemanagerController@index');
+    Route::get('/uploads/files/{id}/{path}', 'FilemanagerController@showfile')->where('path', '.*');
+    Route::get('/uploads/photos/{id}/{path}', 'FilemanagerController@showimage')->where('path', '.*');
     Route::get('/uploads/mentorship_tasks/{id}/cards/{card_id}/{path}', [MentorshipTaskController::class, 'attachments'])->where('path', '.*');
     //Explore private files
-    Route::get('/private/{id}/{path}','FilemanagerController@showprivate')->where('path', '.*');
+    Route::get('/private/{id}/{path}', 'FilemanagerController@showprivate')->where('path', '.*');
     //FileManager for training
-    Route::get('/training/allfiles','FilemanagerController@allfiles');
-    Route::get('/training/files/{path}','FilemanagerController@trainingfile')->where('path', '.*');
-    Route::get('/training/photos/{path}','FilemanagerController@trainingimage')->where('path', '.*');
+    Route::get('/training/allfiles', 'FilemanagerController@allfiles');
+    Route::get('/training/files/{path}', 'FilemanagerController@trainingfile')->where('path', '.*');
+    Route::get('/training/photos/{path}', 'FilemanagerController@trainingimage')->where('path', '.*');
     //SendMessage
-    Route::post('/send_message','MessengerController@sendmsg');
-    Route::get('/sendmessage','MessengerController@sendmessage')->name('sendmessage');
-    Route::post('/sendmessage','MessengerController@savemessage');
+    Route::post('/send_message', 'MessengerController@sendmsg');
+    Route::get('/sendmessage', 'MessengerController@sendmessage')->name('sendmessage');
+    Route::post('/sendmessage', 'MessengerController@savemessage');
     //ShowMessages
-    Route::get('/inbox','MessengerController@index')->name('inbox');
-    Route::get('/outbox','MessengerController@outbox')->name('outbox');
-    Route::get('/openmsg','MessengerController@openmsg');
-    Route::post('/mread','MessengerController@makeread');
-    Route::post('/messages/delete','MessengerController@destroy');
+    Route::get('/inbox', 'MessengerController@index')->name('inbox');
+    Route::get('/outbox', 'MessengerController@outbox')->name('outbox');
+    Route::get('/openmsg', 'MessengerController@openmsg');
+    Route::post('/mread', 'MessengerController@makeread');
+    Route::post('/messages/delete', 'MessengerController@destroy');
     //Contact US Messages
-    Route::get('mymsg','SettingsController@mymsg');
-    Route::post('msgreply','SettingsController@msgreply');
+    Route::get('mymsg', 'SettingsController@mymsg');
+    Route::post('msgreply', 'SettingsController@msgreply');
     Route::get('deletemsg/{id}', 'SettingsController@deletemsg');
     Route::post('makeread/{id}', 'SettingsController@makeread');
     Route::post('makeunread/{id}', 'SettingsController@makeunread');
     Route::get('openonemsg/{id}', 'SettingsController@openonemsg');
     //products categories Manager routes
     Route::resource('productsCategories', 'ProductCategoryController');
-    
+
     //products Manager routes
     Route::resource('products', 'ProductController');
     //publish
-    Route::any('products/publish/{id}','ProductController@publish');
+    Route::any('products/publish/{id}', 'ProductController@publish');
     //Interests
-    Route::any('interests','HomeController@myinterests')->name('myinterests');
+    Route::any('interests', 'HomeController@myinterests')->name('myinterests');
     //Audit Logs
     Route::resource('audit-logs', 'AuditLogsController', ['except' => ['create', 'store', 'edit', 'update']]);
     //Permissions
@@ -260,97 +260,98 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::post('form/{id}/save-form', 'FormBuilderController@saveForm')->name('save.form');
     Route::post('builder/{set}', 'FormBuilderController@modifyForm');
     Route::post('submit-form', 'FormBuilderController@handleFormRequest')->name('submit.form');
-    Route::get('builder/organization/{id?}','FormBuilderController@builderByOrganization');
+    Route::get('builder/organization/{id?}', 'FormBuilderController@builderByOrganization');
     //Cycles
-    Route::get('cycles/{id?}','CyclesController@index')->name('index.cycle');
-    Route::get('cycles/{id}/registered','CyclesController@users');
-    Route::post('cycles/modify','CyclesController@modify');
-    Route::get('cycles/view/{c?}/{s?}','CyclesController@view');
-    Route::post('cycles/save','CyclesController@saveForm');
-    Route::get('cycles/my/{id}','CyclesController@my');
-    Route::post('change/cyc','CyclesController@changAll');
+    Route::get('cycles/{id?}', 'CyclesController@index')->name('index.cycle');
+    Route::get('cycles/{id}/registered', 'CyclesController@users');
+    Route::post('cycles/modify', 'CyclesController@modify');
+    Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
+    Route::post('cycles/save', 'CyclesController@saveForm');
+    Route::get('cycles/my/{id}', 'CyclesController@my');
+    Route::post('change/cyc', 'CyclesController@changAll');
     Route::get('/export-cyclesComp', 'CyclesController@exportcyclesComp');
 
     //Screening
-    Route::get('screening','ScreeningController@index');
-    Route::post('screening/update','ScreeningController@update');
-    Route::post('screening/save','ScreeningController@save');
-    Route::post('screening/add','ScreeningController@add');
-    Route::get('screening/results/{id?}','ScreeningController@results');
-    Route::get('{id?}/screening','ScreeningController@index');
-    Route::get('screening/{fid}/{cid}','ScreeningController@view');
-    Route::get('screening/get/{fid}/{sid}/{pid}','ScreeningController@getusers');
-    Route::post('screening/changestep','ScreeningController@changestep');
+    Route::get('screening', 'ScreeningController@index');
+    Route::post('screening/update', 'ScreeningController@update');
+    Route::post('screening/save', 'ScreeningController@save');
+    Route::post('screening/add', 'ScreeningController@add');
+    Route::get('screening/results/{id?}', 'ScreeningController@results');
+    Route::get('{id?}/screening', 'ScreeningController@index');
+    Route::get('screening/{fid}/{cid}', 'ScreeningController@view');
+    Route::get('screening/get/{fid}/{sid}/{pid}', 'ScreeningController@getusers');
+    Route::post('screening/changestep', 'ScreeningController@changestep');
     Route::get('/export-Result', 'ScreeningController@exportresultScreen');
 
     //ZOOM
-    Route::get('zoom/all','MeetingController@showall');
-    Route::get('zoom/{id}/get','MeetingController@show');
-    Route::post('zoom/store','MeetingController@store');
-    Route::post('zoom/{id}/update','MeetingController@update');
-    Route::post('zoom/{id}/delete','MeetingController@destroy');
-    Route::get('zoom/{id}/registrants','MeetingController@registrants');
+    Route::get('zoom/all', 'MeetingController@showall');
+    Route::get('zoom/{id}/get', 'MeetingController@show');
+    Route::post('zoom/store', 'MeetingController@store');
+    Route::post('zoom/{id}/update', 'MeetingController@update');
+    Route::post('zoom/{id}/delete', 'MeetingController@destroy');
+    Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
     //Mentors
-    Route::post('mentors/modify','MentorsController@modify');
-    Route::post('mentorship/add','MentorsController@add');
-    Route::get('mentorship/assign/{id?}','MentorsController@list');
-    Route::post('mentorship/assign/{id}','MentorsController@assign');
-    Route::get('mentorship/view/{id?}','MentorsController@index');
-    Route::get('mentorship/{id?}/surveys','MentorsController@list_surveys')->name('mentorship.surveys');
-    Route::get('mentorship/{id?}/surveys/create','MentorsController@create_survey')->name('mentorship.create_survey');
-    Route::post('mentorship/{id?}/surveys/store','MentorsController@store_survey')->name('mentorship.store_survey');
-    Route::get('mentorship/{id?}/surveys/{survey?}/edit','MentorsController@edit_survey')->name('mentorship.edit_survey');
-    Route::patch('mentorship/{id?}/surveys/{survey?}/update','MentorsController@update_survey')->name('mentorship.update_survey');
-    Route::delete('mentorship/{id?}/surveys/{survey?}/destroy','MentorsController@destroy_survey')->name('mentorship.destroy_survey');
-    Route::get('mentorship/sessions','MentorsController@sessions');
-  	Route::post('mentorship/session','MentorsController@getSession');
-  	Route::post('mentorship/modify','MentorsController@modifySession');
-    Route::post('mentorship/addwait','MentorsController@addWait');
-    Route::get('mentorship/mine','MentorsController@mine');
-    Route::post('mentorship/rate','MentorsController@rate');
-    Route::post('mentorship/delsession/{id}' ,'MentorsController@delSession');
+    Route::post('mentors/modify', 'MentorsController@modify');
+    Route::post('mentorship/add', 'MentorsController@add');
+    Route::get('mentorship/assign/{id?}', 'MentorsController@list');
+    Route::post('mentorship/assign/{id}', 'MentorsController@assign');
+    Route::get('mentorship/view/{id?}', 'MentorsController@index');
+    Route::get('mentorship/{id?}/surveys', 'MentorsController@list_surveys')->name('mentorship.surveys');
+    Route::get('mentorship/{id?}/surveys/create', 'MentorsController@create_survey')->name('mentorship.create_survey');
+    Route::post('mentorship/{id?}/surveys/store', 'MentorsController@store_survey')->name('mentorship.store_survey');
+    Route::get('mentorship/{id?}/surveys/{survey?}/edit', 'MentorsController@edit_survey')->name('mentorship.edit_survey');
+    Route::patch('mentorship/{id?}/surveys/{survey?}/update', 'MentorsController@update_survey')->name('mentorship.update_survey');
+    Route::delete('mentorship/{id?}/surveys/{survey?}/destroy', 'MentorsController@destroy_survey')->name('mentorship.destroy_survey');
+    Route::get('mentorship/sessions', 'MentorsController@sessions');
+    Route::post('mentorship/session', 'MentorsController@getSession');
+    Route::post('mentorship/modify', 'MentorsController@modifySession');
+    Route::post('mentorship/addwait', 'MentorsController@addWait');
+    Route::get('mentorship/mine', 'MentorsController@mine');
+    Route::post('mentorship/rate', 'MentorsController@rate');
+    Route::post('mentorship/delsession/{id}', 'MentorsController@delSession');
     Route::get('/export-mentorship', 'MentorsController@exportMentorship');
-   
+
 
 
 
     //Training
-    Route::get('training/all/{id?}','TrainingController@all')->name('training.all');
-    Route::get('training/edit/{id}','TrainingController@edit');
-    Route::post('training/store','TrainingController@store');
-    Route::post('training/delete/{id}','TrainingController@delete');
-    Route::post('training/delcontent/{id}','TrainingController@delcontent');
-    Route::get('training/addcontent/{id}','TrainingController@addcontent');
-    Route::get('training/editcontent/{id}','TrainingController@editcontent');
-    Route::get('training/viewcontent/{id}','TrainingController@viewcontent');
-    Route::post('training/upload','TrainingController@upload')->name('training.upload');
+    Route::get('training/all/{id?}', 'TrainingController@all')->name('training.all');
+    Route::get('training/edit/{id}', 'TrainingController@edit');
+    Route::post('training/store', 'TrainingController@store');
+    Route::post('training/delete/{id}', 'TrainingController@delete');
+    Route::post('training/delcontent/{id}', 'TrainingController@delcontent');
+    Route::get('training/addcontent/{id}', 'TrainingController@addcontent');
+    Route::get('training/editcontent/{id}', 'TrainingController@editcontent');
+    Route::get('training/viewcontent/{id}', 'TrainingController@viewcontent');
+    Route::post('training/upload', 'TrainingController@upload')->name('training.upload');
     Route::post('training/storecontent', 'TrainingController@storecontent');
-    Route::get('training/my','TrainingController@mysessions')->name('training.my');
-    Route::get('training/my/{id}','TrainingController@my');
-    Route::get('training/my/{id}/quiz/{quiz_id}','TrainingController@myQuiz')->name('quiz.overview');
-    Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}','TrainingController@myQuizResponses')->name('quiz.response');
-    Route::post('training/my/{id}/quiz/{quiz_id}','TrainingController@doQuiz')->name('quiz.start');
-    Route::get('training/EditTR/{id}','TrainingController@editTR');
-    Route::get('training/viewCourse/{id}','TrainingController@showCourse');
+    Route::get('training/my', 'TrainingController@mysessions')->name('training.my');
+    Route::get('training/my/{id}', 'TrainingController@my');
+    Route::get('training/my/{id}/quiz/{quiz_id}', 'TrainingController@myQuiz')->name('quiz.overview');
+    Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}', 'TrainingController@myQuizResponses')->name('quiz.response');
+    Route::post('training/my/{id}/quiz/{quiz_id}', 'TrainingController@doQuiz')->name('quiz.start');
+    Route::get('training/EditTR/{id}', 'TrainingController@editTR');
+    Route::get('training/viewCourse/{id}', 'TrainingController@showCourse');
 
 
-    Route::get('training/results/{id?}','TrainingController@results');
-    Route::get('training/sessions/{id?}','TrainingController@sessions');
-    Route::post('training/addsession' ,'TrainingController@addsession');
-    Route::post('training/delsession/{id}' ,'TrainingController@delsession');
-    Route::post('training/session' ,'TrainingController@session');
-    Route::post('training/editsession' ,'TrainingController@editsession');
-    Route::post('trainings/getdsc/{id}' ,'TrainingController@getdsc');
+    Route::get('training/results/{id?}', 'TrainingController@results');
+    Route::get('training/sessions/{id?}', 'TrainingController@sessions');
+    Route::post('training/addsession', 'TrainingController@addsession');
+    Route::post('training/delsession/{id}', 'TrainingController@delsession');
+    Route::post('training/session', 'TrainingController@session');
+    Route::post('training/editsession', 'TrainingController@editsession');
+    Route::post('trainings/getdsc/{id}', 'TrainingController@getdsc');
     Route::get('/export-Tresult', 'TrainingController@exportTresult');
-    Route::post('trainings/change/Tresult','TrainingController@changAllTL');
-    Route::get('training/create','TrainingController@create')->name('training.create');
-    Route::get('training/{id?}/surveys','TrainingController@list_surveys')->name('training.surveys');
-    Route::get('training/{id?}/surveys/create','TrainingController@create_survey')->name('training.create_survey');
-    Route::post('training/{id?}/surveys/store','TrainingController@store_survey')->name('training.store_survey');
-    Route::get('training/{id?}/surveys/{survey?}/edit','TrainingController@edit_survey')->name('training.edit_survey');
-    Route::patch('training/{id?}/surveys/{survey?}/update','TrainingController@update_survey')->name('training.update_survey');
-    Route::delete('training/{id?}/surveys/{survey?}/destroy','TrainingController@destroy_survey')->name('training.destroy_survey');
-
+    Route::post('trainings/change/Tresult', 'TrainingController@changAllTL');
+    Route::get('training/create', 'TrainingController@create')->name('training.create');
+    Route::get('training/{id?}/surveys', 'TrainingController@list_surveys')->name('training.surveys');
+    Route::get('training/{id?}/surveys/create', 'TrainingController@create_survey')->name('training.create_survey');
+    Route::post('training/{id?}/surveys/store', 'TrainingController@store_survey')->name('training.store_survey');
+    Route::get('training/{id?}/surveys/{survey?}/edit', 'TrainingController@edit_survey')->name('training.edit_survey');
+    Route::patch('training/{id?}/surveys/{survey?}/update', 'TrainingController@update_survey')->name('training.update_survey');
+    Route::delete('training/{id?}/surveys/{survey?}/destroy', 'TrainingController@destroy_survey')->name('training.destroy_survey');
+    Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.sessionReport');
+    Route::get('training/recorded-sessions/{id}', 'TrainingController@recordedSessions')->name('training.recordedSessions');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
@@ -369,8 +370,8 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
 
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
-    Route::get('/roomImages/{id}','RoomsController@roomImages')->name('roomImages');
-    Route::get('/deleteImages/{id}','RoomsController@deleteImages')->name('deleteImages');
+    Route::get('/roomImages/{id}', 'RoomsController@roomImages')->name('roomImages');
+    Route::get('/deleteImages/{id}', 'RoomsController@deleteImages')->name('deleteImages');
     Route::resource('booking', 'BookingController');
     Route::get('/bookingreview', 'BookingController@review')->name('bookingreview');
     Route::get('/bookingApprove/{id}/{action}', 'BookingController@approve')->name('bookingApprove');
@@ -378,50 +379,49 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
     Route::get('/upcomingBusyReview', 'BookingController@upcomingBusyReview')->name('upcomingBusyReview');
     Route::get('/oldReview', 'BookingController@oldReview')->name('oldReview');
     //Final Screening
-    Route::get('final','FinalscreeningController@index');
-    Route::get('{id?}/final','FinalscreeningController@index');
-    Route::post('final/update','FinalscreeningController@update');
-    Route::post('final/save','FinalscreeningController@save');
-    Route::post('final/addzoom','FinalscreeningController@addzoom');
-    Route::get('final/results/{id?}','FinalscreeningController@results');
-    Route::get('final/{step_id}/{company_id}','FinalscreeningController@view');
-    Route::get('final/get/{sid}/{pid}','FinalscreeningController@getusers');
-    Route::post('final/delsession/{id}' ,'FinalscreeningController@delsession');
+    Route::get('final', 'FinalscreeningController@index');
+    Route::get('{id?}/final', 'FinalscreeningController@index');
+    Route::post('final/update', 'FinalscreeningController@update');
+    Route::post('final/save', 'FinalscreeningController@save');
+    Route::post('final/addzoom', 'FinalscreeningController@addzoom');
+    Route::get('final/results/{id?}', 'FinalscreeningController@results');
+    Route::get('final/{step_id}/{company_id}', 'FinalscreeningController@view');
+    Route::get('final/get/{sid}/{pid}', 'FinalscreeningController@getusers');
+    Route::post('final/delsession/{id}', 'FinalscreeningController@delsession');
 
 
     //Program List
     Route::resource('programlist', 'ProgramController');
-    Route::get('programlist/show/{id}','ProgramController@show');
-    Route::post('programlist/Email','ProgramController@SentEmail');
+    Route::get('programlist/show/{id}', 'ProgramController@show');
+    Route::post('programlist/Email', 'ProgramController@SentEmail');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     // ===============> Mentor Dashboard Routes <===============
-    Route::group(['prefix' => 'mentor','namespace'=>'Mentor'],function (){
-        Route::get('mentorshipSessions','MentorshipController@index')->name('mentorshipSessions.index');
-        Route::get('meetingRedirect/{mentorship_request_id}','MentorshipController@meetingRedirect')->name('meetingRedirect');
-        Route::resource('mentorshipTasks','MentorshipTaskController');
-        Route::post('mentorshipTasks/send/comment','MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
-        Route::post('mentorshipTasks/updateW','MentorshipTaskController@updateWith')->name('mentorshipTasks.updateWith');
-
+    Route::group(['prefix' => 'mentor', 'namespace' => 'Mentor'], function () {
+        Route::get('mentorshipSessions', 'MentorshipController@index')->name('mentorshipSessions.index');
+        Route::get('meetingRedirect/{mentorship_request_id}', 'MentorshipController@meetingRedirect')->name('meetingRedirect');
+        Route::resource('mentorshipTasks', 'MentorshipTaskController');
+        Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+        Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorshipTasks.updateWith');
     });
 
 
 
     // =====================> Startup Routes <===========
 
-    Route::group(['prefix' => 'startup','as'=>'startup.','namespace'=>'Startup'],function (){
-        Route::get('mentorshipTasks','MentorshipTaskController@home')->name('mentorshipTasks.home');
-        Route::get('mentorshipTasks/{mentorship_id}','MentorshipTaskController@index')->name('mentorshipTasks.index');
-        Route::get('mentorshipTasks/show/{mentorshipTask}','MentorshipTaskController@show')->name('mentorshipTasks.show');
-        Route::post('mentorshipTasks/complete/{mentorshipTask}','MentorshipTaskController@complete')->name('mentorshipTasks.complete');
-        Route::post('mentorshipTasks/send/comment','MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
-        Route::resource('fundingRounds','FundingRoundController')->except(['index']);
+    Route::group(['prefix' => 'startup', 'as' => 'startup.', 'namespace' => 'Startup'], function () {
+        Route::get('mentorshipTasks', 'MentorshipTaskController@home')->name('mentorshipTasks.home');
+        Route::get('mentorshipTasks/{mentorship_id}', 'MentorshipTaskController@index')->name('mentorshipTasks.index');
+        Route::get('mentorshipTasks/show/{mentorshipTask}', 'MentorshipTaskController@show')->name('mentorshipTasks.show');
+        Route::post('mentorshipTasks/complete/{mentorshipTask}', 'MentorshipTaskController@complete')->name('mentorshipTasks.complete');
+        Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+        Route::resource('fundingRounds', 'FundingRoundController')->except(['index']);
     });
 
     // =================> Calender Routes <==================
-    Route::group(['prefix' => 'calendar','namespace'=>'Calender'],function () {
-        Route::get('/','CalenderController@index')->name('calendar');
-        Route::post('calendarViewCall','CalenderController@ViewCall')->name('calendarAjax');
+    Route::group(['prefix' => 'calendar', 'namespace' => 'Calender'], function () {
+        Route::get('/', 'CalenderController@index')->name('calendar');
+        Route::post('calendarViewCall', 'CalenderController@ViewCall')->name('calendarAjax');
         // ===>  google sync <=====
         Route::get('login/google', 'GoogleCalendarController@redirectToGoogle')->name('calender.login.google');
         Route::get('callback/google', 'GoogleCalendarController@handleGoogleCallback')->name('calender.callback.google');
@@ -431,14 +431,13 @@ Route::group(['prefix' => 'dashboard','middleware'=>['auth', 'verified']],functi
         Route::get('login/microsoft', 'MicrosoftCalendarController@redirectToMicrosoft')->name('calender.login.microsoft');
         Route::get('callback/microsoft', 'MicrosoftCalendarController@handleMicrosoftCallback')->name('calender.callback.microsoft');
         Route::get('microsoft-sync-events', 'MicrosoftCalendarController@syncEvents')->name('calender.MicrosoftsyncEvents');
-
     });
 
     // ===============> Reports <============
-    Route::group(['prefix' => 'reports'],function (){
-        Route::get('/','ReportController@index')->name('reports.index');
+    Route::group(['prefix' => 'reports'], function () {
+        Route::get('/', 'ReportController@index')->name('reports.index');
         // ======> Ajax Route
-        Route::get('view/{type?}','ReportController@View')->name('reports.view.ajax');
+        Route::get('view/{type?}', 'ReportController@View')->name('reports.view.ajax');
     });
     //================> End Reports <============
 });
@@ -461,4 +460,6 @@ Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
 Route::get('/auth/microsoft/redirect/{mentorship_id}',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
 Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('auth.microsoft.callback');
 
-if( request()->secure() ) { URL::forceScheme("https"); }
+if (request()->secure()) {
+    URL::forceScheme("https");
+}

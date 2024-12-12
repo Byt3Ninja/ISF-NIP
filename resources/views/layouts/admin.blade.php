@@ -98,8 +98,7 @@
         // Enable pusher logging - don't include this in production
         Pusher.logToConsole = true;
         var pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
-          // cluster: 'eu'
-          encrypted: true
+          cluster: 'eu'
         });
         // Subscribe to the channel we specified in our Laravel Event
         var channel = pusher.subscribe('Web-Message');

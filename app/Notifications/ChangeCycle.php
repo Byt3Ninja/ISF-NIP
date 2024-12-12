@@ -55,4 +55,17 @@ class ChangeCycle extends Notification
             'organization_name' => $this->data['organization_name_en'] ?? 'Unknown Organization',
         ];
     }
+
+    /**
+     * Get the generic array representation of the notification.
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'company_name' => $this->data['company_name_en'] ?? 'Unknown Company',
+            'last_step' => $this->data['last_step'] ?? 'N/A',
+            'new_step' => $this->data['new_step'] ?? 'N/A',
+            'organization_name' => $this->data['organization_name_en'] ?? 'Unknown Organization',
+        ];
+    }
 }
