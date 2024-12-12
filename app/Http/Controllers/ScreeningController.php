@@ -237,8 +237,7 @@ class ScreeningController extends Controller
             $data['organization_name_en'] = $cstep->cycle->organization->name_en;
 
             // Broadcast Event //
-            broadcast(new ChangeStep($data));
-
+            ChangeStep::dispatch($data);
 
             $recipients = collect([$company_owner])
                 ->merge(User::role("Mentor")->get())
