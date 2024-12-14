@@ -9,6 +9,9 @@
  use Illuminate\Support\Str;
  use Illuminate\Support\Facades\Hash;
  use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
  class SocialController extends Controller
  {
 
@@ -94,4 +97,58 @@
             return redirect('auth/google');
         }
     }
+
+    // ===========> LinkedIn <==========
+    public function redirectToLinkedIn()
+    {
+      
+    return Socialite::driver('linkedin')->stateless()->redirect();
+    }
+
+    public function handleLinkedInCallback()
+    {
+      
+      try {
+        // جلب بيانات المستخدم من LinkedIn
+        $linkedInUser = Socialite::driver('linkedin')->user();
+        
+        // تقسيم الاسم الكامل إلى الاسم الأول واسم العائلة
+        $name = explode(' ', $linkedInUser->getName(), 2); // أول جزئين من الاسم
+
+        // التحقق مما إذا كان المستخدم موجودًا في قاعدة البيانات
+        $existingUser = User::where('email', $linkedInUser->getEmail())->first();
+
+        if ($existingUser) {
+            // تسجيل دخول المستخدم إذا كان موجودًا
+            auth()->login($existingUser);
+        } else {
+            // إنشاء مستخدم جديد
+            $newUser = User::create([
+                'first_name_en' => $name[0] ?? '', // الاسم الأول
+                'last_name_en'  => $name[1] ?? '', // اسم العائلة
+                'email'         => $linkedInUser->getEmail(),
+                'password'      => Hash::make('no need for password token based'),
+                'linkedin_id'   => $linkedInUser->getId(), // معرف LinkedIn
+                'email_verified_at' => now(),
+            ]);
+
+            // تعيين دور للمستخدم (مثال: مسجل)
+            $newUser->assignRole('Registered');
+
+            // إطلاق حدث مخصص عند إنشاء مستخدم جديد
+            event(new WebMessage('NewUser', $linkedInUser->getName(), 1));
+
+            // تسجيل دخول المستخدم الجديد
+            auth()->login($newUser);
+        }
+
+        // إعادة توجيه المستخدم إلى لوحة التحكم
+        return redirect('/dashboard');
+    } catch (\Exception $e) {
+        // في حالة حدوث خطأ أثناء عملية تسجيل الدخول
+        return redirect('/login')->withErrors(['error' => 'Failed to log in using LinkedIn.']);
+    }
+    }
+
+
  }

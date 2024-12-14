@@ -118,12 +118,7 @@
     $secondName = $l == 'ar' ? 'الاسم الاخير' : 'Last Name';
     $gender = $l == 'ar' ? 'النوع' : 'Gender';
     $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
-
-    $accountRoles = ['Mentor', 'Founder'];
-
-    // Validations
-    $jobTitleEn = $l == 'ar' ? 'هذا الحقل يقبل الحروف الإنجليزية فقط' : 'This field accepts English letters only.';
-  @endphp
+    $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
   
   <!-- Content -->
 
@@ -368,23 +363,44 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary d-grid w-100 mb-4"> {{ __('auth.Register') }}</button>
-              <p class="text-center">
-                <span>{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</span>
-                <a href="/login">
-                  <span>{{ __('Login') }}</span>
-                </a>
-              </p>
-              <div class="divider my-6">
-                <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
-              </div>
-              <div class="container mt-5 mb-12">
-                <a href="{{ url('/auth/redirect/google') }}"
-                  class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
-                  <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
-                </a>
-              </div>
-          </form>
+              {{-- <div class="my-8">
+                <div class="form-check mb-0 ms-2">
+                  <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
+                  <label class="form-check-label" for="terms-conditions">
+                    I agree to
+                    <a href="javascript:void(0);">privacy policy & terms</a>
+                  </label>
+                </div>
+              </div> --}}
+              <button class="btn btn-primary d-grid w-100"> {{ __('auth.Register') }}</button>
+            </form>
+
+            <p class="text-center">
+              <span>{{__('Already have account')}}{{$l == 'ar' ? '؟' : '?'}}</span>
+              <a href="/login">
+                <span>{{__('Login')}}</span>
+              </a>
+            </p>
+
+            <div class="divider my-6">
+              <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+            </div>
+
+            <div class="container mt-5">
+              <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
+                <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
+              </a>
+            </div>
+
+            @if (app()->environment('local'))
+          <div class="container mt-5">
+            <a href="{{ route('linkedin.login') }}" class="btn btn-label-success btn-block d-flex align-items-center justify-content-center">
+              <i class="fab fa-linkdin me-2"></i> <span>{{ $linkdinSignIn }}</span>
+            </a>
+          </div>
+          @endif
+          
+          </div>
         </div>
       @endif
       <!-- / Register -->
