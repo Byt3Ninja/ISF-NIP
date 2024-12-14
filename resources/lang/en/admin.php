@@ -1032,4 +1032,5 @@ return [
 	'EmailUpdatedSuccessfully'=> 'Email Updated Successfully',
 	'WrongLink'=> 'Wrong Link',
 	'UpdateEmailSent'=> 'Update Email Sent',
+	'Select Expertise' => 'Select Expertise',
 ];

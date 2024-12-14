@@ -1050,5 +1050,5 @@ return [
 	'EmailUpdatedSuccessfully'=> 'تم تحديث البريد الالكتروني بنجاح',
 	'WrongLink'=> 'الرابط غير صالح',
 	'UpdateEmailSent'=> 'تم ارسال البريد الالكتروني للتأكيد',
-	
+	'Select Expertise' => 'اختر الخبرة',
 ];
