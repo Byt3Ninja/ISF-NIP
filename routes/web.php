@@ -432,6 +432,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('callback/microsoft', 'MicrosoftCalendarController@handleMicrosoftCallback')->name('calender.callback.microsoft');
         Route::get('microsoft-sync-events', 'MicrosoftCalendarController@syncEvents')->name('calender.MicrosoftsyncEvents');
     });
+    
 
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'], function () {
@@ -441,6 +442,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     });
     //================> End Reports <============
 });
+
+
 
 ///// Reports routes
 //Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
@@ -459,6 +462,10 @@ Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
 
 Route::get('/auth/microsoft/redirect/{mentorship_id}',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
 Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('auth.microsoft.callback');
+
+// --------------------> Linked In <-------------------
+Route::get('/auth/linkedin', 'SocialController@redirectToLinkedIn')->name('linkedin.login');
+Route::get('/auth/linkedin/callback', 'SocialController@handleLinkedInCallback')->name('handleLinkedInCallback');
 
 if (request()->secure()) {
     URL::forceScheme("https");

@@ -90,6 +90,7 @@
     : 'Please sign-in to your account and
     start the adventure';
     $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
+    $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
     @endphp
 
   <!-- Content -->
@@ -268,6 +269,14 @@
               <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
             </a>
           </div>
+          @if (app()->environment('local', 'dev'))
+          <div class="container mt-5">
+            <a href="{{ route('linkedin.login') }}" class="btn btn-label-success btn-block d-flex align-items-center justify-content-center">
+              <i class="fab fa-linkdin me-2"></i> <span>{{ $linkdinSignIn }}</span>
+            </a>
+          </div>
+          @endif
+
         </div>
       </div>
       <!-- /Login -->
