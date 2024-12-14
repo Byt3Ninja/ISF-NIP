@@ -269,7 +269,7 @@
               <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
             </a>
           </div>
-          @if (app()->environment('local'))
+          @if (app()->environment('local', 'dev'))
           <div class="container mt-5">
             <a href="{{ route('linkedin.login') }}" class="btn btn-label-success btn-block d-flex align-items-center justify-content-center">
               <i class="fab fa-linkdin me-2"></i> <span>{{ $linkdinSignIn }}</span>
