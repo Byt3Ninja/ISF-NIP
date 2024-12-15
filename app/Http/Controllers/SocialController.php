@@ -145,8 +145,9 @@ use Illuminate\Support\Facades\Log;
         // إعادة توجيه المستخدم إلى لوحة التحكم
         return redirect('/dashboard');
     } catch (\Exception $e) {
+      dd($e);
         // في حالة حدوث خطأ أثناء عملية تسجيل الدخول
-        return redirect('/login')->withErrors(['error' => 'Failed to log in using LinkedIn.']);
+        return redirect('/login')->with(['error' => 'Failed to log in using LinkedIn.']);
     }
     }
 
