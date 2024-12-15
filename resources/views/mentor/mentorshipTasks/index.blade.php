@@ -270,7 +270,7 @@
 								<input type="text" class="form-control" id="task-name" name="task-name" />
 							</div>
 							<div class="mb-3">
-								<label for="task-content" class="form-label">Discription</label>
+								<label for="task-content" class="form-label">Description</label>
 								<textarea class="form-control" id="task-content" name="task-content" rows="3"></textarea>
 							</div>
 							<div class="row mb-3">
@@ -288,7 +288,7 @@
 									</select>
 								</div>
 							</div>
-							<div class="bg-label-secondary p-2 rounded mb-4 border">
+							{{--  <div class="bg-label-secondary p-2 rounded mb-4 border">
 								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
 									<div class="d-flex align-items-center justify-content-center gap-2">
 										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>Attachments</h6>
@@ -301,7 +301,7 @@
 									</button>
 								</div>
 								<div class="d-flex flex-wrap gap-2" id="fileList"></div>
-							</div>
+							</div>  --}}
 							
 							<div class="row mb-3">
 								<div class="col-3 d-flex align-items-center">
@@ -332,13 +332,7 @@
 										<option value="2">User 2</option>
 										<option value="3">User 3</option>
 									</select> --}}
-									<input
-										id="AssigneeInput"
-										name="AssigneeInput"
-										class="form-control"
-										placeholder="select users"
-										value=""
-									/>
+									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="select user" value="" />
 								</div>
 							</div>
 							<div class="row mb-3">
@@ -352,7 +346,7 @@
 									<input type="date" class="form-control" id="task-due-date" name="task-due-date" />
 								</div>
 								<div class="col-4">
-									<input type="date" class="form-control" id="task-due-date" name="task-due-date" />
+									{{--  <input type="date" class="form-control" id="task-due-date" name="task-due-date" />  --}}
 								</div>
 							</div>
 							<div class="row mb-3">
@@ -363,20 +357,14 @@
 									</label>
 								</div>
 								<div class="col-9">
-									<input
-										id="TagifyTags"
-										name="TagifyTags"
-										class="form-control"
-										placeholder="select tags"
-										value=""
-									/>
+									<input id="task-labels" name="task-labels" class="form-control" placeholder="select labels" value="" />
 								</div>
 							</div>
 						</form>
 					</div>
 					<div class="mt-4 d-flex align-items-center gap-3">
 						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary">Create</button>
+						<button id="createTask" type="button" class="btn btn-primary">Create</button>
 					</div>
 				</div>
 			</div>
@@ -533,11 +521,10 @@
 	{{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
 	<script src="/vuexy/assets/js/forms-typeahead.js"></script>
 	<script>
+		var kanban;
 		var boards = @json($kanban);
-
 		var lang = '{{ $l }}';
 
-		// console.log('boards', boards)
 		var board_tasks = @json($tasks);
 		function getElement(el) { 
 			let id = $(el).data('eid');
@@ -546,8 +533,8 @@
 		}
 
 		// Render Kanban board
-		const renderKanabanBoard = () => {
-			const kanban = new jKanban({
+		const renderKanbanBoard = () => {
+			kanban = new jKanban({
 				element: '.kanban-wrapper',
 				gutter: '15px',
 				widthBoard: '250px',
@@ -675,17 +662,56 @@
 					$('#viewTaskModal').modal('show');
 				},
 				dragEl: (el, source) => {
-					console.log('Task is being dragged:', el);
+					// 
 				},
 				dragendEl: el => {
-					console.log('Task drag ended:', el);
 					// Perform any additional actions here
 				},
 				dropEl: (el, target, source, sibling) => {
-					console.log('Task dropped:', el);
-					console.log('New parent board:', target.parentElement.dataset.id);
-					console.log('Previous parent board:', source.parentElement.dataset.id);
+					var element = getElement(el);
+
+					var target_board_elements = target.parentElement.getElementsByClassName('kanban-item');
+					var target_board_elements_array = Array.from(target_board_elements);
+
+					var ids = target_board_elements_array.map((board_element, index) => { return $(board_element).data('eid'); });
+
 					// Perform any additional actions here
+					var send_data = {
+						_token: "{{ csrf_token() }}",
+						board_ids: ids,
+						moved_task_id: element.id,
+						mentorship_request_id: '{{ $session_id }}',
+						old_board: source.parentElement.dataset.id,
+						new_board: target.parentElement.dataset.id
+					}
+					$.ajax({
+						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/move-task') }}",
+						type: "POST",
+						data: send_data,
+						dataType: "json",
+						success: function(response) {
+							if( response.status )
+							{
+								var data = response.data;
+								boards = data.kanban;
+								board_tasks = data.tasks;
+								labels = data.labels;
+							}
+							else
+							{
+								alertify.error(response.message);
+							}
+							reloadKanban();
+						},
+						error: function(error) {
+							reloadKanban();
+							if( error.status == 422 )
+							{
+								for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+							} else { alertify.error('Unexpected error occurred.'); }
+						}
+					});
+
 				}
 			});
 		};
@@ -693,7 +719,6 @@
 		// Render kanban item
 		const renderKanbanItem = () => {
 			const tasks = document.querySelectorAll('.kanban-item');
-			// console.log('tasks', board_tasks)
 			tasks.forEach(item => {
 				var element = getElement(item);
 
@@ -712,9 +737,6 @@
 					return [label.name];
 				}
 			}).flat(); // Flatten the result into a single array if needed
-
-				console.log('labels', labels)
-
 				let taskContent = element.content;
 				let taskName = element.name;
 				let comments = element.comments;
@@ -728,7 +750,6 @@
 				else { bg = 'success'; }
 				let priority = element.priority_visible;
 
-				console.log('item', item);
 				let content = `
 					<div class="card shadow-sm p-3 d-flex flex-column">
 						<div class="d-flex align-items-center gap-1 mb-2">
@@ -761,17 +782,21 @@
 			})
 		};
 
+		const reloadKanban = () => {
+			var kanbanWrapper = document.querySelector('.kanban-wrapper');
+			kanbanWrapper.innerHTML = '';
+			renderKanbanBoard();
+			renderKanbanItem();
+		}
+
 		// Filter tasks on search
 		const searchTask = () => {
 			const searchInput = document.getElementById('search-task');
-			console.log('searchInput', searchInput);
 			searchInput.addEventListener('input', (e) => {
 				const searchValue = e.target.value;
-				console.log('searchValue', searchValue);
 				const tasks = document.querySelectorAll('.kanban-item');
 				tasks.forEach(task => {
 					const title = task.getAttribute('data-name');
-					console.log('title', title)
 					if (title.toLowerCase().includes(searchValue.toLowerCase())) {
 						task.style.display = 'block';
 					} else {
@@ -781,14 +806,13 @@
 			});
 		}
 
-		renderKanabanBoard();
+		renderKanbanBoard();
 		renderKanbanItem();
 		searchTask();
 	</script>
 	<script>
 		function handleFileUpload(event) {
 			const files = event.target.files;
-			console.log('files length', files?.length);
 			const fileList = document.getElementById('fileList');
 			const attachmentCount = document.getElementById('attachmentCount');
 			fileList.innerHTML = '';
@@ -868,14 +892,22 @@
 			commentsContainer.classList.add('d-none');
 		});
 	</script>
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			const tagsInput = document.getElementById('TagifyTags');
-			const assigneeInput = document.getElementById('AssigneeInput');
-			console.log('tagsInput', tagsInput);
-			console.log('assigneeInput', assigneeInput);
-			let TagifyCustomInlineSuggestion = new Tagify(tagsInput, {
-				whitelist: ['html', 'css'],
+	<script type="text/javascript">
+		var labels = @json($labels);
+		var selected_tags = [];
+		var selected_user = null;
+		var TagsCustomInlineSuggestion;
+		var AssigneeCustomInlineSuggestion;
+
+		const tagsInput = document.getElementById('task-labels');
+		const assigneeInput = document.getElementById('task-assignee');
+
+		const refreshLabelsForCreate = () => {
+			TagsCustomInlineSuggestion.off('change');
+			TagsCustomInlineSuggestion.destroy();
+			$('#task-labels').val('');
+			TagsCustomInlineSuggestion = new Tagify(tagsInput, {
+				whitelist: labels,
 				maxTags: 10,
 				dropdown: {
 					maxItems: 20,
@@ -883,16 +915,88 @@
 					enabled: 0,
 					closeOnSelect: false
 				}
-			});
+			}).on('change', function(e) { selected_tags =  e.detail.value.trim() ? selected_tags = JSON.parse( e.detail.value ) : []; });
+		};
 
-			let AssigneeCustomInlineSuggestion = new Tagify(assigneeInput, {
-				whitelist: ['ahmed', 'mohamed'],
+		document.addEventListener('DOMContentLoaded', function() {
+			$("#task-labels").val('');
+			$("#task-assignee").val('');
+			TagsCustomInlineSuggestion = new Tagify(tagsInput, {
+				whitelist: labels,
 				maxTags: 10,
 				dropdown: {
 					maxItems: 20,
 					classname: 'tags-inline',
 					enabled: 0,
 					closeOnSelect: false
+				}
+			}).on('change', function(e) { selected_tags =  e.detail.value.trim() ? selected_tags = JSON.parse( e.detail.value ) : []; });
+
+			AssigneeCustomInlineSuggestion = new Tagify(assigneeInput, {
+				whitelist: @json($users),
+				maxTags: 1,
+				dropdown: {
+					maxItems: 20,
+					classname: 'tags-inline',
+					enabled: 0,
+					closeOnSelect: true
+				}
+			}).on('change', function(e) {
+				if( e.detail.value.trim() )
+				{
+					selected_user = JSON.parse( e.detail.value ).map(item => item.id)[0];
+				} else { selected_user = null; }
+			});
+		});
+		$(document).on('click', '#createTask', function(e) {
+			e.preventDefault();
+			var send_data = {
+				_token: "{{ csrf_token() }}",
+				mentorship_request_id: '{{ $session_id }}',
+				title: $('#task-name').val(),
+				description: $('#task-content').val(),
+				due_date: $("#task-due-date").val(),
+				status: $('#task-status').val(),
+				priority: $("#task-priority").val('low'),
+				assignee: selected_user,
+				labels: selected_tags
+			}
+			$.ajax({
+				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/add-task') }}",
+				type: "POST",
+				data: send_data,
+				dataType: "json",
+				success: function(response) {
+					if( response.status )
+					{
+						var data = response.data;
+						boards = data.kanban;
+						board_tasks = data.tasks;
+						labels = data.labels;
+						$('#formTaskModal').modal('hide');
+						refreshLabelsForCreate();
+						$('#task-name').val('');
+						$('#task-content').val('');
+						$("#task-due-date").val('');
+						$('#task-status').val('pending');
+						$("#task-priority").val('low');
+						$("#task-labels").val('');
+						$("#task-assignee").val('');
+						Swal.fire({
+							icon: 'success',
+							title: response.title,
+							text: response.message,
+							showConfirmButton: false,
+							timer: 4500
+						});
+						reloadKanban();
+					}
+				},
+				error: function(error) {
+					if( error.status == 422 )
+					{
+						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+					}
 				}
 			});
 		});

@@ -144,5 +144,6 @@ return [
     'logTaskUpdatePriority' => 'قام <a target="_blank" href=":url">:user</a> بتغيير أولوية المهمة من ":old" إلى ":new"',
     'logTaskUpdateUserChange' => 'قام <a target="_blank" href=":url">:user</a> بإسناد <a target="_blank" href=":new_url">:new_user</a> إلى المهمة بدلا من <a target="_blank" href=":old_url">:old_user</a>',
     'logTaskUpdateUserAdd' => 'قام <a target="_blank" href=":url">:user</a> بإسناد <a target="_blank" href=":new_url">:new_user</a> إلى المهمة',
-    'logTaskUpdateUserRemove' => 'قام <a target="_blank" href=":url">:user</a> بإزالة <a target="_blank" href=":old_url">:old_user</a> من المهمة'
+    'logTaskUpdateUserRemove' => 'قام <a target="_blank" href=":url">:user</a> بإزالة <a target="_blank" href=":old_url">:old_user</a> من المهمة',
+    'logTaskUpdateRow_no' => 'قام <a target="_blank" href=":url">:user</a> بتغيير ترتيب فرز المهام من ":old" إلى ":new"',
 ];

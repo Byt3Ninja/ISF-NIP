@@ -9,7 +9,7 @@ class Label extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'user_id', 'company_id'];
 
     public function trainings()
     {
