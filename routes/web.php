@@ -401,6 +401,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('mentorshipSessions', 'MentorshipController@index')->name('mentorshipSessions.index');
         Route::get('meetingRedirect/{mentorship_request_id}', 'MentorshipController@meetingRedirect')->name('meetingRedirect');
         Route::resource('mentorshipTasks', 'MentorshipTaskController');
+        Route::post('mentorshipTasks/add-task', 'MentorshipTaskController@addTask');
+        Route::post('mentorshipTasks/move-task', 'MentorshipTaskController@moveTask');
+
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorshipTasks.updateWith');
     });
