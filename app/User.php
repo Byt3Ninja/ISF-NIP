@@ -59,7 +59,10 @@ class User extends Authenticatable implements MustVerifyEmail
         if (!$image) {
             return "/images/placeholder.jpg";
         }
-        return "/191014/".$image;
+        if ($image && !str_starts_with($image, 'https://')) {
+            return "/191014/" . $image;
+        }
+        return $image;
     }
     public function getNameAttribute()
     {

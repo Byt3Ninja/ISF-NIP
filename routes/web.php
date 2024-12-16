@@ -468,7 +468,7 @@ Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('a
 
 // --------------------> Linked In <-------------------
 Route::get('/auth/linkedin', 'SocialController@redirectToLinkedIn')->name('linkedin.login');
-Route::get('/auth/linkedin/callback', 'SocialController@handleLinkedInCallback')->name('handleLinkedInCallback');
+Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCallback')->name('handleLinkedInCallback');
 
 if (request()->secure()) {
     URL::forceScheme("https");

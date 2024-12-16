@@ -11,6 +11,7 @@
  use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
  class SocialController extends Controller
  {
@@ -101,54 +102,99 @@ use Illuminate\Support\Facades\Log;
     // ===========> LinkedIn <==========
     public function redirectToLinkedIn()
     {
-      
-    return Socialite::driver('linkedin')->stateless()->redirect();
+        $authorizationUrl = 'https://www.linkedin.com/oauth/v2/authorization';
+        $clientId = env('LINKEDIN_CLIENT_ID');
+        $redirectUri = env('LINKEDIN_REDIRECT_URI');
+        $scope = 'openid profile email'; // الأذونات المطلوبة
+    
+        $url = $authorizationUrl . '?response_type=code'
+            . '&client_id=' . $clientId
+            . '&redirect_uri=' . urlencode($redirectUri)
+            . '&scope=' . urlencode($scope);
+    
+        return redirect($url);
     }
-
-    public function handleLinkedInCallback()
+    
+    public function handleLinkedInCallback(Request $request)
     {
-      
-      try {
-        // جلب بيانات المستخدم من LinkedIn
-        $linkedInUser = Socialite::driver('linkedin')->user();
-        
-        // تقسيم الاسم الكامل إلى الاسم الأول واسم العائلة
-        $name = explode(' ', $linkedInUser->getName(), 2); // أول جزئين من الاسم
-
-        // التحقق مما إذا كان المستخدم موجودًا في قاعدة البيانات
-        $existingUser = User::where('email', $linkedInUser->getEmail())->first();
-
-        if ($existingUser) {
-            // تسجيل دخول المستخدم إذا كان موجودًا
-            auth()->login($existingUser);
-        } else {
-            // إنشاء مستخدم جديد
-            $newUser = User::create([
-                'first_name_en' => $name[0] ?? '', // الاسم الأول
-                'last_name_en'  => $name[1] ?? '', // اسم العائلة
-                'email'         => $linkedInUser->getEmail(),
-                'password'      => Hash::make('no need for password token based'),
-                'linkedin_id'   => $linkedInUser->getId(), // معرف LinkedIn
-                'email_verified_at' => now(),
-            ]);
-
-            // تعيين دور للمستخدم (مثال: مسجل)
-            $newUser->assignRole('Registered');
-
-            // إطلاق حدث مخصص عند إنشاء مستخدم جديد
-            event(new WebMessage('NewUser', $linkedInUser->getName(), 1));
-
-            // تسجيل دخول المستخدم الجديد
-            auth()->login($newUser);
+        if (!$request->has('code')) {
+            return redirect()->route('login')->with('error', 'Authorization code is missing');
         }
+    
+        $clientId = env('LINKEDIN_CLIENT_ID');
+        $clientSecret = env('LINKEDIN_CLIENT_SECRET');
+        $redirectUri = env('LINKEDIN_REDIRECT_URI');
+        $authorizationCode = $request->get('code');
+    
+        try {
+            $response = Http::asForm()->post('https://www.linkedin.com/oauth/v2/accessToken', [
+                'grant_type' => 'authorization_code',
+                'code' => $authorizationCode,
+                'redirect_uri' => $redirectUri,
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+            ]);
+            
+            if ($response->successful()) {
+                $accessToken = $response->json()['access_token'];
+                $userInfo = $this->getUserInfo($accessToken);
+                $userInfo = json_decode($userInfo, true);
+                  
+                if ($userInfo) {
+                    
 
-        // إعادة توجيه المستخدم إلى لوحة التحكم
-        return redirect('/dashboard');
-    } catch (\Exception $e) {
-      dd($e);
-        // في حالة حدوث خطأ أثناء عملية تسجيل الدخول
-        return redirect('/login')->with(['error' => 'Failed to log in using LinkedIn.']);
+                  $user = User::where('linkedin_id', $userInfo['sub'])->first();
+
+                  if ($user == null) {
+                      // حاول العثور على المستخدم باستخدام البريد الإلكتروني
+                      $user = User::where('email', $userInfo['email'] ?? null)->first();
+                      if ($user == null) {
+                          // إذا لم يتم العثور على المستخدم، قم بإنشاء مستخدم جديد
+                          $user = new User;
+                      }
+                      // تعيين بيانات المستخدم
+                      $user->first_name_en = $userInfo['given_name'] ?? '';
+                      $user->last_name_en = $userInfo['family_name'] ?? '';
+                      $user->first_name_ar = $userInfo['given_name'] ?? '';
+                      $user->last_name_ar = $userInfo['family_name'] ?? '';
+                      $user->linkedin_id = $userInfo['sub'] ?? '';
+                      $user->img_url = $userInfo['picture'] ?? null;
+                      // ضبط كلمة المرور إذا كانت غير موجودة
+                      if (!$user->password) {
+                          $user->password = Hash::make('no need for password token based');
+                      }
+                      // ضبط حالة التحقق من البريد الإلكتروني
+                      if (!empty($userInfo['email_verified']) && $userInfo['email_verified'] == true) {
+                          $user->email_verified_at = now();
+                      }
+                      $user->save();
+                  } else {
+                      // تحديث linkedin_id إذا تم العثور على المستخدم
+                      $user->linkedin_id = $userInfo['sub'] ?? '';
+                      $user->save();
+                  }
+                    auth()->login($user);
+    
+                    return redirect('/dashboard');
+                }
+            }
+    
+            return redirect()->route('login')->with('error', $response->json()['error_description'] ?? 'Unable to authenticate');
+        } catch (\Exception $e) {
+          dd($e);
+            return redirect()->route('login')->with('error', 'An unexpected error occurred');
+        }
     }
+    
+    private function getUserInfo($accessToken)
+    {
+        // طلب للحصول على بيانات المستخدم
+        $response = Http::withToken($accessToken)
+            ->get('https://api.linkedin.com/v2/userinfo');
+        if ($response->successful()) {
+          return $response->body(); 
+        }
+        return null; // في حالة فشل طلب البيانات
     }
 
 
