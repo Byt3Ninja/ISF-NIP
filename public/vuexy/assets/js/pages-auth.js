@@ -6,8 +6,6 @@
 
 const lang = document.documentElement.lang;
 
-const formAuthentication = document.querySelector('#formAuthentication');
-
 const translations = {
   en: {
     username: {
@@ -129,33 +127,40 @@ const translations = {
 
 document.addEventListener('DOMContentLoaded', function (e) {
   (function () {
-    const mentorInputs = document.getElementById('ShowInputMentor');
+    const founderForm = document.querySelector('#founderForm');
+    const mentorForm = document.querySelector('#mentorForm');
 
-    const mentorRoleRadio = document.getElementById('accountRole1');
-    const founderRoleRadio = document.getElementById('accountRole2');
-    console.log('mentorRoleRadio', mentorRoleRadio.checked);
+    const mentorRoleRadio = document.getElementById('MentorRole');
+    const founderRoleRadio = document.getElementById('FounderRole');
 
-    if (mentorInputs) {
-      mentorInputs.style.display = 'none';
-    }
+    console.log('mentorRoleRadio', mentorRoleRadio);
+    console.log('founderRoleRadio', founderRoleRadio);
 
-    console.log('mentorInputs', mentorInputs)
+    console.log('mentorForm', mentorForm);
+    console.log('founderForm', founderForm);
 
     if (mentorRoleRadio) {
       mentorRoleRadio.addEventListener('change', () => {
-        mentorInputs.style.display = mentorRoleRadio.checked ? 'block' : 'none';
+        console.log('mentor changed')
+        if (mentorRoleRadio.checked) {
+          mentorForm.style.display = 'block';
+          founderForm.style.display = 'none';
+        }
       });
     }
 
     if (founderRoleRadio) {
       founderRoleRadio.addEventListener('change', () => {
-        mentorInputs.style.display = founderRoleRadio.checked ? 'none' : 'block';
+        console.log('founder changed')
+        if (founderRoleRadio.checked) {
+          founderForm.style.display = 'block';
+          mentorForm.style.display = 'none';
+        }
       });
     }
 
-    // Form validation for Add new record
-    if (formAuthentication) {
-      const fv = FormValidation.formValidation(formAuthentication, {
+    if (founderForm) {
+      const fv = FormValidation.formValidation(founderForm, {
         fields: {
           username: {
             validators: {
@@ -174,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 message: translations[lang].first_name_en.notEmpty
               },
               regexp: {
-                regexp: /^[a-zA-Z\s]*$/i,
+                regexp: lang === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
                 message: translations[lang].first_name_en.stringOnly
               },
               // stringLength: {
@@ -189,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 message: translations[lang].last_name_en.notEmpty
               },
               regexp: {
-                regexp: /^[a-zA-Z\s]*$/i,
+                regexp: lang === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
                 message: translations[lang].last_name_en.stringOnly
               },
               // stringLength: {
@@ -249,13 +254,128 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 min: 8,
                 message: translations[lang].password_confirmation.stringLength
               },
-              // regexp: {
-              //   regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-              //   message: translations[lang].password.strong
-              // },
             }
           },
-          title_en: true ? {
+        },
+        plugins: {
+          trigger: new FormValidation.plugins.Trigger(),
+          bootstrap5: new FormValidation.plugins.Bootstrap5({
+            eleValidClass: '',
+            rowSelector: '.mb-6'
+          }),
+          submitButton: new FormValidation.plugins.SubmitButton(),
+
+          defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+          autoFocus: new FormValidation.plugins.AutoFocus()
+        },
+        init: instance => {
+          instance.on('plugins.message.placed', function (e) {
+            if (e.element.parentElement.classList.contains('input-group')) {
+              e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+            }
+          });
+        }
+      });
+    }
+    
+    if (mentorForm) {
+      const fv = FormValidation.formValidation(mentorForm, {
+        fields: {
+          username: {
+            validators: {
+              notEmpty: {
+                message: translations[lang].username.notEmpty
+              },
+              stringLength: {
+                min: 6,
+                message: translations[lang].username.stringLength
+              }
+            }
+          },
+          first_name_en: {
+            validators: {
+              notEmpty: {
+                message: translations[lang].first_name_en.notEmpty
+              },
+              regexp: {
+                regexp: /^[a-zA-Z\s]*$/i,
+                message: translations[lang].first_name_en.stringOnly
+              },
+              // stringLength: {
+              //   min: 6,
+              //   message: translations[lang].first_name_en.stringLength
+              // }
+            }
+          },
+          last_name_en: {
+            validators: {
+              notEmpty: {
+                message: translations[lang].last_name_en.notEmpty
+              },
+              regexp: {
+                regexp: lang === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
+                message: translations[lang].last_name_en.stringOnly
+              },
+              // stringLength: {
+              //   min: 6,
+              //   message: translations[lang].last_name_en.stringLength
+              // }
+            }
+          },
+          phone: {
+            validators: {
+              notEmpty: {
+                message: translations[lang].phone.notEmpty
+              },
+              regexp: {
+                regexp: lang === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
+                message: translations[lang].phone.phone
+              }
+            }
+          },
+          email: {
+            validators: {
+              notEmpty: {
+                message: translations[lang].email.notEmpty
+              },
+              emailAddress: {
+                message: translations[lang].email.emailAddress
+              }
+            }
+          },
+          password: {
+            validators: {
+              notEmpty: {
+                message: translations[lang].password.notEmpty
+              },
+              stringLength: {
+                min: 8,
+                message: translations[lang].password.stringLength
+              },
+              regexp: {
+                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                message: translations[lang].password.strong
+              },
+            }
+          },
+          password_confirmation: {
+            validators: {
+              notEmpty: {
+                message: translations[lang].password_confirmation.notEmpty
+              },
+              identical: {
+                compare: function () {
+                  return formAuthentication.querySelector('[name="password"]').value;
+                },
+                message: translations[lang].password_confirmation.identical
+              },
+              stringLength: {
+                min: 8,
+                message: translations[lang].password_confirmation.stringLength
+              },
+            }
+          },
+          title_en: {
             validators: {
               notEmpty: {
                 message: translations[lang].jobTitle.notEmpty
@@ -265,22 +385,22 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 message: translations[lang].jobTitle.enOnly
               }
             }
-          } : {},
-          expertise: true ?  {
+          },
+          expertise: {
             validators: {
               notEmpty: {
                 message: translations[lang].expertise.notEmpty
               }
             }
-          } : {},
-          userbio: true ? {
+          },
+          userbio: {
             validators: {
               notEmpty: {
                 message: translations[lang].bio.notEmpty
               }
             }
-          } : {},
-          Linkedin: true ? {
+          },
+          Linkedin: {
             validators: {
               notEmpty: {
                 message: translations[lang].linkedin.notEmpty
@@ -289,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 message: translations[lang].linkedin.uri
               }
             }
-          } : {},
+          },
         },
         plugins: {
           trigger: new FormValidation.plugins.Trigger(),
