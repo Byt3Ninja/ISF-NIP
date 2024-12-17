@@ -351,7 +351,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::patch('training/{id?}/surveys/{survey?}/update', 'TrainingController@update_survey')->name('training.update_survey');
     Route::delete('training/{id?}/surveys/{survey?}/destroy', 'TrainingController@destroy_survey')->name('training.destroy_survey');
     Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.sessionReport');
-    Route::get('training/recorded-sessions/{id}', 'TrainingController@recordedSessions')->name('training.recordedSessions');
+    Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.sessionRecord');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
@@ -435,7 +435,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('callback/microsoft', 'MicrosoftCalendarController@handleMicrosoftCallback')->name('calender.callback.microsoft');
         Route::get('microsoft-sync-events', 'MicrosoftCalendarController@syncEvents')->name('calender.MicrosoftsyncEvents');
     });
-    
+
 
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'], function () {

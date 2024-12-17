@@ -890,13 +890,11 @@ class TrainingController extends Controller
 
     public function sessionReport(Request $request, $id)
     {
-        if (!$id) {
-            return response()->json(['success' => false, 'message' => 'Invalid meeting ID provided.'], 400);
-        }
+        $session = TrainingSession::find($id);
 
-        $response = $this->meetingService->getSessionReport($id);
-
+        $response = $this->meetingService->getSessionReport($session->zoom_id);
         dd($response);
+
         if ($response['success']) {
             return response()->json(['success' => true, 'data' => $response['data']], 200);
         }
@@ -904,23 +902,21 @@ class TrainingController extends Controller
         return response()->json(['success' => false, 'message' => $response['message']], 500);
     }
 
-    public function recordedSessions($id)
-    {
-        $response = $this->meetingService->getRecordedSessions($id);
 
-        // Check if the response is successful
+    public function sessionRecord($id)
+    {
+        $session = TrainingSession::find($id);
+
+        $response = $this->meetingService->getSessionRecord($session->zoom_id);
+        dd($response);
+
         if ($response['success']) {
             return response()->json([
                 'success' => true,
                 'data' => $response['data'],
             ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => $response['message'],
-                'status_code' => $response['status_code'] ?? 500,
-            ], $response['status_code'] ?? 500);
         }
+        return response()->json(['success' => false, 'message' => $response['message']], 500);
     }
 
     public function getdsc($id)
