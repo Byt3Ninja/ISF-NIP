@@ -1136,7 +1136,7 @@
 				description: $('#task-content').val(),
 				due_date: $("#task-due-date").val(),
 				status: $('#task-status').val(),
-				priority: $("#task-priority").val('low'),
+				priority: $("#task-priority").val(),
 				assignee: selected_user,
 				labels: selected_tags
 			}
