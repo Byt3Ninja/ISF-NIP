@@ -12,6 +12,9 @@ class ZoomService implements OnlineMeetingServiceInterface
     const MEETING_TYPE_RECURRING = 3;
     const MEETING_TYPE_FIXED_RECURRING_FIXED = 8;
 
+    /**
+     * Generate Zoom Access Token.
+     */
     public function generateZoomAccessToken()
     {
         $apiKey = env('ZOOM_CLIENT_ID');
@@ -33,10 +36,9 @@ class ZoomService implements OnlineMeetingServiceInterface
             return $responseData['access_token'];
         } else {
             Log::error('Zoom OAuth Token Response: ' . json_encode($responseData));
-            return null;
+            throw new \Exception('Failed to Generate Access Token');
         }
     }
-
 
     public function toZoomTimeFormat(string $dateTime)
     {
@@ -48,6 +50,10 @@ class ZoomService implements OnlineMeetingServiceInterface
             return '';
         }
     }
+
+    /**
+     * Create Zoom Meeting.
+     */
 
     public function createMeeting($data)
     {
@@ -66,12 +72,12 @@ class ZoomService implements OnlineMeetingServiceInterface
             "timezone"   => 'Africa/Cairo',
             'settings' => [
                 'join_before_host' => false,
-                'host_video' => false,
-                'participant_video' => false,
+                'host_video' => true,
+                'participant_video' => true,
                 'mute_upon_entry' => false,
                 'waiting_room' => false,
                 'audio' => 'both',
-                'auto_recording' => 'none',
+                'auto_recording' => 'cloud',
                 'approval_type' => 0,
             ],
         ];
@@ -92,10 +98,14 @@ class ZoomService implements OnlineMeetingServiceInterface
             Log::error('Zoom Create Meeting Response: ' . json_encode($responseData));
             return [
                 'success' => false,
-                'message' => $responseData['message'] ?? 'Failed to create Zoom meeting.',
+                'message' => $responseData['message'] ?? 'Failed to Create Zoom Meeting',
             ];
         }
     }
+
+    /**
+     * Retrieve Zoom Meeting Report.
+     */
 
     public function getSessionReport(string $meetingId)
     {
@@ -127,7 +137,11 @@ class ZoomService implements OnlineMeetingServiceInterface
         }
     }
 
-    public function getRecordedSessions($meetingId)
+    /**
+     * Retrive Zoom Meeting Recording.
+     */
+
+    public function getSessionRecord($meetingId)
     {
         $accessToken = $this->generateZoomAccessToken();
         if (!$accessToken) {
@@ -136,7 +150,6 @@ class ZoomService implements OnlineMeetingServiceInterface
 
         $url = "https://api.zoom.us/v2/meetings/{$meetingId}/recordings";
 
-        // Make the API Request to Zoom
         $response = Http::withHeaders([
             'Authorization' => "Bearer $accessToken",
             'Content-Type'  => 'application/json',
@@ -151,65 +164,7 @@ class ZoomService implements OnlineMeetingServiceInterface
             return [
                 'success' => false,
                 'message' => $response->json()['message'] ?? 'Failed to Fetch Recorded Sessions',
-                'status_code' => $response->status(),
             ];
-        }
-    }
-    /**
-     * Fetch all Zoom Meetings.
-     */
-    public function getAllMeetings()
-    {
-        $accessToken = $this->generateZoomAccessToken();
-        if (!$accessToken) {
-            return ['success' => false, 'message' => 'Failed to generate access token.'];
-        }
-
-        $url = 'https://api.zoom.us/v2/users/me/meetings';
-
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer $accessToken",
-            'Content-Type'  => 'application/json',
-        ])->get($url);
-
-        $responseData = $response->json();
-
-        if ($response->successful()) {
-            return [
-                'success' => true,
-                'data'    => $responseData['meetings'],
-            ];
-        } else {
-            Log::error('Zoom Get All Meetings Response: ' . json_encode($responseData));
-            return [
-                'success' => false,
-                'message' => 'Failed to fetch meetings.',
-            ];
-        }
-    }
-
-    /**
-     * Delete a Zoom Meeting.
-     */
-    public function deleteMeeting($id)
-    {
-        $accessToken = $this->generateZoomAccessToken();
-        if (!$accessToken) {
-            return ['success' => false, 'message' => 'Failed to Generate Access Token.'];
-        }
-        $url = "https://api.zoom.us/v2/users/me/meetings/{$id}";
-
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer $accessToken",
-            'Content-Type'  => 'application/json',
-        ])->delete($url);
-
-        if ($response->successful()) {
-            return ['success' => true];
-        } else {
-            $responseData = $response->json();
-            Log::error('Zoom Delete Meeting Response: ' . json_encode($responseData));
-            return ['success' => false, 'message' => 'Failed to delete Zoom meeting.'];
         }
     }
 }
