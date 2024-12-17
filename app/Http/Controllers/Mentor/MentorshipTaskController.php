@@ -407,6 +407,40 @@ class MentorshipTaskController extends Controller
 		], 200);
 	}
 
+	public function addComment(Request $request)
+	{
+		$user = auth()->user();
+		$lang = app()->getLocale();
+		$this->validate($request, [
+			'task_id' => 'required|integer|exists:mentorship_tasks,id',
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+			'comment' => 'required',
+		]);
+		$id = $request->mentorship_request_id;
+		$task = MentorshipTask::where('mentorship_request_id', $id)->find( $request->task_id );
+		if( empty( $task ) )
+		{
+			$output = [
+				'message' => 'Task could not be found',
+				'errors' => ['task_id' => 'Task could not be found']
+			];
+			return response()->json($output, 422);
+		}
+		$comment = new MentorshipTaskComment;
+		$comment->mentorship_task_id = $request->task_id;
+		$comment->user_id = $user->id;
+		$comment->comment = $request->comment;
+		$comment->attached = null; // keep it null for now
+		$comment->edited = false;
+		$comment->save();
+		
+		return response()->json([
+			'status' => true,
+			'title' => 'Done',
+			'message' => 'Comment added successfully',
+		], 200);
+	}
+
 	/**
 	 * Store a newly created resource in storage.
 	 */

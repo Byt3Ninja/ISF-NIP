@@ -405,6 +405,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::post('mentorshipTasks/move-task', 'MentorshipTaskController@moveTask');
         Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask');
         Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
+        Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment');
         Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display');
 
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
