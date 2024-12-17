@@ -403,6 +403,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::resource('mentorshipTasks', 'MentorshipTaskController');
         Route::post('mentorshipTasks/add-task', 'MentorshipTaskController@addTask');
         Route::post('mentorshipTasks/move-task', 'MentorshipTaskController@moveTask');
+        Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask');
+        Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
+        Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display');
 
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorshipTasks.updateWith');

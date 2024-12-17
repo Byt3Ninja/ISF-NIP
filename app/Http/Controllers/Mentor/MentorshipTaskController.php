@@ -237,6 +237,176 @@ class MentorshipTaskController extends Controller
 		], 200);
 	}
 
+	public function updateTask(Request $request)
+	{
+		$user = auth()->user();
+		$lang = app()->getLocale();
+		$this->validate($request, [
+			'task_id' => 'required|integer|exists:mentorship_tasks,id',
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+			'title' => 'required|string',
+			'description' => 'required',
+			'assignee' => 'required|integer|exists:users,id',
+			'due_date' => 'sometimes|nullable|date_format:Y-m-d',
+			'status' => 'required|in:pending,progress,review,completed',
+			'priority' => 'required|in:low,medium,high',
+		]);
+		$task = MentorshipTask::where('mentorship_request_id', $request->mentorship_request_id)->find( $request->task_id );
+		if( empty( $task ) )
+		{
+			$output = [
+				'message' => 'Task could not be found',
+				'errors' => ['task_id' => 'Task could not be found']
+			];
+			return response()->json($output, 422);
+		}
+
+		$id = $request->mentorship_request_id;
+		$assignee = intval( $request->assignee );
+		$labels = collect($request->input('labels', []));
+		$session = $this->getSession( $lang, $id );
+
+		$mentor = $session['mentor'];
+		$users = $session['startups'];
+		$company = $session['company'];
+		$stored_labels = $session['labels'];
+
+		if( !in_array( $assignee, $users->pluck('id')->toArray() ) )
+		{
+			$output = [
+				'message' => 'Assignee not in session',
+				'errors' => ['assignee' => 'Assignee not in session']
+			];
+			return response()->json($output, 422);
+		}
+		else
+		{
+			$labelsToAdd = [];
+			$allowedLabels = [];
+			foreach( $labels as $label )
+			{
+				if( !array_key_exists('id', $label) ) { $labelsToAdd[] = ['name' => $label['value'], 'user_id' => $user->id, 'company_id' => $company['id']]; }
+				else
+				{
+					$isLabelExist = $stored_labels->where('id', $label['id'])->first();
+					if( !empty( $isLabelExist ) ) { $allowedLabels[] = $label['id']; }
+				}
+			}
+
+			$logsToAdd = [];
+			$columns = ['user_id', 'title', 'description', 'due_date', 'done_date', 'status', 'priority'];
+			foreach( $columns as $column )
+			{
+				if( $request->has( $column ) && $request->$column != $task->$column )
+				{
+					$logData = [
+						'mentorship_task_id' => $task->id,
+						'user_id' => $user->id,
+						'action' => 'update',
+						'column' => $column,
+						'new' => $request->$column,
+						'was' => $task->$column,
+					];
+					$logsToAdd[] = $logData;
+				}
+			}
+
+			$task->user_id = $assignee;
+			$task->title = $request->title;
+			$task->description = $request->description;
+			if( $request->has('due_date') && trim( $request->due_date ) ) { $task->due_date = $request->due_date; }
+			if( $request->has('done_date') && trim( $request->done_date ) ) { $task->done_date = $request->done_date; }
+			$task->status = $request->status;
+			$task->priority = $request->priority;
+			$task->save();
+			$task_id = $task->id;
+			$stored_labels = $stored_labels->toArray();
+			foreach( $labelsToAdd as $label )
+			{
+				$createdLabel = Label::create( $label );
+				$allowedLabels[] = $createdLabel->id;
+				$stored_labels[] = ['id' => $createdLabel->id, 'value' => $label['name']];
+			}
+			$task->labels()->sync( $allowedLabels );
+			MentorshipTaskLog::insert( $logsToAdd );
+
+			$condition = "mentorship_tasks.mentorship_request_id = $id ";
+			$tasks = $this->handleTask($lang, $condition, 'list');
+			$tasks = $tasks->sortBy('row_no')->values();
+			$available_statuses = ['pending', 'progress', 'review', 'completed'];
+			$_tasks = $tasks->groupBy('status');
+			foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+			$kanban = [];
+			foreach( $available_statuses as $status )
+			{
+				$kanban[] = [
+					'id' => $status . '-board',
+					'title' => __('admin.boardTitle' . ucfirst($status)),
+					'item' => $_tasks->get($status),
+				];
+			}
+
+			return response()->json([
+				'status' => true,
+				'title' => 'Done',
+				'message' => 'Task updated successfully',
+				'data' => [
+					'task' => $task,
+					'kanban' => $kanban,
+					'tasks' => $tasks,
+					'labels' => $stored_labels,
+				]
+			], 200);
+		}
+	}
+
+	public function removeTask(Request $request)
+	{
+		$user = auth()->user();
+		$lang = app()->getLocale();
+		$this->validate($request, [
+			'task_id' => 'required|integer|exists:mentorship_tasks,id',
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+		]);
+		$id = $request->mentorship_request_id;
+		$task = MentorshipTask::where('mentorship_request_id', $id)->find( $request->task_id );
+		if( empty( $task ) )
+		{
+			$output = [
+				'message' => 'Task could not be found',
+				'errors' => ['task_id' => 'Task could not be found']
+			];
+			return response()->json($output, 422);
+		}
+		$task->delete();
+		$condition = "mentorship_tasks.mentorship_request_id = $id ";
+		$tasks = $this->handleTask($lang, $condition, 'list');
+		$tasks = $tasks->sortBy('row_no')->values();
+		$available_statuses = ['pending', 'progress', 'review', 'completed'];
+		$_tasks = $tasks->groupBy('status');
+		foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+		$kanban = [];
+		foreach( $available_statuses as $status )
+		{
+			$kanban[] = [
+				'id' => $status . '-board',
+				'title' => __('admin.boardTitle' . ucfirst($status)),
+				'item' => $_tasks->get($status),
+			];
+		}
+
+		return response()->json([
+			'status' => true,
+			'title' => 'Done',
+			'message' => 'Task deleted successfully',
+			'data' => [
+				'task' => $task,
+				'kanban' => $kanban,
+				'tasks' => $tasks
+			]
+		], 200);
+	}
+
 	/**
 	 * Store a newly created resource in storage.
 	 */
@@ -318,6 +488,19 @@ class MentorshipTaskController extends Controller
 			// log what happend
 			Log::channel('system_exceptions')->info('Exceptions:', [$e]);
 			abort(500);
+		}
+	}
+
+	public function display(string $id)
+	{
+		$lang = app()->getLocale();
+		$condition = "mentorship_tasks.id = $id ";
+		$tasks = $this->handleTask($lang, $condition, 'show');
+		if( $tasks == '404' ) { abort( 404 ); }
+		else
+		{
+			$task = $tasks->first();
+			return $task;
 		}
 	}
 
