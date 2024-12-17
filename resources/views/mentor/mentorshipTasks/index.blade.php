@@ -238,7 +238,7 @@
 							<div class="bg-label-secondary p-2 rounded mb-3 border">
 								<div class="d-flex align-items-center gap-2">
 									<input type="text" id="commentInput" class="form-control bg-white" placeholder="Add a comment" />
-									<button type="button" class="btn btn-info" onclick="addComment()">Publish</button>
+									<button id="commentButton" data-task="" type="button" class="btn btn-info">Publish</button>
 								</div>
 							</div>
 						</div>
@@ -558,6 +558,8 @@
 							$('#editTakButton').attr('data-id', id);
 							$('#editTakButton').attr('data-task', id);
 							$('#confirmDeleteTask').attr('data-task', id);
+							$('#commentButton').attr('data-task', id);
+							
 							if( element.priority == 'high' ) { bg = 'danger'; }
 							else if( element.priority == 'medium' ) { bg = 'warning'; }
 							else { bg = 'success'; }
@@ -850,38 +852,6 @@
 		}
 	</script>
 	<script>
-		function addComment() {
-			const commentInput = document.getElementById('commentInput');
-			const commentList = document.getElementById('commentList');
-			const commentText = commentInput.value.trim();
-			if( commentText )
-			{
-				commentList.classList.add('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border');
-				const commentDiv = document.createElement('div');
-				commentDiv.className = 'border rounded p-2 mb-2 bg-white';
-				commentDiv.innerHTML = `
-					<div class="d-flex justify-content-between comment-element">
-						<div class="d-flex align-items-center gap-2 mb-2">
-							<img src="{{ URL::to( $user->image_url ) }}" class="rounded-circle" title="{{ $user->name }}" alt="{{ $user->name }}" width="34" height="34">
-							<div class="d-flex align-items-center gap-2">
-								<h6 class="mb-0 text-dark fw-bold">{{ $user->name }}</h6>
-								<span class="text-secondary text-xs">Just Now</span>
-							</div>
-						</div>
-						<div class="cursor-pointer" onclick="this.parentElement.parentElement.remove(); if( $('#commentList .comment-element').length == 0 ) { commentList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); }">
-							<i class="ti ti-trash text-danger ti-16px"></i>
-						</div>
-					</div>
-					<div class="text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
-						${commentText}
-					</div>
-				`;
-				commentList.appendChild(commentDiv);
-				commentInput.value = '';
-			}
-		}
-	</script>
-	<script>
 		const commentsTab = document.getElementById('commentsTab');
 		const activityTab = document.getElementById('activityTab');
 
@@ -926,6 +896,7 @@
 		const editAssigneeInput = document.getElementById('edit-task-assignee');
 		const editTakButton = document.getElementById('editTakButton');
 		const DeleteTaskButton = document.getElementById('confirmDeleteTask');
+		const commentButton = document.getElementById('commentButton');
 
 		const refreshLabelsForCreate = () => {
 			TagsCustomInlineSuggestion.off('change');
@@ -1089,7 +1060,7 @@
 							timer: 4500
 						});
 						reloadKanban();
-					}
+					} else { alertify.error( response.message ); }
 				},
 				error: function(error) {
 					if( error.status == 422 )
@@ -1098,6 +1069,62 @@
 					}
 				}
 			});
+		})
+
+		commentButton.addEventListener('click', function(e) {
+			e.preventDefault();
+			const commentInput = document.getElementById('commentInput');
+			const commentList = document.getElementById('commentList');
+			const commentText = commentInput.value.trim();
+			if( commentText )
+			{
+				let task_id = $(this).attr('data-task');
+				var send_data = {
+					_token: "{{ csrf_token() }}",
+					mentorship_request_id: '{{ $session_id }}',
+					task_id: task_id,
+					comment: commentText
+				}
+				$.ajax({
+					url: "{{ URL::to('dashboard/mentor/mentorshipTasks/post-comment') }}",
+					type: "POST",
+					data: send_data,
+					dataType: "json",
+					success: function(response) {
+						if( response.status )
+						{
+							commentList.classList.add('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border');
+							const commentDiv = document.createElement('div');
+							commentDiv.className = 'border rounded p-2 mb-2 bg-white';
+							commentDiv.innerHTML = `
+								<div class="d-flex justify-content-between comment-element">
+									<div class="d-flex align-items-center gap-2 mb-2">
+										<img src="{{ URL::to( $user->image_url ) }}" class="rounded-circle" title="{{ $user->name }}" alt="{{ $user->name }}" width="34" height="34">
+										<div class="d-flex align-items-center gap-2">
+											<h6 class="mb-0 text-dark fw-bold">{{ $user->name }}</h6>
+											<span class="text-secondary text-xs">Just Now</span>
+										</div>
+									</div>
+									<div class="cursor-pointer" onclick="this.parentElement.parentElement.remove(); if( $('#commentList .comment-element').length == 0 ) { commentList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); }">
+										<i class="ti ti-trash text-danger ti-16px"></i>
+									</div>
+								</div>
+								<div class="text-muted mb-0 text-wrap px-2 text-${lang == 'ar' ? 'right' : 'left'}" style="overflow-wrap: break-word;">
+									${commentText}
+								</div>
+							`;
+							commentList.appendChild(commentDiv);
+							commentInput.value = '';
+						} else { alertify.error( response.message ); }
+					},
+					error: function(error) {
+						if( error.status == 422 )
+						{
+							for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
+						}
+					}
+				});
+			}
 		})
 
 		$(document).on('click', '#createTask', function(e) {
@@ -1142,7 +1169,7 @@
 							timer: 4500
 						});
 						reloadKanban();
-					}
+					} else { alertify.error( response.message ); }
 				},
 				error: function(error) {
 					if( error.status == 422 )
@@ -1196,7 +1223,7 @@
 							timer: 4500
 						});
 						reloadKanban();
-					}
+					} else { alertify.error( response.message ); }
 				},
 				error: function(error) {
 					if( error.status == 422 )
