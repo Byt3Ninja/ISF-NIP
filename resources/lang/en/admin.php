@@ -1033,4 +1033,9 @@ return [
 	'WrongLink'=> 'Wrong Link',
 	'UpdateEmailSent'=> 'Update Email Sent',
 	'Select Expertise' => 'Select Expertise',
+	'No_Cycles' => 'You don’t have any Program',
+	'No_Cycles_Description' => 'Create a program for the success of companies',
+	'Filtration'=> 'Filtration',
+	'Filtration_pending' => 'Filtration Pending',
+	'Filtration_done' => 'Filtration Done',
 ];

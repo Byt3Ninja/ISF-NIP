@@ -141,8 +141,8 @@
                 width="337"
                 height="234"
               />
-              <h3 class="text-center mt-4">You don’t have any Program</h3>
-              <h6 class="text-center text-secondary">Create a program for the success of companies</h6>
+              <h3 class="text-center mt-4">{{ __('admin.No_Cycles') }}</h3>
+              <h6 class="text-center text-secondary">{{ __('admin.No_Cycles_Description') }}</h6>
               <!-- Add New Program Button -->
               <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;">
                 <span class="mx-2">{{__('admin.New Program')}}</span>
@@ -208,13 +208,13 @@
                           <a href="/dashboard/programlist/show/{{$cycle->id}}" class="text-primary fs-5 fw-bold">
                             {{ $cycle->title }}
                           </a>
-                          <div 
+                          {{-- <div 
                             class="badge d-flex align-items-center justify-content-center
                             bg-label-light rounded mx-1 rounded-pill"
                           >
                             <img src="/icons/star.svg" width="20" height="20" />
                             <span style="color: orange" class="fw-bold mt-1 mx-1">4.8</span>
-                          </div>
+                          </div> --}}
                         </div>  
                         <!-- / Program Title -->
                         <!-- Company Name -->
@@ -257,7 +257,7 @@
                               <div class="bg-label-info p-2 d-flex align-items-center justify-content-center rounded mx-1">
                                 <i class="ti ti-stack-2 ti-24px"></i>
                               </div>
-                              <a target="_blank" href="/dashboard/cycles/{{$cycle->id}}">
+                              <a target="_blank" href="/dashboard/programlist/show/{{$cycle->id}}">
                               <div class="my-auto d-flex">
                                 <p class="fw-medium fs-6 my-auto">{{__('cycles.steps')}}</p>
                                 <span class="badge bg-light rounded-pill text-secondary mx-2 fw-bold">

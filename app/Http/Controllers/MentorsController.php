@@ -304,6 +304,9 @@ class MentorsController extends Controller
 
 				// البحث باستخدام التاريخ من وإلى
 				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
+			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
+				// التحقق من وجود cycle_id
+				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id','DESC')->get();
 		}
 		elseif( $request->show == 'approved' )
@@ -317,6 +320,9 @@ class MentorsController extends Controller
 
 				// البحث باستخدام التاريخ من وإلى
 				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
+			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
+				// التحقق من وجود cycle_id
+				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id','DESC')->get();
 		}
 		elseif( $request->show == 'disapproved' )
@@ -330,6 +336,9 @@ class MentorsController extends Controller
 
 				// البحث باستخدام التاريخ من وإلى
 				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
+			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
+				// التحقق من وجود cycle_id
+				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id','DESC')->get();
 		}
 		else
@@ -343,6 +352,9 @@ class MentorsController extends Controller
 
 				// البحث باستخدام التاريخ من وإلى
 				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
+			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
+				// التحقق من وجود cycle_id
+				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id','DESC')->get();
 		}
 		return view('admin.settings.mentorship.sessions', compact( 'sessions'));
