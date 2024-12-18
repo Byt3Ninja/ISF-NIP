@@ -102,7 +102,7 @@
 
   // Users List suggestion
   //------------------------------------------------------
-  const TagifyUserListEl = document.querySelector('#TagifyUserList');
+  const TagifyUserListEls = document.querySelectorAll('#TagifyUserList');
 
   const usersList = [
     {
@@ -215,28 +215,28 @@
     `;
   }
 
-  // initialize Tagify on the above input node reference
-  let TagifyUserList = new Tagify(TagifyUserListEl, {
-    tagTextProp: 'name', // very important since a custom template is used with this property as text. allows typing a "value" or a "name" to match input with whitelist
-    enforceWhitelist: true,
-    skipInvalid: true, // do not remporarily add invalid tags
-    dropdown: {
-      closeOnSelect: false,
-      enabled: 0,
-      classname: 'users-list',
-      searchKeys: ['name', 'email'] // very important to set by which keys to search for suggesttions when typing
-    },
-    templates: {
-      tag: tagTemplate,
-      dropdownItem: suggestionItemTemplate,
-      dropdownHeader: dropdownHeaderTemplate
-    },
-    whitelist: usersList
-  });
+  TagifyUserListEls.forEach(TagifyUserListEl => {
+    let TagifyUserList = new Tagify(TagifyUserListEl, {
+      tagTextProp: 'name',
+      enforceWhitelist: true,
+      skipInvalid: true,
+      dropdown: {
+        closeOnSelect: false,
+        enabled: 0,
+        classname: 'users-list',
+        searchKeys: ['name', 'email']
+      },
+      templates: {
+        tag: tagTemplate,
+        dropdownItem: suggestionItemTemplate,
+        dropdownHeader: dropdownHeaderTemplate
+      },
+      whitelist: usersList
+    });
 
-  // attach events listeners
-  TagifyUserList.on('dropdown:select', onSelectSuggestion) // allows selecting all the suggested (whitelist) items
-    .on('edit:start', onEditStart); // show custom text in the tag while in edit-mode
+    TagifyUserList.on('dropdown:select', onSelectSuggestion)
+      .on('edit:start', onEditStart);
+  });
 
   function onSelectSuggestion(e) {
     // custom class from "dropdownHeaderTemplate"

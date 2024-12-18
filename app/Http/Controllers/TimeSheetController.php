@@ -64,7 +64,7 @@ if ($request->has('cycle_name') && $request->cycle_name != null) {
     
 }
        
-        $categories = Category::all();
+        $categories = Category::where('category_type', 'TimeSheet')->get();
     
         return view('admin.TimeSheets.index', compact('timeSheets','categories','users','cycles', 'setting'));
     }

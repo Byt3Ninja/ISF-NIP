@@ -24,8 +24,8 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $fillable = [
-        'organization_id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar','gender', 'phone', 'email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
-        'PageId','dob','academic_stat','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate'];
+        'organization_id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar','gender', 'phone', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
+        'PageId','dob','academic_stat','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address'];
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -59,7 +59,10 @@ class User extends Authenticatable implements MustVerifyEmail
         if (!$image) {
             return "/images/placeholder.jpg";
         }
-        return "/191014/".$image;
+        if ($image && !str_starts_with($image, 'https://')) {
+            return "/191014/" . $image;
+        }
+        return $image;
     }
     public function getNameAttribute()
     {

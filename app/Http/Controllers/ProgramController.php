@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Step;
+use App\User;
 use App\Cycle;
-use App\Jobs\ExportCycleData;
+use App\Company;
 use App\Organization;
+use App\Finalscreening;
 use Illuminate\Http\Request;
-
+use App\Jobs\ExportCycleData;
+use App\Notifications\TemplateEmail;
+use Illuminate\Support\Facades\Session;
 
 class ProgramController extends Controller
 {
@@ -72,7 +77,26 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        return view('admin.programs.show');
+        $program = Cycle::where('id', $id)->first();
+        $steps = Step::where('cycle_id', $program->id)->orderBy('arr','ASC')->get();
+        
+        // $id = $program->pluck('id')[0];
+        //         $steps = Step::where('cycle_id', $id)->orderBy('arr','ASC')->get();
+
+                $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
+                
+               $stepsData = [];
+                foreach ($steps as $step) {
+                    $stepsData[] = [
+                        'step_id' => $step->id,
+                        'total_companies' => Company::where('step', $step->id)->count(),
+                    ];
+                }
+
+               
+
+
+        return view('admin.programs.show', compact('program','steps', 'judges', 'stepsData'));
     }
 
     /**
@@ -98,4 +122,53 @@ class ProgramController extends Controller
     {
         //
     }
+
+    public function SentEmail(Request $request)
+    {
+
+        // Filter Screening
+        try {
+            // جلب جميع final screenings المرتبطة بـ step->id
+            $finalScreenings = Finalscreening::where('step_id', '=', $request->step)->get();
+        
+            // جلب جميع المحكمين المرتبطين
+            $allJudges = collect();
+        
+            foreach ($finalScreenings as $screening) {
+                $finaljudges = is_string($screening->judges) ? json_decode($screening->judges, true) : $screening->judges;
+        
+                if (is_array($finaljudges)) {
+                    $judgeData = User::whereIn('id', $finaljudges)->get();
+                    $allJudges = $allJudges->merge($judgeData);
+                }
+            }
+        
+            // إزالة التكرارات بين المحكمين
+            $allJudges = $allJudges->unique('id');
+
+        $cstep = Step::findOrFail($request->step);
+                foreach ($allJudges  as $rname) {
+                    $judgeData = User::whereIn('id', $finaljudges)->get();
+                $user = new User();
+                $user->email = $rname->email;
+                $user->id = $rname->id;
+                $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
+                $MSG = new TemplateEmail;
+                $MSG->Message=["New judging - VI portal","Dear ".$rfullname.",","Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from ".$cstep->from->format('d-m-Y').
+                    " to ". $cstep->to->format('d-m-Y') .", Check your account for more details.","/dashboard"];
+                $user->notify($MSG); }
+                 // تخزين رسالة نجاح في الجلسة
+    Session::flash('message', 'Email_sent_notify');
+
+} catch (\Exception $e) {
+    // تخزين رسالة خطأ في الجلسة إذا حدثت مشكلة
+    Session::flash('message2', 'An error occurred while sending emails. Please try again.');
+}
+
+// إعادة التوجيه إلى الصفحة المطلوبة
+return redirect()->back(); // استبدل `your_desired_route` بالمسار المطلوب.
+
+    }
+
+
 }

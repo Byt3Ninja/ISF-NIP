@@ -40,7 +40,7 @@
               ? optional($client->company)->state_id
               : 0;
         @endphp
-        <div class="col-md-4 col-12 mb-3">
+        <div class="col-md-6 mb-3">
           <label for="country_id"
             class="form-label">{{ __('admin.Country') }}</label>
           <div class="position-relative">
@@ -50,14 +50,14 @@
               @foreach ($countries as $country)
                 <option value="{{ $country->id }}"
                   {{ $country->id == $client->country_id ? 'selected' : '' }}>
-                  {{ $country->{'name_' . $l} }}</option>
+                  {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
               @endforeach
             </select>
             <i class="ti ti-map-2 fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
               style="left: 7px;"></i>
           </div>
         </div>
-        <div class="col-md-4 col-12 mb-3">
+        <div class="col-md-6 mb-6">
           <label for="state_id" class="form-label">{{ __('admin.State') }}
             *</label>
           <div class="position-relative">
@@ -74,23 +74,8 @@
               style="left: 7px;"></i>
           </div>
         </div>
-        <div class="col-md-4 col-12 mb-3">
-          <label for="city_id" class="form-label">{{ __('admin.City') }}
-            *</label>
-          <div class="position-relative">
-            <select class="form-select border-light light-shadow px-10"
-              id="city_id" name="city_id" required>
-              <option value="">{{ __('admin.City') }}</option>
-              @if (isset($client->company) && $client->company->city_id != null)
-                <option value="{{ $client->company->city_id }}" selected>
-                  {{ $client->company->city->{$name} }}</option>
-              @endif
-            </select>
-            <i class="ti ti-current-location fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-              style="left: 7px;"></i>
-          </div>
-        </div>
-        <div class="col-md-12 col-12 mb-3">
+        
+        <div class="col-md-12 col-12 mb-6">
           <label for="sector" class="form-label">{{ __('admin.Sector') }}
             *</label>
           <div class="position-relative">
@@ -101,7 +86,7 @@
               @foreach ($sectors as $sector_group)
                 <optgroup label="{{ $sector_group->name }}">
                   @foreach ($sector_group->children as $sector)
-                    <option value="{{ $sector->name_en }}">{{ $sector->name }}
+                    <option value="{{ $sector->id }}" {{ optional($client->company)->sector == $sector->id ? 'Selected' : ''}}>{{ $sector->name }}
                     </option>
                   @endforeach
                 </optgroup>
@@ -111,6 +96,71 @@
               style="left: 7px;"></i>
           </div>
         </div>
+        <div class="mb-3">
+          <label for="categories" class="form-label">{{ __('admin.Categories') }} *</label>
+          <div class="row">
+              @php
+                  $categories = [
+                      'Food & Beverage',
+                      'Technology',
+                      'App / Website',
+                      'Housewares / Home Design',
+                      'Health / Wellness / Nutrition',
+                      'Fitness',
+                      'Sports',
+                      'Beauty',
+                      'Clothing / Fashion',
+                      'Toys / Games',
+                      'Children',
+                      'Entertainment / Experiential',
+                      'Pets',
+                      'Music',
+                      'Holiday',
+                      'Other',
+                  ];
+                  
+            $selectedCategories = old('business_categories', $client->company->business_categories ?? []);
+            
+            if (is_string($selectedCategories)) {
+                $selectedCategories = json_decode($selectedCategories, true) ?? [];
+            }
+              @endphp
+              
+              @foreach ($categories as $category)
+              <div class="col-md-4 col-6">
+                  <div class="form-check">
+                      <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          name="business_categories[]" 
+                          id="category_{{ $loop->index }}" 
+                          value="{{ $category }}"
+                          {{ in_array($category, $selectedCategories) ? 'checked' : '' }}
+                          @if ($category === 'Other') onclick="toggleOtherCategoryInput(this)" @endif>
+                           <label class="form-check-label" for="category_{{ $loop->index }}">
+                          {{ $category }}
+                      </label>
+                  </div>
+              </div>
+             @endforeach
+          </div>
+        </div>
+
+      <div class="mb-3">
+        <div id="otherCategoryInput" class="mt-3" 
+         style="display: {{ in_array('Other', $selectedCategories) ? 'block' : 'none' }};">
+        <label for="other_category" class="form-label">{{ __('admin.other? Please Specify') }}</label>
+        <input 
+            type="text" 
+            class="form-control" 
+            id="other_category" 
+            name="other_category" 
+            value="{{ old('other_category', '') }}" 
+            placeholder="{{ __('admin.other? Please Specify') }}">
+    </div>
+     
+     </div>
+
         <div class="col-md-12 col-12 mb-3">
           <label for="address_en"
             class="form-label">{{ __('admin.English Address') }} *</label>
@@ -169,6 +219,39 @@
           </div>
         </div>
 
+        <div class="col-6 mb-3">
+          <label for="years_of_operations" class="form-label">{{ __('admin.Years of Operations') }} *</label>
+          <div class="position-relative">
+              <select class="form-select border-light light-shadow px-10" id="years_of_operations" name="years_of_operations" required>
+                  <option value="">{{ __('admin.Select Years of Operations') }}</option>
+                  <option value="0-2" {{ optional($client->company)->years_of_operations === '0-2' ? 'selected' : '' }}>0-2</option>
+                  <option value="2-5" {{ optional($client->company)->years_of_operations === '2-5' ? 'selected' : '' }}>2-5</option>
+                  <option value="5-10" {{ optional($client->company)->years_of_operations === '5-10' ? 'selected' : '' }}>5-10</option>
+                  <option value="10+" {{ optional($client->company)->years_of_operations === '10+' ? 'selected' : '' }}>10+</option>
+              </select>
+              <i class="ti ti-calendar-time fs-5 position-absolute top-50 translate-middle-y me-3 text-primary" style="left: 7px;"></i>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-12 mb-3">
+          <label for="product_or_service" class="form-label">{{ __('admin.Product or Service') }} *</label>
+          <div class="position-relative">
+              <select class="form-select border-light light-shadow px-10" id="product_or_service" name="product_or_service" required>
+                  <option value="">{{ __('admin.Select Product or Service') }}</option>
+                  <option value="Product" {{ optional($client->company)->product_or_service === 'Product' ? 'selected' : '' }}>
+                      {{ __('admin.Product') }}
+                  </option>
+                  <option value="Service" {{ optional($client->company)->product_or_service === 'Service' ? 'selected' : '' }}>
+                      {{ __('admin.Service') }}
+                  </option>
+                  <option value="Product + Service" {{ optional($client->company)->product_or_service === 'Product + Service' ? 'selected' : '' }}>
+                      {{ __('admin.Product + Service') }}
+                  </option>
+              </select>
+              <i class="ti ti-box fs-5 position-absolute top-50 translate-middle-y me-3 text-primary" style="left: 7px;"></i>
+          </div>
+        </div>
+
       <div class="row ShowCreatedTax" style="{{ $client->company && $client->company->CreatedTax == '1' ? '' : 'display: none;' }}" > 
 
         <div class="col-md-4 col-12 mb-3">
@@ -181,7 +264,7 @@
               @foreach ($countries as $country)
                 <option value="{{ $country->id }}"
                   {{ $client->company && $country->id == $client->company->Country_Register_id ? 'selected' : '' }}>
-                  {{ $country->{'name_' . $l} }}</option>
+                  {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
               @endforeach
             </select>
             <i class="ti ti-map-2 fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
@@ -189,7 +272,7 @@
           </div>
         </div>
 
-<div class="col-md-4 col-12 mb-3">
+        <div class="col-md-4 col-12 mb-3">
           <label for="Commercial_Register" class="form-label">{{ __('admin.Commercial_Register') }}
             *</label>
           <div class="position-relative">
@@ -216,7 +299,7 @@
               style="left: 7px;"></i>
           </div>
         </div>
-    </div>
+      </div>
 
         <div class="col-12 d-flex justify-content-end">
           <button type="submit" class="btn btn-primary" id="submit-button">
@@ -230,3 +313,33 @@
     </form>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const checkboxes = document.querySelectorAll('.category-checkbox');
+    const otherCheckbox = document.querySelector('input[value="Other"]');
+    const otherCategoryInput = document.getElementById('otherCategoryInput');
+
+    if (otherCheckbox.checked) {
+        otherCategoryInput.style.display = 'block';
+    } else {
+        otherCategoryInput.style.display = 'none';
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            toggleOtherCategoryInput(this);
+        });
+    });
+});
+
+function toggleOtherCategoryInput(checkbox) {
+    const otherInput = document.getElementById('otherCategoryInput');
+    if (checkbox.value === 'Other') {
+        otherInput.style.display = checkbox.checked ? 'block' : 'none';
+        if (!checkbox.checked) {
+            document.getElementById('other_category').value = '';
+        }
+    }
+}
+</script>

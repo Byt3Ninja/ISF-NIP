@@ -1,6 +1,6 @@
 <p class="d-flex justify-content-between align-items-center">
   <span class="float-left d-inline-block" style="direction: ltr">
-    VI portal v2.0 -
+    VI portal {{ env('Version') }} -
     {{-- USAID Funded --}} &copy; {{ date('Y') }}
   </span>
   {{-- <span class="float-right d-sm-inline-block d-none">Developed by <i class="bx bxs-heart pink mx-50 font-small-3"></i><a class="text-uppercase" href="https://masterencode.com" target="_blank">masterencode</a></span> --}}

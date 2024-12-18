@@ -35,13 +35,17 @@
         </footer>
       </div>
     </div>
-  </div>
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
 
+    <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+    <div class="drag-target"></div>
+  </div>
   <!-- / Layout wrapper -->
 
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->
-
+  <script src="{{ mix('js/app.js') }}"></script>
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
   <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
@@ -64,6 +68,7 @@
   <script src="/vuexy/assets/js/main.js"></script>
 
   <!-- Custom JS -->
+  {{-- <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script> --}}
   <script src="/app-assets/js/1.js"></script>
 
   <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>
@@ -78,11 +83,40 @@
     <!-- Pusher scripts -->
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
       integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="//js.pusher.com/3.1/pusher.min.js"></script>
-    <script type="text/javascript">
+      <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+
+      <script>
+        window.Echo.channel('step-changes')
+          .listen('ChangeStep', (e) => {
+              console.log(`The step has been changed for ${e.company_name} from "${e.last_step}" to "${e.new_step}" by ${e.organization_name}.`);
+          });
+
+          const pusherAppKey = "{{ env('MIX_PUSHER_APP_KEY') }}";
+          const pusherCluster = "{{ env('MIX_PUSHER_APP_CLUSTER') }}";
+
+          console.log('pusherAppKey', pusherAppKey);
+          console.log('pusherCluster', pusherCluster);
+
+          const pusher = new Pusher(pusherAppKey, {
+            broadcaster: "pusher",
+            key: pusherAppKey,
+            cluster: pusherCluster,
+            forceTLS: true,
+          });
+          
+          // window.Pusher = Pusher;
+
+          // window.Echo = new Echo({
+          //   broadcaster: "pusher",
+          //   key: pusherAppKey,
+          //   cluster: pusherCluster,
+          //   forceTLS: true,
+          // });
+      </script>
+
+
+      {{-- <script>
       $(document).ready(function() {
-
-
         var notificationsWrapper = $('.dropdown-menu-media');
         var countWrapper = $('.dropdown-notification');
         var notificationsCountElem = notificationsWrapper.find('li[data-count]');
@@ -91,10 +125,9 @@
         var audio = new Audio('{{ asset('/notification-sound.mp3') }}');
 
         // Enable pusher logging - don't include this in production
-        Pusher.logToConsole = false;
+        Pusher.logToConsole = true;
         var pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
-          // cluster: 'eu'
-          encrypted: true
+          cluster: 'eu'
         });
         // Subscribe to the channel we specified in our Laravel Event
         var channel = pusher.subscribe('Web-Message');
@@ -148,7 +181,7 @@
           notificationsWrapper.css('display', '');
         });
       });
-    </script>
+    </script> --}}
     <!-- End of Pusher -->
   @endhasanyrole
   <script>

@@ -37,6 +37,8 @@
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
       ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
+      ['about_problem', 'ti-presentation', $l == 'en' ? 'About Problem' : ' حول المشكلة '],
+      ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
   ])
       ->map(function ($tab) {
           return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
@@ -82,11 +84,11 @@
       <div class="d-flex justify-content-start w-100 mb-6">
         <nav 
           class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
-          style="height: 440px; min-width: 15%; max-width: 15%;">
+          style="height: auto; min-width: 15%; max-width: 15%;">
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
+              <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
                 <a href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
                   data-bs-toggle="tab" role="tab">
@@ -129,6 +131,12 @@
                 @break
                 @case('company-social')
                   @include('partials.forms.company.company-social', ['heading' => $tab['label']])
+                @break
+                @case('about_problem')
+                  @include('partials.forms.company.about_problem', ['heading' => $tab['label']])
+                @break
+                @case('business_model')
+                  @include('partials.forms.company.business_model', ['heading' => $tab['label']])
                 @break
               @endswitch
             </div>

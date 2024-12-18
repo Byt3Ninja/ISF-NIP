@@ -16,7 +16,7 @@
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
-  <!-- Fonts -->
+  {{-- <!-- Fonts -->
   @if ($l == 'ar')
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
   @else
@@ -26,7 +26,10 @@
       href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
       rel="stylesheet" />
   @endif
-  <!-- End Fonts -->
+  <!-- End Fonts --> --}}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
 
   <!-- Icons -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/fontawesome.css" />
@@ -90,6 +93,7 @@
     : 'Please sign-in to your account and
     start the adventure';
     $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
+    $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
     @endphp
 
   <!-- Content -->
@@ -264,10 +268,18 @@
           </div>
 
           <div class="container mt-5">
-            <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
-              <i class="fab fa-google me-2"></i> <span>{{ $googleSignIn }}</span>
+            <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-secondary btn-block d-flex align-items-center justify-content-center">
+              <i class="fab fa-google text-success me-2"></i> <span class="text-success">{{ $googleSignIn }}</span>
             </a>
           </div>
+          @if (app()->environment('local', 'dev'))
+          <div class="container mt-5">
+            <a href="{{ route('linkedin.login') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
+              <i class="fa-brands fa-linkedin-in me-2"></i> <span>{{ $linkdinSignIn }}</span>
+            </a>
+          </div>
+          @endif
+
         </div>
       </div>
       <!-- /Login -->

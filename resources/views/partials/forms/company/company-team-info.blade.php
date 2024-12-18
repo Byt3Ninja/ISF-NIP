@@ -72,7 +72,8 @@
                 <div class="d-flex align-items-center">
                   <div class="border d-flex radius-15 flex-shrink-0"
                     style="width: 80px; height: 80px;">
-                    <img src="/images/background/logo.png"
+                    
+                    <img src="{{optional($client->company)->logo_url}}"
                       class="img-fluid m-auto" alt="logo" />
                   </div>
                   <div
@@ -464,7 +465,7 @@
                     <div class="d-flex align-items-center">
                       <div class="border d-flex radius-15 d-flex flex-shrink-0"
                         style="width: 80px; height: 80px;">
-                        <img src="/images/background/logo.png"
+                        <img src="{{optional($client->company)->logo_url}}"
                           class="img-fluid m-auto" alt="logo" />
                       </div>
                       <div
@@ -607,10 +608,19 @@
         <div class="col-md-3 col-12 mb-3">
           <div class="form-label-group mt-75">
             <label class="fs-6 mb-2" for="team_num">{{ __('admin.team_num') }}</label>
-            <input type="number" class="form-control mt-2" id="team_num"
-              placeholder="{{ __('admin.team_num') }}"
-              value="{{ $client->company ? $client->company->team_num : old('team_num') }}"
-              name="team_num" autocomplete="new-team_num">
+            
+              <select class="form-control mt-2" id="team_num" name="team_num">
+                <option value="" disabled selected>{{ __('admin.team_num') }}</option>
+                <option value="Self-employed" {{ $client->company && $client->company->team_num == 'Self-employed' ? 'selected' : '' }}>Self-employed</option>
+                <option value="1-10 employees" {{ $client->company && $client->company->team_num == '1-10 employees' ? 'selected' : '' }}>1-10 employees</option>
+                <option value="11-50 employees" {{ $client->company && $client->company->team_num == '11-50 employees' ? 'selected' : '' }}>11-50 employees</option>
+                <option value="51-200 employees" {{ $client->company && $client->company->team_num == '51-200 employees' ? 'selected' : '' }}>51-200 employees</option>
+                <option value="201-500 employees" {{ $client->company && $client->company->team_num == '201-500 employees' ? 'selected' : '' }}>201-500 employees</option>
+                <option value="501-1000 employees" {{ $client->company && $client->company->team_num == '501-1000 employees' ? 'selected' : '' }}>501-1000 employees</option>
+                <option value="1001-5000 employees" {{ $client->company && $client->company->team_num == '1001-5000 employees' ? 'selected' : '' }}>1001-5000 employees</option>
+                <option value="5001-10000 employees" {{ $client->company && $client->company->team_num == '5001-10000 employees' ? 'selected' : '' }}>5001-10000 employees</option>
+                <option value="10001+ employees" {{ $client->company && $client->company->team_num == '10001+' ? 'selected' : '' }}>10001+ employees</option>
+            </select>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Startup;
 use App\Company;
 use App\Http\Controllers\Controller;
 use App\MentorshipRequest;
+use App\MentorshipTaskComment;
 use App\MentorshipTask;
 use Illuminate\Http\Request;
 use Exception;
@@ -15,6 +16,8 @@ class MentorshipTaskController extends Controller
     public function index($id){
         $mentorship= MentorshipRequest::findOrFail($id);
         $mentorshipTasks = $mentorship->mentorshipTasks;
+
+        
         return view('startup.mentorshipTask.index',compact('mentorshipTasks','mentorship'));
     }
     public function home(){
@@ -22,8 +25,9 @@ class MentorshipTaskController extends Controller
         $user = auth()->user();
         if ($user && $user->company) {
             $companyId = $user->company->id;
-            $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
-            
+            $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->with(['labels', 'comments.user', 'user', 'mentor'])->get();
+
+
             // إذا كانت المهام فارغة، يمكنك أيضًا إرجاع الرسالة كعنصر في المصفوفة
             if ($mentorshipTasks->isEmpty()) {
                 $mentorshipTasks = ["NoCompany"];
@@ -32,6 +36,7 @@ class MentorshipTaskController extends Controller
             // إذا لم يكن هناك شركة مرتبطة بالمستخدم
             $mentorshipTasks = ["NoCompany"];
         }
+        
         return view('startup.mentorshipTask.home',compact('mentorshipTasks'));
         
     }

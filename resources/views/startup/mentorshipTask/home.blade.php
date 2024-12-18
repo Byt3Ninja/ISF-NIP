@@ -2,472 +2,318 @@
 
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jkanban/jkanban.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 @stop
 
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-kanban.css" />
   <style>
-    .kanban-board-header .dropdown {
-      display: none;
-    }
-    .kanban-container {
+    #card-header {
       display: flex;
-      width: max-content !important;
-      gap: 3rem;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .text-xs {
+      font-size: 12px;
+    }
+
+    @media screen and (min-width: 768px) {
+      #card-header {
+        width: 50%;
+      }
+    }
+
+    .kanban-container,
+    .kanban-wrapper {
+      display: flex !important;
+      width: 100% !important;
+      flex-grow: 1 !important;
+      padding-inline-start: 0.7rem;
+    }
+
+    .kanban-item,
+    .kanban-board {
+      padding: 0 !important;
+      width: 300px !important;
+    }
+
+    .kanban-board-header {
+      padding: 0 !important;
+      background-color: var(--bs-light) !important;
+      margin-bottom: 1rem !important;
+      width: 100% !important;
+      border-radius: 0.25rem !important;
+    }
+
+    .kanban-title-board {
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+      padding: 0.3rem 1rem !important;
+      letter-spacing: 0.5px !important;
+    }
+
+    p,
+    span {
+      font-size: 12px;
     }
   </style>
 @stop
 
 @section('content')
-<!-- Content wrapper -->
-<div class="content-wrapper">
-  <!-- Content -->
+  <!-- Content wrapper -->
+  <div class="content-wrapper">
+    <!-- Content -->
 
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="app-kanban">
-
-      @if (!empty($mentorshipTasks))
-      {{-- <!-- Add new board -->
-      <div class="row">
-        <div class="col-12">
-          <form class="kanban-add-new-board">
-            <label class="kanban-add-board-btn" for="kanban-add-board-input">
-              <i class="ti ti-plus"></i>
-              <span class="align-middle">Add new</span>
-            </label>
-            <input
-              type="text"
-              class="form-control w-px-250 kanban-add-board-input mb-4 d-none"
-              placeholder="Add Board Title"
-              id="kanban-add-board-input"
-              required />
-            <div class="mb-4 kanban-add-board-input d-none">
-              <button class="btn btn-primary btn-sm me-4">Add</button>
-              <button type="button" class="btn btn-label-secondary btn-sm kanban-add-board-cancel-btn">
-                Cancel
-              </button>
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <div class="card card-body">
+        <div class="app-kanban">
+          <!-- Kanban Wrapper -->
+          @if (!empty($mentorshipTasks) && count($mentorshipTasks) > 0)
+            <div class="row mb-6 border-bottom pb-3 ms-md-8">
+              <div class="col-12 col-md-6">
+                <div class="d-flex flex-grow-1 position-relative">
+                  <input id="search-task" type="text" class="form-control px-8"
+                    placeholder="{{ __('admin.Search') }}" />
+                  <i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
+                </div>
+              </div>
             </div>
-          </form>
+            <div class="kanban-wrapper"></div>
+          @else
+            <div class="d-flex flex-column justify-content-center align-items-center gap-4 mt-10">
+              <img src="/icons/not-found.svg" width="337" height="234" />
+              <h4 class="mb-0 text-center">
+                {{ $l == 'en' ? 'You don’t have any tasks' : 'ليس لديك أي مهام' }}
+              </h4>
+            </div>
+          @endif
+          <!-- / Kanban Wrapper -->
         </div>
-      </div> --}}
 
-      <!-- Kanban Wrapper -->
-      <div 
-        class="kanban-wrapper bg-white px-4 py-8" 
-        style="border-radius: 1rem;">
-      </div>
-
-      <!-- Edit Task/Task & Activities -->
-      <div class="offcanvas offcanvas-end kanban-update-item-sidebar">
-        <div class="offcanvas-header border-bottom">
-          <h5 class="offcanvas-title">Add Comment</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body pt-0">
-          <div class="nav-align-top">
-            <ul class="nav nav-tabs mb-5 rounded-0">
-              <li class="nav-item">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-update">
-                  <i class="ti ti-edit ti-18px me-1_5"></i>
-                  <span class="align-middle">{{ __('admin.Edit') }}</span>
-                </button>
-              </li>
-              <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-activity">
-                  <i class="ti ti-chart-pie-2 ti-18px me-1_5"></i>
-                  <span class="align-middle">Activity</span>
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div class="tab-content p-0">
-            <!-- Update item/tasks -->
-            <div class="tab-pane fade show active" id="tab-update" role="tabpanel">
-              <form>
-                <div class="mb-5">
-                  <label class="form-label">{{ __('admin.comment') }}</label>
-                  <div class="comment-editor border-bottom-0"></div>
-                  <div class="d-flex justify-content-end">
-                    <div class="comment-toolbar">
-                      <span class="ql-formats me-0">
-                        <button class="ql-bold"></button>
-                        <button class="ql-italic"></button>
-                        <button class="ql-underline"></button>
-                        <button class="ql-link"></button>
-                        <button class="ql-image"></button>
-                      </span>
+        <!-- Comment Modal -->
+        <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="nav-align-top">
+                  <ul class="nav nav-tabs mb-5 rounded-0">
+                    <li class="nav-item">
+                      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-update">
+                        <i class="ti ti-message-2 ti-18px me-1_5"></i>
+                        <span class="align-middle">Comment</span>
+                      </button>
+                    </li>
+                    <li class="nav-item">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-activity">
+                        <i class="ti ti-chart-pie-2 ti-18px me-1_5"></i>
+                        <span class="align-middle">Activity</span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <div class="tab-content p-0">
+                  <!-- Add Comment -->
+                  <div class="tab-pane fade show active" id="tab-update" role="tabpanel">
+                    <form class="form-horizontal form-bordered" id="basicForm"
+                      action= "{{ route('startup.mentorshipTasks.sendComment') }}" method="POST"
+                      enctype="multipart/form-data">
+                      {!! csrf_field() !!}
+                      <legend>
+                        <h5 class="modal-title" id="commentModalLabel">Add Comment</h5>
+                      </legend>
+                      <input type="hidden" name="mentorship_task_id" value="">
+                      <div class="form-label-group">
+                        <textarea class="form-control" id="summernote" name="comment" placeholder="Add comment" required></textarea>
+                      </div>    
+                      <div class="mt-8">
+                        <div class="d-flex flex-wrap">
+                          <button type="reset" class="btn btn-label-secondary me-4" data-bs-dismiss="modal">
+                            Cancel
+                          </button>
+                          <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">
+                            Publish
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <!-- Activities -->
+                  <div class="tab-pane fade text-heading" id="tab-activity" role="tabpanel">
+                    <div class="media mb-4 d-flex align-items-center">
+                      <div class="avatar me-3 flex-shrink-0">
+                        <span class="avatar-initial bg-label-success rounded-circle">HJ</span>
+                      </div>
+                      <div class="media-body">
+                        <p class="mb-0"><span>Jordan</span> Left the board.</p>
+                        <small class="text-muted">Today 11:00 AM</small>
+                      </div>
+                    </div>
+                    <div class="media mb-4 d-flex align-items-center">
+                      <div class="avatar me-3 flex-shrink-0">
+                        <img src="/vuexy/assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
+                      </div>
+                      <div class="media-body">
+                        <p class="mb-0">
+                          <span>Dianna</span> mentioned <span class="text-primary">@bruce</span> in a comment.
+                        </p>
+                        <small class="text-muted">Today 10:20 AM</small>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <div class="d-flex flex-wrap">
-                    <button type="button" class="btn btn-primary me-4" data-bs-dismiss="offcanvas">
-                      Update
-                    </button>
-                    <button type="button" class="btn btn-label-danger" data-bs-dismiss="offcanvas">
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-            <!-- Activities -->
-            <div class="tab-pane fade text-heading" id="tab-activity" role="tabpanel">
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <span class="avatar-initial bg-label-success rounded-circle">HJ</span>
-                </div>
-                <div class="media-body">
-                  <p class="mb-0"><span>Jordan</span> Left the board.</p>
-                  <small class="text-muted">Today 11:00 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <img src="/vuexy/assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
-                </div>
-                <div class="media-body">
-                  <p class="mb-0">
-                    <span>Dianna</span> mentioned <span class="text-primary">@bruce</span> in a comment.
-                  </p>
-                  <small class="text-muted">Today 10:20 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <img src="/vuexy/assets/img/avatars/2.png" alt="Avatar" class="rounded-circle" />
-                </div>
-                <div class="media-body">
-                  <p class="mb-0"><span>Martian</span> added moved Charts & Maps task to the done board.</p>
-                  <small class="text-muted">Today 10:00 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
-                </div>
-                <div class="media-body">
-                  <p class="mb-0"><span>Barry</span> Commented on App review task.</p>
-                  <small class="text-muted">Today 8:32 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <span class="avatar-initial bg-label-dark rounded-circle">BW</span>
-                </div>
-                <div class="media-body">
-                  <p class="mb-0"><span>Bruce</span> was assigned task of code review.</p>
-                  <small class="text-muted">Today 8:30 PM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <span class="avatar-initial bg-label-danger rounded-circle">CK</span>
-                </div>
-                <div class="media-body">
-                  <p class="mb-0">
-                    <span>Clark</span> assigned task UX Research to
-                    <span class="text-primary">@martian</span>
-                  </p>
-                  <small class="text-muted">Today 8:00 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <img src="/vuexy/assets/img/avatars/4.png" alt="Avatar" class="rounded-circle" />
-                </div>
-                <div class="media-body">
-                  <p class="mb-0">
-                    <span>Ray</span> Added moved <span>Forms & Tables</span> task from in progress to done.
-                  </p>
-                  <small class="text-muted">Today 7:45 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <img src="/vuexy/assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
-                </div>
-                <div class="media-body">
-                  <p class="mb-0"><span>Barry</span> Complete all the tasks assigned to him.</p>
-                  <small class="text-muted">Today 7:17 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <span class="avatar-initial bg-label-success rounded-circle">HJ</span>
-                </div>
-                <div class="media-body">
-                  <p class="mb-0"><span>Jordan</span> added task to update new images.</p>
-                  <small class="text-muted">Today 7:00 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <img src="/vuexy/assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
-                </div>
-                <div class="media-body">
-                  <p class="mb-0">
-                    <span>Dianna</span> moved task <span>FAQ UX</span> from in progress to done board.
-                  </p>
-                  <small class="text-muted">Today 7:00 AM</small>
-                </div>
-              </div>
-              <div class="media mb-4 d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <span class="avatar-initial bg-label-danger rounded-circle">CK</span>
-                </div>
-                <div class="media-body">
-                  <p class="mb-0"><span>Clark</span> added new board with name <span>Done</span>.</p>
-                  <small class="text-muted">Yesterday 3:00 PM</small>
-                </div>
-              </div>
-              <div class="media d-flex align-items-center">
-                <div class="avatar me-3 flex-shrink-0">
-                  <span class="avatar-initial bg-label-dark rounded-circle">BW</span>
-                </div>
-                <div class="media-body">
-                  <p class="mb-0"><span>Bruce</span> added new task in progress board.</p>
-                  <small class="text-muted">Yesterday 12:00 PM</small>
-                </div>
               </div>
             </div>
           </div>
         </div>
+        <!-- / Comment Modal -->
       </div>
-      @else
-			<section class="row">
-				<div class="col-xl-12 col-md-12 col-sm-12">
-				  <div class="card px-4">
-					<div class="card-header border-bottom mb-4">
-					  <h4 class="card-title">{{ __('cycles.nosubscripe') }}</h4>
-					</div>
-	
-					<div class="card-body">
-					  {{ __('admin.No Quizzes added yet') }}, <a href="/dashboard">{{ __('cycles.Back') }}</a>.
-					</div>
-				  </div>
-				</div>
-			  </section>
-			@endif
     </div>
-  </div>
-  <!-- / Content -->
+    <!-- / Content -->
 
-  <div class="content-backdrop fade"></div>
-</div>
-<!-- Content wrapper -->
+    <div class="content-backdrop fade"></div>
+  </div>
+  <!-- Content wrapper -->
 @stop
 
 @section('scripts')
-  <script>
-    // Remove taskId from URL
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      if (searchParams.has('taskId')) {
-        searchParams.delete('taskId');
-        const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname;
-        window.history.pushState({}, '', newUrl);
-      }
-    });
-  </script>
-  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/jkanban/jkanban.js"></script>
-  <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
-  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
 @stop
 
 @section('pagescripts')
   <script>
-    // Mentorship tasks data
-    const mentorshipTasks = @json($mentorshipTasks);
-
-    // Restructure tasks
-    const restructureTasks = () => {
-      if (mentorshipTasks?.length > 0) {
-        return [
-          {
-            id: "board-in-progress",
-            title: "Pending",
-            item: mentorshipTasks.filter(task => task.status === 'pending'),
-          },
-          {
-            id: "board-in-review",
-            title: "In Review",
-            item: mentorshipTasks.filter(task => task.status === 'in-review'),
-          },
-          {
-            id: "board-done",
-            title: "Done",
-            item: mentorshipTasks.filter(task => task.status === 'completed'),
-          }
-        ]
+    const boards = [{
+        id: 'board-1',
+        title: 'Pending',
+        item: [{
+          id: 1,
+          name: "first task pending",
+          title: 'Pending Task 1',
+          content: 'Task 1 content',
+          due_date: '2021-09-01',
+          label: 'Label 1'
+        }, ]
+      },
+      {
+        id: 'board-2',
+        title: 'In Review',
+        item: [{
+          id: 1,
+          name: 'InReview Task 1',
+          content: 'Task 1 content',
+          due_date: '2021-09-01',
+          label: 'Label 1'
+        }, ]
+      },
+      {
+        id: 'board-3',
+        title: 'Completed',
+        item: [{
+          id: 1,
+          name: 'Completed Task 1',
+          content: 'Task 1 content',
+          due_date: '2021-09-01',
+          label: 'Label 1'
+        }, ]
       }
-    }
-    const tasks = restructureTasks();
-  </script>
-  <script src="/vuexy/assets/js/app-kanban.js"></script>
-@stop
+    ]
 
+    // Render Kanban board
+    const renderKanabanBoard = () => {
+      const kanban = new jKanban({
+        element: '.kanban-wrapper',
+        gutter: '15px',
+        widthBoard: '250px',
+        boards,
+        addItemButton: false,
+        dragBoards: false,
+        dragItems: false,
+        click: (el) => {
+          $('#commentModal').modal('show');
+        },
+        dragEl: (el, source) => {
+          console.log('Task is being dragged:', el);
+        },
+        dragendEl: el => {
+          console.log('Task drag ended:', el);
+          // Perform any additional actions here
+        },
+        dropEl: (el, target, source, sibling) => {
+          console.log('Task dropped:', el);
+          console.log('New parent board:', target.parentElement.dataset.id);
+          console.log('Previous parent board:', source.parentElement.dataset.id);
+          // Perform any additional actions here
+        }
+      });
+    };
 
-{{-- @extends('layouts.admin')
-
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-@stop
-
-@section('content')
-  <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-body">
-        <section id="multiple-column-form">
-          @if (session()->has('message'))
-            <div class="alert alert-success alert-dismissible mb-2" role="alert">
-              {{ __('admin.' . session()->get('message')) }}
-              <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-
-            </div>
-          @endif
-
-          @if (session()->has('message2') || !empty($errors->all()))
-            <div class="alert alert-danger alert-dismissible mb-2" role="alert">
-              <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-              <div class="d-flex align-items-center">
-                <i class="ti ti-error"></i>
-                <span>
-                  {{ __('admin.' . session()->get('message2')) }}
-                  @forelse($errors->all() as $message)
-                    {{ $message }}
-                  @empty
-                  @endforelse
-
-                </span>
+    // Render kanban item
+    const renderKanbanItem = () => {
+      const tasks = document.querySelectorAll('.kanban-item');
+      console.log('tasks', tasks)
+      tasks.forEach(item => {
+        let taskContent = item.getAttribute('data-content');
+        let taskName = item.getAttribute('data-name');
+        // console.log('taskName', taskName);
+        console.log('item', item);
+        let content = `
+          <div class="card shadow-sm p-3 d-flex flex-column">
+            <div class="d-flex align-items-center gap-1 mb-2">
+              <div class="badge bg-label-info">
+                <div class="fw-bold" style="font-size: 11px;">Marketing</div>
+              </div>
+              <div class="badge bg-label-danger d-flex align-items-center justify-content-center">
+                <div style="width: 7px; height: 7px;" class="bg-danger rounded-circle me-1"></div>
+                <div class="fw-bold" style="font-size: 11px;">Medium</div>
               </div>
             </div>
-          @endif
-        </section>
-        <section class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card">
-              <div class="card-header border-bottom mb-4">
-                <h4 class="card-title align-items-center">
-                  <i class='bx bx-card font-medium-4 mr-1'></i>{{ __('mentor.mentorshipTasks.all') }}
-                </h4>
+            <div class="d-flex flex-column gap-2 border-bottom mb-2">
+              <h6 class="mb-0 fw-bold">${taskName}</h6>
+              <p class="text-muted mb-1 text-xs">${taskContent}</p>
+            </div>
+            <div class="d-flex justify-content-between">
+              <div class="d-flex justify-content-center align-items-center">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 1" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 2" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
+                <img src="https://www.w3schools.com/howto/img_avatar.png" class="rounded-circle" alt="User 3" width="24" height="24" style="{{ $l == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
               </div>
-              <div class="card-body">
-                <div class="card-text">
-                  <div class="table-responsive">
-                    <table class="table mb-0" id="userstable">
-                      <thead class="table-light">
-                        <tr>
-                          <th class="text-center">{{ __('mentor.mentorshipTasks.mentorship request') }}</th>
-                          <th class="text-center">{{ __('mentor.mentorshipTasks.title') }}</th>
-                          <th class="text-center">{{ __('cycles.Done') }}</th>
-                          <th class="text-center">{{ __('cycles.Actions') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @if (is_array($mentorshipTasks) && in_array('NoCompany', $mentorshipTasks))
-
-                          <tr>
-                            <td class="text-center">
-                              {{ __('mentor.mentorshipTasks.noCompany') }}
-                            </td>
-                            <td class="text-center">
-
-                            </td>
-                            <td class="text-center">
-
-                            </td>
-                          </tr>
-                        @else
-                          @foreach ($mentorshipTasks as $task)
-                            <tr>
-                              <td class="text-center">
-                                {{ $task->mentorshipRequest->zoom_date }}
-                              </td>
-                              <td class="text-center">
-                                {{ $task->title ?? '-----' }}
-                              </td>
-                              <td class="text-center">
-                                {{ $task->status == 'pending' ? __('No') : __('Yes') }}
-                              </td>
-                              <td class="text-center">
-                                <a href="{{ route('startup.mentorshipTasks.show', ['mentorshipTask' => $task->id]) }}"
-                                  title="Show" class="btn btn-icon rounded-circle btn-label-success">
-                                  <i class="bx bxs-comment-add"></i></a>
-                              </td>
-                            </tr>
-                          @endforeach
-                        @endif
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              <div class="d-flex justify-content-center align-items-center gap-2">
+                <span class="text-xs"><i class='ti ti-paperclip ti-16px me-1'></i>4</span>
+                <span class="text-xs"><i class="ti ti-clock ti-16px me-1"></i>24 Feb</span>
+                <span class="text-xs"><i class="ti ti-message-2 ti-16px me-1"></i>12</span>
               </div>
             </div>
           </div>
-        </section>
-      </div>
-    </div>
-  </div>
-  <!-- END: Content-->
-@stop
+        `;
 
-@section('pagescripts')
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      $('.table').DataTable({
-        "responsive": true,
-        "searching": true,
-        "lengthChange": false,
-        "paging": true,
-        "bInfo": false,
-        "columnDefs": [{
-          "orderable": false,
-          "targets": [7]
-        }, ],
-        @if ($l == 'ar')
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
+        item.innerHTML = content;
+      })
+    };
+
+    // Filter tasks on search
+    const searchTask = () => {
+      const searchInput = document.getElementById('search-task');
+      console.log('searchInput', searchInput);
+      searchInput.addEventListener('input', (e) => {
+        const searchValue = e.target.value;
+        console.log('searchValue', searchValue);
+        const tasks = document.querySelectorAll('.kanban-item');
+        tasks.forEach(task => {
+          const title = task.getAttribute('data-name');
+          console.log('title', title)
+          if (title.toLowerCase().includes(searchValue.toLowerCase())) {
+            task.style.display = 'block';
+          } else {
+            task.style.display = 'none';
           }
-        @endif
+        });
       });
-    });
+    }
+
+    renderKanabanBoard();
+    renderKanbanItem();
+    searchTask();
   </script>
-@stop --}}
+@stop
