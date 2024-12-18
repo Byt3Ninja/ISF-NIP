@@ -641,8 +641,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   </div>
                   @php
                   $companys = \App\Company::where('step', $step->id)->get();
-                
+                  $totalfiltration = 0;
+                  $totalfiltrationPinding = 0;
+                  $totalfiltrationDone = 0;
+
                   foreach ($companys as $key => $company) {
+                    
                     $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
                     $totalfiltrationPinding = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '=', '{}')->count();
                     $totalfiltrationDone = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '!=', '{}')->count();
