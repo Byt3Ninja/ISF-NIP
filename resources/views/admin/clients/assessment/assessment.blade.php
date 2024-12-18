@@ -91,13 +91,17 @@ $mobilePills = ['analysis', 'questions', 'history'];
       </div>
     </div>
     <!-- / Pills -->
-    <div class="row">
-      <div class="col-md-3 col-12 position-relative" style="height: fit-content;">
+    <div class="row ">
+      <div class="col-md-3 col-12 position-relative " style="height: fit-content;">
         @foreach ($user_scores as $key => $assessment)
         @php
-        $totalQuestions = Count($assessment->question);
-        $totalAnswered = Count($assessment->question->where('Result_assessment', '!=', null));
-        $totalNotAnswered = Count($assessment->question->where('Result_assessment', '=', null));
+        $totalQuestions = $assessment->question->where('assessment_id', $assessment_user->id)->count();
+        $totalAnswered = $assessment->question->where('Result_assessment', '!=', null)
+                                      ->where('assessment_id', $assessment_user->id)
+                                      ->count();
+        $totalNotAnswered = $assessment->question->where('Result_assessment', '=', null)
+                                      ->where('assessment_id', $assessment_user->id)
+                                      ->count();
         // حساب التقدم الإجمالي عبر جميع الأقسام
         $progress = $totalQuestions > 0 ? ($totalAnswered / $totalQuestions) * 100 : 0;
 
@@ -180,7 +184,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
             @foreach ($assessment['subcategories'] as $key => $subcategory)
             <div class="row" style="display: {{ $key == 0 ? 'block' : 'none' }};" id="questionsContainer">
               @foreach ($subcategory['questions'] as $key => $question)
-              <div class="col-12 question-card-bus-con mb-3" data-category="question-{{ $key }}">
+              <div class="col-12 question-card-bus-con mb-3 " data-category="question-{{ $key }}" >
                 <div class="card shadow-sm">
                   <div class="card-body">
                     <div class="d-flex align-items-center gap-3 mb-2 pb-2 border-bottom">
@@ -189,6 +193,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
                         {{ $key + 1 }}
                       </span>
                       <h6 class="fw-bold mb-0">{{ $question['QuestionBank'] }}</h6>
+                      <input type="hidden" name="question_id" class="question_id{{ $question['id'] }}" value="{{ $question['id'] }}">
                     </div>
                     <div class="mt-3">
                       @php
@@ -196,7 +201,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
                       @endphp
                       @foreach ($options as $key => $option)
                       <div class="form-check">
-                        <input class="form-check-input" type="radio" name="answer_{{ $key }}" id="{{ $key }}">
+                        <input class="form-check-input AnswerQuestion"  do="{{ $question['id'] }}" type="radio" name="answer_{{ $question['id'] }}" id="{{ $key }}" value="{{ $key }}" {{ $question['score'] ==  $option->score ? 'checked' : '' }} >
                         <label class="form-check-label" for="{{ $key }}">
                           {{ $option->text }}
                         </label>
@@ -237,6 +242,33 @@ $mobilePills = ['analysis', 'questions', 'history'];
 @stop
 @section('pagescripts')
 <script>
+    $('.AnswerQuestion').click(function() {
+      const questionId = $(this).attr('do');
+      const answer = $('input[name="answer_' + questionId + '"]:checked').val();
+      $.ajax({
+                url: '/dashboard/answer-assessment', 
+                method: 'post',
+                data: {
+                    'questionId': questionId,
+                    'answer': answer,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                  if(response.message == 1){
+                    location.reload();
+                  }
+                    $('.refreshDiv').load(location.href + ' .refreshDiv');
+                    console.log(response.message);
+                    // location.reload();
+                },
+                error: function(error) {
+                  console.log(error.responseText);
+                }
+            });
+    });
+
+
+
   const assessmentTabs = document.querySelectorAll('.assessment-tab');
   const assessmentContainers = document.querySelectorAll('#assessmentContent'); 
   const questionsContainers = document.querySelectorAll('#questionsContainer');
