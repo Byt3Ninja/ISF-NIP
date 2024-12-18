@@ -21,6 +21,31 @@ class CountryStateCitySeeder extends Seeder
 
         $counties[]=array_values(array_filter($data,function ($q){
 
+            return $q->iso3=='EGY' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='SAU' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='ARE' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='KWT' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='QAT' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        $counties[]=array_values(array_filter($data,function ($q){
+
+            return $q->iso3=='BHR' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
+        }));
+        
+        $counties[]=array_values(array_filter($data,function ($q){
+
             return $q->iso3=='NGA' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         }));
         $counties[]=array_values(array_filter($data,function ($q){
@@ -59,22 +84,21 @@ class CountryStateCitySeeder extends Seeder
 
             return $q->iso3=='TUN' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
         }));
-    foreach ($counties as $value){
-        $country =  Country::create(['name_ar'=>$value[0]->native,'name_en'=>$value[0]->name,'iso3'=>$value[0]->iso3]);
-        foreach($value[0]->states as $key){
-            $state = $country->states()->create([
-                'name_ar'=>GoogleTranslate::trans($key->name, 'ar', 'en'),
-                'name_en'=>$key->name
-            ]);
-            foreach ($key->cities as $value){
-                $state->cities()->create([
-                    'country_id'=>$country->id,
-                    'name_ar'=>GoogleTranslate::trans($value->name, 'ar', 'en'),
-                    'name_en'=>$value->name
+        foreach ($counties as $value) {
+            $country =  Country::create(['name_ar' => $value->native, 'name_en' => $value->name, 'iso3' => $value->iso3, 'phone_code' => $value->phone_code]);
+            foreach ($value->states as $key) {
+                $state = $country->states()->create([
+                    'name_ar' => GoogleTranslate::trans($key->name, 'ar', 'en'),
+                    'name_en' => $key->name
                 ]);
+                foreach ($key->cities as $value) {
+                    $state->cities()->create([
+                        'country_id' => $country->id,
+                        'name_ar' => GoogleTranslate::trans($value->name, 'ar', 'en'),
+                        'name_en' => $value->name
+                    ]);
+                }
             }
         }
-    }
-
     }
 }

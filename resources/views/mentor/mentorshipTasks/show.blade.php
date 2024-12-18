@@ -24,9 +24,9 @@
                                 <ol class="breadcrumb p-0 mb-0">
                                     <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{{ route('mentorshipTasks.index') }}">{{ $mentorship->zoom_date }} - {{ $mentorship->user->company->name }}</a>
+                                    <li class="breadcrumb-item"><a href="{{ route('mentorshipTasks.index') }}"></a>
                                     </li>
-                                    <li class="breadcrumb-item active">{{ $task->title }}
+                                    <li class="breadcrumb-item active">{{ $task['name'] }}
                                     </li>
                                 </ol>
                             </div>
@@ -55,20 +55,18 @@
 
                                                             <div class="card">
                                                                 <div class="card-header border-bottom">
-                                                                    <a href="/dashboard/companyProfile/{{ $task->company->id }}">
+                                                                    <a href="/dashboard/companyProfile/0">
                                                                      <div class="media align-items-center mt-2 mb-1">
                                                                         <div class="media-left mr-50">
-                                                                            <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                            <img src="{{ $task['assignee']['photo'] }}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                                         </div>
                                                                         <div class="d-flex align-items-center gap-1">
-                                                                            {{$task->user->name }}
+                                                                            {{ $task['assignee']['name'] }}
                                                                         </div>
                                                                         <div class="media-left mr-50">
-                                                                            <img src="{{$task->company->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                            <img src="#" alt="company avatar" class="rounded-circle" height="40" width="40">
                                                                         </div>
-                                                                        <div class="d-flex align-items-center gap-1">
-                                                                            {{$task->company->name }}
-                                                                        </div>
+                                                                        <div class="d-flex align-items-center gap-1"> company name </div>
                                                                     </div>
                                                                     </a>
                                                                 </div>
@@ -78,52 +76,37 @@
                                                 </tr>
                                                 <tr>
                                                     <td class="width-200">{{__('mentor.mentorshipTasks.title')}}:</td>
-                                                    <td>{{ $task->title }}</td>
+                                                    <td>{{ $task['name'] }}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>{{__('mentor.mentorshipTasks.status')}}:</td>
                                                     <td>
-                                                        {{ $task->status =='pending'?__('Uncompleted'):__('Completed') }}
+                                                        {{ $task['visible_status'] }}
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td>{{__('mentor.mentorshipTasks.description')}}:</td>
-                                                    <td >{!! $task->description !!}</td>
+                                                    <td >{!! $task['content'] !!}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>{{__('mentor.mentorshipTasks.comments')}}:</td>
-                                                    @forelse($task->comments as $comment)
+                                                    @forelse($task['comments'] as $comment)
                                                         <tr>
                                                             <td></td>
                                                             <td>
                                                                 <div class="card">
                                                                     <div class="card-header border-bottom">
-                                                                    <div class="media align-items-center mt-2 mb-1">
-                                                                        @if(!$comment->user->hasRole('Mentor'))
-                                                                            <a href="/dashboard/companyProfile/{{ $comment->user->company->id }}">
-                                                                        @endif
-                                                                                <div class="media-left mr-50">
-                                                                                    <img src="{{$comment->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
-                                                                                </div>
-                                                                                <div class="d-flex align-items-center gap-1">
-                                                                                    {{$comment->user->name }}
-                                                                                    @if(!$comment->user->hasRole('Mentor'))
-                                                                                        - {{ $comment->user->company->name }}
-                                                                                    @endif
-                                                                                </div>
-                                                                        @if(!$comment->user->hasRole('Mentor'))
-                                                                            </a>
-                                                                        @endif
-
+                                                                        <div class="media align-items-center mt-2 mb-1">
+                                                                            <div class="media-left mr-50">
+                                                                                <img src="{{ $comment['commenter']['photo'] }}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                            </div>
+                                                                            <div class="d-flex align-items-center gap-1">
+                                                                                {{ $comment['commenter']['name'] }}
+                                                                            </div>
+                                                                        </div>
+                                                                        <small> {{ $comment['created_since'] }} </small>
+                                                                        <p> {!! $comment['comment'] !!} </p>
                                                                     </div>
-                                                                        <small>
-                                                                            {{ $comment->created_at->diffForHumans() }}
-                                                                        </small>
-                                                                    <p>
-                                                                        {!! $comment->comment !!}
-                                                                    </p>
-
-                                                                </div>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -139,7 +122,7 @@
                                                     <td>
                                                         <form class="form-horizontal form-bordered" id="basicForm" action= "{{ route('mentorshipTasks.sendComment') }}" method="POST" enctype="multipart/form-data">
                                                             {!! csrf_field() !!}
-                                                            <input type="hidden" name="mentorship_task_id" value="{{ $task->id }}">
+                                                            <input type="hidden" name="mentorship_task_id" value="{{ $task['id'] }}">
                                                             <div class="form-label-group">
                                                                 <textarea class="form-control" id="summernote" name="comment" required></textarea>
                                                             </div>

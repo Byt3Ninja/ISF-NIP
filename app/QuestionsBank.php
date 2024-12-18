@@ -20,11 +20,18 @@ class QuestionsBank extends Model
 		'group',
 		'question',
 		'type',
+		'survey_type',
 		'correct',
 		'answers',
 		'explanation',
 		'difficulty',
 		'tags',
+		'explanation_QA_ar',
+		'explanation_QA_en',
+		'explanation_AA_ar',
+		'explanation_AA_en',
+		'ascategory_id',
+		'subcategory_id',
 	];
 
 	protected $casts = [
@@ -33,6 +40,7 @@ class QuestionsBank extends Model
 		'group' => 'string',
 		'question' => 'string',
 		'type' => 'string',
+		'survey_type' => 'string',
 		'correct' => 'boolean',
 		'answers' => 'collection',
 		'explanation' => 'string',
@@ -48,5 +56,14 @@ class QuestionsBank extends Model
 	public function category()
 	{
 		return $this->belongsTo(QuestionCategories::class, 'category_id');
+	}
+
+	public function ascategory()
+	{
+		return $this->belongsTo(Category::class, 'ascategory_id');
+	}
+	public function subcategory()
+	{
+		return $this->belongsTo(SubCategory::class, 'subcategory_id');
 	}
 }

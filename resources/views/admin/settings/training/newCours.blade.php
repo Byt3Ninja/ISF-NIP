@@ -252,6 +252,7 @@
                       <div class="form-group mb-3">
                         <label class="form-label fs-6">{{__('cycles.Quizs')}}</label>
                           <select  class="select2 form-select" name="Quizs" >
+                            <option value="0">{{ __('admin.noQuiz') }}</option>
                             @foreach ($Quizzes as $Quizz)
                             <option value="{{$Quizz->id}}">{{$Quizz->title}}</option>
                             @endforeach

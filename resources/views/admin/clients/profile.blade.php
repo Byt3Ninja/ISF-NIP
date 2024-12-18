@@ -237,7 +237,7 @@
                     {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
                   </span>
                   <span>
-                    {{ $client->country->{'name_' . $l} }}
+                    {{ $client->country_id ? $client->country->{'name_' . $l} : __('admin.Egypt') }}
                   </span>
                 </li>
                 <li class="d-flex align-items-center mb-2">

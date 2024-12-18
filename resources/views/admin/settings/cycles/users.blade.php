@@ -13,6 +13,7 @@
 
 @section('content')
   <!-- BEGIN: Content-->
+ 
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
@@ -389,8 +390,7 @@
             location.href = '/dashboard/cycles/{{ $id }}/registered';
           },
           error: function(error) {
-            console.log(error);
-            alert("Error Occurred, arrange failed");
+            console.log("Error Occurred, arrange failed");
           }
         });
       } else {

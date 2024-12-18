@@ -137,11 +137,22 @@
                   </div>
                   <div class="table-responsive">
                     <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-                    <div class="btn btn-label-info ExportExcelScreesRes">{{ __('cycles.Export') }}</div>
+                    <div class="d-flex align-items-center gap-4">
+                      <div class="media align-items-center col-md-3">
+                        <select class="form-control ChangeAllBox">
+                          <option value="0">{{ __('cycles.Disapprove') }}</option>
+                          @foreach ($_steps as $step)
+                          <option value="{{ $step->id }}">{{ $step->title }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                      <div class="btn btn-label-primary ExportCycleComp">{{ __('cycles.Export') }}</div>
+                    </div>
 
                     <table id="result-list-datatable" class="table mb-0">
                       <thead class="bg-label-secondary">
                         <tr>
+                          <th><input type="checkbox" class="checkAll"></th>
                           <th>{{ __('cycles.Company') }}</th>
                           <th>{{ __('cycles.User/Title') }}</th>
                           <th>{{ __('cycles.Judges') }}</th>
@@ -152,6 +163,12 @@
                       <tbody>
                         @foreach ($companies as $company)
                           <tr>
+                            <td>
+                              <div class="d-flex align-items-center gap-1">
+                                <input type="checkbox" class="chboxcyclesReg" do="{{ $company->id }}"
+                                  userid="{{ $company->user->id }}" value="1" name="chboxcyclesReg[]">
+                              </div>
+                            </td>
                             <td>
                               <div class="d-flex align-items-center">
                                 <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">

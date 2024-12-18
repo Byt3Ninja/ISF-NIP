@@ -1,27 +1,25 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\User;
+use App\Cycle;
 use App\Country;
 use App\Currency;
-use App\Cycle;
-use App\Expertise;
-use App\Http\Requests\UpdateClientProfileRequest;
-use App\Http\Requests\UpdateClientProfilePasswordRequest;
-use App\User;
-use App\UsersBio;
-use Storage;
-use Intervention\Image\ImageManagerStatic as Image;
-use Hash;
-use DB;
-use Exception;
-use Session;
-use App\CyclesMentors;
 use App\Schedule;
-use App\MentorshipRequest;
+use App\UsersBio;
+use App\Expertise;
+use App\CyclesMentors;
 use App\MentorshipTask;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
+use App\Mail\ConfirmEmailUpdate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Requests\UpdateClientProfileRequest;
+use Intervention\Image\ImageManagerStatic as Image;
+use Storage, Hash, DB, Exception, Session, URL, File;
+use App\Http\Requests\UpdateClientProfilePasswordRequest;
 
 class ClientProfileController extends Controller
 {
@@ -39,16 +37,32 @@ class ClientProfileController extends Controller
      * @param  \App\User  $Type
      * @return \Illuminate\Http\Response
      */
-    public function edit(){
-//        dd(auth()->id());
-        try{
+    public function edit()
+    {
+        try
+        {
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id',null)->get();
             $Currencies = Currency::all();
+            $json = File::get(base_path('database/dbFiles/countries.json'));
+            $_countries = json_decode($json, true);
+            $_countries = collect( $_countries )->map(function ($country) {
+                $country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
+                return $country;
+            });
+            $countries = $countries->map(function ( $country ) use ( $_countries ) {
+                $getCountry = $_countries->where('iso3', $country->iso3)->first();
+                $flag = null; $emoji = null;
+                if( !empty( $getCountry ) ) { $flag = $getCountry['flag']; $emoji = $getCountry['emoji']; }
+                $country->flag = $flag;
+                $country->emoji = $emoji;
+                return $country;
+            });
             return view('admin/clients/editProfile', compact('client','Currencies', 'countries','expertises'));
-        }catch (Exception $e){
-            //log what happend
+        }
+        catch (Exception $e)
+        {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
@@ -95,10 +109,12 @@ class ClientProfileController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateClientProfileRequest $request)
-    {
+    {           
         try{
+            
             $user = Auth::user();
 
+            
             // Mentor Bio section
             if ($request->mentor_section){
                 $data =[
@@ -115,21 +131,63 @@ class ClientProfileController extends Controller
                 $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
                 $user->mentorExpertises()->sync($request->expertises);
             }
+            
 
             if ($request->hasFile('img_url')) {
-                //store the image
+
+                $getemail = User::where('id', $user->id)->first();
+
+                if($request->email == $getemail->email){
+                    //store the image
                 $img_url = $request->file('img_url');
                 //get the path of the stores image
                 $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
                 //resize
                 Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function($con) {$con->aspectRatio();})->save();
                 //update
-                $result = $user->update($request->except(['img_url','password']) + ['img_url' => $img_url]);
+                $result = $user->update($request->except(['img_url','password','email']) + ['img_url' => $img_url]);
+                }else{
+                    // if email changed send email verification
+                    //store the image
+                $img_url = $request->file('img_url');
+                //get the path of the stores image
+                $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                //resize
+                Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function($con) {$con->aspectRatio();})->save();
+                //update
+                $result = $user->update($request->except(['img_url','password','email']) + ['img_url' => $img_url]);
+
+                    $user->new_email = $request->email;
+                    $user->save();
+                     // إرسال رابط التحقق
+                    $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
+
+                    Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
+                    return redirect()->route('my_profile')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
+                }
+
+                
 
 
             }else{
-                $result = $user->update($request->except(['password']));
+                $getemail = User::where('id', $user->id)->first();
+
+                if($request->email == $getemail->email){
+                    $result = $user->update($request->except(['password','email']));
+                }else{
+                    $result = $user->update($request->except(['password','email']));
+                    $user->new_email = $request->email;
+                    $user->save();
+                     // إرسال رابط التحقق
+                    $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
+
+                    Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
+                    return redirect()->route('my_profile')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
+                }
+            
+                
             }
+            
             if($result)
                 return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
             else
@@ -140,6 +198,32 @@ class ClientProfileController extends Controller
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
+    }
+
+        public function confirmEmailUpdate($token)
+    {
+        try {
+            $newEmail = decrypt($token);
+          
+        } catch (\Exception $e) {
+           
+            return redirect()->route('my_profile')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+
+        }
+
+        $user = auth()->user();
+
+        // تحقق من وجود البريد الجديد
+        if ($user->new_email != $newEmail) {
+            return redirect()->route('my_profile')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+        }
+
+        // تحديث البريد الإلكتروني
+        $user->email = $newEmail;
+        $user->new_email = null;
+        $user->save();
+
+        return redirect()->route('my_profile')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
     }
     /**
      * Update the specified resource in storage.

@@ -82,6 +82,8 @@
 																<span class="badge bg-label-success"> {{ __('admin.quizPassed') }} </span>
 															@elseif( $attempts->where('score', '<', $quiz->passing_criteria)->count() >= $quiz->attempts )
 																<span class="badge bg-label-danger"> {{ __('admin.quizFailed') }} </span>
+															@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )
+																<span class="badge bg-label-danger"> {{ __('admin.quizFailed') }} </span>
 															@elseif( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') )
 																<span class="badge bg-secondary"> {{ __('admin.quizNotStartedYet') }} </span>
 															@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )

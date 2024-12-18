@@ -11,8 +11,13 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
+      
       @if (!is_null(auth()->user()->organization))
-          <img src="{{ auth()->user()->organization->image_url }}" alt="avatar" class="logo-img">
+      @php
+    $fileN = pathinfo(auth()->user()->organization->image_url, PATHINFO_BASENAME);
+    @endphp
+          <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar" class="logo-img">
+         
       @else
           <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
       @endif
@@ -48,30 +53,66 @@
       </a>
     </li>
 
-
-
     @if (auth()->user()->HaveCompany == 1 && !auth()->user()->company)
       <li class="{{ Request::is('*companyProfile') ? 'active' : '' }} menu-item">
-        <a href="{{ route('my_company') }}" class="menu-link">
+        <a class="menu-link menu-toggle">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('dashboard/companyProfile') ? 'active' : '' }} menu-item">
+            <a href="{{ route('my_company') }}" class="menu-link">
+              <span class="menu-item">
+                {{ $l == 'en' ? 'Company Profile' :  'عرض شركتي' }}
+              </span>
+            </a>
+          </li>
+          @if (!app()->environment('production', 'beta'))
+          <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/analysis-assessment" class="menu-link">
+              <span class="menu-item">
+                {{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}
+              </span>
+            </a>
+          </li>
+          @endif
+        </ul>
       </li>
     @endif
-      @if (auth()->user()->HaveCompany != 0 &&auth()->user()->company)
-      <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">
-          <i class="ti ti-building me-3 ti-md"></i>
-          <div>{{ __('admin.My company') }}</div>
-        </a>
-      </li>
-      @endif
+    
+    @if (auth()->user()->HaveCompany != 0 &&auth()->user()->company)
+    <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
+      <a class="menu-link menu-toggle">
+        <i class="ti ti-building me-3 ti-md"></i>
+        <div>{{ __('admin.My company') }}</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="{{ Request::is('dashboard/companyProfile') ? 'active' : '' }} menu-item">
+          <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">
+            <span class="menu-item">
+              {{ $l == 'en' ? 'Company Profile' : ' عرض شركتي' }}
+            </span>
+          </a>
+        </li>
+        @if (!app()->environment('production', 'beta'))
+        <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/analysis-assessment" class="menu-link">
+            <span class="menu-item">
+              {{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}
+            </span>
+          </a>
+        </li>
+        @endif
+      </ul>
+    </li>
+    @endif
 
     <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
-      <a href="{{ route('calendar') }}" class="menu-link">
+      <a href="{{ route('calendar') }}" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-calendar"></i>
         <div>{{ __('admin.Calendar') }}</div>
       </a>
+      <ul class="menu-sub"></ul>
     </li>
 
     <?php
@@ -142,7 +183,13 @@
       </li>
     @endif
     @role('Mentor')
-      <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
+      <li 
+        class="{{ 
+          Request::is(
+          'dashboard/mentor/mentorshipSessions*', 'dashboard/mentor/mentorshipTasks*') 
+          ? 'active' : '' 
+        }} menu-item"
+      >
         <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
           <i class="ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
@@ -150,6 +197,7 @@
       </li>
     @endrole
     @role('Registered')
+    @if (!app()->environment('production', 'beta'))
       <li
         class="{{ Request::is('dashboard/requests/mine', '/dashboard/mentorship/mine') ? 'sidebar-group-active open' : '' }} menu-item">
         <a href="#" class="menu-link menu-toggle">
@@ -170,25 +218,29 @@
           </li>
         </ul>
       </li>
-
+      @endif
       <li class="{{ Request::is('dashboard/training/my*') ? 'active' : '' }} menu-item"><a href="/dashboard/training/my"
           class="menu-link">
           <i class="menu-icon tf-icons ti ti-forms"></i>
           <div>{{ __('admin.My courses') }}</div>
         </a>
       </li>
+
       <li class="{{ Request::is('dashboard/quizzes/my*') ? 'active' : '' }} menu-item"> <a href="/dashboard/quizzes/my"
           class="menu-link">
           <i class="menu-icon tf-icons ti ti-question-mark"></i>
           <div>{{ __('admin.My Quizzes') }}</div>
         </a>
       </li>
+
+      @if (!app()->environment('production', 'beta'))
       <li class="{{ Request::is('dashboard/startup/mentorshipTasks*') ? 'active' : '' }} menu-item">
         <a href="{{ route('startup.mentorshipTasks.home') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
+      @endif
     @endrole
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
       <a href="/dashboard/myFiles" class="menu-link">
@@ -211,12 +263,46 @@
         </a>
       </li>
 
+      @if (!app()->environment('production', 'beta'))
       <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
         <a href="{{ route('Tags.index') }}" class="menu-link">
           <i class="ti ti-flag me-3 ti-md"></i>
           <div>{{ __('admin.Tags') }}</div>
         </a>
       </li>
+
+      
+      
+      <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Category.index') }}" class="menu-link">
+          <i class="ti ti-flag me-3 ti-md"></i>
+          <div>{{ __('admin.Categories') }}</div>
+        </a>
+      </li>
+
+      <li class="{{ Request::is('dashboard/subcategories*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('subcategories.index') }}" class="menu-link">
+          <i class="ti ti-flag me-3 ti-md"></i>
+          <div>{{ __('admin.SubCategories') }}</div>
+        </a>
+      </li>
+
+      <li class="{{ Request::is('*stages') ? 'active' : '' }} menu-item">
+        <a href="{{ route('stages.index') }}" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-settings"></i>
+          <div>{{ __('admin.Stages') }}</div>
+        </a>
+      </li>
+      
+
+
+      <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Labels.index') }}" class="menu-link">
+          <i class="ti ti-flag me-3 ti-md"></i>
+          <div>{{ __('admin.Labels') }}</div>
+        </a>
+      </li>
+    @endif
     @endif
 
     @can('edit_forms')
@@ -286,18 +372,61 @@
             </a>
           </li>
 
-          <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
-            <a href="{{ route('Category.index') }}" class="menu-link">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Category') }}</span>
-            </a>
-          </li>
+          
         </ul>
       </li>
 
       <!-- End Time Sheets -->
 
+      @if (!app()->environment('production', 'beta'))
+<!-- Start Assessments -->
+<li
+class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
+<a class="menu-link menu-toggle">
+  <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
+  <div>{{ __('admin.Assessments') }}</div>
+</a>
+<ul class="menu-sub">
+  {{-- <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('questions.index') }}" class="menu-link">
+      <i class="bx bx-message"></i>
+      <div>{{ __('admin.AddQuestions') }}</div>
+    </a>
+  </li>
+  <li class="{{ Request::is('dashboard/answerOption*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('answerOption.index') }}" class="menu-link">
+      <i class="bx bx-message"></i>
+      <div>{{ __('admin.AddAnswerOption') }}</div>
+    </a>
+  </li> --}}
 
+
+
+
+  <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('question-assessment') }}" class="menu-link">
+      <span class="menu-item">{{ __('admin.Question_Assessment') }}</span>
+      <i class="bx bx-message"></i>
+    </a>
+  </li>
+  <li class="{{ Request::is('dashboard/analysis-assessment*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('analysis-assessment') }}" class="menu-link">
+      <span class="menu-item">{{ __('admin.Analysis_Assessment') }}</span>
+      <i class="bx bx-message"></i>
+    </a>
+  </li>
+
+  <li class="{{ Request::is('dashboard/history-assessment*') ? 'active' : '' }} menu-item">
+    <a href="{{ route('history-assessment') }}" class="menu-link">
+      <span class="menu-item">{{ __('admin.History_Assessment') }}</span>
+      <i class="bx bx-message"></i>
+    </a>
+  </li>
+
+</ul>
+</li>
+@endif
+<!-- End Assessment -->
 
 
 
@@ -381,7 +510,7 @@
 
       <!-- Questions Nav Item -->
       <li
-        class="{{ Request::is('*question-categories*', '*questions-bank*') ? 'sidebar-group-active open' : '' }} menu-item">
+        class="{{ Request::is('*question-categories*', '*questions-bank*', '*weights*', '*assessments*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-question-mark me-3 ti-md"></i>
           <div>{{ __('admin.Questions') }}</div>
@@ -399,11 +528,27 @@
               <span class="menu-item"> {{ __('admin.Questions Bank') }}</span>
             </a>
           </li>
+        @if (!app()->environment('production', 'beta'))
+          <li class="{{ Request::is('*weights') ? 'active' : '' }} menu-item">
+            <a href="{{ route('weights.index') }}" class="menu-link">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Weight') }}</span>
+            </a>
+          </li>
+          
+          <li class="{{ Request::is('*assessments') ? 'active' : '' }} menu-item">
+            <a href="{{ route('assessments.index') }}" class="menu-link">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Assessments') }}</span>
+            </a>
+          </li>
+        @endif
+
         </ul>
       </li>
       <!-- End Questions Nav Item -->
 
-      <li class="{{ Request::is('*training*', '*quizzes*') ? 'sidebar-group-active open' : '' }} menu-item">
+      <li class="{{ Request::is('*training*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           {{-- <i class="menu-livicon" data-icon="info-alt"></i> --}}
           <i class="ti ti-presentation me-3 ti-md"></i>
@@ -430,10 +575,24 @@
               <span class="menu-item">{{ __('admin.Results') }}</span>
             </a>
           </li>
+        </ul>
+      </li>
+      <li class="{{ Request::is('*quizzes*', '*surveys*') ? 'sidebar-group-active open' : '' }} menu-item">
+        <a class="menu-link menu-toggle">
+          <i class="ti ti-stack me-3 ti-md"></i>
+          <div>{{ __('admin.quizzesAndSurveys') }}</div>
+        </a>
+        <ul class="menu-sub">
           <li class="{{ Request::is('dashboard/quizzes*') ? 'active' : '' }} menu-item">
             <a class="menu-link" href="/dashboard/quizzes">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item"> {{ __('admin.quizzes') }}</span>
+            </a>
+          </li>
+          <li class="{{ Request::is('dashboard/surveys*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="/dashboard/surveys">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.surveys') }}</span>
             </a>
           </li>
         </ul>
