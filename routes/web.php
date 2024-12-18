@@ -173,6 +173,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/analysis-assessment', 'AssessmentController@analysisAssessment')->name('analysis-assessment');;
     Route::get('/history-assessment', 'AssessmentController@historyAssessment')->name('history-assessment');;
     Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
+    Route::post('/answer-assessment', 'AssessmentController@AnswerAssessment')->name('answer-assessment');
 
 
     // LFM File Manager Imges

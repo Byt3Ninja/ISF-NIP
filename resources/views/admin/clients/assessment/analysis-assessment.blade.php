@@ -83,7 +83,7 @@ $userid = auth()->user()->id;
 
 
                   
-                  // $assessment_user = App\Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+                  $assessment_user = App\Assessment::where('user_id', $userid)->whereNull('end_date')->first();
                   
                   if($assessment != null){
                     
@@ -190,11 +190,12 @@ $userid = auth()->user()->id;
                 <h6 class="text-sm text-muted mb-0 text-nowrap">{{ __('admin.Overall_Recommendation') }}</h6>
                 <div class="badge bg-label-secondary text-dark radius-10 py-2 fs-6">
                   Good progress, but room for scaling
+                  
                 </div>
               </div>
               <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
                 
-                @if($assessment == null)
+                @if(!$assessment_user)
                 <a 
                   href="{{ route('make_new_assessment_to_user') }}"
                   class="btn btn-sm btn-primary light-shadow radius-10">
@@ -215,6 +216,7 @@ $userid = auth()->user()->id;
                 {{ $scoresTotals > 0 ? $scoresTotals : 0 }}
               </div>
             </div>
+            
             <div class="row">
               @php
                   $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary']; // مصفوفة الألوان
