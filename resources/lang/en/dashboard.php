@@ -144,5 +144,6 @@ return [
     'logTaskUpdatePriority' => '<a target="_blank" href=":url">:user</a> changed task priority from ":old" to ":new"',
     'logTaskUpdateUserChange' => '<a target="_blank" href=":url">:user</a> assigned <a target="_blank" href=":new_url">:new_user</a> to the task instead of <a target="_blank" href=":old_url">:old_user</a>',
     'logTaskUpdateUserAdd' => '<a target="_blank" href=":url">:user</a> assigned <a target="_blank" href=":new_url">:new_user</a> to the task',
-    'logTaskUpdateUserRemove' => '<a target="_blank" href=":url">:user</a> released <a target="_blank" href=":old_url">:old_user</a> from the task'
+    'logTaskUpdateUserRemove' => '<a target="_blank" href=":url">:user</a> released <a target="_blank" href=":old_url">:old_user</a> from the task',
+    'logTaskUpdateRow_no' => '<a target="_blank" href=":url">:user</a> changed task sorting order from ":old" to ":new"',
 ];

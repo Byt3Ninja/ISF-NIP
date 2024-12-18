@@ -351,7 +351,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::patch('training/{id?}/surveys/{survey?}/update', 'TrainingController@update_survey')->name('training.update_survey');
     Route::delete('training/{id?}/surveys/{survey?}/destroy', 'TrainingController@destroy_survey')->name('training.destroy_survey');
     Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.sessionReport');
-    Route::get('training/recorded-sessions/{id}', 'TrainingController@recordedSessions')->name('training.recordedSessions');
+    Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.sessionRecord');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
@@ -401,6 +401,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('mentorshipSessions', 'MentorshipController@index')->name('mentorshipSessions.index');
         Route::get('meetingRedirect/{mentorship_request_id}', 'MentorshipController@meetingRedirect')->name('meetingRedirect');
         Route::resource('mentorshipTasks', 'MentorshipTaskController');
+        Route::post('mentorshipTasks/add-task', 'MentorshipTaskController@addTask');
+        Route::post('mentorshipTasks/move-task', 'MentorshipTaskController@moveTask');
+        Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask');
+        Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
+        Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment');
+        Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display');
+
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorshipTasks.updateWith');
     });
@@ -433,6 +440,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('microsoft-sync-events', 'MicrosoftCalendarController@syncEvents')->name('calender.MicrosoftsyncEvents');
     });
 
+
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'], function () {
         Route::get('/', 'ReportController@index')->name('reports.index');
@@ -441,6 +449,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     });
     //================> End Reports <============
 });
+
+
 
 ///// Reports routes
 //Route::group(['prefix' => 'reports',  'middleware' => ['auth', 'verified']], function(){
@@ -459,6 +469,10 @@ Route::get('/auth/google/callback', 'SocialController@handleGoogleCallback');
 
 Route::get('/auth/microsoft/redirect/{mentorship_id}',  'MicrosoftController@redirect')->name('auth.microsoft.redirect');
 Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('auth.microsoft.callback');
+
+// --------------------> Linked In <-------------------
+Route::get('/auth/linkedin', 'SocialController@redirectToLinkedIn')->name('linkedin.login');
+Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCallback')->name('handleLinkedInCallback');
 
 if (request()->secure()) {
     URL::forceScheme("https");

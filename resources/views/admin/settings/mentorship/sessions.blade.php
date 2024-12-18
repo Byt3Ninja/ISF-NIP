@@ -128,15 +128,15 @@
                       <div class="d-flex align-items-center">
                         <!-- إدخال تاريخ البداية -->
                         <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-                        <div class="col-md-3" style="display: inline-block">
+                        <div class="col-md-2" style="display: inline-block">
                           <input type="text" class="datewithouttime form-control" id="start_date"
                             value="{{ request('start_date') }}" name="start_date" placeholder="Start Date">
                         </div>
-                        <div class="col-md-3 mx-2" style="display: inline-block">
+                        <div class="col-md-2 mx-2" style="display: inline-block">
                           <input type="text" class="datewithouttime form-control" id="end_date"
                             value="{{ request('end_date') }}" name="end_date" placeholder="End Date">
                         </div>
-                        <div class="col-md-3" style="display: inline-block">
+                        <div class="col-md-2 mx-2" style="display: inline-block">
                           <select class="form-control " id="showValueSelect">
                             <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>
                               {{ __('cycles.All requests') }}</option>
@@ -148,6 +148,20 @@
                               {{ __('cycles.disapproved requests') }}</option>
                           </select>
                         </div>
+                        @php
+                        
+                            $cycles = \App\Cycle::get();
+                        
+                        @endphp
+                        <div class="col-md-3 mx-2" style="display: inline-block">
+                          <select class="form-control " id="cycle_id">
+                            @foreach ($cycles as $cycle)
+                            <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
+                              {{ $cycle->title }}</option>
+                            @endforeach
+                          </select>
+                        </div>
+
                         <div class="btn btn-label-primary mx-3" id="searchBot">
                           <i class="ti ti-search"></i>
                           <span class="mx-2">{{ __('cycles.search') }} </span>
@@ -454,6 +468,7 @@
       // الحصول على قيم التواريخ
       const startDate = document.getElementById('start_date').value;
       const endDate = document.getElementById('end_date').value;
+      const CycleId = document.getElementById('cycle_id').value;
 
       const showValue = document.getElementById('showValueSelect').value;
 
@@ -465,6 +480,9 @@
         const formattedStartDate = formatDate(startDate);
         const formattedEndDate = formatDate(endDate);
         url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
+      }
+      if(CycleId){
+        url += `&cycle_id=${CycleId}`;
       }
 
       // إعادة التوجيه إلى الرابط المناسب

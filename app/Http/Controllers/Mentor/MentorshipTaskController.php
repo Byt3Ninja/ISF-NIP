@@ -7,6 +7,7 @@ use App\Http\Requests\Mentor\MentorshipTask\TaskRequest;
 use App\Label;
 use App\MentorshipRequest;
 use App\MentorshipTask;
+use App\MentorshipTaskLog;
 use App\MentorshipTaskComment;
 use Illuminate\Http\Request;
 use Exception, Log, URL;
@@ -27,8 +28,16 @@ class MentorshipTaskController extends Controller
 			$lang = app()->getLocale();
 			$condition = "mentorship_tasks.mentorship_request_id = $request->mentorship_id ";
 			$tasks = $this->handleTask($lang, $condition, 'list');
+			$tasks = $tasks->sortBy('row_no')->values();
 
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
+			$session = $this->getSession( $lang, $request->mentorship_id );
+			$session_id = $session['id'];
+			$mentor = $session['mentor'];
+			$users = $session['startups'];
+			$company = $session['company'];
+			$labels = $session['labels'];
+
 			$_tasks = $tasks->groupBy('status');
 			foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
 			$kanban = [];
@@ -40,7 +49,7 @@ class MentorshipTaskController extends Controller
 					'item' => $_tasks->get($status),
 				];
 			}
-			return view('mentor.mentorshipTasks.index', compact('tasks', 'kanban', 'lang'));
+			return view('mentor.mentorshipTasks.index', compact('tasks', 'kanban', 'lang', 'session_id', 'mentor', 'users', 'company', 'labels'));
 		}
 	}
 
@@ -53,10 +62,389 @@ class MentorshipTaskController extends Controller
 		return view('mentor.mentorshipTasks.create',compact('mentorship'));
 	}
 
+	public function addTask(Request $request)
+	{
+		$user = auth()->user();
+		$lang = app()->getLocale();
+		$this->validate($request, [
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+			'title' => 'required|string',
+			'description' => 'required',
+			'assignee' => 'required|integer|exists:users,id',
+			'due_date' => 'sometimes|nullable|date_format:Y-m-d',
+			'status' => 'required|in:pending,progress,review,completed',
+			'priority' => 'required|in:low,medium,high',
+		]);
+
+		$id = $request->mentorship_request_id;
+		$assignee = intval( $request->assignee );
+		$labels = collect($request->input('labels', []));
+		$session = $this->getSession( $lang, $id );
+
+		$mentor = $session['mentor'];
+		$users = $session['startups'];
+		$company = $session['company'];
+		$stored_labels = $session['labels'];
+
+		if( !in_array( $assignee, $users->pluck('id')->toArray() ) )
+		{
+			$output = [
+				'message' => 'Assignee not in session',
+				'errors' => ['assignee' => 'Assignee not in session']
+			];
+			return response()->json($output, 422);
+		}
+		else
+		{
+			$labelsToAdd = [];
+			$allowedLabels = [];
+			foreach( $labels as $label )
+			{
+				if( !array_key_exists('id', $label) ) { $labelsToAdd[] = ['name' => $label['value'], 'user_id' => $user->id, 'company_id' => $company['id']]; }
+				else
+				{
+					$isLabelExist = $stored_labels->where('id', $label['id'])->first();
+					if( !empty( $isLabelExist ) ) { $allowedLabels[] = $label['id']; }
+				}
+			}
+
+			$task = new MentorshipTask;
+			$task->parent_id = null;
+			$task->mentorship_request_id = $id;
+			$task->mentor_id = $user->id;
+			$task->company_id = $company['id'];
+			$task->user_id = $assignee;
+			$task->title = $request->title;
+			$task->description = $request->description;
+			$task->due_date = trim( $request->due_date ) ? $request->due_date : null;
+			$task->done_date = $request->input('done_date', null);
+			$task->status = $request->status;
+			$task->priority = $request->priority;
+			$task->reported_by = $user->id;
+			$task->save();
+			
+			$task_id = $task->id;
+			$stored_labels = $stored_labels->toArray();
+			foreach( $labelsToAdd as $label )
+			{
+				$createdLabel = Label::create( $label );
+				$allowedLabels[] = $createdLabel->id;
+				$stored_labels[] = ['id' => $createdLabel->id, 'value' => $label['name']];
+			}
+			$task->labels()->sync( $allowedLabels );
+
+			$condition = "mentorship_tasks.mentorship_request_id = $id ";
+			$tasks = $this->handleTask($lang, $condition, 'list');
+			$tasks = $tasks->sortBy('row_no')->values();
+			$available_statuses = ['pending', 'progress', 'review', 'completed'];
+			$_tasks = $tasks->groupBy('status');
+			foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+			$kanban = [];
+			foreach( $available_statuses as $status )
+			{
+				$kanban[] = [
+					'id' => $status . '-board',
+					'title' => __('admin.boardTitle' . ucfirst($status)),
+					'item' => $_tasks->get($status),
+				];
+			}
+
+			return response()->json([
+				'status' => true,
+				'title' => 'Done',
+				'message' => 'Task created successfully',
+				'data' => [
+					'task' => $task,
+					'kanban' => $kanban,
+					'tasks' => $tasks,
+					'labels' => $stored_labels,
+				]
+			], 200);
+		}
+	}
+
+	public function moveTask(Request $request)
+	{
+		$user = auth()->user();
+		$lang = app()->getLocale();
+		$this->validate($request, [
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+			'moved_task_id' => 'required|integer|exists:mentorship_tasks,id',
+			'old_board' => 'required|in:pending-board,progress-board,review-board,completed-board',
+			'new_board' => 'required|in:pending-board,progress-board,review-board,completed-board',
+		]);
+
+		$task_id = $request->moved_task_id;
+		$task = MentorshipTask::find( $task_id );
+		$status = trim( strtolower( str_replace('-board', '', $request->new_board) ) );
+		$old_status = trim( strtolower( str_replace('-board', '', $request->old_board) ) );
+
+		$log = new MentorshipTaskLog;
+		$log->mentorship_task_id = $task->id;
+		$log->user_id = $user->id;
+		$log->action = 'update';
+
+		if( $status == $old_status )
+		{
+			$old = $task->row_no;
+			$log->column = 'row_no';
+			$new = array_search( $task_id, $request->board_ids ) + 1;
+
+			$get_tasks = MentorshipTask::where('mentorship_request_id', $task->mentorship_request_id)->where('status', $status)->orderBy('row_no', 'asc')->get();
+			foreach( $get_tasks as $get_task )
+			{
+				$row_no = array_search( $get_task->id, $request->board_ids ) + 1;
+				$get_task->row_no = $row_no;
+				$get_task->save();
+			}
+		}
+		else
+		{
+			$old = $task->status;
+			$task->status = $status;
+			$task->save();
+	
+			
+			$log->column = 'status';
+			$new = $status;
+		}
+		
+		$log->new = $new;
+		$log->was = $old;
+		$log->save();
+
+		$condition = "mentorship_tasks.mentorship_request_id = $task->mentorship_request_id ";
+		$tasks = $this->handleTask($lang, $condition, 'list');
+		$tasks = $tasks->sortBy('row_no')->values();
+		$available_statuses = ['pending', 'progress', 'review', 'completed'];
+		$_tasks = $tasks->groupBy('status');
+		foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+		$kanban = [];
+		foreach( $available_statuses as $status )
+		{
+			$kanban[] = [
+				'id' => $status . '-board',
+				'title' => __('admin.boardTitle' . ucfirst($status)),
+				'item' => $_tasks->get($status),
+			];
+		}
+
+		return response()->json([
+			'status' => true,
+			'title' => 'Done',
+			'message' => 'Task moved successfully',
+			'data' => ['kanban' => $kanban, 'tasks' => $tasks]
+		], 200);
+	}
+
+	public function updateTask(Request $request)
+	{
+		$user = auth()->user();
+		$lang = app()->getLocale();
+		$this->validate($request, [
+			'task_id' => 'required|integer|exists:mentorship_tasks,id',
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+			'title' => 'required|string',
+			'description' => 'required',
+			'assignee' => 'required|integer|exists:users,id',
+			'due_date' => 'sometimes|nullable|date_format:Y-m-d',
+			'status' => 'required|in:pending,progress,review,completed',
+			'priority' => 'required|in:low,medium,high',
+		]);
+		$task = MentorshipTask::where('mentorship_request_id', $request->mentorship_request_id)->find( $request->task_id );
+		if( empty( $task ) )
+		{
+			$output = [
+				'message' => 'Task could not be found',
+				'errors' => ['task_id' => 'Task could not be found']
+			];
+			return response()->json($output, 422);
+		}
+
+		$id = $request->mentorship_request_id;
+		$assignee = intval( $request->assignee );
+		$labels = collect($request->input('labels', []));
+		$session = $this->getSession( $lang, $id );
+
+		$mentor = $session['mentor'];
+		$users = $session['startups'];
+		$company = $session['company'];
+		$stored_labels = $session['labels'];
+
+		if( !in_array( $assignee, $users->pluck('id')->toArray() ) )
+		{
+			$output = [
+				'message' => 'Assignee not in session',
+				'errors' => ['assignee' => 'Assignee not in session']
+			];
+			return response()->json($output, 422);
+		}
+		else
+		{
+			$labelsToAdd = [];
+			$allowedLabels = [];
+			foreach( $labels as $label )
+			{
+				if( !array_key_exists('id', $label) ) { $labelsToAdd[] = ['name' => $label['value'], 'user_id' => $user->id, 'company_id' => $company['id']]; }
+				else
+				{
+					$isLabelExist = $stored_labels->where('id', $label['id'])->first();
+					if( !empty( $isLabelExist ) ) { $allowedLabels[] = $label['id']; }
+				}
+			}
+
+			$logsToAdd = [];
+			$columns = ['user_id', 'title', 'description', 'due_date', 'done_date', 'status', 'priority'];
+			foreach( $columns as $column )
+			{
+				if( $request->has( $column ) && $request->$column != $task->$column )
+				{
+					$logData = [
+						'mentorship_task_id' => $task->id,
+						'user_id' => $user->id,
+						'action' => 'update',
+						'column' => $column,
+						'new' => $request->$column,
+						'was' => $task->$column,
+					];
+					$logsToAdd[] = $logData;
+				}
+			}
+
+			$task->user_id = $assignee;
+			$task->title = $request->title;
+			$task->description = $request->description;
+			if( $request->has('due_date') && trim( $request->due_date ) ) { $task->due_date = $request->due_date; }
+			if( $request->has('done_date') && trim( $request->done_date ) ) { $task->done_date = $request->done_date; }
+			$task->status = $request->status;
+			$task->priority = $request->priority;
+			$task->save();
+			$task_id = $task->id;
+			$stored_labels = $stored_labels->toArray();
+			foreach( $labelsToAdd as $label )
+			{
+				$createdLabel = Label::create( $label );
+				$allowedLabels[] = $createdLabel->id;
+				$stored_labels[] = ['id' => $createdLabel->id, 'value' => $label['name']];
+			}
+			$task->labels()->sync( $allowedLabels );
+			MentorshipTaskLog::insert( $logsToAdd );
+
+			$condition = "mentorship_tasks.mentorship_request_id = $id ";
+			$tasks = $this->handleTask($lang, $condition, 'list');
+			$tasks = $tasks->sortBy('row_no')->values();
+			$available_statuses = ['pending', 'progress', 'review', 'completed'];
+			$_tasks = $tasks->groupBy('status');
+			foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+			$kanban = [];
+			foreach( $available_statuses as $status )
+			{
+				$kanban[] = [
+					'id' => $status . '-board',
+					'title' => __('admin.boardTitle' . ucfirst($status)),
+					'item' => $_tasks->get($status),
+				];
+			}
+
+			return response()->json([
+				'status' => true,
+				'title' => 'Done',
+				'message' => 'Task updated successfully',
+				'data' => [
+					'task' => $task,
+					'kanban' => $kanban,
+					'tasks' => $tasks,
+					'labels' => $stored_labels,
+				]
+			], 200);
+		}
+	}
+
+	public function removeTask(Request $request)
+	{
+		$user = auth()->user();
+		$lang = app()->getLocale();
+		$this->validate($request, [
+			'task_id' => 'required|integer|exists:mentorship_tasks,id',
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+		]);
+		$id = $request->mentorship_request_id;
+		$task = MentorshipTask::where('mentorship_request_id', $id)->find( $request->task_id );
+		if( empty( $task ) )
+		{
+			$output = [
+				'message' => 'Task could not be found',
+				'errors' => ['task_id' => 'Task could not be found']
+			];
+			return response()->json($output, 422);
+		}
+		$task->delete();
+		$condition = "mentorship_tasks.mentorship_request_id = $id ";
+		$tasks = $this->handleTask($lang, $condition, 'list');
+		$tasks = $tasks->sortBy('row_no')->values();
+		$available_statuses = ['pending', 'progress', 'review', 'completed'];
+		$_tasks = $tasks->groupBy('status');
+		foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+		$kanban = [];
+		foreach( $available_statuses as $status )
+		{
+			$kanban[] = [
+				'id' => $status . '-board',
+				'title' => __('admin.boardTitle' . ucfirst($status)),
+				'item' => $_tasks->get($status),
+			];
+		}
+
+		return response()->json([
+			'status' => true,
+			'title' => 'Done',
+			'message' => 'Task deleted successfully',
+			'data' => [
+				'task' => $task,
+				'kanban' => $kanban,
+				'tasks' => $tasks
+			]
+		], 200);
+	}
+
+	public function addComment(Request $request)
+	{
+		$user = auth()->user();
+		$lang = app()->getLocale();
+		$this->validate($request, [
+			'task_id' => 'required|integer|exists:mentorship_tasks,id',
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+			'comment' => 'required',
+		]);
+		$id = $request->mentorship_request_id;
+		$task = MentorshipTask::where('mentorship_request_id', $id)->find( $request->task_id );
+		if( empty( $task ) )
+		{
+			$output = [
+				'message' => 'Task could not be found',
+				'errors' => ['task_id' => 'Task could not be found']
+			];
+			return response()->json($output, 422);
+		}
+		$comment = new MentorshipTaskComment;
+		$comment->mentorship_task_id = $request->task_id;
+		$comment->user_id = $user->id;
+		$comment->comment = $request->comment;
+		$comment->attached = null; // keep it null for now
+		$comment->edited = false;
+		$comment->save();
+		
+		return response()->json([
+			'status' => true,
+			'title' => 'Done',
+			'message' => 'Comment added successfully',
+		], 200);
+	}
+
 	/**
 	 * Store a newly created resource in storage.
 	 */
-	public function store(TaskRequest $request)
+	public function store(Request $request)
 	{
 		try {
 			$mentorship = MentorshipRequest::find($request->mentorship_request_id);
@@ -134,6 +522,19 @@ class MentorshipTaskController extends Controller
 			// log what happend
 			Log::channel('system_exceptions')->info('Exceptions:', [$e]);
 			abort(500);
+		}
+	}
+
+	public function display(string $id)
+	{
+		$lang = app()->getLocale();
+		$condition = "mentorship_tasks.id = $id ";
+		$tasks = $this->handleTask($lang, $condition, 'show');
+		if( $tasks == '404' ) { abort( 404 ); }
+		else
+		{
+			$task = $tasks->first();
+			return $task;
 		}
 	}
 
@@ -315,7 +716,7 @@ class MentorshipTaskController extends Controller
 	private function getImage( $image = null )
 	{
 		if( !$image ) { return URL::to('/images/placeholder.jpg'); }
-        return URL::to("/191014/$image");
+		return URL::to("/191014/$image");
 	}
 
 	private function handleTask($lang, $condition, $type)
@@ -329,6 +730,7 @@ class MentorshipTaskController extends Controller
 				mentorship_tasks.status AS status,
 				mentorship_tasks.priority AS priority,
 				mentorship_tasks.mentor_id AS mentor_id,
+				mentorship_tasks.row_no AS row_no,
 				mentorship_tasks.created_at AS reported_at,
 				mentorship_tasks.updated_at AS updated_at,
 				CONCAT(TRIM(COALESCE(mentor.first_name_$lang, '')), ' ', TRIM(COALESCE(mentor.last_name_$lang, ''))) AS mentor,
@@ -515,6 +917,7 @@ class MentorshipTaskController extends Controller
 					'due_date' => !empty( $task->due_at ) && trim( $task->due_at ) ? trim( $task->due_at ) : null,
 					'done_date' => !empty( $task->done_at ) && trim( $task->done_at ) ? trim( $task->done_at ) : null,
 					'status' => $task->status,
+					'row_no' => $task->row_no,
 					'visible_status' => __('admin.boardTitle'. ucfirst($task->status)),
 					'priority' => $task->priority,
 					'priority_visible' => __('admin.priority'. ucfirst($task->priority)),
@@ -532,6 +935,47 @@ class MentorshipTaskController extends Controller
 	
 			return $tasks;
 		}
+	}
+
+	private function getSession( $lang, $id )
+	{
+		$sessions = "SELECT
+				mr.id,
+				m.id AS mentor_id,
+				CONCAT(TRIM(COALESCE(m.first_name_$lang, '')), ' ', TRIM(COALESCE(m.last_name_$lang, ''))) AS mentor,
+				c.id AS company_id,
+				TRIM(COALESCE(c.name_$lang, '')) AS company,
+				u.id AS startup_id,
+				CONCAT(TRIM(COALESCE(u.first_name_$lang, '')), ' ', TRIM(COALESCE(u.last_name_$lang, ''))) AS startup,
+				l.id AS label_id,
+				l.name AS label
+			FROM
+				mentorship_requests mr
+			LEFT JOIN
+				users m ON mr.mentor_id = m.id
+			LEFT JOIN
+				users s ON mr.user_id = s.id
+			LEFT JOIN
+				companies c ON s.company_id = c.id
+			LEFT JOIN
+				users u ON c.id = u.company_id
+			LEFT JOIN
+				labels l ON l.company_id = c.id
+			WHERE
+				mr.id = $id
+		";
+		$sessions = collect( DB::select( $sessions ) );
+		$sessions = $sessions->groupBy('id')->map(function( $groupedSession ) {
+			$session = $groupedSession->first();
+			return [
+				'id' => $session->id,
+				'mentor' => ['id' => $session->mentor_id, 'name' => $session->mentor],
+				'company' => ['id' => $session->company_id, 'name' => $session->company],
+				'startups' => $groupedSession->map(function ( $item ) { return ['id' => $item->startup_id, 'value' => $item->startup]; })->unique('id')->values()->whereNotNull('id'),
+				'labels' => $groupedSession->map(function ( $item ) { return ['id' => $item->label_id, 'value' => $item->label]; })->unique('id')->values()->whereNotNull('id'),
+			];
+		})->values()->first();
+		return $sessions;
 	}
 
 	public function attachments($id, $card_id, $path)

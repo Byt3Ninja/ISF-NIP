@@ -79,7 +79,6 @@ class RegisterController extends Controller
             'first_name_en' => $data['first_name_en'],
             'last_name_en' => $data['last_name_en'],
             'gender' =>  $data['gender'],
-            'title_en' =>  $data['title_en'],
             'phone' => $data['phone'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
@@ -102,6 +101,9 @@ class RegisterController extends Controller
                 'mentor_id' => $user->id
             ];
         }
+
+        $user->title_en = $data['title_en'];
+        $user->save();
         
         // إدراج الخبرات دفعة واحدة
         DB::table('mentor_expertise')->insert($expertises);
@@ -112,7 +114,6 @@ $user = User::create([
             'first_name_en' => $data['first_name_en'],
             'last_name_en' => $data['last_name_en'],
             'gender' =>  $data['gender'],
-            'title_en' =>  $data['title_en'],
             'phone' => $data['phone'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),

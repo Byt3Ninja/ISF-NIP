@@ -79,8 +79,9 @@ class ProgramController extends Controller
     {
         $program = Cycle::where('id', $id)->first();
         $steps = Step::where('cycle_id', $program->id)->orderBy('arr','ASC')->get();
-        $id = $program->pluck('id')[0];
-                $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
+        
+        // $id = $program->pluck('id')[0];
+        //         $steps = Step::where('cycle_id', $id)->orderBy('arr','ASC')->get();
 
                 $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
                 
@@ -92,7 +93,7 @@ class ProgramController extends Controller
                     ];
                 }
 
-
+               
 
 
         return view('admin.programs.show', compact('program','steps', 'judges', 'stepsData'));
