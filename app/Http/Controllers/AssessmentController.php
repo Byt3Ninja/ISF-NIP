@@ -173,11 +173,11 @@ class AssessmentController extends Controller
 
          $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
 
-         $user_scores = $categories->map(function ($category) {
-             $questions = $category->question;
+         $user_scores = $categories->map(function ($category) use ($assessment_user) {
+             $questions = $category->question->where('assessment_id', $assessment_user->id);
              $subcategories = $category->subcategory;
-             $subcategories = $subcategories->map(function ($subcategory) use ($questions) {
-                 $subcategory->questions = $questions->where('subcategory_id', $subcategory->id);
+             $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
+                 $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
                  return $subcategory;
              });
              $category->subcategories = $subcategories;
@@ -201,7 +201,7 @@ class AssessmentController extends Controller
         }
         
 
-        return view('admin/clients/assessment/assessment',compact('user_scores','answers'));
+        return view('admin/clients/assessment/assessment',compact('user_scores','answers', 'assessment_user'));
 
     }else{
         return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
@@ -298,7 +298,7 @@ public function MakeAssessment()
         return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
         }else{
             $user_scores = [];
-            $categories = [];
+            $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
             return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
         }
 
@@ -326,7 +326,54 @@ public function MakeAssessment()
         
     }
 
+    public function AnswerAssessment(Request $request)
+    {
+        $userid = auth()->user()->id;
+        $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
 
+        if($assessment_user != null){
+        // تحقق من البيانات القادمة
+        $validatedData = $request->validate([
+            'questionId' => 'required|integer|exists:user_scores,id',
+            'answer' => 'required|string',
+        ]);
+        
+       
+        // هنا من الممكن تنفيذ منطق تحديث الإجابة
+        try {
+            // افترض أن لديك موديل `Answer` لحفظ الإجابة
+            $user_score = UserScore::find($request->questionId);
+
+            $data = json_decode($user_score->Answers, true);
+        $result = collect($data)->get($request->answer);
+
+        $score = $result['score'];
+        $text = $result['text'];
+        $weight = $user_score->weight;
+        $weighted_score = $score * $weight / 100;
+            $user_score->score = $score;
+            $user_score->Result_assessment = $text;
+            $user_score->weighted_score = $weighted_score;
+            $user_score->save();
+
+            $assessment_user = UserScore::where('assessment_id', $user_score->assessment_id)->where('score', '=', '0')->count();
+            if($assessment_user == 0){
+                $assessment_user = Assessment::where('id', $user_score->assessment_id)->first();
+                $assessment_user->end_date = now();
+                $assessment_user->save();
+                return response()->json(['success' => true, 'message' => '1']);
+            }
+            return response()->json(['success' => true, 'message' => 'تم تحديث الإجابة بنجاح']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'حدث خطأ أثناء تحديث الإجابة']);
+        }
+    }else{
+        return redirect()->route('analysis-assessment');
+    }
+
+
+    }
+    
 
 
 
