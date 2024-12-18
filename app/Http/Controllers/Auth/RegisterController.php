@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Events\WebMessage;
+use App\Country;
 use App\User;
-use App\Http\Controllers\Controller;
+use App\Settings;
 use App\UsersBio;
+use App\Events\WebMessage;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
@@ -69,7 +71,10 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        
+        $Settings = Settings::where('id', 1)->first();
 
+        if($Settings->VFEmail == 1){
         $user = User::create([
             'first_name_en' => $data['first_name_en'],
             'last_name_en' => $data['last_name_en'],
@@ -101,8 +106,57 @@ class RegisterController extends Controller
         // إدراج الخبرات دفعة واحدة
         DB::table('mentor_expertise')->insert($expertises);
     }
+    }else{
 
+$user = User::create([
+            'first_name_en' => $data['first_name_en'],
+            'last_name_en' => $data['last_name_en'],
+            'gender' =>  $data['gender'],
+            'title_en' =>  $data['title_en'],
+            'phone' => $data['phone'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'email_verified_at' => now(),
+        ]);
+        $user->assignRole($data['role']);
+
+
+        if($data['role'] == "Mentor"){
+        $userbio = UsersBio::create([
+            'user_id' => $user->id,
+            'bio_en' => $data['userbio'],
+            'linkedin' => $data['Linkedin'],
+        ]);
+
+        // معالجة الخبرات كمصفوفة
+        $expertises = [];
+        foreach ($data['Expertise'] as $expertiseId) {
+            $expertises[] = [
+                'expertise_id' => $expertiseId,
+                'mentor_id' => $user->id
+            ];
+        }
         
+        // إدراج الخبرات دفعة واحدة
+        DB::table('mentor_expertise')->insert($expertises);
+    }
+
+
+
+
+    }
+        
+
+
+
+
+
+
+
+
+
+
+
         event(new WebMessage('NewUser', $data['first_name_en'] .' '. $data['last_name_en']));
         return $user;
     }

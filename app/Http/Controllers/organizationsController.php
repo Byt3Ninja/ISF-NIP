@@ -68,7 +68,11 @@ class organizationsController extends Controller
 		$organization->color = $request->color;
         
             //store the image
-            $img_url = $request->input('img_url');
+			if($request->input('img_url') != null){
+				$img_url = $request->input('img_url');
+			}else{
+				$img_url = '/images/background/logo.png';
+			}
             //update
              $organization->img_url= $img_url;
         
@@ -126,7 +130,11 @@ class organizationsController extends Controller
         
 
             //store the image
-            $img_url = $request->input('img_url');
+			if($request->input('img_url') != null){
+				$img_url = $request->input('img_url');
+			}else{
+				$img_url = $organization->img_url;
+			}
             //update
             $organization->img_url= $img_url;
         
@@ -170,5 +178,18 @@ class organizationsController extends Controller
 			Log::channel('system_exceptions')->info('Exceptions:', [$e]);
 			abort(500);
 		}
+	}
+
+	public function GetLFM( $path = null )
+	{
+		try {
+			 $instance = Storage::disk('UsersLFMPublic');
+			if( $instance->directoryExists( $path ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+			$file = $instance->response( $path );
+			$mimeType = $instance->mimeType($path);
+			if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
+			$file->headers->set('Content-Type', $mimeType);
+			return $file;
+		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
 	}
 }

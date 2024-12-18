@@ -44,6 +44,8 @@
                         <tr>
                           <th>#</th>
                           <th>{{ __('admin.Name') }}</th>
+                          <th>{{ __('admin.Description') }}</th>
+                          <th>{{ __('admin.Type') }}</th>
                           <th>{{ __('cycles.Created at') }}</th>
                           <th>{{ __('cycles.Edit/Delete') }}</th>
                         </tr>
@@ -56,6 +58,8 @@
                         <tr>
                           <td>{{$c++}}</td>
                           <td>{{$Category->{'category_name_' . $l} }}</td>
+                          <td>{{$Category->category_description }}</td>
+                          <td>{{$Category->category_type }}</td>
                           <td>{{$Category->created_at}}</td>
                           <td>
                             <div class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ShowCategory{{ $Category->id }}" >{{__('admin.Show')}}</div>
@@ -114,6 +118,32 @@
                                                     />
                                                 </div>
 
+                                              <div class="mb-6 width49">
+                                                <div>
+                                                    <label for="category_type" class="form-label" >{{__('admin.Category_Type')}}</label>
+                                                </div>
+                                                <select name="category_type" id="category_type" class="form-control @error('category_type') is-invalid @enderror">
+                                                  <option value="TimeSheet" {{ $Category->category_type == "TimeSheet" ? 'selected' : '' }}>TimeSheet</option>
+                                                  <option value="Assesment" {{ $Category->category_type == "Assesment" ? 'selected' : '' }}>Assesment</option>
+                                                </select>
+                                                
+                                            </div>
+                          
+                                            
+                                              <div class="mb-6 width49">
+                                                <div>
+                                                    <label for="category_description" class="form-label" >{{__('admin.Category_Description')}}</label>
+                                                </div>
+                                                <textarea id="category_description"
+                                                class="form-control @error('category_description') is-invalid @enderror"
+                                                type="text"
+                                                name="category_description"
+                                                autocomplete="off">{{$Category->category_description}}</textarea>
+                                                
+                                            </div>
+
+
+
                                               </div>
                                           </div>
 
@@ -147,6 +177,20 @@
                                   </div>
                                   <p class="m-0 d-none d-sm-block">{{__('admin.Category Name')}}</p>
                               </div>
+                              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                                  <div class="d-flex gap-4 align-items-center">
+                                      <h6 class="m-0">{{$Category->category_description}}</h6>
+                                  </div>
+                                  <p class="m-0 d-none d-sm-block">{{__('admin.Category_Description')}}</p>
+                              </div>
+                              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                                  <div class="d-flex gap-4 align-items-center">
+                                      <h6 class="m-0">{{$Category->category_type}}</h6>
+                                  </div>
+                                  <p class="m-0 d-none d-sm-block">{{__('admin.Category_Typeq')}}</p>
+                              </div>
+
+                              
 
 
                               <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
@@ -155,6 +199,7 @@
                                   </div>
                                   <p class="m-0 d-none d-sm-block">{{__('admin.Created At')}}</p>
                               </div>
+                              
 
                           </div>
                       </div>
@@ -215,6 +260,34 @@
                             autocomplete="off"
                         />
                     </div>
+
+                    <div class="mb-6 width49">
+                      <div>
+                          <label for="category_type" class="form-label" >{{__('admin.Category_Type')}}</label>
+                      </div>
+                      <select name="category_type" id="category_type" class="form-control @error('category_type') is-invalid @enderror">
+                        <option value="TimeSheet">TimeSheet</option>
+                        <option value="Assesment">Assesment</option>
+                      </select>
+                      
+                  </div>
+
+                  
+                    <div class="mb-6 width49">
+                      <div>
+                          <label for="category_description" class="form-label" >{{__('admin.Category_Description')}}</label>
+                      </div>
+                      <textarea id="category_description"
+                      class="form-control @error('category_description') is-invalid @enderror"
+                      type="text"
+                      name="category_description"
+                      autocomplete="off"></textarea>
+                      
+                  </div>
+
+                  
+
+
 
                       </div>
                   </div>

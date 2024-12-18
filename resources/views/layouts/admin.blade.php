@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html 
   lang="{{ $l }}" 
-  dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
+  dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
   data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
   class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
   data-theme="theme-default" 
@@ -35,13 +35,17 @@
         </footer>
       </div>
     </div>
-  </div>
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
 
+    <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+    <div class="drag-target"></div>
+  </div>
   <!-- / Layout wrapper -->
 
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->
-
+  <script src="{{ mix('js/app.js') }}"></script>
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
   <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
@@ -64,6 +68,7 @@
   <script src="/vuexy/assets/js/main.js"></script>
 
   <!-- Custom JS -->
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/app-assets/js/1.js"></script>
 
   <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>
@@ -91,10 +96,9 @@
         var audio = new Audio('{{ asset('/notification-sound.mp3') }}');
 
         // Enable pusher logging - don't include this in production
-        Pusher.logToConsole = false;
+        Pusher.logToConsole = true;
         var pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
-          // cluster: 'eu'
-          encrypted: true
+          cluster: 'eu'
         });
         // Subscribe to the channel we specified in our Laravel Event
         var channel = pusher.subscribe('Web-Message');

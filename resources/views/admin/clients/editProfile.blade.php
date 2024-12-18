@@ -189,8 +189,8 @@
                     </div>
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" name="address" placeholder="Address" />
+                    <label for="address" class="form-label">{{ __('admin.Address') }}</label>
+                    <input type="text" class="form-control" id="address" name="address" placeholder="{{ __('admin.Address') }}" value="{{ $client->address }}" />
                   </div>
                   {{-- <div class="mb-4 col-md-6">
                     <label for="state" class="form-label">State</label>
@@ -198,18 +198,18 @@
                       placeholder="California" />
                   </div> --}}
                   <div class="mb-4 col-md-6">
-                    <label for="zipCode" class="form-label">Zip Code</label>
-                    <input type="text" class="form-control" id="zipCode" name="zipCode" placeholder="231465"
-                      maxlength="6" />
+                    <label for="zip_code" class="form-label">{{ __('admin.Zip_Code') }}</label>
+                    <input type="text" class="form-control" id="zip_code" name="zip_code" placeholder="231465"
+                      maxlength="6" value="{{ $client->zip_code }}" />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="state_id" class="form-label">{{ __('admin.Country') }}</label>
+                    <label for="country_id" class="form-label">{{ __('admin.Country') }}</label>
                     <select id="country_id" name='country_id' class="select2 form-select" required>
                       <option value="">{{ __('admin.Country') }}</option>
                       @foreach ($countries as $country)
                         <option value="{{ $country->id }}"
                           {{ $country->id == $client->country_id ? 'selected' : '' }}>
-                          {{ $country->{'name_' . $l} }}</option>
+                          {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
                       @endforeach
                     </select>
                   </div>
@@ -223,16 +223,7 @@
                       @endif
                     </select>
                   </div>
-                  <div class="mb-4 col-md-6">
-                    <label for="city_id" class="form-label">{{ __('admin.City') }}</label>
-                    <select class="select2 form-select" required id="city_id" name='city_id'>
-                      <option value="">{{ __('admin.City') }}</option>
-                      @php $name = 'name_'.$l; @endphp
-                      @if ($client->city_id)
-                        <option value="{{ $client->city_id }}" selected>{{ $client->city->{'name_' . $l} }}</option>
-                      @endif
-                    </select>
-                  </div>
+    
                   <div class="mb-4 col-md-6">
                     <label for="HaveCompany" class="form-label">{{ __('auth.DoYouHaveCompany') }}</label>
                     <select name="HaveCompany" id="HaveCompany" class="select2 form-select">
@@ -246,9 +237,7 @@
                     <select id="language" name="language" class="select2 form-select">
                       <option value="">Select Language</option>
                       <option value="en" {{ $client->language == 'en' ? 'selected' : '' }} >English</option>
-                      <option value="fr" {{ $client->language == 'fr' ? 'selected' : '' }} >French</option>
-                      <option value="de" {{ $client->language == 'de' ? 'selected' : '' }} >German</option>
-                      <option value="pt" {{ $client->language == 'pt' ? 'selected' : '' }} >Portuguese</option>
+                      <option value="ar" {{ $client->language == 'ar' ? 'selected' : '' }} >Arabic</option>
                     </select>
                   </div>
                   <div class="mb-4 col-md-6">
@@ -275,7 +264,7 @@
                       <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Caracas, La Paz</option>
                     </select>
                   </div>
-                  <div class="mb-4 col-md-6">
+                  <div class="mb-4 col-md-12">
                     <label for="currency" class="form-label">Currency</label>
                     <select id="currency" name="currency" class="select2 form-select">
                       <option value="">Select Currency</option>

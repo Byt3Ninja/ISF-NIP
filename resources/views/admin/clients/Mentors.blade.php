@@ -58,9 +58,11 @@
 @stop
 
 @section('content')
-  @if (!Auth::user()->first_name_ar)
-    {!! redirect()->route('my_profile')->with(['msg' => 'FailedStore', 'class' => 'danger']) !!}
-  @endif
+@if (!Auth::user()->first_name_ar)
+<div class="d-none">
+  {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+</div>
+@endif
 
   <!-- Content wrapper -->
   <div class="content-wrapper">

@@ -9,6 +9,8 @@
 @stop
 
 @section('content')
+
+
   @php
     $countCards = [
         [
@@ -82,6 +84,8 @@
 
   <!-- Content wrapper -->
   <div class="content-wrapper">
+    
+    
     <div class="container-xxl flex-grow-1 container-p-y">
       <!-- Alert -->
       @if (session()->has('msg'))
@@ -182,6 +186,7 @@
       <!--/ Latest Cycles Table -->
 
       <!-- Latest Mentorship Requests Table -->
+      @if (!empty($mentorshipRequests))
       <div class="card mt-6">
         <h5 class="card-header" style="text-transform: capitalize">
           <i class="ti ti-school ti-28px"></i>
@@ -262,6 +267,165 @@
         </div>
       </div>
       <!--/ Latest Mentorship Requests Table -->
+      @endif
+
+      <div class="row mt-6">
+        <!-- Horizontal Bar Chart -->
+        <div class="col-12 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0 mx-2">{{ __('admin.Cycle Startups Statistics') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="horizontalBarChart"></div>
+            </div>
+          </div>
+        </div>
+        <!-- /Horizontal Bar Chart -->
+        <!-- / Total companies by sdg chart -->
+        <div class="col-12 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">{{__('admin.Total_company_by_SDG')}}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="sdgCompaniesChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- / Total companies by sdg chart -->
+        <!-- Pie Chart -->
+        <div class="col-md-6 col-12 mt-6">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">{{ __('admin.totalusersmf') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="pieChart"></div>
+            </div>
+          </div>
+        </div>
+        <!-- /Pie Chart -->
+        <!-- Vertical Bar Charts -->
+        <div class="col-md-6 col-12 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="verticalBarChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- /Vertical Bar Charts -->
+        <!-- Projects Pie Chart -->
+        <div class="col-md-6 col-12 mt-6">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">{{__('admin.Project_Status_Over_Time')}}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="projectsPieChart"></div>
+            </div>
+          </div>
+        </div>
+        <!-- / Projects Pie Chart -->
+        <!-- Vertical Bar Charts -->
+        <div class="col-md-6 col-12 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">{{__('admin.Development_Stage')}}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="devStageStackedBarChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- /Vertical Bar Charts -->
+        <!-- Sector Breakdown Chart -->
+        <div class="col-md-6 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">{{__('admin.Sector_Breakdown')}} </h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="sectorBreakdownChart"></div>
+            </div>
+          </div>
+        </div>
+        <!-- / Sector Breakdown Chart -->
+        <!-- /User Distribution Chart -->
+        <div class="col-md-6 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">{{__('admin.User_distribution_by_country')}}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="userDistributionChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- /User Distribution Chart -->
+        <!-- Target Market Analysis Chart -->
+        <div class="col-md-6 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">{{__('admin.Target_Market_Analysis')}}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="targetMarketChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+        </div>
+        <!-- /Target Market Analysis Chart -->
+        <!-- Project Status Over Time Chart -->
+          <div class="col-12 col-md-6 mt-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <h5 class="card-title mb-0">{{__('admin.Project_Status_Over_Time')}}</h5>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="projectStatusOverTimeChart"></div>
+              </div>
+            </div>
+          </div>
+        <!-- /Project Status Over Time Chart -->
+  
+        <!-- Total companies by sectors -->
+        {{-- <div class="col-md-6 col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <h5 class="card-title mb-0">Total companies by sectors</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <canvas id="companyBySectorChart" class="chartjs" data-height="345"></canvas>
+            </div>
+          </div>
+          <!-- / Total companies by sectors -->
+        </div> --}}
+      </div>
     </div>
   </div>
 @stop
@@ -273,6 +437,36 @@
 
 @section('pagescripts')
   <script>
+    // User distribution by country
+    const userDistributionData = @json($countries);  
+
+    // Project Distribution Pie Chart Data
+    const projectsPieData = @json($project_types);    
+    
+    // Development Stage Chart Data
+    const devStageData = @json($development_stages);
+
+    // Target Market Analysis Chart Data
+    const targetMarketData = @json($target_market_data);    
+
+     // Sector Breakdown
+     const sectorBreakdownData = @json($sector_data);
+
+    // Project Status Over Time Chart Data
+     const projectStatusData = @json($project_status);
+
+    // Total jobs created
+    const totalJobsCreated = @json($total_jobs_created);
+
+    // Total Founders
+    const totalFounders = @json($total_founders);
+    
+    // Companies by SDG Chart Data
+    const sdgData = @json($sdg_data);
+
+    // Companies by sector
+    const companiesBySectorData = @json($sector_distribution);
+
     // Mentorship chart data
     const seriesName = '({{ __('admin.hours') }})';
     const barChartCategories = {!! json_encode($mentorship_labels) !!};
@@ -283,7 +477,8 @@
     const internshipBarChartCategories = {!! json_encode($sessions_labels) !!};
     const internshipSeriesData = {!! json_encode($sessions_durations) !!};
   </script>
-
+  
+  <script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
   <script src="/vuexy/assets/js/orgDashboard.js"></script>
 

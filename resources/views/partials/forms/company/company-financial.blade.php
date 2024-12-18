@@ -75,26 +75,52 @@
 
         <div class="col-6 mb-3">
           <label for="stage"
-            class="form-label">{{ __('admin.stage') }}*</label>
+            class="form-label">{{ __('admin.development_stage') }}*</label>
           <div class="position-relative">
             <select class="form-select border-light light-shadow px-10" required
               id="stage" name="stage">
               <option value="">{{ __('admin.stage') }}</option>
-              <option value="idea"
-                {{ !empty($client->company) && $client->company->stage == 'idea' ? 'selected' : '' }}>
-                {{ __('admin.stage_idea') }}
+
+              @foreach ($Stages as $Stage)
+              <option value="{{ $Stage->id }}"
+              {{ !empty($client->company) && $client->company->stage == $Stage->id ? 'selected' : '' }}>
+              {{ $Stage->{'name_' . $l} }}
+            </option>
+              @endforeach
+              
+            </select>
+            <i class="ti ti-flag fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
+              style="left: 7px;"></i>
+          </div>
+        </div>
+
+
+        <div class="col-6 mb-3">
+          <label for="development_stage"
+            class="form-label">{{ __('admin.Funding_Stage') }}*</label>
+          <div class="position-relative">
+            <select class="form-select border-light light-shadow px-10" required
+              id="development_stage" name="development_stage">
+              <option value="" disabled>{{ __('admin.development_stage') }}</option>
+              <option value="Pre_seed_funding_stage"
+                {{ !empty($client->company) && $client->company->development_stage == 'Pre_seed_funding_stage' ? 'selected' : '' }}>
+                {{ __('admin.Pre_seed_funding_stage') }}
               </option>
-              <option value="prototype"
-                {{ !empty($client->company) && $client->company->stage == 'prototype' ? 'selected' : '' }}>
-                {{ __('admin.stage_prototype') }}
+              <option value="Seed_funding_stage "
+                {{ !empty($client->company) && $client->company->development_stage == 'Seed_funding_stage' ? 'selected' : '' }}>
+                {{ __('admin.Seed_funding_stage') }}
               </option>
-              <option value="ready_product"
-                {{ !empty($client->company) && $client->company->stage == 'ready_product' ? 'selected' : '' }}>
-                {{ __('admin.stage_ready_product') }}
+              <option value="Series_A_funding"
+                {{ !empty($client->company) && $client->company->development_stage == 'Series_A_funding' ? 'selected' : '' }}>
+                {{ __('admin.Series_A_funding') }}
               </option>
-              <option value="company_in_market"
-                {{ !empty($client->company) && $client->company->stage == 'company_in_market' ? 'selected' : '' }}>
-                {{ __('admin.stage_company_in_market') }}
+              <option value="Series_B_funding"
+                {{ !empty($client->company) && $client->company->development_stage == 'Series_B_funding' ? 'selected' : '' }}>
+                {{ __('admin.Series_B_funding') }}
+              </option>
+              <option value="Series_C_funding"
+                {{ !empty($client->company) && $client->company->development_stage == 'Series_C_funding' ? 'selected' : '' }}>
+                {{ __('admin.Series_C_funding') }}
               </option>
             </select>
             <i class="ti ti-flag fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
@@ -114,7 +140,7 @@
                 autocomplete="targeted_market">
                 @foreach($countries as $country)
                 <option value="{{$country->id}}" @if($client->company) @if ($client->company->targeted_market !=null)
-                 {{ in_array($country->id, json_decode($client->company ? $client->company->targeted_market : old('Targeted Market', '[]'))) ? 'selected' : '' }} @endif @endif> {{$country->{'name_'.$l} }} </option>
+                 {{ in_array($country->id, json_decode($client->company ? $client->company->targeted_market : old('Targeted Market', '[]'))) ? 'selected' : '' }} @endif @endif> {{$country->emoji . ' ' . $country->{'name_'.$l} }} </option>
             @endforeach
                 <!-- Add more options as needed -->
               </select>
@@ -152,6 +178,48 @@
               style="left: 7px;"></i>
           </div>
         </div>
+
+        <hr>
+
+        <div class="col-md-6 col-12 mb-6">
+          <label for="financial_plan" class="form-label">{{ __('admin.financial_plan') }}
+            *</label>
+          <div class="position-relative">
+              <div class="mt-3" style="display: grid; place-items: center;">
+                  <input id="financial_plan" readonly
+                    class="form-control border-light light-shadow px-8 "
+                    type="text" name="financial_plan" value="">
+                  <a data-input="financial_plan" data-preview="financial_plan"
+                    href="#"
+                    class="lfm btn btn-outline-primary text-black fw-bold rounded-pill">
+                    <i
+                      class="ti ti-plus me-3"></i>{{ __('admin.Add new document') }}
+                  </a>
+                </div>
+          </div>
+        </div>
+
+        
+
+
+        <div class="col-md-6 col-12 mb-6">
+          <label for="financial_plan_description"
+            class="form-label">{{ __('admin.financial_plan_description') }}*</label>
+          <div class="position-relative">
+              <textarea class="form-control border-light light-shadow px-10"
+              id="financial_plan_description" placeholder="{{ __('admin.financial_plan_description') }}*" name="financial_plan_description" required autocomplete="financial_plan_description">{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}</textarea>
+            <i class="ti ti-chart-bar fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
+              style="left: 7px;"></i>
+          </div>
+        </div>
+
+
+
+       
+
+
+
+
 
         <div class="col-12 d-flex justify-content-end">
           <button type="submit" class="btn btn-primary" id="submit-button">

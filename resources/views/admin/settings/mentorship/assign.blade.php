@@ -52,6 +52,9 @@
                       <a class="btn btn-label-primary" href="/dashboard/mentorship/view/{{ $id }}">
                         <i class="ti ti-settings"></i> <span class="mx-1">{{ __('cycles.Manage sessions') }}</span>
                       </a>
+                      <a class="btn btn-label-dark" href="/dashboard/mentorship/{{ $id }}/surveys">
+                        <i class="ti ti-question-mark"></i> <span class="mx-1">{{ __('cycles.Manage Surveys') }}</span>
+                      </a>
                     </div>
                   </fieldset>
                   <br />
@@ -89,7 +92,7 @@
                             <td>
                               <div class="d-flex align-items-center">
                                 <input type='checkbox' id="checkbox{{ $mentor->id }}" class="checkbox-input"
-                                  {{ in_array($mentor->id, $clist) ? 'checked' : '' }} name='users[]'
+                                  {{ in_array($mentor->id, $cList) ? 'checked' : '' }} name='users[]'
                                   value="{{ $mentor->id }}">
                                 <label for="checkbox{{ $mentor->id }}">
                                   <div class="d-flex align-items-center mx-2" style="height: 40px;">

@@ -22,6 +22,15 @@
     </div>
   </div>
 
+<hr>
+<br>
+  <div class="col-md-12 col-12">
+    <div class="form-check form-switch mb-2">
+      <input class="form-check-input" name="VerficationEmail" type="checkbox" {{ $Title->VFEmail == '1' ? 'checked' : '' }} />
+      <label class="form-check-label">{{ __('admin.VerficationEmail') }}</label>
+    </div>
+  </div>
+
   <div class="form-group d-flex justify-content-end mt-auto">
     <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
   </div>

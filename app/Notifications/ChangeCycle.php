@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ChangeCycle extends Notification implements ShouldQueue
+class ChangeCycle extends Notification
 {
     use Queueable;
     public $data;
@@ -17,7 +17,7 @@ class ChangeCycle extends Notification implements ShouldQueue
      */
     public function __construct($data)
     {
-        $this->data= $data;
+        $this->data = $data;
     }
 
     /**
@@ -27,7 +27,7 @@ class ChangeCycle extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -46,10 +46,26 @@ class ChangeCycle extends Notification implements ShouldQueue
      *
      * @return array<string, mixed>
      */
+    public function toDatabase(object $notifiable): array
+    {
+        return [
+            'company_name' => $this->data['company_name_en'] ?? 'Unknown Company',
+            'last_step' => $this->data['last_step'] ?? 'N/A',
+            'new_step' => $this->data['new_step'] ?? 'N/A',
+            'organization_name' => $this->data['organization_name_en'] ?? 'Unknown Organization',
+        ];
+    }
+
+    /**
+     * Get the generic array representation of the notification.
+     */
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'company_name' => $this->data['company_name_en'] ?? 'Unknown Company',
+            'last_step' => $this->data['last_step'] ?? 'N/A',
+            'new_step' => $this->data['new_step'] ?? 'N/A',
+            'organization_name' => $this->data['organization_name_en'] ?? 'Unknown Organization',
         ];
     }
 }

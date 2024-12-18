@@ -141,7 +141,7 @@
                 width="337"
                 height="234"
               />
-              <h3 class="text-center mt-4">You don’t have any Program</h4>
+              <h3 class="text-center mt-4">You don’t have any Program</h3>
               <h6 class="text-center text-secondary">Create a program for the success of companies</h6>
               <!-- Add New Program Button -->
               <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;">
@@ -190,8 +190,12 @@
                         class="border border-light align-items-center justify-content-center d-none d-md-flex h-100"
                         style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
                       >
+                      @php
+                          $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME);
+                      @endphp
+
                         <img 
-                            src="{{$cycle->organization->image_url}}"
+                            src="{{ asset('dashboard/LFMGet/' . $fileN) }}"
                             alt="Logo"
                             class="img-fluid"
                             style="max-width: 100%; max-height: 100%; object-fit: contain;"
@@ -201,9 +205,9 @@
                       <div class="d-flex flex-column justify-content-between" style="flex: 1;">
                         <!-- Program Title -->
                         <div class="d-flex justify-content-between">
-                          <p class="text-primary fs-5 fw-bold">
+                          <a href="/dashboard/programlist/show/{{$cycle->id}}" class="text-primary fs-5 fw-bold">
                             {{ $cycle->title }}
-                          </p>
+                          </a>
                           <div 
                             class="badge d-flex align-items-center justify-content-center
                             bg-label-light rounded mx-1 rounded-pill"

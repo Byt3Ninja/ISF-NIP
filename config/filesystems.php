@@ -104,6 +104,18 @@ return [
             'url' => env('APP_URL').'/dashboard/uploads',
             'visibility' => 'private',
         ],
+        'UsersLFMPublic' => [
+            'driver' => 'local',
+            'root' => storage_path('app/uploads/files/1'),
+            'url' => env('APP_URL').'/dashboard/uploads',
+            'visibility' => 'private',
+        ],
+        'mentorship_tasks' => [
+            'driver' => 'local',
+            'root' => storage_path('app/mentorship_tasks'),
+            'url' => env('APP_URL').'/dashboard/uploads',
+            'visibility' => 'private',
+        ]
 
     ],
 

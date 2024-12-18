@@ -6,18 +6,23 @@
     .radius-15 {
       border-radius: 15px;
     }
+
     .text-sm {
       font-size: 0.875rem;
     }
+
     .text-xs {
       font-size: 0.75rem;
     }
+
     .text-xxs {
       font-size: 0.65rem;
     }
+
     .custom-shadow {
       box-shadow: 0px 2px 0px 0px #F2F1F3;
     }
+
     .company-image-container {
       height: 150px;
       border-radius: 15px;
@@ -25,16 +30,29 @@
       background-position: center;
     }
 
+    #search-table {
+      color: var(--bs-primary);
+    }
+
+    #search-table::placeholder {
+      color: var(--bs-primary);
+    }
+
     /* @media screen and (min-width: 1440px) {
-      .card-container {
-        width: 390px;
-      }
-    } */
+        .card-container {
+          width: 390px;
+        }
+      } */
   </style>
 @stop
 
 @section('content')
   <!-- BEGIN: Content-->
+  @if (isset($errorMessage) && !empty($errorMessage))
+    <div class="alert alert-danger">
+      {{ $errorMessage }}
+    </div>
+  @endif
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
@@ -82,93 +100,90 @@
                 <!-- Filter -->
                 <form method="GET" action="{{ route('users.companies') }}">
                   <div class="d-flex align-items-center gap-3">
-                    <div style="display: flex; align-items: center;">
+                    <div class="d-flex align-items-center ms-3">
                       <button class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center"
                         style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
                         <i class="ti ti-filter text-white ti-24px"></i>
                       </button>
                     </div>
+
                     <!-- Search Bar -->
-                    <div class="position-relative d-none d-md-flex">
-
-                      <div class="SearchName">
-                      <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
-                        <i class="ti ti-search text-primary ti-24px"></i>
+                    <div class="position-relative d-none d-md-flex flex-wrap gap-2">
+                      <div class="SearchName position-relative">
+                        <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
+                          <i class="ti ti-search text-primary"></i>
+                        </div>
+                        <input class="form-control search border rounded bg-transparent px-10"
+                          style="max-width: 180px;" id="search-table" placeholder="Search" name="search"
+                          value="{{ request('search') }}" />
                       </div>
+                      <div class="SearchSector">
+                        @php
+                          $sectors = App\Sector::whereNull('parent_id')->get();
+                        @endphp
 
-                      <input class="form-control search border rounded mx-1 bg-transparent text-primary px-10"
-                        style="width: 300px;" id="search-table" placeholder="Search" name="search"
-                        value="{{ request('search') }}"  />
-                      </div>
-
-
-          <div class="SearchSector">
-            @php
-              $sectors = App\Sector::whereNull('parent_id')->get();
-            @endphp
-
-                                    <select id="selectsector"
-                          class="form-control sector border rounded mx-1 bg-transparent text-primary px-10"style="width: 300px;" name="sector">
-                          <option value="" selected >{{ __('admin.Sector') }}
+                        <select id="selectsector"
+                          class="form-select sector border rounded bg-transparent text-primary px-10"style="max-width: 180px;"
+                          name="sector">
+                          <option value="" selected>{{ __('admin.Sector') }}
                           </option>
                           @foreach ($sectors as $sector_group)
                             <optgroup label="{{ $sector_group->name }}">
                               @foreach ($sector_group->children as $sector)
-                                <option value="{{ $sector->name_en }} " {{ $sector->name_en == request('sector') ? 'selected' : '' }} >{{ $sector->name }}
+                                <option value="{{ $sector->name_en }} "
+                                  {{ $sector->name_en == request('sector') ? 'selected' : '' }}>{{ $sector->name }}
                                 </option>
                               @endforeach
                             </optgroup>
                           @endforeach
                         </select>
-          </div>
-                        
+                      </div>
 
-                        <div class="SearchStage">
-                        
-                    <select class="form-control stage border rounded mx-1 bg-transparent text-primary px-10"
-                            style="width: 300px;" name="stage">
+
+                      <div class="SearchStage">
+
+                        <select class="form-select stage border rounded bg-transparent text-primary px-10"
+                          style="max-width: 180px;" name="stage">
                           <option value="">{{ __('admin.stage') }}</option>
-                          <option value="idea"
-                            {{ 'idea' == request('stage') ? 'selected' : '' }}>
+                          <option value="idea" {{ 'idea' == request('stage') ? 'selected' : '' }}>
                             {{ __('admin.stage_idea') }}
                           </option>
-                          <option value="prototype"
-                            {{ "prototype" == request('stage') ? 'selected' : '' }}>
+                          <option value="prototype" {{ 'prototype' == request('stage') ? 'selected' : '' }}>
                             {{ __('admin.stage_prototype') }}
                           </option>
-                          <option value="ready_product"
-                            {{ "ready_product" == request('stage') ? 'selected' : '' }}>
+                          <option value="ready_product" {{ 'ready_product' == request('stage') ? 'selected' : '' }}>
                             {{ __('admin.stage_ready_product') }}
                           </option>
                           <option value="company_in_market"
-                            {{ "company_in_market" == request('stage') ? 'selected' : '' }}>
+                            {{ 'company_in_market' == request('stage') ? 'selected' : '' }}>
                             {{ __('admin.stage_company_in_market') }}
                           </option>
-                    </select>
+                        </select>
 
 
-                          </div>
+                      </div>
 
-                          @role('Admin')
-                          <div class="SearchOrg">
-                            @php
-                              $orgs = App\Organization::all();
-                              $orgrequest = App\Organization::where('id', request('orgnization'))->get();
-                            @endphp
-                
-                                                    <select
-                                          class="form-control sector border rounded mx-1 bg-transparent text-primary px-10" style="width: 300px;" name="orgnization">
-                                          <option value="" selected >{{ __('admin.Organizations') }}
-                                          </option>
-                                          @foreach ($orgs as $org)
-                                                <option value="{{ $org->id }} " {{ $org->id == request('orgnization') ? 'selected' : '' }} >{{ $org->{'name_'.$l} }}
-                                                </option>
-                                          @endforeach
-                                        </select>
-                          </div>
-                          @endrole
+                      @role('Admin')
+                        <div class="SearchOrg">
+                          @php
+                            $orgs = App\Organization::all();
+                            $orgrequest = App\Organization::where('id', request('orgnization'))->get();
+                          @endphp
 
-                        
+                          <select class="form-select sector border rounded bg-transparent text-primary px-10"
+                            style="max-width: 180px;" name="orgnization">
+                            <option value="" selected>{{ __('admin.Organizations') }}
+                            </option>
+                            @foreach ($orgs as $org)
+                              <option value="{{ $org->id }} "
+                                {{ $org->id == request('orgnization') ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}
+                              </option>
+                            @endforeach
+                          </select>
+                        </div>
+                      @endrole
+
+
                     </div>
                   </div>
                 </form>
@@ -192,7 +207,7 @@
                   <i class="ti ti-search text-primary ti-24px"></i>
                 </div>
                 <input class="form-control search border rounded mx-1 bg-transparent text-primary px-10"
-                  style="width: 300px;" id="search-table" placeholder="Search" />
+                  style="max-width: 180px;" id="search-table" placeholder="Search" />
               </div>
               <button class="btn bg-primary p-3 d-flex d-md-none justify-content-center align-items-center mt-3"
                 style="border-radius: 17px; width: 40px; height: 40px;">
@@ -212,46 +227,35 @@
             @foreach ($companies as $company)
               <!-- Company Card -->
               <div class="col-md-4">
-                <div 
-                  class="bg-white border shadow-sm p-4 mb-3 radius-15 card-container cursor-pointer" 
-                  style="height: 580px;"
-                  onclick="window.location.href='/dashboard/companyProfile/{{ $company->id }}'"
-                >
-                @php
-                  $client = App\User::where('company_id',$company->id)->first();
-                @endphp
+                <div class="bg-white border shadow-sm p-4 mb-3 radius-15 card-container cursor-pointer"
+                  style="height: 580px;" onclick="window.location.href='/dashboard/companyProfile/{{ $company->id }}'">
+                  @php
+                    $client = App\User::where('company_id', $company->id)->first();
+                  @endphp
                   <div class="w-100 d-flex justify-content-between align-items-center">
                     <span class="text-muted text-sm fw-semibold">
                       {{ $l == 'en' ? 'Startup' : 'الشركة' }}
-                      
-                      <a 
-                      href="{{ route('users.edit', ['user' => $client->id]) }}"
-                      class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"
-                    ><i class="ti ti-user-circle"></i></a>
+
+                      <a href="{{ route('users.edit', ['user' => $client->id]) }}"
+                        class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"><i
+                          class="ti ti-user-circle"></i></a>
                     </span>
-                    <a 
-                      href="/dashboard/companyProfile/{{ $company->id }}"
-                      class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"
-                    >
+                    <a href="/dashboard/companyProfile/{{ $company->id }}"
+                      class="bg-white px-2 py-1 radius-15 custom-shadow border text-info">
                       <i class="ti ti-world me-2 fs-5"></i>
                       <span class="text-xs fw-bold">
                         {{ $l == 'en' ? 'More Info' : 'المزيد' }}
                       </span>
                     </a>
                   </div>
-                  <div 
-                    class="company-image-container mt-2 border custom-shadow radius-15"
-                    style="background-image: url('{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}')"
-                  >
+                  <div class="company-image-container mt-2 border custom-shadow radius-15"
+                    style="background-image: url('{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}')">
                   </div>
                   <div class="w-100 d-flex flex-column justify-content-between" style="height: 80px;">
                     <h6 class="mt-3 fw-bold text-capitalize">{{ $company->{'name_' . $l} }}</h6>
                     <p class="text-muted text-xs" style="margin-top: -10px;">{{ $company->sector }}</p>
-                    <div 
-                      style="margin-top: -10px;" 
-                      class="d-flex justify-content-between align-items-center"
-                    >
-                      @if($company->est_date)
+                    <div style="margin-top: -10px;" class="d-flex justify-content-between align-items-center">
+                      @if ($company->est_date)
                         <div class="p-1 bg-label-info rounded">
                           <div class="d-flex align-items-center justif-content-center">
                             <div class="d-flex align-items-center">
@@ -272,17 +276,15 @@
                       @endif
                       <div class="d-flex align-items-center" style="gap: 10px;">
                         @if ($company->facebook)
-                          <a
-                            class="d-flex align-items-center" 
-                            href="{{ strpos($company->facebook,"http")===0?$company->facebook:'http://'.$company->facebook }}"
+                          <a class="d-flex align-items-center"
+                            href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
                             target='_blank'>
                             <i class="fa-brands fa-facebook-f fs-6"></i>
                           </a>
                         @endif
                         @if ($company->linkedin)
-                          <a
-                            class="d-flex align-items-center" 
-                            href="{{ strpos($company->linkedin,"http")===0?$company->linkedin:'http://'.$company->linkedin }}"
+                          <a class="d-flex align-items-center"
+                            href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
                             target='_blank'>
                             <img src="/icons/linkedin.svg" width="15" height="15" />
                           </a>
@@ -291,70 +293,64 @@
                           <i class="fa-brands fa-whatsapp fs-5 text-success"></i>
                         </a>
                         @if ($company->twitter)
-                          <a
-                            class="d-flex align-items-center" 
-                            href="{{ strpos($company->twitter,"http")===0?$company->twitter:'http://'.$company->twitter }}"
+                          <a class="d-flex align-items-center"
+                            href="{{ strpos($company->twitter, 'http') === 0 ? $company->twitter : 'http://' . $company->twitter }}"
                             target='_blank'>
                             <i class="fa-brands fa-twitter fs-6 text-info"></i>
                           </a>
                         @endif
                         @if ($company->youtube)
-                          <a
-                            class="d-flex align-items-center" 
-                            href="{{ strpos($company->youtube,"http")===0?$company->youtube:'http://'.$company->youtube }}"
+                          <a class="d-flex align-items-center"
+                            href="{{ strpos($company->youtube, 'http') === 0 ? $company->youtube : 'http://' . $company->youtube }}"
                             target='_blank'>
                             <i class="fa-brands fa-youtube fs-6 text-danger"></i>
                           </a>
                         @endif
 
                         @php
-                  // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-                  //  $Sustainables = explode(',', $company->Sustainable_development);
-                  $Sustainables = json_decode(
-                      $company->Sustainable_development,
-                  );
-                @endphp
-                @if (!empty($Sustainables) && count($Sustainables) > 0)
-                  
-                    <a class="btn btn-primary" href="#"  data-bs-toggle="modal" data-bs-target="#EditLabor"><i class="ti ti-user"></i></a>
-<!-- Edit Customer Modal -->
-<div class="modal fade" id="EditLabor" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-      <div class="modal-content">
-          <div class="modal-body">
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              <div class="text-center mb-6">
-                  <h4 class="mb-2">{{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}</h4>
-                  <div class="row w-75">
-                    @foreach ($Sustainables as $Sustainable)
-                      @php
-                        $icon = App\SustainableIcon::where(
-                            'title',
-                            $Sustainable,
-                        )->first();
-                      @endphp
-                      <div class="col-md-2 mb-2">
-                        <div class="border light-shadow radius-15" style="display: grid; place-items: center;">
-                          @if ($icon->icon_ar)
-                            <img
-                              src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}"
-                              alt="icon"
-                              style="width: 100px; height: 100px;">
-                          @endif
-                        </div>
-                      </div>
-                    @endforeach
-                  </div>
-              </div>
+                          // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+                          //  $Sustainables = explode(',', $company->Sustainable_development);
+                          $Sustainables = json_decode($company->Sustainable_development);
+                        @endphp
+                        @if (!empty($Sustainables) && count($Sustainables) > 0)
+                          <a class="btn btn-primary" href="#" data-bs-toggle="modal"
+                            data-bs-target="#EditLabor"><i class="ti ti-user"></i></a>
+                          <!-- Edit Customer Modal -->
+                          <div class="modal fade" id="EditLabor" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+                              <div class="modal-content">
+                                <div class="modal-body">
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                                  <div class="text-center mb-6">
+                                    <h4 class="mb-2">{{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}
+                                    </h4>
+                                    <div class="row w-75">
+                                      @foreach ($Sustainables as $Sustainable)
+                                        @php
+                                          $icon = App\SustainableIcon::where('title', $Sustainable)->first();
+                                        @endphp
+                                        <div class="col-md-2 mb-2">
+                                          <div class="border light-shadow radius-15"
+                                            style="display: grid; place-items: center;">
+                                            @if ($icon->icon_ar)
+                                              <img
+                                                src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}"
+                                                alt="icon" style="width: 100px; height: 100px;">
+                                            @endif
+                                          </div>
+                                        </div>
+                                      @endforeach
+                                    </div>
+                                  </div>
 
-          </div>
-      </div>
-  </div>
-</div>
-<!--/ Edit JO Modal -->
-                  
-                  @endif
-                        
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <!--/ Edit JO Modal -->
+                        @endif
+
                       </div>
                     </div>
                   </div>
@@ -362,80 +358,78 @@
                   @php
                     $founders = App\Team_member::where([
                         ['TeamMember', 'Founder'],
-                        ['Company_id', $company->id]
+                        ['Company_id', $company->id],
                     ])->get();
-                @endphp
-                  
+                  @endphp
+
                   <div class="mt-3">
                     <span class="text-muted text-xs fw-medium">{{ __('admin.Founders') }}</span>
                     <div class="d-flex align-items-center mt-1 gap-2">
-                      @if(!empty($founders))
-                      @foreach($founders as $founder)
+                      @if (!empty($founders))
+                        @foreach ($founders as $founder)
+                          <div class="col-md-4">
+                            <div class="px-3 border redius-15 text-center radius-15 flex flex-column g-1"
+                              style="height: 70px; width: 90px;">
+                              <i class="ti ti-user fs-5 mt-1"></i> <br />
+                              <div>
+                                <span class="text-xs line-clamp-1">
+                                  {{ $company->founder }}
+                                </span>
+                                <span class="text-muted text-xs">{{ $founder->Name }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Company Card -->
+                        @endforeach
+                      @else
                         <div class="col-md-4">
-                          <div 
-                            class="px-3 border redius-15 text-center radius-15 flex flex-column g-1" 
-                            style="height: 70px; width: 90px;"
-                          >
+                          <div class="px-3 border redius-15 text-center radius-15 flex flex-column g-1"
+                            style="height: 70px; width: 90px;">
                             <i class="ti ti-user fs-5 mt-1"></i> <br />
                             <div>
                               <span class="text-xs line-clamp-1">
-                                {{ $company->founder }}
+                                {{ __('admin.N/A') }}
                               </span>
-                              <span class="text-muted text-xs">{{ $founder->Name }}</span>
+                              <span class="text-muted text-xs">{{ __('admin.N/A') }}</span>
                             </div>
                           </div>
                         </div>
                         <!-- Company Card -->
-                      @endforeach
-                      @else
-                      <div class="col-md-4">
-                        <div 
-                          class="px-3 border redius-15 text-center radius-15 flex flex-column g-1" 
-                          style="height: 70px; width: 90px;"
-                        >
-                          <i class="ti ti-user fs-5 mt-1"></i> <br />
-                          <div>
-                            <span class="text-xs line-clamp-1">
-                              {{ __('admin.N/A') }}
-                            </span>
-                            <span class="text-muted text-xs">{{ __('admin.N/A') }}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Company Card -->
                       @endif
                     </div>
                   </div>
-                  
+
                   <!-- / Founders -->
                   <div class="mt-2 border p-2 radius-15">
                     <span class="text-muted text-xs fw-medium">{{ __('admin.Sector') }}</span>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <div class="bg-label-secondary px-1 rounded">
-                        <span class="text-xxs text-primary fw-bold">{{ $company->sector ? __('admin.' . $company->sector) : __('admin.N/A') }}</span>
+                        <span
+                          class="text-xxs text-primary fw-bold">{{ $company->sector ? __('admin.' . $company->sector) : __('admin.N/A') }}</span>
                       </div>
-                      
-                      
+
+
                     </div>
                   </div>
                   <div class="mt-2 border p-2 radius-15">
                     <span class="text-muted text-xs">{{ __('admin.Stage') }}</span>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <div class="bg-label-warning px-1 rounded">
-                        <span class="text-xxs text-warning fw-bold">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
+                        <span
+                          class="text-xxs text-warning fw-bold">{{ $company->stage ? __('admin.stage_' . $company->stage) : __('admin.N/A') }}</span>
                       </div>
-                      
+
                     </div>
                   </div>
-                  
+
 
                   <div class="mt-2 d-flex align-items-center justify-content-center gap-2">
                     <i class="ti ti-map-pin text-danger"></i>
-                    <span class="text-muted text-xs">{{ optional($company->state)->{'name_'.$l} }}</span>
+                    <span class="text-muted text-xs">{{ optional($company->state)->{'name_' . $l} }}</span>
                     <div class="border px-2 rounded">
                       <span class="text-xs">
-                        {{ optional($company->city)->{'name_'.$l} }}, 
-                        {{ optional($company->country)->{'name_'.$l} }}
+                        {{ optional($company->city)->{'name_' . $l} }},
+                        {{ optional($company->country)->{'name_' . $l} }}
                       </span>
                     </div>
                   </div>

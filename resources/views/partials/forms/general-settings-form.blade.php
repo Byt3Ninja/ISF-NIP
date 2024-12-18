@@ -47,7 +47,7 @@
         <option value="">{{ __('admin.Country') }}</option>
         @foreach ($countries as $country)
           <option value="{{ $country->id }}" {{ $country->id == $Title->Country ? 'selected' : '' }}>
-            {{ $country->{'name_' . $l} }}</option>
+            {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
         @endforeach
       </select>
 
