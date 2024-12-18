@@ -1051,4 +1051,9 @@ return [
 	'WrongLink'=> 'الرابط غير صالح',
 	'UpdateEmailSent'=> 'تم ارسال البريد الالكتروني للتأكيد',
 	'Select Expertise' => 'اختر الخبرة',
+	'No_Cycles' =>'لا يوجد مراحل',
+	'No_Cycles_Description' => 'انشاء برنامج او انضم الي برنامج',
+	'Filtration'=> 'اجمالى المراجعة',
+	'Filtration_pending' => 'انتظار المراجعة',
+	'Filtration_done' => 'تمت المراجعة',
 ];

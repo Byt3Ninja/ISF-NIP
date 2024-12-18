@@ -226,16 +226,16 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between mb-2">
                   <h4 class="text-primary mb-0">{{ $program->title }}</h4>
-                  <a href="#" class="btn btn-primary">
+                  {{-- <a href="#" class="btn btn-primary">
                     <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
-                  </a>
+                  </a> --}}
                 </div>
-                <div class="d-flex justify-content-end mb-2">
+                {{-- <div class="d-flex justify-content-end mb-2">
                   <div class="btn btn-label-light rounded-pill px-2 h-px-30">
                     <img src="/icons/star.svg" width="17" height="17" class="me-1" />
                     <span class="text-warning fw-bold">4.5</span>
                   </div>
-                </div>
+                </div> --}}
                 <div class="d-flex justify-content-between mb-4">
                   <h5 class="mb-0">{{ $program->organization['name_' . $l] }}</h5>
                   
@@ -580,8 +580,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   </a>
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
-                    <a href="#" class="btn btn-primary">
+                    <a href="/dashboard/screening/results/{{ $step->id }}" class="btn btn-primary">
                       <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
+                    </a>
+                    <a href="/dashboard/{{ $step->id }}/screening" class="btn btn-primary">
+                      <i class="ti ti-settings me-2"></i> {{ __('admin.Manage') }}
                     </a>
                     <div class="mx-2 position-relative">
                       <div class="dropdown"></div>
@@ -636,15 +639,26 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       </small>
                     </div>
                   </div>
-                  
+                  @php
+                  $companys = \App\Company::where('step', $step->id)->get();
+                
+                  foreach ($companys as $key => $company) {
+                    $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
+                    $totalfiltrationPinding = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '=', '{}')->count();
+                    $totalfiltrationDone = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '!=', '{}')->count();
+                    
+                  }
+                    // $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $step->id)->count();
+                  @endphp
+                
                   <div class="d-flex align-items-center">
                     <div class="badge bg-label-warning me-2 p-2">
                       <i class="ti ti-transform text-warning ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">filtration</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Filtration') }} </span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $totalfiltration }}
                       </small>
                     </div>
                   </div>
@@ -654,9 +668,9 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-rotate-clockwise-2 text-info ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">filtration pending</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Filtration_pending')  }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $totalfiltrationPinding }}
                       </small>
                     </div>
                   </div>
@@ -666,9 +680,9 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-checkbox text-success ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">filtration done</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Filtration_done') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $totalfiltrationDone }}
                       </small>
                     </div>
                   </div>
@@ -799,18 +813,18 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0 text-nowrap">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                      <a id="mentors" href="/dashboard/mentorship/sessions" class="btn btn-primary">
+                      <a id="mentors" href="/dashboard/mentorship/assign/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-user me-2"></i> {{ __('admin.Mentors') }}
                       </a>
-                      <a id="manage" href="/dashboard/mentorship/assign/{{ $step->cycle_id }}" class="btn btn-primary">
+                      <a id="manage" href="/dashboard/mentorship/view/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-settings me-2"></i> {{ __('admin.Manage') }}
                       </a>
-                      <a id="sessions" href="/dashboard/training/sessions/{{ $step->id }}" class="btn btn-primary">
+                      <a id="sessions" href="/dashboard/mentorship/sessions?show=all&cycle_id={{ $step->cycle_id }}" class="btn btn-primary">
                         <i class="ti ti-cast me-2"></i> {{ __('admin.Sessions') }}
                       </a>
-                      <a id="results" href="#" class="btn btn-primary">
+                      {{-- <a id="results" href="#" class="btn btn-primary">
                         <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
-                      </a>
+                      </a> --}}
                     </div>
                     <div class="mx-2 position-relative">
                       <div class="dropdown"></div>
