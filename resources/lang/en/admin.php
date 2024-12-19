@@ -1038,4 +1038,5 @@ return [
 	'Filtration'=> 'Filtration',
 	'Filtration_pending' => 'Filtration Pending',
 	'Filtration_done' => 'Filtration Done',
+	'Next' => 'Next',
 ];
