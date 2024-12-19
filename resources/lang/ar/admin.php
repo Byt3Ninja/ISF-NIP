@@ -1056,4 +1056,5 @@ return [
 	'Filtration'=> 'اجمالى المراجعة',
 	'Filtration_pending' => 'انتظار المراجعة',
 	'Filtration_done' => 'تمت المراجعة',
+	'Next' => 'التالى',
 ];
