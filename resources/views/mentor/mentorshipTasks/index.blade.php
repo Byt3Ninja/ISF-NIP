@@ -554,6 +554,7 @@
 						type: "GET",
 						dataType: "json",
 						success: function( element ) {
+							console.log('element', element);
 							let bg = '';
 							$('#editTakButton').attr('data-id', id);
 							$('#editTakButton').attr('data-task', id);
@@ -673,6 +674,23 @@
 									</div>
 								`;
 							});
+
+							// Replace with actual attachments like (element.attachments)
+							const attachments = [
+								{
+									id: 1,
+									name: 'File 1',
+									url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+								},
+								{
+									id: 2,
+									name: 'File 2',
+									url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+								}
+							]
+
+							// Handle attachments
+							renderFiles(attachments, 'view');
 		
 							$('#viewTaskModal').modal('show');
 						},
@@ -830,26 +848,105 @@
 		searchTask();
 	</script>
 	<script>
+		// Handle attachments upload
 		function handleFileUpload(event) {
 			const files = event.target.files;
+			
+			// Render files handler
+			renderFiles(files);
+		}
+
+		// Render files handler
+		const renderFiles = (files, mode) => {
+			console.log('upload files', files);
+				
 			const fileList = document.getElementById('fileList');
 			const attachmentCount = document.getElementById('attachmentCount');
 			fileList.innerHTML = '';
+			
+			// To Do: Upload this files to server on request success, below is the request code 👇
 			Array.from(files).forEach(file => {
-				const fileDiv = document.createElement('div');
-				fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
-				fileDiv.innerHTML = `
-					<i class="ti ti-file text-info ti-20px me-2"></i>
-					<span class="text-dark fw-bold">${file.name}</span>
-					<div class="cursor-pointer" onclick="this.parentElement.remove(); attachmentCount.textContent = fileList.children.length;">
-						<i class="ti ti-trash text-danger ti-16px ms-2"></i>
-					</div>
-				`;
-				document.getElementById('fileInput').value = '';
-				fileList.appendChild(fileDiv);
+				if (file instanceof File) {
+					const fileDiv = document.createElement('div');
+					fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
+					fileDiv.innerHTML = `
+						<i class="ti ti-file text-info ti-20px me-2"></i>
+						<span class="text-dark fw-bold">${file.name}</span>
+						<div 
+							class="cursor-pointer me-2" 
+							onclick="deleteFileHandler('${file.name}', this.parentElement);"
+						>
+							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
+						</div>
+						<a href="${URL.createObjectURL(file)}" download="${file.name}" class="ms-auto">
+							<i class="ti ti-download text-primary ti-16px"></i>
+						</a>
+					`;
+					fileList.appendChild(fileDiv);
+				}
 			});
 			attachmentCount.textContent = fileList.children.length;
+			
+			// To Do: Use this ajax request to upload files to server
+			if (mode == 'upload') {
+				const formData = new FormData();
+				Array.from(files).forEach(file => {
+					formData.append('attachments[]', file);
+				});
+	
+				$.ajax({
+					url: "{{ URL::to('dashboard/mentor/mentorshipTasks/upload-attachments') }}",
+					type: 'POST',
+					data: formData,
+					processData: false,
+					contentType: false,
+					success: function(data) {
+						return data;
+					},
+					error: function(error) {
+						console.error('Error uploading files:', error);
+					}
+				});
+			}
 		}
+
+		// Delete file handler
+		const deleteFileHandler = (fileName, ele) => {
+			$('#viewTaskModal').modal('hide');
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, delete it!',
+				backdrop: true // Ensure SweetAlert modal overlays on any modal
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$('#viewTaskModal').modal('show');
+					ele.remove();
+					const attachmentCount = document.getElementById('attachmentCount');
+					attachmentCount.textContent = document.getElementById('fileList').children.length;
+
+					// To Do: Use this ajax request to delete file from server
+					// $.ajax({
+					// 	url: "{{ URL::to('dashboard/mentor/mentorshipTasks/delete-attachment') }}",
+					// 	type: 'POST',
+					// 	data: { file: fileName },
+					// 	success: function(data) {
+					// 		return data;
+					// 	},
+					// 	error: function(error) {
+					// 		console.error('Error deleting file:', error);
+					// 	}
+					// });
+					return;
+				}
+
+				$('#viewTaskModal').modal('show');
+			});
+		};
 	</script>
 	<script>
 		const commentsTab = document.getElementById('commentsTab');
