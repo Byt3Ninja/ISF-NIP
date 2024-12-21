@@ -25,6 +25,11 @@ class BroadcastConfigService
                     'GOOGLE_CLIENT_SECRET' => '',
                     'GOOGLE_REDIRECT' => '',
 
+                    
+                    'LINKEDIN_CLIENT_ID' => '',
+                    'LINKEDIN_CLIENT_SECRET' => '',
+                    'LINKEDIN_REDIRECT_URI' => '',
+
                 ];
             }
         }
@@ -39,6 +44,10 @@ class BroadcastConfigService
             'GOOGLE_CLIENT_ID' => $settings->GOOGLE_CLIENT_ID ?? '',
             'GOOGLE_CLIENT_SECRET' => $settings->GOOGLE_CLIENT_SECRET ?? '',
             'GOOGLE_REDIRECT' => $settings->GOOGLE_REDIRECT ?? '',
+
+            'LINKEDIN_CLIENT_ID' => $settings->LINKEDIN_CLIENT_ID ?? '',
+            'LINKEDIN_CLIENT_SECRET' => $settings->LINKEDIN_CLIENT_SECRET ?? '',
+            'LINKEDIN_REDIRECT_URI' => $settings->LINKEDIN_REDIRECT_URI ?? '',
 
             'MICROSOFT_CLIENT_ID' => $settings->MICROSOFT_CLIENT_ID ?? '0',
             'MICROSOFT_CLIENT_SECRET_VALUE' => $settings->MICROSOFT_CLIENT_SECRET_VALUE ?? '',
