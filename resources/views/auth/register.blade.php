@@ -226,20 +226,149 @@
             </div>
             @endforeach
           </div>
-        </div>
-
-
-        <form id="registerForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}"
-          style="display: block;">
-          @csrf
+          <!-- Toggle theme and language -->
+          <form id="founderForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}" style="display: block;">
+            @csrf
           <div class="card card-body shadow-none">
             <div class="row">
-              <div class="col-12 mb-3">
-                <label for="username" class="form-label fs-6 fw-bold">{{ $firstName }}</label>
-                <div class="input-group input-group-merge">
-                  <input value="{{ old('first_name_en') }}" name="first_name_en" type="text" class="form-control"
-                    id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required
-                    autocomplete="first_name_en" autofocus />
+              <div class="col-12">
+                <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
+                <p class="mb-6">{{ $formSubHeading }}</p>
+                @if (count($errors) > 0)
+                  @foreach ($errors->all() as $error)
+                    <x-alert type="danger" message="{{ $error }}" />
+                  @endforeach
+                @endif
+              </div>
+              @foreach($accountRoles as $key => $role)
+                <div class="col-6">
+                  <div class="form-check custom-option custom-option-icon">
+                    <label class="form-check-label custom-option-content" for="{{$role}}Role">
+                      <span class="custom-option-body">
+                        <i class="ti ti-rocket"></i>
+                        <span class="custom-option-title">{{ __('admin.' . $role) }}</span>
+                      </span>
+                      <input 
+                        name="role" 
+                        class="form-check-input" 
+                        type="radio" 
+                        value="{{$key == 0 ? $role : 'Registered'}}" 
+                        id="{{$role}}Role"
+                        checked={{ $key == 0 ? 'true' : '' }}
+                        required
+                      />
+                    </label>
+                  </div>
+                </div>
+              @endforeach
+            </div>
+          </div>
+
+
+          
+            <div class="card card-body shadow-none">
+              <div class="row">
+                <div class="col-12 mb-3">
+                  <label for="username" class="form-label fs-6 fw-bold">{{ $firstName }}</label>
+                  <div class="input-group input-group-merge">
+                    <input value="{{ old('first_name_en') }}" name="first_name_en" type="text" class="form-control"
+                      id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name_en"
+                      autofocus />
+                  </div>
+                </div>
+                <div class="col-12 mb-3">
+                  <label for="last_name_en" class="form-label fs-6 fw-bold">{{ $secondName }}</label>
+                  <div class="input-group input-group-merge">
+                    <input value="{{ old('last_name_en') }}" name="last_name_en" type="text" class="form-control"
+                      id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name_en" />
+                  </div>
+                </div>
+                <div class="col-12 mb-3">
+                  <label for="email" class="form-label fs-6 fw-bold">{{ __('auth.E-Mail') }}</label>
+                  <div class="input-group input-group-merge">
+                    <input value="{{ old('email') }}" name="email" type="email" class="form-control"
+                      placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" />
+                  </div>
+                </div>
+                <div class="col-12 mb-4 form-password-toggle">
+                  <label class="form-label fs-6 fw-bold" for="password">{{ __('auth.Password') }}</label>
+                  <div class="input-group input-group-merge">
+                    <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}"
+                      name="password" required autocomplete="password" aria-describedby="password" />
+                    <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
+                  </div>
+                </div>
+                <div class="col-12 mb-4 form-password-toggle">
+                  <label class="form-label fs-6 fw-bold" for="password">{{ __('auth.Confirm') }}</label>
+                  <div class="input-group input-group-merge">
+                    <input type="password" class="form-control" id="confirm-password" placeholder="{{ __('auth.Password') }}"
+                      name="password_confirmation" required autocomplete="new-password" aria-describedby="password" />
+                    <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
+                  </div>
+                </div>
+                <div class="col-12 mb-4">
+                  <label class="form-label fs-6 fw-bold" for="gender">{{ $gender }}</label>
+                  <select class="form-select select2" name="gender" id="gender" required>
+                    <option value="Male">{{ __('Male') }}</option>
+                    <option value="Female">{{ __('Female') }}</option>
+                  </select>
+                </div>
+                <div class="col-12 mb-4 d-grid">
+                  <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
+                  <input 
+                    id="phone" 
+                    type="tel" 
+                    class="form-control" 
+                    placeholder="{{ __('auth.Phone') }}"
+                    value="{{ old('phone') }}"
+                    name="phone" 
+                    autocomplete="phone"
+                    required
+                  />
+                    {{--  <div class="input-group">
+                  <div class="codeInputContainer">
+                      @php
+                        $phone_codes = App\Country::all();
+                      @endphp
+                      <select id="country_code" name="country_code" class="form-select select2" required>
+                        @foreach ($phone_codes as $phone_code)
+                          <option value="{{ $phone_code->phone_code }}">
+                            {{ $phone_code->phone_code }}+
+                          </option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <input type="tel" class="form-control mx-2 rounded" id="phone" placeholder="{{ __('auth.Phone') }}"
+                      value="{{ old('phone') }}" name="phone" required autocomplete="phone" /> 
+                  </div>--}}
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
+                  <p class="text-center">
+                    <span>{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</span>
+                    <a href="/login">
+                      <span>{{ __('Login') }}</span>
+                    </a>
+                  </p>
+                  <div class="divider my-6">
+                    <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+                  </div>
+                  <div class="container mt-5">
+                    <a href="{{ url('/auth/redirect/google') }}"
+                      class="btn btn-label-secondary btn-block d-flex align-items-center justify-content-center">
+                      <i class="fab fa-google me-2 text-success"></i> <span class="text-success">{{ $googleSignIn }}</span>
+                    </a>
+                  </div> 
+                  <div class="divider my-6">
+                    <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+                  </div>
+                  @if (app()->environment('local'))
+                    <div class="container">
+                      <a href="{{ route('linkedin.login') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
+                        <i class="fa-brands fa-linkedin-in me-2"></i> <span>{{ $linkdinSignIn }}</span>
+                      </a>
+                    </div>
+                  @endif
                 </div>
               </div>
               <div class="col-12 mb-3">

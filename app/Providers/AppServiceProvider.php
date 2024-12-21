@@ -6,6 +6,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
+use Illuminate\Support\Facades\Config;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,6 +43,12 @@ class AppServiceProvider extends ServiceProvider
             }
             $view->with('l', $l)->with('organization_id', $organization_id);
         });
+
+        $pusherConfig = BroadcastConfigService::getPusherConfig();
+        // تحديث القيم في ملف config
+    Config::set('services.linkedin.client_id', $pusherConfig['LINKEDIN_CLIENT_ID']);
+    Config::set('services.linkedin.client_secret', $pusherConfig['LINKEDIN_CLIENT_SECRET']);
+    Config::set('services.linkedin.redirect', $pusherConfig['LINKEDIN_REDIRECT_URI']);
 
         // $pusherConfig = BroadcastConfigService::getPusherConfig();
         // if (isset($pusherConfig['MICROSOFT_CLIENT_ID'])) {

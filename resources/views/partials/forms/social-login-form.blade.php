@@ -20,6 +20,23 @@
       <input type="text" class="form-control" value="{{ $Title->GOOGLE_REDIRECT }}" name="GOOGLE_REDIRECT"
         id="GOOGLE_REDIRECT">
     </div>
+
+
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="LINKEDIN_CLIENT_ID">{{ __('admin.LINKEDIN_CLIENT_ID') }}</label>
+      <input id="LINKEDIN_CLIENT_ID" type="text" class="form-control" value="{{ $Title->LINKEDIN_CLIENT_ID }}"
+        name="LINKEDIN_CLIENT_ID">
+    </div>
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="LINKEDIN_CLIENT_SECRET">{{ __('admin.LINKEDIN_CLIENT_SECRET') }}</label>
+      <input type="text" class="form-control" value="{{ $Title->LINKEDIN_CLIENT_SECRET }}" name="LINKEDIN_CLIENT_SECRET"
+        id="LINKEDIN_CLIENT_SECRET">
+    </div>
+    <div class="form-group mb-3">
+      <label class="form-label mb-1" for="LINKEDIN_REDIRECT_URI">{{ __('admin.LINKEDIN_REDIRECT_URI') }}</label>
+      <input type="text" class="form-control" value="{{ $Title->LINKEDIN_REDIRECT_URI }}" name="LINKEDIN_REDIRECT_URI"
+        id="LINKEDIN_REDIRECT_URI">
+    </div>
   </div>
 
 <hr>
