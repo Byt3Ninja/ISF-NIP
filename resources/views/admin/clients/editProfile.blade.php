@@ -177,12 +177,19 @@
                       id="title_en" style="direction: ltr;" placeholder="{{ __('admin.JobTitleEn') }}" required
                       autocomplete="title_en">
                   </div>
-                  
+                  @php
+                    $phone_codes = App\Country::all();
+                    @endphp
                   <div class="mb-4 col-md-6">
                     <label for="phone" class="form-label fs-6 fw-bold">{{ __('admin.Phone') }}</label>
                     <div class="input-group">
                       <div class="codeInputContainer">
-                        <select id="country_code" name="country_code" class="form-select select2" required>
+                        <select id="" name="country_code" class="form-select select2" required>
+                          @foreach ($phone_codes as $phone_code)
+                        <option value="{{ $phone_code->phone_code }}">
+                          {{ $phone_code->phone_code }}+
+                        </option>
+                      @endforeach
                         </select>
                       </div>
                       <input type="text" class="form-control" id="phone" style="direction: ltr;"
