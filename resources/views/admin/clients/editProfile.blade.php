@@ -157,7 +157,7 @@
                       autocomplete="email">
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="gender" class="form-label fs-6 fw-bold">Gender</label>
+                    <label for="gender" class="form-label">{{ __('admin.Gender') }}</label>
                     <select name="gender" id="gender" class="select2 form-select">
                       <option value="Male" {{ $client->gender == 'Male' ? 'selected' : '' }}>{{ __('Male') }}
                       </option>
@@ -235,15 +235,15 @@
                   </div>
 
                   <div class="mb-4 col-md-6">
-                    <label for="language" class="form-label fs-6 fw-bold">Language</label>
+                    <label for="language" class="form-label">{{__('admin.Language')}}</label>
                     <select id="language" name="language" class="select2 form-select">
-                      <option value="">Select Language</option>
+                      <option value="">{{ __('admin.Select Language') }}</option>
                       <option value="en" {{ $client->language == 'en' ? 'selected' : '' }} >English</option>
                       <option value="ar" {{ $client->language == 'ar' ? 'selected' : '' }} >Arabic</option>
                     </select>
                   </div>
-                  <div class="mb-4 col-md-6">
-                    <label for="timeZones" class="form-label fs-6 fw-bold">Timezone</label>
+                  {{-- <div class="mb-4 col-md-6">
+                    <label for="timeZones" class="form-label">Timezone</label>
                     <select id="timeZones" name="timezone" class="select2 form-select">
                       <option value="">Select Timezone</option>
                       <option value="-12" {{ $client->timezone == '-12' ? 'selected' : '' }} >(GMT-12:00) International Date Line West</option>
@@ -265,14 +265,25 @@
                       <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Atlantic Time (Canada)</option>
                       <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Caracas, La Paz</option>
                     </select>
-                  </div>
+                  </div> --}}
+                  <div class="mb-4 col-md-6">
+                    <label for="timeZones" class="form-label">{{ __('admin.Timezone') }}</label>
+                    <select id="timeZones" name="timezone" class="select2 form-select">
+                        <option value="">{{ __('admin.Select Timezone') }}</option>
+                        @foreach (timezone_identifiers_list() as $timezone)
+                            <option value="{{ $timezone }}" {{ $client->timezone == $timezone ? 'selected' : '' }}>
+                                {{ '(GMT' . \Carbon\Carbon::now($timezone)->format('P') . ') ' . $timezone }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
                   <div class="mb-4 col-md-12">
-                    <label for="currency" class="form-label fs-6 fw-bold">Currency</label>
+                    <label for="currency" class="form-label">{{ __('admin.Currency') }}</label>
                     <select id="currency" name="currency" class="select2 form-select">
-                      <option value="">Select Currency</option>
+                      <option value="">{{ __('admin.Select Currency') }}</option>
                       @foreach ($Currencies as $Currency)
                             <option value="{{ $Currency->currency_code }}" {{ $client->currency && $client->currency == $Currency->currency_code ? 'selected' : '' }}> {{ $Currency->currency_name }} </option>
-                            @endforeach
+                      @endforeach
                     </select>
                   </div>
 
