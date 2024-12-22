@@ -89,7 +89,7 @@
               <button
                 class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;" onclick="DoChange(2)">
                   <span class="mx-2">{{__('admin.New Program')}}</span>
-                  <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
+                  <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
               <button 
                 class="btn btn-primary d-none d-md-inline-block"
@@ -97,7 +97,7 @@
                  onclick="DoChange(2)"
               >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
-                <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
+                <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
             </div>
           </div>
@@ -146,7 +146,7 @@
               <!-- Add New Program Button -->
               <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;">
                 <span class="mx-2">{{__('admin.New Program')}}</span>
-                <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
+                <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
             </div>
           @else

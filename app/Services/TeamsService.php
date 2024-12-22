@@ -22,6 +22,7 @@ class TeamsService implements OnlineMeetingServiceInterface
         $this->graph = new Graph();
         $this->graph->setAccessToken($this->getAccessToken());
     }
+
     public function redirect($mentorship_id)
     {
         $provider = new GenericProvider([
@@ -91,6 +92,9 @@ class TeamsService implements OnlineMeetingServiceInterface
         }
     }
 
+    /**
+     * Generate Microsoft Access Token.
+     */
     protected function getAccessToken()
     {
         if (Schema::hasTable('settings')) {
@@ -106,7 +110,6 @@ class TeamsService implements OnlineMeetingServiceInterface
                 $MICROSOFT_CLIENT_SECRET_VALUE = '';
             }
 
-
             $response = $this->client->post('https://login.microsoftonline.com/' . $MICROSOFT_TENANT_ID . '/oauth2/v2.0/token', [
                 'form_params' => [
                     'client_id' => $MICROSOFT_CLIENT_ID,
@@ -121,20 +124,37 @@ class TeamsService implements OnlineMeetingServiceInterface
         }
     }
 
+    /**
+     * Get User By Email.
+     */
     public function getUserIdByEmail($email)
     {
-        $user = $this->graph->createRequest("GET", "/users?\$filter=mail eq '{$email}'")
-            ->setReturnType(Model\User::class)
-            ->execute();
+        try {
+            $response = $this->graph->createRequest("GET", "/users?\$filter=mail eq '{$email}'")
+                ->execute();
 
-        return $user[0]->getId(); // Get the user ID
+            $data = $response->getBody();
 
+            if (isset($data['value']) && count($data['value']) > 0) {
+                return $data['value'][0]['id'];
+            } else {
+                Log::error("No user found with email {$email}");
+                return null;
+            }
+        } catch (\Exception $e) {
+            Log::error("Error fetching user ID by email: {$e->getMessage()}");
+            return null;
+        }
     }
 
+    /**
+     * Create Microsoft Teams Meeting.
+     */
     public function createMeeting($data)
     {
         $Setting = Settings::where('id', 1)->first();
         $userId = $this->getUserIdByEmail($Setting->MICROSOFT_APP_EMAIL);
+
         $meeting = [
             'subject' => $data['topic'],
             'startDateTime' => $this->toZoomTimeFormat($data['start_time']),
@@ -142,87 +162,139 @@ class TeamsService implements OnlineMeetingServiceInterface
             "lobbyBypassSettings" => [
                 "scope" => "everyone",
                 "isDialInBypassEnabled" => true
-            ]
-
-        ];
-
-
-        $response = $this->graph->createRequest('POST', "/users/{$userId}/onlineMeetings")
-            ->attachBody($meeting)
-            //            ->setReturnType(\ArrayObject::class)
-            ->execute();
-        return [
-            'success' => 201,
-            'data'    => [
-                'id' => $response->getBody()['id'],
-                'start_url' => $response->getBody()['joinUrl'],
-                'join_url' => $response->getBody()['joinUrl'],
             ],
+            'isOnlineMeeting' => true,
+            'isCalendarEvent' => true,
         ];
-    }
 
-    /**
-     * Get Session Report.
-     */
-    public function getSessionReport(string $meetingId)
-    {
         try {
-            $response = $this->graph->createRequest("GET", "/onlineMeetings/{$meetingId}")
-                ->addHeaders(["Content-Type" => "application/json"])
+            $response = $this->graph->createRequest('POST', "/me/onlineMeetings")
+                ->attachBody($meeting)
                 ->execute();
-
-            $data = $response->getBody();
 
             return [
                 'success' => true,
-                'data' => json_decode($data, true),
-            ];
-        } catch (\Microsoft\Graph\Exception\GraphException $e) {
-            Log::error('TeamsService->getSessionReport: Graph API Error - ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Failed to Retrieve Session Report: ' . $e->getMessage(),
+                'data'    => [
+                    'id' => $response->getBody()['id'],
+                    'start_url' => $response->getBody()['joinUrl'],
+                    'join_url' => $response->getBody()['joinUrl'],
+                ],
             ];
         } catch (\Exception $e) {
-            Log::error('TeamsService->getSessionReport: General Error - ' . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Failed to Retrieve Session Report: ' . $e->getMessage(),
+                'message' => 'Failed to create meeting: ' . $e->getMessage(),
             ];
         }
     }
 
 
     /**
-     * Get the recorded video for a session.
+     * Get Microsoft Teams Session Report.
      */
-    public function getSessionRecord(string $meetingId)
+
+    public function getSessionReport(string $meetingId, ?string $userId = null)
     {
+        if (is_null($userId)) {
+            $organizerEmail = env('MICROSOFT_APP_EMAIL');
+            $userId = $this->getUserIdByEmail($organizerEmail);
+
+            if (!$userId) {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to fetch user ID for the organizer email.',
+                ];
+            }
+        }
+
         try {
-            $response = $this->graph->createRequest("GET", "/me/onlineMeetings/{meetingId}/recordings")
+            $response = $this->graph->createRequest(
+                "GET",
+                "/users/{$userId}/onlineMeetings/{$meetingId}/attendanceReports"
+            )->addHeaders(["Content-Type" => "application/json"])
+                ->execute();
+
+            $data = $response->getBody();
+
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+
+            return [
+                'success' => true,
+                'data' => $data,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to list Attendance Reports: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Get Microsoft Teams Session Record.
+     */
+    public function getSessionRecord(string $meetingId, ?string $userId = null)
+    {
+        if (is_null($userId)) {
+            $organizerEmail = env('MICROSOFT_APP_EMAIL');
+            $userId = $this->getUserIdByEmail($organizerEmail);
+
+            if (!$userId) {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to fetch user ID for the organizer email.',
+                ];
+            }
+        }
+
+        try {
+            $meetingDetailsResponse = $this->graph->createRequest("GET", "/users/{$userId}/onlineMeetings/{$meetingId}")
+                ->addHeaders(["Content-Type" => "application/json"])
+                ->execute();
+
+            $meetingData = $meetingDetailsResponse->getBody();
+
+            if (!isset($meetingData['iCalUid'])) {
+                return [
+                    'success' => false,
+                    'message' => 'This meeting is not calendar-backed and does not support recordings.',
+                ];
+            }
+
+            $response = $this->graph->createRequest("GET", "/me/onlineMeetings/{$meetingId}/recordings")
                 ->addHeaders(["Content-Type" => "application/json"])
                 ->execute();
 
             $data = $response->getBody();
 
+            if (empty($data['value'])) {
+                return [
+                    'success' => false,
+                    'message' => 'No recordings found for this meeting.',
+                ];
+            }
+
             return [
                 'success' => true,
-                'data' => json_decode($data, true),
-            ];
-        } catch (\Microsoft\Graph\Exception\GraphException $e) {
-            Log::error('TeamsService->getSessionRecordedVideo: Graph API Error - ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Failed to Retrieve Recorded Video: ' . $e->getMessage(),
+                'data' => $data['value'],
             ];
         } catch (\Exception $e) {
-            Log::error('TeamsService->getSessionRecordedVideo: General Error - ' . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Failed to Retrieve Recorded Video: ' . $e->getMessage(),
             ];
         }
     }
+
+
+    public function getUserIdFromMeeting(string $meetingId)
+    {
+        //
+    }
+
+
 
     public function toZoomTimeFormat(string $dateTime, $duration = null)
     {

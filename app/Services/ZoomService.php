@@ -40,6 +40,9 @@ class ZoomService implements OnlineMeetingServiceInterface
         }
     }
 
+    /**
+     * Zoom Time Format.
+     */
     public function toZoomTimeFormat(string $dateTime)
     {
         try {
@@ -104,17 +107,17 @@ class ZoomService implements OnlineMeetingServiceInterface
     }
 
     /**
-     * Retrieve Zoom Meeting Report.
+     * Get Zoom Meeting Report.
      */
 
-    public function getSessionReport(string $meetingId)
+    public function getSessionReport(string $userId, ?string $meetingId = null)
     {
         $accessToken = $this->generateZoomAccessToken();
         if (!$accessToken) {
             return ['success' => false, 'message' => 'Failed to Generate Access Token.'];
         }
 
-        $url = "https://api.zoom.us/v2/report/meetings/{$meetingId}";
+        $url = "https://api.zoom.us/v2/report/users/{$userId}/meetings";
 
         $response = Http::withHeaders([
             'Authorization' => "Bearer $accessToken",
@@ -129,19 +132,19 @@ class ZoomService implements OnlineMeetingServiceInterface
                 'data'    => $responseData,
             ];
         } else {
-            Log::error('Zoom Meeting Details Report Response: ' . json_encode($responseData));
             return [
                 'success' => false,
-                'message' => $responseData['message'] ?? 'Failed to fetch meeting details report.',
+                'message' => $responseData['message'] ?? 'Failed to fetch user meetings report.',
             ];
         }
     }
 
+
     /**
-     * Retrive Zoom Meeting Recording.
+     * Get Zoom Meeting Recording.
      */
 
-    public function getSessionRecord($meetingId)
+    public function getSessionRecord($meetingId, ?string $userId = null)
     {
         $accessToken = $this->generateZoomAccessToken();
         if (!$accessToken) {
@@ -164,6 +167,36 @@ class ZoomService implements OnlineMeetingServiceInterface
             return [
                 'success' => false,
                 'message' => $response->json()['message'] ?? 'Failed to Fetch Recorded Sessions',
+            ];
+        }
+    }
+
+    public function getUserIdFromMeeting(string $meetingId)
+    {
+        $accessToken = $this->generateZoomAccessToken();
+        if (!$accessToken) {
+            return ['success' => false, 'message' => 'Failed to Generate Access Token.'];
+        }
+
+        $url = "https://api.zoom.us/v2/meetings/{$meetingId}";
+
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer $accessToken",
+            'Content-Type'  => 'application/json',
+        ])->get($url);
+
+        $responseData = $response->json();
+
+        if ($response->successful()) {
+            return [
+                'success' => true,
+                'user_id' => $responseData['host_id'],
+                'data'    => $responseData,
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => $responseData['message'] ?? 'Failed to fetch meeting details.',
             ];
         }
     }

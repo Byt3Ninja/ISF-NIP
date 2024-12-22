@@ -8,6 +8,9 @@
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 @stop
 
 @php $user = auth()->user(); @endphp
@@ -94,7 +97,7 @@
 						<div class="d-flex flex-column justify-content-center align-items-center gap-4 my-10">
 							<img src="/icons/not-found.svg" width="337" height="234" />
 							<h4 class="mb-0 text-center">
-								{{ $l == 'en' ? 'You don’t have any tasks' : 'ليس لديك أي مهام' }}
+								 {{ __('admin.No_Tasks') }}
 							</h4>
 							<button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
 								<i class="ti ti-plus ti-16px me-2"></i>
@@ -124,31 +127,31 @@
 									<div class="d-flex justify-content-between align-items-center p-2">
 										<div class="d-flex align-items-center gap-2">
 											<i class="ti ti-alert-square-rounded ti-20px"></i>
-											<h6 class="fw-medium mb-0">Warning</h6>
+											<h6 class="fw-medium mb-0">{{ __('admin.Warning') }}</h6>
 										</div>
 										<div id="closeViewTask" class="cursor-pointer" data-bs-toggle="dropdown" aria-label="Close">
 											<i class="ti ti-x ti-20px text-primary"></i>
 										</div>
 									</div>
 									<div class="bg-white rounded border border-secondary mb-2">
-										<p class="text-muted p-2" style="font-size: 13px;">Are you sure you want to delete this task?</p>
+										<p class="text-muted p-2" style="font-size: 13px;">{{ __('admin.Delete_Confirmation') }}</p>
 									</div>
 									<button id="confirmDeleteTask" class="btn btn-danger" style="width: 100%;" data-task="">
 										<i class="ti ti-trash ti-20px me-2"></i>
-										<span>Delete</span>
+										 <span>{{ __('admin.Delete') }}</span>
 									</button>
 								</div>
 							</div>
-							<h6 class="modal-title" id="viewTaskModalLabel">View Task</h6>
+							<h6 class="modal-title" id="viewTaskModalLabel">{{ __('admin.View_Task') }}</h6>
 							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
 								<i class="ti ti-x ti-20px text-primary"></i>
 							</div>
 						</div>
 					</div>
 					<div class="bg-white rounded border border-light p-2 p-md-4">
-						<h4 id="task-details-name" class="fw-medium">Task Name</h4>
+						<h4 id="task-details-name" class="fw-medium">{{ __('admin.Task_Name') }}</h4>
 						<div class="bg-label-secondary p-2 rounded mb-3">
-							<h6 class="fw-semibold mb-1">Description</h6>
+							<h6 class="fw-semibold mb-1">{{ __('admin.Description') }}</h6>
 							<p id="task-details-contents" class="text-secondary"></p>
 						</div>
 						<div
@@ -156,20 +159,20 @@
 							<div class="d-flex justify-content-center align-items-center gap-2">
 								<div class="d-flex justify-content-center align-items-center gap-1">
 									<i class="ti ti-flag text-primary ti-24px"></i>
-									<span class="text-dark">Priority:</span>
+									<span class="text-dark">{{ __('admin.Priority') }}:</span>
 								</div>
 								<div id="task-details-priority" class="badge bg-label-warning d-flex align-items-center justify-content-center">
 									<div style="width: 9px; height: 9px;" class="bg-warning rounded-circle me-1"></div>
-									<span class="fw-semibold">Medium</span>
+									<span class="fw-semibold">{{ __('admin.Medium') }}</span>
 								</div>
 							</div>
 							<div class="d-flex justify-content-center align-items-center gap-2">
 								<div class="p-2 border rounded d-flex flex-column">
-									<span class="text-dark fw-bold">Created</span>
+									<span class="text-dark fw-bold">{{ __('admin.Created') }}</span>
 									<span class="text-muted"><i class="ti ti-clock me-1 ti-16px"></i><span id="task-details-reported-at">24 Feb 04:20 PM</span> </span>
 								</div>
 								<div class="p-2 border rounded d-flex flex-column">
-									<span class="text-dark fw-bold">Updated</span>
+									<span class="text-dark fw-bold">{{ __('admin.Updated') }}</span>
 									<span class="text-muted"><i class="ti ti-clock me-1 ti-16px"></i><span id="task-details-updated-at">24 Feb 04:20 PM</span> </span>
 								</div>
 							</div>
@@ -177,7 +180,7 @@
 						<div class="bg-label-secondary p-2 rounded mb-3 border">
 							<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
 								<div class="d-flex align-items-center justify-content-center gap-2">
-									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>Attachments</h6>
+									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
 									<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
 								</div>
 								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" />
@@ -190,17 +193,17 @@
 						</div>
 						<div class="d-flex gap-10 mb-3 pb-3">
 							<div class="d-flex flex-column gap-4">
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-circle-dot text-primary ti-20px me-2"></i>Status</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-users text-primary ti-20px me-2"></i>Assignee</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-users text-primary ti-20px me-2"></i>Reporter</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-calendar text-primary ti-20px me-2"></i>Due date</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-calendar text-primary ti-20px me-2"></i>Complete date</h6>
-								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-tag text-primary ti-20px me-2"></i>Tags</h6>
+								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-circle-dot text-primary ti-20px me-2"></i>{{ __('admin.Status') }}</h6>
+								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-users text-primary ti-20px me-2"></i>{{ __('admin.Assignee') }}</h6>
+								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-users text-primary ti-20px me-2"></i>{{ __('admin.Reporter') }}</h6>
+								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-calendar text-primary ti-20px me-2"></i>{{ __('admin.Due_Date') }}</h6>
+								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-calendar text-primary ti-20px me-2"></i>{{ __('admin.Complete_Date') }}</h6>
+								<h6 class="mb-0 fw-medium text-nowrap"><i class="ti ti-tag text-primary ti-20px me-2"></i>{{ __('admin.Tags') }}</h6>
 							</div>
 							<div class="d-flex flex-column gap-3 overflow-x-auto">
 								<div id="task-details-status" class="badge bg-label-secondary d-flex align-items-center" style="width:fit-content;">
 									<div style="width:10px; height:10px;" class="rounded-circle me-2"></div>
-									<span class="fw-semibold">In Progress</span>
+									<span class="fw-semibold">{{ __('admin.In_Progress') }}</span>
 								</div>
 								<div id="task-details-assignee" class="d-flex align-items-center">
 									<img src="#" class="rounded-circle" title="#" alt="#" width="24" height="24" style="{{ $lang == 'en' ? 'margin-right: -5px;' : 'margin-left: -5px;' }}">
@@ -225,10 +228,10 @@
 						</div>
 						<div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
 							<div id="commentsTab" class="pb-2 border-bottom border-primary">
-								<button id="commentsButton" style="border-radius: 15px" class="btn btn-outline-primary">Comments</button>
+								<button id="commentsButton" style="border-radius: 15px" class="btn btn-outline-primary">{{ __('admin.Comments') }}</button>
 							</div>
 							<div id="activityTab" class="pb-2 ">
-								<button id="activityButton" style="border-radius: 15px" class="btn">Activity</button>
+								<button id="activityButton" style="border-radius: 15px" class="btn">{{ __('admin.Activity') }}</button>
 							</div>
 						</div>
 						<div id="commentsContainer">
@@ -237,8 +240,8 @@
 							</div>
 							<div class="bg-label-secondary p-2 rounded mb-3 border">
 								<div class="d-flex align-items-center gap-2">
-									<input type="text" id="commentInput" class="form-control bg-white" placeholder="Add a comment" />
-									<button id="commentButton" data-task="" type="button" class="btn btn-info">Publish</button>
+									<input type="text" id="commentInput" class="form-control bg-white" placeholder="{{ __('admin.Add_Comment') }}" />
+									<button id="commentButton" data-task="" type="button" class="btn btn-info">{{ __('admin.Publish') }}</button>
 								</div>
 							</div>
 						</div>
@@ -257,7 +260,7 @@
 				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
-							<h6 class="modal-title" id="form-modal-title">Create New task</h6>
+							<h6 class="modal-title" id="form-modal-title">{{ __('admin.Create_New_Task') }}</h6>
 							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
 								<i class="ti ti-x ti-20px text-primary"></i>
 							</div>
@@ -266,25 +269,28 @@
 					<div class="bg-white rounded border border-light p-2 p-md-4">
 						<form action="#" method="POST">
 							<div class="mb-3">
-								<label for="task-name" class="form-label">Task Name</label>
+								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
 								<input type="text" class="form-control" id="task-name" name="task-name" />
 							</div>
 							<div class="mb-3">
-								<label for="task-content" class="form-label">Description</label>
-								<textarea class="form-control" id="task-content" name="task-content" rows="3"></textarea>
+								<label for="task-content" class="form-label">{{ __('admin.Description') }}</label>
+								<div style="height: 150px; overflow-y: auto;" class="border border-light rounded">
+									<div id="task-content-editor" class="form-control border-none"></div>
+								</div>
+								<textarea class="form-control d-none" id="task-content" name="task-content" rows="3"></textarea>
 							</div>
 							<div class="row mb-3">
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-status" class="form-label">
 										<i class="ti ti-flag text-primary ti-24px"></i>
-										Priority
+										{{ __('admin.Priority') }}
 									</label>
 								</div>
 								<div class="col-4">
 									<select class="form-select select2" id="task-priority" name="task-priority">
-										<option value="low">Low</option>
-										<option value="medium">Medium</option>
-										<option value="high">High</option>
+										<option value="low">{{ __('admin.Low') }}</option>
+										<option value="medium">{{ __('admin.Medium') }}</option>
+										<option value="high">{{ __('admin.High') }}</option>
 									</select>
 								</div>
 							</div>
@@ -307,15 +313,15 @@
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-status" class="form-label">
 										<i class="ti ti-circle-dot text-primary ti-20px me-2"></i>
-										Status
+										{{ __('admin.Status') }}
 									</label>
 								</div>
 								<div class="col-4">
 									<select class="form-select select2" id="task-status" name="task-status">
-										<option value="pending">Pending</option>
-										<option value="progress">In Progress</option>
-										<option value="review">Review</option>
-										<option value="completed">Completed</option>
+										<option value="pending">{{ __('admin.Pending') }}</option>
+										<option value="progress">{{ __('admin.In_Progress') }}</option>
+										<option value="review">{{ __('admin.Review') }}</option>
+										<option value="completed">{{ __('admin.Completed') }}</option>
 									</select>
 								</div>
 							</div>
@@ -323,7 +329,7 @@
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-assignee" class="form-label">
 										<i class="ti ti-users text-primary ti-20px me-2"></i>
-										Assignee
+										{{ __('admin.Assignee') }}
 									</label>
 								</div>
 								<div class="col-9">
@@ -332,14 +338,14 @@
 										<option value="2">User 2</option>
 										<option value="3">User 3</option>
 									</select> --}}
-									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="select user" value="" />
+									<input id="task-assignee" name="task-assignee" class="form-control" placeholder="{{ __('admin.Select_User') }}" value="" />
 								</div>
 							</div>
 							<div class="row mb-3">
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-due-date" class="form-label">
 										<i class="ti ti-calendar text-primary ti-20px me-2"></i>
-										Due Date
+										{{ __('admin.Due_Date') }}
 									</label>
 								</div>
 								<div class="col-4">
@@ -353,18 +359,18 @@
 								<div class="col-3 d-flex align-items-center">
 									<label for="tags" class="form-label">
 										<i class="ti ti-tag text-primary ti-20px me-2"></i>
-										Tags
+										{{ __('admin.Tags') }}
 									</label>
 								</div>
 								<div class="col-9">
-									<input id="task-labels" name="task-labels" class="form-control" placeholder="select labels" value="" />
+									<input id="task-labels" name="task-labels" class="form-control" placeholder="{{ __('admin.Select_Labels') }}" value="" />
 								</div>
 							</div>
 						</form>
 					</div>
 					<div class="mt-4 d-flex align-items-center gap-3">
-						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button id="createTask" type="button" class="btn btn-primary">Create</button>
+						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
+						<button id="createTask" type="button" class="btn btn-primary">{{ __('admin.Create') }}</button>
 					</div>
 				</div>
 			</div>
@@ -376,7 +382,7 @@
 				<div class="modal-content rounded overflow-hidden bg-label-light p-md-4">
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
-							<h6 class="modal-title" id="form-modal-title">Edit task</h6>
+							<h6 class="modal-title" id="form-modal-title">{{ __('admin.Edit_Task') }}</h6>
 							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
 								<i class="ti ti-x ti-20px text-primary"></i>
 							</div>
@@ -385,25 +391,28 @@
 					<div class="bg-white rounded border border-light p-2 p-md-4">
 						<form action="#" method="POST" id="editTaskForm">
 							<div class="mb-3">
-								<label for="task-name" class="form-label">Task Name</label>
+								<label for="task-name" class="form-label">{{ __('admin.Task_Name') }}</label>
 								<input type="text" class="form-control" id="edit-task-name" name="edit-task-name" />
 							</div>
 							<div class="mb-3">
-								<label for="task-content" class="form-label">Description</label>
-								<textarea class="form-control" id="edit-task-content" name="edit-task-content" rows="3"></textarea>
+								<label class="form-label">{{ __('admin.Description') }}</label>
+								<div style="height: 150px; overflow-y: auto;" class="border border-light rounded">
+									<div id="edit-task-content-editor" class="form-control border-none"></div>
+								</div>
+								<textarea class="form-control d-none" id="edit-task-content" name="edit-task-content" rows="3"></textarea>
 							</div>
 							<div class="row mb-3">
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-status" class="form-label">
 										<i class="ti ti-flag text-primary ti-24px"></i>
-										Priority
+										{{ __('admin.Priority') }}
 									</label>
 								</div>
 								<div class="col-4">
 									<select class="form-select select2" id="edit-task-priority" name="edit-task-priority">
-										<option value="low">Low</option>
-										<option value="medium">Medium</option>
-										<option value="high">High</option>
+										<option value="low">{{ __('admin.Low') }}</option>
+										<option value="medium">{{ __('admin.Medium') }}</option>
+										<option value="high">{{ __('admin.High') }}</option>
 									</select>
 								</div>
 							</div>
@@ -426,15 +435,15 @@
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-status" class="form-label">
 										<i class="ti ti-circle-dot text-primary ti-20px me-2"></i>
-										Status
+										{{ __('admin.Status') }}
 									</label>
 								</div>
 								<div class="col-4">
 									<select class="form-select select2" id="edit-task-status" name="edit-task-status">
-										<option value="pending">Pending</option>
-										<option value="progress">In Progress</option>
-										<option value="review">Review</option>
-										<option value="completed">Completed</option>
+										<option value="pending">{{ __('admin.Pending') }}</option>
+										<option value="progress">{{ __('admin.In_Progress') }}</option>
+										<option value="review">{{ __('admin.Review') }}</option>
+										<option value="completed">{{ __('admin.Completed') }}</option>
 									</select>
 								</div>
 							</div>
@@ -442,7 +451,7 @@
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-assignee" class="form-label">
 										<i class="ti ti-users text-primary ti-20px me-2"></i>
-										Assignee
+										{{ __('admin.Assignee') }}
 									</label>
 								</div>
 								<div class="col-9">
@@ -455,7 +464,7 @@
 										id="edit-task-assignee"
 										name="edit-task-assignee"
 										class="form-control"
-										placeholder="select users"
+										placeholder="{{ __('admin.Select_Users') }}"
 										value=""
 									/>
 								</div>
@@ -464,7 +473,7 @@
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-due-date" class="form-label">
 										<i class="ti ti-calendar text-primary ti-20px me-2"></i>
-										Due Date
+										{{ __('admin.Due_Date') }}
 									</label>
 								</div>
 								<div class="col-4">
@@ -478,7 +487,7 @@
 								<div class="col-3 d-flex align-items-center">
 									<label for="tags" class="form-label">
 										<i class="ti ti-tag text-primary ti-20px me-2"></i>
-										Tags
+										{{ __('admin.Tags') }}
 									</label>
 								</div>
 								<div class="col-9">
@@ -486,7 +495,7 @@
 										id="edit-task-labels"
 										name="edit-task-labels"
 										class="form-control"
-										placeholder="select tags"
+										placeholder="{{ __('admin.Select_Tags') }}"
 										value=""
 									/>
 								</div>
@@ -495,8 +504,8 @@
 					</div>
 					<div class="mt-4 d-flex align-items-center gap-3">
 						<input type="hidden" id="edit-task-id" name="edit-task-id" value="0" />
-						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button id="editTaskBtn" type="button" class="btn btn-primary">Edit</button>
+						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
+						<button id="editTaskBtn" type="button" class="btn btn-primary">{{ __('admin.Edit') }}</button>
 					</div>
 				</div>
 			</div>
@@ -515,6 +524,8 @@
 	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 	<script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
 	<script src="/vuexy/assets/vendor/libs/bloodhound/bloodhound.js"></script>
+	<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
 @stop
 
 @section('pagescripts')
@@ -554,6 +565,7 @@
 						type: "GET",
 						dataType: "json",
 						success: function( element ) {
+							console.log('element', element);
 							let bg = '';
 							$('#editTakButton').attr('data-id', id);
 							$('#editTakButton').attr('data-task', id);
@@ -673,6 +685,23 @@
 									</div>
 								`;
 							});
+
+							// Replace with actual attachments like (element.attachments)
+							const attachments = [
+								{
+									id: 1,
+									name: 'File 1',
+									url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+								},
+								{
+									id: 2,
+									name: 'File 2',
+									url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+								}
+							]
+
+							// Handle attachments
+							renderFiles(attachments, 'view');
 		
 							$('#viewTaskModal').modal('show');
 						},
@@ -830,26 +859,105 @@
 		searchTask();
 	</script>
 	<script>
+		// Handle attachments upload
 		function handleFileUpload(event) {
 			const files = event.target.files;
+			
+			// Render files handler
+			renderFiles(files);
+		}
+
+		// Render files handler
+		const renderFiles = (files, mode) => {
+			console.log('upload files', files);
+				
 			const fileList = document.getElementById('fileList');
 			const attachmentCount = document.getElementById('attachmentCount');
 			fileList.innerHTML = '';
+			
+			// To Do: Upload this files to server on request success, below is the request code 👇
 			Array.from(files).forEach(file => {
-				const fileDiv = document.createElement('div');
-				fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
-				fileDiv.innerHTML = `
-					<i class="ti ti-file text-info ti-20px me-2"></i>
-					<span class="text-dark fw-bold">${file.name}</span>
-					<div class="cursor-pointer" onclick="this.parentElement.remove(); attachmentCount.textContent = fileList.children.length;">
-						<i class="ti ti-trash text-danger ti-16px ms-2"></i>
-					</div>
-				`;
-				document.getElementById('fileInput').value = '';
-				fileList.appendChild(fileDiv);
+				if (file instanceof File) {
+					const fileDiv = document.createElement('div');
+					fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
+					fileDiv.innerHTML = `
+						<i class="ti ti-file text-info ti-20px me-2"></i>
+						<span class="text-dark fw-bold">${file.name}</span>
+						<div 
+							class="cursor-pointer me-2" 
+							onclick="deleteFileHandler('${file.name}', this.parentElement);"
+						>
+							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
+						</div>
+						<a href="${URL.createObjectURL(file)}" download="${file.name}" class="ms-auto">
+							<i class="ti ti-download text-primary ti-16px"></i>
+						</a>
+					`;
+					fileList.appendChild(fileDiv);
+				}
 			});
 			attachmentCount.textContent = fileList.children.length;
+			
+			// To Do: Use this ajax request to upload files to server
+			if (mode == 'upload') {
+				const formData = new FormData();
+				Array.from(files).forEach(file => {
+					formData.append('attachments[]', file);
+				});
+	
+				$.ajax({
+					url: "{{ URL::to('dashboard/mentor/mentorshipTasks/upload-attachments') }}",
+					type: 'POST',
+					data: formData,
+					processData: false,
+					contentType: false,
+					success: function(data) {
+						return data;
+					},
+					error: function(error) {
+						console.error('Error uploading files:', error);
+					}
+				});
+			}
 		}
+
+		// Delete file handler
+		const deleteFileHandler = (fileName, ele) => {
+			$('#viewTaskModal').modal('hide');
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, delete it!',
+				backdrop: true // Ensure SweetAlert modal overlays on any modal
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$('#viewTaskModal').modal('show');
+					ele.remove();
+					const attachmentCount = document.getElementById('attachmentCount');
+					attachmentCount.textContent = document.getElementById('fileList').children.length;
+
+					// To Do: Use this ajax request to delete file from server
+					// $.ajax({
+					// 	url: "{{ URL::to('dashboard/mentor/mentorshipTasks/delete-attachment') }}",
+					// 	type: 'POST',
+					// 	data: { file: fileName },
+					// 	success: function(data) {
+					// 		return data;
+					// 	},
+					// 	error: function(error) {
+					// 		console.error('Error deleting file:', error);
+					// 	}
+					// });
+					return;
+				}
+
+				$('#viewTaskModal').modal('show');
+			});
+		};
 	</script>
 	<script>
 		const commentsTab = document.getElementById('commentsTab');
@@ -962,6 +1070,7 @@
 		});
 
 		editTakButton.addEventListener('click', function(e) {
+			console.log('edit task button clicked');
 			e.preventDefault();
 			let task_id = $(this).attr('data-id');
 			let url = "{{ URL::to('dashboard/mentor/mentorshipTasks/display') }}/" + task_id;
@@ -973,6 +1082,7 @@
 					$('#edit-task-id').val( element.id );
 					$('#edit-task-name').val( element.name );
 					$('#edit-task-content').val( element.content );
+					editQuill.root.innerHTML = element.content;
 					$('#edit-task-priority').val( element.priority );
 					$('#edit-task-priority').trigger('change');
 					$('#edit-task-status').val( element.status );
@@ -1156,6 +1266,7 @@
 						refreshLabelsForCreate();
 						$('#task-name').val('');
 						$('#task-content').val('');
+						editQuill.root.innerHTML = '';
 						$("#task-due-date").val('');
 						$('#task-status').val('pending');
 						$("#task-priority").val('low');
@@ -1210,6 +1321,7 @@
 						refreshLabelsForEdit();
 						$('#edit-task-name').val('');
 						$('#edit-task-content').val('');
+						editQuill.root.innerHTML = '';
 						$("#edit-task-due-date").val('');
 						$('#edit-task-status').val('pending');
 						$("#edit-task-priority").val('low');
@@ -1233,5 +1345,29 @@
 				}
 			});
 		});
+	</script>
+	<script>
+		// Initialize Quill editor for task content
+		var quill = new Quill('#task-content-editor', {
+			theme: 'snow',
+			placeholder: lang == 'en' ? 'Write task content here...' : 'اكتب محتوى المهمة هنا...',
+		});
+		quill.on('text-change', function() {
+			document.getElementById('task-content').value = quill.root.innerHTML;
+		});
+
+		// Initialize Quill editor for edit task content
+		var editQuill = new Quill('#edit-task-content-editor', {
+			theme: 'snow'
+		});
+		editQuill.on('text-change', function() {
+			document.getElementById('edit-task-content').value = editQuill.root.innerHTML;
+		});
+
+		// // Set initial content for edit task
+		// $('#editTakButton').on('click', function() {
+		// 	var content = $('#edit-task-content').val();
+		// 	editQuill.root.innerHTML = content;
+		// });
 	</script>
 @stop

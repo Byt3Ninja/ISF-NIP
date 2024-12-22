@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ $l }}" dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+<html lang="{{ $l }}" dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
   class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-theme="theme-default"
   data-assets-path="/vuexy/assets/" data-template="vertical-menu-template" data-style="light">
 
@@ -11,19 +10,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
   <meta name="description" content="VI Login">
   <meta name="author" content="info@growthlabs.app">
-  <title>{{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}} - {{ App\Settings::findorfail(1)->first('title')->title }} - v1</title>
+  <title>{{ $l == 'en' ? 'Register New Account' : 'تسجيل حساب جديد'}} - {{
+    App\Settings::findorfail(1)->first('title')->title }} - v1</title>
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
-  {{-- <!-- Fonts -->
+  {{--
+  <!-- Fonts -->
   @if ($l == 'ar')
-    <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
   @else
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
-      rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+    rel="stylesheet" />
   @endif
   <!-- End Fonts --> --}}
 
@@ -54,9 +55,9 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet"
-    href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-  
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+
   <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css">
   <link rel="stylesheet" href="/app-assets/plugins/alertify/css/alertify.min.css">
   <link rel="stylesheet" href="/app-assets/plugins/alertify/css/themes/bootstrap.min.css">
@@ -69,20 +70,26 @@
       overflow: hidden;
       min-height: 100vh;
     }
-    .authentication-wrapper, .authentication-cover {
+
+    .authentication-wrapper,
+    .authentication-cover {
       padding: 0 !important;
       margin: 0 !important;
     }
+
     .authentication-bg {
       overflow-y: auto;
       height: 100vh;
     }
+
     .codeInputContainer {
       width: 135px;
     }
+
     .iti__country-list {
       position: absolute;
-      left: calc(100% - 3rem);
+      left: 1rem;
+      /* right: 0; */
       z-index: 9999;
       list-style: none;
       text-align: left;
@@ -95,8 +102,7 @@
       max-height: 200px;
       width: 350px;
       overflow-y: scroll;
-      overflow-x: auto
-      -webkit-overflow-scrolling: touch;
+      overflow-x: auto -webkit-overflow-scrolling: touch;
       background-color: #fff;
     }
   </style>
@@ -116,17 +122,17 @@
 
 <body>
   @php
-    $formHeading = $l == 'ar' ? 'تبدأ المغامرة من هنا' : 'Adventure starts here';
-    $formSubHeading = $l == 'ar' ? 'اجعل إدارة تطبيقك سهلة وممتعة!' : 'Make your app management easy and fun!';
-    $firstName = $l == 'ar' ? 'الاسم الأول' : 'First Name';
-    $secondName = $l == 'ar' ? 'الاسم الاخير' : 'Last Name';
-    $gender = $l == 'ar' ? 'النوع' : 'Gender';
-    $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
-    $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
+  $formHeading = $l == 'ar' ? 'تبدأ المغامرة من هنا' : 'Adventure starts here';
+  $formSubHeading = $l == 'ar' ? 'اجعل إدارة تطبيقك سهلة وممتعة!' : 'Make your app management easy and fun!';
+  $firstName = $l == 'ar' ? 'الاسم الأول' : 'First Name';
+  $secondName = $l == 'ar' ? 'الاسم الاخير' : 'Last Name';
+  $gender = $l == 'ar' ? 'النوع' : 'Gender';
+  $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
+  $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
 
-    $accountRoles = ['Mentor', 'Founder'];
+  $accountRoles = ['Mentor', 'Founder'];
   @endphp
-  
+
   <!-- Content -->
   <div class="authentication-wrapper authentication-cover p-0">
     <!-- Logo -->
@@ -140,63 +146,89 @@
         <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
           <img src="/vuexy/assets/img/illustrations/auth-register-illustration-light.png" alt="auth-register-cover"
             class="my-5 auth-illustration" data-app-light-img="illustrations/auth-register-illustration-light.png"
-            data-app-dark-img="illustrations/auth-register-illustration-dark.png" 
-            loading="lazy"
-          />
+            data-app-dark-img="illustrations/auth-register-illustration-dark.png" loading="lazy" />
 
           <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-register-cover"
             class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png"
-            data-app-dark-img="illustrations/bg-shape-image-dark.png" 
-            loading="lazy"
-          />
+            data-app-dark-img="illustrations/bg-shape-image-dark.png" loading="lazy" />
         </div>
       </div>
       <!-- /Left Text -->
 
       <!-- Register -->
       @if (App\Settings::findOrFail(1)->set_order)
-        <div class="col-12 col-lg-4 authentication-bg px-0">
-          <!-- Toggle theme and language -->
-          <div class="navbar-nav-right p-4 d-flex" id="navbar-collapse">
-            <ul class="navbar-nav flex-row ms-auto">
-              <!-- Language -->
-              <li class="nav-item dropdown-language dropdown">
-                <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
-                  href="javascript:void(0);" data-bs-toggle="dropdown">
-                  <i class="ti ti-language rounded-circle ti-md"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li class="dropdown dropdown-language nav-item">
-                    <a class="dropdown-item" href="/lang/{{ $l == 'ar' ? 'en' : 'ar' }}">
-                      <i class="flag-icon flag-icon-{{ $l == 'ar' ? 'us' : 'sa' }}"></i>
-                      <span class="selected-language">{{ $l == 'ar' ? 'English' : 'عربي' }}</span>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <!--/ Language -->
+      <div class="col-12 col-lg-4 authentication-bg px-0">
+        <!-- Toggle theme and language -->
+        <div class="navbar-nav-right p-4 d-flex" id="navbar-collapse">
+          <ul class="navbar-nav flex-row ms-auto">
+            <!-- Language -->
+            <li class="nav-item dropdown-language dropdown">
+              <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+                href="javascript:void(0);" data-bs-toggle="dropdown">
+                <i class="ti ti-language rounded-circle ti-md"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li class="dropdown dropdown-language nav-item">
+                  <a class="dropdown-item" href="/lang/{{ $l == 'ar' ? 'en' : 'ar' }}">
+                    <i class="flag-icon flag-icon-{{ $l == 'ar' ? 'us' : 'sa' }}"></i>
+                    <span class="selected-language">{{ $l == 'ar' ? 'English' : 'عربي' }}</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <!--/ Language -->
 
-              <!-- Style Switcher -->
-              <li class="nav-item dropdown-style-switcher dropdown">
-                <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow"
-                  href="javascript:void(0);" data-bs-toggle="dropdown">
-                  <i class="ti ti-md"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
-                  @foreach(['light' => 'sun', 'dark' => 'moon-stars', 'system' => 'device-desktop-analytics'] as $theme => $icon)
-                    <li>
-                      <a class="dropdown-item" href="javascript:void(0);" data-theme="{{ $theme }}">
-                        <span class="align-middle"><i class="ti ti-{{ $icon }} ti-md me-3"></i>{{ ucfirst($theme) }}</span>
-                      </a>
-                    </li>
-                  @endforeach
-                </ul>
-              </li>
-              <!-- / Style Switcher-->
-            </ul>
+            <!-- Style Switcher -->
+            <li class="nav-item dropdown-style-switcher dropdown">
+              <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);"
+                data-bs-toggle="dropdown">
+                <i class="ti ti-md"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+                @foreach(['light' => 'sun', 'dark' => 'moon-stars', 'system' => 'device-desktop-analytics'] as $theme =>
+                $icon)
+                <li>
+                  <a class="dropdown-item" href="javascript:void(0);" data-theme="{{ $theme }}">
+                    <span class="align-middle"><i class="ti ti-{{ $icon }} ti-md me-3"></i>{{ ucfirst($theme) }}</span>
+                  </a>
+                </li>
+                @endforeach
+              </ul>
+            </li>
+            <!-- / Style Switcher-->
+          </ul>
+        </div>
+        <!-- Toggle theme and language -->
+
+        <div class="card card-body shadow-none">
+          <div class="row">
+            <div class="col-12">
+              <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
+              <p class="mb-6">{{ $formSubHeading }}</p>
+              @if (count($errors) > 0)
+              @foreach ($errors->all() as $error)
+              <x-alert type="danger" message="{{ $error }}" />
+              @endforeach
+              @endif
+            </div>
+            @foreach($accountRoles as $key => $role)
+            <div class="col-6">
+              <div class="form-check custom-option custom-option-icon">
+                <label class="form-check-label custom-option-content" for="{{$role}}Role">
+                  <span class="custom-option-body">
+                    <i class="ti ti-rocket"></i>
+                    <span class="custom-option-title">{{ __('admin.' . $role) }}</span>
+                  </span>
+                  <input name="role" class="form-check-input" type="radio" value="{{$key == 0 ? $role : 'Registered'}}"
+                    id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
+                </label>
+              </div>
+            </div>
+            @endforeach
           </div>
           <!-- Toggle theme and language -->
-
+          <form id="founderForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}" style="display: block;">
+            @csrf
           <div class="card card-body shadow-none">
             <div class="row">
               <div class="col-12">
@@ -233,8 +265,7 @@
           </div>
 
 
-          <form id="founderForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}" style="display: block;">
-            @csrf
+          
             <div class="card card-body shadow-none">
               <div class="row">
                 <div class="col-12 mb-3">
@@ -340,86 +371,52 @@
                   @endif
                 </div>
               </div>
-            </div>
-          </form>
-          <form id="mentorForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}" style="display: none;">
-            @csrf
-            <div class="card card-body shadow-none">
-              <div class="row">
-                <div class="col-12 mb-3">
-                  <label for="username" class="form-label fs-6 fw-bold">{{ $firstName }}</label>
-                  <div class="input-group input-group-merge">
-                    <input value="{{ old('first_name_en') }}" name="first_name_en" type="text" class="form-control"
-                      id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name_en"
-                      autofocus />
-                  </div>
+              <div class="col-12 mb-3">
+                <label for="last_name_en" class="form-label fs-6 fw-bold">{{ $secondName }}</label>
+                <div class="input-group input-group-merge">
+                  <input value="{{ old('last_name_en') }}" name="last_name_en" type="text" class="form-control"
+                    id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required
+                    autocomplete="last_name_en" />
                 </div>
-                <div class="col-12 mb-3">
-                  <label for="last_name_en" class="form-label fs-6 fw-bold">{{ $secondName }}</label>
-                  <div class="input-group input-group-merge">
-                    <input value="{{ old('last_name_en') }}" name="last_name_en" type="text" class="form-control"
-                      id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name_en" />
-                  </div>
+              </div>
+              <div class="col-12 mb-3">
+                <label for="email" class="form-label fs-6 fw-bold">{{ __('auth.E-Mail') }}</label>
+                <div class="input-group input-group-merge">
+                  <input value="{{ old('email') }}" name="email" type="email" class="form-control"
+                    placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" />
                 </div>
-                <div class="col-12 mb-3">
-                  <label for="email" class="form-label fs-6 fw-bold">{{ __('auth.E-Mail') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input value="{{ old('email') }}" name="email" type="email" class="form-control"
-                      placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" />
-                  </div>
+              </div>
+              <div class="col-12 mb-4 form-password-toggle">
+                <label class="form-label fs-6 fw-bold" for="password">{{ __('auth.Password') }}</label>
+                <div class="input-group input-group-merge">
+                  <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}"
+                    name="password" required autocomplete="password" aria-describedby="password" />
+                  <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                 </div>
-                <div class="col-12 mb-4 form-password-toggle">
-                  <label class="form-label fs-6 fw-bold" for="password">{{ __('auth.Password') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}"
-                      name="password" required autocomplete="password" aria-describedby="password" />
-                    <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                  </div>
+              </div>
+              <div class="col-12 mb-4 form-password-toggle">
+                <label class="form-label fs-6 fw-bold" for="password_confirmation">{{ __('auth.Confirm') }}</label>
+                <div class="input-group input-group-merge">
+                  <input type="password" class="form-control" id="password_confirmation"
+                    placeholder="{{ __('auth.Password') }}" name="password_confirmation" required
+                    autocomplete="new-password" aria-describedby="new-password" />
+                  <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                 </div>
-                <div class="col-12 mb-4 form-password-toggle">
-                  <label class="form-label fs-6 fw-bold" for="password">{{ __('auth.Confirm') }}</label>
-                  <div class="input-group input-group-merge">
-                    <input type="password" class="form-control" id="confirm-password" placeholder="{{ __('auth.Password') }}"
-                      name="password_confirmation" required autocomplete="new-password" aria-describedby="password" />
-                    <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                  </div>
-                </div>
-                <div class="col-12 mb-4">
-                  <label class="form-label fs-6 fw-bold" for="gender">{{ $gender }}</label>
-                  <select class="form-select select2" name="gender" id="gender" required>
-                    <option value="Male">{{ __('Male') }}</option>
-                    <option value="Female">{{ __('Female') }}</option>
-                  </select>
-                </div>
-                <div class="col-12 mb-4 d-grid">
-                  <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
-                  <input 
-                    id="phone" 
-                    type="tel" 
-                    class="form-control" 
-                    placeholder="{{ __('auth.Phone') }}"
-                    value="{{ old('phone') }}"
-                    name="phone" 
-                    autocomplete="phone"
-                    required
-                  />
-                  {{-- <div class="input-group" style="display: flex; flex-flow: {{$l == 'ar' ? 'row-reverse' : 'row'}}; align-items: center;">
-                    <div class="codeInputContainer">
-                      @php
-                        $phone_codes = App\Country::all();
-                      @endphp
-                      <select id="country_code" name="country_code" class="form-select select2" required>
-                        @foreach ($phone_codes as $phone_code)
-                          <option value="{{ $phone_code->phone_code }}">
-                            {{ $phone_code->phone_code }}+
-                          </option>
-                        @endforeach
-                      </select>
-                    </div>
-                    <input type="tel" class="form-control mx-2 rounded" id="phone" placeholder="{{ __('auth.Phone') }}"
-                      value="{{ old('phone') }}" name="phone" required autocomplete="phone" /> --}}
-                  </div>
-                </div>
+              </div>
+              <div class="col-12 mb-4">
+                <label class="form-label fs-6 fw-bold" for="gender">{{ $gender }}</label>
+                <select class="form-select select2" name="gender" id="gender" required>
+                  <option value="Male">{{ __('Male') }}</option>
+                  <option value="Female">{{ __('Female') }}</option>
+                </select>
+              </div>
+              <div class="col-12 mb-4 d-grid">
+                <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
+                <input id="phone" type="tel" class="form-control" placeholder="{{ __('auth.Phone') }}"
+                  value="{{ old('phone') }}" name="phone" autocomplete="phone" required />
+                  <span class="text-danger" id="phone-error" style="display: none;"></span>
+              </div>
+              <div id="mentorInputsWrapper" style="display: none;">
                 <div class="col-12 mb-3">
                   <label for="Title" class="form-label fs-6 fw-bold">{{ __('admin.JobTitleEn') }}</label>
                   <div class="input-group input-group-merge">
@@ -430,17 +427,17 @@
                 <div class="col-12 mb-3">
                   <label class="form-label fs-6 fw-bold" for="expertise">{{ __('admin.Industry Expertise') }}</label>
                   <div class="form-group">
-                    <select name="expertise" class="select2 form-control" multiple="multiple" id="expertise" placeholder="{{__('admin.Select Expertise')}}" 
-                      value="" required>
+                    <select name="expertise" class="select2 form-select" multiple="multiple" id="expertise"
+                      data-placeholder="{{__('admin.Select Expertise')}}" value="" required>
                       @php
-                        $expertises = App\Expertise::where('parent_id', null)->get();
+                      $expertises = App\Expertise::where('parent_id', null)->get();
                       @endphp
                       @foreach ($expertises as $expertise_group)
-                        <optgroup label="{{ $expertise_group->title }}">
-                          @foreach ($expertise_group->children as $expertise)
-                            <option value="{{ $expertise->id }}"> {{ $expertise->title }} </option>
-                          @endforeach
-                        </optgroup>
+                      <optgroup label="{{ $expertise_group->title }}">
+                        @foreach ($expertise_group->children as $expertise)
+                        <option value="{{ $expertise->id }}"> {{ $expertise->title }} </option>
+                        @endforeach
+                      </optgroup>
                       @endforeach
                     </select>
                   </div>
@@ -449,48 +446,51 @@
                   <label for="userbio" class="form-label fs-6 fw-bold">{{ __('admin.userbio') }}</label>
                   <div class="input-group">
                     <textarea name="userbio" type="text" class="form-control" id="userbio"
-                    placeholder="{{ __('admin.userbio') }}" autocomplete="userbio">{{ old('userbio') }}</textarea>
+                      placeholder="{{ __('admin.userbio') }}" autocomplete="userbio">{{ old('userbio') }}</textarea>
                   </div>
                 </div>
                 <div class="col-12 mb-3">
                   <label for="Linkedin" class="form-label fs-6 fw-bold">{{ __('admin.Linkedin') }}</label>
                   <div class="input-group">
                     <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control" id="Linkedin"
-                    placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
+                      placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
                   </div>
-                </div>
-                <div class="col-12">
-                  <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
-                  <p class="text-center">
-                    <span>{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</span>
-                    <a href="/login">
-                      <span>{{ __('Login') }}</span>
-                    </a>
-                  </p>
-                  <div class="divider my-6">
-                    <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
-                  </div>
-                  <div class="container mt-5">
-                    <a href="{{ url('/auth/redirect/google') }}"
-                      class="btn btn-label-secondary btn-block d-flex align-items-center justify-content-center">
-                      <i class="fab fa-google me-2 text-success"></i> <span class="text-success">{{ $googleSignIn }}</span>
-                    </a>
-                  </div> 
-                  <div class="divider my-6">
-                    <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
-                  </div>
-                  @if (app()->environment('local'))
-                    <div class="container">
-                      <a href="{{ route('linkedin.login') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
-                        <i class="fa-brands fa-linkedin-in me-2"></i> <span>{{ $linkdinSignIn }}</span>
-                      </a>
-                    </div>
-                  @endif
                 </div>
               </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
+                <p class="text-center">
+                  <span>{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</span>
+                  <a href="/login">
+                    <span>{{ __('Login') }}</span>
+                  </a>
+                </p>
+                <div class="divider my-6">
+                  <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+                </div>
+                <div class="container mt-5">
+                  <a href="{{ url('/auth/redirect/google') }}"
+                    class="btn btn-label-secondary btn-block d-flex align-items-center justify-content-center">
+                    <i class="fab fa-google me-2 text-success"></i> <span class="text-success">{{ $googleSignIn
+                      }}</span>
+                  </a>
+                </div>
+                <div class="divider my-6">
+                  <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+                </div>
+                @if (app()->environment('local'))
+                <div class="container">
+                  <a href="{{ route('linkedin.login') }}"
+                    class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
+                    <i class="fa-brands fa-linkedin-in me-2"></i> <span>{{ $linkdinSignIn }}</span>
+                  </a>
+                </div>
+                @endif
+              </div>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
+      </div>
       @endif
       <!-- / Register -->
     </div>
@@ -503,7 +503,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
-  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
+  {{-- <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script> --}}
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
   <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
   <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
@@ -516,6 +516,7 @@
 
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
@@ -528,29 +529,34 @@
 
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-auth.js"></script>
-  <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  {{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
 
   <script>
+    const lang = '{{ $l }}';
+
     // Initialize the phone input
-    const phoneInputs = document.querySelectorAll("#phone");
+    const phoneInput = document.getElementById("phone");
+    const phoneError = document.getElementById('phone-error');
 
-    phoneInputs.forEach(input => {
-      const iti = intlTelInput(input, {
-        initialCountry: "eg", // Default country
-        preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
-      });
-  
-      // Optional: Handle validation
-      input.addEventListener("blur", () => {
-        if (iti.isValidNumber()) {
-          console.log("Valid number:", iti.getNumber());
-        } else {
-          console.error("Invalid number");
-        }
-      });
-    })
+    const iti = intlTelInput(phoneInput, {
+      initialCountry: "eg", // Default country
+      preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
+    });
 
+    // Optional: Handle validation
+    phoneInput.addEventListener("input", (e) => {
+      console.log(e.target.value);
+      if (iti.isValidNumber()) {
+        phoneError.style.display = 'none';
+        // console.log("Valid number:", iti.getNumber());
+      } else {
+        phoneError.style.display = 'block';
+        phoneError.innerText = lang == 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
+        // console.error("Invalid number");
+      }
+    });
   </script>
 
   <!-- Get countries and phone codes -->
@@ -572,5 +578,6 @@
         });
       });
   </script> --}}
-  </body>
+</body>
+
 </html>

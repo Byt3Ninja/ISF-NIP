@@ -5,6 +5,8 @@
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 @stop
 
 @section('style')
@@ -125,37 +127,37 @@
                 </div>
                 <div class="row">
                   <div class="mb-4 col-md-6">
-                    <label for="first_name_en" class="form-label">{{ __('admin.English UserName') }}</label>
+                    <label for="first_name_en" class="form-label fs-6 fw-bold">{{ __('admin.English UserName') }}</label>
                     <input value="{{ $client->first_name_en }}" name="first_name_en" type="text" class="form-control"
                       id="first_name_en" style="direction: ltr;" placeholder="{{ __('admin.First Name') }}" required
                       autocomplete="first_name_en" autofocus />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="last_name_en" class="form-label">{{ __('admin.Last Name') }}</label>
+                    <label for="last_name_en" class="form-label fs-6 fw-bold">{{ __('admin.Last Name') }}</label>
                     <input value="{{ $client->last_name_en }}" name="last_name_en" type="text" class="form-control"
                       id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required
                       autocomplete="last_name_en" />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="first_name_ar" class="form-label">{{ __('admin.Arabic UserName') }}</label> <input
+                    <label for="first_name_ar" class="form-label fs-6 fw-bold">{{ __('admin.Arabic UserName') }}</label> <input
                       value="{{ $client->first_name_ar }}" name="first_name_ar" type="text" class="form-control"
                       id="first_name_ar" style="direction: rtl;" placeholder="{{ __('admin.First Name') }}" required
                       autocomplete="first_name_ar" autofocus />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="last_name_ar" class="form-label">Arabic {{ __('admin.Last Name') }}</label>
+                    <label for="last_name_ar" class="form-label fs-6 fw-bold">Arabic {{ __('admin.Last Name') }}</label>
                     <input value="{{ $client->last_name_ar }}" name="last_name_ar" type="text"
                       class="form-control" id="last_name_ar" style="direction: rtl;"
                       placeholder="{{ __('admin.Last Name') }}" required autocomplete="last_name_ar" />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="email" class="form-label">{{ __('admin.E-mail') }}</label>
+                    <label for="email" class="form-label fs-6 fw-bold">{{ __('admin.E-mail') }}</label>
                     <input value="{{ $client->email }}" name="email" type="email" class="form-control"
                       id="email" style="direction: ltr;" placeholder="{{ __('admin.E-mail') }}" required
                       autocomplete="email">
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="gender" class="form-label">Gender</label>
+                    <label for="gender" class="form-label">{{ __('admin.Gender') }}</label>
                     <select name="gender" id="gender" class="select2 form-select">
                       <option value="Male" {{ $client->gender == 'Male' ? 'selected' : '' }}>{{ __('Male') }}
                       </option>
@@ -164,20 +166,20 @@
                     </select>
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="title_ar" class="form-label">{{ __('admin.JobTitleAr') }}</label>
+                    <label for="title_ar" class="form-label fs-6 fw-bold">{{ __('admin.JobTitleAr') }}</label>
                     <input value="{{ $client->title_ar }}" name="title_ar" type="title_ar" class="form-control"
                       id="title_ar" style="direction: rtl;" placeholder="{{ __('admin.JobTitleAr') }}" required
                       autocomplete="title_ar">
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="title_en">{{ __('admin.JobTitleEn') }}</label>
+                    <label for="title_en" class="form-label fs-6 fw-bold">{{ __('admin.JobTitleEn') }}</label>
                     <input value="{{ $client->title_en }}" name="title_en" type="title_en" class="form-control"
                       id="title_en" style="direction: ltr;" placeholder="{{ __('admin.JobTitleEn') }}" required
                       autocomplete="title_en">
                   </div>
                   
                   <div class="mb-4 col-md-6">
-                    <label for="phone" class="form-label">{{ __('admin.Phone') }}</label>
+                    <label for="phone" class="form-label fs-6 fw-bold">{{ __('admin.Phone') }}</label>
                     <div class="input-group">
                       <div class="codeInputContainer">
                         <select id="country_code" name="country_code" class="form-select select2" required>
@@ -189,21 +191,21 @@
                     </div>
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="address" class="form-label">{{ __('admin.Address') }}</label>
+                    <label for="address" class="form-label fs-6 fw-bold">{{ __('admin.Address') }}</label>
                     <input type="text" class="form-control" id="address" name="address" placeholder="{{ __('admin.Address') }}" value="{{ $client->address }}" />
                   </div>
                   {{-- <div class="mb-4 col-md-6">
-                    <label for="state" class="form-label">State</label>
+                    <label for="state" class="form-label fs-6 fw-bold">State</label>
                     <input class="form-control" type="text" id="state" name="state"
                       placeholder="California" />
                   </div> --}}
                   <div class="mb-4 col-md-6">
-                    <label for="zip_code" class="form-label">{{ __('admin.Zip_Code') }}</label>
+                    <label for="zip_code" class="form-label fs-6 fw-bold">{{ __('admin.Zip_Code') }}</label>
                     <input type="text" class="form-control" id="zip_code" name="zip_code" placeholder="231465"
                       maxlength="6" value="{{ $client->zip_code }}" />
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="country_id" class="form-label">{{ __('admin.Country') }}</label>
+                    <label for="country_id" class="form-label fs-6 fw-bold">{{ __('admin.Country') }}</label>
                     <select id="country_id" name='country_id' class="select2 form-select" required>
                       <option value="">{{ __('admin.Country') }}</option>
                       @foreach ($countries as $country)
@@ -214,7 +216,7 @@
                     </select>
                   </div>
                   <div class="mb-4 col-md-6">
-                    <label for="state_id">{{ __('admin.State') }}</label>
+                    <label for="state_id" class="form-label fs-6 fw-bold">{{ __('admin.State') }}</label>
                     <select class="select2 form-select" required id="state_id" name='state_id'>
                       <option value="">{{ __('admin.State') }}</option>
                       @php $name = 'name_'.$l; @endphp
@@ -225,7 +227,7 @@
                   </div>
     
                   <div class="mb-4 col-md-6">
-                    <label for="HaveCompany" class="form-label">{{ __('auth.DoYouHaveCompany') }}</label>
+                    <label for="HaveCompany" class="form-label fs-6 fw-bold">{{ __('auth.DoYouHaveCompany') }}</label>
                     <select name="HaveCompany" id="HaveCompany" class="select2 form-select">
                       <option value="1" {{ $client->HaveCompany ? 'selected' : '' }}>{{ __('Yes') }}</option>
                       <option value="" {{ $client->HaveCompany ? '' : 'selected' }}>{{ __('No') }}</option>
@@ -233,14 +235,14 @@
                   </div>
 
                   <div class="mb-4 col-md-6">
-                    <label for="language" class="form-label">Language</label>
+                    <label for="language" class="form-label">{{__('admin.Language')}}</label>
                     <select id="language" name="language" class="select2 form-select">
-                      <option value="">Select Language</option>
+                      <option value="">{{ __('admin.Select Language') }}</option>
                       <option value="en" {{ $client->language == 'en' ? 'selected' : '' }} >English</option>
                       <option value="ar" {{ $client->language == 'ar' ? 'selected' : '' }} >Arabic</option>
                     </select>
                   </div>
-                  <div class="mb-4 col-md-6">
+                  {{-- <div class="mb-4 col-md-6">
                     <label for="timeZones" class="form-label">Timezone</label>
                     <select id="timeZones" name="timezone" class="select2 form-select">
                       <option value="">Select Timezone</option>
@@ -263,14 +265,25 @@
                       <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Atlantic Time (Canada)</option>
                       <option value="-4" {{ $client->timezone == '-4' ? 'selected' : '' }}>(GMT-04:00) Caracas, La Paz</option>
                     </select>
-                  </div>
+                  </div> --}}
+                  <div class="mb-4 col-md-6">
+                    <label for="timeZones" class="form-label">{{ __('admin.Timezone') }}</label>
+                    <select id="timeZones" name="timezone" class="select2 form-select">
+                        <option value="">{{ __('admin.Select Timezone') }}</option>
+                        @foreach (timezone_identifiers_list() as $timezone)
+                            <option value="{{ $timezone }}" {{ $client->timezone == $timezone ? 'selected' : '' }}>
+                                {{ '(GMT' . \Carbon\Carbon::now($timezone)->format('P') . ') ' . $timezone }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
                   <div class="mb-4 col-md-12">
-                    <label for="currency" class="form-label">Currency</label>
+                    <label for="currency" class="form-label">{{ __('admin.Currency') }}</label>
                     <select id="currency" name="currency" class="select2 form-select">
-                      <option value="">Select Currency</option>
+                      <option value="">{{ __('admin.Select Currency') }}</option>
                       @foreach ($Currencies as $Currency)
                             <option value="{{ $Currency->currency_code }}" {{ $client->currency && $client->currency == $Currency->currency_code ? 'selected' : '' }}> {{ $Currency->currency_name }} </option>
-                            @endforeach
+                      @endforeach
                     </select>
                   </div>
 
@@ -292,7 +305,7 @@
 
                                     <div class="col-md-12">
                                       <div class="col-md-12 col-12">
-                                        <label for="linkedin" class="form-label">{{ __('admin.Linkedin') }}</label>
+                                        <label for="linkedin" class="form-label fs-6 fw-bold">{{ __('admin.Linkedin') }}</label>
                                         <div class="form-group">
                                           <input value="{{ $client->bio ? $client->bio->linkedin : '' }}" name="linkedin"
                                             type="text" class="form-control" id="linkedin" style="direction: ltr;"
@@ -302,14 +315,14 @@
                                         </div>
                                       </div>
                                       <div class="col-md-12 col-12 mt-4">
-                                        <label class="form-label">{{ __('admin.arbio') }}: </label>
+                                        <label class="form-label fs-6 fw-bold">{{ __('admin.arbio') }}: </label>
                                         <div class="form-group">
                                           <textarea class="form-control" id="bio_ar" name='bio_ar' rows="3" dir="rtl"
                                             placeholder="{{ __('admin.writebioar') }}">{{ $client->bio->bio_ar ?? '' }}</textarea>
                                         </div>
                                       </div>
                                       <div class="col-md-12 col-12 mt-4">
-                                        <label class="form-label">{{ __('admin.enbio') }}: </label>
+                                        <label class="form-label fs-6 fw-bold">{{ __('admin.enbio') }}: </label>
                                         <div class="form-group">
                                           <textarea class="form-control" id="bio_en" name='bio_en' rows="3" dir="ltr"
                                             placeholder="{{ __('admin.writebioen') }}">{{ $client->bio->bio_en ?? '' }}</textarea>
@@ -341,7 +354,7 @@
                                   </div>
 
                                   <div class="mt-4 col-md-6">
-                                    <label for="basicInput" class="form-label">
+                                    <label for="basicInput" class="form-label fs-6 fw-bold">
                                       {{ __('admin.Entrepreneurial Experience') }}
                                     </label>
 
@@ -358,7 +371,7 @@
                                   <br>
 
                                   <div class="mt-4 col-md-6">
-                                    <label class="form-label">{{ __('admin.Entrepreneurial Experience desc') }}.</label>
+                                    <label class="form-label fs-6 fw-bold">{{ __('admin.Entrepreneurial Experience desc') }}.</label>
                                     <textarea class="form-control" id="basicTextarea" rows="8" name="entrepreneurial_experience_brief" required>{{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }} </textarea>
                                     <label for="tcontent"
                                       class="mt-2">{{ __('admin.Entrepreneurial Experience Brief') }}</label>
@@ -367,7 +380,7 @@
 
                                   <div class="my-4 col-md-6">
                                     <label for="profile_privacy"
-                                      class="form-label">{{ __('admin.Profile Privacy') }}</label>
+                                      class="form-label fs-6 fw-bold">{{ __('admin.Profile Privacy') }}</label>
                                     <select name="profile_privacy" id="profile_privacy" class="select2 form-select">
                                       <option value="1"
                                         {{ optional($client->bio)->profile_privacy ? 'selected' : '' }}>
@@ -379,7 +392,7 @@
                                   </div>
 
                                   <div class="col-md-12 col-12">
-                                    <label for="approach" class="form-label">{{ __('admin.mentorship approach') }}
+                                    <label for="approach" class="form-label fs-6 fw-bold">{{ __('admin.mentorship approach') }}
                                       :</label>
                                     <div class="form-group" id="approach">
                                       <div class="checkbox mr-5">
@@ -387,7 +400,7 @@
                                           name='mentorship_approach[]'
                                           {{ $client->bio && in_array('E-mail', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
                                           value="E-mail">
-                                        <label for="checkbox1" class="form-label">
+                                        <label for="checkbox1" class="form-label fs-6 fw-bold">
                                           {{ __('admin.E-mail') }}
                                         </label>
                                       </div>
@@ -396,7 +409,7 @@
                                           name='mentorship_approach[]'
                                           {{ $client->bio && in_array('phone calls', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
                                           value="phone calls">
-                                        <label for="checkbox2" class="form-label">
+                                        <label for="checkbox2" class="form-label fs-6 fw-bold">
                                           {{ __('admin.phone calls') }}
                                         </label>
                                       </div>
@@ -405,7 +418,7 @@
                                           name='mentorship_approach[]'
                                           {{ $client->bio && in_array('video calls', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
                                           value="video calls">
-                                        <label for="checkbox3" class="form-label">
+                                        <label for="checkbox3" class="form-label fs-6 fw-bold">
                                           {{ __('admin.video calls') }}
                                         </label>
                                       </div>
@@ -414,7 +427,7 @@
                                           name='mentorship_approach[]'
                                           {{ $client->bio && in_array('in-person meetings', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
                                           value="in-person meetings">
-                                        <label for="checkbox4" class="form-label">
+                                        <label for="checkbox4" class="form-label fs-6 fw-bold">
                                           {{ __('admin.in-person meetings') }}
                                         </label>
                                       </div>
@@ -455,7 +468,7 @@
                 {!! csrf_field() !!}
                 <div class="row">
                   {{-- <div class="mb-6 col-md-6 form-password-toggle">
-                    <label class="form-label" for="currentPassword">Current Password</label>
+                    <label class="form-label fs-6 fw-bold" for="currentPassword">Current Password</label>
                     <div class="input-group input-group-merge">
                       <input class="form-control" type="password" name="currentPassword" id="currentPassword"
                         placeholder="Current password" />
@@ -465,7 +478,7 @@
                 </div>
                 <div class="row">
                   <div class="mb-6 col-md-6 form-password-toggle">
-                    <label class="form-label" for="password">{{ __('admin.Password') }}
+                    <label class="form-label fs-6 fw-bold" for="password">{{ __('admin.Password') }}
                     </label>
                     <div class="input-group input-group-merge">
                       <input type="password" class="form-control" id="password"
@@ -475,7 +488,7 @@
                   </div>
 
                   <div class="mb-6 col-md-6 form-password-toggle">
-                    <label class="form-label" for="password-confirm">{{ __('admin.Confirm') }}</label>
+                    <label class="form-label fs-6 fw-bold" for="password-confirm">{{ __('admin.Confirm') }}</label>
                     <div class="input-group input-group-merge">
                       <input type="password" class="form-control" id="password-confirm"
                         placeholder="{{ __('admin.Password') }}" name="password_confirmation" required
@@ -551,18 +564,19 @@
 
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-
+  @stop
+  
+  @section('pagescripts')
   <!-- Page JS -->
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
-@stop
-
-@section('pagescripts')
   <script>
     const accountButton = document.getElementById('accountButton');
     const securityBtn = document.getElementById('securityBtn');
