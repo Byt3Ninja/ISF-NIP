@@ -190,7 +190,14 @@
                         class="border border-light align-items-center justify-content-center d-none d-md-flex h-100"
                         style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
                       >
-                      @php
+
+                      <img src="{{ Storage::disk('public_uploads')->url($cycle->organization->image_url) }}" 
+                      alt="{{ $cycle->organization->name_en ?? 'Organization Logo' }}" 
+                      class="img-fluid" 
+                      style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                     />
+                    
+                      {{-- @php
                           $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME);
                       @endphp
 
@@ -199,7 +206,7 @@
                             alt="Logo"
                             class="img-fluid"
                             style="max-width: 100%; max-height: 100%; object-fit: contain;"
-                        />
+                        /> --}}
                       </div>
                       </div>
                       <div class="d-flex flex-column justify-content-between" style="flex: 1;">
