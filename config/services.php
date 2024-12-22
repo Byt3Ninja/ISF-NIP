@@ -51,9 +51,9 @@ return [
         'redirect' => config('broadcasting.connections.pusher.MICROSOFT_REDIRECT_URI'),
     ],
     'linkedin' => [
-    'client_id' => env('LINKEDIN_CLIENT_ID'),
-    'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
-    'redirect' => env('LINKEDIN_REDIRECT_URI'),
+    'client_id' => config('services.linkedin.client_id'),
+    'client_secret' => config('services.linkedin.client_secret'),
+    'redirect' => config('services.linkedin.redirect'),
     ],
 
 ];

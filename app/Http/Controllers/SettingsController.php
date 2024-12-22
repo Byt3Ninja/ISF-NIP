@@ -545,6 +545,11 @@ public function update_settingsLogin(Request $request){
     $GOOGLE_CLIENT_ID = $request->input('GOOGLE_CLIENT_ID');
     $GOOGLE_CLIENT_SECRET = $request->input('GOOGLE_CLIENT_SECRET');
     $GOOGLE_REDIRECT = $request->input('GOOGLE_REDIRECT');
+
+    $LINKEDIN_CLIENT_ID = $request->input('LINKEDIN_CLIENT_ID');
+    $LINKEDIN_CLIENT_SECRET = $request->input('LINKEDIN_CLIENT_SECRET');
+    $LINKEDIN_REDIRECT_URI = $request->input('LINKEDIN_REDIRECT_URI');
+
     $VFEmail = $request->input('VerficationEmail');
     if($request->VerficationEmail == 'on'){
         $VFEmail1 = '1';
@@ -557,6 +562,11 @@ public function update_settingsLogin(Request $request){
         $updateSittings->GOOGLE_CLIENT_ID = $GOOGLE_CLIENT_ID;
         $updateSittings->GOOGLE_CLIENT_SECRET = $GOOGLE_CLIENT_SECRET;
         $updateSittings->GOOGLE_REDIRECT = $GOOGLE_REDIRECT;
+
+        $updateSittings->LINKEDIN_CLIENT_ID = $LINKEDIN_CLIENT_ID;
+        $updateSittings->LINKEDIN_CLIENT_SECRET = $LINKEDIN_CLIENT_SECRET;
+        $updateSittings->LINKEDIN_REDIRECT_URI = $LINKEDIN_REDIRECT_URI;
+
         $updateSittings->VFEmail = $VFEmail1;
         $updateSittings->save();
 

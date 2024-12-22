@@ -226,16 +226,16 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between mb-2">
                   <h4 class="text-primary mb-0">{{ $program->title }}</h4>
-                  <a href="#" class="btn btn-primary">
+                  {{-- <a href="#" class="btn btn-primary">
                     <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
-                  </a>
+                  </a> --}}
                 </div>
-                <div class="d-flex justify-content-end mb-2">
+                {{-- <div class="d-flex justify-content-end mb-2">
                   <div class="btn btn-label-light rounded-pill px-2 h-px-30">
                     <img src="/icons/star.svg" width="17" height="17" class="me-1" />
                     <span class="text-warning fw-bold">4.5</span>
                   </div>
-                </div>
+                </div> --}}
                 <div class="d-flex justify-content-between mb-4">
                   <h5 class="mb-0">{{ $program->organization['name_' . $l] }}</h5>
                   
@@ -252,57 +252,21 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         @endif
                 </div>
                 <div class="row border radius-15 py-3 mb-3">
-                  <div class="col-md-3">
-                    @foreach ($orgCountList->slice(0, 2) as $item)
-                    <div class="col-12 mb-2">
-                      <div class="d-flex align-items-center">
+                  @foreach ($orgCountList as $item)
+                    <div class="col-md-3 mb-2">
+                      <div class="d-flex flex-nowrap shrink align-items-center">
                         <div class="badge bg-label-{{ $item['color'] }} me-2 p-2">
                           <i class="ti ti-{{ $item['icon'] }} text-{{ $item['color'] }} ti-24px"></i>
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex flex-nowrap align-items-center">
                           <span class="me-2 fw-semibold text-capitalize ">{{ $item['label'] }}</span>
-                          <small class="bg-light text-secondary py-1 px-2 rounded-pill commanums">
+                          <small class="text-nowrap bg-light text-secondary py-1 px-2 rounded-pill commanums">
                             {{ $item['count'] }}
                           </small>
                         </div>
                       </div>
                     </div>
-                    @endforeach
-                  </div>
-                  <div class="col-md-4">
-                    @foreach ($orgCountList->slice(2, 4) as $item)
-                    <div class="col-12 mb-2">
-                      <div class="d-flex align-items-center">
-                        <div class="badge bg-label-{{ $item['color'] }} me-2 p-2">
-                          <i class="ti ti-{{ $item['icon'] }} text-{{ $item['color'] }} ti-24px"></i>
-                        </div>
-                        <div class="d-flex align-items-center">
-                          <span class="me-2 fw-semibold text-capitalize">{{ $item['label'] }}</span>
-                          <small class="bg-light text-secondary py-1 px-2 rounded-pill commanums">
-                            {{ $item['count'] }}
-                          </small>
-                        </div>
-                      </div>
-                    </div>
-                    @endforeach
-                  </div>
-                  <div class="col-md-5">
-                    @foreach ($orgCountList->slice(6, 10) as $item)
-                    <div class="col-12 mb-2">
-                      <div class="d-flex align-items-center">
-                        <div class="badge bg-label-{{ $item['color'] }} me-2 p-2">
-                          <i class="ti ti-{{ $item['icon'] }} text-{{ $item['color'] }} ti-24px"></i>
-                        </div>
-                        <div class="d-flex align-items-center">
-                          <span class="me-2 fw-semibold text-capitalize">{{ $item['label'] }}</span>
-                          <small class="bg-light text-secondary py-1 px-2 rounded-pill commanums">
-                            {{ $item['count'] }}
-                          </small>
-                        </div>
-                      </div>
-                    </div>
-                    @endforeach
-                  </div>
+                  @endforeach
                 </div>
                 <div class="row">
                   <div class="col-md-9">
@@ -332,7 +296,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-message text-primary ti-20px me-2"></i>
                         <h6 class="mb-0">{{__('admin.Description')}}</span>
                       </div>
-                      <div class="d-flex flex-wrap align-items-center px-4" style="width: 85%;">
+                      <div class="d-flex flex-wrap align-items-center ps-7">
                         <p class="text-muted">
                           @if(!empty($program->description))
                               {{ $program->description }}
@@ -343,17 +307,17 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       </div>
                     </div>
                   </div>
-                  <div class="col-md-3 mt-6">
+                  <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
-                      <div class="d-flex flex-md-column gap-2" style="width: fit-content;">
-                        <h6 class="mb-1 text-center">{{__('admin.Duration')}}</h6>
+                      <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
+                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $program->start->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $program->start->format('Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $program->end->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $program->end->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -519,7 +483,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-building-skyscraper text-primary ti-24px"></i>
                     </div>
                     <div class="d-flex flex-column align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Startups') }}</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Startups') }}</span>
                       <small>{{ $totalcompanystips }}</small>
                     </div>
                   </div>
@@ -528,33 +492,33 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-9">
                     {{-- <div class="d-flex align-items-center">
                       <i class="ti ti-notes text-primary ti-20px me-2"></i>
-                      <div class="px-4 py-1 bg-light text-black rounded-pill" style="max-width: 85%;">
+                      <div class="px-4 py-1 bg-light text-dark rounded-pill" style="max-width: 85%;">
                         Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias consequatur.
                       </div>
                     </div> --}}
                     <div class="d-flex flex-column mt-3">
-                      <div class="d-flex align-items-center my-2">
-                        <i class="ti ti-message text-primary ti-20px me-2"></i>
-                        <h6 class="mb-0">{{__('admin.Description')}}</span>
-                      </div>
                       @if($step->description != '')
-                      <div class="d-flex flex-wrap px-4 py-1 bg-light text-black rounded-pill" style="max-width: 85%;">
-                        {{ $step->description }}
-                      </div>
+                        <div class="d-flex align-items-center my-2">
+                          <i class="ti ti-message text-primary ti-20px me-2"></i>
+                          <h6 class="mb-0">{{__('admin.Description')}}</span>
+                        </div>
+                        <div class="d-flex flex-wrap px-4 py-1 bg-light text-dark rounded-pill" style="max-width: 85%;">
+                          {{ $step->description }}
+                        </div>
                       @endif
                     </div>
                   </div>
-                  <div class="col-md-3 mt-6">
+                  <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
-                      <div class="d-flex flex-md-column gap-2" style="width: fit-content;">
-                        <h6 class="mb-1 text-center">{{__('admin.Duration')}}</h6>
+                      <div class="d-flex justify-content-between flex-md-column gap-1" style="width: fit-content;">
+                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -580,8 +544,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   </a>
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
-                    <a href="#" class="btn btn-primary">
+                    <a href="/dashboard/screening/results/{{ $step->id }}" class="btn btn-primary">
                       <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
+                    </a>
+                    <a href="/dashboard/{{ $step->id }}/screening" class="btn btn-primary">
+                      <i class="ti ti-settings me-2"></i> {{ __('admin.Manage') }}
                     </a>
                     <div class="mx-2 position-relative">
                       <div class="dropdown"></div>
@@ -618,7 +585,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-gavel text-warning ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Judgers') }}</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Judgers') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $judges->count() }}
                       </small>
@@ -630,21 +597,36 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-building-skyscraper text-primary ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Startups') }}</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Startups') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $TotalscreenStepsIds }}
                       </small>
                     </div>
                   </div>
-                  
+                  @php
+                  $companys = \App\Company::where('step', $step->id)->get();
+                  $totalfiltration = 0;
+                  $totalfiltrationPinding = 0;
+                  $totalfiltrationDone = 0;
+
+                  foreach ($companys as $key => $company) {
+                    
+                    $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
+                    $totalfiltrationPinding = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '=', '{}')->count();
+                    $totalfiltrationDone = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '!=', '{}')->count();
+                    
+                  }
+                    // $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $step->id)->count();
+                  @endphp
+                
                   <div class="d-flex align-items-center">
                     <div class="badge bg-label-warning me-2 p-2">
                       <i class="ti ti-transform text-warning ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">filtration</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Filtration') }} </span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $totalfiltration }}
                       </small>
                     </div>
                   </div>
@@ -654,9 +636,9 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-rotate-clockwise-2 text-info ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">filtration pending</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Filtration_pending')  }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $totalfiltrationPinding }}
                       </small>
                     </div>
                   </div>
@@ -666,33 +648,34 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-checkbox text-success ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">filtration done</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Filtration_done') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        5
+                        {{ $totalfiltrationDone }}
                       </small>
                     </div>
                   </div>
                 </div>
-                <div class="row">
-                  <div class="col-8 col-md-9">
-                    <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="d-flex justify-content-between w-100">
+                  <div class="d-flex align-items-center gap-3 mb-3">
+                    @if (count($judges) > 0)
                       <div class="d-flex align-items-center">
                         <i class="ti ti-gavel text-primary ti-24px me-2"></i>
                         <h6 class="mb-0">{{ __('admin.Judgers') }}</span>
                       </div>
-                      {{-- <small class="badge bg-primary fw-normal"> Assign one to all users </small> --}}
-                    </div>
+                      @endif
                   </div>
-                  <div class="col-4 col-md-3">
-                    {{-- <a id="private-link" href="#" class="d-flex align-items-center text-nowrap">
-                      {{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                    </a> --}}
-                    <form action="/dashboard/programlist/Email" method="post" >
+                  <div class="ms-auto">
+                    <form action="/dashboard/programlist/Email" method="post" id="myForm">
                       @csrf
                       <input type="hidden" value="{{ $step->id }}" name="step">
-                      <button id="private-link" type="submit" class="btn btn-transparent text-nowrap">{{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i></button>
+                      <a id="private-link" role="button" onclick="document.getElementById('myForm').submit(); return false;" class="text-nowrap fw-semibold">
+                        {{ __('cycles.Notify them') }}
+                        <i class="ti ti-circle-check text-success ti-24px"></i>
+                      </a>
                     </form>
                   </div>
+                </div>
+                <div class="row">
                   <div class="col-md-9">
                     <div class="d-flex flex-column">
                       <div class="d-flex flex-wrap gap-1">
@@ -710,29 +693,35 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         @endforeach
                       </div>
                     </div>
-                    <div class="d-flex flex-column mt-3">
-                      <div class="d-flex align-items-center my-2">
-                        <i class="ti ti-message text-primary ti-20px me-2"></i>
-                        <h6 class="mb-0">{{__('admin.Description')}}</span>
-                      </div>
-                      <div class="d-flex flex-wrap align-items-center px-4" style="width: 85%;">
-                        <p class="text-muted">
-                          {{ $step->description }}
-                        </p>
-                      </div>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-md-9">
+                    <div class="d-flex flex-column">
+                      @if(!empty($step->description))
+                        <div class="d-flex align-items-center mb-1">
+                          <i class="ti ti-message text-primary ti-20px me-2"></i>
+                          <h6 class="mb-0">{{__('admin.Description')}}</span>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center ps-7">
+                          <p class="text-muted">
+                            {{ $step->description }}
+                          </p>
+                        </div>
+                      @endif
                     </div>
                   </div>
-                  <div class="col-md-3 mt-6">
+                  <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
-                      <div class="d-flex flex-md-column gap-2" style="width: fit-content;">
-                        <h6 class="mb-1 text-center">{{__('admin.Duration')}}</h6>
+                      <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
+                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -799,18 +788,18 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0 text-nowrap">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                      <a id="mentors" href="/dashboard/mentorship/sessions" class="btn btn-primary">
+                      <a id="mentors" href="/dashboard/mentorship/assign/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-user me-2"></i> {{ __('admin.Mentors') }}
                       </a>
-                      <a id="manage" href="/dashboard/mentorship/assign/{{ $step->cycle_id }}" class="btn btn-primary">
+                      <a id="manage" href="/dashboard/mentorship/view/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-settings me-2"></i> {{ __('admin.Manage') }}
                       </a>
-                      <a id="sessions" href="/dashboard/training/sessions/{{ $step->id }}" class="btn btn-primary">
+                      <a id="sessions" href="/dashboard/mentorship/sessions?show=all&cycle_id={{ $step->cycle_id }}" class="btn btn-primary">
                         <i class="ti ti-cast me-2"></i> {{ __('admin.Sessions') }}
                       </a>
-                      <a id="results" href="#" class="btn btn-primary">
+                      {{-- <a id="results" href="#" class="btn btn-primary">
                         <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
-                      </a>
+                      </a> --}}
                     </div>
                     <div class="mx-2 position-relative">
                       <div class="dropdown"></div>
@@ -849,7 +838,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-users text-success ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Mentors') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Mentors') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $mentoreCountRequest }}
                         </small>
@@ -863,7 +852,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-clock text-danger ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Mentorship_sessions_duration_(hours)') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Mentorship_sessions_duration_(hours)') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $totalsessionsMen }}
                         </small>
@@ -877,7 +866,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-check text-warning ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Mentorship_done_requests_count') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Mentorship_done_requests_count') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $totalsessionsDoneMen }}
                         </small>
@@ -891,7 +880,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-message text-info ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.All requests') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.All requests') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $mentorship_requests }}
                         </small>
@@ -905,7 +894,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-plus text-light ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.New requests only') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.New requests only') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $new_requests }}
                         </small>
@@ -919,7 +908,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-checkbox text-dark ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.approved requests') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.approved requests') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $approved_requests }}
                         </small>
@@ -933,7 +922,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-trash-x text-primary ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.disapproved requests') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.disapproved requests') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $disapproved_requests }}
                         </small>
@@ -947,7 +936,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-rotate-clockwise-2 text-secondary ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">mentorship pending requests count</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 dark-black">mentorship pending requests count</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           5
                         </small>
@@ -981,27 +970,29 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         @endforeach
                       </div>
                     </div>
-                    <div class="d-flex flex-column mt-3">
-                      <div class="d-flex align-items-center my-2">
-                        <i class="ti ti-message text-primary ti-20px me-2"></i>
-                        <h6 class="mb-0">{{__('admin.Description')}}</span>
+                    @if (!empty($step->description))
+                      <div class="d-flex flex-column mt-3">
+                        <div class="d-flex align-items-center my-b-1">
+                          <i class="ti ti-message text-primary ti-20px me-2"></i>
+                          <h6 class="mb-0">{{__('admin.Description')}}</span>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center ps-7">
+                          <p class="text-muted">{{ $step->description }}</p>
+                        </div>
                       </div>
-                      <div class="d-flex flex-wrap align-items-center px-4" style="width: 85%;">
-                        <p class="text-muted">{{ $step->description }}</p>
-                      </div>
-                    </div>
+                    @endif
                   </div>
-                  <div class="col-md-3 mt-6">
+                  <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
-                      <div class="d-flex flex-md-column gap-2" style="width: fit-content;">
-                        <h6 class="mb-1 text-center">{{__('admin.Duration')}}</h6>
+                      <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
+                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1073,7 +1064,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-user-screen text-light ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Total_sessions') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Total_sessions') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $totalTrainingSessionCount }}
                         </small>
@@ -1087,7 +1078,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-clock text-success ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Training sessions duration (hours)') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Training sessions duration (hours)') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $totaldurationTr }}
                         </small>
@@ -1101,7 +1092,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-device-desktop text-primary ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.sessions') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.sessions') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $totalsessions }}
                         </small>
@@ -1115,7 +1106,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-world text-warning ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.online') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.online') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $totalonline }}
                         </small>
@@ -1129,7 +1120,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <i class="ti ti-home-2 text-info ti-24px"></i>
                       </div>
                       <div class="d-flex align-items-center">
-                        <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('cycles.offline') }}</span>
+                        <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('cycles.offline') }}</span>
                         <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                           {{ $totaloffline }}
                         </small>
@@ -1140,27 +1131,29 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 </div>
                 <div class="row">
                   <div class="col-md-9">
+                    @if (!empty($step->description))
                     <div class="d-flex flex-column mt-3">
-                      <div class="d-flex align-items-center my-2">
+                      <div class="d-flex align-items-center mb-1">
                         <i class="ti ti-message text-primary ti-20px me-2"></i>
                         <h6 class="mb-0">{{__('admin.Description')}}</span>
                       </div>
-                      <div class="d-flex flex-wrap align-items-center px-4" style="width: 85%;">
+                      <div class="d-flex flex-wrap align-items-center ps-7">
                         <p class="text-muted">{{ $step->description }}</p>
                       </div>
                     </div>
+                    @endif
                   </div>
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
-                      <div class="d-flex flex-md-column gap-2" style="width: fit-content;">
-                        <h6 class="mb-1 text-center">{{__('admin.Duration')}}</h6>
+                      <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
+                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1241,7 +1234,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-gavel text-warning ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Judgers') }}</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Judgers') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $judgesDetails->count() }}
                       </small>
@@ -1253,7 +1246,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-building-skyscraper text-primary ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Startups') }}</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Startups') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $totalDistinctCompanies }}
                       </small>
@@ -1265,7 +1258,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-presentation text-danger ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Evaluation') }}evaluation</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Evaluation') }}evaluation</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $answers }}
                       </small>
@@ -1277,7 +1270,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-rotate-clockwise-2 text-info ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Traditional_Evaluation_pending') }} </span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Traditional_Evaluation_pending') }} </span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $answerspinding }}
                       </small>
@@ -1289,43 +1282,35 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-checkbox text-success ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-black">{{ __('admin.Evaluation_done') }}</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Evaluation_done') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $answersdone }}
                       </small>
                     </div>
                   </div>
                 </div>
-                <div class="row">
-                  {{-- <div class="col-12 mb-3">
-                    <div class="d-flex align-items-center">
-                      <i class="ti ti-notes text-primary ti-20px me-2"></i>
-                      <div class="px-4 py-1 bg-light text-black rounded-pill" style="max-width: 85%;">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias consequatur.
-                      </div>
-                    </div>
-                  </div> --}}
-                  <div class="col-8 col-md-9">
-                    <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="d-flex justify-content-between w-100">
+                  <div class="d-flex align-items-center gap-3 mb-3">
+                    @if (count($judgesDetails) > 0)
                       <div class="d-flex align-items-center">
                         <i class="ti ti-gavel text-primary ti-24px me-2"></i>
                         <h6 class="mb-0">{{ __('admin.Judgers') }}</span>
                       </div>
-                    </div>
+                      @endif
                   </div>
-                  <div class="col-4 col-md-3">
-                    {{-- <a id="private-link" href="#" class="d-flex align-items-center text-nowrap">
-                      {{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                    </a> --}}
-                    <form action="/dashboard/programlist/Email" method="post" >
+                  <div class="ms-auto">
+                    <form action="/dashboard/programlist/Email" method="post" id="myForm">
                       @csrf
                       <input type="hidden" value="{{ $step->id }}" name="step">
-                      <button id="private-link" type="submit" class="btn-btn-transparent text-nowrap">{{ __('cycles.Notify them') }} <i class="ti ti-circle-check ms-2 text-success ti-24px"></i></button>
+                      <a id="private-link" role="button" onclick="document.getElementById('myForm').submit(); return false;" class="text-nowrap fw-semibold">
+                        {{ __('cycles.Notify them') }}
+                        <i class="ti ti-circle-check text-success ti-24px"></i>
+                      </a>
                     </form>
-
-
                   </div>
-                  <div class="col-md-9">
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-10">
                     <div class="d-flex flex-column">
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($judgesDetails as $judge)
@@ -1342,30 +1327,29 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         @endforeach
                       </div>
                     </div>
-                    <div class="d-flex flex-column mt-3">
-                      <div class="d-flex align-items-center my-2">
-                        <i class="ti ti-message text-primary ti-20px me-2"></i>
-                        <h6 class="mb-0">{{__('admin.Description')}}</span>
+                    @if (empty($step->description))
+                      <div class="d-flex flex-column">
+                        <div class="d-flex align-items-center mb-1">
+                          <i class="ti ti-message text-primary ti-20px me-2"></i>
+                          <h6 class="mb-0">{{__('admin.Description')}}</span>
+                        </div>
+                        <div class="d-flex flex-wrap ps-7 text-muted">
+                          {{ $step->description }} Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem perspiciatis ab eaque repudiandae officia consequatur nobis. Provident, adipisci aliquid magnam ex beatae culpa consequatur! Numquam repudiandae dolore vero. Ea, rerum?
+                        </div>
                       </div>
-                      
-                          <div class="d-flex flex-wrap px-4 py-1 bg-light text-black rounded-pill" style="max-width: 85%;">
-                            {{ $step->description }}
-                          </div>
-                        
-                      
-                    </div>
+                    @endif
                   </div>
-                  <div class="col-md-3 mt-6">
+                  <div class="col-md-2 mt-4 mt-md-0">
                     <div class="d-flex align-items-end justify-content-end w-100">
-                      <div class="d-flex flex-md-column gap-2" style="width: fit-content;">
-                        <h6 class="mb-1 text-center">{{__('admin.Duration')}}</h6>
+                      <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
+                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->from->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px" style="color: blue;"></i>
-                          <span class="fw-bold text-black mx-2">{{ $step->to->format('Y-m-d') }}</span>
+                          <i class="ti ti-calendar-clock ti-20px"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $step->to->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
