@@ -196,7 +196,7 @@
                       class="img-fluid" 
                       style="max-width: 100%; max-height: 100%; object-fit: contain;"
                      /> --}}
-                     @if (!is_null(auth()->user()->organization))
+                     @if (!is_null($cycle->organization))
                      @php
                      $imageUrl = $cycle->organization->image_url;
 
