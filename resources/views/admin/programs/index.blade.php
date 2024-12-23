@@ -196,10 +196,16 @@
                       class="img-fluid" 
                       style="max-width: 100%; max-height: 100%; object-fit: contain;"
                      /> --}}
-                    
-                      @php
-                          $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME);
-                      @endphp
+                     @if (!is_null(auth()->user()->organization))
+                     @php
+                     $imageUrl = $cycle->organization->image_url;
+
+                      // استخراج المسار من الرابط
+                      $imagePath = parse_url($imageUrl, PHP_URL_PATH);
+
+                      // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
+                      $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
+                 @endphp
 
                         <img 
                             src="{{ asset('dashboard/LFMGet/' . $fileN) }}"
@@ -207,13 +213,25 @@
                             class="img-fluid"
                             style="max-width: 100%; max-height: 100%; object-fit: contain;"
                         />
+                        @else
+                        @php $setting = \App\Settings::where('id', 1)->first(); @endphp
+                        @if(!empty($setting->Logo))
+                          <img src="/images/logo/{{ $setting->Logo }}" alt="Logo"
+                          class="img-fluid"
+                          style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        @else
+                          <img src="/images/background/logo.png" alt="Logo"
+                          class="img-fluid"
+                          style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                          @endif
+                        @endif
                       </div>
                       </div>
                       <div class="d-flex flex-column justify-content-between" style="flex: 1;">
                         <!-- Program Title -->
                         <div class="d-flex justify-content-between">
                           <a href="/dashboard/programlist/show/{{$cycle->id}}" class="text-primary fs-5 fw-bold">
-                            {{ $cycle->title }}
+                            {{ $cycle->title}}
                           </a>
                           {{-- <div 
                             class="badge d-flex align-items-center justify-content-center

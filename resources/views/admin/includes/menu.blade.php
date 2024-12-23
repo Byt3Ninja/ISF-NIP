@@ -13,13 +13,24 @@
     <a href="/dashboard" class="app-brand-link">
       
       @if (!is_null(auth()->user()->organization))
-      @php
-    $fileN = pathinfo(auth()->user()->organization->image_url, PATHINFO_BASENAME);
-    @endphp
+    @php
+    $imageUrl = auth()->user()->organization->image_url;
+
+     // استخراج المسار من الرابط
+     $imagePath = parse_url($imageUrl, PHP_URL_PATH);
+
+     // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
+     $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
+@endphp
           <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar" class="logo-img">
          
       @else
+      @if(!empty($setting->Logo))
           <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
+          @else
+            <img src="/images/background/logo.png" alt="avatar" class="logo-img">
+          @endif
+          
       @endif
   </a>
 
