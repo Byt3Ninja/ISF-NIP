@@ -185,7 +185,7 @@ $passwordRules = [
                     <div class="mb-4 col-md-6 d-grid">
                       <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
                       <input id="phone" type="tel" class="form-control" placeholder="{{ __('auth.Phone') }}"
-                        value="{{ old('phone') }}" name="phone" autocomplete="phone" required />
+                        value="{{ $client->phone }}" name="phone" autocomplete="phone" required />
                         <span class="text-danger" id="phone-error" style="display: none;"></span>
                     </div>
                     <div class="mb-4 col-md-6">
