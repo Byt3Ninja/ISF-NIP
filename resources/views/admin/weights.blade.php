@@ -140,7 +140,7 @@
                                                     </select>
                                                   </div>
                         
-                                                  <div class="mb-6 width49">
+                                                  {{-- <div class="mb-6 width49">
                                                     <label class="form-label fs-6">
                                                       {{ __('admin.Question') }}
                                                       
@@ -153,7 +153,7 @@
                                                         <option value="{{ $question->id }}"  {{ $question->id == $weight->question_id ? 'selected' : '' }}  >{{ $question->question }}</option>
                                                       @endforeach
                                                     </select>
-                                                  </div>
+                                                  </div> --}}
                         
                         
                                                   <div class="mb-6 width49">
@@ -316,7 +316,7 @@
                             </select>
                           </div>
 
-                          <div class="mb-6 width49">
+                          {{-- <div class="mb-6 width49">
                             <label class="form-label fs-6">
                               {{ __('admin.Question') }}
                               
@@ -329,7 +329,7 @@
                                 <option value="{{ $question->id }}"  >{{ $question->question }}</option>
                               @endforeach
                             </select>
-                          </div>
+                          </div> --}}
 
 
                           <div class="mb-6 width49">

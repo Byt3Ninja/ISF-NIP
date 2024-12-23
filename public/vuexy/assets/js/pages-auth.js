@@ -4,7 +4,7 @@
 
 'use strict';
 
-const lang = document.documentElement.lang;
+// const lang = document.documentElement.lang;
 
 const translations = {
   en: {
@@ -15,16 +15,14 @@ const translations = {
     first_name_en: {
       notEmpty: 'Please enter first name',
       stringOnly: 'This field accepts English or Arabic letters only.'
-      // stringLength: 'First name must be more than 6 characters'
     },
     last_name_en: {
       notEmpty: 'Please enter last name',
       stringOnly: 'This field accepts English or Arabic letters only.'
-      // stringLength: 'Last name must be more than 6 characters'
     },
     phone: {
       notEmpty: 'Please enter your phone',
-      phone: 'Please enter valid phone number'
+      phone: 'Phone should be consist of numbers only'
     },
     email: {
       notEmpty: 'Please enter your email',
@@ -37,12 +35,13 @@ const translations = {
     password: {
       notEmpty: 'Please enter your password',
       stringLength: 'Password must be more than or equal 8 characters',
-      strong: 'Provide a strong password, at least 8 characters long, containing at least one lowercase, one uppercase letter, one digit and one special character'
+      strong: 'Password must be 8-20 characters long, including uppercase, lowercase, numbers, and special characters.'
     },
     password_confirmation: {
       notEmpty: 'Please confirm password',
       identical: 'The password and its confirm are not the same',
-      stringLength: 'Password must be more than or equal 8 characters'
+      stringLength: 'Password must be more than or equal 8 characters',
+      strong: 'Password must be 8-20 characters long, including uppercase, lowercase, numbers, and special characters.'
     },
     terms: {
       notEmpty: 'Please agree terms & conditions'
@@ -52,7 +51,7 @@ const translations = {
     },
     jobTitle: {
       notEmpty: 'Please enter job title',
-      enOnly: 'Please enter job title in English'
+      enOnly: 'Job title accepts english letters only'
     },
     expertise: {
       notEmpty: 'Please select expertise'
@@ -73,16 +72,14 @@ const translations = {
     first_name_en: {
       notEmpty: 'يرجى إدخال الاسم الأول',
       stringOnly: 'هذا الحقل يقبل الحروف الإنجليزية أو العربية فقط'
-      // stringLength: 'يجب أن يكون الاسم الأول أكثر من 6 أحرف'
     },
     last_name_en: {
       notEmpty: 'يرجى إدخال الاسم الأخير',
       stringOnly: 'هذا الحقل يقبل الحروف الإنجليزية أو العربية فقط'
-      // stringLength: 'يجب أن يكون الاسم الأخير أكثر من 6 أحرف'
     },
     phone: {
       notEmpty: 'يرجى إدخال رقم الهاتف',
-      phone: 'يرجى إدخال رقم هاتف صحيح'
+      phone: 'يجب أن يتكون الهاتف من أرقام فقط',
     },
     email: {
       notEmpty: 'يرجى إدخال بريدك الإلكتروني',
@@ -95,12 +92,13 @@ const translations = {
     password: {
       notEmpty: 'يرجى إدخال كلمة المرور الخاصة بك',
       stringLength: 'يجب أن تكون كلمة المرور أكثر من او يساوي 8 أحرف',
-      strong: 'قدم كلمة مرور قوية ، تحتوي على 8 أحرف على الأقل ، تحتوي على حرف صغير واحد على الأقل ، وحرف كبير واحد على الأقل ، ورقم واحد على الأقل وحرف خاص واحد على الأقل'
+      strong: 'كلمة السر يجب أن تكون بين 8-20 حرفًا وتتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
     },
     password_confirmation: {
       notEmpty: 'يرجى تأكيد كلمة المرور',
       identical: 'كلمة المرور وتأكيدها غير متطابقين',
-      stringLength: 'يجب أن تكون كلمة المرور أكثر من او يساوي 8 أحرف'
+      stringLength: 'يجب أن تكون كلمة المرور أكثر من او يساوي 8 أحرف',
+      strong: 'كلمة السر يجب أن تكون بين 8-20 حرفًا وتتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
     },
     terms: {
       notEmpty: 'يرجى الموافقة على الشروط والأحكام'
@@ -125,309 +123,200 @@ const translations = {
   }
 };
 
+function getValidationConfig(lang, isMentor) {
+  const config = {
+    fields: {
+      username: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].username.notEmpty
+          },
+          stringLength: {
+            min: 6,
+            message: translations[lang].username.stringLength
+          }
+        }
+      },
+      first_name_en: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].first_name_en.notEmpty
+          },
+          regexp: {
+            regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
+            message: translations[lang].first_name_en.stringOnly
+          }
+        }
+      },
+      last_name_en: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].last_name_en.notEmpty
+          },
+          regexp: {
+            regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
+            message: translations[lang].last_name_en.stringOnly
+          }
+        }
+      },
+      phone: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].phone.notEmpty
+          },
+          regexp: {
+            regexp: /^[0-9]+$/,
+            message: translations[lang].phone.phone
+          }
+        }
+      },
+      email: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].email.notEmpty
+          },
+          regexp: {
+            regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
+            message: translations[lang].email.emailAddress
+          }
+        }
+      },
+      password: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].password.notEmpty
+          },
+          stringLength: {
+            min: 8,
+            message: translations[lang].password.stringLength
+          },
+          regexp: {
+            regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+            message: translations[lang].password.strong
+          }
+        }
+      },
+      password_confirmation: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].password_confirmation.notEmpty
+          },
+          stringLength: {
+            min: 8,
+            message: translations[lang].password_confirmation.stringLength
+          },
+          regexp: {
+            regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+            message: translations[lang].password_confirmation.strong
+          },
+          identical: {
+            compare: function () {
+              return registerForm.querySelector('[name="password"]').value;
+            },
+            message: translations[lang].password_confirmation.identical
+          }
+        }
+      }
+    },
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        eleValidClass: '',
+        rowSelector: '.mb-6'
+      }),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+      defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+      autoFocus: new FormValidation.plugins.AutoFocus()
+    },
+    init: instance => {
+      instance.on('plugins.message.placed', function (e) {
+        if (e.element.parentElement.classList.contains('input-group')) {
+          e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+        }
+      });
+    }
+  };
+
+  if (isMentor) {
+    config.fields.title_en = {
+      validators: {
+        notEmpty: {
+          message: translations[lang].jobTitle.notEmpty
+        },
+        regexp: {
+          regexp: /^[a-zA-Z\s]*$/i,
+          message: translations[lang].jobTitle.enOnly
+        }
+      }
+    };
+    config.fields.expertise = {
+      validators: {
+        notEmpty: {
+          message: translations[lang].expertise.notEmpty
+        }
+      }
+    };
+    config.fields.userbio = {
+      validators: {
+        notEmpty: {
+          message: translations[lang].bio.notEmpty
+        }
+      }
+    };
+    config.fields.Linkedin = {
+      validators: {
+        notEmpty: {
+          message: translations[lang].linkedin.notEmpty
+        },
+        regexp: {
+          regexp: /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/,
+          message: translations[lang].linkedin.uri
+        }
+      }
+    };
+  }
+
+  return config;
+}
+
 document.addEventListener('DOMContentLoaded', function (e) {
   (function () {
-    const founderForm = document.querySelector('#founderForm');
-    const mentorForm = document.querySelector('#mentorForm');
-
+    const registerForm = document.getElementById('registerForm');
+    const mentorInputsWrapper = document.getElementById('mentorInputsWrapper');
     const mentorRoleRadio = document.getElementById('MentorRole');
     const founderRoleRadio = document.getElementById('FounderRole');
 
-    console.log('mentorRoleRadio', mentorRoleRadio);
-    console.log('founderRoleRadio', founderRoleRadio);
+    let validationInstance;
+    let validationConfig = getValidationConfig(lang, false);
 
-    console.log('mentorForm', mentorForm);
-    console.log('founderForm', founderForm);
+    function initializeValidation(config) {
+      if (validationInstance) {
+        validationInstance.destroy();
+      }
+      validationInstance = FormValidation.formValidation(registerForm, config);
+    }
 
     if (mentorRoleRadio) {
       mentorRoleRadio.addEventListener('change', () => {
-        console.log('mentor changed')
         if (mentorRoleRadio.checked) {
-          mentorForm.style.display = 'block';
-          founderForm.style.display = 'none';
+          validationConfig = getValidationConfig(lang, true);
+          initializeValidation(validationConfig);
+          mentorInputsWrapper.style.display = 'block';
         }
       });
+    }
+
+    if (registerForm && !registerForm.hasAttribute('data-validation-initialized')) {
+      registerForm.setAttribute('data-validation-initialized', 'true');
+      initializeValidation(validationConfig);
     }
 
     if (founderRoleRadio) {
       founderRoleRadio.addEventListener('change', () => {
-        console.log('founder changed')
         if (founderRoleRadio.checked) {
-          founderForm.style.display = 'block';
-          mentorForm.style.display = 'none';
-        }
-      });
-    }
-
-    if (founderForm) {
-      const fv = FormValidation.formValidation(founderForm, {
-        fields: {
-          username: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].username.notEmpty
-              },
-              stringLength: {
-                min: 6,
-                message: translations[lang].username.stringLength
-              }
-            }
-          },
-          first_name_en: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].first_name_en.notEmpty
-              },
-              regexp: {
-                regexp: lang === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
-                message: translations[lang].first_name_en.stringOnly
-              },
-              // stringLength: {
-              //   min: 6,
-              //   message: translations[lang].first_name_en.stringLength
-              // }
-            }
-          },
-          last_name_en: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].last_name_en.notEmpty
-              },
-              regexp: {
-                regexp: lang === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
-                message: translations[lang].last_name_en.stringOnly
-              },
-              // stringLength: {
-              //   min: 6,
-              //   message: translations[lang].last_name_en.stringLength
-              // }
-            }
-          },
-          phone: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].phone.notEmpty
-              },
-              regexp: {
-                regexp: /^[0-9]+$/,
-                message: translations[lang].phone.phone
-              }
-            }
-          },
-          email: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].email.notEmpty
-              },
-              emailAddress: {
-                message: translations[lang].email.emailAddress
-              }
-            }
-          },
-          password: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].password.notEmpty
-              },
-              stringLength: {
-                min: 8,
-                message: translations[lang].password.stringLength
-              },
-              regexp: {
-                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                message: translations[lang].password.strong
-              },
-            }
-          },
-          password_confirmation: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].password_confirmation.notEmpty
-              },
-              identical: {
-                compare: function () {
-                  return formAuthentication.querySelector('[name="password"]').value;
-                },
-                message: translations[lang].password_confirmation.identical
-              },
-              stringLength: {
-                min: 8,
-                message: translations[lang].password_confirmation.stringLength
-              },
-            }
-          },
-        },
-        plugins: {
-          trigger: new FormValidation.plugins.Trigger(),
-          bootstrap5: new FormValidation.plugins.Bootstrap5({
-            eleValidClass: '',
-            rowSelector: '.mb-6'
-          }),
-          submitButton: new FormValidation.plugins.SubmitButton(),
-
-          defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
-          autoFocus: new FormValidation.plugins.AutoFocus()
-        },
-        init: instance => {
-          instance.on('plugins.message.placed', function (e) {
-            if (e.element.parentElement.classList.contains('input-group')) {
-              e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-            }
-          });
-        }
-      });
-    }
-    
-    if (mentorForm) {
-      const fv = FormValidation.formValidation(mentorForm, {
-        fields: {
-          username: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].username.notEmpty
-              },
-              stringLength: {
-                min: 6,
-                message: translations[lang].username.stringLength
-              }
-            }
-          },
-          first_name_en: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].first_name_en.notEmpty
-              },
-              regexp: {
-                regexp: /^[a-zA-Z\s]*$/i,
-                message: translations[lang].first_name_en.stringOnly
-              },
-              // stringLength: {
-              //   min: 6,
-              //   message: translations[lang].first_name_en.stringLength
-              // }
-            }
-          },
-          last_name_en: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].last_name_en.notEmpty
-              },
-              regexp: {
-                regexp: lang === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
-                message: translations[lang].last_name_en.stringOnly
-              },
-              // stringLength: {
-              //   min: 6,
-              //   message: translations[lang].last_name_en.stringLength
-              // }
-            }
-          },
-          phone: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].phone.notEmpty
-              },
-              regexp: {
-                regexp: lang === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
-                message: translations[lang].phone.phone
-              }
-            }
-          },
-          email: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].email.notEmpty
-              },
-              emailAddress: {
-                message: translations[lang].email.emailAddress
-              }
-            }
-          },
-          password: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].password.notEmpty
-              },
-              stringLength: {
-                min: 8,
-                message: translations[lang].password.stringLength
-              },
-              regexp: {
-                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                message: translations[lang].password.strong
-              },
-            }
-          },
-          password_confirmation: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].password_confirmation.notEmpty
-              },
-              identical: {
-                compare: function () {
-                  return formAuthentication.querySelector('[name="password"]').value;
-                },
-                message: translations[lang].password_confirmation.identical
-              },
-              stringLength: {
-                min: 8,
-                message: translations[lang].password_confirmation.stringLength
-              },
-            }
-          },
-          title_en: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].jobTitle.notEmpty
-              },
-              regexp: {
-                regexp: /^[a-zA-Z\s]*$/i,
-                message: translations[lang].jobTitle.enOnly
-              }
-            }
-          },
-          expertise: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].expertise.notEmpty
-              }
-            }
-          },
-          userbio: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].bio.notEmpty
-              }
-            }
-          },
-          Linkedin: {
-            validators: {
-              notEmpty: {
-                message: translations[lang].linkedin.notEmpty
-              },
-              uri: {
-                message: translations[lang].linkedin.uri
-              }
-            }
-          },
-        },
-        plugins: {
-          trigger: new FormValidation.plugins.Trigger(),
-          bootstrap5: new FormValidation.plugins.Bootstrap5({
-            eleValidClass: '',
-            rowSelector: '.mb-6'
-          }),
-          submitButton: new FormValidation.plugins.SubmitButton(),
-
-          defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
-          autoFocus: new FormValidation.plugins.AutoFocus()
-        },
-        init: instance => {
-          instance.on('plugins.message.placed', function (e) {
-            if (e.element.parentElement.classList.contains('input-group')) {
-              e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-            }
-          });
+          validationConfig = getValidationConfig(lang, false);
+          mentorInputsWrapper.style.display = 'none';
+          initializeValidation(validationConfig);
         }
       });
     }

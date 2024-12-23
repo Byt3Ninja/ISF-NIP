@@ -73,47 +73,44 @@
 
   <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>
   <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
- 
 
   <!-- Main Page JS -->
   <!-- End Main JS-->
 
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
   @hasanyrole('Admin|Manager')
-    <!-- Pusher scripts -->
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
       integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-      <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+    <!-- Pusher scripts -->
+    <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/1.11.3/echo.iife.js"></script>
+    <script>
+      const pusherAppKey = "{{ env('MIX_PUSHER_APP_KEY') }}";
+      const pusherCluster = "{{ env('MIX_PUSHER_APP_CLUSTER') }}";
 
-      <script>
-        window.Echo.channel('step-changes')
-          .listen('ChangeStep', (e) => {
-              console.log(`The step has been changed for ${e.company_name} from "${e.last_step}" to "${e.new_step}" by ${e.organization_name}.`);
-          });
+      Pusher.logToConsole = true;
 
-          const pusherAppKey = "{{ env('MIX_PUSHER_APP_KEY') }}";
-          const pusherCluster = "{{ env('MIX_PUSHER_APP_CLUSTER') }}";
+      const pusher = new Pusher(pusherAppKey, {
+        cluster: pusherCluster,
+        forceTLS: true,
+      });
 
-          console.log('pusherAppKey', pusherAppKey);
-          console.log('pusherCluster', pusherCluster);
+      window.Echo = new Echo({
+        broadcaster: 'pusher',
+        key: pusherAppKey,
+        cluster: pusherCluster,
+        forceTLS: true,
+      });
 
-          const pusher = new Pusher(pusherAppKey, {
-            broadcaster: "pusher",
-            key: pusherAppKey,
-            cluster: pusherCluster,
-            forceTLS: true,
-          });
-          
-          // window.Pusher = Pusher;
+      window.Echo.channel('step-changes')
+        .listen('ChangeStep', (e) => {
+          console.log(`The step has been changed for ${e.company_name} from "${e.last_step}" to "${e.new_step}" by ${e.organization_name}.`);
+        });
 
-          // window.Echo = new Echo({
-          //   broadcaster: "pusher",
-          //   key: pusherAppKey,
-          //   cluster: pusherCluster,
-          //   forceTLS: true,
-          // });
-      </script>
-
+      console.log('pusherAppKey', pusherAppKey);
+      console.log('pusherCluster', pusherCluster);
+    </script>
+    <!--/ Pusher scripts -->
 
       {{-- <script>
       $(document).ready(function() {

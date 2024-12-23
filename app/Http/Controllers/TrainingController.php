@@ -888,11 +888,37 @@ class TrainingController extends Controller
         }
     }
 
+    // public function sessionReport(Request $request, $id)
+    // {
+    //     $session = TrainingSession::find($id);
+
+    //     $response = $this->meetingService->getSessionReport($session->zoom_id);
+    //     dd($response);
+
+    //     if ($response['success']) {
+    //         return response()->json(['success' => true, 'data' => $response['data']], 200);
+    //     }
+
+    //     return response()->json(['success' => false, 'message' => $response['message']], 500);
+    // }
+
+
     public function sessionReport(Request $request, $id)
     {
         $session = TrainingSession::find($id);
+        if (!$session || !$session->zoom_id) {
+            return response()->json(['success' => false, 'message' => 'Session not found or missing Zoom ID'], 404);
+        }
 
-        $response = $this->meetingService->getSessionReport($session->zoom_id);
+        $hostResponse = $this->meetingService->getUserIdFromMeeting($session->zoom_id);
+
+        if (!$hostResponse['success']) {
+            return response()->json(['success' => false, 'message' => $hostResponse['message']], 500);
+        }
+
+        $hostId = $hostResponse['user_id'];
+
+        $response = $this->meetingService->getSessionReport($hostId,$session->zoom_id);
         dd($response);
 
         if ($response['success']) {

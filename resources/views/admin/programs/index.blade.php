@@ -89,7 +89,7 @@
               <button
                 class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;" onclick="DoChange(2)">
                   <span class="mx-2">{{__('admin.New Program')}}</span>
-                  <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
+                  <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
               <button 
                 class="btn btn-primary d-none d-md-inline-block"
@@ -97,7 +97,7 @@
                  onclick="DoChange(2)"
               >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
-                <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
+                <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
             </div>
           </div>
@@ -146,7 +146,7 @@
               <!-- Add New Program Button -->
               <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;">
                 <span class="mx-2">{{__('admin.New Program')}}</span>
-                <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
+                <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
             </div>
           @else
@@ -190,7 +190,14 @@
                         class="border border-light align-items-center justify-content-center d-none d-md-flex h-100"
                         style="width: 180px; height: 180px; border-radius: 20px; overflow: hidden;"
                       >
-                      @php
+
+                      <img src="{{ Storage::disk('public_uploads')->url($cycle->organization->image_url) }}" 
+                      alt="{{ $cycle->organization->name_en ?? 'Organization Logo' }}" 
+                      class="img-fluid" 
+                      style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                     />
+                    
+                      {{-- @php
                           $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME);
                       @endphp
 
@@ -199,7 +206,7 @@
                             alt="Logo"
                             class="img-fluid"
                             style="max-width: 100%; max-height: 100%; object-fit: contain;"
-                        />
+                        /> --}}
                       </div>
                       </div>
                       <div class="d-flex flex-column justify-content-between" style="flex: 1;">

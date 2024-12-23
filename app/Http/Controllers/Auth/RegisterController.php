@@ -95,7 +95,7 @@ class RegisterController extends Controller
 
         // معالجة الخبرات كمصفوفة
         $expertises = [];
-        foreach ($data['Expertise'] as $expertiseId) {
+        foreach ($data['expertise'] as $expertiseId) {
             $expertises[] = [
                 'expertise_id' => $expertiseId,
                 'mentor_id' => $user->id
@@ -131,7 +131,7 @@ $user = User::create([
 
         // معالجة الخبرات كمصفوفة
         $expertises = [];
-        foreach ($data['Expertise'] as $expertiseId) {
+        foreach ($data['expertise'] as $expertiseId) {
             $expertises[] = [
                 'expertise_id' => $expertiseId,
                 'mentor_id' => $user->id

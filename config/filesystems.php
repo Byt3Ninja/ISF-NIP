@@ -52,12 +52,14 @@ return [
         'public_uploads' => [
             'driver' => 'local',
             'root'   => public_path('191014'),
+            'url' => env('APP_URL') . '/191014',
+            'visibility' => 'public',
         ],
 
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
         ],
         'logo_uploads' => [
@@ -75,19 +77,19 @@ return [
         'UsersDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads'),
-            'url' => env('APP_URL').'/dashboard/uploads',
+            'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
         ],
         'TrainingDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/training'),
-            'url' => env('APP_URL').'/dashboard/training',
+            'url' => env('APP_URL') . '/dashboard/training',
             'visibility' => 'private',
         ],
         'PrivateDisk' => [
             'driver' => 'local',
             'root' => storage_path('app/users'),
-            'url' => env('APP_URL').'/dashboard/private',
+            'url' => env('APP_URL') . '/dashboard/private',
             'visibility' => 'private',
         ],
         's3' => [
@@ -101,19 +103,19 @@ return [
         'UsersLFM' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads/files'),
-            'url' => env('APP_URL').'/dashboard/uploads',
+            'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
         ],
         'UsersLFMPublic' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads/files/1'),
-            'url' => env('APP_URL').'/dashboard/uploads',
+            'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
         ],
         'mentorship_tasks' => [
             'driver' => 'local',
             'root' => storage_path('app/mentorship_tasks'),
-            'url' => env('APP_URL').'/dashboard/uploads',
+            'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
         ]
 
