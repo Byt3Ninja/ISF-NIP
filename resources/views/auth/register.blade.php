@@ -232,7 +232,6 @@
 
 
         
-          <input type="hidden" name="role" value="">
           <div class="card card-body shadow-none">
             <div class="row">
               <div class="col-12 mb-3">
@@ -299,7 +298,7 @@
                 <div class="col-12 mb-3">
                   <label class="form-label fs-6 fw-bold" for="expertise">{{ __('admin.Industry Expertise') }}</label>
                   <div class="form-group">
-                    <select name="expertise" class="select2 form-select" multiple="multiple" id="expertise"
+                    <select name="expertise[]" class="select2 form-select" multiple="multiple" id="expertise"
                       data-placeholder="{{__('admin.Select Expertise')}}" value="" required>
                       @php
                       $expertises = App\Expertise::where('parent_id', null)->get();

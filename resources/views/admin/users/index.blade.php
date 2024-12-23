@@ -103,7 +103,7 @@
                         <td style="font-size: small;">{{ $user->phone }}</td>
                         <td style="font-size: small;">{{ __('admin.' . $user->gender) }}</td>
                         <td style="font-size: small;">
-                          {{ $user->email_verified_at ? $user->roles->first()->name : 'Not Verified' }}</td>
+                          {{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}</td>
                         <td style="font-size: small;">{{ $user->company ? __('admin.Yes') : __('admin.No') }}</td>
                         <td style="font-size: small;">{{ $user->created_at }}</td>
                         <td style="padding: 0px;font-size: small;">
