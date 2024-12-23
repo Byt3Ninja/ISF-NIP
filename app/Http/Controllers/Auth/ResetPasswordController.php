@@ -75,4 +75,6 @@ class ResetPasswordController extends Controller
     {
         return back()->withErrors(['email' => trans($response)]);
     }
+
+ 
 }

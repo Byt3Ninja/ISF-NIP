@@ -235,7 +235,7 @@
               <label class="form-label" for="password">{{ __('auth.Password') }}</label>
               <div class="input-group input-group-merge">
                 <input type="password" id="password" class="form-control" placeholder="{{ __('auth.Password') }}"
-                  name="password" required aria-describedby="password" />
+                  name="password" required aria-describedby="password" autocomplete="current-password" />
                 <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
               </div>
             </div>
@@ -243,7 +243,7 @@
               <div class="d-flex justify-content-between">
                 <div class="form-check mb-0 ms-2">
                   <input class="form-check-input" type="checkbox" id="remember-me"
-                    {{ old('remember') ? 'checked' : '' }} />
+                    {{ old('remember') ? 'checked' : '' }} name="remember" />
                   <label class="form-check-label" for="remember-me">{{ __('auth.Remember') }}</label>
                 </div>
                 <a href="{{ route('password.request') }}">
