@@ -15,6 +15,7 @@
             <div class="codeInputContainer">
               @php
                     $phone_codes = App\Country::all();
+                    
                     @endphp
               <select id="" name="country_code"
                 class="form-select border-light light-shadow" required
