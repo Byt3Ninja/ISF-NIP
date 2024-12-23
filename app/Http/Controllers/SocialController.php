@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Http;
  {
 
     public function redirect($provider){
-      // dd(config('services.google.client_id'), config('services.google.client_secret'), config('services.google.redirect'));
+    //   dd(config('services.LINKEDIN_CLIENT_ID'), config('services.LINKEDIN_CLIENT_SECRET'), config('services.LINKEDIN_REDIRECT_URI'));
       
         return Socialite::driver($provider)->redirect();
     }
@@ -102,9 +102,14 @@ use Illuminate\Support\Facades\Http;
     // ===========> LinkedIn <==========
     public function redirectToLinkedIn()
     {
+        // dd(config('services.linkedin.client_id'), config('services.linkedin.client_secret'), config('services.linkedin.redirect'));
+        $LINKEDIN_CLIENT_ID = config('services.linkedin.client_id');
+        $LINKEDIN_CLIENT_SECRET = config('services.linkedin.client_secret');
+        $LINKEDIN_REDIRECT_URI = config('services.linkedin.redirect');
+        
         $authorizationUrl = 'https://www.linkedin.com/oauth/v2/authorization';
-        $clientId = env('LINKEDIN_CLIENT_ID');
-        $redirectUri = env('LINKEDIN_REDIRECT_URI');
+        $clientId = $LINKEDIN_CLIENT_ID;
+        $redirectUri = $LINKEDIN_REDIRECT_URI;
         $scope = 'openid profile email'; // الأذونات المطلوبة
     
         $url = $authorizationUrl . '?response_type=code'
@@ -120,10 +125,14 @@ use Illuminate\Support\Facades\Http;
         if (!$request->has('code')) {
             return redirect()->route('login')->with('error', 'Authorization code is missing');
         }
-    
-        $clientId = env('LINKEDIN_CLIENT_ID');
-        $clientSecret = env('LINKEDIN_CLIENT_SECRET');
-        $redirectUri = env('LINKEDIN_REDIRECT_URI');
+        $LINKEDIN_CLIENT_ID = config('services.linkedin.client_id');
+        $LINKEDIN_CLIENT_SECRET = config('services.linkedin.client_secret');
+        $LINKEDIN_REDIRECT_URI = config('services.linkedin.redirect');
+
+
+        $clientId = $LINKEDIN_CLIENT_ID;
+        $clientSecret = $LINKEDIN_CLIENT_SECRET;
+        $redirectUri = $LINKEDIN_REDIRECT_URI;
         $authorizationCode = $request->get('code');
     
         try {

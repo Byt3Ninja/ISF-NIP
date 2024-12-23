@@ -145,7 +145,9 @@ $mobilePills = ['analysis', 'questions', 'history'];
           style="position: absolute; left: 0.35rem; top: 0; height: 100%; border-left: 2px dashed rgb(120, 108, 163);">
         </div>
       </div>
-
+      @php
+      $num = 1;
+      @endphp
       <div class="col-md-9 col-12">
         @foreach ($user_scores as $key => $assessment)
         @php
@@ -181,16 +183,18 @@ $mobilePills = ['analysis', 'questions', 'history'];
               </div>
               @endforeach
             </div>
+             
             @foreach ($assessment['subcategories'] as $key => $subcategory)
             <div class="row" style="display: {{ $key == 0 ? 'block' : 'none' }};" id="questionsContainer">
               @foreach ($subcategory['questions'] as $key => $question)
+              
               <div class="col-12 question-card-bus-con mb-3 " data-category="question-{{ $key }}" >
                 <div class="card shadow-sm">
                   <div class="card-body">
                     <div class="d-flex align-items-center gap-3 mb-2 pb-2 border-bottom">
                       <span class="badge bg-primary rounded-circle d-flex justify-content-center align-items-center"
                         style="width: 30px; height: 30px;">
-                        {{ $key + 1 }}
+                        {{ $num++ }}
                       </span>
                       <h6 class="fw-bold mb-0">{{ $question['QuestionBank'] }}</h6>
                       <input type="hidden" name="question_id" class="question_id{{ $question['id'] }}" value="{{ $question['id'] }}">
@@ -222,7 +226,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
           @foreach ($assessment['subcategories'] as $key => $subcategory)
           <div id="submitContainer" style="{{ $key == 0 ? 'display: flex;' : 'display: none;' }}">
             <div class="w-100 d-flex justify-content-end">
-              <button id="submitButton" class="btn btn-primary">Submit</button>
+              <button id="submitButton" class="btn btn-primary">{{ __('admin.Next') }}</button>
             </div>
           </div>
           @endforeach
@@ -251,15 +255,23 @@ $mobilePills = ['analysis', 'questions', 'history'];
                 data: {
                     'questionId': questionId,
                     'answer': answer,
-                    _token: $('meta[name="csrf-token"]').attr('content')
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    'activeAssessment': 2
                 },
                 success: function(response) {
                   if(response.message == 1){
                     location.reload();
                   }
-                    $('.refreshDiv').load(location.href + ' .refreshDiv');
+                    // $('.refreshDiv').load(location.href + ' .refreshDiv');
                     console.log(response.message);
                     // location.reload();
+
+                    if (i === index) {
+                      container.style.display = 'block';
+                    } else {
+                      container.style.display = 'none';
+                    }
+
                 },
                 error: function(error) {
                   console.log(error.responseText);
@@ -274,10 +286,6 @@ $mobilePills = ['analysis', 'questions', 'history'];
   const questionsContainers = document.querySelectorAll('#questionsContainer');
   const categoryTabs = document.querySelectorAll('#category-tab');
   const submitContainers = document.querySelectorAll('#submitContainer');
-
-  console.log('assessmentContainers', assessmentContainers)
-  console.log('questionsContainers', questionsContainers)
-  console.log('categoryTabs', categoryTabs)
 
   function changeAssessment(index) {
     console.log('changeAssessment', index);
