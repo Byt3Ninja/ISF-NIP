@@ -199,8 +199,7 @@
           </ul>
         </div>
         <!-- Toggle theme and language -->
-<form id="registerForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}"
-          style="display: block;">
+<form id="registerForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}">
           @csrf
         <div class="card card-body shadow-none">
           <div class="row">
