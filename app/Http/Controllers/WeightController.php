@@ -20,8 +20,8 @@ class WeightController extends Controller
     {
         $weights = Weight::with(['stage', 'category', 'subcategory', 'question'])->get();
         $stages = Stage::all();
-        $categories = Category::all();
-        $subcategories = SubCategory::all();
+        $categories = Category::where('category_type', 'Assesment')->get();
+        $subcategories = SubCategory::where('Type', 'Assesment')->get();
         $questions = QuestionsBank::where('group', 'assessment')->get();
         return view('admin.weights', compact('weights', 'stages', 'categories', 'subcategories', 'questions'));
     }
@@ -43,7 +43,7 @@ class WeightController extends Controller
             'stage_id' => 'required|exists:stages,id',
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'required|exists:sub_categories,id',
-            'question_id' => 'exists:questions_bank,id',
+            // 'question_id' => 'exists:questions_bank,id',
             'weights' => 'required|numeric',
         ]);
 
@@ -52,7 +52,7 @@ class WeightController extends Controller
         $Weights->stage_id = $request->stage_id;
         $Weights->category_id = $request->category_id;
         $Weights->subcategory_id = $request->subcategory_id;
-        $Weights->question_id = $request->question_id;
+        // $Weights->question_id = $request->question_id;
         $Weights->weight = $request->weights;
         $Weights->save();
 
@@ -84,7 +84,7 @@ class WeightController extends Controller
             'stage_id' => 'required|exists:stages,id',
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'required|exists:sub_categories,id',
-            'question_id' => 'exists:questions_bank,id',
+            // 'question_id' => 'exists:questions_bank,id',
             'weights' => 'required|numeric',
         ]);
 
@@ -92,7 +92,7 @@ class WeightController extends Controller
         $Weights->stage_id = $request->stage_id;
         $Weights->category_id = $request->category_id;
         $Weights->subcategory_id = $request->subcategory_id;
-        $Weights->question_id = $request->question_id;
+        // $Weights->question_id = $request->question_id;
         $Weights->weight = $request->weights;
         $Weights->save();
 

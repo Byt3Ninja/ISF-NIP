@@ -123,6 +123,162 @@ const translations = {
   }
 };
 
+function getValidationConfig(lang, isMentor) {
+  const config = {
+    fields: {
+      username: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].username.notEmpty
+          },
+          stringLength: {
+            min: 6,
+            message: translations[lang].username.stringLength
+          }
+        }
+      },
+      first_name_en: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].first_name_en.notEmpty
+          },
+          regexp: {
+            regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
+            message: translations[lang].first_name_en.stringOnly
+          }
+        }
+      },
+      last_name_en: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].last_name_en.notEmpty
+          },
+          regexp: {
+            regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
+            message: translations[lang].last_name_en.stringOnly
+          }
+        }
+      },
+      phone: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].phone.notEmpty
+          },
+          regexp: {
+            regexp: /^[0-9]+$/,
+            message: translations[lang].phone.phone
+          }
+        }
+      },
+      email: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].email.notEmpty
+          },
+          regexp: {
+            regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
+            message: translations[lang].email.emailAddress
+          }
+        }
+      },
+      password: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].password.notEmpty
+          },
+          stringLength: {
+            min: 8,
+            message: translations[lang].password.stringLength
+          },
+          regexp: {
+            regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+            message: translations[lang].password.strong
+          }
+        }
+      },
+      password_confirmation: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].password_confirmation.notEmpty
+          },
+          stringLength: {
+            min: 8,
+            message: translations[lang].password_confirmation.stringLength
+          },
+          regexp: {
+            regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+            message: translations[lang].password_confirmation.strong
+          },
+          identical: {
+            compare: function () {
+              return registerForm.querySelector('[name="password"]').value;
+            },
+            message: translations[lang].password_confirmation.identical
+          }
+        }
+      }
+    },
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        eleValidClass: '',
+        rowSelector: '.mb-6'
+      }),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+      defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+      autoFocus: new FormValidation.plugins.AutoFocus()
+    },
+    init: instance => {
+      instance.on('plugins.message.placed', function (e) {
+        if (e.element.parentElement.classList.contains('input-group')) {
+          e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+        }
+      });
+    }
+  };
+
+  if (isMentor) {
+    config.fields.title_en = {
+      validators: {
+        notEmpty: {
+          message: translations[lang].jobTitle.notEmpty
+        },
+        regexp: {
+          regexp: /^[a-zA-Z\s]*$/i,
+          message: translations[lang].jobTitle.enOnly
+        }
+      }
+    };
+    config.fields.expertise = {
+      validators: {
+        notEmpty: {
+          message: translations[lang].expertise.notEmpty
+        }
+      }
+    };
+    config.fields.userbio = {
+      validators: {
+        notEmpty: {
+          message: translations[lang].bio.notEmpty
+        }
+      }
+    };
+    config.fields.Linkedin = {
+      validators: {
+        notEmpty: {
+          message: translations[lang].linkedin.notEmpty
+        },
+        regexp: {
+          regexp: /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/,
+          message: translations[lang].linkedin.uri
+        }
+      }
+    };
+  }
+
+  return config;
+}
+
 document.addEventListener('DOMContentLoaded', function (e) {
   (function () {
     const registerForm = document.getElementById('registerForm');
@@ -130,213 +286,39 @@ document.addEventListener('DOMContentLoaded', function (e) {
     const mentorRoleRadio = document.getElementById('MentorRole');
     const founderRoleRadio = document.getElementById('FounderRole');
 
-    const validationConfig = {
-      fields: {
-        username: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].username.notEmpty
-            },
-            stringLength: {
-              min: 6,
-              message: translations[lang].username.stringLength
-            }
-          }
-        },
-        first_name_en: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].first_name_en.notEmpty
-            },
-            regexp: {
-              regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
-              message: translations[lang].first_name_en.stringOnly
-            }
-          }
-        },
-        last_name_en: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].last_name_en.notEmpty
-            },
-            regexp: {
-              regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
-              message: translations[lang].last_name_en.stringOnly
-            }
-          }
-        },
-        phone: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].phone.notEmpty
-            },
-            regexp: {
-              regexp: /^[0-9]+$/,
-              message: translations[lang].phone.phone
-            }
-          }
-        },
-        email: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].email.notEmpty
-            },
-            regexp: {
-              regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
-              message: translations[lang].email.emailAddress
-            }
-          }
-        },
-        password: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].password.notEmpty
-            },
-            stringLength: {
-              min: 8,
-              message: translations[lang].password.stringLength
-            },
-            regexp: {
-              regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-              message: translations[lang].password.strong
-            }
-          }
-        },
-        password_confirmation: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].password_confirmation.notEmpty
-            },
-            stringLength: {
-              min: 8,
-              message: translations[lang].password_confirmation.stringLength
-            },
-            regexp: {
-              regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-              message: translations[lang].password_confirmation.strong
-            },
-            identical: {
-              compare: function () {
-                return registerForm.querySelector('[name="password"]').value;
-              },
-              message: translations[lang].password_confirmation.identical
-            }
-          }
-        },
-        title_en: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].jobTitle.notEmpty
-            },
-            regexp: {
-              regexp: /^[a-zA-Z\s]*$/i,
-              message: translations[lang].jobTitle.enOnly
-            }
-          }
-        },
-        expertise: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].expertise.notEmpty
-            }
-          }
-        },
-        userbio: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].bio.notEmpty
-            }
-          }
-        },
-        Linkedin: {
-          validators: {
-            notEmpty: {
-              message: translations[lang].linkedin.notEmpty
-            },
-            regexp: {
-              regexp: /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/,
-              message: translations[lang].linkedin.uri
-            }
-          }
-        }
-      },
-      plugins: {
-        trigger: new FormValidation.plugins.Trigger(),
-        bootstrap5: new FormValidation.plugins.Bootstrap5({
-          eleValidClass: '',
-          rowSelector: '.mb-6'
-        }),
-        submitButton: new FormValidation.plugins.SubmitButton(),
-        defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
-        autoFocus: new FormValidation.plugins.AutoFocus()
-      },
-      init: instance => {
-        instance.on('plugins.message.placed', function (e) {
-          if (e.element.parentElement.classList.contains('input-group')) {
-            e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-          }
-        });
+    let validationInstance;
+    let validationConfig = getValidationConfig(lang, false);
+
+    function initializeValidation(config) {
+      if (validationInstance) {
+        validationInstance.destroy();
       }
-    };
+      validationInstance = FormValidation.formValidation(registerForm, config);
+    }
 
     if (mentorRoleRadio) {
       mentorRoleRadio.addEventListener('change', () => {
         if (mentorRoleRadio.checked) {
-          validationConfig.fields.title_en = {
-            validators: {
-              notEmpty: {
-                message: translations[lang].jobTitle.notEmpty
-              },
-              regexp: {
-                regexp: /^[a-zA-Z\s]*$/i,
-                message: translations[lang].jobTitle.enOnly
-              }
-            }
-          };
-          validationConfig.fields.expertise = {
-            validators: {
-              notEmpty: {
-                message: translations[lang].expertise.notEmpty
-              }
-            }
-          };
-          validationConfig.fields.userbio = {
-            validators: {
-              notEmpty: {
-                message: translations[lang].bio.notEmpty
-              }
-            }
-          };
-          validationConfig.fields.Linkedin = {
-            validators: {
-              notEmpty: {
-                message: translations[lang].linkedin.notEmpty
-              },
-              regexp: {
-                regexp: /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/,
-                message: translations[lang].linkedin.uri
-              }
-            }
-          };
+          validationConfig = getValidationConfig(lang, true);
+          initializeValidation(validationConfig);
           mentorInputsWrapper.style.display = 'block';
         }
       });
     }
 
+    if (registerForm && !registerForm.hasAttribute('data-validation-initialized')) {
+      registerForm.setAttribute('data-validation-initialized', 'true');
+      initializeValidation(validationConfig);
+    }
+
     if (founderRoleRadio) {
       founderRoleRadio.addEventListener('change', () => {
         if (founderRoleRadio.checked) {
-          delete validationConfig.fields.title_en;
-          delete validationConfig.fields.expertise;
-          delete validationConfig.fields.userbio;
-          delete validationConfig.fields.Linkedin;
+          validationConfig = getValidationConfig(lang, false);
           mentorInputsWrapper.style.display = 'none';
+          initializeValidation(validationConfig);
         }
       });
-    }
-
-    if (registerForm) {
-      FormValidation.formValidation(registerForm, validationConfig);
     }
 
     //  Two Steps Verification
