@@ -25,7 +25,7 @@
     {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
   </div>
   @endif
-
+  @php $setting = \App\Settings::where('id', 1)->first(); @endphp
   @php
     $user_id = Auth::id();
     $s_latest = \App\Service::orderBy('created_at', 'DESC')->take(5)->get();
@@ -668,8 +668,22 @@
             <span
               class="text-capitalize">{{ __('dashboard.start from') . ': ' . Auth::user()->company->cycledata->start_format . ' ' . __('dashboard.to') . ': ' . Auth::user()->company->cycledata->end_format }}</span>
             <div class="d-flex align-items-center mt-3">
-              <img src="{{ Auth::user()->company->cycledata->organization->image_url }}" alt="avatar"
+              @if (!is_null(Auth::user()->company->cycledata->organization))
+              @php
+              $imageUrl = Auth::user()->company->cycledata->organization->image_url;
+          
+               // استخراج المسار من الرابط
+               $imagePath = parse_url($imageUrl, PHP_URL_PATH);
+          
+               // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
+               $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
+              @endphp
+              <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar"
                 class="rounded-circle" height="35" width="35">
+                @else
+                <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
+            @endif
+
               <span class="mx-3 text-secondary">{{ Auth::user()->company->cycledata->organization->name }}</span>
             </div>
           </div>

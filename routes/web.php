@@ -177,7 +177,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
 
 
     // LFM File Manager Imges
-    Route::get('/LFMGet/{files?}', 'organizationsController@GetLFM')->name('LFMGet');
+    Route::get('/LFMGet/{idUser?}/{files?}', 'organizationsController@GetLFM')->name('LFMGet');
 
     //Client's company
     Route::resource('organizations', 'organizationsController');
