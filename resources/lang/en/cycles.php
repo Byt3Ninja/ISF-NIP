@@ -268,8 +268,6 @@ return [
     'Beginner'=>' Beginner ',
     'Intermediate'=>' Intermediate ',
     'Advanced'=>' Advanced ',
-
-
-
+    'No sessions' => 'No sessions',
 ];
 

@@ -284,8 +284,16 @@ class MentorsController extends Controller
 				$user->notify($MSG);
 				/// End of mail send
 			}
-			return back()->with(['message' => 'Session added successfully']);
-		} else{ return back()->with(['message2' => "Error, can't add session"]); }
+			return back()->with([
+        'message' => 'Session added successfully',
+        'add' => 1
+			]);
+		} else{ 
+			return back()->with([
+        'message2' => "Error, can't add session",
+        'notAdd' => 2
+			]);
+		 }
 	}
 
 	public function sessions(Request $request)
