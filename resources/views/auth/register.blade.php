@@ -430,6 +430,11 @@
       initialCountry: "eg", // Default country
       preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
       utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
+      separateDialCode: true, // Separate dial code from the number
+      autoPlaceholder: "aggressive", // Show placeholder
+      customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
+      return "e.g. " + selectedCountryPlaceholder;
+      }
     });
 
     // Optional: Handle validation
