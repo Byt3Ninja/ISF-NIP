@@ -205,6 +205,8 @@
 
                       // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
                       $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
+
+                      
                  @endphp
 
                         <img 
@@ -231,7 +233,7 @@
                         <!-- Program Title -->
                         <div class="d-flex justify-content-between">
                           <a href="/dashboard/programlist/show/{{$cycle->id}}" class="text-primary fs-5 fw-bold">
-                            {{ $cycle->title}}
+                            {{ $cycle->title }}
                           </a>
                           {{-- <div 
                             class="badge d-flex align-items-center justify-content-center
