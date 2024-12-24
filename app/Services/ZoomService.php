@@ -4,6 +4,9 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use App\Settings;
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Schema;
 
 class ZoomService implements OnlineMeetingServiceInterface
 {
@@ -12,31 +15,70 @@ class ZoomService implements OnlineMeetingServiceInterface
     const MEETING_TYPE_RECURRING = 3;
     const MEETING_TYPE_FIXED_RECURRING_FIXED = 8;
 
+    public $client;
+    public $jwt;
+    public $headers;
+
+    public function __construct()
+    {
+        $this->client = new Client();
+        $this->jwt = $this->generateZoomToken();
+        $this->headers = [
+            'Authorization' => 'Bearer ' . $this->jwt,
+            'Content-Type'  => 'application/json',
+            'Accept'        => 'application/json',
+        ];
+    }
+
+
     /**
      * Generate Zoom Access Token.
      */
-    public function generateZoomAccessToken()
+    protected function generateZoomToken()
     {
-        $apiKey = env('ZOOM_CLIENT_ID');
-        $apiSecret = env('ZOOM_CLIENT_SECRET');
-        $accountId = env('ZOOM_ACCOUNT_ID');
+        if (Schema::hasTable('settings')) {
+            $Setting = Settings::where('id', 1)->first();
 
-        $base64Credentials = base64_encode("$apiKey:$apiSecret");
+            if ($Setting) {
+                $ZOOM_CLIENT_ID = $Setting->ZOOM_CLIENT_ID;
+                $ZOOM_CLIENT_SECRET = $Setting->ZOOM_CLIENT_SECRET;
+                $ZOOM_ACCOUNT_ID = $Setting->ZOOM_ACCOUNT_ID;
+            } else {
+                $ZOOM_CLIENT_ID = '';
+                $ZOOM_CLIENT_SECRET = '';
+                $ZOOM_ACCOUNT_ID = '';
+            }
+            $client = new Client([
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode($ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
+                    'Host' => 'zoom.us',
+                ],
+            ]);
 
-        $url = "https://zoom.us/oauth/token?grant_type=account_credentials&account_id=$accountId";
+            $response = $client->request('POST', "https://zoom.us/oauth/token", [
+                'form_params' => [
+                    'grant_type' => 'account_credentials',
+                    'account_id' => $ZOOM_ACCOUNT_ID,
+                ],
+            ]);
 
-        $response = Http::withHeaders([
-            'Authorization' => "Basic $base64Credentials",
-            'Content-Type'  => 'application/x-www-form-urlencoded',
-        ])->post($url);
+            $responseBody = json_decode($response->getBody(), true);
+            return $responseBody['access_token'];
+        }
+    }
 
-        $responseData = $response->json();
+    private function retrieveZoomUrl()
+    {
+        if (Schema::hasTable('settings')) {
+            $Setting = Settings::where('id', 1)->first();
+            $zoom_api_url = $Setting->ZOOM_API_URL;
+            if (!empty($Setting) && !empty($zoom_api_url)) {
+                $ZOOM_API_URL = $Setting->ZOOM_API_URL;
+            } else {
+                $ZOOM_API_URL = 'https://api.zoom.us/v2/';
+            }
 
-        if ($response->successful()) {
-            return $responseData['access_token'];
-        } else {
-            Log::error('Zoom OAuth Token Response: ' . json_encode($responseData));
-            throw new \Exception('Failed to Generate Access Token');
+            return $ZOOM_API_URL;
         }
     }
 
@@ -57,54 +99,143 @@ class ZoomService implements OnlineMeetingServiceInterface
     /**
      * Create Zoom Meeting.
      */
-
     public function createMeeting($data)
     {
-        $accessToken = $this->generateZoomAccessToken();
-        if (!$accessToken) {
-            return ['success' => false, 'message' => 'Failed to generate access token.'];
-        }
-        $url = 'https://api.zoom.us/v2/users/me/meetings';
+        $path = 'users/me/meetings';
+        $url = $this->retrieveZoomUrl();
 
-        $meeting = [
-            "topic"      => $data['topic'],
-            "agenda"     => $data['agenda'] ?? null,
-            "type"       => self::MEETING_TYPE_SCHEDULE,
-            "start_time" => $this->toZoomTimeFormat($data['start_time']),
-            "duration"   => $data['duration'],
-            "timezone"   => 'Africa/Cairo',
-            'settings' => [
-                'join_before_host' => false,
-                'host_video' => true,
-                'participant_video' => true,
-                'mute_upon_entry' => false,
-                'waiting_room' => false,
-                'audio' => 'both',
-                'auto_recording' => 'cloud',
-                'approval_type' => 0,
-            ],
+        $body = [
+            'headers' => $this->headers,
+            'body'    => json_encode([
+                'topic'      => $data['topic'],
+                'type'       => self::MEETING_TYPE_SCHEDULE,
+                'start_time' => $this->toZoomTimeFormat($data['start_time']),
+                'duration'   => $data['duration'],
+                'agenda'     => (! empty($data['agenda'])) ? $data['agenda'] : null,
+                'timezone'     => 'Africa/Cairo',
+                'settings'   => [
+                    'host_video'        => ($data['host_video'] == "1") ? true : false,
+                    'participant_video' => ($data['participant_video'] == "1") ? true : false,
+                    'waiting_room'      => false,
+                ],
+            ]),
         ];
 
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer $accessToken",
-            'Content-Type'  => 'application/json',
-        ])->post($url, $meeting);
+        $response =  $this->client->post($url . $path, $body);
 
-        $responseData = $response->json();
-
-        if ($response->successful()) {
+        if ($response && $response->getStatusCode() === 201) {
+            $responseData = json_decode($response->getBody(), true);
             return [
                 'success' => true,
-                'data' => $responseData,
+                'data'    => [
+                    'id'        => $responseData['id'],
+                    'start_url' => $responseData['start_url'],
+                    'join_url'  => $responseData['join_url'],
+                ],
             ];
         } else {
-            Log::error('Zoom Create Meeting Response: ' . json_encode($responseData));
             return [
                 'success' => false,
-                'message' => $responseData['message'] ?? 'Failed to Create Zoom Meeting',
+                'data'    => null,
             ];
         }
     }
+    public function update($id, $data)
+    {
+        $path = 'meetings/' . $id;
+        $url = $this->retrieveZoomUrl();
+
+        $body = [
+            'headers' => $this->headers,
+            'body'    => json_encode([
+                'topic'      => $data['topic'],
+                'type'       => self::MEETING_TYPE_SCHEDULE,
+                'start_time' => $this->toZoomTimeFormat($data['start_time']),
+                'duration'   => $data['duration'],
+                'agenda'     => (! empty($data['agenda'])) ? $data['agenda'] : null,
+                'timezone'     => 'Africa/Cairo',
+                'settings'   => [
+                    'host_video'        => ($data['host_video'] == "1") ? true : false,
+                    'participant_video' => ($data['participant_video'] == "1") ? true : false,
+                    'waiting_room'      => false,
+                ],
+            ]),
+        ];
+        $response =  $this->client->patch($url . $path, $body);
+
+        return [
+            'success' => $response->getStatusCode() === 204,
+            'data'    => json_decode($response->getBody(), true),
+        ];
+    }
+
+    public function get($id)
+    {
+        $path = 'meetings/' . $id;
+        $url = $this->retrieveZoomUrl();
+        $this->jwt = $this->generateZoomToken();
+        $body = [
+            'headers' => $this->headers,
+            'body'    => json_encode([]),
+        ];
+        $response =  $this->client->get($url . $path, $body);
+        return [
+            'success' => $response->getStatusCode() === 204,
+            'data'    => json_decode($response->getBody(), true),
+        ];
+    }
+
+    public function getregistrants($id)
+    {
+        $path = 'meetings/' . $id . '/registrants';
+        $url = $this->retrieveZoomUrl();
+        $this->jwt = $this->generateZoomToken();
+        $body = [
+            'headers' => $this->headers,
+            'body'    => json_encode([]),
+        ];
+        $response =  $this->client->get($url . $path, $body);
+        return [
+            'success' => $response->getStatusCode() === 204,
+            'data'    => json_decode($response->getBody(), true),
+        ];
+    }
+
+    public function getall()
+    {
+        $path = '/users/me/meetings';
+        $url = $this->retrieveZoomUrl();
+        $this->jwt = $this->generateZoomToken();
+        $body = [
+            'headers' => $this->headers,
+            'body'    => json_encode([]),
+        ];
+        $response =  $this->client->get($url . $path, $body);
+        return [
+            'success' => $response->getStatusCode() === 204,
+            'data'    => json_decode($response->getBody(), true),
+        ];
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return bool[]
+     */
+    public function delete($id)
+    {
+        $path = 'meetings/' . $id;
+        $url = $this->retrieveZoomUrl();
+        $body = [
+            'headers' => $this->headers,
+            'body'    => json_encode([]),
+        ];
+        $response =  $this->client->delete($url . $path, $body);
+        return [
+            'success' => $response->getStatusCode() === 204,
+        ];
+    }
+
 
     /**
      * Get Zoom Meeting Report.
@@ -112,7 +243,7 @@ class ZoomService implements OnlineMeetingServiceInterface
 
     public function getSessionReport(string $userId, ?string $meetingId = null)
     {
-        $accessToken = $this->generateZoomAccessToken();
+        $accessToken = $this->generateZoomToken();
         if (!$accessToken) {
             return ['success' => false, 'message' => 'Failed to Generate Access Token.'];
         }
@@ -146,7 +277,7 @@ class ZoomService implements OnlineMeetingServiceInterface
 
     public function getSessionRecord($meetingId, ?string $userId = null)
     {
-        $accessToken = $this->generateZoomAccessToken();
+        $accessToken = $this->generateZoomToken();
         if (!$accessToken) {
             return ['success' => false, 'message' => 'Failed to generate access token.'];
         }
@@ -173,7 +304,7 @@ class ZoomService implements OnlineMeetingServiceInterface
 
     public function getUserIdFromMeeting(string $meetingId)
     {
-        $accessToken = $this->generateZoomAccessToken();
+        $accessToken = $this->generateZoomToken();
         if (!$accessToken) {
             return ['success' => false, 'message' => 'Failed to Generate Access Token.'];
         }

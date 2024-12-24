@@ -8,6 +8,7 @@ use App\Label;
 use App\MentorshipRequest;
 use App\MentorshipTask;
 use App\MentorshipTaskLog;
+use App\MentorshipTaskFile;
 use App\MentorshipTaskComment;
 use Illuminate\Http\Request;
 use Exception, Log, URL;
@@ -441,6 +442,83 @@ class MentorshipTaskController extends Controller
 		], 200);
 	}
 
+	public function attach(Request $request)
+	{
+		$user = auth()->user();
+		$request->validate([
+			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
+			'task_id' => 'required|integer|exists:mentorship_tasks,id'
+		]);
+		$task = MentorshipTask::where('mentorship_request_id', $request->mentorship_request_id)->find( $request->task_id );
+		if( empty( $task ) ) { return response()->json(['status' => false, 'title' => 'Failure', 'message' => 'Task not found'], 200); }
+		else
+		{
+			$card = $task->id;
+			$session = $task->mentorship_request_id;
+			$instance = Storage::disk('mentorship_tasks');
+			$target = "$session/$card";
+			if( !$instance->directoryExists( $session ) )
+			{
+				$instance->makeDirectory("$session");
+				$instance->makeDirectory($target);
+			}
+			elseif( !$instance->directoryExists($target) )
+			{
+				$instance->makeDirectory($target);
+			}
+			$filesToAdd = [];
+			foreach( $request->attachments as $attachment )
+			{
+				$check_file = $instance->missing( $target . '/' . $attachment->getClientOriginalName() );
+				if( !$check_file )
+				{
+					$counter = 1;
+					do {
+						$file_name = str_replace( '.' . $attachment->getClientOriginalExtension(), '', $attachment->getClientOriginalName() ) . '-' . $counter++ . '.' . $attachment->getClientOriginalExtension();
+						$check_file = $instance->missing( $target . '/' .  $file_name );
+					} while ( !$check_file );
+				} else { $file_name = $attachment->getClientOriginalName(); }
+				$file_name = strtolower( str_replace(' ', '-', $file_name) );
+				$filesToAdd[] = [
+					'mentorship_request_id' => $task->mentorship_request_id,
+					'mentorship_task_id' => $task->id,
+					'user_id' => $user->id,
+					'file_name' => $attachment->getClientOriginalName(),
+					'file' => $file_name,
+				];
+				$path = $instance->putFileAs($target, $attachment, $file_name);
+			}
+			MentorshipTaskFile::insert( $filesToAdd );
+			$lang = app()->getLocale();
+			$condition = "mentorship_tasks.id = $card ";
+			$tasks = $this->handleTask($lang, $condition, 'show');
+			$task = $tasks->first();
+			return response()->json([
+				'status' => true,
+				'title' => 'Done',
+				'message' => 'Task files uploaded successfully',
+				'task' => $task
+			]);
+		}
+	}
+
+	public function deAttach(Request $request)
+	{
+		$file = MentorshipTaskFile::find( $request->file );
+		if( empty( $file ) ) { return response()->json(['status' => false, 'message' => 'File not found']); }
+		else
+		{
+			$instance = Storage::disk('mentorship_tasks');
+			$session = $file->mentorship_request_id;
+			$card = $file->mentorship_task_id;
+			$target = "$session/$card";
+			$check_file = $instance->missing( $target . '/' . $file->file );
+			if( !$check_file ) { $instance->delete( $target . '/' . $file->file ); }
+			$file->delete();
+			return response()->json(['status' => true, 'message' => 'File deleted successfully']);
+		}
+	}
+
 	/**
 	 * Store a newly created resource in storage.
 	 */
@@ -529,11 +607,23 @@ class MentorshipTaskController extends Controller
 	{
 		$lang = app()->getLocale();
 		$condition = "mentorship_tasks.id = $id ";
+		$instance = Storage::disk('mentorship_tasks');
 		$tasks = $this->handleTask($lang, $condition, 'show');
 		if( $tasks == '404' ) { abort( 404 ); }
 		else
 		{
 			$task = $tasks->first();
+			$session = $task['request_id'];
+			$card = $task['id'];
+			if( !$instance->directoryExists( $session ) )
+			{
+				$instance->makeDirectory("$session");
+				$instance->makeDirectory("$session/$card");
+			}
+			elseif( !$instance->directoryExists("$session/$card") )
+			{
+				$instance->makeDirectory("$session/$card");
+			}
 			return $task;
 		}
 	}
@@ -731,6 +821,7 @@ class MentorshipTaskController extends Controller
 				mentorship_tasks.priority AS priority,
 				mentorship_tasks.mentor_id AS mentor_id,
 				mentorship_tasks.row_no AS row_no,
+				mentorship_tasks.mentorship_request_id AS request_id,
 				mentorship_tasks.created_at AS reported_at,
 				mentorship_tasks.updated_at AS updated_at,
 				CONCAT(TRIM(COALESCE(mentor.first_name_$lang, '')), ' ', TRIM(COALESCE(mentor.last_name_$lang, ''))) AS mentor,
@@ -761,7 +852,13 @@ class MentorshipTaskController extends Controller
 				logs.column AS log_column,
 				logs.was AS log_was,
 				logs.new AS log_new,
-				logs.created_at AS log_created_at
+				logs.created_at AS log_created_at,
+				files.id AS `file_id`,
+				files.file AS `file`,
+				files.file_name AS `file_name`,
+				files.user_id AS uploader_id,
+				CONCAT(TRIM(COALESCE(uploader.first_name_$lang, '')), ' ', TRIM(COALESCE(uploader.last_name_$lang, ''))) AS uploader,
+				uploader.img_url AS uploader_img
 			FROM
 				mentorship_tasks mentorship_tasks
 			LEFT JOIN
@@ -778,6 +875,10 @@ class MentorshipTaskController extends Controller
 				users commenter ON comments.user_id = commenter.id
 			LEFT JOIN
 				mentorship_task_labels task_labels ON mentorship_tasks.id = task_labels.mentorship_tasks_id
+			LEFT JOIN
+				mentorship_task_files files ON mentorship_tasks.id = files.mentorship_task_id
+			LEFT JOIN
+				users uploader ON files.user_id = uploader.id
 			LEFT JOIN
 				labels labels ON task_labels.label_id = labels.id
 			LEFT JOIN
@@ -910,8 +1011,19 @@ class MentorshipTaskController extends Controller
 						'footprint' => $footprint
 					];
 				})->unique('id')->values()->whereNotNull('id');
+				$files = $groupedTasks->filter(function( $file ) {
+					return $file->file !== null;
+				})->map(function ($task) {
+					return [
+						'id' => $task->file_id,
+						'name' => $task->file_name,
+						'url' => URL::to('dashboard/uploads/tasks/' . $task->request_id . '/cards/' . $task->id . '/' . $task->file),
+						'uploader' => ['id' => $task->uploader_id, 'name' => $task->uploader, 'photo' => $this->getImage( $task->uploader_img )],
+					];
+				})->unique('id')->values()->whereNotNull('id');
 				return [
 					'id' => $task->id,
+					'request_id' => $task->request_id,
 					'name' => $task->title,
 					'content' => $task->description,
 					'due_date' => !empty( $task->due_at ) && trim( $task->due_at ) ? trim( $task->due_at ) : null,
@@ -928,8 +1040,9 @@ class MentorshipTaskController extends Controller
 					'updated_at' => $task->updated_at,
 					'labels' => $labels,
 					'comments' => $comments,
-					'attachments' => $comments->whereNotNull('attached')->count(),
+					'attachments' => $files->count(),
 					'logs' => $logs,
+					'files' => $files,
 				];
 			})->values();
 	
