@@ -105,6 +105,18 @@
       overflow-x: auto -webkit-overflow-scrolling: touch;
       background-color: #fff;
     }
+
+    #google-sign-in:hover {
+      background-color: var(--bs-light);
+    }
+
+    #linkedin-sign-in {
+      background-color: #0077b5;
+    }
+
+    #linkedin-sign-in:hover {
+      background-color: #154e6d;
+    }
   </style>
 
   <!-- Helpers -->
@@ -199,9 +211,9 @@
           </ul>
         </div>
         <!-- Toggle theme and language -->
-<form id="registerForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}">
-          @csrf
-        <div class="card card-body shadow-none">
+        <form id="registerForm" class="col-12 mb-6" method="POST" action="{{ route('register') }}">
+        @csrf
+        <div class="card card-body shadow-none py-0">
           <div class="row">
             <div class="col-12">
               <h4 class="mb-1">{{ $formHeading }} 🚀</h4>
@@ -214,22 +226,20 @@
             </div>
             @foreach($accountRoles as $key => $role)
             <div class="col-6">
-              <div class="form-check custom-option custom-option-icon">
-                <label class="form-check-label custom-option-content" for="{{$role}}Role">
-                  <span class="custom-option-body">
-                    <i class="ti ti-rocket"></i>
-                    <span class="custom-option-title">{{ __('admin.' . $role) }}</span>
-                  </span>
+              <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
+                <div class="d-flex align-items-center">
                   <input name="role" class="form-check-input" type="radio" value="{{$key == 0 ? $role : 'Registered'}}"
                     id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
-                </label>
+                  <div class="form-check-label custom-option-content d-flex align-items-center">
+                    <i class="ti ti-{{ $key==0 ? 'user' : 'businessplan' }} me-2"></i>
+                    <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
+                  </label>
+                </div>
               </div>
             </div>
             @endforeach
           </div>
         </div>
-
-
         
           <div class="card card-body shadow-none">
             <div class="row">
@@ -329,6 +339,7 @@
               </div>
               <div class="col-12">
                 <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
+
                 <p class="text-center">
                   <span>{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</span>
                   <a href="/login">
@@ -336,25 +347,31 @@
                   </a>
                 </p>
                 <div class="divider my-6">
-                  <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+                  <div class="divider-text">{{ $l == 'ar' ? 'او' : 'OR' }}</div>
                 </div>
-                <div class="container mt-5">
-                  <a href="{{ url('/auth/redirect/google') }}"
-                    class="btn btn-label-secondary btn-block d-flex align-items-center justify-content-center">
-                    <i class="fab fa-google me-2 text-success"></i> <span class="text-success">{{ $googleSignIn
-                      }}</span>
+                <a 
+                  id="google-sign-in"
+                  href="{{ url('/auth/redirect/google') }}" 
+                  class="btn btn-transparent shadow-sm border btn-block d-flex align-items-center justify-content-center"
+                >
+                  <img src="/icons/google-icon.svg" alt="google" width="20" height="20" class="me-2">
+                  <span class="fw-semibold">{{ $googleSignIn }}</span>
+                </a>
+                
+                <div class="divider">
+                  <div class="divider-text">{{ $l == 'ar' ? 'او' : 'OR' }}</div>
+                </div>
+
+                @if (app()->environment('local', 'dev'))
+                  <a 
+                    id="linkedin-sign-in"
+                    href="{{ route('linkedin.login') }}" 
+                    class="btn btn-block shadow-sm d-flex align-items-center justify-content-center"
+                    style="color: #fff;"
+                  >
+                    <i class="fa-brands fa-linkedin-in me-2"></i> 
+                    <span class="fw-semibold">{{ $linkdinSignIn }}</span>
                   </a>
-                </div>
-                <div class="divider my-6">
-                  <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
-                </div>
-                @if (app()->environment('local'))
-                <div class="container">
-                  <a href="{{ route('linkedin.login') }}"
-                    class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
-                    <i class="fa-brands fa-linkedin-in me-2"></i> <span>{{ $linkdinSignIn }}</span>
-                  </a>
-                </div>
                 @endif
               </div>
             </div>

@@ -62,6 +62,18 @@
       top: 1rem;
       width: 100px;
     }
+
+    #google-sign-in:hover {
+      background-color: var(--bs-light);
+    }
+
+    #linkedin-sign-in {
+      background-color: #0077b5;
+    }
+
+    #linkedin-sign-in:hover {
+      background-color: #154e6d;
+    }
     
     @media screen and (min-width: 768px) {
       #switcher-container {
@@ -190,8 +202,8 @@
 
       <!-- Login -->
       <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
-        <div class="w-px-400 mx-auto mt-12 pt-5">
-          <h4 class="mb-1">{{ $formHeading }}</h4>
+        <div class="w-px-400 mx-auto pt-3">
+          <h3 class="mb-1">{{ $formHeading }}</h3>
           <p class="mb-6">{{ $formSubHeading }}</p>
           
           <!-- Auth Errors -->
@@ -226,20 +238,20 @@
 
           <form id="formAuthentication" class="mb-4" method="POST" action="{{ route('login') }}">
             @csrf
-            <div class="mb-6">
-              <label for="email" class="form-label">{{ __('auth.E-Mail') }}</label>
+            <div class="mb-4">
+              <label for="email" class="form-label fs-6 fw-semibold">{{ __('auth.E-Mail') }}</label>
               <input value="{{ old('email') }}" name="email" type="email" class="form-control" id="email"
                 placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" autofocus />
             </div>
-            <div class="mb-6 form-password-toggle">
-              <label class="form-label" for="password">{{ __('auth.Password') }}</label>
+            <div class="mb-4 form-password-toggle">
+              <label class="form-label fs-6 fw-semibold" for="password">{{ __('auth.Password') }}</label>
               <div class="input-group input-group-merge">
                 <input type="password" id="password" class="form-control" placeholder="{{ __('auth.Password') }}"
                   name="password" required aria-describedby="password" autocomplete="current-password" />
                 <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
               </div>
             </div>
-            <div class="my-8">
+            <div class="my-4">
               <div class="d-flex justify-content-between">
                 <div class="form-check mb-0 ms-2">
                   <input class="form-check-input" type="checkbox" id="remember-me"
@@ -251,7 +263,7 @@
                 </a>
               </div>
             </div>
-            <div class="mb-6">
+            <div class="mb-4">
               <button class="btn btn-primary d-grid w-100" type="submit">{{ __('auth.Login') }}</button>
             </div>
           </form>
@@ -263,21 +275,33 @@
             </a>
           </p>
 
-          <div class="divider my-6">
-            <div class="divider-text">{{ $l == 'ar' ? 'او' : 'or' }}</div>
+          <div class="divider">
+            <div class="divider-text">{{ $l == 'ar' ? 'او' : 'OR' }}</div>
           </div>
 
-          <div class="container mt-5">
-            <a href="{{ url('/auth/redirect/google') }}" class="btn btn-label-secondary btn-block d-flex align-items-center justify-content-center">
-              <i class="fab fa-google text-success me-2"></i> <span class="text-success">{{ $googleSignIn }}</span>
-            </a>
+          <a 
+            id="google-sign-in"
+            href="{{ url('/auth/redirect/google') }}" 
+            class="btn btn-transparent shadow-sm border btn-block d-flex align-items-center justify-content-center"
+          >
+            <img src="/icons/google-icon.svg" alt="google" width="20" height="20" class="me-2">
+            <span class="fw-semibold">{{ $googleSignIn }}</span>
+          </a>
+          
+          <div class="divider">
+            <div class="divider-text">{{ $l == 'ar' ? 'او' : 'OR' }}</div>
           </div>
+
           @if (app()->environment('local', 'dev'))
-          <div class="container mt-5">
-            <a href="{{ route('linkedin.login') }}" class="btn btn-label-primary btn-block d-flex align-items-center justify-content-center">
-              <i class="fa-brands fa-linkedin-in me-2"></i> <span>{{ $linkdinSignIn }}</span>
+            <a 
+              id="linkedin-sign-in"
+              href="{{ route('linkedin.login') }}" 
+              class="btn btn-block shadow-sm d-flex align-items-center justify-content-center"
+              style="color: #fff;"
+            >
+              <i class="fa-brands fa-linkedin-in me-2"></i> 
+              <span class="fw-semibold">{{ $linkdinSignIn }}</span>
             </a>
-          </div>
           @endif
 
         </div>
