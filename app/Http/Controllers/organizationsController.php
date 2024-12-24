@@ -180,15 +180,21 @@ class organizationsController extends Controller
 		}
 	}
 
-	public function GetLFM( $path = null )
+	public function GetLFM( $path = null , $file = null )
 	{
+		
 		try {
 			 $instance = Storage::disk('UsersLFMPublic');
-			if( $instance->directoryExists( $path ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
-			$file = $instance->response( $path );
-			$mimeType = $instance->mimeType($path);
-			if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
-			$file->headers->set('Content-Type', $mimeType);
+
+			 $fullPath = '/' . $path . '/' . $file;
+			 
+			if( $instance->directoryExists( $fullPath ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+			$file = $instance->response( $fullPath);
+			
+			// $mimeType = $instance->mimeType($file);
+			// if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
+			// $file->headers->set('Content-Type', $mimeType);
+			
 			return $file;
 		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
 	}

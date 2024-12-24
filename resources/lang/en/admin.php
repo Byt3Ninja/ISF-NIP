@@ -644,7 +644,7 @@ return [
 	'settings' => 'Settings',
 	'Expertince' => 'Expertince',
 	'ProfileSummary' => 'Profile Summary',
-	'Programms' => 'Programms',
+	'Programms' => 'Programs',
 	'Orgnizations' => 'Orgnizations',
 	'OrderSession' => 'Request Mentor Ship',
 	'free' => ' Free ',
