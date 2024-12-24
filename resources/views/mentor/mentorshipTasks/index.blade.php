@@ -183,7 +183,7 @@
 									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
 									<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
 								</div>
-								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" />
+								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" />
 								<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
 									onclick="document.getElementById('fileInput').click();">
 									<i class="ti ti-plus ti-16px"></i>
@@ -294,21 +294,6 @@
 									</select>
 								</div>
 							</div>
-							{{--  <div class="bg-label-secondary p-2 rounded mb-4 border">
-								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
-									<div class="d-flex align-items-center justify-content-center gap-2">
-										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>Attachments</h6>
-										<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
-									</div>
-									<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" />
-									<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
-										onclick="document.getElementById('fileInput').click();">
-										<i class="ti ti-plus ti-16px"></i>
-									</button>
-								</div>
-								<div class="d-flex flex-wrap gap-2" id="fileList"></div>
-							</div>  --}}
-							
 							<div class="row mb-3">
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-status" class="form-label">
@@ -416,21 +401,6 @@
 									</select>
 								</div>
 							</div>
-							{{--  <div class="bg-label-secondary p-2 rounded mb-4 border">
-								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
-									<div class="d-flex align-items-center justify-content-center gap-2">
-										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>Attachments</h6>
-										<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
-									</div>
-									<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" />
-									<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
-										onclick="document.getElementById('fileInput').click();">
-										<i class="ti ti-plus ti-16px"></i>
-									</button>
-								</div>
-								<div class="d-flex flex-wrap gap-2" id="fileList"></div>
-							</div>  --}}
-							
 							<div class="row mb-3">
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-status" class="form-label">
@@ -565,12 +535,12 @@
 						type: "GET",
 						dataType: "json",
 						success: function( element ) {
-							console.log('element', element);
 							let bg = '';
 							$('#editTakButton').attr('data-id', id);
 							$('#editTakButton').attr('data-task', id);
 							$('#confirmDeleteTask').attr('data-task', id);
 							$('#commentButton').attr('data-task', id);
+							$('#fileInput').attr('data-task', id);
 							
 							if( element.priority == 'high' ) { bg = 'danger'; }
 							else if( element.priority == 'medium' ) { bg = 'warning'; }
@@ -605,7 +575,7 @@
 							$('#task-details-reported-at').html(reported_at_pretty);
 							$('#task-details-updated-at').html(updated_at_pretty);
 							$('#attachmentCount').html(element.attachments);
-		
+
 							$('#task-details-status .rounded-circle').removeClass('bg-secondary bg-warning bg-info bg-success');
 							if( element.status.toLowerCase() == 'pending' ) { $('#task-details-status .rounded-circle').addClass('bg-secondary'); }
 							else if( element.status.toLowerCase() == 'progress' ) { $('#task-details-status .rounded-circle').addClass('bg-info'); }
@@ -686,22 +656,8 @@
 								`;
 							});
 
-							// Replace with actual attachments like (element.attachments)
-							const attachments = [
-								{
-									id: 1,
-									name: 'File 1',
-									url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-								},
-								{
-									id: 2,
-									name: 'File 2',
-									url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-								}
-							]
-
 							// Handle attachments
-							renderFiles(attachments, 'view');
+							renderFiles(element.files, 'view');
 		
 							$('#viewTaskModal').modal('show');
 						},
@@ -864,20 +820,63 @@
 			const files = event.target.files;
 			
 			// Render files handler
-			renderFiles(files);
+			renderFiles(files, 'upload');
 		}
 
 		// Render files handler
 		const renderFiles = (files, mode) => {
-			console.log('upload files', files);
-				
 			const fileList = document.getElementById('fileList');
 			const attachmentCount = document.getElementById('attachmentCount');
 			fileList.innerHTML = '';
-			
-			// To Do: Upload this files to server on request success, below is the request code 👇
-			Array.from(files).forEach(file => {
-				if (file instanceof File) {
+
+			if (mode == 'upload')
+			{
+				const formData = new FormData();
+				Array.from(files).forEach(file => {
+					formData.append('attachments[]', file);
+				});
+				let task_id = $('#fileInput').attr('data-task');
+				formData.append('mentorship_request_id', {{ $session_id }});
+				formData.append('task_id', task_id);
+				formData.append('_token', '{{ csrf_token() }}')
+				$.ajax({
+					url: "{{ URL::to('dashboard/mentor/mentorshipTasks/upload-attachments') }}",
+					type: 'POST',
+					data: formData,
+					processData: false,
+					contentType: false,
+					success: function(response) {
+						if( response.status )
+						{
+							Array.from(response.task.files).forEach(file => {
+								const fileDiv = document.createElement('div');
+								fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
+								fileDiv.innerHTML = `
+									<i class="ti ti-file text-info ti-20px me-2"></i>
+									<span class="text-dark fw-bold">${file.name}</span>
+									<div 
+										class="cursor-pointer me-2" 
+										onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
+									>
+										<i class="ti ti-trash text-danger ti-16px ms-2"></i>
+									</div>
+									<a href="${file.url}" download="${file.name}" class="ms-auto">
+										<i class="ti ti-download text-primary ti-16px"></i>
+									</a>
+								`;
+								fileList.appendChild(fileDiv);
+							});
+							attachmentCount.textContent = response.task.files.length;
+						} else { alertify.error( response.message ); }
+					},
+					error: function(error) {
+						console.error('Error uploading files:', error);
+					}
+				});
+			}
+			else if (mode == 'view')
+			{
+				Array.from(files).forEach(file => {
 					const fileDiv = document.createElement('div');
 					fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
 					fileDiv.innerHTML = `
@@ -885,44 +884,21 @@
 						<span class="text-dark fw-bold">${file.name}</span>
 						<div 
 							class="cursor-pointer me-2" 
-							onclick="deleteFileHandler('${file.name}', this.parentElement);"
+							onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
 						>
 							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
 						</div>
-						<a href="${URL.createObjectURL(file)}" download="${file.name}" class="ms-auto">
+						<a href="${file.url}" download="${file.url}" class="ms-auto">
 							<i class="ti ti-download text-primary ti-16px"></i>
 						</a>
 					`;
 					fileList.appendChild(fileDiv);
-				}
-			});
-			attachmentCount.textContent = fileList.children.length;
-			
-			// To Do: Use this ajax request to upload files to server
-			if (mode == 'upload') {
-				const formData = new FormData();
-				Array.from(files).forEach(file => {
-					formData.append('attachments[]', file);
-				});
-	
-				$.ajax({
-					url: "{{ URL::to('dashboard/mentor/mentorshipTasks/upload-attachments') }}",
-					type: 'POST',
-					data: formData,
-					processData: false,
-					contentType: false,
-					success: function(data) {
-						return data;
-					},
-					error: function(error) {
-						console.error('Error uploading files:', error);
-					}
 				});
 			}
 		}
 
 		// Delete file handler
-		const deleteFileHandler = (fileName, ele) => {
+		const deleteFileHandler = (fileName, fileId, ele) => {
 			$('#viewTaskModal').modal('hide');
 			Swal.fire({
 				title: 'Are you sure?',
@@ -936,22 +912,22 @@
 			}).then((result) => {
 				if (result.isConfirmed) {
 					$('#viewTaskModal').modal('show');
-					ele.remove();
-					const attachmentCount = document.getElementById('attachmentCount');
-					attachmentCount.textContent = document.getElementById('fileList').children.length;
-
-					// To Do: Use this ajax request to delete file from server
-					// $.ajax({
-					// 	url: "{{ URL::to('dashboard/mentor/mentorshipTasks/delete-attachment') }}",
-					// 	type: 'POST',
-					// 	data: { file: fileName },
-					// 	success: function(data) {
-					// 		return data;
-					// 	},
-					// 	error: function(error) {
-					// 		console.error('Error deleting file:', error);
-					// 	}
-					// });
+					$.ajax({
+						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/delete-attachments') }}",
+						type: 'POST',
+						data: { file: fileId, _token: '{{ csrf_token() }}' },
+						success: function(response) {
+							if( response.status )
+							{
+								ele.remove();
+								const attachmentCount = document.getElementById('attachmentCount');
+								attachmentCount.textContent = document.getElementById('fileList').children.length;
+							} else { alertify.error( response.message ); }
+						},
+						error: function(error) {
+							console.error('Error deleting file:', error);
+						}
+					});
 					return;
 				}
 
