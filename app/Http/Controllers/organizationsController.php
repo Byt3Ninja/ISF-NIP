@@ -182,16 +182,17 @@ class organizationsController extends Controller
 
 	public function GetLFM($path = null, $file = null)
 {
+	dd($path, $file);
     try {
         $instance = Storage::disk('UsersLFMPublic');
 
         // تحديد المسار الكامل
         $fullPath = empty($path) ? '/' . $file : '/' . $path . '/' . $file;
-
+		
         // التحقق من وجود الملف
         if (!$instance->exists($fullPath)) {
             // إذا لم يكن الملف موجودًا، إزالة '/1/' من المسار وإعادة المحاولة
-            $updatedPath = str_replace('/1/', '/', $fullPath);
+            $updatedPath = str_replace('/'.$path.'/', '/', $fullPath);
 
             if ($instance->exists($updatedPath)) {
                 $fileContent = $instance->get($updatedPath);
