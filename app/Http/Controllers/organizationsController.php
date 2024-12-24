@@ -187,7 +187,7 @@ class organizationsController extends Controller
 			 $instance = Storage::disk('UsersLFMPublic');
 
 			 $fullPath = '/' . $path . '/' . $file;
-			 
+			//  $check_file = $instance->missing( $fullPath);
 			if( $instance->directoryExists( $fullPath ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
 			$file = $instance->response( $fullPath);
 			
