@@ -180,50 +180,22 @@ class organizationsController extends Controller
 		}
 	}
 
-	public function GetLFM($path = null, $file = null)
-{
-	dd($path, $file);
-    try {
-        $instance = Storage::disk('UsersLFMPublic');
-
-        // تحديد المسار الكامل
-        $fullPath = empty($path) ? '/' . $file : '/' . $path . '/' . $file;
+	public function GetLFM( $path = null , $file = null )
+	{
 		
-        // التحقق من وجود الملف
-        if (!$instance->exists($fullPath)) {
-            // إذا لم يكن الملف موجودًا، إزالة '/1/' من المسار وإعادة المحاولة
-            $updatedPath = str_replace('/'.$path.'/', '/', $fullPath);
+		try {
+			 $instance = Storage::disk('UsersLFMPublic');
 
-            if ($instance->exists($updatedPath)) {
-                $fileContent = $instance->get($updatedPath);
-                $mimeType = $instance->mimeType($updatedPath);
-
-                if ($mimeType === 'image/svg') {
-                    $mimeType = 'image/svg+xml';
-                }
-
-                return response($fileContent, 200, [
-                    'Content-Type' => $mimeType,
-                ]);
-            }
-
-            // إذا لم يتم العثور على الملف حتى بعد التعديل، عرض صفحة 404
-            return response()->view('errors.404')->setStatusCode(404);
-        }
-
-        // إذا كان الملف موجودًا في المسار الأصلي، جلبه وعرضه
-        $fileContent = $instance->get($fullPath);
-        $mimeType = $instance->mimeType($fullPath);
-
-        if ($mimeType === 'image/svg') {
-            $mimeType = 'image/svg+xml';
-        }
-
-        return response($fileContent, 200, [
-            'Content-Type' => $mimeType,
-        ]);
-    } catch (\Throwable $th) {
-        return response()->view('errors.404')->setStatusCode(404);
-    }
-}
+			 $fullPath = '/' . $path . '/' . $file;
+			 
+			if( $instance->directoryExists( $fullPath ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+			$file = $instance->response( $fullPath);
+			
+			// $mimeType = $instance->mimeType($file);
+			// if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
+			// $file->headers->set('Content-Type', $mimeType);
+			
+			return $file;
+		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+	}
 }
