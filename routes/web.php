@@ -214,7 +214,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/myFiles', 'FilemanagerController@index');
     Route::get('/uploads/files/{id}/{path}', 'FilemanagerController@showfile')->where('path', '.*');
     Route::get('/uploads/photos/{id}/{path}', 'FilemanagerController@showimage')->where('path', '.*');
-    Route::get('/uploads/mentorship_tasks/{id}/cards/{card_id}/{path}', [MentorshipTaskController::class, 'attachments'])->where('path', '.*');
+    Route::get('/uploads/tasks/{id}/cards/{card_id}/{path}', [MentorshipTaskController::class, 'attachments'])->where('path', '.*');
     //Explore private files
     Route::get('/private/{id}/{path}', 'FilemanagerController@showprivate')->where('path', '.*');
     //FileManager for training
@@ -408,6 +408,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
         Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment');
         Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display');
+        Route::post('mentorshipTasks/upload-attachments', 'MentorshipTaskController@attach');
+        Route::post('mentorshipTasks/delete-attachments', 'MentorshipTaskController@deAttach');
 
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
         Route::post('mentorshipTasks/updateW', 'MentorshipTaskController@updateWith')->name('mentorshipTasks.updateWith');
