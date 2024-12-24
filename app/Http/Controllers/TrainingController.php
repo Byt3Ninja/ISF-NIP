@@ -910,20 +910,54 @@ class TrainingController extends Controller
             return response()->json(['success' => false, 'message' => 'Session not found or missing Zoom ID'], 404);
         }
 
-        $hostResponse = $this->meetingService->getUserIdFromMeeting($session->zoom_id);
+        $setting = \App\Settings::where('id', 1)->first();
+        $service = $setting->Meeting;
 
-        if (!$hostResponse['success']) {
-            return response()->json(['success' => false, 'message' => $hostResponse['message']], 500);
+        if ($service === 'Zoom') {
+            if (!$session->zoom_id) {
+                return response()->json(['success' => false, 'message' => 'Missing Zoom ID'], 404);
+            }
+
+            $hostResponse = $this->meetingService->getUserIdFromMeeting($session->zoom_id);
+
+            if (!$hostResponse['success']) {
+                return response()->json(['success' => false, 'message' => $hostResponse['message']], 500);
+            }
+
+            $hostId = $hostResponse['user_id'];
+
+            $response = $this->meetingService->getSessionReport($hostId, $session->zoom_id);
+            dd($response);
+        } elseif ($service === 'Teams') {
+            if (!$session->teams_meeting_id) {
+                return response()->json(['success' => false, 'message' => 'Missing Teams meeting ID'], 404);
+            }
+
+            $response = $this->meetingService->getSessionReport($session->teams_meeting_id);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Unsupported meeting service'], 400);
         }
-
-        $hostId = $hostResponse['user_id'];
-
-        $response = $this->meetingService->getSessionReport($hostId,$session->zoom_id);
-        dd($response);
 
         if ($response['success']) {
             return response()->json(['success' => true, 'data' => $response['data']], 200);
         }
+
+
+
+        // $hostResponse = $this->meetingService->getUserIdFromMeeting($session->zoom_id);
+
+        // if (!$hostResponse['success']) {
+        //     return response()->json(['success' => false, 'message' => $hostResponse['message']], 500);
+        // }
+
+        // $hostId = $hostResponse['user_id'];
+
+        // $response = $this->meetingService->getSessionReport($hostId, $session->zoom_id);
+        // dd($response);
+
+        // if ($response['success']) {
+        //     return response()->json(['success' => true, 'data' => $response['data']], 200);
+        // }
 
         return response()->json(['success' => false, 'message' => $response['message']], 500);
     }
