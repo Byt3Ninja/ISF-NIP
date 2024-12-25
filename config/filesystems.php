@@ -110,7 +110,7 @@ return [
             'driver' => 'local',
             'root' => storage_path('app/uploads/files'),
             'url' => env('APP_URL') . '/dashboard/uploads',
-            'visibility' => 'private',
+            'visibility' => 'public',
         ],
         'mentorship_tasks' => [
             'driver' => 'local',
