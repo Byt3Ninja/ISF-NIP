@@ -210,7 +210,7 @@
                  @endphp
 
                         <img 
-                            src="{{ auth()->user()->hasRole('admin') ? $imageUrl : asset('dashboard/LFMGet/' . $fileN) }}"
+                            src="{{ auth()->user()->hasRole('Admin') ? $imageUrl : asset('dashboard/LFMGet/' . $fileN) }}"
                             alt="Logo"
                             class="img-fluid"
                             style="max-width: 100%; max-height: 100%; object-fit: contain;"
