@@ -22,7 +22,7 @@
      // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
      $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
 @endphp
-          <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar" class="logo-img">
+          <img src="{{ $imageUrl }}" alt="avatar" class="logo-img">
          
       @else
       @if(!empty($setting->Logo))
