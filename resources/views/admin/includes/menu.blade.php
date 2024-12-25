@@ -119,7 +119,7 @@
     @endif
 
     <li class="{{ Request::is('*calendar*') ? 'active' : '' }} menu-item">
-      <a href="{{ route('calendar') }}" class="menu-link menu-toggle">
+      <a href="{{ route('calendar') }}" class="menu-link">
         <i class="menu-icon tf-icons ti ti-calendar"></i>
         <div>{{ __('admin.Calendar') }}</div>
       </a>
