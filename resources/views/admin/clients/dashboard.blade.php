@@ -678,7 +678,7 @@
                // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
                $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
               @endphp
-              <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar"
+              <img src="{{ $imageUrl }}" alt="avatar"
                 class="rounded-circle" height="35" width="35">
                 @else
                 <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
@@ -783,7 +783,7 @@
                     @php( $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME) )
     
     
-															<img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar" class="rounded-circle" height="40" width="40">
+															<img src="{{ $cycle->organization->image_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
                               @endif
 														</div>
 														<div class="mx-2">

@@ -7,7 +7,22 @@
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
-		
+	<style>
+		.progress-bar-container {
+		  width: 100%;
+		  background-color: #f3f3f3;
+		  border: 1px solid #ccc;
+		  border-radius: 5px;
+		  overflow: hidden;
+		  margin-top: 10px;
+		}
+		.progress-bar {
+		  height: 20px;
+		  background-color: #4caf50;
+		  width: 0%;
+		  transition: width 0.3s;
+		}
+	  </style>
 		<div class="content-body">
 			<!-- BuilderForm start -->
 			<section id="basic-input">
@@ -98,7 +113,7 @@
 			/>
 		  </div>
 		  @else
-		  <div id="holder">
+		  <div>
 			<img 
 			  id="company-logo" 
 			  src="/images/background/logo.png"
@@ -108,15 +123,17 @@
 			/>
 		  </div>
 		  @endif
-			<input type="text" class="form-control d-none" id="file1"
-			  name="img_url"  />
+		  <input type="file" class="form-control" id="file1"
+		  name="img_url"  />
 		  <!-- right bottom-icon -->
-		  
+		  <div class="progress-bar-container">
+			<div id="progress-bar" class="progress-bar"></div>
+		  </div>
 		</div>
-		<div 
+		{{-- <div 
 		  class="btn btn-outline-primary rounded-pill btn-sm lfm" data-input="file1" data-preview="holder" >
 		  {{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
-		</div>
+		</div> --}}
 	  </div>
 	  <!-- / Upload Company Logo -->
 													</div>
@@ -233,5 +250,38 @@
 
 <script>
     $('.lfm').filemanager('file');
+
+	const fileInput = document.getElementById('file1');
+  const previewImage = document.getElementById('company-logo');
+  const progressBar = document.getElementById('progress-bar');
+
+  fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadstart = () => {
+        progressBar.style.width = '0%';
+      };
+
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentLoaded = Math.round((event.loaded / event.total) * 100);
+          progressBar.style.width = `${percentLoaded}%`;
+        }
+      };
+
+      reader.onload = (event) => {
+        previewImage.src = event.target.result;
+        progressBar.style.width = '100%';
+      };
+
+      reader.onerror = () => {
+        alert('Error loading file');
+      };
+
+      reader.readAsDataURL(file);
+    }
+  });
   </script>
 @stop
