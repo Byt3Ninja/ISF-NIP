@@ -108,8 +108,8 @@ return [
         ],
         'UsersLFMPublic' => [
             'driver' => 'local',
-            'root' => storage_path('app/uploads/files'),
-            'url' => env('APP_URL') . '/dashboard/uploads',
+            'root' => public_path('orgnizations'),
+            'url' => env('APP_URL') . '/orgnizations',
             'visibility' => 'public',
         ],
         'mentorship_tasks' => [

@@ -130,13 +130,25 @@ class organizationsController extends Controller
         
 
             //store the image
-			if($request->input('img_url') != null){
-				$img_url = $request->input('img_url');
+			if($request->file('img_url') != false){
+				$img_file = $request->file('img_url'); // الملف المرفوع
+				// الحصول على اسم الصورة الأصلي أو اسم جديد حسب الحاجة
+				$counter = 1;
+				$imageName = str_replace( '.' . $img_file->getClientOriginalExtension(), '', $img_file->getClientOriginalName() ) . '-' . $counter++ . '.' . $img_file->getClientOriginalExtension();
+				$imageName = strtolower( str_replace(' ', '-', $imageName) );
+				// تخزين الصورة في المجلد المحدد في إعدادات التخزين 'UsersLFMPublic'
+				Storage::disk('UsersLFMPublic')->put($imageName, file_get_contents($img_file));
+
+				// الحصول على رابط الصورة المخزنة
+				$imagePath = Storage::disk('UsersLFMPublic')->url($imageName);
+			
 			}else{
-				$img_url = $organization->img_url;
+				$imagePath = $organization->img_url;
 			}
+			
+			
             //update
-            $organization->img_url= $img_url;
+            $organization->img_url= $imagePath;
         
 		$organization->save();
 		$user = $organization->user;
