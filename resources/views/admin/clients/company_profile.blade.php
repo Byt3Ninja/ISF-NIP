@@ -523,7 +523,7 @@
                     @endphp
                     <div class="col-md-2 mb-2">
                       <div class="border light-shadow radius-15" style="display: grid; place-items: center;">
-                        @if ($icon->icon_ar)
+                        @if ($icon && $icon->icon_ar)
                           <img src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}"
                             alt="icon" style="width: 100px; height: 100px;">
                         @endif
