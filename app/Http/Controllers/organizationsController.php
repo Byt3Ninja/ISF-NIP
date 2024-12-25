@@ -184,17 +184,25 @@ class organizationsController extends Controller
 	{
 		
 		try {
-			 $instance = Storage::disk('UsersLFMPublic');
+			$instance = Storage::disk('UsersLFMPublic');
 
-			 $fullPath = '/' . $path . '/' . $file;
-			 
-			if( $instance->directoryExists( $fullPath ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
-			$file = $instance->response( $fullPath);
-			
-			// $mimeType = $instance->mimeType($file);
-			// if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
-			// $file->headers->set('Content-Type', $mimeType);
-			
+			// تحديد المسار الكامل الأساسي
+			$fullPath = '/' . $path . '/' . $file;
+	
+			// التحقق مما إذا كان الملف مفقودًا
+			if ($instance->missing($fullPath)) {
+				// إذا كان الملف مفقودًا، إزالة الجزء `'/'.$path` من المسار
+				$fullPath = '/' . $file;
+	
+				// التحقق مرة أخرى بعد تعديل المسار
+				if ($instance->missing($fullPath)) {
+					return response()->view('errors.404')->setStatusCode(404);
+				}
+			}
+	
+			// إذا كان الملف موجودًا، استرجاعه
+			$file = $instance->response($fullPath);
+	
 			return $file;
 		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
 	}
