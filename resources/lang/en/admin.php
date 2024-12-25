@@ -1092,4 +1092,5 @@ return [
 	'Reset' => 'Reset',
 	'Image_Format' => 'Allowed JPG, GIF or PNG. Max size of 800K',
 	'Save_Changes' => 'Save Changes',
+	'Required_Field' => 'This field is required',
 ];

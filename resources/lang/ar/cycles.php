@@ -266,14 +266,6 @@ return [
     'Intermediate'=>' متوسط ',
     'Advanced'=>' متقدم ',
     'PublishProgram'=>' نشر البرنامج ',
-
-
-
-
-
-
-
-
-
+    'No sessions' => 'لا توجد جلسات',
     ];
 

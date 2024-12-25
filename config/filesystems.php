@@ -108,7 +108,7 @@ return [
         ],
         'UsersLFMPublic' => [
             'driver' => 'local',
-            'root' => storage_path('app/uploads/files/'),
+            'root' => storage_path('app/uploads/files'),
             'url' => env('APP_URL') . '/dashboard/uploads',
             'visibility' => 'private',
         ],
