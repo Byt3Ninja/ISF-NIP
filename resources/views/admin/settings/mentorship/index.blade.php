@@ -1,248 +1,266 @@
 @extends('layouts.admin')
 
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  {{-- <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css"> --}}
-  {{-- <link rel="stylesheet" href="/Datepicker/dist/css/datepicker.material.css"> --}}
-  {{-- <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet"> --}}
-  <style>
-    #mentorstable tr td {
-      padding: 0.15rem 2rem;
-    }
-  </style>
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
+{{--
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> --}}
+{{--
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css"> --}}
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+{{--
+<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css"> --}}
+{{--
+<link rel="stylesheet" href="/Datepicker/dist/css/datepicker.material.css"> --}}
+{{--
+<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet"> --}}
+<style>
+  #mentorstable tr td {
+    padding: 0.15rem 2rem;
+  }
+</style>
 @stop
 
 @section('content')
-  <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-body">
-        <section id="multiple-column-form">
-          @if (session()->has('message'))
-            <div class="alert alert-success alert-dismissible" role="alert">
-              {{ __('admin.' . session()->get('message')) }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<!-- BEGIN: Content-->
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="content-overlay"></div>
+    @if (session()->has('message'))
+    <div class="alert alert-success alert-dismissible" role="alert">
+      {{ __('admin.' . session()->get('message')) }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    @if (session()->has('message2'))
+    <div class="alert alert-danger alert-dismissible" role="alert">
+      {{ __('admin.' . session()->get('message2')) }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    <div class="content-body">
+      <section id="multiple-column-form" class="card mb-4">
+        <div class="card-header border-bottom mb-4">
+          <h4 class="card-title">{{ __('cycles.Portal Cycles Users') }}</h4>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-12 col-md-6 d-flex-align-items-center">
+              <label class="form-label fs-5 mb-2">{{ __('cycles.Select cycle from list') }}</label>
+              <fieldset class="d-flex flex-column flex-md-row gap-3">
+                <select id="cstep" class="select2 form-select"
+                    onchange="window.open('/dashboard/mentorship/view/'+this.options[this.selectedIndex].value,'_self');">
+                  @foreach ($cycles as $cycle)
+                  <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
+                    ({{ __('cycles.from') }} {{ $cycle->start->format('d-M') }} {{ __('cycles.to') }}
+                    {{ $cycle->end->format('d-M-Y') }})
+                    - {{ optional($cycle->organization)->name }}</option>
+                  @endforeach
+                  @if (!$id)
+                  <option> {{ __('cycles.No records saved') }} -
+                    ({{ __('cycles.Manage Cycle') }}).
+                  </option>
+                  @endif
+                </select>
+              </fieldset>
             </div>
-          @endif
-          @if (session()->has('message2'))
-            <div class="alert alert-danger alert-dismissible" role="alert">
-              {{ __('admin.' . session()->get('message2')) }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          @endif
-          <div class="card-header mb-4">
-            <h4 class="card-title">{{ __('cycles.Portal Cycles Users') }}</h4>
           </div>
-          <div class="row match-height">
-            <div class="col-xl-12 col-md-12 col-sm-12">
-              <div class="card mb-4 py-4">
-                <div class="card-body">
-                  <label class="form-label fs-5 mb-2">{{ __('cycles.Select cycle from list') }}</label>
-                  <fieldset class="d-flex flex-column flex-md-row gap-3">
-                    <select id="cstep" class="select2 form-control"
-                      style="margin-left: {{ $l == 'ar' ? '10px' : '0' }}; margin-right: {{ $l == 'ar' ? '0' : '10px' }}; width: 60%;"
-                      onchange="window.open('/dashboard/mentorship/view/'+this.options[this.selectedIndex].value,'_self');">
-                      @foreach ($cycles as $cycle)
-                        <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                          ({{ __('cycles.from') }} {{ $cycle->start->format('d-M') }} {{ __('cycles.to') }}
-                          {{ $cycle->end->format('d-M-Y') }})
-                          - {{ optional($cycle->organization)->name }}</option>
-                      @endforeach
-                      @if (!$id)
-                        <option> {{ __('cycles.No records saved') }} -
-                          ({{ __('cycles.Manage Cycle') }}).
-                        </option>
-                      @endif
-                    </select>
-                    <div class="input-group-append">
-                      <a class="btn btn-label-success" href="/dashboard/cycles/{{ $id }}">
-                        <i class="ti ti-pencil"></i> <span class="mx-1">{{ __('cycles.Manage Cycle') }}</span>
+          <div class="row">
+            <div class="col-12 d-flex flex-wrap gap-2">
+              <a class="btn btn-label-success mb-2" href="/dashboard/cycles/{{ $id }}">
+                <i class="ti ti-pencil"></i> <span class="mx-1">{{ __('cycles.Manage Cycle') }}</span>
+              </a>
+              <a class="btn btn-label-primary mb-2" href="/dashboard/mentorship/view/{{ $id }}">
+                <i class="ti ti-settings"></i> <span class="mx-1">{{ __('cycles.Manage sessions') }}</span>
+              </a>
+              <a class="btn btn-label-dark mb-2" href="/dashboard/mentorship/{{ $id }}/surveys">
+                <i class="ti ti-question-mark"></i> <span class="mx-1">{{ __('cycles.Manage Surveys') }}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="row">
+        <div class="col-xl-12 col-md-12 col-sm-12">
+          <div class="card mb-4">
+            <div class="card-header border-bottom border-light mb-6">
+              <h4 class="card-title">{{ __('cycles.Mentors') }}</h4>
+            </div>
+            <div class="card-body">
+              @if (count($mentors) == 0)
+              <span class="small">
+                {{ __('cycles.Add mentors to this cycle from') }} <a href="/dashboard/mentorship/assign/{{ $id }}">{{
+                  __('cycles.here') }} </a>.
+              </span>
+              @endif
+              <div class="d-flex flex-wrap gap-2">
+                @foreach ($mentors as $mentor)
+                <label class="btn btn-outline-primary mentor-label" id="label-mentor{{ $mentor->user_id }}">
+                  <div class="d-flex align-items-center">
+                    <img class="rounded-circle me-2" src="{{ $mentor->user->image_url }}" alt="click to view"
+                      height="20" width="20" />
+                    <div class="d-flex align-items-center">
+                      <span class="mx-2">
+                        {{ $mentor->user->id }}-
+                        {{ $thementor = $mentor->user->{'first_name_' . $l} . ' ' . $mentor->user->{'last_name_' . $l}
+                        }}
+                      </span>
+                      <input type="radio" value="{{ $mentor->user_id }}" id="mentor{{ $mentor->user_id }}" name="mentor"
+                        onclick="mentor({{ $mentor->user_id }},'{{ $thementor }}','{{ $mentor->mrating() }}')">
+                    </div>
+                  </div>
+                </label>
+                @endforeach
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="mentors" style="display: none;" class="mb-3">
+                <hr class="my-3">
+                <h4 class="card-title mb-4">
+                  <b id="name"></b>
+                  {{ __('cycles.Schedule') }}:
+                </h4>
+                <div class="table-responsive">
+                  <table class="table" id="mentorstable">
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="card">
+          <div class="card-header border-bottom mb-4">
+            <h4 class="card-title">{{ __('cycles.Cycle registered users') }}</h4>
+          </div>
+          <div class="table-responsive card-body">
+            <table class="table mb-0" id="userstable">
+              <thead class="bg-label-light text-nowrap">
+                <tr>
+                  <th>{{ __('cycles.Company') }}</th>
+                  <th>{{ __('cycles.User/Title') }}</th>
+                  <th>{{ __('cycles.Session') }}</th>
+                  <th>{{ __('cycles.Current Step') }}</th>
+                  <th>{{ __('cycles.Actions') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($companies as $company)
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <a class="me-2" href="/dashboard/companyProfile/{{ $company->id }}">
+                        <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
                       </a>
-                      <a class="btn btn-label-primary" href="/dashboard/mentorship/view/{{ $id }}">
-                        <i class="ti ti-settings"></i> <span class="mx-1">{{ __('cycles.Manage sessions') }}</span>
-                      </a>
-                      <a class="btn btn-label-dark" href="/dashboard/mentorship/{{ $id }}/surveys">
-                        <i class="ti ti-question-mark"></i> <span class="mx-1">{{ __('cycles.Manage Surveys') }}</span>
+                      <a href="/dashboard/companyProfile/{{ $company->id }}">
+                        <div class="d-flex align-items-center">
+                          {{ $company->name }}
+                        </div>
                       </a>
                     </div>
-                  </fieldset>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card mb-4">
-              <div class="card-header border-bottom border-light mb-6">
-                <h4 class="card-title">{{ __('cycles.Mentors') }}</h4>
-              </div>
-              <div class="card-body">
-                @if (count($mentors) == 0)
-                  <span class="small">
-                    {{ __('cycles.Add mentors to this cycle from') }} <a
-                      href="/dashboard/mentorship/assign/{{ $id }}">{{ __('cycles.here') }} </a>.
-                  </span>
-                @endif
-                <div class="d-flex flex-wrap gap-2">
-                  @foreach ($mentors as $mentor)
-                    <label class="btn btn-outline-primary mentor-label" id="label-mentor{{ $mentor->user_id }}">
-                      <div class="d-flex align-items-center">
-                        <img class="rounded-circle me-2" src="{{ $mentor->user->image_url }}" alt="click to view"
-                          height="20" width="20" />
-                        <div class="d-flex align-items-center">
-                          <span class="mx-2">
-                            {{ $mentor->user->id }}-
-                            {{ $thementor = $mentor->user->{'first_name_' . $l} . ' ' . $mentor->user->{'last_name_' . $l} }}
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center" style="width: 150px;">
+                      <a class="me-2" href="/dashboard/users/{{ $company->user->id }}/edit">
+                        <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}" alt="avatar"
+                          class="rounded-circle" height="40" width="40">
+                      </a>
+                      <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                        <div>
+                          <h6 class="mb-0">{{ $company->user->{'first_name_' . $l} }}
+                            {{ $company->user->{'last_name_' . $l} }}</h6>
+                          <span class="small">{{ $company->user->{'title_' . $l} }}</span>
+                        </div>
+                      </a>
+                    </div>
+                  </td>
+                  <td>
+                    @if (count($company->user->mentorship) > 0)
+                      <div class="d-flex align-items-center bg-light border rounded p-2" style="height: 100px; width: 300px; overflow-x: auto;">
+                        @foreach ($company->user->mentorship as $session)
+                          @if ($session->approved == 'Yes')
+                          <span class="text-wrap badge bg-white text-dark m-1" style="min-width: 100px;">
+                            M#{{ $session->mentor_id }} ({{ $session->zoom_date }})
                           </span>
-                          <input type="radio" value="{{ $mentor->user_id }}" id="mentor{{ $mentor->user_id }}"
-                            name="mentor"
-                            onclick="mentor({{ $mentor->user_id }},'{{ $thementor }}','{{ $mentor->mrating() }}')">
+                          @endif
+                        @endforeach
+                      </div>
+                    @else
+                      <div class="d-flex align-items-center justify-content-center">
+                        <div class="card-body">
+                          <span class="badge bg-white text-dark text-nowrap fs-5">{{ __('cycles.No sessions') }}</span>
                         </div>
                       </div>
-                    </label>
-                  @endforeach
-                </div>
-              </div>
-              <div class="card-body">
-                <div id="mentors" style="display: none;" class="mb-3">
-                  <hr class="my-3">
-                  <h4 class="card-title mb-4">
-                    <b id="name"></b>
-                    {{ __('cycles.Schedule') }}:
-                  </h4>
-                  <div class="table-responsive">
-                    <table class="table" id="mentorstable">
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
+                    @endif
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center text-nowrap">
+                      {{ $company->stepdata->title }}
+                    </div>
+                  </td>
+                  <td>
+                    <button
+                      onclick="add({{ $company->user->id }},{{ $company->cycledata->organization_id }},{{ $company->cycle }})"
+                      type="button" class="btn btn-label-primary btn-icon rounded-circle">
+                      <i class="ti ti-plus"></i>
+                    </button>
+                  </td>
+                </tr>
+                @endforeach
+              </tbody>
+            </table>
           </div>
-        </section>
-        <section>
-          <div class="card">
-            <div class="card-header border-bottom mb-4">
-              <h4 class="card-title">{{ __('cycles.Cycle registered users') }}</h4>
-            </div>
-            <div class="table-responsive card-body">
-              <table class="table mb-0" id="userstable">
-                <thead class="bg-label-light">
-                  <tr>
-                    <th>{{ __('cycles.Company') }}</th>
-                    <th>{{ __('cycles.User/Title') }}</th>
-                    <th>{{ __('cycles.Session') }}</th>
-                    <th>{{ __('cycles.Current Step') }}</th>
-                    <th>{{ __('cycles.Actions') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach ($companies as $company)
-                    <tr>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <a class="me-2" href="/dashboard/companyProfile/{{ $company->id }}">
-                            <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" height="40"
-                              width="40">
-                          </a>
-                          <a href="/dashboard/companyProfile/{{ $company->id }}">
-                            <div class="d-flex align-items-center">
-                              {{ $company->name }}
-                            </div>
-                          </a>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <a class="me-2" href="/dashboard/users/{{ $company->user->id }}/edit">
-                            <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}"
-                              alt="avatar" class="rounded-circle" height="40" width="40">
-                          </a>
-                          <a href="/dashboard/users/{{ $company->user->id }}/edit">
-                            <div>
-                              <h6 class="mb-0">{{ $company->user->{'first_name_' . $l} }}
-                                {{ $company->user->{'last_name_' . $l} }}</h6>
-                              <span class="small">{{ $company->user->{'title_' . $l} }}</span>
-                            </div>
-                          </a>
-                        </div>
-                      </td>
-                      <td>
-                        @if ($company->user->mentorship)
-                          @foreach ($company->user->mentorship as $session)
-                            @if ($session->approved == 'Yes')
-                              M#{{ $session->mentor_id }} ({{ $session->zoom_date }})
-                              <br>
-                            @endif
-                          @endforeach
-                        @endif
-                      </td>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          {{ $company->stepdata->title }}
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          onclick="add({{ $company->user->id }},{{ $company->cycledata->organization_id }},{{ $company->cycle }})"
-                          type="button" class="btn btn-success btn-sm rounded-circle">
-                          <i class="ti ti-plus"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   </div>
-  <!-- END: Content-->
-  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
-      <div class="modal-content">
-        <form method="post" action="/dashboard/mentorship/add" enctype="multipart/form-data" autocomplete="off">
-          <div class="modal-header">
-            <h4 class="modal-title">{{ __('cycles.Add new mentorship session') }} <span id="rname"></span>
-            </h4>
-            
-          </div>
-          <div class="modal-body">
-            @csrf
-            <input type="hidden" name="mentorid" value="0" id="mentorid">
-            <input type="hidden" name="userid" value="0" id="userid">
-            <input type="hidden" name="organization_id" id="addOrganizationID">
-            <input type="hidden" name="cycle_id" id="addCycleID">
-            <div class="form-group" id="showdates">
-              <label>{{ __('cycles.Date/Time') }}:</label>
-              <p id="selectSubtitle">{{ __('admin.SelectDateTime') }}.</p>
-              <div class="flatpickr input-group">
-                <a class="input-button" title="toggle" style="margin-left: 3px;margin-top: 3px;" data-toggle>
-                  <i class="fa fa-calendar fa-2x primary    "></i>
-                </a>
+</div>
+<!-- END: Content-->
+<div class="modal fade" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <form id="sessionForm" method="post" action="/dashboard/mentorship/add" enctype="multipart/form-data"
+        autocomplete="off">
+        <div class="modal-header">
+          <h4 class="modal-title">
+            {{ __('cycles.Add new mentorship session') }} <span id="rname"></span>
+          </h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          @csrf
+          <input type="hidden" name="mentorid" value="0" id="mentorid">
+          <input type="hidden" name="userid" value="0" id="userid">
+          <input type="hidden" name="organization_id" id="addOrganizationID">
+          <input type="hidden" name="cycle_id" id="addCycleID">
 
-                <input type="text" name="date" placeholder="{{ __('admin.selectDate') }}"
-                  class="form-control mr-1" data-input> <!-- input is mandatory -->
-
-
-                <a class="input-button" title="clear" style="margin-top: 3px" data-clear>
-                  <i class="fa fa-trash-o fa-2x danger"></i>
-                </a>
-              </div>
-              {{--                            <input type="hidden" class="date form-control" name="date" id="constrained" --}}
-              {{--                                   data-inline="true" data-multiple="true" data-open-on="today" data-time="true"> --}}
-
-              {{--                        <input class='date width-200 form-control' type="text" id="date" name="date" value="" required> --}}
+          <div class="form-group mb-4" id="showdates">
+            <label class="form-label fs-6 fw-bold">{{ __('cycles.Date/Time') }}:</label>
+            <p id="selectSubtitle">{{ __('admin.SelectDateTime') }}.</p>
+            <!-- input is mandatory -->
+            <div class="input-group mb-2">
+              <input type="text" name="date" placeholder="{{ __('admin.selectDate') }}" class="form-control"
+                id="flatpickr-date-time"
+                required
+              />
             </div>
-            <div class="form-group">
-              <label>{{ __('cycles.Meeting period') }}:</label>
+            <span class="fw-semibold text-danger" id="dateError"></span>
+            {{-- <input type="hidden" class="date form-control" name="date" id="constrained" --}} {{--
+              data-inline="true" data-multiple="true" data-open-on="today" data-time="true"> --}}
+
+            {{-- <input class='date width-200 form-control' type="text" id="date" name="date" value="" required> --}}
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label fs-6 fw-bold">{{ __('cycles.Meeting period') }}:</label>
+            <div class="input-group">
               <select name="period" class="select form-control">
                 <option value="30">30 {{ __('cycles.Minutes') }}</option>
                 <option value="60" selected>1 {{ __('cycles.Hour') }}</option>
@@ -252,36 +270,108 @@
                 <option value="300">5 {{ __('cycles.Hour') }}</option>
               </select>
             </div>
-            <label>{{ __('cycles.Add a session note') }}:</label>
-            <div class="form-group">
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label fs-6 fw-bold">{{ __('cycles.Add a session note') }}:</label>
+            <div class="input-group">
               <textarea class="form-control" id="notes" name='notes' rows="4"
                 placeholder="{{ __('cycles.Write your note here') }}."></textarea>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary ml-1">
-              
-              <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary ml-1" id="submitBtn">
+            <span class="me-2">{{ __('cycles.Submit') }}</span>
+            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="loadingSpinner"></span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
 @stop
+
+@section('scripts')
+<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
+<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
+<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+{{-- <script src="/js/jquery.datetimepicker.full.min.js"></script> --}}
+{{-- <script src="/Datepicker/dist/datepicker.js"></script> --}}
+{{-- <script src="https://cdn.jsdelivr.net/npm/flatpickr">
+  </scrit> --}}
+{{-- @if ($l == 'ar')
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/ar.js">
+</script>
+@endif --}}
+@stop
+
 @section('pagescripts')
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-  {{--    <script src="/js/jquery.datetimepicker.full.min.js"></script> --}}
-  {{--    <script src="/Datepicker/dist/datepicker.js"></script> --}}
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  @if ($l == 'ar')
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/ar.js"></script>
-  @endif
+<script src="/vuexy/assets/js/forms-selects.js"></script>
+@php
+  $addedSession = session()->has('add');
+  $notAddedSession = session()->has('notAdd');
+@endphp
+
+<script>
+  // const addedSession = '{{  $addedSession }}';
+  // const notAddedSession = '{{  $notAddedSession }}';
+
+  // console.log('notAddedSession', notAddedSession);
+  // console.log('addedSession', addedSession);
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sessionForm = document.getElementById('sessionForm');
+    const flatpickerDataTime = document.getElementById('flatpickr-date-time');
+    const dateError = document.getElementById('dateError');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    if (flatpickerDataTime) {
+      flatpickr(flatpickerDataTime, {
+      enableTime: true,
+      minDate: "today",
+      onChange: function(selectedDates, dateStr, instance) {
+        dateError.innerText = '';
+        // remove is-invalid class
+        flatpickerDataTime.classList.remove('is-invalid');
+      }
+      });
+    }
+    
+    sessionForm.addEventListener('submit', function(e) {
+      let loading = false;
+      e.preventDefault();
+      console.log('Form submitted');
 
 
-  <script type="text/javascript">
-    $(document).ready(function() {
+      let date = flatpickerDataTime.value;
+      if (date) {
+        this.submit();
+        loading = true;
+        submitBtn.disabled = true;
+        loadingSpinner.classList.remove('d-none');
+        flatpickerDataTime.classList.remove('is-invalid');
+      } else {
+        dateError.innerText = '{{ __('admin.Required_Field') }}';
+        flatpickerDataTime.focus();
+        flatpickerDataTime.classList.add('is-invalid');
+      }
+    });
+  });
+</script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
       $('#userstable').DataTable({
         "responsive": true,
         "searching": true,
@@ -319,9 +409,9 @@
         @endif
       });
     });
-  </script>
-  <script>
-    // $('.date').datetimepicker({
+</script>
+<script>
+  // $('.date').datetimepicker({
     //     timepicker:true,
     //     multiple: true,
     //     format:'Y-m-d H:i'
@@ -333,19 +423,6 @@
     //         return date;
     //     })(),
     // });
-
-
-    $(".flatpickr").flatpickr({
-      inline: false,
-      enableTime: true,
-      dateFormat: "d-m-Y H:i",
-      minDate: "today",
-      mode: "multiple",
-      locale: "ar",
-      wrap: true,
-      time_24hr: true
-
-    });
 
     function add(id, organization_id, cycle_id) {
       let mentor = $('input[name="mentor"]:checked').val();
@@ -424,5 +501,5 @@
         }
       });
     }
-  </script>
+</script>
 @stop
