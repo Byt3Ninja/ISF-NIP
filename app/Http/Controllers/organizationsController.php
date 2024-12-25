@@ -186,15 +186,22 @@ class organizationsController extends Controller
 		try {
 			$instance = Storage::disk('UsersLFMPublic');
 
-			$fullPath = Storage::get('uploads/files/'.$path.'/'.$file);
-
-            // إذا لم يتم العثور على الصورة في قاعدة البيانات
-            if (!$fullPath) {
-                return response()->view('errors.404')->setStatusCode(404);
-            }
+			// تحديد المسار الكامل الأساسي
+			$fullPath = '/' . $path . '/' . $file;
+	
+			// التحقق مما إذا كان الملف مفقودًا
+			if ($instance->missing($fullPath)) {
+				// إذا كان الملف مفقودًا، إزالة الجزء `'/'.$path` من المسار
+				$fullPath = '/' . $file;
+	
+				// التحقق مرة أخرى بعد تعديل المسار
+				if ($instance->missing($fullPath)) {
+					return response()->view('errors.404')->setStatusCode(404);
+				}
+			}
 	
 			// إذا كان الملف موجودًا، استرجاعه
-			$file = $fullPath;
+			$file = $instance->response($fullPath);
 	
 			return $file;
 		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
