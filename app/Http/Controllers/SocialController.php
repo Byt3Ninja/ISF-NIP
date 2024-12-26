@@ -6,6 +6,7 @@
  use Validator,Redirect,Response,File;
 
  use App\User;
+ use App\Settings;
  use Illuminate\Support\Str;
  use Illuminate\Support\Facades\Hash;
  use Laravel\Socialite\Facades\Socialite;
@@ -18,7 +19,13 @@ use Illuminate\Support\Facades\Http;
 
     public function redirect($provider){
     //   dd(config('services.LINKEDIN_CLIENT_ID'), config('services.LINKEDIN_CLIENT_SECRET'), config('services.LINKEDIN_REDIRECT_URI'));
-      
+        $settings = Settings::where('id', 1)->first();
+        $config = [
+            'services.google.client_id' => $settings->GOOGLE_CLIENT_ID ?? '',
+            'services.google.client_secret' => $settings->GOOGLE_CLIENT_SECRET ?? '',
+            'services.google.redirect' => $settings->GOOGLE_REDIRECT ?? '',
+        ];
+        config( $config );
         return Socialite::driver($provider)->redirect();
     }
     public function callback($provider){
