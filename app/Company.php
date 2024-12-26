@@ -19,13 +19,20 @@ class Company extends Model
         'name_ar',
         'address_en',
         'sector',
+        'Funding_Target',
+        'info_company',
         'business_categories',
+        'business_phase',
         'address_ar',
         'years_of_operations',
         'product_or_service',
+        'occupation',
+        'annual_revenue',
         'phone',
         'fax',
         'email',
+        'product_photo',
+        'product_video',
         'website',
         'est_date',
         'idea',
@@ -34,9 +41,12 @@ class Company extends Model
         'team_num',
         'stage',
         'raised_fund',
+        'equity_offered',
         'investors',
         'founder',
         'employees',
+        'collaborators',
+        'hear_about_us',
         'facebook',
         'twitter',
         'linkedin',
@@ -78,6 +88,7 @@ class Company extends Model
 
     protected $casts = [
         'business_categories' => 'array',
+        'product_photo' => 'array',
     ];
     // ===========> Attributes <==============
     public function getLogoUrlAttribute()
@@ -275,5 +286,38 @@ class Company extends Model
     public function cycle()
     {
         return $this->belongsTo(Cycle::class, 'cycle', 'id');
+    }
+
+    public static function static_categories()
+    {
+        return [
+            'Food & Beverage' => false,
+            'Technology' => false,
+            'App / Website' => false,
+            'Housewares / Home Design' => false,
+            'Health / Wellness / Nutrition' => false,
+            'Fitness' => false,
+            'Sports' => false,
+            'Beauty' => false,
+            'Clothing / Fashion' => false,
+            'Toys / Games' => false,
+            'Children' => false,
+            'Entertainment / Experiential' => false,
+            'Pets' => false,
+            'Music' => false,
+            'Holiday' => false,
+            'Other' => true
+        ];
+    }
+
+    public static function business_phase()
+    {
+        return [
+            '1' => 'Idea',
+            '2' => 'Research & Development',
+            '3' => 'Prototype / Beta Testing',
+            '4' => 'Crowdfunding',
+            '5' => 'Operating / Shipping',
+        ];
     }
 }
