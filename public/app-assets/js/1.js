@@ -413,6 +413,7 @@ $('.lfm').filemanager('file');
 
 $('.AddTeams').click(function() {
       var TeamsNo = $(this).attr('do');
+      var company = $(this).attr('company');
       
     var founder_name = $('.founder_name').val();
     var founder_email = $('.founder_email').val();
@@ -423,9 +424,8 @@ $('.AddTeams').click(function() {
     var investor_name = $('.investor_name').val();
     var investment_type = $('.investment_type').val();
 
-
         $.ajax({
-            url: '/dashboard/AddCompanyTeams', 
+            url: '/dashboard/AddCompanyTeams/'+company, 
             method: 'post',
             data: {
                 'TeamsNo': TeamsNo,
@@ -507,7 +507,7 @@ $('.AddTeams').click(function() {
 
 $('.EditTeams').click(function() {
     var id = $(this).attr('do');
-
+    var company = $(this).attr('company');
     
   var founder_name = $('.founder_name'+id).val();
   var founder_email = $('.founder_email'+id).val();
@@ -518,10 +518,8 @@ $('.EditTeams').click(function() {
   var investor_name = $('.investor_name'+id).val();
   var investment_type = $('.investment_type'+id).val();
 
-
-
       $.ajax({
-          url: '/dashboard/AddCompanyEdit', 
+          url: '/dashboard/AddCompanyEdit/'+company, 
           method: 'post',
           data: {
               'id': id,
@@ -539,11 +537,7 @@ $('.EditTeams').click(function() {
               
               if (response.state) {
                   alert(response.state);
-                 
-                  
                   location.reload();
-
-
               }else{
                   alert(errors);
               }
@@ -593,7 +587,7 @@ $('.EditTeams').click(function() {
 $('.AddMileStone').click(function() {
 
     var Plan = $(this).attr('do');
-
+    var company = $(this).attr('company');
     
     if(Plan == "Achieved_Milestones"){
     var achieved_milestone_description = $('.achieved_milestone_description').val();
@@ -612,7 +606,7 @@ $('.AddMileStone').click(function() {
   
 
         $.ajax({
-            url: '/dashboard/AddCompanyMileStone', 
+            url: '/dashboard/AddCompanyMileStone/'+company, 
             method: 'post',
             data: {
                 'achieved_milestone_description': achieved_milestone_description,
@@ -671,7 +665,7 @@ $('.AddMileStone').click(function() {
 
 $('.EditMilestone').click(function() {
     var id = $(this).attr('do');
-
+    var company = $(this).attr('company');
     
   var Achieved_name = $('.Achieved_name'+id).val();
   var Achieved_desc = $('.Achieved_desc'+id).val();
@@ -683,7 +677,7 @@ $('.EditMilestone').click(function() {
 
 
       $.ajax({
-          url: '/dashboard/EditCompanyMileStone', 
+          url: '/dashboard/EditCompanyMileStone/'+company, 
           method: 'post',
           data: {
               'id': id,
