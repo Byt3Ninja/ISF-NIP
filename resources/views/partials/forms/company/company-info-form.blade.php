@@ -100,32 +100,11 @@
           <label for="categories" class="form-label">{{ __('admin.Categories') }} *</label>
           <div class="row">
               @php
-                  $categories = [
-                      'Food & Beverage',
-                      'Technology',
-                      'App / Website',
-                      'Housewares / Home Design',
-                      'Health / Wellness / Nutrition',
-                      'Fitness',
-                      'Sports',
-                      'Beauty',
-                      'Clothing / Fashion',
-                      'Toys / Games',
-                      'Children',
-                      'Entertainment / Experiential',
-                      'Pets',
-                      'Music',
-                      'Holiday',
-                      'Other',
-                  ];
-                  
-            $selectedCategories = old('business_categories', $client->company->business_categories ?? []);
-            
-            if (is_string($selectedCategories)) {
-                $selectedCategories = json_decode($selectedCategories, true) ?? [];
-            }
+                $categories = array_keys(App\Company::static_categories());
+                $selectedCategories = old('business_categories', $client->company->business_categories ?? []);
+                if (is_string($selectedCategories)) { $selectedCategories = json_decode($selectedCategories, true) ?? []; }
               @endphp
-              
+
               @foreach ($categories as $category)
               <div class="col-md-4 col-6">
                   <div class="form-check">
@@ -224,10 +203,10 @@
           <div class="position-relative">
               <select class="form-select border-light light-shadow px-10" id="years_of_operations" name="years_of_operations" required>
                   <option value="">{{ __('admin.Select Years of Operations') }}</option>
-                  <option value="0-2" {{ optional($client->company)->years_of_operations === '0-2' ? 'selected' : '' }}>0-2</option>
-                  <option value="2-5" {{ optional($client->company)->years_of_operations === '2-5' ? 'selected' : '' }}>2-5</option>
-                  <option value="5-10" {{ optional($client->company)->years_of_operations === '5-10' ? 'selected' : '' }}>5-10</option>
-                  <option value="10+" {{ optional($client->company)->years_of_operations === '10+' ? 'selected' : '' }}>10+</option>
+                  <option value="1" {{ optional($client->company)->years_of_operations === '1' ? 'selected' : '' }}>0-2</option>
+                  <option value="2" {{ optional($client->company)->years_of_operations === '2' ? 'selected' : '' }}>2-5</option>
+                  <option value="3" {{ optional($client->company)->years_of_operations === '3' ? 'selected' : '' }}>5-10</option>
+                  <option value="4" {{ optional($client->company)->years_of_operations === '4' ? 'selected' : '' }}>10+</option>
               </select>
               <i class="ti ti-calendar-time fs-5 position-absolute top-50 translate-middle-y me-3 text-primary" style="left: 7px;"></i>
           </div>

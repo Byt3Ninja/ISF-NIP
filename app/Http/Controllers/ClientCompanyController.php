@@ -233,7 +233,7 @@ class ClientCompanyController extends Controller
                     'address_en' => 'required|string|max:500',
                     'address_ar' => 'required|string|max:500',
                     'est_date' => 'required|date',
-                    'years_of_operations' => 'required|string|in:0-2,2-5,5-10,10+',
+                    'years_of_operations' => 'required|string|in:1,2,3,4',
                     'product_or_service' => 'required|string|in:Product,Service,Product + Service',
                     'business_categories' => 'nullable|array',
                     'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
