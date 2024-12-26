@@ -3,8 +3,13 @@
     <div class="border-bottom border-light mb-6">
       <h5 class="card-title">{{ $tab['label'] }}</h5>
     </div>
-    <form method="post" action="{{ route('update_my_company') }}"
+    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('update_my_company') }}"
+  enctype="multipart/form-data">
+@endif
       {!! csrf_field() !!}
       <input type="hidden" value="1" name="CompanyN">
       <div class="row">

@@ -53,7 +53,8 @@
         <div class="col-12 text-end mt-3" style="height: 40px;">
           <div
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
-            do="Founders">
+            do="Founders"
+            company="{{ optional($client->company)->id }}">
             <i class="ti ti-plus me-3"></i>
             {{ $l == 'en' ? 'Add new founder' : 'إضافة مؤسس جديد' }}
           </div>
@@ -104,8 +105,13 @@
                         <span style="font-size: 11px;"
                           class="fw-bold">{{ __('admin.Edit') }}</span>
                       </div>
-                      <form action="{{ route('DeleteTeams_Comp') }}"
-                        method="POST" style="display: inline-block;">
+                      @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+                            <form action="{{ route('DeleteTeams_Comp', $client->company->id) }}"
+                              method="POST" style="display: inline-block;">
+                            @else
+                            <form action="{{ route('DeleteTeams_Comp') }}"
+                              method="POST" style="display: inline-block;">
+                            @endif
                         @csrf
                         <input type="hidden" value="{{ $fonder->id }}"
                           name="id">
@@ -200,7 +206,7 @@
                     <div class="text-center">
                       <div type="submit"
                         class="btn btn-primary me-3 data-submit EditTeams"
-                        do="{{ $fonder->id }}">{{ __('admin.submit') }}
+                        do="{{ $fonder->id }}"  company="{{ optional($client->company)->id }}" >{{ __('admin.submit') }}
                       </div>
                       <button type="reset" class="btn btn-label-secondary"
                         data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
@@ -272,7 +278,7 @@
           <div class="col-12 text-end mt-3" style="height: 40px;">
             <div type="submit"
               class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
-              do="Shareholders">
+              do="Shareholders" company="{{ optional($client->company)->id }}">
               <i class="ti ti-plus me-3"></i>
               {{ $l == 'en' ? 'Add new shareholder' : 'إضافة مساهم جديد' }}
             </div>
@@ -314,7 +320,13 @@
                             <i class="ti ti-pencil text-primary fs-6"></i>
                             <span style="font-size: 11px;" class="fw-bold">{{ __('admin.Edit') }}</span>
                           </div>
-                          <form action="{{ route('DeleteTeams_Comp') }}" method="POST" style="display: inline-block;">
+                          @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+                            <form action="{{ route('DeleteTeams_Comp', $client->company->id) }}"
+                              method="POST" style="display: inline-block;">
+                            @else
+                            <form action="{{ route('DeleteTeams_Comp') }}"
+                              method="POST" style="display: inline-block;">
+                            @endif
                             @csrf
                             <input type="hidden" value="{{ $Shareholder->id }}" name="id">
                             <button class="d-flex align-items-center gap-2 p-2 cursor-pointer border-0 bg-transparent w-100 text-start" type="submit" onclick="return confirm('Are you sure you want to delete this ?')">
@@ -377,7 +389,7 @@
                           </div>
                         </div>
                         <div class="text-center">
-                          <div type="submit" class="btn btn-primary me-3 data-submit EditTeams" do="{{ $Shareholder->id }}">
+                          <div type="submit" class="btn btn-primary me-3 data-submit EditTeams" do="{{ $Shareholder->id }}" company="{{ optional($client->company)->id }}">
                             {{ __('admin.submit') }}
                           </div>
                           <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
@@ -443,7 +455,7 @@
         <div class="col-12 text-end mt-3" style="height: 40px;">
           <div type="submit"
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
-            do="Investors">
+            do="Investors" company="{{ optional($client->company)->id }}">
             <i class="ti ti-plus me-3"></i>
             {{ $l == 'en' ? 'Add new investor' : 'إضافة مستثمر جديد' }}
           </div>
@@ -494,8 +506,14 @@
                             <span style="font-size: 11px;"
                               class="fw-bold">{{ __('admin.Edit') }}</span>
                           </div>
-                          <form action="{{ route('DeleteTeams_Comp') }}"
-                            method="POST" style="display: inline-block;">
+                          
+                            @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+                            <form action="{{ route('DeleteTeams_Comp', $client->company->id) }}"
+                              method="POST" style="display: inline-block;">
+                            @else
+                            <form action="{{ route('DeleteTeams_Comp') }}"
+                              method="POST" style="display: inline-block;">
+                            @endif
                             @csrf
                             <input type="hidden" value="{{ $Investor->id }}"
                               name="id">
@@ -548,22 +566,23 @@
                               {{ __('admin.investment_type') }}
                             </label>
                             <select
-                            class="form-select border-light form-control my-2 investment_type light-shadow px-10"
+                            class="form-select border-light form-control my-2 investment_type{{ $Investor->id }} light-shadow px-10"
                             id="investment_type" name="investment_type"
                             aria-placeholder="{{ __('admin.investment_type') }}"
                             autocomplete="investment_type" required>
                              <i class="ti ti-world position-absolute top-50 translate-middle-y me-3 text-primary"
                   style="left: 7px;"></i>
                             <option value="{{ __('admin.investment_type') }}" selected
-                              disabled>
-                              {{ __('admin.investment_type') }}
-                            </option>
-                            <option value="type1">
-                              Type 1</option>
-                            <option value="type2">
-                              Type 2</option>
-                            <option value="type3">
-                              Type 3</option>
+                              disabled>{{ __('admin.investment_type') }}</option>
+                            <option value="Angel_Investor" {{ $Investor->investorType == 'Angel_Investor' ? 'selected' : '' }}>{{ __('admin.Angel_Investor') }}</option>
+                            <option value="Angel_Group" {{ $Investor->investorType == 'Angel_Group' ? 'selected' : '' }}>{{ __('admin.Angel_Group') }}</option>
+                            <option value="Venture_Capital_Firm" {{ $Investor->investorType == 'Venture_Capital_Firm' ? 'selected' : '' }}>{{ __('admin.Venture_Capital_Firm') }}</option>
+                            <option value="Accelerator" {{ $Investor->investorType == 'Accelerator' ? 'selected' : '' }}>{{ __('admin.Accelerator') }}</option>
+                            <option value="Incubator" {{ $Investor->investorType == 'Incubator' ? 'selected' : '' }}>{{ __('admin.Incubator') }}</option>
+                            <option value="Corporate_Investor" {{ $Investor->investorType == 'Corporate_Investor' ? 'selected' : '' }}>{{ __('admin.Corporate_Investor') }}</option>
+                            <option value="Family_Office" {{ $Investor->investorType == 'Family_Office' ? 'selected' : '' }}>{{ __('admin.Family_Office') }}</option>
+                            <option value="Family" {{ $Investor->investorType == 'Family' ? 'selected' : '' }}>{{ __('admin.Family') }}</option>
+                            <option value="Friends" {{ $Investor->investorType == 'Friends' ? 'selected' : '' }}>{{ __('admin.Friends') }}</option>
                             <!-- Add more options as needed -->
                           </select>
                           </div>
@@ -599,8 +618,13 @@
     <div class="p-4">
       <h5 class="card-title">{{ __('admin.Working_Team_Details') }}</h5>
 
-      <form method="post" action="{{ route('update_my_company') }}"
+      @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('update_my_company') }}"
+  enctype="multipart/form-data">
+@endif
       {!! csrf_field() !!}
         <input type="hidden" value="5" name="CompanyN">
         <div class="row">
