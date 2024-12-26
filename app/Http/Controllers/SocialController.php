@@ -29,6 +29,13 @@ use Illuminate\Support\Facades\Http;
         return Socialite::driver($provider)->redirect();
     }
     public function callback($provider){
+        $settings = Settings::where('id', 1)->first();
+        $config = [
+            'services.google.client_id' => $settings->GOOGLE_CLIENT_ID ?? '',
+            'services.google.client_secret' => $settings->GOOGLE_CLIENT_SECRET ?? '',
+            'services.google.redirect' => $settings->GOOGLE_REDIRECT ?? '',
+        ];
+        config( $config );
         $getInfo = Socialite::driver($provider)->user();
 
         
