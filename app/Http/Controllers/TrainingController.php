@@ -924,6 +924,65 @@ class TrainingController extends Controller
         return response()->json(['success' => false, 'message' => $response['message']], 500);
     }
 
+    public function attendanceReport(Request $request, $id)
+    {
+        $session = TrainingSession::find($id);
+
+        if (!$session || !$session->zoom_id) {
+            return response()->json(['success' => false, 'message' => 'Session not found'], 404);
+        }
+
+        if ($this->meetingService instanceof \App\Services\TeamsService) {
+
+            $sessionReportResponse = $this->meetingService->getSessionReport($session->zoom_id);
+
+            if (!$sessionReportResponse['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch session reports: ' . $sessionReportResponse['message'],
+                ], 500);
+            }
+
+            $reports = $sessionReportResponse['data']['value'] ?? []; // Adjust based on API response structure
+            if (empty($reports)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No attendance reports found for this session.',
+                ], 404);
+            }
+
+            $reportId = $reports[0]['id'] ?? null;
+
+            if (!$reportId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to determine the report ID.',
+                ], 500);
+            }
+
+            // Step 3: Fetch the attendance report using the extracted report ID
+            $attendanceReportResponse = $this->meetingService->getMeetingAttendanceReport($session->zoom_id, $reportId);
+
+            if ($attendanceReportResponse['success']) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $attendanceReportResponse['data'],
+                ], 200);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch attendance report: ' . $attendanceReportResponse['message'],
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'This service does not support attendance reports',
+        ], 400);
+    }
+
+
     public function getdsc($id)
     {
         if ($id) {
