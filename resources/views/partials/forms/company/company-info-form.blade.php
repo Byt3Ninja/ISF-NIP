@@ -53,8 +53,9 @@
               id="country_id" name="country_id" required>
               <option value="">{{ __('admin.Country') }}</option>
               @foreach ($countries as $country)
+              
                 <option value="{{ $country->id }}"
-                  {{ $country->id == $client->country_id ? 'selected' : '' }}>
+                  {{ $country->id == $client->company->country_id ? 'selected' : '' }}>
                   {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
               @endforeach
             </select>
@@ -72,7 +73,7 @@
               @foreach ($states as $state)
                 <option value="{{ $state->id }}"
                   {{ $state->id == $stateID ? 'selected' : '' }}>
-                  {{ $state->$name }}</option>
+                  {{ $state->{'name_' . $l} }}</option>
               @endforeach
             </select>
             <i class="ti ti-map-pin fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
@@ -108,9 +109,17 @@
                 $categories = array_keys(App\Company::static_categories());
                 $selectedCategories = old('business_categories', $client->company->business_categories ?? []);
                 if (is_string($selectedCategories)) { $selectedCategories = json_decode($selectedCategories, true) ?? []; }
+
+                          // البحث عن "Other" والحصول على القيمة التي تليها
+              $otherValue = '';
+              $otherIndex = array_search('Other', $selectedCategories);
+              if ($otherIndex !== false && isset($selectedCategories[$otherIndex + 1])) {
+                  $otherValue = $selectedCategories[$otherIndex + 1];
+              }
               @endphp
 
               @foreach ($categories as $category)
+              
               <div class="col-md-4 col-6">
                   <div class="form-check">
                       <input 
@@ -139,7 +148,7 @@
             class="form-control" 
             id="other_category" 
             name="other_category" 
-            value="{{ old('other_category', '') }}" 
+            value="{{ old('other_category', $otherValue) }}" 
             placeholder="{{ __('admin.other? Please Specify') }}">
     </div>
      
