@@ -322,6 +322,7 @@ class ClientCompanyController extends Controller
                 if (in_array('Other', $validatedData['business_categories'] ?? [])) {
                     $validatedData['business_categories'] = array_diff($validatedData['business_categories'], ['Other']);
                     if (!empty($validatedData['other_category'])) {
+                        $validatedData['business_categories'][] = 'Other';
                         $validatedData['business_categories'][] = $validatedData['other_category'];
                     }
                 }
