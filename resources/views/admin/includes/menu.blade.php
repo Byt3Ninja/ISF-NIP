@@ -245,12 +245,14 @@
       </li>
 
       @if (!app()->environment('production', 'beta'))
+      @if (auth()->user()->HaveCompany != 0 && auth()->user()->company)
       <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
         <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
+      @endif
       @endif
     @endrole
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">

@@ -81,10 +81,12 @@
 									<input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
 									<i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
 								</div>
+								@role('Mentor')
 								<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
 									<span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
 									<i class="ti ti-plus ti-16px"></i>
 								</button>
+								@endrole
 							</div>
 						</div>
 					</div>
@@ -117,9 +119,11 @@
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
 							<div class="d-flex align-items-center gap-3">
+								@role('Mentor')
 								<div class="cursor-pointer" id="editTakButton" data-id="" data-task="">
 									<i class="ti ti-edit text-primary ti-20px"></i>
 								</div>
+
 								<div class="cursor-pointer" id="warningDropdown" data-bs-toggle="dropdown" aria-expanded="false">
 									<i class="ti ti-trash text-danger ti-20px"></i>
 								</div>
@@ -141,6 +145,7 @@
 										 <span>{{ __('admin.Delete') }}</span>
 									</button>
 								</div>
+								@endrole
 							</div>
 							<h6 class="modal-title" id="viewTaskModalLabel">{{ __('admin.View_Task') }}</h6>
 							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">

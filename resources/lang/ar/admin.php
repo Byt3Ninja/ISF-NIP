@@ -1112,4 +1112,5 @@ return [
 	'Save_Changes' => 'حفظ التغييرات',
 	'Required_Field' => 'هذا الحقل مطلوب',
 	'NoHavePermission' => 'لا يمكنك الوصول لهذه الصفحة',
+	
 ];
