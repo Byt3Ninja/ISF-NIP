@@ -96,8 +96,9 @@
                             </div>
                           </td>
                           <td class="text-center">
+                            {{-- /show/UserProfile/{{$session->user->id}} --}}
                             <a 
-                              href="/show/UserProfile/{{$session->user->id}}" 
+                              href="@role('Mentor') /dashboard/companyProfile/{{$session->user->company->id}} @else /dashboard/show/myProfile @endrole" 
                               class="d-flex align-items-center gap-1"
                             >
                               <img 
