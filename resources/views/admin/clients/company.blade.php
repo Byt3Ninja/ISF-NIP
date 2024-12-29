@@ -2,10 +2,10 @@
 
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet"
-    href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <style>
     .radius-15 {
       border-radius: 15px;
@@ -20,7 +20,7 @@
 
     @media screen and (min-width: 768px) {
       .custom-container {
-        width: 80%;
+        width: 79%;
       }
     }
   </style>
@@ -48,7 +48,7 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper">
+  <div class="content-wrapper" style="margin-bottom: 10rem;">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
       <!-- Alert -->
@@ -153,6 +153,12 @@
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
@@ -160,7 +166,7 @@
 
 @section('pagescripts')
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/vuexy/assets/js/forms-pickers.js"></script>
+  <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
 
   <script>
     document.getElementById('img_url').addEventListener('change', function(
