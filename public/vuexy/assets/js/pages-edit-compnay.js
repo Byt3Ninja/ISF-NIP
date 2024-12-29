@@ -65,7 +65,7 @@ const translations = {
     },
     address_en: {
       notEmpty: 'الرجاء إدخال العنوان بالإنجليزية',
-      address: 'الرجاء إدخال عنوان صالح باللغة العربية باستخدام الحروف العربية والأرقام والشرطات فقط.'
+      address: 'الرجاء إدخال عنوان صالح باللغة الانجليزية باستخدام الحروف الانجليزية والأرقام والشرطات فقط.'
     },
     address_ar: {
       notEmpty: 'الرجاء إدخال العنوان بالعربية',
@@ -249,7 +249,6 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   if (editInfoForm) {
-    console.log('Form exists', editInfoForm);
     const formValidation = FormValidation.formValidation(editInfoForm, validationConfig);
 
     // Add event listener to business categories checkboxes

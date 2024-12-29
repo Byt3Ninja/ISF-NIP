@@ -207,8 +207,6 @@
 </div>
 
 <script>
-  const categories = @json($categories);
-  console.log('categories', categories);
   document.addEventListener('DOMContentLoaded', function() {
     const checkboxes = document.querySelectorAll('.category-checkbox');
     const otherCheckbox = document.querySelector('input[value="Other"]');
