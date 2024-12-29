@@ -101,10 +101,12 @@
 							<h4 class="mb-0 text-center">
 								 {{ __('admin.No_Tasks') }}
 							</h4>
+							@role('Mentor')
 							<button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
 								<i class="ti ti-plus ti-16px me-2"></i>
 								<span class="align-middle">{{ __('admin.Add_Task') }}</span>
 							</button>
+							@endrole
 						</div>
 					@endif
 				</div>		
