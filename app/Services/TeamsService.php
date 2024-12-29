@@ -143,7 +143,6 @@ class TeamsService implements OnlineMeetingServiceInterface
     {
         $Setting = Settings::where('id', 1)->first();
         $userId = $this->getUserIdByEmail($Setting->MICROSOFT_APP_EMAIL);
-
         $meeting = [
             'subject' => $data['topic'],
             'startDateTime' => $this->toZoomTimeFormat($data['start_time']),
@@ -151,30 +150,23 @@ class TeamsService implements OnlineMeetingServiceInterface
             "lobbyBypassSettings" => [
                 "scope" => "everyone",
                 "isDialInBypassEnabled" => true
-            ],
-            'isOnlineMeeting' => true,
-            'isCalendarEvent' => true,
+            ]
+
         ];
 
-        try {
-            $response = $this->graph->createRequest('POST', "/me/onlineMeetings")
-                ->attachBody($meeting)
-                ->execute();
 
-            return [
-                'success' => true,
-                'data'    => [
-                    'id' => $response->getBody()['id'],
-                    'start_url' => $response->getBody()['joinUrl'],
-                    'join_url' => $response->getBody()['joinUrl'],
-                ],
-            ];
-        } catch (\Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Failed to create meeting: ' . $e->getMessage(),
-            ];
-        }
+        $response = $this->graph->createRequest('POST', "/users/{$userId}/onlineMeetings")
+            ->attachBody($meeting)
+            //            ->setReturnType(\ArrayObject::class)
+            ->execute();
+        return [
+            'success' => 201,
+            'data'    => [
+                'id' => $response->getBody()['id'],
+                'start_url' => $response->getBody()['joinUrl'],
+                'join_url' => $response->getBody()['joinUrl'],
+            ],
+        ];
     }
 
 
