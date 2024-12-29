@@ -245,8 +245,8 @@
       </li>
 
       @if (!app()->environment('production', 'beta'))
-      <li class="{{ Request::is('dashboard/startup/mentorshipTasks*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('startup.mentorshipTasks.home') }}" class="menu-link">
+      <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
