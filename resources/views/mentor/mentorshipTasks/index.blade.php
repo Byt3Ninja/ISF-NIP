@@ -101,12 +101,10 @@
 							<h4 class="mb-0 text-center">
 								 {{ __('admin.No_Tasks') }}
 							</h4>
-							@role('Mentor')
 							<button id="addTaskButton" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
 								<i class="ti ti-plus ti-16px me-2"></i>
 								<span class="align-middle">{{ __('admin.Add_Task') }}</span>
 							</button>
-							@endrole
 						</div>
 					@endif
 				</div>		
@@ -121,13 +119,17 @@
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
 							<div class="d-flex align-items-center gap-3">
-								@role('Mentor')
+								
 								<div class="cursor-pointer" id="editTakButton" data-id="" data-task="">
+									@role('Mentor')
 									<i class="ti ti-edit text-primary ti-20px"></i>
+									@endrole
 								</div>
-
+								
 								<div class="cursor-pointer" id="warningDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+									@role('Mentor')
 									<i class="ti ti-trash text-danger ti-20px"></i>
+									@endrole
 								</div>
 								<div class="dropdown-menu border" aria-labelledby="warningDropdown" style="background-color: #ebebed; width: 300px;">
 									<div class="d-flex justify-content-between align-items-center p-2">
@@ -142,12 +144,14 @@
 									<div class="bg-white rounded border border-secondary mb-2">
 										<p class="text-muted p-2" style="font-size: 13px;">{{ __('admin.Delete_Confirmation') }}</p>
 									</div>
+									
 									<button id="confirmDeleteTask" class="btn btn-danger" style="width: 100%;" data-task="">
 										<i class="ti ti-trash ti-20px me-2"></i>
 										 <span>{{ __('admin.Delete') }}</span>
 									</button>
+									
 								</div>
-								@endrole
+								
 							</div>
 							<h6 class="modal-title" id="viewTaskModalLabel">{{ __('admin.View_Task') }}</h6>
 							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">
