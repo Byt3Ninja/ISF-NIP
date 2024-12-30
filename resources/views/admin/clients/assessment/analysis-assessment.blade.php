@@ -91,7 +91,7 @@ $userid = auth()->user()->id;
                     ->where('assessment_id', $assessment->id)
                     ->get();
                     
-                    $scoresTotals = $scoresTotal->sum('score');
+                    $scoresTotals = $scoresTotal->sum('weighted_score');
                     
                   }else{
                     $scoresTotals = 0;
@@ -233,7 +233,7 @@ $userid = auth()->user()->id;
                     ->where('assessment_id', $assessment->id)
                     ->where('category_id', $phase->id)
                     ->get();
-                    $scores = $scoresTotal->sum('score');
+                    $scores = $scoresTotal->sum('weighted_score');
                     
                     if(!empty($scoresTotal)){
                       // إجمالي عدد الأسئلة
@@ -259,12 +259,12 @@ $userid = auth()->user()->id;
                     <h6 class="mb-0 text-{{ $color }} text-uppercase">{{ $phase->{'category_name_'. $l} }}</h6>
                   </div>
                   <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">{{ number_format($percentage, 2) }}%</h4>
+                    <h4 class="mb-0">{{ number_format($scores, 2) }}%</h4>
                     <div class="d-flex flex-column align-items-center gap-1">
                       <span class="text-xs text-secodnary">{{ __('admin.Score') }}</span>
-                      <div class="badge bg-label-info text-xs radius-10">
+                      {{-- <div class="badge bg-label-info text-xs radius-10">
                         {{ $scores }}
-                      </div>
+                      </div> --}}
                     </div>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ $userid = auth()->user()->id;
                     ->where('assessment_id', $assessment->id)
                     ->where('category_id', $category->id)
                     ->get();
-                    $scoresTotalssub = $scoresTotalsub->sum('score');
+                    $scoresTotalssub = $scoresTotalsub->sum('weighted_score');
 
                     $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
                     $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
@@ -335,7 +335,7 @@ $userid = auth()->user()->id;
                     ->where('assessment_id', $assessment->id)
                     ->where('subcategory_id', $subcategory->id)
                     ->get();
-                    $scoresTotalssub = $scoresTotalsub->sum('score');
+                    $scoresTotalssub = $scoresTotalsub->sum('weighted_score');
 
                     $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
                     $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
@@ -358,10 +358,10 @@ $userid = auth()->user()->id;
               <div class="d-flex flex-column align-items-center gap-1">
                 <span class="text-xs text-secodnary">{{ __('admin.Score') }}</span>
                 <div class="badge bg-label-info radius-10">
-                  <span class="text-xs">{{ $scoresTotalssub }}</span>
+                  <span class="text-xs">{{ $scoresTotalssub }} %</span>
                 </div>
               </div>
-              <div class="text-sm fw-bold">{{ $progress }}%</div>
+              {{-- <div class="text-sm fw-bold">{{ $progress }}%</div> --}}
             </div>
           </div>
           @endforeach
