@@ -296,7 +296,7 @@ class ClientCompanyController extends Controller
                     'address_en' => 'required|string|max:500',
                     'address_ar' => 'required|string|max:500',
                     'est_date' => 'required|date',
-                    'years_of_operations' => 'required|string|in:1,2,3,4',
+                    'years_of_operations' => 'required|string',
                     'product_or_service' => 'required|string|in:Product,Service,Product + Service',
                     'business_categories' => 'nullable|array',
                     'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
@@ -313,7 +313,6 @@ class ClientCompanyController extends Controller
                     'address_ar.required' => __('admin.Arabic Address is required'),
                     'est_date.required' => __('admin.Established Date must be a valid date'),
                     'years_of_operations.required' => __('admin.Years of Operations is required'),
-                    'years_of_operations.in' => __('admin.Invalid Years of Operations selection'),
                     'product_or_service.required' => __('admin.Product or Service is required'),
                     'product_or_service.in' => __('admin.Invalid Product or Service selection'),
                 ]);
@@ -886,7 +885,7 @@ class ClientCompanyController extends Controller
                     'address_en' => 'required|string|max:500',
                     'address_ar' => 'required|string|max:500',
                     'est_date' => 'required|date',
-                    'years_of_operations' => 'required|string|in:0-2,2-5,5-10,10+',
+                    'years_of_operations' => 'required|string',
                     'product_or_service' => 'required|string|in:Product,Service,Product + Service',
                     'business_categories' => 'nullable|array',
                     'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
@@ -903,7 +902,6 @@ class ClientCompanyController extends Controller
                     'address_ar.required' => __('admin.Arabic Address is required'),
                     'est_date.required' => __('admin.Established Date must be a valid date'),
                     'years_of_operations.required' => __('admin.Years of Operations is required'),
-                    'years_of_operations.in' => __('admin.Invalid Years of Operations selection'),
                     'product_or_service.required' => __('admin.Product or Service is required'),
                     'product_or_service.in' => __('admin.Invalid Product or Service selection'),
                 ]);
