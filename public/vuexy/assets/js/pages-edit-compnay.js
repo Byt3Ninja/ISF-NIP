@@ -16,11 +16,11 @@ const translations = {
     },
     address_en: {
       notEmpty: 'Please enter address in English',
-      address: 'Please enter a valid English address using English letters, numbers, and dashes only.'
+      address: 'Please enter a valid English address using English letters'
     },
     address_ar: {
       notEmpty: 'Please enter address in Arabic',
-      address: 'Please enter a valid Arabic address using Arabic letters, numbers, and dashes only.'
+      address: 'Please enter a valid Arabic address using Arabic letters'
     },
     est_date: {
       establishmentDate: 'Establishment date cannot be a future date'
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].address_en.notEmpty
           },
           regexp: {
-            regexp: /^[a-zA-Z0-9\s-]*$/i,
+            regexp: /^(?!\s)[a-zA-Z0-9\s,;:-]*$/i,
             message: translations[lang].address_en.address
           }
         }
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].address_ar.notEmpty
           },
           regexp: {
-            regexp: /^[\u0621-\u064A0-9\s-]*$/i,
+            regexp: /^(?!\s)[\u0621-\u064A0-9\s,;:-]*$/i,
             message: translations[lang].address_ar.address
           }
         }
