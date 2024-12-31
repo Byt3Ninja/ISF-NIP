@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <style>
+    #contentWrapper {
+      margin-bottom: 5rem;
+    }
     .radius-15 {
       border-radius: 15px;
     }
@@ -19,8 +22,11 @@
     }
 
     @media screen and (min-width: 768px) {
+      #contentWrapper {
+       margin-bottom: 12rem;
+      }
       .custom-container {
-        width: 79%;
+        width: 78%;
       }
     }
   </style>
@@ -48,7 +54,7 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper" style="margin-bottom: 10rem;">
+  <div class="content-wrapper" id="contentWrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
       <!-- Alert -->
@@ -83,7 +89,7 @@
 
       <div class="d-flex justify-content-start w-100 mb-6">
         <nav 
-          class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
+          class="nav-align-left nav-tabs-shadow mb-6 px-4 py-2 bg-white position-fixed d-none d-md-block" 
           style="height: auto; min-width: 15%; max-width: 15%;">
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">

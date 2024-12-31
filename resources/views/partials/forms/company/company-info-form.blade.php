@@ -128,6 +128,40 @@
             <input class="form-control" id="est-date" name="est_date" type="text" value="{{ $client->company ? $client->company->est_date : old('est_date') }}" placeholder="YYYY-MM-DD" />
           </div>
         </div>
+        <div class="col-md-12 col-12 mb-4">
+          <label class="form-label fs-6 fw-semibold mb-2" for="CreatedTax">{{ __('admin.Have_Rgister_Company') }} *</label>
+          <select class="form-select CreatedTax" id="CreatedTax" name="CreatedTax" required>
+            <option value="0" {{ $client->company && $client->company->CreatedTax == '0' ? 'selected' : '' }}>
+              {{ __('admin.No') }}
+            </option>
+            <option value="1" {{ $client->company && $client->company->CreatedTax == '1' ? 'selected' : '' }}>
+              {{ __('admin.Yes') }}
+            </option>
+          </select>
+        </div>
+        <div class="row ShowCreatedTax mb-3" style="{{ $client->company && $client->company->CreatedTax == '1' ? '' : 'display: none;' }}">
+          <div class="col-md-4 col-12 mb-3">
+            <label class="form-label fs-6 fw-semibold mb-2" for="Country_Register">{{ __('admin.Country_Register') }}</label>
+            <select class="form-select select2 Country_Register" id="Country_Register" name="Country_Register"
+              data-placeholder="{{ __('admin.Country') }}"
+            >
+              <option value="">{{ __('admin.Country') }}</option>
+              @foreach ($countries as $country)
+                <option value="{{ $country->id }}" {{ $client->company && $country->id == $client->company->Country_Register_id ? 'selected' : '' }}>
+                  {{ $country->emoji . ' ' . $country->{'name_' . $l} }}
+                </option>
+              @endforeach
+            </select>
+          </div>
+          <div class="col-md-4 col-12 mb-3">
+            <label class="form-label fs-6 fw-semibold mb-2" for="Commercial_Register">{{ __('admin.Commercial_Register') }} *</label>
+            <input class="form-control Commercial_Register" id="Commercial_Register" name="Commercial_Register" type="text" value="{{ $client->company ? $client->company->Commercial_Register : old('Commercial_Register') }}" style="direction: rtl;" placeholder="{{ __('admin.Commercial_Register') }} *" autocomplete="Commercial_Register">
+          </div>
+          <div class="col-md-4 col-12 mb-3">
+            <label class="form-label fs-6 fw-semibold mb-2" for="Tax_Card">{{ __('admin.Tax_Card') }} *</label>
+            <input class="form-control Tax_Card" id="Tax_Card" name="Tax_Card" type="text" value="{{ $client->company ? $client->company->Tax_Card : old('Tax_Card') }}" style="direction: rtl;" placeholder="{{ __('admin.Tax_Card') }} *" autocomplete="Tax_Card">
+          </div>
+        </div>
         <div class="col-md-6 col-12 mb-4">
           <div class="form-group w-100">
             <label class="form-label fs-6 fw-semibold mb-2" for="years_of_operations">{{ __('admin.Years of Operations') }} *</label>
@@ -159,40 +193,6 @@
                 {{ __('admin.Product + Service') }}
               </option>
             </select>
-          </div>
-        </div>
-        <div class="col-md-6 col-12 mb-4">
-          <label class="form-label fs-6 fw-semibold mb-2" for="CreatedTax">{{ __('admin.Have_Rgister_Company') }} *</label>
-          <select class="form-select CreatedTax" id="CreatedTax" name="CreatedTax" required>
-            <option value="0" {{ $client->company && $client->company->CreatedTax == '0' ? 'selected' : '' }}>
-              {{ __('admin.No') }}
-            </option>
-            <option value="1" {{ $client->company && $client->company->CreatedTax == '1' ? 'selected' : '' }}>
-              {{ __('admin.Yes') }}
-            </option>
-          </select>
-        </div>
-        <div class="row ShowCreatedTax" style="{{ $client->company && $client->company->CreatedTax == '1' ? '' : 'display: none;' }}">
-          <div class="col-md-4 col-12 mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2" for="Country_Register">{{ __('admin.Country_Register') }}</label>
-            <select class="form-select select2 Country_Register" id="Country_Register" name="Country_Register"
-              data-placeholder="{{ __('admin.Country') }}"
-            >
-              <option value="">{{ __('admin.Country') }}</option>
-              @foreach ($countries as $country)
-                <option value="{{ $country->id }}" {{ $client->company && $country->id == $client->company->Country_Register_id ? 'selected' : '' }}>
-                  {{ $country->emoji . ' ' . $country->{'name_' . $l} }}
-                </option>
-              @endforeach
-            </select>
-          </div>
-          <div class="col-md-4 col-12 mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2" for="Commercial_Register">{{ __('admin.Commercial_Register') }} *</label>
-            <input class="form-control Commercial_Register" id="Commercial_Register" name="Commercial_Register" type="text" value="{{ $client->company ? $client->company->Commercial_Register : old('Commercial_Register') }}" style="direction: rtl;" placeholder="{{ __('admin.Commercial_Register') }} *" autocomplete="Commercial_Register">
-          </div>
-          <div class="col-md-4 col-12 mb-3">
-            <label class="form-label fs-6 fw-semibold mb-2" for="Tax_Card">{{ __('admin.Tax_Card') }} *</label>
-            <input class="form-control Tax_Card" id="Tax_Card" name="Tax_Card" type="text" value="{{ $client->company ? $client->company->Tax_Card : old('Tax_Card') }}" style="direction: rtl;" placeholder="{{ __('admin.Tax_Card') }} *" autocomplete="Tax_Card">
           </div>
         </div>
         <div class="col-12 d-flex justify-content-end">
