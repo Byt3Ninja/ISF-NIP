@@ -34,14 +34,14 @@ const translations = {
     },
     password: {
       notEmpty: 'Please enter your password',
-      stringLength: 'Password must be more than or equal 8 characters',
-      strong: 'Password must be 8-20 characters long, including uppercase, lowercase, numbers, and special characters.'
+      stringLength: 'Password must be 8-20 characters long',
+      strong: 'Password must be strong including uppercase, lowercase, numbers, and special characters.'
     },
     password_confirmation: {
       notEmpty: 'Please confirm password',
       identical: 'The password and its confirm are not the same',
-      stringLength: 'Password must be more than or equal 8 characters',
-      strong: 'Password must be 8-20 characters long, including uppercase, lowercase, numbers, and special characters.'
+      stringLength: 'Password must be 8-20 characters long',
+      strong: 'Password must be strong including uppercase, lowercase, numbers, and special characters.'
     },
     terms: {
       notEmpty: 'Please agree terms & conditions'
@@ -91,14 +91,14 @@ const translations = {
     },
     password: {
       notEmpty: 'يرجى إدخال كلمة المرور الخاصة بك',
-      stringLength: 'يجب أن تكون كلمة المرور أكثر من او يساوي 8 أحرف',
-      strong: 'كلمة السر يجب أن تكون بين 8-20 حرفًا وتتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
+      stringLength: 'يجب ان تتكون كلمة المرور من 8-20 حرفًا',
+      strong: 'كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
     },
     password_confirmation: {
       notEmpty: 'يرجى تأكيد كلمة المرور',
       identical: 'كلمة المرور وتأكيدها غير متطابقين',
-      stringLength: 'يجب أن تكون كلمة المرور أكثر من او يساوي 8 أحرف',
-      strong: 'كلمة السر يجب أن تكون بين 8-20 حرفًا وتتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
+      stringLength: 'يجب ان تتكون كلمة المرور من 8-20 حرفًا',
+      strong: 'كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
     },
     terms: {
       notEmpty: 'يرجى الموافقة على الشروط والأحكام'
@@ -188,6 +188,7 @@ function getValidationConfig(lang, isMentor) {
           },
           stringLength: {
             min: 8,
+            max: 20,
             message: translations[lang].password.stringLength
           },
           regexp: {
@@ -201,20 +202,21 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].password_confirmation.notEmpty
           },
+          identical: {
+            compare: function () {
+              return document.getElementById('registerForm').querySelector('[name="password"]').value;
+            },
+            message: translations[lang].password_confirmation.identical
+          },
           stringLength: {
             min: 8,
+            max: 20,
             message: translations[lang].password_confirmation.stringLength
           },
           regexp: {
             regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
             message: translations[lang].password_confirmation.strong
           },
-          identical: {
-            compare: function () {
-              return registerForm.querySelector('[name="password"]').value;
-            },
-            message: translations[lang].password_confirmation.identical
-          }
         }
       }
     },
