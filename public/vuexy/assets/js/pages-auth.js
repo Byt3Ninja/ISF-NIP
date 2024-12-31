@@ -271,7 +271,7 @@ function getValidationConfig(lang, isMentor) {
           message: translations[lang].linkedin.notEmpty
         },
         regexp: {
-          regexp: /^(https?:\/\/)?(www\.)?linkedin\.com\/.*$/,
+          regexp: /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-_\u00C0-\u017F]+\/?$/,
           message: translations[lang].linkedin.uri
         }
       }
