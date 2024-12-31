@@ -143,7 +143,7 @@ function getValidationConfig(lang, isMentor) {
             message: translations[lang].first_name_en.notEmpty
           },
           regexp: {
-            regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
+            regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
             message: translations[lang].first_name_en.stringOnly
           }
         }
@@ -154,7 +154,7 @@ function getValidationConfig(lang, isMentor) {
             message: translations[lang].last_name_en.notEmpty
           },
           regexp: {
-            regexp: lang === 'en' ? /^[a-zA-Z]*$/i : /^[\u0621-\u064A]*$/i,
+            regexp: /^[a-zA-Z\u0621-\u064A]*$/i,
             message: translations[lang].last_name_en.stringOnly
           }
         }
