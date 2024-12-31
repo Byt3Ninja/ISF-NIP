@@ -41,17 +41,17 @@
                                 <td>
 
                                   <div class="d-flex align-items-center">
-                                    <a class="media-left mr-50">
-                                      <img src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle"
+                                    <a class="media-left">
+                                      <img src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle me-3"
                                         height="40" width="40">
                                     </a>
                                     <div class="media-body">
 
                                       <a href="{{ route('show_mentor_profile', $session->mentor->id) }}">
 
-                                        <h6 class="media-heading mb-0">{{ $session->mentor->{'first_name_' . $l} }}
+                                        <h6 class="media-heading mb-0 text-nowrap">{{ $session->mentor->{'first_name_' . $l} }}
                                           {{ $session->mentor->{'last_name_' . $l} }}</h6>
-                                        <span class="font-small-2">{{ $session->mentor->{'title_' . $l} }}</span>
+                                        <span class="font-small-2 text-nowrap">{{ $session->mentor->{'title_' . $l} }}</span>
                                       </a>
                                     </div>
                                   </div>
