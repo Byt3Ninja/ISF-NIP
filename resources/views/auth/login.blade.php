@@ -219,6 +219,18 @@
                 </div>
               </div>
             @endif
+
+            @if (session('Reset'))
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="alert alert-success">
+                    <ul>
+                      <li>{{ session('Reset') }} </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            @endif
   
             @if ($errors->has('social'))
               <div class="text-danger mb-6 bg-label-danger p-3 rounded">

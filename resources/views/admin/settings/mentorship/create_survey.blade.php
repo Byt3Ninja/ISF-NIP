@@ -68,13 +68,28 @@
 									<form method="post" action="{{ route('mentorship.store_survey', ['id' => $cycle->id]) }}">
 										{!! csrf_field() !!}
 										<div class="row">
-											<div class="col-lg-12 col-md-12 col-sm-12">
+											<div class="col-lg-9 col-md-9 col-sm-9">
 												<fieldset class="form-group">
 													<label for="survey_id">{{ __('admin.Survey') }}</label>
 													<select class="form-control form-select" name="survey_id" id="survey_id" required>
+														<option value="" selected disabled>{{ $l == 'ar' ? 'اختر' : 'Select' }} </option>
 														@foreach( $surveys as $survey )
 															<option value="{{ $survey->id }}">{{ $survey->title }}</option>
 														@endforeach
+													</select>
+												</fieldset>
+											</div>
+
+											<div class="col-lg-3 col-md-3 col-sm-3">
+												<fieldset class="form-group">
+													<label for="type">{{ __('admin.Type_Survey') }}</label>
+													<select class="form-control form-select" name="type" id="type" required>
+														
+															<option value="" selected disabled>{{ $l == 'ar' ? 'اختر' : 'Select' }} </option>
+															<option value="mentor">{{ $l == 'ar' ? 'مرشد' : 'Mentor' }}</option>
+															<option value="startup">{{ $l == 'ar' ? 'مؤسس' : 'StartUp' }}</option>
+															<option value="both">{{ $l == 'ar' ? 'الاثنين' : 'Both' }}</option>
+														
 													</select>
 												</fieldset>
 											</div>
