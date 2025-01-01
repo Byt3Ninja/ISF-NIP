@@ -69,7 +69,7 @@
 										{!! csrf_field() !!}
 										<input name="_method" type="hidden" value="PATCH" />
 										<div class="row">
-											<div class="col-lg-12 col-md-12 col-sm-12">
+											<div class="col-lg-9 col-md-9 col-sm-9">
 												<fieldset class="form-group">
 													<label for="survey_id">{{ __('admin.Survey') }}</label>
 													<select class="form-control form-select" name="survey_id" id="survey_id" required>
@@ -79,6 +79,21 @@
 													</select>
 												</fieldset>
 											</div>
+
+											<div class="col-lg-3 col-md-3 col-sm-3">
+												<fieldset class="form-group">
+													<label for="type">{{ __('admin.Type_Survey') }}</label>
+													<select class="form-control form-select" name="type" id="type" required>
+														
+															<option value="" selected disabled>{{ $l == 'ar' ? 'اختر' : 'Select' }} </option>
+															<option value="mentor" {{ $scope->type == 'mentor' ? 'selected' : '' }} >{{ $l == 'ar' ? 'مرشد' : 'Mentor' }}</option>
+															<option value="startup" {{ $scope->type == 'startup' ? 'selected' : '' }} >{{ $l == 'ar' ? 'مؤسس' : 'Start Up' }}</option>
+															<option value="both" {{ $scope->type == 'both' ? 'selected' : '' }} >{{ $l == 'ar' ? 'الاثنين' : 'Both' }}</option>
+														
+													</select>
+												</fieldset>
+											</div>
+
 										</div>
 										<div class="row my-6">
 											<div class="col-lg-12 col-md-12 col-sm-12">
@@ -87,10 +102,12 @@
 													<input type="checkbox" class="checkbox-input" id="trigger_by_session" name="trigger_by_session" {{ $scope->trigger_by_session ? 'checked' : '' }} />
 													<label for="trigger_by_session"> {{ __('admin.surveyTriggerAfterSession') }} </label>
 												</fieldset>
+
 												<fieldset class="form-group my-3">
 													<input type="checkbox" class="checkbox-input" id="trigger_by_due" name="trigger_by_due" {{ $scope->trigger_by_due ? 'checked' : '' }} />
 													<label for="trigger_by_due"> {{ __('admin.surveyTriggerAfterCycle') }} </label>
 												</fieldset>
+												
 											</div>
 										</div>
 										<div class="row">

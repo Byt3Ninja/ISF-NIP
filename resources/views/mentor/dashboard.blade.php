@@ -92,7 +92,150 @@
         __('dashboard.Admin Notes'),
         __('dashboard.Meeting Link'),
     ];
+    
+
+    $user_id = Auth::id();
+    $circle_ids = Auth::user()->mentorCycles()->get()->pluck('id');
+    if( Auth::user()->hasRole('Mentor') )
+  {
+    /// Rating
+    $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
+    $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
+    $available_surveys = collect([]);
+      
+    // load survey for mentor
+    if( !$circle_ids->isEmpty() )
+    {
+        $myMentorships = \App\MentorshipRequest::where('mentor_id', $user_id)->whereIn('cycle_id', $circle_ids)->where('approved', 'Yes')->get();
+
+    foreach( $myMentorships as $mentorship )
+    {
+      if( empty( $mentorship->zoom_date ) || empty( $mentorship->period ) ) { continue; }
+      else
+      {
+        $endAt = Carbon\carbon::parse($mentorship->zoom_date)->addMinutes($mentorship->period)->format('Y-m-d H:i:s');
+        if( now() > $endAt )
+        {
+          $surveyEligible[] = [
+            'triggered_on' => 'mentorship',
+            'triggered_at' => $mentorship->id,
+            'cycle_id' => $mentorship->cycle_id,
+            'triggered_by' => 'session'
+          ];
+        }
+      }
+    }
+    
+    $surveyEligible = collect($surveyEligible)->groupBy('triggered_on')->toArray();
+      $surveysToAdd = [];
+      
+      // $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['mentor', 'both'])->with(['myResponses'])->get();
+      $surveys = \App\SurveyScopes::whereIn('cycle_id', $circle_ids)
+        ->whereIn('type', ['mentor', 'both'])
+        ->with(['myResponses'])
+        ->get();
+
+    // تنظيم الاستطلاعات حسب الدورة
+    $surveysByCycle = $surveys->groupBy('cycle_id');
+
+    
+    
+      foreach( $surveys as $survey_scope )
+      {
+        
+        $my_responses = $survey_scope->myResponses;
+        
+        if( $survey_scope->scope == 'mentorship' ) 
+        {
+          $due = $survey_scope->trigger_by_due;
+          $session = $survey_scope->trigger_by_session;
+          $mentorship = collect($surveyEligible['mentorship']);
+          
+          $triggers = [];
+          if( $due == true ) { $triggers[] = 'due';  }
+          if( $session == true ) { $triggers[] = 'session'; }
+          $triggers = array_unique( $triggers );
+          
+          if( count( $triggers ) == 0 ) { $mentorship = $mentorship->where('triggered_at', null); }
+          
+          else { $mentorship = $mentorship->whereIn('triggered_by', $triggers); }
+          $mentorship = $mentorship->values();
+          
+          foreach( $mentorship as $conditions )
+          {
+            
+            $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+           
+            if( empty( $checkResponse ) )
+            {
+             
+              
+              $surveysToAdd[] = [
+                'user_id' => $user_id,
+                'survey_id' => $survey_scope->survey_id, 
+                'cycle_id' => $conditions['cycle_id'],
+                'scope_id' => $survey_scope->id,
+                'triggered_on' => $conditions['triggered_on'],
+                'triggered_at' => $conditions['triggered_at'],
+                'triggered_by' => $conditions['triggered_by'],
+                'responses' => Null
+              ];
+            
+              
+            }
+            
+          }
+          
+        }
+        elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
+        {
+          $due = $survey_scope->trigger_by_due;
+          $quiz = $survey_scope->trigger_by_quiz;
+          $session = $survey_scope->trigger_by_session;
+          $training = collect($surveyEligible['training']);
+          if( $due == true ) { $triggers[] = 'due';  }
+          if( $quiz == true ) { $triggers[] = 'quiz'; }
+          if( $session == true ) { $triggers[] = 'session'; }
+          $triggers = array_unique( $triggers );
+          if( count( $triggers ) == 0 ) { $training = $training->where('triggered_at', null); }
+          else { $training = $training->whereIn('triggered_by', $triggers); }
+          $training = $training->values();
+          foreach( $training as $conditions )
+          {
+            $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+            if( empty( $checkResponse ) )
+            {
+              $surveysToAdd[] = [
+                'user_id' => $user_id,
+                'survey_id' => $survey_scope->survey_id, 
+                'cycle_id' => $circle_id,
+                'scope_id' => $survey_scope->id,
+                'triggered_on' => $conditions['triggered_on'],
+                'triggered_at' => $conditions['triggered_at'],
+                'triggered_by' => $conditions['triggered_by'],
+                'responses' => Null
+              ];
+            }
+          }
+        }
+        
+      }
+      
+    
+    
+      if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
+      
+      $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->whereNull('responses')->get();
+    }
+
+    
+
+  }
   @endphp
+
+
+
+
 
   <!-- Content wrapper -->
   <div class="content-wrapper">
@@ -190,6 +333,76 @@
         </div>
         <!-- / Latest Services -->
 
+        @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
+    
+    
+    @if( Auth::user()->hasRole('Mentor') )
+    <div class="col-sm-6 col-12">
+      <div class="card">
+        <div class="card-header border-bottom py-3">
+          <h5 class="card-title m-0">
+            <i class="ti ti-user-question mr-1"></i> {{ __('dashboard.availableSurveysList') }}
+          </h5>
+        </div>
+        <div class="card-body py-6">
+          <div class="container-fluid px-0">
+            @foreach( $available_surveys as $survey )
+            <div class="row my-3">
+              <div class="col-9 py-1">
+                @if( $survey->triggered_on == 'mentorship' )
+                <i class="ti ti-bulb mx-1"></i> 
+                @elseif( $survey->triggered_on == 'training' )
+                <i class="ti ti-presentation mx-1"></i> 
+                @endif
+                {{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on) . ucFirst($survey->triggered_by) ) }} 
+                @php
+                  $middleware = collect([]);
+                  if( $survey->triggered_on == 'mentorship' )
+                  {
+                    if( $survey->triggered_by == 'session' ) { $middleware = $survey->mentorship_session; }
+                    if( $survey->triggered_by == 'due' ) { $middleware = $survey->mentorship_step; }
+                  }
+                  elseif( $survey->triggered_on == 'training' )
+                  {
+                    if( $survey->triggered_by == 'session' ) { $middleware = $survey->training_session; }
+                    if( $survey->triggered_by == 'due' ) { $middleware = $survey->training_step; }
+                    if( $survey->triggered_by == 'quiz' ) { $middleware = $survey->training_quiz; }
+                  }
+                @endphp
+                @if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on) ) }} @endif
+                @if( $survey->triggered_on == 'mentorship' )
+                  @if( $survey->triggered_by == 'session' )
+                  {{ __('dashboard.with') }} 
+                    @php $mentor = $middleware->mentor; @endphp
+                    {{ $survey->mentorship_session->user->company->{'name_' . $l} ." - ". $survey->triggered_at }}
+                  @elseif( $survey->triggered_by == 'due' )
+                    - {{ $middleware->title }}
+                  @else
+                    -
+                  @endif
+                @elseif( $survey->triggered_on == 'training' )
+                  @if( $survey->triggered_by == 'session' )
+                    {{ '(' . __('cycles.' . $middleware->type ) . ')' }} {{ $middleware->title }}
+                  @elseif( $survey->triggered_by == 'due' )
+                    - {{ $middleware->title }}
+                  @elseif( $survey->triggered_by == 'quiz' )
+                    - {{ $middleware->title }}
+                  @else
+                    -
+                  @endif
+                @endif
+              </div>
+              <div class="col-3 text-end">
+                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
+              </div>
+            </div>
+            @endforeach
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
+    @endif
         <!-- Latest Events -->
         <div class="col-sm-6 col-12">
           <div class="card">
