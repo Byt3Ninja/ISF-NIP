@@ -6,6 +6,22 @@
 @section('index_url', route('organizations.index') )
 @section('subTitle', __('admin.Edit organization'))
 @section('content')
+<style>
+	.progress-bar-container {
+	  width: 100%;
+	  background-color: #f3f3f3;
+	  border: 1px solid #ccc;
+	  border-radius: 5px;
+	  overflow: hidden;
+	  margin-top: 10px;
+	}
+	.progress-bar {
+	  height: 20px;
+	  background-color: #4caf50;
+	  width: 0%;
+	  transition: width 0.3s;
+	}
+  </style>
 <!-- BEGIN: Content-->
 <div class="app-content content">
 	<div class="content-overlay"></div>
@@ -87,9 +103,9 @@
 															<span class="text-center text-black fw-medium">{{ __('admin.Image')}}</span>
 															<div class="position-relative">
 															@if (isset($organization->image_url))
-															<div id="holder">
+															<div>
 																<img 
-																id="company-logo holder" 
+																id="company-logo" 
 																src="{{$organization->image_url }}"
 																alt="Company logo"
 																class="mb-2 radius-15"
@@ -97,26 +113,21 @@
 																
 																/>
 															</div>
-															@else
-															<div id="holder">
-																<img 
-																id="company-logo" 
-																src="/images/background/logo.png"
-																alt="Default logo"
-																style="width: 90px; height: 90px; border-radius: 10px; cursor: pointer;"
-																class="mb-2"
-																/>
-															</div>
+
 															@endif
-																<input type="text" class="form-control d-none" id="file1"
-																name="img_url"  />
+																<input type="file" class="form-control" id="file1"
+																name="img_url" />
+																
 															<!-- right bottom-icon -->
+															<div class="progress-bar-container">
+																<div id="progress-bar" class="progress-bar"></div>
+															  </div>
 															
 															</div>
-															<div 
+															{{-- <div 
 															class="btn btn-outline-primary rounded-pill btn-sm lfm" data-input="file1" data-preview="holder" >
 															{{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
-															</div>
+															</div> --}}
 														</div>
 														<!-- / Upload Company Logo -->
 													</div>
@@ -235,5 +246,38 @@
 <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
 <script>
     $('.lfm').filemanager('file');
+
+	const fileInput = document.getElementById('file1');
+	const previewImage = document.getElementById('company-logo');
+	const progressBar = document.getElementById('progress-bar');
+
+  fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadstart = () => {
+        progressBar.style.width = '0%';
+      };
+
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentLoaded = Math.round((event.loaded / event.total) * 100);
+          progressBar.style.width = `${percentLoaded}%`;
+        }
+      };
+
+      reader.onload = (event) => {
+        previewImage.src = event.target.result;
+        progressBar.style.width = '100%';
+      };
+
+      reader.onerror = () => {
+        alert('Error loading file');
+      };
+
+      reader.readAsDataURL(file);
+    }
+  });
   </script>
 @stop

@@ -219,7 +219,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                    // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
                    $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
               @endphp
-                  <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" class="w-100 h-100 border radius-15"
+                  <img src="{{ $imageUrl }}" class="w-100 h-100 border radius-15"
                     style="object-fit: contain;" alt="Program Image" />
                   @else
                   <img src="/images/background/logo.png" class="w-100 h-100 border radius-15"

@@ -120,8 +120,13 @@
                       @endif
                     </div>
                   </div>
+                  @php
+                  $sector = App\Sector::where('id', $company->sector)->first();
+
+
+                  @endphp
                   <p class="text-light mt-2 fw-medium line-clamp-1">
-                    {{ __($company->sector) }}
+                    {{ $sector ? $sector->{'name_' . $l} : $company->sector }}
                   </p>
                 </div>
 
@@ -129,7 +134,12 @@
             </div>
             <!-- Action Button -->
             <div class="col-md-2 d-flex align-items-center justify-content-end">
-
+              @if (Auth::user()->hasanyRole('Admin|organizationManager'))
+              <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
+                  style="border-radius: 15px;">
+                  {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
+                </a>
+              @endif
               @if (isset(Auth::user()->company()->first()->id) && $company->id == Auth::user()->company()->first()->id)
                 <a href="/dashboard/myCompany" class="btn btn-label-primary shadow-sm text-primary fw-bold"
                   style="border-radius: 15px;">
@@ -246,7 +256,7 @@
                       <img class="card-icon mb-2" src="/icons/development-stages.svg" alt="icon" />
                     </div>
                     <span class="text-black fs-5">{{ __('admin.Funding_Stage') }}</span>
-                    <span class="text-primary">{{ __('admin.' . $company->development_stage) ?? __('admin.N/A') }}</span>
+                    <span class="text-primary">{{ $company->development_stage ? __('admin.' . $company->development_stage) : __('admin.N/A') }}</span>
                   </div>
                 </div>
               </div>
@@ -523,7 +533,7 @@
                     @endphp
                     <div class="col-md-2 mb-2">
                       <div class="border light-shadow radius-15" style="display: grid; place-items: center;">
-                        @if ($icon->icon_ar)
+                        @if ($icon && $icon->icon_ar)
                           <img src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}"
                             alt="icon" style="width: 100px; height: 100px;">
                         @endif

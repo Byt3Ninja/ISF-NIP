@@ -206,12 +206,13 @@
                 <tr>
                   <td>
                     <div class="d-flex align-items-center">
-                      <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                        <img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
+                      <a class="media-left" href="/dashboard/companyProfile/{{ $session->user->company->id }}">
+                        <img src="{{ $session->user->company->logo_url }}" alt="avatar" 
+                          class="rounded-circle me-3"
                           height="40" width="40">
                       </a>
                       <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                        <div class="d-flex align-items-center gap-1">
+                        <div class="d-flex align-items-center gap-1 text-nowrap">
                           {{ $session->user->company->name }}
                         </div>
                       </a>
@@ -219,14 +220,15 @@
                   </td>
                   <td>
                     <div class="d-flex align-items-center">
-                      <a class="media-left mr-50" href="/dashboard/users/{{ $session->user->company->user->id }}/edit">
-                        <img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle" height="40"
+                      <a class="media-left" href="/dashboard/users/{{ $session->user->company->user->id }}/edit">
+                        <img src="{{ $session->user->image_url }}" alt="avatar" 
+                        class="rounded-circle me-3" height="40"
                           width="40">
                       </a>
                       <a href="/dashboard/users/{{ $session->user_id }}/edit">
                         <div class="media-body">
-                          <h6 class="media-heading mb-0">{{ $session->user->name }}</h6>
-                          <span class="font-small-2">{{ $session->user->title }}</span>
+                          <h6 class="media-heading mb-0 text-nowrap">{{ $session->user->name }}</h6>
+                          <span class="font-small-2 text-nowrap">{{ $session->user->title }}</span>
                         </div>
                       </a>
                     </div>
@@ -236,11 +238,12 @@
                       onclick="mentor({{ $session->mentor_id }},'{{ $session->mentor->name }}','{{ $session->mentor->mrating() }}')">
                       <div class="d-flex align-items-center">
                         <div class="avatar">
-                          <img class="img-fluid" src="{{ $session->mentor->image_url }}" alt="Mentor photo"
+                          <img class="img-fluid rounded-circle me-3" 
+                          src="{{ $session->mentor->image_url }}" alt="Mentor photo"
                             height="20" width="20"
                           />
                         </div>
-                        <span class="chip-text">
+                        <span class="chip-text text-nowrap">
                           {{ $session->mentor->name }}
                         </span>
                       </div>

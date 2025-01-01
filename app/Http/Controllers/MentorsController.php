@@ -141,6 +141,7 @@ class MentorsController extends Controller
 		$scope->cycle_id = $id;
 		$scope->organization_id = $request->organization_id;
 		$scope->scope = 'mentorship';
+		$scope->type = $request->type;
 		$scope->trigger_by_session = $request->has('trigger_by_session') ? true : false;
 		$scope->trigger_by_due = $request->has('trigger_by_due') ? true : false;
 		$scope->trigger_by_quiz = false;
@@ -180,6 +181,7 @@ class MentorsController extends Controller
 			$scope = SurveyScopes::where('cycle_id', $cycle->id)->where('scope', 'mentorship')->find( $survey );
 			if( !empty( $cycle ) )
 			{
+				$scope->type = $request->type;
 				$scope->survey_id = $request->survey_id;
 				$scope->trigger_by_session = $request->has('trigger_by_session') ? true : false;
 				$scope->trigger_by_due = $request->has('trigger_by_due') ? true : false;

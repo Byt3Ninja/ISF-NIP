@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\API\RegistrationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,6 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::post('register-company', [RegistrationController::class, 'register']);
+Route::get('uploads/companies/{path}', [RegistrationController::class, 'showImage'])->where('path', '.*');
+Route::get('company', [RegistrationController::class, 'getCompany']);

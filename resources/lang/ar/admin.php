@@ -529,7 +529,7 @@ return [
 	'noMoreFiveAllowed'  => 'لا يمكنك اضافة أكثر من 5 أجابات في الإختيار بالنجوم',
 	'surveys' => 'الاستطلاعات',
 	'surveysList' => 'قائمة الاستطلاعات',
-	'AddNewSurvey' => 'إضافة استطلاع جديد',
+	'AddNewSurvey' => 'تعيين استطلاع جديد',
 	'EditSurvey' => 'تعديل الاستطلاع',
 	'surveyTitle' => 'عنوان الاستطلاع',
 	'mentorshipSurveys' => 'استطلاعات جلسات الارشاد',
@@ -1111,4 +1111,7 @@ return [
 	'Image_Format' => 'السماح بـ JPG أو GIF أو PNG. الحجم الأقصى لـ 800 كيلوبايت',
 	'Save_Changes' => 'حفظ التغييرات',
 	'Required_Field' => 'هذا الحقل مطلوب',
+	'NoHavePermission' => 'لا يمكنك الوصول لهذه الصفحة',
+	'Type_Survey' => ' تحديد من سيقوم بالإجابة على الاستبيان ',
+	
 ];

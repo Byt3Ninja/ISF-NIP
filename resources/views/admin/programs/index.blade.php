@@ -210,7 +210,7 @@
                  @endphp
 
                         <img 
-                            src="{{ asset('dashboard/LFMGet/' . $fileN) }}"
+                            src="{{ $imageUrl }}"
                             alt="Logo"
                             class="img-fluid"
                             style="max-width: 100%; max-height: 100%; object-fit: contain;"

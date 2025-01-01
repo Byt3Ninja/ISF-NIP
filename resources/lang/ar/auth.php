@@ -27,5 +27,6 @@ return [
 	'AccountType' => 'نوع الحساب',
 	'DoYouHaveCompany' => 'هل لديك شركة أو تعمل ضمن شركة؟',
 	'Registration Disabled' => 'تم إيقاف التسجيل بشكل مؤقت',
-	'auth_error' => 'لم نتكمن من إكمال المصادقة بسبب ":reason"'
+	'auth_error' => 'لم نتكمن من إكمال المصادقة بسبب ":reason"',
+	'password_reset_success' => 'تم تغيير كلمة المرور بنجاح',
 ];

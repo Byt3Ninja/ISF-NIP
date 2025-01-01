@@ -264,6 +264,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
                   }
                     // $('.refreshDiv').load(location.href + ' .refreshDiv');
                     console.log(response.message);
+                    console.log(response);
                     // location.reload();
 
                     if (i === index) {

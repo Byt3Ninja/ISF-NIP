@@ -538,7 +538,7 @@ return [
 	'noMoreFiveAllowed'  => 'No more than 5 answers are allowed in star rating survey',
 	'surveys' => 'Surveys',
 	'surveysList' => 'Surveys List',
-	'AddNewSurvey' => 'Add new Survey',
+	'AddNewSurvey' => 'Assign new Survey',
 	'EditSurvey' => 'Edit Survey',
 	'surveyTitle' => 'Title',
 	'mentorshipSurveys' => 'Mentorship Surveys',
@@ -1093,4 +1093,6 @@ return [
 	'Image_Format' => 'Allowed JPG, GIF or PNG. Max size of 800K',
 	'Save_Changes' => 'Save Changes',
 	'Required_Field' => 'This field is required',
+	'NoHavePermission' => '	You do not have permission to access this page',
+	'Type_Survey' => 'Specify who will answer the survey'
 ];

@@ -222,19 +222,22 @@
     ->get();
 	
 	
-	/// Rating
-	$notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
-	$notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
-  $available_surveys = collect([]);
+	
   if( Auth::user()->hasRole('Registered') )
   {
+    /// Rating
+    $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
+    $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
+    $available_surveys = collect([]);
     // load survey for startup
     if( Auth::user()->company && $circle_id != 0 )
     {
       $surveysToAdd = [];
-      $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->with(['myResponses'])->get();
+      $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['startup', 'both'])->with(['myResponses'])->get();
+      
       foreach( $surveys as $survey_scope )
       {
+        
         $my_responses = $survey_scope->myResponses;
         if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
         {
@@ -302,6 +305,7 @@
       $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
     }
   }
+
 	/// My sessions
 	if( !empty( Auth::user()->company ) ) { $sessions = \App\TrainingSession::where("step_id", Auth::user()->company->step)->orderBy('datetime','ASC')->take(1)->get(); }
 	else { $sessions = []; }
@@ -545,6 +549,7 @@
 		@endif
     @endif
     @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
+    @if( Auth::user()->hasRole('Registered') )
     <div class="col-sm-6 col-12">
       <div class="card">
         <div class="card-header border-bottom py-3">
@@ -609,6 +614,74 @@
         </div>
       </div>
     </div>
+    @endif
+    @if( Auth::user()->hasRole('Mentor') )
+    <div class="col-sm-6 col-12">
+      <div class="card">
+        <div class="card-header border-bottom py-3">
+          <h5 class="card-title m-0">
+            <i class="ti ti-user-question mr-1"></i> {{ __('dashboard.availableSurveysList') }}
+          </h5>
+        </div>
+        <div class="card-body py-6">
+          <div class="container-fluid px-0">
+            @foreach( $available_surveys as $survey )
+            <div class="row my-3">
+              <div class="col-9 py-1">
+                @if( $survey->triggered_on == 'mentorship' )
+                <i class="ti ti-bulb mx-1"></i> 
+                @elseif( $survey->triggered_on == 'training' )
+                <i class="ti ti-presentation mx-1"></i> 
+                @endif
+                {{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on) . ucFirst($survey->triggered_by) ) }} 
+                @php
+                  $middleware = collect([]);
+                  if( $survey->triggered_on == 'mentorship' )
+                  {
+                    if( $survey->triggered_by == 'session' ) { $middleware = $survey->mentorship_session; }
+                    if( $survey->triggered_by == 'due' ) { $middleware = $survey->mentorship_step; }
+                  }
+                  elseif( $survey->triggered_on == 'training' )
+                  {
+                    if( $survey->triggered_by == 'session' ) { $middleware = $survey->training_session; }
+                    if( $survey->triggered_by == 'due' ) { $middleware = $survey->training_step; }
+                    if( $survey->triggered_by == 'quiz' ) { $middleware = $survey->training_quiz; }
+                  }
+                @endphp
+                @if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on) ) }} @endif
+                @if( $survey->triggered_on == 'mentorship' )
+                  @if( $survey->triggered_by == 'session' )
+                  {{ __('dashboard.with') }} 
+                    @php $mentor = $middleware->mentor; @endphp
+                    {{ $mentor->name }}
+                  @elseif( $survey->triggered_by == 'due' )
+                    - {{ $middleware->title }}
+                  @else
+                    -
+                  @endif
+                @elseif( $survey->triggered_on == 'training' )
+                  @if( $survey->triggered_by == 'session' )
+                    {{ '(' . __('cycles.' . $middleware->type ) . ')' }} {{ $middleware->title }}
+                  @elseif( $survey->triggered_by == 'due' )
+                    - {{ $middleware->title }}
+                  @elseif( $survey->triggered_by == 'quiz' )
+                    - {{ $middleware->title }}
+                  @else
+                    -
+                  @endif
+                @endif
+              </div>
+              <div class="col-3 text-end">
+                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
+              </div>
+            </div>
+            @endforeach
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
+
     @endif
         <!-- / Latest Services -->
 
@@ -678,7 +751,7 @@
                // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
                $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
               @endphp
-              <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar"
+              <img src="{{ $imageUrl }}" alt="avatar"
                 class="rounded-circle" height="35" width="35">
                 @else
                 <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
@@ -783,7 +856,7 @@
                     @php( $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME) )
     
     
-															<img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar" class="rounded-circle" height="40" width="40">
+															<img src="{{ $cycle->organization->image_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
                               @endif
 														</div>
 														<div class="mx-2">
@@ -913,25 +986,26 @@
 							<h4 class="card-title align-items-center">
 								<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
 								@if($days!=14)
-								<div onclick="redirectWithDays('14')" class="btn btn-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
+								<div onclick="redirectWithDays('14')" class="btn btn-label-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
 								@else
-								<div onclick="redirectWithDays('14')" class="btn btn-warning" id="forteenDays"> 14 {{__('cycles.days')}}</div>
+								<div onclick="redirectWithDays('14')" class="btn btn-label-warning" id="forteenDays"> 14 {{__('cycles.days')}}</div>
 								@endif
 								@if($days!=7)
-								<div onclick="redirectWithDays('7')" class="btn btn-success" id="sevenDays"> 7 {{__('cycles.days')}}</div>
+								<div onclick="redirectWithDays('7')" class="btn btn-label-success" id="sevenDays"> 7 {{__('cycles.days')}}</div>
 								@else
-								<div onclick="redirectWithDays('7')" class="btn btn-warning" id="sevenDays"> 7 {{__('cycles.days')}}</div>
+								<div onclick="redirectWithDays('7')" class="btn btn-label-warning" id="sevenDays"> 7 {{__('cycles.days')}}</div>
 								@endif
-								<a href="/dashboard/mentorship/mine"><div class="btn btn-info">{{__('cycles.showAll')}}</div></a>
+								<a href="/dashboard/mentorship/mine"><div class="btn btn-label-info">{{__('cycles.showAll')}}</div></a>
 								
 							</h4>
+						</div>
 
-							<div class="card-body">
-								<div class="card ">
+							<div class="">
+								<div class="">
 									<div class="table-responsive">
 										<table class="table mb-0 sessonsTable" >
-											<thead class="thead-dark">
-											<tr>
+                      <thead class="bg-label-light">
+                        <tr>
 												{{-- <th>{{__('cycles.Company')}}</th> --}}
 												<th>{{__('cycles.User/Title')}}</th>
 												<th>{{__('cycles.Mentor')}}</th>
@@ -960,27 +1034,27 @@
 														</div>
 													</td> --}}
 													<td>
-														<div class="d-flex align-items-center gap-1">
-															<a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
-																<img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+														<div class="d-flex align-items-center">
+															<a class="media-left" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
+																<img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
 															</a>
 															<a href="/dashboard/users/{{$session->user_id}}/edit">
 																<div class="media-body">
-																	<h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
-																	<span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
+																	<h6 class="media-heading mb-0 text-nowrap">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
+																	<span class="font-small-2 text-nowrap">{{$session->user->{'title_'.$l} }}</span>
 																</div>
 															</a>
 														</div>
 													</td>
 													<td>
-														<div style="cursor: pointer;" class="chip mr-1" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
+														<div style="cursor: pointer;" class="d-flex align-items-center" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
 															<div class="chip-body">
 																<div class="avatar">
-																	<img class="img-fluid" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
+																	<img class="img-fluid rounded-circle me-3" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
 																</div>
-														<span class="chip-text">
-													{{$session->mentor->name}}
-														</span>
+                                <span class="chip-text text-nowrap">
+                                  {{$session->mentor->name}}
+                                </span>
 															</div>
 														</div>
 													</td>
@@ -1016,7 +1090,6 @@
 							</div>
 							
 
-						</div>
 
 						
 					</div>
@@ -1032,18 +1105,17 @@
 			<div class="row">
 				<div class="col-md-12">
 					<div class="card">
-						<div class="card-header border-bottom">
+						<div class="card-header border-bottom mb-4">
 							<h4 class="card-title align-items-center">
                 <i class="ti ti-school ti-28px"></i>
                 <span class="mx-2">{{ __("dashboard.Mentors") }}</span>
 							</h4>
-
 						</div>
-						<div class="card-body">
-							<div class="card ">
+						<div class="">
+							<div class="">
 								<div class="table-responsive">
 									<table class="table" id="mentorstable">
-										<thead class="thead-dark">
+                    <thead class="bg-label-light">
 											<tr>
 												<th>#</th>
 												<th>{{__('dashboard.Name/Title')}}</th>
@@ -1060,13 +1132,13 @@
 													<td>
                             
 														<div class="d-flex align-items-center gap-1">
-															<a class="media-left mr-50">
-																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+															<a class="media-left">
+																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
 															</a>
                               <a target="_blank" href="{{route('show_mentor_profile', ($mentor->user)->id)}}">
 															<div class="media-body">
-																<h6 class="media-heading mb-0">{{optional($mentor->user)->name }}</h6>
-																<span class="font-small-2">{{optional($mentor->user)->title }}</span>
+																<h6 class="media-heading mb-0 text-nowrap">{{optional($mentor->user)->name }}</h6>
+																<span class="font-small-2 text-nowrap">{{optional($mentor->user)->title }}</span>
 															</div>
                             </a>
 														</div>
@@ -1076,11 +1148,11 @@
 													<td> {{optional($mentor->user)->bio->{'specialization_'.$l} ?? '-' }} </td>
 													<td>
 														@if (optional($mentor->user)->bio->linkedin ??0)
-															<a title="Linkedin URL" target="_blank" href="{{optional($mentor->user)->bio->linkedin}}" class="btn btn-icon rounded-circle btn-primary"> <i class="fa-brands fa-linkedin-in"></i></a>
+															<a title="Linkedin URL" target="_blank" href="{{optional($mentor->user)->bio->linkedin}}" class="btn btn-icon rounded-circle btn-label-primary"> <i class="fa-brands fa-linkedin-in"></i></a>
 														@endif
 													</td>
 													<td>
-														<button onclick="request({{$mentor->user_id}},'{{optional($mentor->user)->{'first_name_'.$l} }} {{optional($mentor->user)->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-primary">
+														<button onclick="request({{$mentor->user_id}},'{{optional($mentor->user)->{'first_name_'.$l} }} {{optional($mentor->user)->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-label-success">
 															<i class="fa fa-plus"></i>
 														</button>
 													</td>

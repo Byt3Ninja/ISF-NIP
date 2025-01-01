@@ -363,7 +363,55 @@ public function MakeAssessment()
                 $assessment_user->save();
                 return response()->json(['success' => true, 'message' => '1']);
             }
-            return response()->json(['success' => true, 'message' => 'تم تحديث الإجابة بنجاح']);
+            
+
+           
+                $l = app()->getLocale();
+                $userid = auth()->user()->id;
+                $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
+        
+                if($assessment_user != null){
+        
+                 $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
+        
+                 $user_scores = $categories->map(function ($category) use ($assessment_user) {
+                     $questions = $category->question->where('assessment_id', $assessment_user->id);
+                     $subcategories = $category->subcategory;
+                     $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
+                         $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
+                         return $subcategory;
+                     });
+                     $category->subcategories = $subcategories;
+                     return $category;
+                 });
+        
+            // استخراج الإجابات
+            $answers = $user_scores->pluck('Answers')->map(function ($answer) {
+                return json_decode($answer, true);
+            })->filter()->toArray();
+        
+            $countanswered = $user_scores->whereNotNull('Result_assessment')->count();
+            $countNotanswered = $user_scores->whereNull('Result_assessment')->count();
+            $totalQuestions = $countanswered + $countNotanswered;
+        
+            $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+                 
+            
+                }else{
+                    return redirect()->route('analysis-assessment');
+                }
+                
+                return response()->json(['success' => true,
+                 'message' => 'تم تحديث الإجابة بنجاح',
+                 'user_scores' => $user_scores,
+                 'answers' => $answers,
+                 'assessment_user' => $assessment_user
+            
+            ]);
+            
+            
+
+            
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'حدث خطأ أثناء تحديث الإجابة']);
         }

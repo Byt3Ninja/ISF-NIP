@@ -22,7 +22,7 @@
      // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
      $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
 @endphp
-          <img src="{{ asset('dashboard/LFMGet/' . $fileN) }}" alt="avatar" class="logo-img">
+          <img src="{{ $imageUrl }}" alt="avatar" class="logo-img">
          
       @else
       @if(!empty($setting->Logo))
@@ -245,12 +245,14 @@
       </li>
 
       @if (!app()->environment('production', 'beta'))
-      <li class="{{ Request::is('dashboard/startup/mentorshipTasks*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('startup.mentorshipTasks.home') }}" class="menu-link">
+      @if (auth()->user()->HaveCompany != 0 && auth()->user()->company)
+      <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
+      @endif
       @endif
     @endrole
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
@@ -273,53 +275,12 @@
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
-
-      @if (!app()->environment('production', 'beta'))
-      <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
-        <a href="{{ route('Tags.index') }}" class="menu-link">
-          <i class="ti ti-flag me-3 ti-md"></i>
-          <div>{{ __('admin.Tags') }}</div>
-        </a>
-      </li>
-
-      
-      
-      <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('Category.index') }}" class="menu-link">
-          <i class="ti ti-flag me-3 ti-md"></i>
-          <div>{{ __('admin.Categories') }}</div>
-        </a>
-      </li>
-
-      <li class="{{ Request::is('dashboard/subcategories*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('subcategories.index') }}" class="menu-link">
-          <i class="ti ti-flag me-3 ti-md"></i>
-          <div>{{ __('admin.SubCategories') }}</div>
-        </a>
-      </li>
-
-      <li class="{{ Request::is('*stages') ? 'active' : '' }} menu-item">
-        <a href="{{ route('stages.index') }}" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-settings"></i>
-          <div>{{ __('admin.Stages') }}</div>
-        </a>
-      </li>
-      
-
-
-      <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
-        <a href="{{ route('Labels.index') }}" class="menu-link">
-          <i class="ti ti-flag me-3 ti-md"></i>
-          <div>{{ __('admin.Labels') }}</div>
-        </a>
-      </li>
-    @endif
     @endif
 
     @can('edit_forms')
       <li class="{{ Request::is('dashboard/show-builder*', 'dashboard/show-form*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/show-builder" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-layout-grid"></i>
+          <i class="menu-icon tf-icons ti ti-forms"></i>
           <div>{{ __('admin.Forms builder') }}</div>
         </a>
       </li>
@@ -394,7 +355,7 @@
 <li
 class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
 <a class="menu-link menu-toggle">
-  <i class="ti ti-clock-hour-2 me-3 ti-md"></i>
+  <i class="ti ti-circle-dashed-check ti-md me-3"></i>
   <div>{{ __('admin.Assessments') }}</div>
 </a>
 <ul class="menu-sub">
@@ -633,7 +594,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         <li
           class="{{ Request::is('*services*', '', 'dashboard/requests/all', 'dashboard/room*') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons ti ti-components"></i>
+            <i class="menu-icon tf-icons ti ti-arrows-move"></i>
             <div>{{ __('admin.Services') }}</div>
           </a>
           <ul class="menu-sub">
@@ -761,7 +722,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         @can('edit_settings')
           <li id="settingMenu" class="menu-item">
             <a class="menu-link menu-toggle">
-              <i class="menu-livicon" data-icon="wrench"></i>
+              <i class="ti ti-home-cog me-3 ti-md" data-icon="wrench"></i>
               <div>{{ __('admin.Homesettings') }}</div>
             </a>
             <ul class="menu-sub">
@@ -857,6 +818,45 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           </li>
         @endcan
       @endif
+    @endif
+
+    @if (auth()->user()->hasRole('Admin'))
+      @if (!app()->environment('production', 'beta'))
+      <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Tags.index') }}" class="menu-link">
+          <i class="ti ti-tags me-3 ti-md"></i>
+          <div>{{ __('admin.Tags') }}</div>
+        </a>
+      </li>
+      
+      <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Category.index') }}" class="menu-link">
+          <i class="ti ti-category-2 me-3 ti-md"></i>
+          <div>{{ __('admin.Categories') }}</div>
+        </a>
+      </li>
+
+      <li class="{{ Request::is('dashboard/subcategories*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('subcategories.index') }}" class="menu-link">
+          <i class="ti ti-category-plus me-3 ti-md"></i>
+          <div>{{ __('admin.SubCategories') }}</div>
+        </a>
+      </li>
+
+      <li class="{{ Request::is('*stages') ? 'active' : '' }} menu-item">
+        <a href="{{ route('stages.index') }}" class="menu-link">
+          <i class="ti ti-stack-2 me-3 ti-md"></i>
+          <div>{{ __('admin.Stages') }}</div>
+        </a>
+      </li>
+      
+      <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
+        <a href="{{ route('Labels.index') }}" class="menu-link">
+          <i class="ti ti-flag me-3 ti-md"></i>
+          <div>{{ __('admin.Labels') }}</div>
+        </a>
+      </li>
+    @endif
     @endif
   </ul>
 </aside>
