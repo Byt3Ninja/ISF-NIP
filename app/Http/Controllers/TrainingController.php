@@ -888,76 +888,21 @@ class TrainingController extends Controller
         }
     }
 
-    // public function sessionReport(Request $request, $id)
-    // {
-    //     $session = TrainingSession::find($id);
-
-    //     $response = $this->meetingService->getSessionReport($session->zoom_id);
-    //     dd($response);
-
-    //     if ($response['success']) {
-    //         return response()->json(['success' => true, 'data' => $response['data']], 200);
-    //     }
-
-    //     return response()->json(['success' => false, 'message' => $response['message']], 500);
-    // }
-
 
     public function sessionReport(Request $request, $id)
     {
         $session = TrainingSession::find($id);
+
         if (!$session || !$session->zoom_id) {
-            return response()->json(['success' => false, 'message' => 'Session not found or missing Zoom ID'], 404);
+            return response()->json(['success' => false, 'message' => 'Session not found'], 404);
         }
 
-        $setting = \App\Settings::where('id', 1)->first();
-        $service = $setting->Meeting;
-
-        if ($service === 'Zoom') {
-            if (!$session->zoom_id) {
-                return response()->json(['success' => false, 'message' => 'Missing Zoom ID'], 404);
-            }
-
-            $hostResponse = $this->meetingService->getUserIdFromMeeting($session->zoom_id);
-
-            if (!$hostResponse['success']) {
-                return response()->json(['success' => false, 'message' => $hostResponse['message']], 500);
-            }
-
-            $hostId = $hostResponse['user_id'];
-
-            $response = $this->meetingService->getSessionReport($hostId, $session->zoom_id);
-            dd($response);
-        } elseif ($service === 'Teams') {
-            if (!$session->teams_meeting_id) {
-                return response()->json(['success' => false, 'message' => 'Missing Teams meeting ID'], 404);
-            }
-
-            $response = $this->meetingService->getSessionReport($session->teams_meeting_id);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Unsupported meeting service'], 400);
-        }
+        $response = $this->meetingService->getSessionReport($session->zoom_id);
+        dd($response);
 
         if ($response['success']) {
             return response()->json(['success' => true, 'data' => $response['data']], 200);
         }
-
-
-
-        // $hostResponse = $this->meetingService->getUserIdFromMeeting($session->zoom_id);
-
-        // if (!$hostResponse['success']) {
-        //     return response()->json(['success' => false, 'message' => $hostResponse['message']], 500);
-        // }
-
-        // $hostId = $hostResponse['user_id'];
-
-        // $response = $this->meetingService->getSessionReport($hostId, $session->zoom_id);
-        // dd($response);
-
-        // if ($response['success']) {
-        //     return response()->json(['success' => true, 'data' => $response['data']], 200);
-        // }
 
         return response()->json(['success' => false, 'message' => $response['message']], 500);
     }
@@ -978,6 +923,65 @@ class TrainingController extends Controller
         }
         return response()->json(['success' => false, 'message' => $response['message']], 500);
     }
+
+    public function attendanceReport(Request $request, $id)
+    {
+        $session = TrainingSession::find($id);
+
+        if (!$session || !$session->zoom_id) {
+            return response()->json(['success' => false, 'message' => 'Session not found'], 404);
+        }
+
+        if ($this->meetingService instanceof \App\Services\TeamsService) {
+
+            $sessionReportResponse = $this->meetingService->getSessionReport($session->zoom_id);
+
+            if (!$sessionReportResponse['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch session reports: ' . $sessionReportResponse['message'],
+                ], 500);
+            }
+
+            $reports = $sessionReportResponse['data']['value'] ?? []; // Adjust based on API response structure
+            if (empty($reports)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No attendance reports found for this session.',
+                ], 404);
+            }
+
+            $reportId = $reports[0]['id'] ?? null;
+
+            if (!$reportId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to determine the report ID.',
+                ], 500);
+            }
+
+            // Step 3: Fetch the attendance report using the extracted report ID
+            $attendanceReportResponse = $this->meetingService->getMeetingAttendanceReport($session->zoom_id, $reportId);
+
+            if ($attendanceReportResponse['success']) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $attendanceReportResponse['data'],
+                ], 200);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch attendance report: ' . $attendanceReportResponse['message'],
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'This service does not support attendance reports',
+        ], 400);
+    }
+
 
     public function getdsc($id)
     {

@@ -81,10 +81,12 @@
 									<input id="search-task" type="text" class="form-control px-8" placeholder="{{ __('admin.Search') }}" />
 									<i class="ti ti-search position-absolute top-50 translate-middle-y mx-2"></i>
 								</div>
+								@role('Mentor')
 								<button id="addTaskButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formTaskModal">
 									<span class="text-nowrap me-2">{{ __('admin.Add_Task') }}</span>
 									<i class="ti ti-plus ti-16px"></i>
 								</button>
+								@endrole
 							</div>
 						</div>
 					</div>
@@ -117,11 +119,17 @@
 					<div class="mb-4 p-4 p-md-0">
 						<div class="d-flex justify-content-between align-items-center w-100">
 							<div class="d-flex align-items-center gap-3">
+								
 								<div class="cursor-pointer" id="editTakButton" data-id="" data-task="">
+									@role('Mentor')
 									<i class="ti ti-edit text-primary ti-20px"></i>
+									@endrole
 								</div>
+								
 								<div class="cursor-pointer" id="warningDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+									@role('Mentor')
 									<i class="ti ti-trash text-danger ti-20px"></i>
+									@endrole
 								</div>
 								<div class="dropdown-menu border" aria-labelledby="warningDropdown" style="background-color: #ebebed; width: 300px;">
 									<div class="d-flex justify-content-between align-items-center p-2">
@@ -136,11 +144,14 @@
 									<div class="bg-white rounded border border-secondary mb-2">
 										<p class="text-muted p-2" style="font-size: 13px;">{{ __('admin.Delete_Confirmation') }}</p>
 									</div>
+									
 									<button id="confirmDeleteTask" class="btn btn-danger" style="width: 100%;" data-task="">
 										<i class="ti ti-trash ti-20px me-2"></i>
 										 <span>{{ __('admin.Delete') }}</span>
 									</button>
+									
 								</div>
+								
 							</div>
 							<h6 class="modal-title" id="viewTaskModalLabel">{{ __('admin.View_Task') }}</h6>
 							<div id="closeViewTask" class="cursor-pointer border rounded" data-bs-dismiss="modal" aria-label="Close">

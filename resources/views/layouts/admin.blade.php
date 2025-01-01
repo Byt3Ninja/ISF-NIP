@@ -45,7 +45,7 @@
 
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->
-  <script src="{{ mix('js/app.js') }}"></script>
+  {{-- <script src="{{ mix('js/app.js') }}"></script> --}}
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
   <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>

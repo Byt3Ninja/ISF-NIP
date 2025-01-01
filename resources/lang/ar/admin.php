@@ -1111,4 +1111,6 @@ return [
 	'Image_Format' => 'السماح بـ JPG أو GIF أو PNG. الحجم الأقصى لـ 800 كيلوبايت',
 	'Save_Changes' => 'حفظ التغييرات',
 	'Required_Field' => 'هذا الحقل مطلوب',
+	'NoHavePermission' => 'لا يمكنك الوصول لهذه الصفحة',
+	
 ];

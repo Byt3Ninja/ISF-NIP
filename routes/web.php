@@ -192,14 +192,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
 
     //Company profile
     Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company_profile');
-    Route::get('/myCompany', 'ClientCompanyController@editOrCreate')->name('my_company');
-    Route::post('/myCompany', 'ClientCompanyController@updateOrStore')->name('update_my_company');
-    Route::post('/AddCompanyTeams', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
-    Route::post('/AddCompanyEdit', 'ClientCompanyController@EditTeams')->name('EditTeams_Comp');
-    Route::post('/AddCompanyDelete', 'ClientCompanyController@DeleteTeams')->name('DeleteTeams_Comp');
-    Route::post('/AddCompanyMileStone', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
-    Route::post('/EditCompanyMileStone', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
-    Route::post('/DeleteCompanyMileStone', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
+    Route::get('/myCompany/{id?}', 'ClientCompanyController@editOrCreate')->name('my_company');
+    Route::post('/myCompany/{id?}', 'ClientCompanyController@updateOrStore')->name('update_my_company');
+    Route::post('/AddCompanyTeams/{id?}', 'ClientCompanyController@AddTeams')->name('AddTeams_Comp');
+    Route::post('/AddCompanyEdit/{id?}', 'ClientCompanyController@EditTeams')->name('EditTeams_Comp');
+    Route::post('/AddCompanyDelete/{id?}', 'ClientCompanyController@DeleteTeams')->name('DeleteTeams_Comp');
+    Route::post('/AddCompanyMileStone/{id?}', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
+    Route::post('/EditCompanyMileStone/{id?}', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
+    Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
     //like a service
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');
     //Users  Manager routes
@@ -425,6 +425,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('mentorshipTasks/show/{mentorshipTask}', 'MentorshipTaskController@show')->name('mentorshipTasks.show');
         Route::post('mentorshipTasks/complete/{mentorshipTask}', 'MentorshipTaskController@complete')->name('mentorshipTasks.complete');
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
+        
         Route::resource('fundingRounds', 'FundingRoundController')->except(['index']);
     });
 

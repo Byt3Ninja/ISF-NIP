@@ -1093,4 +1093,5 @@ return [
 	'Image_Format' => 'Allowed JPG, GIF or PNG. Max size of 800K',
 	'Save_Changes' => 'Save Changes',
 	'Required_Field' => 'This field is required',
+	'NoHavePermission' => '	You do not have permission to access this page',
 ];

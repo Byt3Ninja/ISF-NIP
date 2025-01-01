@@ -2,11 +2,14 @@
 
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet"
-    href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <style>
+    #contentWrapper {
+      margin-bottom: 5rem;
+    }
     .radius-15 {
       border-radius: 15px;
     }
@@ -19,8 +22,11 @@
     }
 
     @media screen and (min-width: 768px) {
+      #contentWrapper {
+       margin-bottom: 12rem;
+      }
       .custom-container {
-        width: 80%;
+        width: 78%;
       }
     }
   </style>
@@ -48,7 +54,7 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper">
+  <div class="content-wrapper" id="contentWrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
       <!-- Alert -->
@@ -83,7 +89,7 @@
 
       <div class="d-flex justify-content-start w-100 mb-6">
         <nav 
-          class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
+          class="nav-align-left nav-tabs-shadow mb-6 px-4 py-2 bg-white position-fixed d-none d-md-block" 
           style="height: auto; min-width: 15%; max-width: 15%;">
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
@@ -153,6 +159,12 @@
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
@@ -160,7 +172,7 @@
 
 @section('pagescripts')
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/vuexy/assets/js/forms-pickers.js"></script>
+  <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
 
   <script>
     document.getElementById('img_url').addEventListener('change', function(

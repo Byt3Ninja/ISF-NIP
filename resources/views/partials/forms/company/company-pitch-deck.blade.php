@@ -1,8 +1,13 @@
 <div class="row">
   <!-- Pitch Deck Column -->
   <div class="col-md-6 mb-3">
-    <form method="post" action="{{ route('update_my_company') }}"
+    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('update_my_company') }}"
+  enctype="multipart/form-data">
+@endif
       {!! csrf_field() !!}
       <input type="hidden" value="9" name="CompanyN">
 
@@ -55,8 +60,13 @@
   </div>
   <!-- Pitch Deck Video Column -->
   <div class="col-md-6">
-    <form method="post" action="{{ route('update_my_company') }}"
+    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('update_my_company') }}"
+  enctype="multipart/form-data">
+@endif
       {!! csrf_field() !!}
       <input type="hidden" value="10" name="CompanyN">
 
@@ -111,8 +121,13 @@
   </div>
   <!-- Documents Column -->
   <div class="col-md-6 mt-3">
-    <form method="post" action="{{ route('update_my_company') }}"
+    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('update_my_company') }}"
+  enctype="multipart/form-data">
+@endif
       {!! csrf_field() !!}
       <input type="hidden" value="11" name="CompanyN">
 
@@ -132,7 +147,7 @@
 
             @endphp
             @foreach ($documents as $index => $document)
-              @if (is_string($document))
+              @if (is_string($document) && !empty($document))
                 <div class="card shadow-sm" style="border-radius: 15px;">
                   <div class="card-body">
                     <div
@@ -183,8 +198,13 @@
   </div>
 
   <div class="col-md-6 mt-3">
-    <form method="post" action="{{ route('update_my_company') }}"
+    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('update_my_company') }}"
+  enctype="multipart/form-data">
+@endif
       {!! csrf_field() !!}
       <input type="hidden" value="6" name="CompanyN">
       <div class="card shadow-sm" style="border-radius: 15px;">

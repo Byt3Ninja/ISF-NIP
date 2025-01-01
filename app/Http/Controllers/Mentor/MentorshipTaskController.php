@@ -23,6 +23,7 @@ class MentorshipTaskController extends Controller
 	 */
 	public function index(Request $request)
 	{
+		
 		if( !$request->has('mentorship_id') ) { abort( 404 ); }
 		else
 		{
@@ -50,6 +51,14 @@ class MentorshipTaskController extends Controller
 					'item' => $_tasks->get($status),
 				];
 			}
+
+
+
+
+
+
+
+
 			return view('mentor.mentorshipTasks.index', compact('tasks', 'kanban', 'lang', 'session_id', 'mentor', 'users', 'company', 'labels'));
 		}
 	}

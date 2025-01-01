@@ -117,6 +117,7 @@ class ZoomService implements OnlineMeetingServiceInterface
                     'host_video'        => ($data['host_video'] == "1") ? true : false,
                     'participant_video' => ($data['participant_video'] == "1") ? true : false,
                     'waiting_room'      => false,
+                    'auto_recording' => 'cloud',
                 ],
             ]),
         ];
@@ -241,14 +242,14 @@ class ZoomService implements OnlineMeetingServiceInterface
      * Get Zoom Meeting Report.
      */
 
-    public function getSessionReport(string $userId, ?string $meetingId = null)
+    public function getSessionReport(string $meetingId, ?string $userId = null)
     {
         $accessToken = $this->generateZoomToken();
         if (!$accessToken) {
             return ['success' => false, 'message' => 'Failed to Generate Access Token.'];
         }
 
-        $url = "https://api.zoom.us/v2/report/users/{$userId}/meetings";
+        $url = "https://api.zoom.us/v2/report/meetings/{$meetingId}/participants";
 
         $response = Http::withHeaders([
             'Authorization' => "Bearer $accessToken",
@@ -265,7 +266,7 @@ class ZoomService implements OnlineMeetingServiceInterface
         } else {
             return [
                 'success' => false,
-                'message' => $responseData['message'] ?? 'Failed to fetch user meetings report.',
+                'message' => $responseData['message'],
             ];
         }
     }

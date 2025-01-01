@@ -913,25 +913,26 @@
 							<h4 class="card-title align-items-center">
 								<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
 								@if($days!=14)
-								<div onclick="redirectWithDays('14')" class="btn btn-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
+								<div onclick="redirectWithDays('14')" class="btn btn-label-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
 								@else
-								<div onclick="redirectWithDays('14')" class="btn btn-warning" id="forteenDays"> 14 {{__('cycles.days')}}</div>
+								<div onclick="redirectWithDays('14')" class="btn btn-label-warning" id="forteenDays"> 14 {{__('cycles.days')}}</div>
 								@endif
 								@if($days!=7)
-								<div onclick="redirectWithDays('7')" class="btn btn-success" id="sevenDays"> 7 {{__('cycles.days')}}</div>
+								<div onclick="redirectWithDays('7')" class="btn btn-label-success" id="sevenDays"> 7 {{__('cycles.days')}}</div>
 								@else
-								<div onclick="redirectWithDays('7')" class="btn btn-warning" id="sevenDays"> 7 {{__('cycles.days')}}</div>
+								<div onclick="redirectWithDays('7')" class="btn btn-label-warning" id="sevenDays"> 7 {{__('cycles.days')}}</div>
 								@endif
-								<a href="/dashboard/mentorship/mine"><div class="btn btn-info">{{__('cycles.showAll')}}</div></a>
+								<a href="/dashboard/mentorship/mine"><div class="btn btn-label-info">{{__('cycles.showAll')}}</div></a>
 								
 							</h4>
+						</div>
 
-							<div class="card-body">
-								<div class="card ">
+							<div class="">
+								<div class="">
 									<div class="table-responsive">
 										<table class="table mb-0 sessonsTable" >
-											<thead class="thead-dark">
-											<tr>
+                      <thead class="bg-label-light">
+                        <tr>
 												{{-- <th>{{__('cycles.Company')}}</th> --}}
 												<th>{{__('cycles.User/Title')}}</th>
 												<th>{{__('cycles.Mentor')}}</th>
@@ -960,27 +961,27 @@
 														</div>
 													</td> --}}
 													<td>
-														<div class="d-flex align-items-center gap-1">
-															<a class="media-left mr-50" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
-																<img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+														<div class="d-flex align-items-center">
+															<a class="media-left" href="/dashboard/users/{{$session->user->company->user->id}}/edit">
+																<img src="{{$session->user->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
 															</a>
 															<a href="/dashboard/users/{{$session->user_id}}/edit">
 																<div class="media-body">
-																	<h6 class="media-heading mb-0">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
-																	<span class="font-small-2">{{$session->user->{'title_'.$l} }}</span>
+																	<h6 class="media-heading mb-0 text-nowrap">{{$session->user->{'first_name_'.$l} }} {{$session->user->{'last_name_'.$l} }}</h6>
+																	<span class="font-small-2 text-nowrap">{{$session->user->{'title_'.$l} }}</span>
 																</div>
 															</a>
 														</div>
 													</td>
 													<td>
-														<div style="cursor: pointer;" class="chip mr-1" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
+														<div style="cursor: pointer;" class="d-flex align-items-center" onclick="mentor({{$session->mentor_id}},'{{$session->mentor->{'first_name_'.$l} .' '. $session->mentor->{'last_name_'.$l} }}','{{$session->mentor->mrating()}}')">
 															<div class="chip-body">
 																<div class="avatar">
-																	<img class="img-fluid" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
+																	<img class="img-fluid rounded-circle me-3" src="{{$session->mentor->image_url}}" alt="Mentor photo" height="20" width="20">
 																</div>
-														<span class="chip-text">
-													{{$session->mentor->name}}
-														</span>
+                                <span class="chip-text text-nowrap">
+                                  {{$session->mentor->name}}
+                                </span>
 															</div>
 														</div>
 													</td>
@@ -1016,7 +1017,6 @@
 							</div>
 							
 
-						</div>
 
 						
 					</div>
@@ -1032,18 +1032,17 @@
 			<div class="row">
 				<div class="col-md-12">
 					<div class="card">
-						<div class="card-header border-bottom">
+						<div class="card-header border-bottom mb-4">
 							<h4 class="card-title align-items-center">
                 <i class="ti ti-school ti-28px"></i>
                 <span class="mx-2">{{ __("dashboard.Mentors") }}</span>
 							</h4>
-
 						</div>
-						<div class="card-body">
-							<div class="card ">
+						<div class="">
+							<div class="">
 								<div class="table-responsive">
 									<table class="table" id="mentorstable">
-										<thead class="thead-dark">
+                    <thead class="bg-label-light">
 											<tr>
 												<th>#</th>
 												<th>{{__('dashboard.Name/Title')}}</th>
@@ -1060,13 +1059,13 @@
 													<td>
                             
 														<div class="d-flex align-items-center gap-1">
-															<a class="media-left mr-50">
-																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
+															<a class="media-left">
+																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
 															</a>
                               <a target="_blank" href="{{route('show_mentor_profile', ($mentor->user)->id)}}">
 															<div class="media-body">
-																<h6 class="media-heading mb-0">{{optional($mentor->user)->name }}</h6>
-																<span class="font-small-2">{{optional($mentor->user)->title }}</span>
+																<h6 class="media-heading mb-0 text-nowrap">{{optional($mentor->user)->name }}</h6>
+																<span class="font-small-2 text-nowrap">{{optional($mentor->user)->title }}</span>
 															</div>
                             </a>
 														</div>
@@ -1076,11 +1075,11 @@
 													<td> {{optional($mentor->user)->bio->{'specialization_'.$l} ?? '-' }} </td>
 													<td>
 														@if (optional($mentor->user)->bio->linkedin ??0)
-															<a title="Linkedin URL" target="_blank" href="{{optional($mentor->user)->bio->linkedin}}" class="btn btn-icon rounded-circle btn-primary"> <i class="fa-brands fa-linkedin-in"></i></a>
+															<a title="Linkedin URL" target="_blank" href="{{optional($mentor->user)->bio->linkedin}}" class="btn btn-icon rounded-circle btn-label-primary"> <i class="fa-brands fa-linkedin-in"></i></a>
 														@endif
 													</td>
 													<td>
-														<button onclick="request({{$mentor->user_id}},'{{optional($mentor->user)->{'first_name_'.$l} }} {{optional($mentor->user)->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-primary">
+														<button onclick="request({{$mentor->user_id}},'{{optional($mentor->user)->{'first_name_'.$l} }} {{optional($mentor->user)->{'last_name_'.$l} }}', {{ $mentor->cycle->organization_id }},{{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-label-success">
 															<i class="fa fa-plus"></i>
 														</button>
 													</td>
