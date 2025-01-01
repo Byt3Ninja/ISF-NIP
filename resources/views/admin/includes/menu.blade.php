@@ -78,7 +78,7 @@
               </span>
             </a>
           </li>
-          @if (!app()->environment('production', 'beta'))
+          {{-- @if (!app()->environment('production', 'beta')) --}}
           <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
             <a href="/dashboard/analysis-assessment" class="menu-link">
               <span class="menu-item">
@@ -86,7 +86,7 @@
               </span>
             </a>
           </li>
-          @endif
+          {{-- @endif --}}
         </ul>
       </li>
     @endif
@@ -105,7 +105,7 @@
             </span>
           </a>
         </li>
-        @if (!app()->environment('production', 'beta'))
+        {{-- @if (!app()->environment('production', 'beta')) --}}
         <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
           <a href="/dashboard/analysis-assessment" class="menu-link">
             <span class="menu-item">
@@ -113,7 +113,7 @@
             </span>
           </a>
         </li>
-        @endif
+        {{-- @endif --}}
       </ul>
     </li>
     @endif
@@ -208,7 +208,7 @@
       </li>
     @endrole
     @role('Registered')
-    @if (!app()->environment('production', 'beta'))
+    {{-- @if (!app()->environment('production', 'beta')) --}}
       <li
         class="{{ Request::is('dashboard/requests/mine', '/dashboard/mentorship/mine') ? 'sidebar-group-active open' : '' }} menu-item">
         <a href="#" class="menu-link menu-toggle">
@@ -229,7 +229,7 @@
           </li>
         </ul>
       </li>
-      @endif
+      {{-- @endif --}}
       <li class="{{ Request::is('dashboard/training/my*') ? 'active' : '' }} menu-item"><a href="/dashboard/training/my"
           class="menu-link">
           <i class="menu-icon tf-icons ti ti-forms"></i>
@@ -244,7 +244,7 @@
         </a>
       </li>
 
-      @if (!app()->environment('production', 'beta'))
+      
       @if (auth()->user()->HaveCompany != 0 && auth()->user()->company)
       <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
         <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
@@ -253,7 +253,7 @@
         </a>
       </li>
       @endif
-      @endif
+      
     @endrole
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
       <a href="/dashboard/myFiles" class="menu-link">
@@ -350,14 +350,14 @@
 
       <!-- End Time Sheets -->
 
-      @if (!app()->environment('production', 'beta'))
+      
 <!-- Start Assessments -->
 <li
 class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 'dashboard/answerOption*', 'dashboard/analysis-assessment*', 'dashboard/history-assessment*', 'dashboard/category-assessment*') ? 'sidebar-group-active open' : '' }} menu-item">
-<a class="menu-link menu-toggle">
+  <a class="menu-link menu-toggle">
   <i class="ti ti-circle-dashed-check ti-md me-3"></i>
   <div>{{ __('admin.Assessments') }}</div>
-</a>
+  </a>
 <ul class="menu-sub">
   {{-- <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
     <a href="{{ route('questions.index') }}" class="menu-link">
@@ -397,7 +397,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
 
 </ul>
 </li>
-@endif
+
 <!-- End Assessment -->
 
 
@@ -500,7 +500,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item"> {{ __('admin.Questions Bank') }}</span>
             </a>
           </li>
-        @if (!app()->environment('production', 'beta'))
+        {{-- @if (!app()->environment('production', 'beta')) --}}
           <li class="{{ Request::is('*weights') ? 'active' : '' }} menu-item">
             <a href="{{ route('weights.index') }}" class="menu-link">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
@@ -514,7 +514,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item"> {{ __('admin.Assessments') }}</span>
             </a>
           </li>
-        @endif
+        {{-- @endif --}}
 
         </ul>
       </li>
@@ -821,7 +821,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
     @endif
 
     @if (auth()->user()->hasRole('Admin'))
-      @if (!app()->environment('production', 'beta'))
+      {{-- @if (!app()->environment('production', 'beta')) --}}
       <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
         <a href="{{ route('Tags.index') }}" class="menu-link">
           <i class="ti ti-tags me-3 ti-md"></i>
@@ -856,7 +856,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           <div>{{ __('admin.Labels') }}</div>
         </a>
       </li>
-    @endif
+    {{-- @endif --}}
     @endif
   </ul>
 </aside>
