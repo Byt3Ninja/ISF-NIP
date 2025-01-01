@@ -113,7 +113,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
               if($assessmentopen != null){
                   $scoresTotalop = App\UserScore::where('assessment_id', $assessmentopen->id)
                     ->get();
-                    $scoresTotalsop = $scoresTotalop->sum('score');
+                    $scoresTotalsop = $scoresTotalop->sum('weighted_score');
                   }else{
                     $scoresTotalsop = 0;
                   }
@@ -147,7 +147,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
                           </div>
                           
                         </div>
-                        <a onclick="history.back()" href="#"><button class="btn btn-sm btn-primary">Back</button></a>
+                        <a onclick="history.back()" href="#"><button class="btn btn-sm btn-primary">{{ __('admin.Back') }}</button></a>
                       </div>
                     </div>
                     
@@ -161,7 +161,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
               if($assessment != null){
                   $scoresTotal = App\UserScore::where('assessment_id', $assessment->id)
                     ->get();
-                    $scoresTotals = $scoresTotal->sum('score');
+                    $scoresTotals = $scoresTotal->sum('weighted_score');
                   }else{
                     $scoresTotals = 0;
                   }
