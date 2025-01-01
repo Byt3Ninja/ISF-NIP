@@ -374,7 +374,7 @@
                   @if( $survey->triggered_by == 'session' )
                   {{ __('dashboard.with') }} 
                     @php $mentor = $middleware->mentor; @endphp
-                    {{ $survey->mentorship_session->user->company->{'name_' . $l} ." - ". $survey->triggered_at }}
+                    {{ $survey->mentorship_session->user->company->{'name_' . $l} }}
                   @elseif( $survey->triggered_by == 'due' )
                     - {{ $middleware->title }}
                   @else
