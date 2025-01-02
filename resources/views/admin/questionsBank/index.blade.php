@@ -72,7 +72,7 @@
 															</span>
 															@elseif( $question->group == 'survey' )
 															<span class="badge text-bg-success rounded-pill">
-																{{ $question->survey_type == 'stars' ? __('admin.survey_type_stars') : ( $question->survey_type == 'radio' ? __('admin.survey_type_radio') : '-') }}
+																{{ $question->survey_type == 'stars' ? __('admin.survey_type_stars') : ( $question->survey_type == 'radio' ? __('admin.survey_type_radio') : __('admin.surveyQuestionAndAnswer')) }}
 															</span>
 
 															@elseif( $question->group == 'assessment' )

@@ -156,6 +156,7 @@
 									<option value="all"> {{ __('admin.All') }} </option>
 									<option value="stars"> {{ __('admin.surveyTypeStarRating') }} </option>
 									<option value="radio"> {{ __('admin.surveyTypeRadioButtons') }} </option>
+									<option value="answers"> {{ __('admin.surveyQuestionAndAnswer') }} </option>
 								</select>
 							</div>
 						</div>
@@ -177,7 +178,7 @@
 											<td> {{ $question->question }} </td>
 											<td class="text-center">
 												<span class="badge text-bg-secondary rounded-pill">
-													{{ $question->survey_type == 'stars' ? __('admin.surveyTypeStarRating') : ( $question->survey_type == 'radio' ? __('admin.surveyTypeRadioButtons') : '-') }}
+													{{ $question->survey_type == 'stars' ? __('admin.surveyTypeStarRating') : ( $question->survey_type == 'radio' ? __('admin.surveyTypeRadioButtons') : __('admin.surveyQuestionAndAnswer')) }}
 												</span>
 											</td>
 											<td class="text-center">
@@ -257,7 +258,7 @@
 			{
 				selected_questions.push( questionId );
 				var base_url = window.location.origin;
-				var survey_type = question.survey_type == 'stars' ? "{{ __('admin.surveyTypeStarRating') }}" : ( question.survey_type == 'radio' ? "{{ __('admin.surveyTypeRadioButtons') }}" : '-')
+				var survey_type = question.survey_type == 'stars' ? "{{ __('admin.surveyTypeStarRating') }}" : ( question.survey_type == 'radio' ? "{{ __('admin.surveyTypeRadioButtons') }}" : "{{ __('admin.surveyQuestionAndAnswer') }}")
 				var question_row = `<tr>
 					<td> <i class="fa fa-sort"></i> ` + question.question + ` <input type="hidden" name="questions_ids[]" value="` + question.id + `" /> </td>
 					<td> ` + survey_type + ` </td>
@@ -323,6 +324,7 @@
 					var question_type = '';
 					if( question.survey_type == 'stars' ) { question_type = '{{ __("admin.surveyTypeStarRating") }}'; }
 					if( question.survey_type == 'radio' ) { question_type = '{{ __("admin.surveyTypeRadioButtons") }}'; }
+					if( question.survey_type == 'answers' ) { question_type = '{{ __("admin.surveyQuestionAndAnswer") }}'; }
 	
 					html += `<tr class="question-picker-row" data-qid="` + question.id + `">
 								<td> ` + question.question + ` </td>

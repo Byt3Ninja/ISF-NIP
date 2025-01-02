@@ -212,6 +212,7 @@ class surveysController extends Controller
 
 	public function survey_submit( $id, Request $request )
 	{
+		
 		$responses = SurveyResponses::where('user_id', Auth::id())->with(['survey'])->find( $id );
 		if( empty( $responses ) ) { abort(404); }
 		else
@@ -220,7 +221,9 @@ class surveysController extends Controller
 			$questions = $responses->questions;
 			foreach( $questions as $oneQuestion )
 			{
+				
 				$question_id = $oneQuestion->id;
+				
 				if( !$request->has('question_' . $question_id) ) { $missingQuestions[] = 'question_' . $question_id; }
 				else
 				{
