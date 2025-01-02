@@ -174,7 +174,45 @@ class TeamsService implements OnlineMeetingServiceInterface
      * Get Microsoft Teams Attendance Report List.
      */
 
-    public function getSessionReport(string $meetingId)
+    // public function getSessionReport(string $meetingId, ?string $userId = null)
+    // {
+    //     $accessToken = $this->getAccessToken();
+
+    //     if (!$accessToken) {
+    //         return [
+    //             'success' => false,
+    //             'message' => 'Failed to retrieve access token.',
+    //         ];
+    //     }
+
+    //     try {
+    //         $url = "/me/onlineMeetings/{$meetingId}/attendanceReports";
+
+    //         $response = $this->graph->createRequest("GET", $url)
+    //             ->addHeaders([
+    //                 "Content-Type" => "application/json",
+    //                 "Authorization" => "Bearer {$accessToken}",
+    //             ])
+    //             ->execute();
+
+    //         $data = $response->getBody();
+    //         if (is_string($data)) {
+    //             $data = json_decode($data, true);
+    //         }
+
+    //         return [
+    //             'success' => true,
+    //             'data' => $data,
+    //         ];
+    //     } catch (\Exception $e) {
+    //         return [
+    //             'success' => false,
+    //             'message' => 'Failed to fetch Attendance Report: ' . $e->getMessage(),
+    //         ];
+    //     }
+    // }
+
+    public function getSessionReport(string $meetingId, ?string $userId = null)
     {
         $accessToken = $this->getAccessToken();
 
@@ -185,8 +223,11 @@ class TeamsService implements OnlineMeetingServiceInterface
             ];
         }
 
+        $Setting = Settings::where('id', 1)->first();
+        $userId = $this->getUserIdByEmail($Setting->MICROSOFT_APP_EMAIL);
+
         try {
-            $url = "/me/onlineMeetings/{$meetingId}/attendanceReports";
+            $url = "/users/{$userId}/onlineMeetings/{$meetingId}/attendanceReports";
 
             $response = $this->graph->createRequest("GET", $url)
                 ->addHeaders([
@@ -196,9 +237,6 @@ class TeamsService implements OnlineMeetingServiceInterface
                 ->execute();
 
             $data = $response->getBody();
-            if (is_string($data)) {
-                $data = json_decode($data, true);
-            }
 
             return [
                 'success' => true,
@@ -207,7 +245,7 @@ class TeamsService implements OnlineMeetingServiceInterface
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Failed to fetch Attendance Report: ' . $e->getMessage(),
+                'message' => 'Failed to Fetch Attendance Report: ' . $e->getMessage(),
             ];
         }
     }
@@ -215,6 +253,44 @@ class TeamsService implements OnlineMeetingServiceInterface
     /**
      * Get Microsoft Teams Attendance Report ID.
      */
+
+    // public function getMeetingAttendanceReport(string $meetingId, string $reportId)
+    // {
+    //     $accessToken = $this->getAccessToken();
+
+    //     if (!$accessToken) {
+    //         return [
+    //             'success' => false,
+    //             'message' => 'Failed to retrieve access token.',
+    //         ];
+    //     }
+
+    //     try {
+    //         $url = "/me/onlineMeetings/{$meetingId}/attendanceReports/{$reportId}";
+
+    //         $response = $this->graph->createRequest("GET", $url)
+    //             ->addHeaders([
+    //                 "Content-Type" => "application/json",
+    //                 "Authorization" => "Bearer {$accessToken}",
+    //             ])
+    //             ->execute();
+
+    //         $data = $response->getBody();
+    //         if (is_string($data)) {
+    //             $data = json_decode($data, true);
+    //         }
+
+    //         return [
+    //             'success' => true,
+    //             'data' => $data,
+    //         ];
+    //     } catch (\Exception $e) {
+    //         return [
+    //             'success' => false,
+    //             'message' => 'Failed to fetch Meeting Attendance Report: ' . $e->getMessage(),
+    //         ];
+    //     }
+    // }
 
     public function getMeetingAttendanceReport(string $meetingId, string $reportId)
     {
@@ -227,8 +303,27 @@ class TeamsService implements OnlineMeetingServiceInterface
             ];
         }
 
+        // Fetch the Microsoft email from settings
+        $settings = Settings::where('id', 1)->first();
+        if (!$settings || !$settings->MICROSOFT_APP_EMAIL) {
+            return [
+                'success' => false,
+                'message' => 'Microsoft App Email not found in settings.',
+            ];
+        }
+
+        // Get user ID using email
+        $userId = $this->getUserIdByEmail($settings->MICROSOFT_APP_EMAIL);
+
+        if (!$userId) {
+            return [
+                'success' => false,
+                'message' => 'Unable to fetch User ID for the provided Microsoft App Email.',
+            ];
+        }
+
         try {
-            $url = "/me/onlineMeetings/{$meetingId}/attendanceReports/{$reportId}";
+            $url = "/users/{$userId}/onlineMeetings/{$meetingId}/attendanceReports/{$reportId}";
 
             $response = $this->graph->createRequest("GET", $url)
                 ->addHeaders([
@@ -238,7 +333,7 @@ class TeamsService implements OnlineMeetingServiceInterface
                 ->execute();
 
             $data = $response->getBody();
-            if (is_string($data)) {
+            if (!is_array($data)) {
                 $data = json_decode($data, true);
             }
 
