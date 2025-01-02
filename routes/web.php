@@ -149,6 +149,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/myProfile', 'ClientProfileController@edit')->name('my_profile');
     Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
     Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
+    Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('updatebio_my_profile');
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('Mentors_Filter');
