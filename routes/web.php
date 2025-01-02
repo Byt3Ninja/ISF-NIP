@@ -352,8 +352,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('training/{id?}/surveys/{survey?}/edit', 'TrainingController@edit_survey')->name('training.edit_survey');
     Route::patch('training/{id?}/surveys/{survey?}/update', 'TrainingController@update_survey')->name('training.update_survey');
     Route::delete('training/{id?}/surveys/{survey?}/destroy', 'TrainingController@destroy_survey')->name('training.destroy_survey');
-    Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.sessionReport');
-    Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.sessionRecord');
+    Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.session-report');
+    Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.session-record');
+    Route::get('training/session-attendance-report/{id}', 'TrainingController@attendanceReport')->name('training.attendance-report');
+    Route::get('session/report/{id}', 'TrainingController@getReports')->name('training.get-reports');
+    Route::get('session/record/{id}', 'TrainingController@getRecordings')->name('training.get-recordings');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
