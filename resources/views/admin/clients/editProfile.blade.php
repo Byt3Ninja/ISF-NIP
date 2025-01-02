@@ -38,13 +38,17 @@
 $phone_codes = App\Country::all();
 
 $tabs = [
-  ['account', 'accountSection', 'users'],
-  ['security', 'securitySection', 'lock'],
-  ['info_profile', 'InfoProfileSection', 'users'],
-  ['billing', 'billingSection', 'bookmark'],
-  ['notifications', 'notificationsSection', 'bell'],
-  ['connections', 'connectionsSection', 'link'],
+    ['account', 'accountSection', 'users'],
+    ['security', 'securitySection', 'lock'],
+    ['billing', 'billingSection', 'bookmark'],
+    ['notifications', 'notificationsSection', 'bell'],
+    ['connections', 'connectionsSection', 'link'],
 ];
+
+// إضافة الشرط بشكل منفصل
+if (auth()->user()->hasRole('Mentor')) {
+  array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
+}
 
 $tabsList = collect($tabs)->map(function ($tab) {
   return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
@@ -71,7 +75,11 @@ $passwordRules = [
             <li class="nav-item">
               <a href="#{{ $tab['target'] }}" class="nav-link {{$key == 0 ? 'active' : ''}}" data-bs-toggle="tab"
                 role="tab" aria-controls="{{ $tab['target'] }}" aria-selected="true"
+                @if (auth()->user()->hasRole('Mentor')) 
                 disabled="{{ $key > 2 ? 'true' : 'false' }}"
+                @else
+                disabled="{{ $key > 1 ? 'true' : 'false' }}"
+                @endif
               >
                 <i class="ti-sm ti ti-{{ $tab['icon'] }} me-1_5"></i>
                 {{ $tab['label'] }}
@@ -317,7 +325,6 @@ $passwordRules = [
           <!-- Mentor fields -->
           @role('Mentor')
           <!-- Security section -->
-      
       <div class="tab-pane fade" id="InfoProfileSection">
         <div id="InfoProfileSection">
           <h5 class="card-header">{{ __('admin.addbio') }}</h5>
