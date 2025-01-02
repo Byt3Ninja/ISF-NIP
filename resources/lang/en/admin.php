@@ -1096,5 +1096,6 @@ return [
 	'Save_Changes' => 'Save Changes',
 	'Required_Field' => 'This field is required',
 	'NoHavePermission' => '	You do not have permission to access this page',
-	'Type_Survey' => 'Specify who will answer the survey'
+	'Type_Survey' => 'Specify who will answer the survey',
+	'info_profile' => 'Profile Information',
 ];
