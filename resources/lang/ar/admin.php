@@ -594,6 +594,7 @@ return [
 	'questionGroup' => 'تصنيف السؤال',
 	'question_type_quiz' => 'اختبار',
 	'question_type_survey' => 'استطلاع',
+	'surveyQuestionAndAnswer' => 'سؤال واجابة',
 	'question_type_assessment' => 'تقييم',
 	'quizDetails' => 'تفاصيل اﻹختبار',
 	'quizNumOfQuestions' => 'عدد الأسئلة',

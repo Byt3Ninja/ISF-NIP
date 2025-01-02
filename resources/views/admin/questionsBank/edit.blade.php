@@ -161,6 +161,7 @@
 													<select class="form-control form-select select2" name="survey_type" id="survey_type" required>
 														<option value="stars" {{ $question->survey_type == 'stars' ? 'selected' : '' }}> {{ __('admin.surveyTypeStarRating') }} </option>
 														<option value="radio" {{ $question->survey_type == 'radio' ? 'selected' : '' }}> {{ __('admin.surveyTypeRadioButtons') }} </option>
+														<option value="answers" {{ $question->survey_type == 'answers' ? 'selected' : '' }}> {{ __('admin.surveyQuestionAndAnswer') }} </option>
 													</select>
 												</fieldset>
 												

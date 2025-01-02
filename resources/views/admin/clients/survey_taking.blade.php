@@ -86,6 +86,11 @@
 													<label class="btn btn-outline-dark w-50 text-left survey-option-label" for="question_{{ $question_index }}_answer_{{ $index }}">{{ ( $index + 1 ) . '. ' . $answer['text'] }}</label>
 												</div>
 												@endforeach
+												@elseif( $response['type'] == 'answers' )
+												<div class="form-group my-2">
+												<textarea name="question_{{ $response['id'] }}" id="question_{{ $question_index }}_answer_1" class="form-control" ></textarea>
+												</div>
+												
 											@endif
 										</div>
 										<div class="text-danger survey-question-block">{{ __('dashboard.surveyQuestionRequired') }}</div>

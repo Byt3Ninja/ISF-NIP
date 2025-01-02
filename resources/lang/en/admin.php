@@ -603,6 +603,8 @@ return [
 	'questionGroup' => 'Question group',
 	'question_type_quiz' => 'Quiz',
 	'question_type_survey' => 'Survey',
+	'question_type_assessment' => 'Assessment',
+	'surveyQuestionAndAnswer'=>'Question and Answer',
 	'quizDetails' => 'Quiz details',
 	'quizNumOfQuestions' => "Questions' count",
 	'quizTopics' => 'Topics',
