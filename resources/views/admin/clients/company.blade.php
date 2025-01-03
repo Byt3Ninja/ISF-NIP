@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('style')
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
@@ -157,6 +158,7 @@
 @stop
 
 @section('scripts')
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -171,6 +173,10 @@
 @stop
 
 @section('pagescripts')
+  <script>
+    const lang = '{{ $l }}';
+  </script>
+
   <script src="/vuexy/assets/js/forms-selects.js"></script>
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
 
@@ -402,7 +408,7 @@
     });
   </script>
 
-<script>
+{{-- <script>
 @if($client->company)
   const selectedCountryCode = '{{$client->company->country_code}}';
  @else
@@ -432,8 +438,71 @@
           select.appendChild(option);  // إضافة العنصر إلى القائمة المنسدلة
       });
   });
-</script>
+</script> --}}
 
+<script>
+  // Initialize the phone input
+  const phoneInput = document.getElementById("phone");
+  const whatsappInput = document.getElementById("WhatsApp");
+  const phoneError = document.getElementById('phone-error');
+  const whatsappError = document.getElementById('whatsapp-error');
+
+  const iti = intlTelInput(phoneInput, {
+    initialCountry: "eg", // Default country
+    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
+    separateDialCode: true, // Separate dial code from the number
+    autoPlaceholder: "aggressive", // Show placeholder
+    customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
+    return "e.g. " + selectedCountryPlaceholder;
+    }
+  });
+
+  // Optional: Handle validation
+  phoneInput.addEventListener("input", (e) => {
+    console.log(e.target.value);
+    const phoneNumber = e.target.value.replace(/\D/g, '');
+    if (isNaN(phoneNumber)) {
+      phoneError.style.display = 'block';
+      phoneError.innerText = lang == 'en' ? 'Phone should be numbers only' : 'يجب أن يكون الهاتف أرقام فقط';
+    } else if (iti.isValidNumber()) {
+      phoneError.style.display = 'none';
+      // console.log("Valid number:", iti.getNumber());
+    } else {
+      phoneError.style.display = 'block';
+      phoneError.innerText = lang == 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
+      // console.error("Invalid number");
+    }
+  });
+
+  const whatsappInit = intlTelInput(whatsappInput, {
+    initialCountry: "eg", // Default country
+    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
+    separateDialCode: true, // Separate dial code from the number
+    autoPlaceholder: "aggressive", // Show placeholder
+    customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
+    return "e.g. " + selectedCountryPlaceholder;
+    }
+  });
+
+  // Optional: Handle validation
+  whatsappInput.addEventListener("input", (e) => {
+    console.log(e.target.value);
+    const whatsappNumber = e.target.value.replace(/\D/g, '');
+    if (isNaN(whatsappNumber)) {
+      whatsappError.style.display = 'block';
+      whatsappError.innerText = lang == 'en' ? 'Whatsapp should be numbers only' : 'يجب أن يكون الواتساب أرقام فقط';
+    } else if (iti.isValidNumber()) {
+      whatsappError.style.display = 'none';
+      // console.log("Valid number:", iti.getNumber());
+    } else {
+      whatsappError.style.display = 'block';
+      whatsappError.innerText = lang == 'en' ? 'Invalid Whatsapp number' : 'رقم الواتساب غير صحيح';
+      // console.error("Invalid number");
+    }
+  });
+</script>
 @stop
 
 

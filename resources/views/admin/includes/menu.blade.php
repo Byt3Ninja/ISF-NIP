@@ -707,10 +707,50 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
   
     @can('edit_settings')
       <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
-        <a class="menu-link" href="/dashboard/settings">
+        <a class="menu-link menu-toggle">
           <i class="menu-icon tf-icons ti ti-settings"></i>
           <div>{{ __('admin.settings') }}</div>
         </a>
+        <ul class="menu-sub">
+          <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/settings" class="menu-link">
+              <i class="menu-livicon" data-icon="globe"></i>
+              <div>{{ __('admin.settings') }}</div>
+            </a>
+          </li>
+          @if (!app()->environment('production', 'beta'))
+            <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
+              <a href="{{ route('Tags.index') }}" class="menu-link">
+                <i class="menu-livicon" data-icon="globe"></i>
+                <div>{{ __('admin.Tags') }}</div>
+              </a>
+            </li>
+            <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
+              <a href="{{ route('Category.index') }}" class="menu-link">
+                <i class="menu-livicon" data-icon="globe"></i>
+                <div>{{ __('admin.Categories') }}</div>
+              </a>
+            </li>
+            <li class="{{ Request::is('dashboard/subcategories*') ? 'active' : '' }} menu-item">
+              <a href="{{ route('subcategories.index') }}" class="menu-link">
+                <i class="menu-livicon" data-icon="globe"></i>
+                <div>{{ __('admin.SubCategories') }}</div>
+              </a>
+            </li>
+            <li class="{{ Request::is('*stages') ? 'active' : '' }} menu-item">
+              <a href="{{ route('stages.index') }}" class="menu-link">
+                <i class="menu-livicon" data-icon="globe"></i>
+                <div>{{ __('admin.Stages') }}</div>
+              </a>
+            </li>
+            <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
+              <a href="{{ route('Labels.index') }}" class="menu-link">
+                <i class="menu-livicon" data-icon="globe"></i>
+                <div>{{ __('admin.Labels') }}</div>
+              </a>
+            </li>
+          @endif
+        </ul>
       </li>
     @endcan
 
@@ -818,45 +858,6 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           </li>
         @endcan
       @endif
-    @endif
-
-    @if (auth()->user()->hasRole('Admin'))
-      {{-- @if (!app()->environment('production', 'beta')) --}}
-      <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
-        <a href="{{ route('Tags.index') }}" class="menu-link">
-          <i class="ti ti-tags me-3 ti-md"></i>
-          <div>{{ __('admin.Tags') }}</div>
-        </a>
-      </li>
-      
-      <li class="{{ Request::is('dashboard/Category*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('Category.index') }}" class="menu-link">
-          <i class="ti ti-category-2 me-3 ti-md"></i>
-          <div>{{ __('admin.Categories') }}</div>
-        </a>
-      </li>
-
-      <li class="{{ Request::is('dashboard/subcategories*') ? 'active' : '' }} menu-item">
-        <a href="{{ route('subcategories.index') }}" class="menu-link">
-          <i class="ti ti-category-plus me-3 ti-md"></i>
-          <div>{{ __('admin.SubCategories') }}</div>
-        </a>
-      </li>
-
-      <li class="{{ Request::is('*stages') ? 'active' : '' }} menu-item">
-        <a href="{{ route('stages.index') }}" class="menu-link">
-          <i class="ti ti-stack-2 me-3 ti-md"></i>
-          <div>{{ __('admin.Stages') }}</div>
-        </a>
-      </li>
-      
-      <li class="{{ Request::is('*Labels') ? 'active' : '' }} menu-item">
-        <a href="{{ route('Labels.index') }}" class="menu-link">
-          <i class="ti ti-flag me-3 ti-md"></i>
-          <div>{{ __('admin.Labels') }}</div>
-        </a>
-      </li>
-    {{-- @endif --}}
     @endif
   </ul>
 </aside>
