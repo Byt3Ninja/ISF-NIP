@@ -149,6 +149,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/myProfile', 'ClientProfileController@edit')->name('my_profile');
     Route::get('/show/myProfile', 'ClientProfileController@show')->name('show_my_profile');
     Route::post('/myProfile', 'ClientProfileController@update')->name('update_my_profile');
+    Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('updatebio_my_profile');
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('Mentors_Filter');
@@ -351,8 +352,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('training/{id?}/surveys/{survey?}/edit', 'TrainingController@edit_survey')->name('training.edit_survey');
     Route::patch('training/{id?}/surveys/{survey?}/update', 'TrainingController@update_survey')->name('training.update_survey');
     Route::delete('training/{id?}/surveys/{survey?}/destroy', 'TrainingController@destroy_survey')->name('training.destroy_survey');
-    Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.sessionReport');
-    Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.sessionRecord');
+    Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.session-report');
+    Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.session-record');
+    Route::get('training/session-attendance-report/{id}', 'TrainingController@attendanceReport')->name('training.attendance-report');
+    Route::get('session/report/{id}', 'TrainingController@getReports')->name('training.get-reports');
+    Route::get('session/record/{id}', 'TrainingController@getRecordings')->name('training.get-recordings');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');

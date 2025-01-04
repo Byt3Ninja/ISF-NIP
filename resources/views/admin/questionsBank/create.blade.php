@@ -196,8 +196,10 @@
 													<fieldset class="form-group mb-4 survey-type">
 														<label class="fs-6 form-label mb-2" for="survey_type">{{ __('admin.surveyType') }}</label>
 														<select class="form-control form-select select2" name="survey_type" id="survey_type" required>
+															<option value="" selected disabled> {{ __('admin.Choose') }} </option>
 															<option value="stars"> {{ __('admin.surveyTypeStarRating') }} </option>
 															<option value="radio"> {{ __('admin.surveyTypeRadioButtons') }} </option>
+															<option value="answers"> {{ __('admin.surveyQuestionAndAnswer') }} </option>
 														</select>
 													</fieldset>
 
@@ -249,7 +251,7 @@
 												</div>
 											</div>
 
-											<fieldset id="mcq-block" class="form-group mb-4 mt-3" style="max-width: 400px;">
+											<fieldset id="mcq-block" class="form-group mb-4 mt-3 " style="max-width: 400px;">
 												<label class="fs-6 form-label mb-2" class ="w-100" for="answers">{{ __('admin.answers') }}
 													<button id="addNewAnswer" style="padding: 0px 10px !important;" class="btn btn-xs btn-label-success float-right rounded-pill py-1">
 														<i class="ti ti-plus"></i> {{ __('admin.addNewAnswer') }}
@@ -395,7 +397,7 @@
 			var answer =
 				`
 			<div class="input-group mb-1">
-				<input placeholder="{{ $l == 'en' ? 'Answer text' : 'اكتب نص الاجابة' }}" class="form-control" style="max-width:300px" id="quiz_answer_` +
+				<input placeholder="{{ $l == 'en' ? 'Answer text' : 'اكتب نص الاجابة' }}" class="form-control " style="max-width:300px" id="quiz_answer_` +
 				count + `_text" name="quiz_answer_text[]">` +
 				`<input placeholder="{{ $l == 'en' ? 'Answer Suggestion' : 'اكتب المقترحات ' }}" class="form-control assessment-type" id="quiz_answer_`+count+`_score" name="quiz_answer_score[]" style="max-width:100px">
 				<select class="form-control form-select select2 ` + class_control + `" id="quiz_answer_` + count + `_status" name="quiz_answer_status[]">
@@ -405,6 +407,10 @@
 				<button class="btn btn-label-danger remove-answer-btn"> <i class="ti ti-x"></i> </button>
 			</div>`;
 			$('#quizAnswers').append(answer);
+
+			if($('#question_group').val()  != 'assessment' ){
+				$('.assessment-type').addClass('d-none');
+			}
 		});
 
 		$(document).on('click', '.remove-answer-btn', function(e) {
@@ -418,6 +424,14 @@
 
 		$(document).ready(function() { handleChangeType(); handleChangeQuestionType(); });
 
+		$(document).on('change', '#survey_type', function() {
+    let Type = $(this).val(); // استخدم let لتعريف المتغير
+    if (Type == 'stars') {
+        $('#mcq-block').addClass('d-none'); // إخفاء العنصر
+    } else {
+        $('#mcq-block').removeClass('d-none'); // إظهار العنصر في الحالات الأخرى
+    }
+});
 
 
 		$(document).ready(function() {

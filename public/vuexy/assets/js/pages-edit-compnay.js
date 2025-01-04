@@ -2,8 +2,6 @@
 
 'use strict';
 
-const lang = document.documentElement.lang;
-
 const translations = {
   en: {
     name_en: {

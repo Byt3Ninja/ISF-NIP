@@ -1,108 +1,69 @@
 <div class="card">
   <div class="card-body">
     <div class="border-bottom border-light mb-6">
-      <h5 class="card-title">{{ $tab['label'] }}</h5>
+      <h5 class="card-title fw-semibold">{{ $tab['label'] }}</h5>
     </div>
-    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
-    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
-      enctype="multipart/form-data">
-@else
-<form method="post" action="{{ route('update_my_company') }}"
-  enctype="multipart/form-data">
-@endif
-      {!! csrf_field() !!}
-      <input type="hidden" value="2" name="CompanyN">
-      <div class="row">
-        <div class="col-md-6 col-12 mb-6">
-          <label for="phone"
-            class="form-label">{{ __('admin.Phone') }}*</label>
-          <div class="d-flex align-items-center gap-1">
-            <div class="codeInputContainer">
-              @php
-                    $phone_codes = App\Country::all();
-                    
-                    @endphp
-              <select id="" name="country_code"
-                class="form-select border-light light-shadow" required
-                style="width: 130px;"
-                >
-                @foreach ($phone_codes as $phone_code)
-                        <option value="{{ $phone_code->phone_code }}">
-                          {{ $phone_code->phone_code }}+
-                        </option>
-                      @endforeach
-              </select>
-            </div>
-            <div class="position-relative">
-              <input type="text"
-                class="form-control border-light light-shadow px-10"
-                id="phone" placeholder="{{ __('admin.Phone') }}*"
+    @if (Auth::user()->hasanyRole('Admin|organizationManager'))
+      <form method="post"
+        action="{{ route('update_my_company', $client->company->id) }}"
+        enctype="multipart/form-data">
+      @else
+        <form id="contact-form" method="post"
+          action="{{ route('update_my_company') }}"
+          enctype="multipart/form-data">
+    @endif
+    {!! csrf_field() !!}
+    <input name="CompanyN" type="hidden" value="2">
+    <div class="row">
+      <div class="col-md-6 col-12 mb-6">
+        <div class="d-grid">
+          <div class="d-grid gap-2">
+            <label class="form-label fs-6 fw-bold"
+              for="phone">{{ __('auth.Phone') }}</label>
+              <input class="form-control phone-input" id="phone"
+                name="phone" type="tel"
                 value="{{ $client->company ? $client->company->phone : old('phone') }}"
-                name="phone" required autocomplete="new-phone">
-              <i class="ti ti-phone fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-                style="left: 7px;"></i>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-12 mb-6">
-          <label for="WhatsApp"
-            class="form-label">{{ __('admin.WhatsApp') }}*</label>
-          <div class="position-relative">
-            <input type="text"
-              class="form-control border-light light-shadow px-10"
-              id="WhatsApp" placeholder="{{ __('admin.WhatsApp') }}*"
-              value="{{ $client->company ? $client->company->whatsapp : old('WhatsApp') }}"
-              name="WhatsApp" required autocomplete="WhatsApp">
-            <i class="ti ti-brand-whatsapp fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-              style="left: 7px;"></i>
-          </div>
-        </div>
-        <div class="col-md-6 col-12 mb-6">
-          <label for="email" class="form-label">{{ __('admin.E-mail') }}
-            *</label>
-          <div class="position-relative">
-            <input type="email"
-              class="form-control border-light light-shadow px-10"
-              id="email" placeholder="{{ __('admin.E-mail') }} *"
-              value="{{ $client->company ? $client->company->email : old('email') }}"
-              name="email" required autocomplete="new-email"
-              style="direction: ltr;">
-            <i class="ti ti-mail fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-              style="left: 7px;"></i>
+                placeholder="{{ __('auth.Phone') }}" autocomplete="phone"
+                 />
+            <span class="text-danger" id="phone-error"
+              style="display: none;"></span>
           </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-12 d-flex justify-content-end">
-          <button type="submit" class="btn btn-primary" id="submit-button">
-            <span id="button-text">{{ __('admin.Update') }}</span>
-            <span id="button-spinner"
-              class="spinner-border spinner-border-sm d-none" role="status"
-              aria-hidden="true"></span>
-          </button>
+      <div class="col-md-6 col-12 mb-6">
+        <div class="d-grid">
+          <div class="d-grid gap-2">
+            <label class="form-label fs-6 fw-bold"
+              for="WhatsApp">{{ __('admin.WhatsApp') }}</label>
+                <input class="form-control phone-input" id="WhatsApp"
+                  name="WhatsApp" type="tel"
+                  value="{{ $client->company ? $client->company->whatsapp : old('WhatsApp') }}"
+                  placeholder="{{ __('admin.WhatsApp') }}" autocomplete="WhatsApp"
+                   />
+            <span class="text-danger" id="whatsapp-error"
+              style="display: none;"></span>
+          </div>
         </div>
       </div>
+      <div class="col-md-6 col-12 mb-6">
+        <label class="form-label fs-6 fw-bold"
+          for="email">{{ __('admin.E-mail') }}</label>
+          <input class="form-control" id="email" name="email"
+            type="email"
+            value="{{ $client->company ? $client->company->email : old('email') }}"
+            style="direction: ltr;" placeholder="{{ __('admin.E-mail') }} *"
+             autocomplete="email">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 d-flex justify-content-end">
+        <button class="btn btn-primary" id="submit-button" type="submit">
+          <span id="button-text">{{ __('admin.Update') }}</span>
+          <span class="spinner-border spinner-border-sm d-none"
+            id="button-spinner" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
     </form>
   </div>
 </div>
-
-<!-- Get countries and phone codes -->
-<script>
-  fetch('https://restcountries.com/v3.1/all')
-    .then(response => response.json())
-    .then(data => {
-      const select = document.getElementById('country_code');
-      data.forEach(country => {
-        const option = document.createElement('option');
-        const countryCode =
-          `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`;
-        option.value = countryCode;
-        option.text = `${countryCode} (${country.cca2})`;
-        option.style.fontSize = '12px';
-        if (country.cca2 === 'EG') {
-          option.selected = true;
-        }
-        select.appendChild(option);
-      });
-    });
-</script>

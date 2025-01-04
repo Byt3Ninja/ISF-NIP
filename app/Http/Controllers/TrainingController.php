@@ -16,9 +16,11 @@ use Carbon\Carbon;
 use App\QuizResults;
 use App\SurveyScopes;
 use App\QuizResponses;
+use App\SessionReport;
 use http\Env\Response;
 use App\TrainingContent;
 use App\TrainingSession;
+use App\SessionRecording;
 use App\TrainingCompleted;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -898,13 +900,50 @@ class TrainingController extends Controller
         }
 
         $response = $this->meetingService->getSessionReport($session->zoom_id);
-        dd($response);
 
         if ($response['success']) {
-            return response()->json(['success' => true, 'data' => $response['data']], 200);
+            $participants = $response['data']['participants'] ?? [];
+
+            foreach ($participants as $participant) {
+                $joinDate = isset($participant['join_time'])
+                    ? Carbon::parse($participant['join_time'])->toDateTimeString()
+                    : null;
+                $endDate = isset($participant['leave_time'])
+                    ? Carbon::parse($participant['leave_time'])->toDateTimeString()
+                    : null;
+
+                SessionReport::updateOrCreate(
+                    [
+                        'session_id' => $session->id,
+                        'participant_user_id' => $participant['user_id'] ?? null,
+                    ],
+                    [
+                        'participant_email' => $participant['user_email'] ?? null,
+                        'participant_name' => $participant['name'] ?? null,
+                        'participant_join_date' => $joinDate,
+                        'participant_end_date' => $endDate,
+                        'attendance_duration' => $participant['duration'] ?? 0,
+                    ]
+                );
+            }
+
+            return response()->json(['success' => true, 'message' => 'Session Report Saved Successfully.'], 200);
         }
 
         return response()->json(['success' => false, 'message' => $response['message']], 500);
+    }
+
+    public function getReports($id)
+    {
+        $session = TrainingSession::find($id);
+
+        if (!$session) {
+            return redirect()->back()->with('error', 'Session Not Found.');
+        }
+
+        $reports = SessionReport::where('session_id', $id)->get();
+
+        return view('training.session_report', compact('session', 'reports'));
     }
 
 
@@ -912,17 +951,55 @@ class TrainingController extends Controller
     {
         $session = TrainingSession::find($id);
 
-        $response = $this->meetingService->getSessionRecord($session->zoom_id);
-        dd($response);
-
-        if ($response['success']) {
-            return response()->json([
-                'success' => true,
-                'data' => $response['data'],
-            ]);
+        if (!$session || !$session->zoom_id) {
+            return response()->json(['success' => false, 'message' => 'Session not found or invalid Zoom ID'], 404);
         }
-        return response()->json(['success' => false, 'message' => $response['message']], 500);
+
+        $response = $this->meetingService->getSessionRecord($session->zoom_id);
+
+        if (!$response['success']) {
+            return response()->json(['success' => false, 'message' => $response['message']], 500);
+        }
+
+        $recordingFiles = $response['data']['recording_files'] ?? [];
+
+        foreach ($recordingFiles as $file) {
+            $recordingTime = isset($file['recording_start'])
+                ? Carbon::parse($file['recording_start'])->toDateTimeString()
+                : null;
+
+            SessionRecording::updateOrCreate(
+                [
+                    'recording_id' => $file['id'],
+                ],
+                [
+                    'session_id' => $session->id,
+                    'recording_type' => $file['recording_type'] ?? null,
+                    'recording_view_url' => $file['play_url'] ?? null,
+                    'recording_download_url' => $file['download_url'] ?? null,
+                    'recording_time' => $recordingTime,
+                ]
+            );
+        }
+
+        return response()->json(['success' => true, 'message' => 'Session Recordings Saved Successfully.'], 200);
     }
+
+    public function getRecordings($id)
+    {
+        $session = TrainingSession::find($id);
+
+        if (!$session) {
+            return redirect()->back()->with('error', 'Session Not Found.');
+        }
+
+        $recordings = SessionRecording::where('session_id', $id)->get();
+        dd($recordings);
+
+        return view('training.session_report', compact('session', 'recordings'));
+    }
+
+
 
     public function attendanceReport(Request $request, $id)
     {
@@ -933,7 +1010,6 @@ class TrainingController extends Controller
         }
 
         if ($this->meetingService instanceof \App\Services\TeamsService) {
-
             $sessionReportResponse = $this->meetingService->getSessionReport($session->zoom_id);
 
             if (!$sessionReportResponse['success']) {
@@ -943,7 +1019,7 @@ class TrainingController extends Controller
                 ], 500);
             }
 
-            $reports = $sessionReportResponse['data']['value'] ?? []; // Adjust based on API response structure
+            $reports = $sessionReportResponse['data']['value'] ?? [];
             if (empty($reports)) {
                 return response()->json([
                     'success' => false,
@@ -956,13 +1032,13 @@ class TrainingController extends Controller
             if (!$reportId) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to determine the report ID.',
+                    'message' => 'Unable to Determine the Report ID.',
                 ], 500);
             }
 
-            // Step 3: Fetch the attendance report using the extracted report ID
             $attendanceReportResponse = $this->meetingService->getMeetingAttendanceReport($session->zoom_id, $reportId);
 
+            dd($attendanceReportResponse);
             if ($attendanceReportResponse['success']) {
                 return response()->json([
                     'success' => true,
@@ -978,8 +1054,8 @@ class TrainingController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => 'This service does not support attendance reports',
-        ], 400);
+            'message' => 'Invalid meeting service instance.',
+        ], 500);
     }
 
 

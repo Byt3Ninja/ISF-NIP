@@ -65,6 +65,15 @@ foreach ($steps as  $step) {
 
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
   $totalDurationSum += $TotalStepsDuration;
+
+  $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
+          $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNull('screening')->orWhere('screening', '{}')->count();
+          $answersdone = app(App\Formdata::class)
+          ->where('step_id', $step->id)
+          ->whereNotNull('screening') // الحقل ليس NULL
+          ->where('screening', '!=', '{}') // الحقل ليس JSON فارغ
+          ->count();
+
 }
 $mentors = $program->mentors()->distinct()->get();
 
@@ -78,8 +87,8 @@ $orgCollection = collect([
 [__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
 [__('admin.Training sessions'), 'layers-subtract', $totalStepsIdsCount, 'light'],
 [__('admin.Training sessions duration (hours)'), 'clock-hour-5', $totalDurationSum, 'success'],
-['filtration', 'transform', '5', 'warning'],
-['evaluation', 'presentation', '5', 'danger']
+[__('admin.Traditional_Evaluation_pending'), 'transform', $answerspinding, 'warning'],
+[__('admin.Evaluation'), 'presentation', $answers, 'danger']
 ]);
 
 
@@ -1264,7 +1273,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <i class="ti ti-presentation text-danger ti-24px"></i>
                     </div>
                     <div class="d-flex align-items-center">
-                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Evaluation') }}evaluation</span>
+                      <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Evaluation') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
                         {{ $answers }}
                       </small>
