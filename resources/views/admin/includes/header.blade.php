@@ -43,12 +43,14 @@
         <ul class="dropdown-menu dropdown-menu-end">
           <li class="dropdown dropdown-language nav-item">
             @if ($l == 'ar')
-              <a class="dropdown-item" href="/lang/en">
+              <a class="dropdown-item" href="/lang/en" 
+              data-language="en" data-text-direction="ltr">
                 <i class="flag-icon flag-icon-us"></i>
                 <span class="selected-language">English</span>
               </a>
             @else
-              <a class="dropdown-item" href="/lang/ar">
+              <a class="dropdown-item" href="/lang/ar" 
+              data-language="ar" data-text-direction="rtl">
                 <i class="flag-icon flag-icon-sa"></i>
                 <span class="selected-language">عربي</span>
               </a>
