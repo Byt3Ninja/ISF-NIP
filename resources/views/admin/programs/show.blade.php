@@ -306,7 +306,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                        
                       </div>
                     </div>
-                    <div class="d-flex flex-column mt-3">
+                    <div class="d-flex flex-column my-3">
                       <div class="d-flex align-items-center my-2">
                         <i class="ti ti-message text-primary ti-20px me-2"></i>
                         <h6 class="mb-0">{{__('admin.Description')}}</span>
@@ -325,7 +325,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
                           <span class="fw-bold text-dark mx-2">{{ $program->start->format('Y-m-d') }}</span>
@@ -511,7 +511,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias consequatur.
                       </div>
                     </div> --}}
-                    <div class="d-flex flex-column mt-3">
+                    <div class="d-flex flex-column my-3">
                       @if($step->description != '')
                         <div class="d-flex align-items-center my-2">
                           <i class="ti ti-message text-primary ti-20px me-2"></i>
@@ -526,7 +526,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex justify-content-between flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
                           <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
@@ -729,7 +729,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
                           <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
@@ -986,7 +986,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       </div>
                     </div>
                     @if (!empty($step->description))
-                      <div class="d-flex flex-column mt-3">
+                      <div class="d-flex flex-column my-3">
                         <div class="d-flex align-items-center my-b-1">
                           <i class="ti ti-message text-primary ti-20px me-2"></i>
                           <h6 class="mb-0">{{__('admin.Description')}}</span>
@@ -1000,7 +1000,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
                           <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
@@ -1147,7 +1147,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="row">
                   <div class="col-md-9">
                     @if (!empty($step->description))
-                    <div class="d-flex flex-column mt-3">
+                    <div class="d-flex flex-column my-3">
                       <div class="d-flex align-items-center mb-1">
                         <i class="ti ti-message text-primary ti-20px me-2"></i>
                         <h6 class="mb-0">{{__('admin.Description')}}</span>
@@ -1161,7 +1161,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-3">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
                           <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
@@ -1357,7 +1357,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-2 mt-4 mt-md-0">
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
-                        <h6 class="mb-1 text-center fw-semibold">{{__('admin.Duration')}}</h6>
+                        <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-info">
                           <i class="ti ti-calendar-clock ti-20px"></i>
                           <span class="fw-bold text-dark mx-2">{{ $step->from->format('Y-m-d') }}</span>
