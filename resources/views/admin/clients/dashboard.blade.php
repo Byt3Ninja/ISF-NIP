@@ -350,7 +350,7 @@
         @endif
       </div>
       <!-- Count cards -->
-      <div class="row g-6">
+      <div class="row mb-6">
         @foreach ($countCards as $card)
           <a href="{{ $card['href'] }}" class="col-lg-3 col-sm-6">
             <div class="card card-border-shadow-{{ $card['color'] }} h-100">
@@ -375,9 +375,9 @@
       </div>
       <!-- / Count cards -->
 
-      <div class="row g-3 mt-6">
+      <div class="row">
         <!-- Latest Services -->
-        <div class="col-sm-6 col-12">
+        <div class="col-sm-6 col-12 mb-6">
           <div class="card">
             <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
               <div class="d-flex align-items-center py-2">
@@ -548,9 +548,57 @@
 		</div>
 		@endif
     @endif
-    @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
+        <!-- / Latest Services -->
+
+        <!-- Latest Events -->
+        <div class="col-sm-6 col-12 mb-6">
+          <div class="card">
+            <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom">
+              <div class="d-flex align-items-center py-2">
+                <i class="ti ti-calendar-event ti-24px"></i>
+                <h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest Events') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              @if (count($e_latest) > 0)
+                @foreach ($e_latest as $event)
+                  <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
+                    <div class="widget-todo-title-area d-flex align-items-center">
+                      <a href="/dashboard/calendar">
+                        <span class="widget-todo-title ml-50 text-secondary">
+                          <i class="ti ti-link"></i>
+                          {{ $event->title }}
+                        </span>
+                      </a>
+                    </div>
+                    <div
+                      class="btn btn-label-success text-success py-1 rounded d-flex align-items-center justify-conetnt-center"
+                      style="width: 200px; height: 30px;">
+                      {{ date('d-m-Y', strtotime($event->start)) }}
+                    </div>
+                  </div>
+                @endforeach
+              @else
+                <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
+                  <div class="widget-todo-title-area d-flex align-items-center">
+                    <span class="widget-todo-title ml-50">
+                      <i class="bx bxs-bell-ring text-danger"></i>
+                      {{ __('dashboard.No Events added') }} '<a
+                        href="/dashboard/calendar">{{ __('dashboard.Add yours now') }}</a>'.</span>
+                  </div>
+                </div>
+              @endif
+            </div>
+          </div>
+        </div>
+        <!-- / Latest Events -->
+      </div>
+
+      <!-- Survey -->
+
+      @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
     @if( Auth::user()->hasRole('Registered') )
-    <div class="col-sm-6 col-12">
+    <div class="col-12" style="height: 500px; overflow-y: auto;">
       <div class="card">
         <div class="card-header border-bottom py-3">
           <h5 class="card-title m-0">
@@ -560,7 +608,7 @@
         <div class="card-body py-6">
           <div class="container-fluid px-0">
             @foreach( $available_surveys as $survey )
-            <div class="row my-3">
+            <div class="row my-3 border-bottom pb-3">
               <div class="col-9 py-1">
                 @if( $survey->triggered_on == 'mentorship' )
                 <i class="ti ti-bulb mx-1"></i> 
@@ -616,7 +664,7 @@
     </div>
     @endif
     @if( Auth::user()->hasRole('Mentor') )
-    <div class="col-sm-6 col-12">
+    <div class="col-12" style="max-height: 500px; overflow-y: auto;">
       <div class="card">
         <div class="card-header border-bottom py-3">
           <h5 class="card-title m-0">
@@ -626,7 +674,7 @@
         <div class="card-body py-6">
           <div class="container-fluid px-0">
             @foreach( $available_surveys as $survey )
-            <div class="row my-3">
+            <div class="row my-3 border-bottom pb-3">
               <div class="col-9 py-1">
                 @if( $survey->triggered_on == 'mentorship' )
                 <i class="ti ti-bulb mx-1"></i> 
@@ -681,53 +729,9 @@
       </div>
     </div>
     @endif
-
     @endif
-        <!-- / Latest Services -->
+      <!-- Survey -->
 
-        <!-- Latest Events -->
-        <div class="col-sm-6 col-12">
-          <div class="card">
-            <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom">
-              <div class="d-flex align-items-center py-2">
-                <i class="ti ti-calendar-event ti-24px"></i>
-                <h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest Events') }}</h5>
-              </div>
-            </div>
-            <div class="card-body">
-              @if (count($e_latest) > 0)
-                @foreach ($e_latest as $event)
-                  <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
-                    <div class="widget-todo-title-area d-flex align-items-center">
-                      <a href="/dashboard/calendar">
-                        <span class="widget-todo-title ml-50 text-secondary">
-                          <i class="ti ti-link"></i>
-                          {{ $event->title }}
-                        </span>
-                      </a>
-                    </div>
-                    <div
-                      class="btn btn-label-success text-success py-1 rounded d-flex align-items-center justify-conetnt-center"
-                      style="width: 200px; height: 30px;">
-                      {{ date('d-m-Y', strtotime($event->start)) }}
-                    </div>
-                  </div>
-                @endforeach
-              @else
-                <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
-                  <div class="widget-todo-title-area d-flex align-items-center">
-                    <span class="widget-todo-title ml-50">
-                      <i class="bx bxs-bell-ring text-danger"></i>
-                      {{ __('dashboard.No Events added') }} '<a
-                        href="/dashboard/calendar">{{ __('dashboard.Add yours now') }}</a>'.</span>
-                  </div>
-                </div>
-              @endif
-            </div>
-          </div>
-        </div>
-        <!-- / Latest Events -->
-      </div>
 
       <!-- My Progress -->
       @if( Auth::user()->company && $circle_id != 0 )
