@@ -128,7 +128,7 @@
 				@foreach( $my_responses as $question_index => $response )
 				<div class="card my-4 {{ in_array( 'question_' . $response['id'], $missingQuestions) ? 'block-danger' : '' }}"
 					id="survey-question-{{ $question_index }}">
-					<div class="card-body">
+					<div class="card-body" style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }}">
 						<div class="d-flex align-items-center gap-3 pb-2 border-bottom">
 							<span class="badge bg-primary rounded-circle d-flex justify-content-center align-items-center"
 								style="width: 30px; height: 30px;">
