@@ -648,7 +648,6 @@ return [
 	'Tags' => 'الاوسام',
 	'all Tags' => 'كافة الاوسام ',
 	'Add new Tags' => 'اضافة وسم جديد',
-	'Reset' => 'افراغ',
 	'Course Deleted' => 'تم المسح بنجاح',
 	'CountProgram' => 'عدد البرامج',
 	'Enroll' => 'تسجيل',
@@ -1115,5 +1114,9 @@ return [
 	'NoHavePermission' => 'لا يمكنك الوصول لهذه الصفحة',
 	'Type_Survey' => ' تحديد من سيقوم بالإجابة على الاستبيان ',
 	'info_profile' => 'معلومات الملف الشخصي',
+<<<<<<< Updated upstream
+=======
+	'Answer' => 'الجواب',
+>>>>>>> Stashed changes
 	
 ];
