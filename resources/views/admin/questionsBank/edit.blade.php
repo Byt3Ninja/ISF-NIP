@@ -273,11 +273,7 @@
 													<input value="{{ optional($question->tags)->implode(',') }}" name="tags" type="text" class="form-control" id="tags" placeholder="{{ __('admin.questionTagsPlaceholder') }}" />
 												</fieldset>
 											
-												
-
-
-
-												
+		
 											
 										</div>
 										</div>

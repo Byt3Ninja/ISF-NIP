@@ -115,10 +115,62 @@
 
                           <td class="text-center">
                             <small>
-                              {!! $session->rate_comment?
-                              str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->rating).
-                              '<br>'.$session->rate_comment:$session->comment !!}
+                              @if( Auth::user()->hasRole('Mentor') )
+                              @php
+                              $surveyScope = \App\SurveyScopes::whereIn('type', ['startup', 'both'])->get();
+                              $available_surveys = \App\SurveyResponses::where('user_id', '!=', Auth::user()->id)->whereIn('scope_id', $surveyScope->pluck('id'))->where('triggered_at', $session->id)->where('triggered_by', 'session')->get();
+                              @endphp
+                              
+                              @if($available_surveys->isNotEmpty())
+                              @foreach($available_surveys as $scope)
+                              @php
+                              $surveyorrate = $scope->responses ? json_decode($scope->responses) : null;
+                              @endphp
+                            
+                              @if($surveyorrate)
+                              
+                              @foreach($surveyorrate as $item)
+                              @if($item->type == 'answers')
+                                  {{-- <p>Question ID: {{ $item->id }} <br></p> --}}
+                                  <p> {{ __('admin.Question') }} : {{ $item->question }} <br></p>
+                                  <p>{{ __('admin.Answer') }}: {{ $item->answer }} <br></p>
+                              @endif
+                              @endforeach
+                              @endif
+                              @endforeach
+                              @else
+                              <p> (ID: {{ $scope->id ?? 'N/A' }} ).</p>
+                              @endif
+                              @endif
+                              @if( Auth::user()->hasRole('Registered') )
+                              @php
+                              $surveyScope = \App\SurveyScopes::whereIn('type', ['Mentor', 'both'])->get();
+                              $available_surveys = \App\SurveyResponses::where('user_id', '!=', Auth::user()->id)->whereIn('scope_id', $surveyScope->pluck('id'))->where('triggered_at', $session->id)->where('triggered_by', 'session')->get();
+                              @endphp
+                              
+                              @if($available_surveys->isNotEmpty())
+                              @foreach($available_surveys as $scope)
+                              @php
+                              $surveyorrate = $scope->responses ? json_decode($scope->responses) : null;
+                              @endphp
+                            
+                              @if($surveyorrate)
+                              
+                              @foreach($surveyorrate as $item)
+                              @if($item->type == 'answers')
+                                  {{-- <p>Question ID: {{ $item->id }} <br></p> --}}
+                                  <p> {{ __('admin.Question') }} : {{ $item->question }} <br></p>
+                                  <p>{{ __('admin.Answer') }}: {{ $item->answer }} <br></p>
+                              @endif
+                              @endforeach
+                              @endif
+                              @endforeach
+                              @else
+                              <p> (ID: {{ $scope->id ?? 'N/A' }} ).</p>
+                              @endif
+                              @endif
                             </small>
+                              
                           </td>
                           <td>
                             <div class="d-flex flex-column gap-0 justify-content-center align-items-center">
