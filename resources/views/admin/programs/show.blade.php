@@ -77,6 +77,11 @@ foreach ($steps as  $step) {
 }
 $mentors = $program->mentors()->distinct()->get();
 
+if($totalStepsIdsCount > 0){
+  $totalStepsIdsCount = $totalStepsIdsCount;
+}else{
+  $totalStepsIdsCount = 0;
+}
 
 $orgCollection = collect([
 [__('admin.Startups'), 'building-skyscraper', $totalcompany, 'primary'],

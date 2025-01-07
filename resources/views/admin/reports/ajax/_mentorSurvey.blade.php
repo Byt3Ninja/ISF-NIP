@@ -195,17 +195,14 @@
                                             </div>
                                         @endif
                                 </div>
-                                
-                                  
-                             
+
                               @endforeach
                               @endif
                               @endforeach
                               @else
                               <p> (ID: {{ $scope->id ?? 'N/A' }} ).</p>
                               @endif
-                                
-  
+
                             </div>
                         </div>
                         </div>

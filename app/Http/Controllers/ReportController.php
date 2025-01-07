@@ -53,15 +53,15 @@ class ReportController extends Controller
                 $view = '_companyReport';
                 break;
                 
-                case 'mentorSurveys':
-                    $data = $this->mentorSurveyReport();
-                    $view = '_mentorSurvey';
-                    break;
+            case 'mentorSurveys':
+                $data = $this->mentorSurveyReport();
+                $view = '_mentorSurvey';
+                break;
 
-                    // case 'startupSurveys':
-                    //     $data = $this->companiesReport($organization_id,$request->id);
-                    //     $view = '_companyReport';
-                    //     break;
+            case 'startupSurveys':
+                $data = $this->startupSurveysReport();
+                $view = '_startupSurveyReport';
+                break;
 
         }
         $view = view('admin.reports.ajax.'.$view, $data)->render();
@@ -70,6 +70,21 @@ class ReportController extends Controller
     }
 
     // =============> ajax report functions <=============
+
+    // =============> ajax report StartupSurveys <=============
+    protected function startupSurveysReport(){
+        $data['mentorRequests'] =  MentorshipRequest::all();
+        $data['cycle_mentors'] = User::whereHas('mentorSessions')->get();
+
+        $surveyScope = SurveyScopes::whereIn('type', ['startup', 'both'])->get();
+        $data['available_surveys'] = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('mentor_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
+        // ==============> counts <=================
+        $data['Total_Survey'] = $data['available_surveys']->count();
+        $data['Survey_Done'] = $data['available_surveys']->whereNotNull('responses')->count();
+        $data['Survey_NotDone'] = $data['available_surveys']->whereNull('responses')->count();
+      
+        return $data;
+    }
  // =============> ajax report MentorSurvey <=============
     protected function mentorSurveyReport(){
         $data['mentorRequests'] =  MentorshipRequest::all();
