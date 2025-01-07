@@ -184,7 +184,7 @@
 														<option value="hard" {{ $question->difficulty == 'hard' ? 'selected' : '' }}>{{ __('admin.difficulty_hard') }}</option>
 													</select>
 												</fieldset>
-												<fieldset id="tfq-block" class="form-group questions-type">
+												<fieldset class="form-group questions-type">
 													<label class="fs-6 form-label mb-2 fw-bold" for="correct">{{ __('admin.answerType')}}</label>
 													<select class="select2 form-select" name="correct" id="correct">
 														<option value="tfq_true" {{ $question->correct == true ? 'selected' : '' }}>{{ __('admin.tfq_statement_true') }}</option>
@@ -193,7 +193,7 @@
 												</fieldset>
 											</div>
 											<div class="col-12" id="answers-section">
-												<fieldset id="mcq-block" >
+												<fieldset>
 													<div class="w-100 d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
 														<label class="fs-6 form-label mb-2 fw-bold w-100" for="answers">{{ __('admin.answers')}}</label>
 														<button id="addNewAnswer" class="btn btn-sm btn-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new answer"> 
@@ -288,6 +288,7 @@
 		$(document).ready(function() {
 			handleGroupChange();
 			handleSurveyTypeChange();
+			// $('#answers-section').show();
 
 			$('#question_group').on('change', handleGroupChange);
 			$('#survey_type').on('change', handleSurveyTypeChange);
@@ -305,11 +306,13 @@
 					$('.assessment-type').hide();
 					$('#explanation_QA').hide();
 					$('.questions-type').show();
+					$('#answers-section').show();
 				} else if (selectedGroupValue === 'assessment') {
 					$('#survey-type-section').hide();
 					$('.assessment-type').show();
 					$('#explanation_QA').show();
 					$('.questions-type').hide();
+					$('#answers-section').show();
 				} else {
 					$('#survey-type-section').hide();
 					$('.assessment-type').show();
@@ -320,6 +323,7 @@
 
 			function handleSurveyTypeChange() {
 				const selectedSurveyTypeValue = $('#survey_type').val();
+				console.log('selectedSurveyTypeValue', selectedSurveyTypeValue)
 	
 				if (selectedSurveyTypeValue === 'stars') {
 					$('#answers-section').hide();
