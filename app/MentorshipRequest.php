@@ -44,4 +44,11 @@ class MentorshipRequest extends Model
     {
         return $this->morphMany(CalenderSync::class, 'calenderable');
     }
+
+    public function cycle(){
+        return $this->belongsTo(Cycle::class, 'cycle_id','id');
+    }
+    public function orgnization(){
+        return $this->belongsTo(Organization::class, 'organization_id','id');
+    }
 }
