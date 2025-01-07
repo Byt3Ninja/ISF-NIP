@@ -101,6 +101,26 @@
                                   </div>
                                 </fieldset>
                               </li>
+
+                              <li class="d-inline-block mx-2 mb-1">
+                                <fieldset>
+                                  <div class="radio">
+                                    <input type="radio" name="type" value="mentorSurveys" id="rad5" class="type">
+                                    <label for="rad5">{{ __('admin.Surveys_Mentor') }}</label>
+                                  </div>
+                                </fieldset>
+                              </li>
+
+                              <li class="d-inline-block mx-2 mb-1">
+                                <fieldset>
+                                  <div class="radio">
+                                    <input type="radio" name="type" value="startupSurveys" id="rad6" class="type">
+                                    <label for="rad6">{{ __('admin.Surveys_Startup') }}</label>
+                                  </div>
+                                </fieldset>
+                              </li>
+
+
                             </ul>
                           </div>
                         </div>
@@ -179,28 +199,32 @@
       });
       $('#showReport').click(function() {
         var value = $('.type:checked').val();
+        
         if (value === 'cycles' || value === 'companies') {
           var selectValue = $('#' + value + 'SelectOptions').val();
           if (selectValue === '' || selectValue === undefined) {
             alert('برجاء اختيار القيمة اولا');
           } else {
+            
             getAjaxReport(value, selectValue);
           }
 
         } else {
-
+          
           getAjaxReport(value)
         }
       });
     });
 
     function getAjaxReport(value, id = 0) {
+      
       $.ajax({
         url: "{{ route('reports.view.ajax') }}/" + value,
         data: {
           id: id
         },
         success: function(data) {
+        
           if (data['value'] === 1) {
             $('#reportContent').html(data['view']);
           }

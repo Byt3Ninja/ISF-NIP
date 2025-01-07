@@ -38,12 +38,17 @@
 $phone_codes = App\Country::all();
 
 $tabs = [
-  ['account', 'accountSection', 'users'],
-  ['security', 'securitySection', 'lock'],
-  ['billing', 'billingSection', 'bookmark'],
-  ['notifications', 'notificationsSection', 'bell'],
-  ['connections', 'connectionsSection', 'link'],
+    ['account', 'accountSection', 'users'],
+    ['security', 'securitySection', 'lock'],
+    ['billing', 'billingSection', 'bookmark'],
+    ['notifications', 'notificationsSection', 'bell'],
+    ['connections', 'connectionsSection', 'link'],
 ];
+
+// إضافة الشرط بشكل منفصل
+if (auth()->user()->hasRole('Mentor')) {
+  array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
+}
 
 $tabsList = collect($tabs)->map(function ($tab) {
   return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
@@ -70,7 +75,11 @@ $passwordRules = [
             <li class="nav-item">
               <a href="#{{ $tab['target'] }}" class="nav-link {{$key == 0 ? 'active' : ''}}" data-bs-toggle="tab"
                 role="tab" aria-controls="{{ $tab['target'] }}" aria-selected="true"
+                @if (auth()->user()->hasRole('Mentor')) 
+                disabled="{{ $key > 2 ? 'true' : 'false' }}"
+                @else
                 disabled="{{ $key > 1 ? 'true' : 'false' }}"
+                @endif
               >
                 <i class="ti-sm ti ti-{{ $tab['icon'] }} me-1_5"></i>
                 {{ $tab['label'] }}
@@ -254,158 +263,7 @@ $passwordRules = [
                       </select>
                     </div>
 
-                    <!-- Mentor fields -->
-                    @role('Mentor')
-                      <input type="hidden" name="mentor_section" value="1">
-                      <a id="bio">
-                        <section id="basic-input">
-                          <div class="row">
-                            <div class="col-md-12">
-                              <div class="card">
-                                <div class="card-header">
-                                  <h4 class="card-title">{{ __('admin.addbio') }}</h4>
-                                </div>
-                                <div class="card-content">
-                                  <div class="card-body">
-                                    <div class="row">
-                                      <div class="col-md-12">
-                                        <div class="col-md-12 col-12">
-                                          <label for="linkedin" class="form-label fs-6 fw-bold">{{ __('admin.Linkedin') }}</label>
-                                          <div class="form-group">
-                                            <input value="{{ $client->bio ? $client->bio->linkedin : '' }}" name="linkedin"
-                                              type="text" class="form-control" id="linkedin" style="direction: ltr;"
-                                              placeholder="{{ __('admin.Linkedin') }} - https://linkedin.com/in/yourname"
-                                              autocomplete="linkedin">
-                                          </div>
-                                        </div>
-                                        <div class="col-md-12 col-12 mt-4">
-                                          <label class="form-label fs-6 fw-bold">{{ __('admin.arbio') }}: </label>
-                                          <div class="form-group">
-                                            <textarea class="form-control" id="bio_ar" name='bio_ar' rows="3" dir="rtl"
-                                              placeholder="{{ __('admin.writebioar') }}">{{ $client->bio->bio_ar ?? '' }}</textarea>
-                                          </div>
-                                        </div>
-                                        <div class="col-md-12 col-12 mt-4">
-                                          <label class="form-label fs-6 fw-bold">{{ __('admin.enbio') }}: </label>
-                                          <div class="form-group">
-                                            <textarea class="form-control" id="bio_en" name='bio_en' rows="3" dir="ltr"
-                                              placeholder="{{ __('admin.writebioen') }}">{{ $client->bio->bio_en ?? '' }}</textarea>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div class="col-md-12 col-12 mt-4">
-                                      <div class="form-label-group">
-                                        <h6 for="selectExpertises">{{ __('admin.SelectExpertises') }}</h6>
-                                        <p>{{ __('admin.SelectMultiExpertises') }}.</p>
-                                        <div class="form-group">
-                                          <select name="expertises[]" class="select2 form-control" multiple="multiple"
-                                            id="selectExpertises">
-                                            @foreach ($expertises as $expertise_group)
-                                              <optgroup label="{{ $expertise_group->title }}">
-                                                @foreach ($expertise_group->children as $expertise)
-                                                  <option value="{{ $expertise->id }}"
-                                                    @if (in_array($expertise->id, $client->mentorExpertises()->pluck('expertises.id')->toArray())) selected @endif>{{ $expertise->title }}
-                                                  </option>
-                                                @endforeach
-                                              </optgroup>
-                                            @endforeach
-                                          </select>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div class="mt-4 col-md-6">
-                                      <label for="basicInput" class="form-label fs-6 fw-bold">
-                                        {{ __('admin.Entrepreneurial Experience') }}
-                                      </label>
-
-                                      <select name="entrepreneurial_experience" id="entrepreneurial_experience"
-                                        class="select2 form-select">
-                                        <option value="1"
-                                          {{ optional($client->bio)->entrepreneurial_experience ? 'selected' : '' }}>
-                                          {{ __('Yes') }}</option>
-                                        <option value="0"
-                                          {{ optional($client->bio)->entrepreneurial_experience ? '' : 'selected' }}>
-                                          {{ __('No') }}</option>
-                                      </select>
-                                    </div>
-                                    <br>
-                                    <div class="mt-4 col-md-6">
-                                      <label class="form-label fs-6 fw-bold">{{ __('admin.Entrepreneurial Experience desc') }}.</label>
-                                      <textarea class="form-control" id="basicTextarea" rows="8" name="entrepreneurial_experience_brief" required>{{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }} </textarea>
-                                      <label for="tcontent"
-                                        class="mt-2">{{ __('admin.Entrepreneurial Experience Brief') }}</label>
-                                    </div>
-                                    <div class="my-4 col-md-6">
-                                      <label for="profile_privacy"
-                                        class="form-label fs-6 fw-bold">{{ __('admin.Profile Privacy') }}</label>
-                                      <select name="profile_privacy" id="profile_privacy" class="select2 form-select">
-                                        <option value="1"
-                                          {{ optional($client->bio)->profile_privacy ? 'selected' : '' }}>
-                                          {{ __('Yes') }}</option>
-                                        <option value="0"
-                                          {{ optional($client->bio)->profile_privacy ? '' : 'selected' }}>
-                                          {{ __('No') }}</option>
-                                      </select>
-                                    </div>
-                                    <div class="col-md-12 col-12">
-                                      <label for="approach" class="form-label fs-6 fw-bold">{{ __('admin.mentorship approach') }}
-                                        :</label>
-                                      <div class="form-group" id="approach">
-                                        <div class="checkbox mr-5">
-                                          <input type='checkbox' id="checkbox1" class="checkbox-input"
-                                            name='mentorship_approach[]'
-                                            {{ $client->bio && in_array('E-mail', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
-                                            value="E-mail">
-                                          <label for="checkbox1" class="form-label fs-6 fw-bold">
-                                            {{ __('admin.E-mail') }}
-                                          </label>
-                                        </div>
-                                        <div class="checkbox mr-5">
-                                          <input type='checkbox' id="checkbox2" class="checkbox-input"
-                                            name='mentorship_approach[]'
-                                            {{ $client->bio && in_array('phone calls', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
-                                            value="phone calls">
-                                          <label for="checkbox2" class="form-label fs-6 fw-bold">
-                                            {{ __('admin.phone calls') }}
-                                          </label>
-                                        </div>
-                                        <div class="checkbox mr-5">
-                                          <input type='checkbox' id="checkbox3" class="checkbox-input"
-                                            name='mentorship_approach[]'
-                                            {{ $client->bio && in_array('video calls', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
-                                            value="video calls">
-                                          <label for="checkbox3" class="form-label fs-6 fw-bold">
-                                            {{ __('admin.video calls') }}
-                                          </label>
-                                        </div>
-                                        <div class="checkbox mr-5">
-                                          <input type='checkbox' id="checkbox4" class="checkbox-input"
-                                            name='mentorship_approach[]'
-                                            {{ $client->bio && in_array('in-person meetings', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
-                                            value="in-person meetings">
-                                          <label for="checkbox4" class="form-label fs-6 fw-bold">
-                                            {{ __('admin.in-person meetings') }}
-                                          </label>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <br>
-                                  <div class="row">
-                                    <div class="col-12 d-flex justify-content-end">
-                                      <button type="submit"
-                                        class="btn btn-primary mr-1 mb-1">{{ __('admin.Update') }}</button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </section>
-                      </a>
-                    @endrole
-                    <!-- /Mentor fields -->
+                     
                   </div>
                   <!-- /Personal Information -->
 
@@ -463,8 +321,163 @@ $passwordRules = [
             </div>
           </div>
           <!-- /Security section -->
+          
+          <!-- Mentor fields -->
+          @role('Mentor')
+          <!-- Security section -->
+      <div class="tab-pane fade" id="InfoProfileSection">
+        <div id="InfoProfileSection">
+          <h5 class="card-header">{{ __('admin.addbio') }}</h5>
+            <div class="card-body pt-1">
+                
+              <form method="post" action="{{ route('updatebio_my_profile') }}" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    <input type="hidden" name="mentor_section" value="1">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="col-md-12 col-12">
+                          <label for="linkedin" class="form-label fs-6 fw-bold">{{ __('admin.Linkedin') }}</label>
+                          <div class="form-group">
+                            <input value="{{ $client->bio ? $client->bio->linkedin : '' }}" name="linkedin"
+                              type="text" class="form-control" id="linkedin" style="direction: ltr;"
+                              placeholder="{{ __('admin.Linkedin') }} - https://linkedin.com/in/yourname"
+                              autocomplete="linkedin">
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mt-4">
+                          <label class="form-label fs-6 fw-bold">{{ __('admin.arbio') }}: </label>
+                          <div class="form-group">
+                            <textarea class="form-control" id="bio_ar" name='bio_ar' rows="3" dir="rtl"
+                              placeholder="{{ __('admin.writebioar') }}">{{ $client->bio->bio_ar ?? '' }}</textarea>
+                          </div>
+                        </div>
+                        <div class="col-md-12 col-12 mt-4">
+                          <label class="form-label fs-6 fw-bold">{{ __('admin.enbio') }}: </label>
+                          <div class="form-group">
+                            <textarea class="form-control" id="bio_en" name='bio_en' rows="3" dir="ltr"
+                              placeholder="{{ __('admin.writebioen') }}">{{ $client->bio->bio_en ?? '' }}</textarea>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-12 col-12 mt-4">
+                      <div class="form-label-group">
+                        <h6 for="selectExpertises">{{ __('admin.SelectExpertises') }}</h6>
+                        <p>{{ __('admin.SelectMultiExpertises') }}.</p>
+                        <div class="form-group">
+                          <select name="expertises[]" class="select2 form-control" multiple="multiple"
+                            id="selectExpertises">
+                            @foreach ($expertises as $expertise_group)
+                              <optgroup label="{{ $expertise_group->title }}">
+                                @foreach ($expertise_group->children as $expertise)
+                                  <option value="{{ $expertise->id }}"
+                                    @if (in_array($expertise->id, $client->mentorExpertises()->pluck('expertises.id')->toArray())) selected @endif>{{ $expertise->title }}
+                                  </option>
+                                @endforeach
+                              </optgroup>
+                            @endforeach
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-4 col-md-6">
+                      <label for="basicInput" class="form-label fs-6 fw-bold">
+                        {{ __('admin.Entrepreneurial Experience') }}
+                      </label>
+
+                      <select name="entrepreneurial_experience" id="entrepreneurial_experience"
+                        class="select2 form-select">
+                        <option value="1"
+                          {{ optional($client->bio)->entrepreneurial_experience ? 'selected' : '' }}>
+                          {{ __('Yes') }}</option>
+                        <option value="0"
+                          {{ optional($client->bio)->entrepreneurial_experience ? '' : 'selected' }}>
+                          {{ __('No') }}</option>
+                      </select>
+                    </div>
+                    <br>
+                    <div class="mt-4 col-md-6">
+                      <label class="form-label fs-6 fw-bold">{{ __('admin.Entrepreneurial Experience desc') }}.</label>
+                      <textarea class="form-control" id="basicTextarea" rows="8" name="entrepreneurial_experience_brief" required>{{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }}</textarea>
+                      <label for="tcontent"
+                        class="mt-2">{{ __('admin.Entrepreneurial Experience Brief') }}</label>
+                    </div>
+                    <div class="my-4 col-md-6">
+                      <label for="profile_privacy"
+                        class="form-label fs-6 fw-bold">{{ __('admin.Profile Privacy') }}</label>
+                      <select name="profile_privacy" id="profile_privacy" class="select2 form-select">
+                        <option value="1"
+                          {{ optional($client->bio)->profile_privacy ? 'selected' : '' }}>
+                          {{ __('Yes') }}</option>
+                        <option value="0"
+                          {{ optional($client->bio)->profile_privacy ? '' : 'selected' }}>
+                          {{ __('No') }}</option>
+                      </select>
+                    </div>
+                    <div class="col-md-12 col-12">
+                      <label for="approach" class="form-label fs-6 fw-bold">{{ __('admin.mentorship approach') }}
+                        :</label>
+                      <div class="form-group" id="approach">
+                        <div class="checkbox mr-5">
+                          <input type='checkbox' id="checkbox1" class="checkbox-input"
+                            name='mentorship_approach[]'
+                            {{ $client->bio && in_array('E-mail', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
+                            value="E-mail">
+                          <label for="checkbox1" class="form-label fs-6 fw-bold">
+                            {{ __('admin.E-mail') }}
+                          </label>
+                        </div>
+                        <div class="checkbox mr-5">
+                          <input type='checkbox' id="checkbox2" class="checkbox-input"
+                            name='mentorship_approach[]'
+                            {{ $client->bio && in_array('phone calls', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
+                            value="phone calls">
+                          <label for="checkbox2" class="form-label fs-6 fw-bold">
+                            {{ __('admin.phone calls') }}
+                          </label>
+                        </div>
+                        <div class="checkbox mr-5">
+                          <input type='checkbox' id="checkbox3" class="checkbox-input"
+                            name='mentorship_approach[]'
+                            {{ $client->bio && in_array('video calls', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
+                            value="video calls">
+                          <label for="checkbox3" class="form-label fs-6 fw-bold">
+                            {{ __('admin.video calls') }}
+                          </label>
+                        </div>
+                        <div class="checkbox mr-5">
+                          <input type='checkbox' id="checkbox4" class="checkbox-input"
+                            name='mentorship_approach[]'
+                            {{ $client->bio && in_array('in-person meetings', $client->bio->mentorship_approaches) ? 'checked=""' : '' }}
+                            value="in-person meetings">
+                          <label for="checkbox4" class="form-label fs-6 fw-bold">
+                            {{ __('admin.in-person meetings') }}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <br>
+                  <div class="mt-6">
+                    <button type="submit" class="btn btn-primary me-3">{{ __('admin.Save_Changes') }}</button>
+                    <button type="reset" class="btn btn-label-secondary">{{ __('admin.Reset') }}</button>
+                  </div>
+              </form>
+                         
+            </div>
+        </div>
+      </div>
+        @endrole
+        <!-- /Mentor fields -->
+
+
+
+
         </div>
         <!-- /Tab Content -->
+
+        
 
         <!-- Deactivate account -->
         <div class="card mb-6">

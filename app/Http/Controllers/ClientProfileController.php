@@ -108,29 +108,55 @@ class ClientProfileController extends Controller
      * @param  \App\Type  $Type
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateClientProfileRequest $request)
-    {           
-        try{
-            
-            $user = Auth::user();
 
-            
+    public function Updatebio(Request $request)
+    {
+       
+            $user = Auth::user();
             // Mentor Bio section
             if ($request->mentor_section){
                 $data =[
                     'bio_ar'=>$request->bio_ar,
                     'bio_en'=>$request->bio_en,
-                    'linkedIn'=>$request->linkedin,
+                    'linkedin'=>$request->linkedin,
                     'entrepreneurial_experience'=>$request->entrepreneurial_experience,
                     'profile_privacy'=>$request->profile_privacy,
                     'mentorship_approach'=>json_encode($request->mentorship_approach),
                 ];
-                if ($request->entrepreneurial_experience){
+                if ($request->entrepreneurial_experience == 1){
                     $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief;
+                }else{
+                    $data['entrepreneurial_experience_brief']=0;
                 }
                 $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
                 $user->mentorExpertises()->sync($request->expertises);
             }
+
+            return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+    }
+    public function update(UpdateClientProfileRequest $request)
+    {           
+        
+        try{
+            
+            $user = Auth::user();
+
+            // // Mentor Bio section
+            // if ($request->mentor_section){
+            //     $data =[
+            //         'bio_ar'=>$request->bio_ar,
+            //         'bio_en'=>$request->bio_en,
+            //         'linkedIn'=>$request->linkedin,
+            //         'entrepreneurial_experience'=>$request->entrepreneurial_experience,
+            //         'profile_privacy'=>$request->profile_privacy,
+            //         'mentorship_approach'=>json_encode($request->mentorship_approach),
+            //     ];
+            //     if ($request->entrepreneurial_experience){
+            //         $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief;
+            //     }
+            //     $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
+            //     $user->mentorExpertises()->sync($request->expertises);
+            // }
             
 
             if ($request->hasFile('img_url')) {

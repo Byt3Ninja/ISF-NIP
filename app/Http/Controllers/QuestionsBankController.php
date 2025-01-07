@@ -82,11 +82,13 @@ class QuestionsBankController extends Controller
 		}
 		if( $request->question_group == 'survey' )
 		{
-			$text_status = $request->survey_type != 'stars' ?  'required_if:type,mcq' : 'nullable';
+			
+			$text_status = ($request->survey_type != 'stars' && $request->survey_type != 'answers') ?  'required_if:type,mcq' : 'nullable';
 			$rules = array_merge( $rules, [
 				'quiz_answer_text' => 'required_if:type,mcq|array',
 				"quiz_answer_text.*" => "$text_status|string",
 			]);
+			
 		}
 		$validator = Validator::make($request->all(), $rules);
 		$errors = [];
@@ -105,6 +107,7 @@ class QuestionsBankController extends Controller
 		$type = null;
 		$surveyType = null;
 		$category_id = null;
+		
 		$question = new QuestionsBank;
 		$question->organization_id = $request->organization_id;
 		$question->group = $request->question_group;
@@ -113,7 +116,7 @@ class QuestionsBankController extends Controller
 			$type = $request->type;
 			$category_id = $request->category_id;
 		} else { $surveyType = $request->survey_type; }
-
+		
 		$question->category_id = $request->category_id;
 		$question->question = $request->question;
 		$question->type = $type;
@@ -235,7 +238,7 @@ class QuestionsBankController extends Controller
 			}
 			if( $request->question_group == 'survey' )
 			{
-				$text_status = $request->survey_type != 'stars' ?  'required_if:type,mcq' : 'nullable';
+				$text_status = ($request->survey_type != 'stars' && $request->survey_type != 'answers') ?  'required_if:type,mcq' : 'nullable';
 				$rules = array_merge( $rules, [
 					'quiz_answer_text' => 'required_if:type,mcq|array',
 					"quiz_answer_text.*" => "$text_status|string",

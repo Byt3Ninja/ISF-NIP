@@ -146,4 +146,5 @@ return [
     'logTaskUpdateUserAdd' => 'قام <a target="_blank" href=":url">:user</a> بإسناد <a target="_blank" href=":new_url">:new_user</a> إلى المهمة',
     'logTaskUpdateUserRemove' => 'قام <a target="_blank" href=":url">:user</a> بإزالة <a target="_blank" href=":old_url">:old_user</a> من المهمة',
     'logTaskUpdateRow_no' => 'قام <a target="_blank" href=":url">:user</a> بتغيير ترتيب فرز المهام من ":old" إلى ":new"',
+    "Survey" => "الاستبيان",
 ];
