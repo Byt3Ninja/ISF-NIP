@@ -17,8 +17,17 @@
 
 @section('style')
 	<style>
+		.content-body {
+			padding: 0;
+		}
 		.form-group {
 			margin-bottom: 1.5rem;
+		}
+
+		@media screen and (min-width: 768px) {
+			.content-body {
+				padding: 0 8rem;
+			}
 		}
 	</style>
 @stop
@@ -28,7 +37,7 @@
 	<div class="container-xxl flex-grow-1 container-p-y">
 		<div class="content-overlay"></div>
 		
-		<div class="content-body" style="padding: 0 8rem;">
+		<div class="content-body">
 			<!-- BuilderForm start -->
 			<section id="basic-input">
 				<div class="row">
@@ -196,7 +205,7 @@
 												<fieldset>
 													<div class="w-100 d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
 														<label class="fs-6 form-label mb-2 fw-bold w-100" for="answers">{{ __('admin.answers')}}</label>
-														<button id="addNewAnswer" class="btn btn-sm btn-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new answer"> 
+														<button id="addNewAnswer" class="btn btn-light" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a new answer" style="height: 35px;"> 
 															<i class="ti ti-plus me-2"></i>
 															<span class="text-nowrap">Add Answer</span>
 														</button>
