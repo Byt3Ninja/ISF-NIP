@@ -334,6 +334,18 @@
           </div>
         </div>
       @endif
+      @if( session()->has('msg') )
+        <div class="row">
+          <div class="col-md-12">
+            <div role="alert" class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2">
+              {{ __('admin.' . session()->get('msg')) }}
+              {{ Session::forget('msg') }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          </div>
+        </div>
+      @endif
+      
       <div class="content-body">
         @if (session()->has('msg'))
           <div class="row">

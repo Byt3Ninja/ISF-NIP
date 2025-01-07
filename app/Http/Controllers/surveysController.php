@@ -252,7 +252,7 @@ class surveysController extends Controller
 				}
 				$responses->responses = $answers;
 				$responses->save();
-				return redirect()->route('dashboard')->with('success', 'surveySubmitSuccess');
+				return redirect()->route('dashboard')->with( ['msg'=> 'surveySubmitSuccess', 'class' => 'success']);
 			}
 		}
 	}

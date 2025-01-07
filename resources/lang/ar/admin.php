@@ -1115,5 +1115,17 @@ return [
 	'Type_Survey' => ' تحديد من سيقوم بالإجابة على الاستبيان ',
 	'info_profile' => 'معلومات الملف الشخصي',
 	'Answer' => 'الجواب',
+	'surveySubmitSuccess' => 'تم تقديم الاستبيان بنجاح',
+	'Surveys_Mentor' => 'استبيانات المشرف',
+	'Surveys_Startup' => 'استبيانات الشركات',
+	'NotDone' => 'غير مكتمل',
+	'Done' => 'مكتمل',
+	'Total_Servey' => 'اجمالي الاستبيانات',
+	'Startup' => 'شركة',
+	'Prorgam_name' => 'اسم البرنامج',
+	'Orgranization' => 'اسم المنظمة',
+	'Session_date' => 'تاريخ الجلسة',
+	'Survey_Report' => 'تقرير الاستبيان',
+	'Mentor_Sessions_survey' => 'جلسات استبيان المشرف',
 	
 ];
