@@ -82,6 +82,11 @@ if($totalStepsIdsCount > 0){
 }else{
   $totalStepsIdsCount = 0;
 }
+if($answerspinding > 0){
+  $answerspinding = $answerspinding;
+}else{
+  $answerspinding = 0;
+}
 
 $orgCollection = collect([
 [__('admin.Startups'), 'building-skyscraper', $totalcompany, 'primary'],
