@@ -86,7 +86,7 @@
                         <td class="text-center">{{ $c++ }}</td>
                         <td class="text-center">
                           <div class="d-flex align-items-center">
-                            <div class="media-left mr-50">
+                            <div class="d-flex align-items-center justify-content-center gap-2 text-nowrap">
                               <img 
                                 src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle"
                                 height="40" width="40" 

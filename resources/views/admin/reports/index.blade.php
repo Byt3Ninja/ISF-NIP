@@ -292,11 +292,11 @@ var responses = @json($available_surveys)
 					{
 						if( i < answer )
 						{
-							html += '<li><i class="fas fa-star text-gold"></i> </li>';
+							html += '<li><i class="ti ti-star text-warning"></i> </li>';
 						}
 						else
 						{
-							html += '<li><i class="far fa-star text-gold"></i> </li>';
+							html += '<li><i class="ti ti-star text-warning"></i> </li>';
 						}
 					}
 				html += '</ul>';
