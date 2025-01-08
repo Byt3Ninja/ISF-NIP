@@ -27,7 +27,13 @@ class ReportController extends Controller
                 $query->where('organization_id',$organization_id);
             });
         })->get();
-        return view('admin.reports.index',compact('companies','cycles'));
+
+
+        $data['mentorRequests'] =  MentorshipRequest::all();
+        $available_surveys = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('mentor_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
+
+
+        return view('admin.reports.index',compact('companies','cycles','available_surveys'));
     }
     public function View($type,Request $request){
         $organization_id = auth()->user()->organization_id;
