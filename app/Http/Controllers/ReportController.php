@@ -81,7 +81,7 @@ class ReportController extends Controller
     protected function startupSurveysReport(){
         $data['mentorRequests'] =  MentorshipRequest::all();
         $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
-            return SurveyResponses::where('user_id', $request->mentor_id)
+            return SurveyResponses::where('user_id', $request->user_id)
                 ->where('triggered_at', $request->id)
                 ->where('triggered_by', 'session')
                 ->exists();
