@@ -202,7 +202,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
 
               <div class="col-12 col-md-2">
                 <!-- Assessment History Chart -->
-                <div class="history-chart">
+                <div class="history-chart mt-1">
                   <div class="card">
                     <div class="card-header pb-0">
                       <h6 class="mb-0 card-title">{{ __('admin.Compare') }}</h6>
