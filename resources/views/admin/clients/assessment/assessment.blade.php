@@ -277,7 +277,6 @@ $mobilePills = ['analysis', 'questions', 'history'];
                     'questionId': questionId,
                     'answer': answer,
                     _token: $('meta[name="csrf-token"]').attr('content'),
-                    'activeAssessment': 2
                 },
                 success: function(response) {
                   if(response.message == 1){
@@ -287,13 +286,6 @@ $mobilePills = ['analysis', 'questions', 'history'];
                     console.log(response.message);
                     console.log(response);
                     // location.reload();
-
-                    if (i === index) {
-                      container.style.display = 'block';
-                    } else {
-                      container.style.display = 'none';
-                    }
-
                 },
                 error: function(error) {
                   console.log(error.responseText);
@@ -321,6 +313,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
 
     assessmentTabs.forEach((tab, i) => {
       if (i === index) {
+        localStorage.setItem('activeCategoryTab', i);
         tab.style.border = '1px solid black';
       } else {
         tab.style.border = 'none';
@@ -341,6 +334,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
     activeCategoryTabs.forEach((tab, i) => {
       if (i === index) {
         tab.style.border = '1px solid black';
+        localStorage.setItem('activeSubCategoryTab', i);
       } else {
         tab.style.border = 'none';
       }
@@ -372,6 +366,19 @@ $mobilePills = ['analysis', 'questions', 'history'];
 
       changeCategory(nextIndex); // Increase index by 1
     });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const activeCategoryTab = localStorage.getItem('activeCategoryTab');
+    const activeSubCategoryTab = localStorage.getItem('activeSubCategoryTab');
+
+    if (activeCategoryTab) {
+      changeAssessment(parseInt(activeCategoryTab));
+    }
+
+    if (activeSubCategoryTab) {
+      changeCategory(parseInt(activeSubCategoryTab));
+    }
   });
 
   // const submitButton = document.querySelector('#submitButton');
