@@ -79,6 +79,9 @@
                         $c = 1;
                     @endphp
                     @foreach ($mentorRequests as $session)
+                    @php
+                              $available_surv = \App\SurveyResponses::where('user_id', $session->mentor_id)->where('triggered_at', $session->id)->where('triggered_by', 'session')->first();
+                              @endphp
                       <tr>
                         <td class="text-center">{{ $c++ }}</td>
                         <td class="text-center">
@@ -113,101 +116,16 @@
                         </td>
                         
                         <td class="text-center">
-                            <div class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ShowSession{{ $session->id }}" >{{__('admin.Show')}}</div>
                             
+                            @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
+    <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
+@elseif(isset($available_surv))
+    <button class="btn btn-sm btn-label-danger"> {{ __('admin.notAnswered') }} </button>
+@endif
 
                         </td>
                       </tr>
-                       <!-- Show Customer Modal -->
-                    <div class="modal fade" id="ShowSession{{ $session->id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-                        <div class="modal-content" dir="ltr">
-                            <div class="modal-body">
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                <div class="text-center mb-6">
-                                    <h4 class="mb-2">{{__('admin.Survey_Report')}} ( {{ $session->zoom_date }} )</h4>
-                                </div>
-  
-  
-                                @php
-                            //   $surveyScope = \App\SurveyScopes::whereIn('type', ['mentor', 'both'])->get();
-                              $available_surveys = \App\SurveyResponses::where('user_id', $session->mentor_id)->where('triggered_at', $session->id)->where('triggered_by', 'session')->get();
-                              @endphp
-                              
-                              @if($available_surveys->isNotEmpty())
-                              @foreach($available_surveys as $scope)
-                             
-                              @php
-                              $surveyorrate = $scope->responses ? json_decode($scope->responses) : null;
-                              @endphp
-                            
-                              @if($surveyorrate)
-                              
-                              @foreach($surveyorrate as $question_index => $item)
-                              <div class="d-flex align-items-center gap-3 pb-2 border-bottom">
-                                <span class="badge bg-primary rounded-circle d-flex justify-content-center align-items-center"
-                                    style="width: 30px; height: 30px;">
-                                    {{ $question_index + 1 }}
-                                </span>
-                                <h5 class="fw-semibold mb-0">{{ $item->question }}</h5>
-                            </div>
-                                  {{-- <p>Question ID: {{ $item->id }} <br></p> --}}
-                                  
-
-                                  <div class="my-3">
-                                    @if( $item->type == 'stars' )
-								@php
-									$answers = $item->answer;
-									
-								@endphp
-								<div class="h-auto d-flex justify-content-center align-items-center py-4" style="width: fit-content;">
-									<div class='stars form-control bg-label-secondary d-flex justify-content-center align-items-center' id="review_stars_{{$question_index}}">
-										@for ($i = 5; $i > 0; $i--)
-                                        
-											<label 
-												class="star star-{{ $i }}" 
-												for="star-{{ $question_index }}-{{ $i }}"
-											></label>
-										@endfor
-										<span class='float-end reviewFaceFeedBack text-nowrap ms-3'></span>
-									</div>
-								</div>
-								@elseif( $item->type == 'radio' )
-                                        <div class="row">
-                                            <div class="col-12 col-md-6">
-                                                @php
-                                                $answers = is_string($item->answers) ? json_decode($item->answers) : $item->answers;
-                                                @endphp
-                                                @if($answers)
-                                                @foreach ($answers as $key => $answers2)
-                                                @if($key == $item->answer)
-                                                {{ $answers2->text }}
-                                                @endif
-                                                @endforeach
-                                                @endif
-                                            </div>
-                                        </div>
-                                        @elseif( $item->type == 'answers' )
-                                            <div class="row">
-                                                <div class="col-12 col-md-6">
-                                                    {{ $item->answer }}
-                                                </div>
-                                            </div>
-                                        @endif
-                                </div>
-
-                              @endforeach
-                              @endif
-                              @endforeach
-                              @else
-                              <p> (ID: {{ $scope->id ?? 'N/A' }} ).</p>
-                              @endif
-
-                            </div>
-                        </div>
-                        </div>
-                      </div>
-                        <!--/ Show Customer Modal -->
+                      
                     @endforeach
                   </tbody>
                 </table>
@@ -218,4 +136,44 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="questionsModal" tabindex="-1" role="dialog" aria-labelledby="modalScrollableTitle" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalScrollableTitle"> {{ __('admin.surveyAnswersDetails') }} </h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-md-8 col-lg-8 col-sm-8">
+							<div class="table-responsive">
+								<table class="table table-bordered table-hover">
+									<thead>
+										<tr>
+											<th> {{__('admin.question')}} </th>
+											<th class="w-25 text-center px-0"> {{__('admin.question_Type')}} </th>
+										</tr>
+									</thead>
+									<tbody id="question-picker-tbody"></tbody>
+								</table>
+							</div>
+						</div>
+						<div class="col-md-4 col-lg-4 col-sm-4">
+							<div class="py-1 px-2" id="modelPreviewArea">
+								<div class="text-center"> {{ __('admin.previewAreaPlaceholder') }} </div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-md btn-dark" data-bs-dismiss="modal">
+					<span class="d-none d-sm-block">{{__('messages.Close')}}</span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
   

@@ -1128,4 +1128,5 @@ return [
 	'Survey_Report' => 'تقرير الاستبيان',
 	'Mentor_Sessions_survey' => 'جلسات استبيان المشرف',
 	
+	
 ];
