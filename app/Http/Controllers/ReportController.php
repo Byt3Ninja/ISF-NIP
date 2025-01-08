@@ -83,7 +83,7 @@ class ReportController extends Controller
         $data['cycle_mentors'] = User::whereHas('mentorSessions')->get();
 
         $surveyScope = SurveyScopes::whereIn('type', ['startup', 'both'])->get();
-        $data['available_surveys'] = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('mentor_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
+        $data['available_surveys'] = SurveyResponses::whereIn('user_id', $data['mentorRequests']->pluck('user_id'))->whereIn('triggered_at', $data['mentorRequests']->pluck('id'))->where('triggered_by', 'session')->get();
         // ==============> counts <=================
         $data['Total_Survey'] = $data['available_surveys']->count();
         $data['Survey_Done'] = $data['available_surveys']->whereNotNull('responses')->count();
