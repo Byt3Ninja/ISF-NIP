@@ -1110,4 +1110,6 @@ return [
 	'Session_date' => 'Session Date',
 	'Survey_Report' => 'Survey Report',
 	'Mentor_Sessions_survey' => 'Mentor Sessions Survey',
+	"No_Assessment" => "No Assessment",
+	'No_Assessment_right_now' => 'You do not have any assessments right now',
 ];
