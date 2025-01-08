@@ -80,6 +80,12 @@ class ReportController extends Controller
     // =============> ajax report StartupSurveys <=============
     protected function startupSurveysReport(){
         $data['mentorRequests'] =  MentorshipRequest::all();
+        $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
+            return SurveyResponses::where('user_id', $request->mentor_id)
+                ->where('triggered_at', $request->id)
+                ->where('triggered_by', 'session')
+                ->exists();
+        });
         $data['cycle_mentors'] = User::whereHas('mentorSessions')->get();
 
         $surveyScope = SurveyScopes::whereIn('type', ['startup', 'both'])->get();
@@ -94,6 +100,12 @@ class ReportController extends Controller
  // =============> ajax report MentorSurvey <=============
     protected function mentorSurveyReport(){
         $data['mentorRequests'] =  MentorshipRequest::all();
+        $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
+            return SurveyResponses::where('user_id', $request->mentor_id)
+                ->where('triggered_at', $request->id)
+                ->where('triggered_by', 'session')
+                ->exists();
+        });
         $data['cycle_mentors'] = User::whereHas('mentorSessions')->get();
 
         $surveyScope = SurveyScopes::whereIn('type', ['mentor', 'both'])->get();
