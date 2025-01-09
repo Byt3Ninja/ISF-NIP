@@ -186,7 +186,9 @@
 
 		$(document).on('click', '.open-responses', function() {
 			var id = $(this).data('id');
+			
 			var responses = @json($responses);
+			
 			var response = responses.filter(function(oneResponse) {
 				return oneResponse.id == id;
 			});
@@ -195,7 +197,7 @@
 			responses.forEach(function(oneResponse) {
 				html += '<tr data-id="' + id + '" data-qid="' + oneResponse.id + '" class="cursor-pointer open-question-details">';
 				html += '<td>' + oneResponse.question + '</td>';
-				html += '<td class="text-center">' + ( oneResponse.type == 'radio' ? "{{  __('admin.surveyTypeRadioButtons') }}" : "{{  __('admin.surveyTypeStarRating') }}" ) + '</td>';
+				html += '<td class="text-center">' + ( oneResponse.type == 'radio' ? "{{ __('admin.surveyTypeRadioButtons') }}" : ( oneResponse.type == 'answers' ? "{{ __('admin.surveyQuestionAndAnswer') }}" : "{{ __('admin.surveyTypeStarRating') }}" ) ) + '</td>';
 				html += '</tr>';
 			});
 			$("#modelPreviewArea").html('<div class="text-center"> {{ __("admin.previewAreaPlaceholder") }} </div>');
@@ -222,6 +224,14 @@
 					var count = key + 1;
 					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
 					html += '<div class="custom-py-1"> <button class="w-100 text-left btn ' + checked + '">' + count + '. ' + item.text + '</button> </div>';
+				});
+			}
+			else if( question.type == 'answers' )
+			{
+				question.answers.forEach( function(item, key) {
+					var count = key + 1;
+					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
+					html += '<div class="custom-py-1"> '+ question.answer +' </div>';
 				});
 			}
 			else if( question.type == 'stars' )
