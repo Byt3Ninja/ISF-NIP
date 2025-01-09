@@ -120,7 +120,8 @@
                             @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
     <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
 @elseif(isset($available_surv))
-    <button class="btn btn-sm btn-label-danger"> {{ __('admin.notAnswered') }} </button>
+    {{-- <button class="btn btn-sm btn-label-danger"> {{ __('admin.notAnswered') }} </button> --}}
+    <a href="{{ route('surveys.taking', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
 @endif
 
                         </td>
