@@ -91,148 +91,169 @@ $mobilePills = ['analysis', 'questions', 'history'];
       </div>
     </div>
     <!-- / Pills -->
-    <div class="row ">
-      <div class="col-md-3 col-12 position-relative " style="height: fit-content;">
-        @foreach ($user_scores as $key => $assessment)
-        @php
-        $totalQuestions = $assessment->question->where('assessment_id', $assessment_user->id)->count();
-        $totalAnswered = $assessment->question->where('Result_assessment', '!=', null)
-                                      ->where('assessment_id', $assessment_user->id)
-                                      ->count();
-        $totalNotAnswered = $assessment->question->where('Result_assessment', '=', null)
-                                      ->where('assessment_id', $assessment_user->id)
-                                      ->count();
-        // حساب التقدم الإجمالي عبر جميع الأقسام
-        $progress = $totalQuestions > 0 ? ($totalAnswered / $totalQuestions) * 100 : 0;
 
-        $status = $progress == 100 ? 'completed' : ($progress > 0 ? 'in-progress' : 'not-started');
-        @endphp
-
-        <div {{-- id="tab{{ intval($key) + 1 }}" --}} id="assessmentTab"
-          class="CategoryGetId assessment-tab card shadow-sm mb-3 position-relative"
-          style="border: {{ $key == 0 ? '1px solid black;' : 'none' }};"
-          {{-- do="{{ intval($key) }}" --}} onclick="changeAssessment({{ $key }})">
-          <div class="d-flex justify-content-between align-items-center p-4">
-            <div class="d-flex flex-column">
-              <h6 class="mb-0 text-capitalize">
-                {{ str_replace('-', ' ', $assessment['category_name_' . $l]) }}
-              </h6>
-              @if ($totalAnswered == $totalQuestions)
-              <span class="text-success fw-bold text-sm">
-                {{ __('admin.Done_All') }}
-              </span>
-              @else
-              <span class="text-secondary" style="font-size: 10px;">
-                {{ __('admin.Questions_answered') }} {{ $totalAnswered }}/{{ $totalQuestions }}
-              </span>
-              @endif
+    @if(!$assessment_user)
+      <div class="row mt-8 d-flex justify-content-center">
+        <div class="col-12 col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex flex-column align-items-center justify-content-center gap-3">
+                <h4 class="text-center mb-0">{{ __('admin.No_Assessment') }}</h4>
+                <h6 class="text-center text-secondary">{{ __('admin.No_Assessment_right_now') }}</h6>
+                <a 
+                  href="{{ route('make_new_assessment_to_user') }}"
+                  class="btn btn-lg btn-primary">
+                  {{ __('admin.Make_a_new_assessment') }}
+                </a>
+              </div>
             </div>
-            <x-circular-progress size="40" color="#28c76f" progress="{{ $progress }}" />
           </div>
-          @if ($status == 'completed' || $progress == 100)
-          <div style="position: absolute; left: -1rem; top: 50%; transform: translateY(-50%); z-index: 1;"
-            class="w-px-20 h-px-20 rounded-circle bg-success justify-content-center align-items-center d-flex">
-            <i class="ti ti-check text-white fs-6"></i>
-          </div>
-          @else
-          <div style="position: absolute; left: -1rem; top: 50%; transform: translateY(-50%); z-index: 1;"
-            class="w-px-20 h-px-20 rounded-circle bg-light border border-secondary">
-          </div>
-          @endif
-        </div>
-        @endforeach
-        <div
-          style="position: absolute; left: 0.35rem; top: 0; height: 100%; border-left: 2px dashed rgb(120, 108, 163);">
         </div>
       </div>
-      @php
-      $num = 1;
-      @endphp
-      <div class="col-md-9 col-12">
-        @foreach ($user_scores as $key => $assessment)
-        @php
-        $categoryId = $assessment['id'];
-        @endphp
-        <section id="assessmentContent" {{-- id="tab-content-{{ intval($key) + 1 }}" --}}
-          style="{{ $key == 0 ? 'display: block;' : 'display: none;' }}">
-          <div class="d-flex flex-column gap-6">
-            <div class="d-flex flex-wrap gap-2">
-              @foreach ($assessment['subcategories'] as $key => $subcategory)
-              @php
-              $totalQuestionsSub = Count($subcategory['questions']);
-              $totalAnsweredSub = Count($subcategory['questions']->where('Result_assessment', '!=', null));
-              $totalNotAnsweredSub = Count($subcategory['questions']->where('Result_assessment', '=', null));
-              @endphp
+    @else
+      <div class="row">
+        <div class="col-md-3 col-12 position-relative " style="height: fit-content;">
+          @foreach ($user_scores as $key => $assessment)
+          @php
+          $totalQuestions = $assessment->question->where('assessment_id', $assessment_user->id)->count();
+          $totalAnswered = $assessment->question->where('Result_assessment', '!=', null)
+                                        ->where('assessment_id', $assessment_user->id)
+                                        ->count();
+          $totalNotAnswered = $assessment->question->where('Result_assessment', '=', null)
+                                        ->where('assessment_id', $assessment_user->id)
+                                        ->count();
+          // حساب التقدم الإجمالي عبر جميع الأقسام
+          $progress = $totalQuestions > 0 ? ($totalAnswered / $totalQuestions) * 100 : 0;
 
-              <div class="card shadow-sm cursor-pointer" style="{{ $key == 0 ? 'border: 1px solid black;' : '' }}"
-                id="category-tab" onclick="changeCategory({{ $key }})">
-                <div class="px-3 py-5 d-flex flex-column gap-2 text-center">
-                  <span class="text-capitalize fw-bold text-sm">
-                    {{ str_replace('-', ' ', $subcategory['name_' . $l]) }}
-                  </span>
-                  @if ($totalQuestionsSub == $totalAnsweredSub)
-                  <span class="text-success fw-bold">
-                    {{ __('admin.Done_All') }}
-                  </span>
-                  @else
-                  <span class="text-secondary" style="font-size: 10px;">
-                    {{ __('admin.Questions_answered') }} {{ $totalAnsweredSub }}/{{ $totalQuestionsSub }}
-                  </span>
-                  @endif
-                </div>
+          $status = $progress == 100 ? 'completed' : ($progress > 0 ? 'in-progress' : 'not-started');
+          @endphp
+
+          <div {{-- id="tab{{ intval($key) + 1 }}" --}} id="assessmentTab"
+            class="CategoryGetId assessment-tab card shadow-sm mb-3 position-relative"
+            style="border: {{ $key == 0 ? '1px solid black;' : 'none' }};"
+            {{-- do="{{ intval($key) }}" --}} onclick="changeAssessment({{ $key }})">
+            <div class="d-flex justify-content-between align-items-center p-4">
+              <div class="d-flex flex-column">
+                <h6 class="mb-0 text-capitalize">
+                  {{ str_replace('-', ' ', $assessment['category_name_' . $l]) }}
+                </h6>
+                @if ($totalAnswered == $totalQuestions)
+                <span class="text-success fw-bold text-sm">
+                  {{ __('admin.Done_All') }}
+                </span>
+                @else
+                <span class="text-secondary" style="font-size: 10px;">
+                  {{ __('admin.Questions_answered') }} {{ $totalAnswered }}/{{ $totalQuestions }}
+                </span>
+                @endif
               </div>
-              @endforeach
+              <x-circular-progress size="40" color="#28c76f" progress="{{ $progress }}" />
             </div>
-             
-            @foreach ($assessment['subcategories'] as $key => $subcategory)
-            <div class="row" style="display: {{ $key == 0 ? 'block' : 'none' }};" id="questionsContainer">
-              @foreach ($subcategory['questions'] as $key => $question)
+            @if ($status == 'completed' || $progress == 100)
+            <div style="position: absolute; left: -1rem; top: 50%; transform: translateY(-50%); z-index: 1;"
+              class="w-px-20 h-px-20 rounded-circle bg-success justify-content-center align-items-center d-flex">
+              <i class="ti ti-check text-white fs-6"></i>
+            </div>
+            @else
+            <div style="position: absolute; left: -1rem; top: 50%; transform: translateY(-50%); z-index: 1;"
+              class="w-px-20 h-px-20 rounded-circle bg-light border border-secondary">
+            </div>
+            @endif
+          </div>
+          @endforeach
+          <div
+            style="position: absolute; left: 0.35rem; top: 0; height: 100%; border-left: 2px dashed rgb(120, 108, 163);">
+          </div>
+        </div>
+        @php
+        $num = 1;
+        @endphp
+        <div class="col-md-9 col-12">
+          @foreach ($user_scores as $key => $assessment)
+          @php
+          $categoryId = $assessment['id'];
+          @endphp
+          <section id="assessmentContent" {{-- id="tab-content-{{ intval($key) + 1 }}" --}}
+            style="{{ $key == 0 ? 'display: block;' : 'display: none;' }}">
+            <div class="d-flex flex-column gap-6">
+              <div class="d-flex flex-wrap gap-2">
+                @foreach ($assessment['subcategories'] as $key => $subcategory)
+                @php
+                $totalQuestionsSub = Count($subcategory['questions']);
+                $totalAnsweredSub = Count($subcategory['questions']->where('Result_assessment', '!=', null));
+                $totalNotAnsweredSub = Count($subcategory['questions']->where('Result_assessment', '=', null));
+                @endphp
+
+                <div class="card shadow-sm cursor-pointer" style="{{ $key == 0 ? 'border: 1px solid black;' : '' }}"
+                  id="category-tab" onclick="changeCategory({{ $key }})">
+                  <div class="px-3 py-5 d-flex flex-column gap-2 text-center">
+                    <span class="text-capitalize fw-bold text-sm">
+                      {{ str_replace('-', ' ', $subcategory['name_' . $l]) }}
+                    </span>
+                    @if ($totalQuestionsSub == $totalAnsweredSub)
+                    <span class="text-success fw-bold">
+                      {{ __('admin.Done_All') }}
+                    </span>
+                    @else
+                    <span class="text-secondary" style="font-size: 10px;">
+                      {{ __('admin.Questions_answered') }} {{ $totalAnsweredSub }}/{{ $totalQuestionsSub }}
+                    </span>
+                    @endif
+                  </div>
+                </div>
+                @endforeach
+              </div>
               
-              <div class="col-12 question-card-bus-con mb-3 " data-category="question-{{ $key }}" >
-                <div class="card shadow-sm">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center gap-3 mb-2 pb-2 border-bottom">
-                      <span class="badge bg-primary rounded-circle d-flex justify-content-center align-items-center"
-                        style="width: 30px; height: 30px;">
-                        {{ $num++ }}
-                      </span>
-                      <h6 class="fw-bold mb-0">{{ $question['QuestionBank'] }}</h6>
-                      <input type="hidden" name="question_id" class="question_id{{ $question['id'] }}" value="{{ $question['id'] }}">
-                    </div>
-                    <div class="mt-3">
-                      @php
-                      $options = json_decode($question['Answers']);
-                      @endphp
-                      @foreach ($options as $key => $option)
-                      <div class="form-check">
-                        <input class="form-check-input AnswerQuestion"  do="{{ $question['id'] }}" type="radio" name="answer_{{ $question['id'] }}" id="{{ $key }}" value="{{ $key }}" {{ $question['score'] ==  $option->score ? 'checked' : '' }} >
-                        <label class="form-check-label" for="{{ $key }}">
-                          {{ $option->text }}
-                        </label>
+              @foreach ($assessment['subcategories'] as $key => $subcategory)
+              <div class="row" style="display: {{ $key == 0 ? 'block' : 'none' }};" id="questionsContainer">
+                @foreach ($subcategory['questions'] as $key => $question)
+                
+                <div class="col-12 question-card-bus-con mb-3 " data-category="question-{{ $key }}" >
+                  <div class="card shadow-sm">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center gap-3 mb-2 pb-2 border-bottom">
+                        <span class="badge bg-primary rounded-circle d-flex justify-content-center align-items-center"
+                          style="width: 30px; height: 30px;">
+                          {{ $num++ }}
+                        </span>
+                        <h6 class="fw-bold mb-0">{{ $question['QuestionBank'] }}</h6>
+                        <input type="hidden" name="question_id" class="question_id{{ $question['id'] }}" value="{{ $question['id'] }}">
                       </div>
-                      @endforeach
+                      <div class="mt-3">
+                        @php
+                        $options = json_decode($question['Answers']);
+                        @endphp
+                        @foreach ($options as $key => $option)
+                        <div class="form-check">
+                          <input class="form-check-input AnswerQuestion"  do="{{ $question['id'] }}" type="radio" name="answer_{{ $question['id'] }}" id="{{ $key }}" value="{{ $key }}" {{ $question['score'] ==  $option->score ? 'checked' : '' }} >
+                          <label class="form-check-label" for="{{ $key }}">
+                            {{ $option->text }}
+                          </label>
+                        </div>
+                        @endforeach
+                      </div>
                     </div>
                   </div>
                 </div>
+                @endforeach
               </div>
               @endforeach
             </div>
+          </section>
+            
+          @endforeach
+          <div>
+            @foreach ($assessment['subcategories'] as $key => $subcategory)
+            <div id="submitContainer" style="{{ $key == 0 ? 'display: flex;' : 'display: none;' }}">
+              <div class="w-100 d-flex justify-content-end">
+                <button id="submitButton" class="btn btn-primary">{{ __('admin.Next') }}</button>
+              </div>
+            </div>
             @endforeach
           </div>
-        </section>
-          
-        @endforeach
-        <div>
-          @foreach ($assessment['subcategories'] as $key => $subcategory)
-          <div id="submitContainer" style="{{ $key == 0 ? 'display: flex;' : 'display: none;' }}">
-            <div class="w-100 d-flex justify-content-end">
-              <button id="submitButton" class="btn btn-primary">{{ __('admin.Next') }}</button>
-            </div>
-          </div>
-          @endforeach
         </div>
       </div>
-    </div>
+    @endif
   </div>
 </div>
 @stop
@@ -256,7 +277,6 @@ $mobilePills = ['analysis', 'questions', 'history'];
                     'questionId': questionId,
                     'answer': answer,
                     _token: $('meta[name="csrf-token"]').attr('content'),
-                    'activeAssessment': 2
                 },
                 success: function(response) {
                   if(response.message == 1){
@@ -266,13 +286,6 @@ $mobilePills = ['analysis', 'questions', 'history'];
                     console.log(response.message);
                     console.log(response);
                     // location.reload();
-
-                    if (i === index) {
-                      container.style.display = 'block';
-                    } else {
-                      container.style.display = 'none';
-                    }
-
                 },
                 error: function(error) {
                   console.log(error.responseText);
@@ -300,6 +313,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
 
     assessmentTabs.forEach((tab, i) => {
       if (i === index) {
+        localStorage.setItem('activeCategoryTab', i);
         tab.style.border = '1px solid black';
       } else {
         tab.style.border = 'none';
@@ -320,6 +334,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
     activeCategoryTabs.forEach((tab, i) => {
       if (i === index) {
         tab.style.border = '1px solid black';
+        localStorage.setItem('activeSubCategoryTab', i);
       } else {
         tab.style.border = 'none';
       }
@@ -351,6 +366,19 @@ $mobilePills = ['analysis', 'questions', 'history'];
 
       changeCategory(nextIndex); // Increase index by 1
     });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const activeCategoryTab = localStorage.getItem('activeCategoryTab');
+    const activeSubCategoryTab = localStorage.getItem('activeSubCategoryTab');
+
+    if (activeCategoryTab) {
+      changeAssessment(parseInt(activeCategoryTab));
+    }
+
+    if (activeSubCategoryTab) {
+      changeCategory(parseInt(activeSubCategoryTab));
+    }
   });
 
   // const submitButton = document.querySelector('#submitButton');

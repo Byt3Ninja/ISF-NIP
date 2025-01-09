@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers\Mentor;
 
-use App\Http\Controllers\Controller;
-use App\MentorshipRequest;
+use App\User;
+use App\Company;
 use App\MentorshipTask;
+use App\SurveyResponses;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Spatie\Permission\Traits\HasRoles;
 
 class MentorshipController extends Controller
 {
     public function index(){
 
+        $mentorRequests =  MentorshipRequest::all();
+        $available_surveys = SurveyResponses::whereIn('user_id', $mentorRequests->pluck('mentor_id'))->whereIn('triggered_at', $mentorRequests->pluck('id'))->where('triggered_by', 'session')->get();
+        
         if(auth()->user() && auth()->user()->hasRole('Mentor')) {
         $sessions = auth()->user()->mentorSessions()->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
         }
@@ -20,8 +26,15 @@ class MentorshipController extends Controller
             $usersCompany = auth()->user()->company->users()->where('company_id', $company_id)->get();
             $sessions = MentorshipRequest::whereIn('user_id', $usersCompany->pluck('id'))->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
         }
+        if(auth()->user() && auth()->user()->hasRole('Admin')) {
+            $company_id = Company::all();
+            $usersCompany = User::whereIn('company_id', $company_id->pluck('id'))->get();
+            $sessions = MentorshipRequest::whereIn('user_id', $usersCompany->pluck('id'))->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
+
+
+        }
         
-        return view('mentor.mentorshipSessions.index',compact('sessions'));
+        return view('mentor.mentorshipSessions.index',compact('sessions','available_surveys'));
     }
 
 

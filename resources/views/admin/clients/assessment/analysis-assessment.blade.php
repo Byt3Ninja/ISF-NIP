@@ -204,7 +204,7 @@ $userid = auth()->user()->id;
               @else
               <a 
                  
-                  class="btn  btn-default light-shadow radius-10">
+                  class="bg-light hover-none radius-10 disabled px-4 py-2" style="cursor: not-allowed !important;">
                   {{ __('admin.Make_a_new_assessment') }}
               </a>
                 @endif

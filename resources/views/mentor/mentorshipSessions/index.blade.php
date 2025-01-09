@@ -73,6 +73,7 @@
                       </thead>
                       <tbody>
                         @foreach($sessions as $session)
+                              
                         <tr>
                           <td class="text-center">{{ $loop->iteration }}</td>
                           <td class="text-center">
@@ -117,56 +118,13 @@
                             <small>
                               @if( Auth::user()->hasRole('Mentor') )
                               @php
-                              $surveyScope = \App\SurveyScopes::whereIn('type', ['startup', 'both'])->get();
-                              $available_surveys = \App\SurveyResponses::where('user_id', '!=', Auth::user()->id)->whereIn('scope_id', $surveyScope->pluck('id'))->where('triggered_at', $session->id)->where('triggered_by', 'session')->get();
+                              $available_surv = \App\SurveyResponses::where('user_id', $session->mentor_id)->where('triggered_at', $session->id)->where('triggered_by', 'session')->first();
                               @endphp
-                              
-                              @if($available_surveys->isNotEmpty())
-                              @foreach($available_surveys as $scope)
-                              @php
-                              $surveyorrate = $scope->responses ? json_decode($scope->responses) : null;
-                              @endphp
-                            
-                              @if($surveyorrate)
-                              
-                              @foreach($surveyorrate as $item)
-                              @if($item->type == 'answers')
-                                  {{-- <p>Question ID: {{ $item->id }} <br></p> --}}
-                                  <p> {{ __('admin.Question') }} : {{ $item->question }} <br></p>
-                                  <p>{{ __('admin.Answer') }}: {{ $item->answer }} <br></p>
-                              @endif
-                              @endforeach
-                              @endif
-                              @endforeach
-                              @else
-                              <p> (ID: {{ $scope->id ?? 'N/A' }} ).</p>
-                              @endif
-                              @endif
-                              @if( Auth::user()->hasRole('Registered') )
-                              @php
-                              $surveyScope = \App\SurveyScopes::whereIn('type', ['Mentor', 'both'])->get();
-                              $available_surveys = \App\SurveyResponses::where('user_id', '!=', Auth::user()->id)->whereIn('scope_id', $surveyScope->pluck('id'))->where('triggered_at', $session->id)->where('triggered_by', 'session')->get();
-                              @endphp
-                              
-                              @if($available_surveys->isNotEmpty())
-                              @foreach($available_surveys as $scope)
-                              @php
-                              $surveyorrate = $scope->responses ? json_decode($scope->responses) : null;
-                              @endphp
-                            
-                              @if($surveyorrate)
-                              
-                              @foreach($surveyorrate as $item)
-                              @if($item->type == 'answers')
-                                  {{-- <p>Question ID: {{ $item->id }} <br></p> --}}
-                                  <p> {{ __('admin.Question') }} : {{ $item->question }} <br></p>
-                                  <p>{{ __('admin.Answer') }}: {{ $item->answer }} <br></p>
-                              @endif
-                              @endforeach
-                              @endif
-                              @endforeach
-                              @else
-                              <p> (ID: {{ $scope->id ?? 'N/A' }} ).</p>
+                              @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
+                                  <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
+                              @elseif(isset($available_surv))
+                                  {{-- <button class="btn btn-sm btn-label-danger"> {{ __('admin.notAnswered') }} </button> --}}
+                                  <a href="{{ route('surveys.taking', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
                               @endif
                               @endif
                             </small>
@@ -189,12 +147,14 @@
                           <td class="text-center"> {{
                             $session->mentorshipTasks()->where('status','pending')->whereNotNull('title')->count() }}</td>
                           <td class="text-center">
+
                             <a href="{{ route('mentorshipTasks.index',['mentorship_id'=>$session->id]) }}"
                               title="{{ __('mentor.mentorshipTasks.tasks') }}"
                               class="btn {{ $session->mentorshipTasks()->whereNull('title')->count()?'btn-label-warning':'btn-label-primary'  }}">
                               <i class="ti ti-eye me-2"></i>
                               {{ $l == 'en' ? 'View' : 'عرض' }}</a>
-                          </td>
+                              
+                            </td>
                         </tr>
                         @endforeach
                       </tbody>
@@ -205,6 +165,46 @@
             </div>
           </div>
         </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="questionsModal" tabindex="-1" role="dialog" aria-labelledby="modalScrollableTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalScrollableTitle"> {{ __('admin.surveyAnswersDetails') }} </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-8 col-lg-8 col-sm-8">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th> {{__('admin.question')}} </th>
+                        <th class="w-25 text-center px-0"> {{__('admin.question_Type')}} </th>
+                      </tr>
+                    </thead>
+                    <tbody id="question-picker-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="col-md-4 col-lg-4 col-sm-4">
+                <div class="py-1 px-2" id="modelPreviewArea">
+                  <div class="text-center"> {{ __('admin.previewAreaPlaceholder') }} </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-md btn-dark" data-bs-dismiss="modal">
+            <span class="d-none d-sm-block">{{__('messages.Close')}}</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -235,5 +235,77 @@
           @endif
       });
   });
+
+  
+  var responses = @json($available_surveys)
+
+		$(document).on('click', '.open-responses', function() {
+			var id = $(this).data('id');
+			var responses = @json($available_surveys);
+			var response = responses.filter(function(oneResponse) {
+				return oneResponse.id == id;
+			});
+			var responses = response[0].responses;
+			var html = '';
+			responses.forEach(function(oneResponse) {
+				html += '<tr data-id="' + id + '" data-qid="' + oneResponse.id + '" class="cursor-pointer open-question-details">';
+				html += '<td>' + oneResponse.question + '</td>';
+				html += '<td class="text-center">' + ( oneResponse.type == 'radio' ? "{{ __('admin.surveyTypeRadioButtons') }}" : ( oneResponse.type == 'answers' ? "{{ __('admin.surveyQuestionAndAnswer') }}" : "{{ __('admin.surveyTypeStarRating') }}" ) ) + '</td>';
+				html += '</tr>';
+			});
+			$("#modelPreviewArea").html('<div class="text-center"> {{ __("admin.previewAreaPlaceholder") }} </div>');
+			$('#question-picker-tbody').html(html);
+			$('#questionsModal').modal('show');
+		});
+
+		$(document).on('click', '.open-question-details', function() {
+			var id = $(this).data('id');
+			var question_id = $(this).data('qid');
+			var responses = @json($available_surveys);
+			var response = responses.filter(function(oneResponse) {
+				return oneResponse.id == id;
+			});
+			var responses = response[0].responses;
+			var question = responses.filter(function(oneResponse) {
+				return oneResponse.id == question_id;
+			});
+			var question = question[0];
+			var html = '';
+			if( question.type == 'radio' )
+			{
+				question.answers.forEach( function(item, key) {
+					var count = key + 1;
+					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
+					html += '<div class="custom-py-1"> <button class="w-100 text-left btn ' + checked + '">' + count + '. ' + item.text + '</button> </div>';
+				});
+			}
+			else if( question.type == 'answers' )
+			{
+				question.answers.forEach( function(item, key) {
+					var count = key + 1;
+					var checked = parseInt( question.answer ) == key ? 'btn-outline-success' : 'btn-outline-secondary';
+					html += '<div class="custom-py-1"> '+ question.answer +' </div>';
+				});
+			}
+			else if( question.type == 'stars' )
+			{
+				var answer = parseInt( question.answer );
+				html += '<ul class="custom-star-rating text-center p-0 my-1">';
+					for( var i = 0; i < question.answers.length; i++ )
+					{
+						if( i < answer )
+						{
+							html += '<li><i class="fas fa-star text-gold"></i> </li>';
+						}
+						else
+						{
+							html += '<li><i class="far fa-star text-gold"></i> </li>';
+						}
+					}
+				html += '</ul>';
+			}
+			$("#modelPreviewArea").html(html);
+		});
+
   </script>
 @stop
