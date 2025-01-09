@@ -45,7 +45,7 @@
             <select class="form-select select2" id="country_id" name="country_id" required>
               <option value="">{{ __('admin.Country') }}</option>
               @foreach ($countries as $country)
-                <option value="{{ $country->id }}" {{ $country->id == $client->company->country_id ? 'selected' : '' }}>
+                <option value="{{ $country->id }}" {{ $client->company && $country->id == $client->company->country_id ? 'selected' : '' }} >
                   {{ $country->emoji . ' ' . $country->{'name_' . $l} }}
                 </option>
               @endforeach
