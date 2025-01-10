@@ -451,12 +451,32 @@
     initialCountry: "eg", // Default country
     preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
     utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
-    separateDialCode: true, // Separate dial code from the number
+    separateDialCode: true, // عرض مفتاح الدولة بشكل منفصل
     autoPlaceholder: "aggressive", // Show placeholder
     customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
-    return "e.g. " + selectedCountryPlaceholder;
-    }
-  });
+        return "e.g. " + selectedCountryPlaceholder;
+    },
+});
+
+// إضافة حقل مخفي
+const countryCodeInput = document.createElement("input");
+countryCodeInput.type = "hidden";
+countryCodeInput.name = "country_code";
+phoneInput.parentNode.appendChild(countryCodeInput);
+
+// عند تحميل الصفحة، ضبط الدولة الافتراضية
+const countryCodeFromDB = "{{ $countryCode ?? '' }}";
+if (countryCodeFromDB) {
+    iti.setCountry(countryCodeFromDB); // تعيين الدولة الافتراضية
+    countryCodeInput.value = "+" + iti.getSelectedCountryData().dialCode; // تحديث الحقل المخفي
+}
+
+// تحديث الحقل المخفي عند تغيير الدولة
+phoneInput.addEventListener("countrychange", function() {
+    const dialCode = iti.getSelectedCountryData().dialCode;
+    console.log("Dial Code: " + dialCode); // طباعة للتأكد
+    countryCodeInput.value = "+" + dialCode; // تحديث الحقل
+});
 
   // Optional: Handle validation
   phoneInput.addEventListener("input", (e) => {

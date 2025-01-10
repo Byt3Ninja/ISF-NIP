@@ -79,9 +79,9 @@
                         $c = 1;
                     @endphp
                     @foreach ($mentorRequests as $session)
-                    @php
+                            @php
                               $available_surv = \App\SurveyResponses::where('user_id', $session->mentor_id)->where('triggered_at', $session->id)->where('triggered_by', 'session')->first();
-                              @endphp
+                            @endphp
                       <tr>
                         <td class="text-center">{{ $c++ }}</td>
                         <td class="text-center">
