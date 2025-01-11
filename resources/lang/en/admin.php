@@ -1112,4 +1112,5 @@ return [
 	'Mentor_Sessions_survey' => 'Mentor Sessions Survey',
 	"No_Assessment" => "No Assessment",
 	'No_Assessment_right_now' => 'You do not have any assessments right now',
+	'No_Activity_Found' => 'No Activity Found',
 ];

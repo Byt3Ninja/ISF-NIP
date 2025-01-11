@@ -194,11 +194,11 @@
 									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
 									<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
 								</div>
-								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" />
-								<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
+								{{-- <input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" /> --}}
+								{{-- <button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
 									onclick="document.getElementById('fileInput').click();">
 									<i class="ti ti-plus ti-16px"></i>
-								</button>
+								</button> --}}
 							</div>
 							<div class="d-flex flex-wrap gap-2" id="fileList"></div>
 						</div>
@@ -290,6 +290,20 @@
 								</div>
 								<textarea class="form-control d-none" id="task-content" name="task-content" rows="3"></textarea>
 							</div>
+							<div class="bg-label-secondary p-2 rounded mb-3 border">
+								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
+									<div class="d-flex align-items-center justify-content-center gap-2">
+										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
+										<h6 class="mb-0"><span class="badge bg-white text-dark" id="createAttachmentCount">0</span></h6>
+									</div>
+									<input type="file" id="createFileInput" style="display: none;" multiple onchange="handleAttachmentCreate(event)" data-task="" />
+									<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
+										onclick="document.getElementById('createFileInput').click();">
+										<i class="ti ti-plus ti-16px"></i>
+									</button>
+								</div>
+								<div class="d-flex flex-wrap gap-2" id="createFileList"></div>
+							</div>
 							<div class="row mb-3">
 								<div class="col-3 d-flex align-items-center">
 									<label for="task-status" class="form-label">
@@ -366,7 +380,10 @@
 					</div>
 					<div class="mt-4 d-flex align-items-center gap-3">
 						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-						<button id="createTask" type="button" class="btn btn-primary">{{ __('admin.Create') }}</button>
+						<button id="createTask" type="button" class="btn btn-primary">
+							<span class="me-3">{{ __('admin.Create') }}</span>
+							<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -396,6 +413,20 @@
 									<div id="edit-task-content-editor" class="form-control border-none"></div>
 								</div>
 								<textarea class="form-control d-none" id="edit-task-content" name="edit-task-content" rows="3"></textarea>
+							</div>
+							<div class="bg-label-secondary p-2 rounded mb-3 border">
+								<div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white">
+									<div class="d-flex align-items-center justify-content-center gap-2">
+										<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
+										<h6 class="mb-0"><span class="badge bg-white text-dark" id="editAttachmentCount">0</span></h6>
+									</div>
+									<input type="file" id="editFileInput" style="display: none;" multiple onchange="handleAttachmentEdit(event)" data-task="" />
+									<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
+										onclick="document.getElementById('editFileInput').click();">
+										<i class="ti ti-plus ti-16px"></i>
+									</button>
+								</div>
+								<div class="d-flex flex-wrap gap-2" id="editFileList"></div>
 							</div>
 							<div class="row mb-3">
 								<div class="col-3 d-flex align-items-center">
@@ -486,7 +517,10 @@
 					<div class="mt-4 d-flex align-items-center gap-3">
 						<input type="hidden" id="edit-task-id" name="edit-task-id" value="0" />
 						<button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-						<button id="editTaskBtn" type="button" class="btn btn-primary">{{ __('admin.Edit') }}</button>
+						<button id="editTaskBtn" type="button" class="btn btn-primary">
+							<span class="me-3">{{ __('admin.Edit') }}</span>
+							<span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -507,6 +541,135 @@
 	<script src="/vuexy/assets/vendor/libs/bloodhound/bloodhound.js"></script>
 	<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+	<script>
+		// Handle attachments upload
+		function handleFileUpload(event) {
+			const files = event.target.files;
+			const task_id = $('#fileInput').attr('data-task');
+			uploadFiles(files, task_id, 'view');
+		}
+
+		// Handle attachments create
+		function handleAttachmentCreate(event) {
+			const files = event.target.files;
+			uploadFiles(files, null, 'create');
+		}
+
+		// Handle attachments edit
+		function handleAttachmentEdit(event) {
+			const files = event.target.files;
+			const task_id = $('#editFileInput').attr('data-task');
+			uploadFiles(files, task_id, 'edit');
+		}
+
+		// Upload files handler
+		function uploadFiles(files, task_id, mode) {
+			const formData = new FormData();
+			Array.from(files).forEach(file => {
+				formData.append('attachments[]', file);
+			});
+			formData.append('mentorship_request_id', {{ $session_id }});
+			if (task_id) {
+				formData.append('task_id', task_id);
+			}
+			formData.append('_token', '{{ csrf_token() }}');
+
+			$.ajax({
+				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/upload-attachments') }}",
+				type: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function(response) {
+					if (response.status) {
+						renderFiles(response.task.files, mode);
+					} else {
+						alertify.error(response.message);
+					}
+				},
+				error: function(error) {
+					console.error('Error uploading files:', error);
+				}
+			});
+		}
+
+		// Render files handler
+		function renderFiles(files, mode) {
+			let fileList, attachmentCount;
+			if (mode === 'view') {
+				fileList = document.getElementById('fileList');
+				attachmentCount = document.getElementById('attachmentCount');
+			} else if (mode === 'create') {
+				fileList = document.getElementById('createFileList');
+				attachmentCount = document.getElementById('createAttachmentCount');
+			} else if (mode === 'edit') {
+				fileList = document.getElementById('editFileList');
+				attachmentCount = document.getElementById('editAttachmentCount');
+				// Clear the file list before rendering new files
+				fileList.innerHTML = '';
+			}
+
+			// Clear the file list only if mode is not 'edit'
+			if (mode !== 'edit') {
+				fileList.innerHTML = '';
+			}
+
+			Array.from(files).forEach(file => {
+				const fileDiv = document.createElement('div');
+				fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
+				fileDiv.innerHTML = `
+					<i class="ti ti-file text-info ti-20px me-2"></i>
+					<span class="text-dark fw-bold">${file.name}</span>
+					<div class="cursor-pointer me-2" onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);">
+						<i class="ti ti-trash text-danger ti-16px ms-2"></i>
+					</div>
+					<a href="${file.url}" download="${file.name}" class="ms-auto">
+						<i class="ti ti-download text-primary ti-16px"></i>
+					</a>
+				`;
+				fileList.appendChild(fileDiv);
+			});
+			attachmentCount.textContent = files.length;
+		}
+
+		// Delete file handler
+		function deleteFileHandler(fileName, fileId, ele) {
+			$('#viewTaskModal').modal('hide');
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, delete it!',
+				backdrop: true
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$('#viewTaskModal').modal('show');
+					$.ajax({
+						url: "{{ URL::to('dashboard/mentor/mentorshipTasks/delete-attachments') }}",
+						type: 'POST',
+						data: { file: fileId, _token: '{{ csrf_token() }}' },
+						success: function(response) {
+							if (response.status) {
+								ele.remove();
+								const attachmentCount = document.getElementById('attachmentCount');
+								attachmentCount.textContent = document.getElementById('fileList').children.length;
+							} else {
+								alertify.error(response.message);
+							}
+						},
+						error: function(error) {
+							console.error('Error deleting file:', error);
+						}
+					});
+					return;
+				}
+				$('#viewTaskModal').modal('show');
+			});
+		}
+	</script>
 @stop
 
 @section('pagescripts')
@@ -610,10 +773,20 @@
 		
 							$('#task-details-assignee img.rounded-circle').prop({src: element.assignee.photo, title: element.assignee.name, alt: element.assignee.name });
 							$('#task-details-reporter img.rounded-circle').prop({src: element.reporter.photo, title: element.reporter.name, alt: element.reporter.name });
-		
-							$('#task-details-due-date .fw-semibold').html(due_date);
-							$('#task-details-done-date .fw-semibold').html(done_date);;
-		
+							
+							if (due_date != '-') {
+								$('#task-details-due-date .fw-semibold').html(due_date);
+							} else {
+								$('#task-details-due-date .fw-semibold').html('N / A');
+							}
+
+							console.log('done_date', done_date);
+							if (done_date != '-') {
+								$('#task-details-done-date .fw-semibold').html(done_date);
+							} else {
+								$('#task-details-done-date .fw-semibold').html('N / A');
+							}
+				
 							var labels = element.labels.map(label => `<h6 class="mb-0"><span class="badge bg-label-info">${label.name}</span></h6>`).join('');
 							$('#task-details-labels').html(labels);
 							let commentList = document.getElementById('commentList');
@@ -647,27 +820,37 @@
 							let activityList = document.getElementById('activityList');
 							activityList.innerHTML = '';
 		
-							if( element.logs.length ) { activityList.classList.add('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); }
-							else { activityList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); }
-		
-							element.logs.forEach(log => {
-								activityList.innerHTML += `
-									<div class="border rounded p-2 mb-2 bg-white">
-										<div class="d-flex justify-content-between">
-											<div class="d-flex align-items-center gap-2 mb-2">
-												<img src="${log.user.photo}" class="rounded-circle" title="${log.user.name}" alt="${log.user.name}" width="34" height="34">
-												<div class="d-flex align-items-center gap-2">
-													<h6 class="mb-0 text-dark fw-bold">${log.user.name}</h6>
-													<span title="${log.created_at}" class="text-secondary text-xs">${log.created_since}</span>
+							if( element.logs.length > 0 ) {
+								activityList.classList.add('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); 
+								element.logs.forEach(log => {
+									activityList.innerHTML += `
+										<div class="border rounded p-2 mb-2 bg-white">
+											<div class="d-flex justify-content-between">
+												<div class="d-flex align-items-center gap-2 mb-2">
+													<img src="${log.user.photo}" class="rounded-circle" title="${log.user.name}" alt="${log.user.name}" width="34" height="34">
+													<div class="d-flex align-items-center gap-2">
+														<h6 class="mb-0 text-dark fw-bold">${log.user.name}</h6>
+														<span title="${log.created_at}" class="text-secondary text-xs">${log.created_since}</span>
+													</div>
 												</div>
 											</div>
+											<div class="text-muted mb-0" style="font-size: 14px; direction: {{ $lang == 'ar' ? 'rtl' : 'ltr' }};">${log.footprint}</div>
 										</div>
-										<div class="text-muted mb-0" style="font-size: 14px; direction: {{ $lang == 'ar' ? 'rtl' : 'ltr' }};">${log.footprint}</div>
-									</div>
+									`;
+								});
+							}
+							else {
+								activityList.classList.remove('bg-label-secondary', 'p-2', 'rounded', 'mb-3', 'border'); 
+								activityList.innerHTML = `
+									<div class="border rounded p-2 mb-2 bg-white">
+										<div class="text-muted mb-0 text-center">
+											{{ __('admin.No_Activity_Found') }}
+										</div>
 								`;
-							});
+							}
+		
 
-							// Handle attachments
+							// Handle view attachments
 							renderFiles(element.files, 'view');
 		
 							$('#viewTaskModal').modal('show');
@@ -833,15 +1016,25 @@
 			// Render files handler
 			renderFiles(files, 'upload');
 		}
+		
+		// Handle attachments create
+		function handleAttachmentCreate(event) {
+			const files = event.target.files;
+			console.log('files', files);
+			
+			// Render files handler
+			renderFiles(files, 'create');
+		}
 
 		// Render files handler
 		const renderFiles = (files, mode) => {
-			const fileList = document.getElementById('fileList');
-			const attachmentCount = document.getElementById('attachmentCount');
-			fileList.innerHTML = '';
-
+			
 			if (mode == 'upload')
 			{
+				console.log('upload mode');
+				const fileList = document.getElementById('fileList');
+				const attachmentCount = document.getElementById('attachmentCount');
+
 				const formData = new FormData();
 				Array.from(files).forEach(file => {
 					formData.append('attachments[]', file);
@@ -884,9 +1077,15 @@
 						console.error('Error uploading files:', error);
 					}
 				});
+
+				return;
 			}
 			else if (mode == 'view')
 			{
+				console.log('view mode');
+				const fileList = document.getElementById('fileList');
+				const attachmentCount = document.getElementById('attachmentCount');
+				fileList.innerHTML = '';
 				Array.from(files).forEach(file => {
 					const fileDiv = document.createElement('div');
 					fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
@@ -904,6 +1103,30 @@
 						</a>
 					`;
 					fileList.appendChild(fileDiv);
+				});
+			} else {
+				console.log('create mode');
+				const fileList = document.getElementById('createFileList');
+				const attachmentCount = document.getElementById('createAttachmentCount');
+				fileList.innerHTML = '';
+				Array.from(files).forEach(file => {
+					const fileDiv = document.createElement('div');
+					fileDiv.className = 'border rounded p-2 d-flex align-items-center bg-white';
+					fileDiv.innerHTML = `
+						<i class="ti ti-file text-info ti-20px me-2"></i>
+						<span class="text-dark fw-bold">${file.name}</span>
+						<div 
+							class="cursor-pointer me-2" 
+							onclick="deleteFileHandler('${file.name}', '${file.id}', this.parentElement);"
+						>
+							<i class="ti ti-trash text-danger ti-16px ms-2"></i>
+						</div>
+						<a href="${file.url}" download="${file.url}" class="ms-auto">
+							<i class="ti ti-download text-primary ti-16px"></i>
+						</a>
+					`;
+					fileList.appendChild(fileDiv);
+					attachmentCount.textContent = files.length;
 				});
 			}
 		}
@@ -1075,6 +1298,8 @@
 					$('#edit-task-status').val( element.status );
 					$('#edit-task-status').trigger('change');
 					$('#edit-task-due-date').val( element.due_date );
+					$('#editFileInput').attr('data-task', element.id);
+					renderFiles(element.files, 'edit');
 					if( typeof( EditAssigneeCustomInlineSuggestion ) !== 'undefined' )
 					{
 						EditAssigneeCustomInlineSuggestion.off('change');
@@ -1236,13 +1461,17 @@
 				priority: $("#task-priority").val(),
 				assignee: selected_user,
 				labels: selected_tags
-			}
+			};
+			var $button = $(this);
+			var $spinner = $button.find('.spinner-border');
+			$spinner.removeClass('d-none');
 			$.ajax({
 				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/add-task') }}",
 				type: "POST",
 				data: send_data,
 				dataType: "json",
 				success: function(response) {
+					$spinner.addClass('d-none');
 					if( response.status )
 					{
 						var data = response.data;
@@ -1270,6 +1499,7 @@
 					} else { alertify.error( response.message ); }
 				},
 				error: function(error) {
+					$spinner.addClass('d-none');
 					if( error.status == 422 )
 					{
 						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
@@ -1292,12 +1522,16 @@
 				assignee: edit_selected_user,
 				labels: edit_selected_tags
 			};
+			var $button = $(this);
+			var $spinner = $button.find('.spinner-border');
+			$spinner.removeClass('d-none');
 			$.ajax({
 				url: "{{ URL::to('dashboard/mentor/mentorshipTasks/edit-task') }}",
 				type: "POST",
 				data: send_data,
 				dataType: "json",
 				success: function(response) {
+					$spinner.addClass('d-none');
 					if( response.status )
 					{
 						var data = response.data;
@@ -1325,6 +1559,7 @@
 					} else { alertify.error( response.message ); }
 				},
 				error: function(error) {
+					$spinner.addClass('d-none');
 					if( error.status == 422 )
 					{
 						for( const [key, messages] of Object.entries(error.responseJSON.errors) ) { messages.forEach(message => { alertify.error(message); }); }
