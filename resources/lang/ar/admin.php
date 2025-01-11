@@ -1129,4 +1129,5 @@ return [
 	'Mentor_Sessions_survey' => 'جلسات استبيان المشرف',
 	'No_Assessment' => 'لا يوجد تقييم',	
 	'No_Assessment_right_now' => 'لا يوجد تقييم حالياً',
+	'No_Activity_Found' => 'لا يوجد اى نشاطات',
 ];
