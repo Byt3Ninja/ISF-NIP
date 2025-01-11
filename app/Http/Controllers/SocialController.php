@@ -180,6 +180,7 @@ use Illuminate\Support\Facades\Http;
                       $user->last_name_en = $userInfo['family_name'] ?? '';
                       $user->first_name_ar = $userInfo['given_name'] ?? '';
                       $user->last_name_ar = $userInfo['family_name'] ?? '';
+                      $user->email = $userInfo['email'] ?? '';
                       $user->linkedin_id = $userInfo['sub'] ?? '';
                       $user->img_url = $userInfo['picture'] ?? null;
                       // ضبط كلمة المرور إذا كانت غير موجودة
