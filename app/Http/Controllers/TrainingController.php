@@ -689,7 +689,7 @@ class TrainingController extends Controller
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
         }
-        $sessions = TrainingSession::where('step_id', $id)->orderBy('datetime', 'ASC')->get();
+        $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC')->get();
         $online = Training::get();
         return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'online'));
     }
@@ -938,7 +938,9 @@ class TrainingController extends Controller
         $session = TrainingSession::find($id);
 
         if (!$session) {
-            return redirect()->back()->with('error', 'Session Not Found.');
+            return redirect()->back()->withErrors([
+                'error' => 'Session Not Found.'
+            ]);
         }
 
         $reports = SessionReport::where('session_id', $id)->get();
