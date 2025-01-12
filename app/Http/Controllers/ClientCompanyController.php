@@ -429,6 +429,7 @@ class ClientCompanyController extends Controller
                         $result = Company::where('id', $companyId)->update([
                             'country_code' => $data['country_code'],  // مثال لإضافة حقل الهاتف
                             'phone' => $data['phone'],  // مثال لإضافة حقل الهاتف
+                            'country_code_w_a' => $data['country_code_w_a'],  // مثال لإضافة حقل الهاتف
                             'whatsapp' => $data['WhatsApp'],  // مثال لإضافة حقل الواتساب
                             'email' => $data['email'],  // مثال لإضافة حقل البريد الإلكتروني
                         ]);
@@ -439,6 +440,7 @@ class ClientCompanyController extends Controller
                         $result = Company::create([
                             'country_code' => $data['country_code'],  // مثال لإضافة حقل الهاتف
                             'phone' => $data['phone'],  // مثال لإضافة حقل الهاتف
+                            'country_code_w_a' => $data['country_code_w_a'],  // مثال لإضافة حقل الهاتف
                             'whatsapp' => $data['WhatsApp'],  // مثال لإضافة حقل الواتساب
                             'email' => $data['email'],  // مثال لإضافة حقل البريد الإلكتروني
                         ]);
