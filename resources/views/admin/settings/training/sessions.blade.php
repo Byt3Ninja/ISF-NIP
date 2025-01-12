@@ -110,6 +110,13 @@
                                     <button title="Join only" type="button"
                                       class="btn btn-icon btn-label-info rounded-circle waves-effect">
                                       <i class="ti ti-user"></i></button></a>
+                                      @if ($session->reports->count() > 0)
+                                      <button title="View Report" type="button" data-bs-toggle="modal" 
+                                        data-bs-target="#reportModal{{ $session->id }}" 
+                                        class="btn btn-icon btn-label-warning rounded-circle waves-effect">
+                                        <i class="ti ti-file-text"></i>
+                                      </button>
+                                    @endif
                                 @elseif ($session->type == 'offline')
                                   <b>{{ __('cycles.trainer name') }}:</b>
                                   {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
@@ -159,6 +166,63 @@
       </div>
     </div>
   </div>
+
+
+  @foreach ($sessions as $session)
+    <div class="modal fade" id="reportModal{{ $session->id }}" tabindex="-1" aria-labelledby="reportModalLabel{{ $session->id }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <strong class="modal-title" id="reportModalLabel{{ $session->id }}">{{ __('admin.session_reports') }}: </strong> 
+              <span class="ms-2">{{ $session->title }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Total Meeting Duration -->
+            <div class="mb-3">
+              <strong>{{ __('admin.total_meeting_duration') }}:</strong> 
+              {{ round($session->reports->sum('attendance_duration') / 60, 2) }} {{ __('admin.minutes') }}
+            </div>
+            <!-- Total Number of Participants -->
+            <div class="mb-3">
+              <strong>{{ __('admin.total_number_of_participants') }}:</strong> 
+              {{ $session->reports->count() }}
+            </div>
+            
+            <!-- Table -->
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th class="text-center">#</th>
+                  <th class="text-center">{{ __('admin.participant_name') }}</th>
+                  <th class="text-center">{{ __('admin.participant_email') }}</th>
+                  <th class="text-center">{{ __('admin.join_time') }}</th>
+                  <th class="text-center">{{ __('admin.leave_time') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($session->reports as $key => $report)
+                  <tr>
+                    <td class="text-center">{{ $key + 1 }}</td>
+                    <td class="text-center">{{ $report->participant_name }}</td>
+                    <td class="text-center">{{ $report->participant_email }}</td>
+                    <td class="text-center">{{ $report->participant_join_date }}</td>
+                    <td class="text-center">{{ $report->participant_end_date }}</td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+@endforeach
+
+
+
 
 
 
