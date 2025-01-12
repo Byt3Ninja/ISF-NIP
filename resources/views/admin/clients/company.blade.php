@@ -443,85 +443,87 @@
 <script>
   // Initialize the phone input
   const phoneInput = document.getElementById("phone");
-  const whatsappInput = document.getElementById("WhatsApp");
-  const phoneError = document.getElementById('phone-error');
-  const whatsappError = document.getElementById('whatsapp-error');
+const whatsappInput = document.getElementById("WhatsApp");
+const phoneError = document.getElementById('phone-error');
+const whatsappError = document.getElementById('whatsapp-error');
 
-  const iti = intlTelInput(phoneInput, {
-    initialCountry: "eg", // Default country
-    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
-    separateDialCode: true, // عرض مفتاح الدولة بشكل منفصل
-    autoPlaceholder: "aggressive", // Show placeholder
-    customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
-        return "e.g. " + selectedCountryPlaceholder;
-    },
+const iti = intlTelInput(phoneInput, {
+    initialCountry: "eg",
+    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+    separateDialCode: true,
+    autoPlaceholder: "aggressive",
+    customPlaceholder: (placeholder) => "e.g. " + placeholder,
 });
 
-// إضافة حقل مخفي
+const whatsappIti = intlTelInput(whatsappInput, {
+    initialCountry: "eg",
+    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+    separateDialCode: true,
+    autoPlaceholder: "aggressive",
+    customPlaceholder: (placeholder) => "e.g. " + placeholder,
+});
+
+// حقل مخفي للكود الدولي للواتساب
+const countryCodeWAInput = document.createElement("input");
+countryCodeWAInput.type = "hidden";
+countryCodeWAInput.name = "country_code_w_a";
+countryCodeWAInput.value = "{{ $client->company->country_code_w_a ?? '' }}";
+whatsappInput.parentNode.appendChild(countryCodeWAInput);
+
+// تحديث الحقل المخفي عند تغيير الدولة في الواتساب
+whatsappInput.addEventListener("countrychange", () => {
+    const dialCode = whatsappIti.getSelectedCountryData().dialCode;
+    countryCodeWAInput.value = "+" + dialCode; // تعيين الكود الدولي
+    console.log("WhatsApp Dial Code Updated: " + countryCodeWAInput.value);
+});
+
+// حقل مخفي للكود الدولي
 const countryCodeInput = document.createElement("input");
 countryCodeInput.type = "hidden";
 countryCodeInput.name = "country_code";
+countryCodeInput.value = "{{ $client->company->country_code ?? '' }}";
 phoneInput.parentNode.appendChild(countryCodeInput);
 
-// عند تحميل الصفحة، ضبط الدولة الافتراضية
-const countryCodeFromDB = "{{ $client->company->country_code ?? '' }}";
+// ضبط الدولة الافتراضية
+const countryCodeFromDB = "{{ $client->company->country_code ?? '' }}".trim();
 if (countryCodeFromDB) {
-    iti.setCountry(countryCodeFromDB); // تعيين الدولة الافتراضية
-    countryCodeInput.value = "+" + iti.getSelectedCountryData().dialCode; // تحديث الحقل المخفي
+    iti.setCountry(countryCodeFromDB);
+    countryCodeInput.value = "+" + iti.getSelectedCountryData().dialCode;
 }
 
 // تحديث الحقل المخفي عند تغيير الدولة
-phoneInput.addEventListener("countrychange", function() {
+phoneInput.addEventListener("countrychange", () => {
     const dialCode = iti.getSelectedCountryData().dialCode;
-    console.log("Dial Code: " + dialCode); // طباعة للتأكد
-    countryCodeInput.value = "+" + dialCode; // تحديث الحقل
+    countryCodeInput.value = "+" + dialCode;
 });
 
-  // Optional: Handle validation
-  phoneInput.addEventListener("input", (e) => {
-    console.log(e.target.value);
-    const phoneNumber = e.target.value.replace(/\D/g, '');
-    if (isNaN(phoneNumber)) {
-      phoneError.style.display = 'block';
-      phoneError.innerText = lang == 'en' ? 'Phone should be numbers only' : 'يجب أن يكون الهاتف أرقام فقط';
-    } else if (iti.isValidNumber()) {
-      phoneError.style.display = 'none';
-      // console.log("Valid number:", iti.getNumber());
-    } else {
-      phoneError.style.display = 'block';
-      phoneError.innerText = lang == 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
-      // console.error("Invalid number");
-    }
-  });
+whatsappInput.addEventListener("countrychange", () => {
+    const dialCode = whatsappIti.getSelectedCountryData().dialCode;
+    console.log("WhatsApp Dial Code: " + dialCode);
+});
 
-  const whatsappInit = intlTelInput(whatsappInput, {
-    initialCountry: "eg", // Default country
-    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
-    separateDialCode: true, // Separate dial code from the number
-    autoPlaceholder: "aggressive", // Show placeholder
-    customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
-    return "e.g. " + selectedCountryPlaceholder;
-    }
-  });
-
-  // Optional: Handle validation
-  whatsappInput.addEventListener("input", (e) => {
-    console.log(e.target.value);
-    const whatsappNumber = e.target.value.replace(/\D/g, '');
-    if (isNaN(whatsappNumber)) {
-      whatsappError.style.display = 'block';
-      whatsappError.innerText = lang == 'en' ? 'Whatsapp should be numbers only' : 'يجب أن يكون الواتساب أرقام فقط';
-    } else if (iti.isValidNumber()) {
-      whatsappError.style.display = 'none';
-      // console.log("Valid number:", iti.getNumber());
+// التحقق من صحة الرقم
+phoneInput.addEventListener("input", () => {
+    if (iti.isValidNumber()) {
+        phoneError.style.display = 'none';
     } else {
-      whatsappError.style.display = 'block';
-      whatsappError.innerText = lang == 'en' ? 'Invalid Whatsapp number' : 'رقم الواتساب غير صحيح';
-      // console.error("Invalid number");
+        phoneError.style.display = 'block';
+        phoneError.innerText = "Invalid phone number";
     }
-  });
+});
+
+whatsappInput.addEventListener("input", () => {
+    if (whatsappIti.isValidNumber()) {
+        whatsappError.style.display = 'none';
+    } else {
+        whatsappError.style.display = 'block';
+        whatsappError.innerText = "Invalid WhatsApp number";
+    }
+});
+
+
 </script>
 @stop
 
