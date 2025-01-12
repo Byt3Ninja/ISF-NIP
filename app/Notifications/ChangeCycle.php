@@ -3,9 +3,10 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 class ChangeCycle extends Notification
 {
@@ -36,6 +37,8 @@ class ChangeCycle extends Notification
     public function toMail(object $notifiable): MailMessage
     {
 
+
+        // Log::info('Mail data:', ['emailCompany' => $this->data['emailCompany']]);
         return (new MailMessage)
             ->subject('Your Startup Progress Update - Stage Transition Notification')
             ->markdown('emails.emailCycle', $this->data);

@@ -235,6 +235,7 @@ class ScreeningController extends Controller
             $data['company_name_en'] = $company_owner->company->name_en;
             $data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
             $data['organization_name_en'] = $cstep->cycle->organization->name_en;
+            $data['emailCompany'] = $company_owner->email;
 
             // Broadcast Event //
             ChangeStep::dispatch($data);

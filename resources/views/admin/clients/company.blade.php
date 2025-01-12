@@ -465,7 +465,7 @@ countryCodeInput.name = "country_code";
 phoneInput.parentNode.appendChild(countryCodeInput);
 
 // عند تحميل الصفحة، ضبط الدولة الافتراضية
-const countryCodeFromDB = "{{ $countryCode ?? '' }}";
+const countryCodeFromDB = "{{ $client->company->country_code ?? '' }}";
 if (countryCodeFromDB) {
     iti.setCountry(countryCodeFromDB); // تعيين الدولة الافتراضية
     countryCodeInput.value = "+" + iti.getSelectedCountryData().dialCode; // تحديث الحقل المخفي
