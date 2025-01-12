@@ -282,6 +282,7 @@ $mobilePills = ['analysis', 'questions', 'history'];
                   if(response.message == 1){
                     location.reload();
                   }
+                 
                     // $('.refreshDiv').load(location.href + ' .refreshDiv');
                     console.log(response.message);
                     console.log(response);
