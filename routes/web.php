@@ -355,8 +355,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.session-report');
     Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.session-record');
     Route::get('training/session-attendance-report/{id}', 'TrainingController@attendanceReport')->name('training.attendance-report');
-    Route::get('session/report/{id}', 'TrainingController@getReports')->name('training.get-reports');
-    Route::get('session/record/{id}', 'TrainingController@getRecordings')->name('training.get-recordings');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
@@ -429,7 +427,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('mentorshipTasks/show/{mentorshipTask}', 'MentorshipTaskController@show')->name('mentorshipTasks.show');
         Route::post('mentorshipTasks/complete/{mentorshipTask}', 'MentorshipTaskController@complete')->name('mentorshipTasks.complete');
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
-        
+
         Route::resource('fundingRounds', 'FundingRoundController')->except(['index']);
     });
 

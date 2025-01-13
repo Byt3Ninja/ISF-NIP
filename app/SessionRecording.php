@@ -16,6 +16,7 @@ class SessionRecording extends Model
         'recording_view_url',
         'recording_download_url',
         'recording_time',
+        'passcode',
     ];
 
     public function session()
