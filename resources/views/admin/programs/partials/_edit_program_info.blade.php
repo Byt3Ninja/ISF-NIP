@@ -1,4 +1,5 @@
-<form>
+<form action="{{ URL::to('dashboard/cycles/modify') }}" method="POST">
+  @csrf
   <div class="row">
     <div class="col-12 col-md-2 text-center text-md-start mb-4">
       <img 
@@ -13,24 +14,24 @@
         <label for="organization" class="form-label fs-6 fw-semibold">
           Select Organization
         </label>
-        <select 
-          class="form-select" 
-          id="organization" 
-          name="organization" 
-          data-placeholder="Select Organization"
-        >
-          <option value="">Select Organization</option>
+        <select class="form-select" id="organization" name="organization_id" 
+          data-placeholder="Select Organization">
+          @foreach (\App\Organization::all() as $org)
+           <option value="{{ $org->id }}">{{ $org->{'name_'.app()->getLocale()} }}</option>
+           @endforeach
         </select>
       </div>
       <div class="mb-3">
-        <label for="program-title" class="form-label fs-6 fw-semibold">
+        <label for="title" class="form-label fs-6 fw-semibold">
           Program Title
         </label>
+        <input type="hidden" name="type" id="type">
+        <input type="hidden" name="cycleid" id="cycleid">
         <input 
           type="text" 
           class="form-control" 
-          id="program-title" 
-          name="program-title" 
+          id="title" 
+          name="title" 
           placeholder="Enter Program Title"
           oninput="this.value = this.value.trimStart()"
           {{-- value="{{ $mode == 'edit' ? $program->title : '' }}" --}}
@@ -45,8 +46,8 @@
             <input 
               type="date" 
               class="form-control" 
-              id="valid-from" 
-              name="valid-from"
+              id="start" 
+              name="start"
             >
           </div>
         </div>
@@ -58,8 +59,8 @@
             <input 
               type="date" 
               class="form-control" 
-              id="valid-to" 
-              name="valid-to"
+              id="end" 
+              name="end"
             >
           </div>
         </div>
@@ -86,7 +87,7 @@
             class="form-check-input" 
             type="checkbox" 
             id="external-participation" 
-            name="external-participation"
+            name="allow_non_company"
           >
           <label class="form-check-label" for="external-participation">
             Enable External Participation
@@ -98,7 +99,7 @@
           class="form-check-input" 
           type="checkbox" 
           id="private-link" 
-          name="private-link"
+          name="private"
         >
         <label class="form-check-label" for="private-link">
           Private Link

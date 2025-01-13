@@ -31,30 +31,31 @@ class CyclesController extends Controller
     public function exportcyclesComp(Request $request)
     {
         // تحقق من أن البريد الإلكتروني موجود
-       
+
         $data2 = [
             'step' => $request->input('step'),
             'userEmail' => auth()->user()->email
         ];
 
         // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
-        ExportCycleCompData::dispatch($data2)   ;
+        ExportCycleCompData::dispatch($data2);
 
         return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
 
 
 
-    public function changAll(Request $request ){
+    public function changAll(Request $request)
+    {
 
-        
+
 
         $this->validate($request, [
-            
+
             'checkget' => 'required|integer',
             'compid' => 'required|array',
             'compid.*' => 'required|integer',
-            
+
         ]);
         $checkget = $request->input('checkget');
         $compid = $request->input('compid');
@@ -67,293 +68,363 @@ class CyclesController extends Controller
         }
         return response()->json(['state' => 'success'], 200);
     }
-    public function index($id=0)
+    public function index($id = 0)
     {
         $this->preProcessingCheck('edit_cycles');
 
-        $organization_id=auth()->user()->organization_id;
+        $organization_id = auth()->user()->organization_id;
 
-        $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->where('organization_id',$organization_id);
-        })->orderBy('start','DESC')->get();
-        $steps=null;
-        if( count( $cycles ) > 0 )
-        {
-            if( $id == 0 )
-            {
+        $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+            return $q->where('organization_id', $organization_id);
+        })->orderBy('start', 'DESC')->get();
+        $steps = null;
+        if (count($cycles) > 0) {
+            if ($id == 0) {
                 $id = $cycles->pluck('id')[0];
                 $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
-            } else { $steps = Step::where('cycle_id', $id)->orderBy('arr')->get(); }
+            } else {
+                $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
+            }
         }
-        $svgs = ['notebook','search','idea','comments','trophy'];
-        return view('admin.settings.cycles.index',compact('cycles','steps','id','svgs'));
+        $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
+        return view('admin.settings.cycles.index', compact('cycles', 'steps', 'id', 'svgs'));
     }
 
     public function users($id)
     {
         $this->preProcessingCheck('edit_cycles');
-        $organization_id=auth()->user()->organization_id;
+        $organization_id = auth()->user()->organization_id;
 
-        if( $id == 0 )
-        {
-            $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
-                return $q->where('organization_id',$organization_id);
-            })->orderBy('id','DESC')->get();
-            if (!empty($cycles->toArray())){
+        if ($id == 0) {
+            $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->where('organization_id', $organization_id);
+            })->orderBy('id', 'DESC')->get();
+            if (!empty($cycles->toArray())) {
                 $id = $cycles->pluck('id')[0];
             }
         } else {
-            $cycles = Cycle::when(!is_null($organization_id),function ($q) use($organization_id){
-            return $q->where('organization_id',$organization_id);
-        })->get();
+            $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
+                return $q->where('organization_id', $organization_id);
+            })->get();
         }
-        $companies = Company::where('cycle',$id)->get();
+        $companies = Company::where('cycle', $id)->get();
         $uniqueCycleIds = $companies->pluck('cycle')->unique();
         $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-        return view('admin.settings.cycles.users',compact('cycles','id','companies','steps'));
+        return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps'));
     }
 
     public function modify(Request $request)
     {
+
         $this->preProcessingCheck('edit_cycles');
         $id = $request->cycleid;
         $type = $request->type;
-        if( $type == 1 )
-        {
+        if ($type == 1) {
             /// Edit Cycle
             $private = null;
-            if ($request->private) {$private=sha1(now());}
-            Cycle::where('id',$id)->update([
-                'organization_id'=>$request->organization_id,
-                'title'=>$request->title,
-                'description'=>$request->description,
-                'start'=>Carbon::parse($request->start),
-                'end'=>Carbon::parse($request->end),
-                'private'=>$private
+            if ($request->private) {
+                $private = sha1(now());
+            }
+            Cycle::where('id', $id)->update([
+                'organization_id' => $request->organization_id,
+                'title' => $request->title,
+                'description' => $request->description,
+                'start' => Carbon::parse($request->start),
+                'end' => Carbon::parse($request->end),
+                'private' => $private,
+                'allow_non_company' => $request->has('allow_non_company') ? 1 : 0,
+                'program_guideline' => $request->program_guideline,
+                'program_guideline_file' => $request->file('program_guideline_pdf')?->store('guidelines', 'public'),
+                'financial_guideline' => $request->financial_policy,
+                'financial_guideline_file' => $request->file('financial_policy_pdf')?->store('guidelines', 'public'),
+                'legal_guideline' => $request->legal_policy,
+                'legal_guideline_file' => $request->file('legal_policy_pdf')?->store('guidelines', 'public'),
+                'delegation_file' => $request->file('delegation_file')?->store('delegations', 'public'),
+                'budget_allocation' => $request->budget_allocation,
+                'currency_type' => $request->currency_type,
             ]);
             return redirect()->back()->with('message', 'Saved');
-        }
-        elseif( $type == 2 )
-        {
+        } elseif ($type == 2) {
+
             /// Save Cycle
             $private = null;
-            if ($request->private) {$private=sha1(now());}
+            if ($request->private) {
+                $private = sha1(now());
+            }
             $createdCycle = Cycle::create([
-                'organization_id'=>$request->organization_id,
-                'title'=>$request->title,
-                'description'=>$request->description,
-                'start'=>Carbon::parse($request->start),
-                'end'=>Carbon::parse($request->end),
-                'private'=>$private
+                'organization_id' => $request->organization_id,
+                'title' => $request->title,
+                'description' => $request->description,
+                'start' => Carbon::parse($request->start),
+                'end' => Carbon::parse($request->end),
+                'private' => $private,
+                'allow_non_company' => $request->has('allow_non_company') ? 1 : 0,
+                'program_guideline' => $request->program_guideline,
+                'program_guideline_file' => $request->file('program_guideline_pdf')?->store('programs', 'public'),
+                'financial_guideline' => $request->financial_policy,
+                'financial_guideline_file' => $request->file('financial_policy_pdf')?->store('financials', 'public'),
+                'legal_guideline' => $request->legal_policy,
+                'legal_guideline_file' => $request->file('legal_policy_pdf')?->store('legal', 'public'),
+                'delegation_file' => $request->file('delegation_file')?->store('delegations', 'public'),
+                'budget_allocation' => $request->budget_allocation,
+                'currency_type' => $request->currency_type,
             ]);
 
             return redirect()->back()->with('message', 'Saved');
-        }
-        elseif( $type == 3 )
-        {
+        } elseif ($type == 3) {
             /// Delete Cycle steps contents
-            $delsteps = Step::where('cycle_id',$id)->get();
+            $delsteps = Step::where('cycle_id', $id)->get();
             foreach ($delsteps as $onestep) {
-                Formfield::where('step_id',$onestep->id)->delete();
-                Screening::where('step_id',$onestep->id)->delete();
-                Formdata::where('form_id',$onestep->id)->delete();
-                Finalscreening::where('step_id',$onestep->id)->delete();
-                FinalData::where('step_id',$onestep->id)->delete();
-                TrainingSession::where('step_id',$onestep->id)->delete();
+                Formfield::where('step_id', $onestep->id)->delete();
+                Screening::where('step_id', $onestep->id)->delete();
+                Formdata::where('form_id', $onestep->id)->delete();
+                Finalscreening::where('step_id', $onestep->id)->delete();
+                FinalData::where('step_id', $onestep->id)->delete();
+                TrainingSession::where('step_id', $onestep->id)->delete();
             }
             /// Delete Step
-            Step::where('cycle_id',$id)->delete();
+            Step::where('cycle_id', $id)->delete();
             /// Delete Cycle
             Cycle::destroy($id);
             return Response()->json('Cycle deleted');
-        }
-        elseif( $type == 4 )
-        {
+        } elseif ($type == 4) {
             /// arrange steps
             $i = 1;
             foreach ($request->steps as $id) {
-                Step::where('id',$id)->update(['arr'=>$i++]);
-                }
+                Step::where('id', $id)->update(['arr' => $i++]);
+            }
             return Response()->json('Arranged ');
-        }
-        elseif( $type == 5 )
-        {
-            if (is_null($request->fromDate)||is_null($request->toDate)){
+        } elseif ($type == 5) {
+            if (is_null($request->fromDate) || is_null($request->toDate)) {
                 return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
             }
             /// add new step
             $stype = $request->stype;
             $data = null;
-            if ($stype==1) {
+            if ($stype == 1) {
                 $data = $request->FormSelect;
-                $id = Step::insertGetId(['cycle_id'=>$request->cid, 'title'=>$request->title, 'description'=>$request->description, 'stype'=>$stype, 'data'=>$data,
-                'arr'=>$request->arr, 'from'=>$request->fromDate, 'to'=>$request->toDate]);
+                $id = Step::insertGetId([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'data' => $data,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
                 // make a copy of form fields
-                $new = BuilderField::where('builder_form_id',$data)->orderBy('id')->get();
-                if (count($new)>0) {
-                    foreach ($new as $n){
+                $new = BuilderField::where('builder_form_id', $data)->orderBy('id')->get();
+                if (count($new) > 0) {
+                    foreach ($new as $n) {
                         Formfield::insert([
-                            'step_id'=>$id,
-                            'field_id'=>$n->field_id,
-                            'options'=>json_encode($n->options)
+                            'step_id' => $id,
+                            'field_id' => $n->field_id,
+                            'options' => json_encode($n->options)
                         ]);
-                    }}
-            } elseif ($stype==2) {
-                if (is_null($request->fromDate)||is_null($request->toDate)){
+                    }
+                }
+            } elseif ($stype == 2) {
+                if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add Screening
-                Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => $request->ScreeningSelect,
-                    'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
-            } elseif ($stype==3) {
-                if (is_null($request->fromDate)||is_null($request->toDate)){
+                Step::insert([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'data' => $request->ScreeningSelect,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
+            } elseif ($stype == 3) {
+                if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add step
-                Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => null,
-                    'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
-            } elseif ($stype==4) {
-                if (is_null($request->fromDate)||is_null($request->toDate)){
+                Step::insert([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'data' => null,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
+            } elseif ($stype == 4) {
+                if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add training
-                Step::insert(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype,'list'=>$request->RecordedSelect, 'data' => null,
-                    'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
-            } elseif ($stype==5) {
-                if (is_null($request->fromDate)||is_null($request->toDate)){
+                Step::insert([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'list' => $request->RecordedSelect,
+                    'data' => null,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
+            } elseif ($stype == 5) {
+                if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
                 // add service
-            $data = $request->FinalScreeningSelect;
-            $fform = $request->FormSelect;
-            if (!$fform) {return redirect()->back()->with('message2', 'You must add form first'); }
-            $id = Step::insertGetId(['cycle_id' => $request->cid, 'title' => $request->title, 'description' => $request->description, 'stype' => $stype, 'data' => $data,
-                'arr' => $request->arr, 'from' => $request->fromDate, 'to' => $request->toDate]);
+                $data = $request->FinalScreeningSelect;
+                $fform = $request->FormSelect;
+                if (!$fform) {
+                    return redirect()->back()->with('message2', 'You must add form first');
+                }
+                $id = Step::insertGetId([
+                    'cycle_id' => $request->cid,
+                    'title' => $request->title,
+                    'description' => $request->description,
+                    'stype' => $stype,
+                    'data' => $data,
+                    'arr' => $request->arr,
+                    'from' => $request->fromDate,
+                    'to' => $request->toDate
+                ]);
                 // make a copy of form fields
-                $new = BuilderField::where('builder_form_id',$fform)->orderBy('id')->get();
-                if (count($new)>0) {
-                    foreach ($new as $n){
+                $new = BuilderField::where('builder_form_id', $fform)->orderBy('id')->get();
+                if (count($new) > 0) {
+                    foreach ($new as $n) {
                         Formfield::insert([
-                            'step_id'=>$id,
-                            'field_id'=>$n->field_id,
-                            'options'=>json_encode($n->options)
+                            'step_id' => $id,
+                            'field_id' => $n->field_id,
+                            'options' => json_encode($n->options)
                         ]);
-                    }}
+                    }
+                }
             }
             return redirect()->back()->with('message', 'Saved');
-        }
-        elseif( $type == 6 )
-        {
+        } elseif ($type == 6) {
             /// Delete step
             $cid = $request->stepid;
-            if ($request->steps) {$steps = $request->steps;}
-            else {$steps=Step::where('cycle_id',Step::where('id',$cid)->pluck('cycle_id')->first())->pluck('id')->toArray();}
+            if ($request->steps) {
+                $steps = $request->steps;
+            } else {
+                $steps = Step::where('cycle_id', Step::where('id', $cid)->pluck('cycle_id')->first())->pluck('id')->toArray();
+            }
 
             //// Delete step contents
-            Formfield::where('step_id',$cid)->delete();
-            Screening::where('step_id',$cid)->delete();
-            Formdata::where('form_id',$cid)->delete();
-            Finalscreening::where('step_id',$cid)->delete();
-            FinalData::where('step_id',$cid)->delete();
-            TrainingSession::where('step_id',$cid)->delete();
+            Formfield::where('step_id', $cid)->delete();
+            Screening::where('step_id', $cid)->delete();
+            Formdata::where('form_id', $cid)->delete();
+            Finalscreening::where('step_id', $cid)->delete();
+            FinalData::where('step_id', $cid)->delete();
+            TrainingSession::where('step_id', $cid)->delete();
             Step::destroy($cid);
             // Arrange steps
             $i = 1;
             $steps = array_diff($steps, [$cid]);
             foreach ($steps as $id) {
-                        Step::where('id', $id)->update(['arr' => $i++]);
+                Step::where('id', $id)->update(['arr' => $i++]);
             }
-            return Response()->json('Step deleted' );
-        }
-        elseif( $type == 7 )
-        {
+            return Response()->json('Step deleted');
+        } elseif ($type == 7) {
             // Modify step
             $step = Step::where('id', $request->sid)->first()->toArray();
             return response()->json($step);
-        }
-        elseif( $type == 8 )
-        {
+        } elseif ($type == 8) {
             /// deleted saved data if type changed
-            if ($request->ScreeningSelect!==null && Step::where('id',$request->sid)->pluck('data')->first()!=$request->ScreeningSelect) {Formdata::where('step_id',$request->sid)->update(['screening'=>null,'comments'=>null]);}
+            if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
+                Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
+            }
             /// Save Modified step
             if ($request->ScreeningSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description,'data' => $request->ScreeningSelect,'list'=>null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->ScreeningSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } elseif ($request->ServiceSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description,'data' => $request->ServiceSelect,'list'=>null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->ServiceSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } elseif ($request->TrainingSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description,'data' => $request->TrainingSelect,'list'=>$request->RecordedSelect, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->TrainingSelect, 'list' => $request->RecordedSelect, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } elseif ($request->FinalScreeningSelect) {
-                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description,'data' => $request->FinalScreeningSelect,'list'=>null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
-            } elseif ( $request->has("mScreeningSelect") && $request->mScreeningSelect) {
+                Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'data' => $request->FinalScreeningSelect, 'list' => null, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
+            } elseif ($request->has("mScreeningSelect") && $request->mScreeningSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mScreeningSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
-            }  elseif ( $request->has("mFormSelect") && $request->mFormSelect) {
+            } elseif ($request->has("mFormSelect") && $request->mFormSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mFormSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             } else {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
             return redirect()->back()->with('message', 'Saved');
-        }
-        else
-        {
+        } else {
             // Show Cycle
             $cycles = Cycle::where('id', $id)->first()->toArray();
             return response()->json($cycles);
         }
     }
 
-    function view ($c,Request $request)
+    function view($c, Request $request)
     {
-        $private = Cycle::where('private',$c)->first();
-        
-        if($private == null){
-            $private = Cycle::where('id',$c)->first();
+        $private = Cycle::where('private', $c)->first();
+
+        if ($private == null) {
+            $private = Cycle::where('id', $c)->first();
             $c = $private->id;
-        }else{
+        } else {
             $c = $private->id;
         }
-        
+
         // Check Company ---> forward to profile
-        if (!Auth::user()->HaveCompany) {return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);}
-        if (!Auth::user()->company) {return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);}
+        if (!Auth::user()->HaveCompany) {
+            return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);
+        }
+        if (!Auth::user()->company) {
+            return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);
+        }
         // Check enrolled in Cycle
-        if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);}
+        if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {
+            return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);
+        }
         //Check private
         $private = Cycle::findOrFail($c);
-//         if ($private->private==null) {
-            
-//             return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
-// //            abort(404);
-//         }
-        
+        //         if ($private->private==null) {
+
+        //             return redirect(route('index.cycle',$c))->with(['message2'=>'هذا البرنامج خاص']);
+        // //            abort(404);
+        //         }
+
         // Check STEPS
         if (!Auth::user()->company->cycle || Auth::user()->company->cycle == $c) {
-                $step = Step::where('cycle_id',$c)->orderBy('arr')->first();
-                if ($step->stype!=1) {return redirect()->back()->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);}
-                if ($step->to<now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, Registration timed out.', 'class' => 'danger']);}
-                
-                $id = $step->id;
-                $field_map_ids = Formfield::where('step_id',$id )->select('id')->pluck('id')->toArray();
-                $answers = [];
-                $data = [
-                    'title' => $step->title,
-                    'fields' => $step->fields()->orderBy('form_fields.id', 'asc')->get(),
-                    'form_id' => $step->id,
-                    'field_ids' => implode(",", $field_map_ids)
-                ];
-            if (Auth::user()->company->step==$id) {
-                $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id',Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+            $step = Step::where('cycle_id', $c)->orderBy('arr')->first();
+            if ($step->stype != 1) {
+                return redirect()->back()->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
             }
-                return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$c)->with('answers',$answers);
+            if ($step->to < now()->format('Y-m-d')) {
+                return redirect()->back()->with(['msg' => 'Error can\'t open form, Registration timed out.', 'class' => 'danger']);
+            }
+
+            $id = $step->id;
+            $field_map_ids = Formfield::where('step_id', $id)->select('id')->pluck('id')->toArray();
+            $answers = [];
+            $data = [
+                'title' => $step->title,
+                'fields' => $step->fields()->orderBy('form_fields.id', 'asc')->get(),
+                'form_id' => $step->id,
+                'field_ids' => implode(",", $field_map_ids)
+            ];
+            if (Auth::user()->company->step == $id) {
+                $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+            }
+            return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $c)->with('answers', $answers);
         }
     }
 
-    function my( $id )
+    function my($id)
     {
-        $step = Step::where('stype',1)->where('id',$id)->first();
-        if (!$step) {return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);}
-//        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
+        $step = Step::where('stype', 1)->where('id', $id)->first();
+        if (!$step) {
+            return redirect()->back()->with(['msg' => 'Error opening the selected form.', 'class' => 'danger']);
+        }
+        //        if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         $id = $step->id;
-        $field_map_ids = Formfield::where('step_id',$id )->select('id')->pluck('id')->toArray();
+        $field_map_ids = Formfield::where('step_id', $id)->select('id')->pluck('id')->toArray();
         $answers = [];
         $data = [
             'title' => $step->title,
@@ -361,10 +432,10 @@ class CyclesController extends Controller
             'form_id' => $step->id,
             'field_ids' => implode(",", $field_map_ids)
         ];
-//        if (Auth::user()->company->step==$id) {
-            $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id',Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
-//        }
-        return view('admin.settings.cycles.form', $data)->with('step',$step)->with('c',$step->cycle_id)->with('answers',$answers);
+        //        if (Auth::user()->company->step==$id) {
+        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
+        //        }
+        return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
     public function saveForm(Request $request)
@@ -379,17 +450,16 @@ class CyclesController extends Controller
 
         // generating validation rules based on dynamic field config data
         $field_map_ids = explode(",", $request->input('field_ids'));
-        $field_required_rules = collect($field_map_ids)->mapWithKeys(function($id){
+        $field_required_rules = collect($field_map_ids)->mapWithKeys(function ($id) {
             $field_options = Formfield::findOrFail($id)->options;
-            if($field_options->validation->required == 1) {
+            if ($field_options->validation->required == 1) {
                 $rules = ['required'];
-                if(isset($field_options->type) && $field_options->type == "email") $rules[] = 'email';
+                if (isset($field_options->type) && $field_options->type == "email") $rules[] = 'email';
                 return [
-                    'field_'. $id => implode("|", $rules)
+                    'field_' . $id => implode("|", $rules)
                 ];
-            }
-            else {
-                return ['field_'. $id => 'nullable'];
+            } else {
+                return ['field_' . $id => 'nullable'];
             }
         });
 
@@ -402,20 +472,20 @@ class CyclesController extends Controller
                 ->withErrors($dynamic_validator)
                 ->withInput();
         }
-//dd("ss");
+        //dd("ss");
         // gather the form data as field_name => [ label, data ]
-        foreach($field_map_ids as $fid){
+        foreach ($field_map_ids as $fid) {
 
             $field_options = Formfield::findOrFail($fid)->options;
-            $field_name = 'field_'. $fid;
+            $field_name = 'field_' . $fid;
 
             $uid = Auth::id();
             $cid = Auth::user()->company->id;
 
             // update cycle & step
-            Auth::user()->company->update(['cycle'=>$request->cycle,'step'=>$request->id]);
+            Auth::user()->company->update(['cycle' => $request->cycle, 'step' => $request->id]);
 
-            Formdata::where('field_id',$fid)->where('company_id',$cid)->delete();
+            Formdata::where('field_id', $fid)->where('company_id', $cid)->delete();
             Formdata::updateOrInsert([
                 'field_id' => $fid,
                 'company_id' => $cid,
@@ -430,6 +500,6 @@ class CyclesController extends Controller
         }
 
 
-        return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully','class'=>'success']);
+        return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
     }
 }

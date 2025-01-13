@@ -1,11 +1,11 @@
-<form method="POST" enctype="multipart/form-data">
+<form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
   @csrf
   <div class="form-group mb-6">
     <label for="program-guideline" class="form-label fs-6 fw-semibold">
       {{ __('cycles.Program_Guideline') }}
     </label>
     <textarea 
-      name="program-guideline" 
+      name="program_guideline" 
       id="text-editor" 
       class="form-control" 
       rows="5"
