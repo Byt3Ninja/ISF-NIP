@@ -33,6 +33,7 @@
           name="program-title" 
           placeholder="Enter Program Title"
           oninput="this.value = this.value.trimStart()"
+          {{-- value="{{ $mode == 'edit' ? $program->title : '' }}" --}}
         >
       </div>
       <div class="row">

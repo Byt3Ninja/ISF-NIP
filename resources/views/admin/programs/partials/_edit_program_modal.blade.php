@@ -56,7 +56,7 @@
               role="tabpanel"
               aria-labelledby="pills-{{ $tab['id'] }}-tab"
             >
-              @include('admin.programs.partials._edit_' . $tab['id'])
+              @include('admin.programs.partials._edit_' . $tab['id'], ['mode' => $mode])
             </div>
           @endforeach
         </div>
