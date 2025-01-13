@@ -87,15 +87,18 @@
 
               <!-- Add New Program Button -->
               <button
-                class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;" onclick="DoChange(2)">
+                class="btn btn-primary btn-sm d-sm-inline-block d-md-none" 
+                style="border-radius: 15px;"
+                data-bs-toggle="modal" data-bs-target="#create-program-modal"
+                >
                   <span class="mx-2">{{__('admin.New Program')}}</span>
                   <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
               <button 
                 class="btn btn-primary d-none d-md-inline-block"
                 style="border-radius: 15px; text-wrap: nowrap;"
-                 onclick="DoChange(2)"
-              >
+                data-bs-toggle="modal" data-bs-target="#create-program-modal"
+                >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
@@ -144,7 +147,9 @@
               <h3 class="text-center mt-4">{{ __('admin.No_Cycles') }}</h3>
               <h6 class="text-center text-secondary">{{ __('admin.No_Cycles_Description') }}</h6>
               <!-- Add New Program Button -->
-              <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;">
+              <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;"
+                data-bs-toggle="modal" data-bs-target="#create-program-modal"
+              >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
@@ -262,7 +267,7 @@
                         @endif
                         <!-- / Company Name -->
                         <!-- Count Row -->
-                        <div class="row">
+                        <div class="row mt-1">
                           <div  style="width: fit-content">
                             <div class="d-flex align-items-center g-1" style="height: 55px;">
                               <div class="bg-label-primary p-2 d-flex align-items-center justify-content-center rounded mx-1">
@@ -322,7 +327,7 @@
                         <div 
                           class="d-flex justify-content-between align-items-end w-100 mb-2"
                         >
-                          <div class="d-flex flex-column">
+                          <div class="d-flex flex-column mt-1">
                             <div class="d-flex align-items-center mb-2">
                               <i class="ti ti-user-circle text-primary ti-24px"></i>
                               <span class="fs-6 fw-bold mx-2">{{__('admin.Responsible')}}</span>
@@ -607,6 +612,7 @@
     </div>
   </div>
 
+  @include('admin.programs.partials._edit_program_modal', ['mode' => 'create'])
 @stop
 
 @section('pagescripts')

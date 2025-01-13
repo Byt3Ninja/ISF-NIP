@@ -2,8 +2,8 @@
 
 @section('vendorstyle')
 <!-- Vendors CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
-
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
@@ -11,13 +11,25 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
-
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 @stop
 
 @section('style')
 <style>
+   input[type="file"]::file-selector-button {
+    background-color: #FFFF;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid lightgray;
+  }
+  input[type="file"]::file-selector-button:hover {
+    background-color: lightgray;
+  }
   .radius-15 {
     border-radius: 15px;
   }
@@ -336,12 +348,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
-                        <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px"></i>
+                        <div class="badge bg-label-secondary">
+                          <i class="ti ti-calendar ti-20px text-info"></i>
                           <span class="fw-bold text-dark mx-2">{{ $program->start->format('Y-m-d') }}</span>
                         </div>
-                        <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px"></i>
+                        <div class="badge bg-label-secondary">
+                          <i class="ti ti-calendar ti-20px text-danger"></i>
                           <span class="fw-bold text-dark mx-2">{{ $program->end->format('Y-m-d') }}</span>
                         </div>
                       </div>
@@ -371,15 +383,28 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                           <li>
-                            <button id="editButton" class="dropdown-item ccycle text-primary">
-                              <i class="ti ti-edit me-2"></i>
-                              {{ __('cycles.Edit') }}
+                            <button id="editButton" class="dropdown-item text-dark">
+                              <i class="ti ti-file-export me-2 text-info"></i>
+                              {{ __('cycles.Export_Data') }}
+                            </button>
+                          </li>
+                          <li>
+                            <button id="editButton" class="dropdown-item text-dark">
+                              <i class="ti ti-stack-2 me-2 text-danger"></i>
+                              {{ __('cycles.Edit_Step') }}
+                            </button>
+                          </li>
+                          <li>
+                            <button id="editButton" class="dropdown-item ccycle text-dark" 
+                              data-bs-toggle="modal" data-bs-target="#edit-program-modal">
+                              <i class="ti ti-edit me-2 text-info"></i>
+                              {{ __('cycles.Edit_Program') }}
                             </button>
                           </li>
                           <li>
                             @can('delete_user')
-                            <button class="dropdown-item text-danger" id="deleteButton">
-                              <i class="ti ti-trash me-2"></i>
+                            <button class="dropdown-item text-dark" id="deleteButton">
+                              <i class="ti ti-trash me-2 text-danger"></i>
                               {{ __('cycles.Delete') }}
                             </button>
                             @endcan
@@ -1921,6 +1946,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     </div>
   </div> --}}
 <!-- / Final Screening Step Modal -->
+
+  @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit'])
 @stop
 
 @section('scripts')
@@ -1928,6 +1955,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 {{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
 {{-- <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script> --}}
 <!-- Vendors JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
@@ -1935,12 +1963,27 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
+<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 @stop
 
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find($program->id))
-  {{-- <script src="/vuexy/assets/js/forms-selects.js"></script> --}}
-  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  <script src="/vuexy/assets/js/forms-tagify.js"></script>
+
+  <script>
+    const lang = '{{ $l }}';
+  </script>
+  <script>
+    const quillEditors = document.querySelectorAll('#text-editor');
+    quillEditors.forEach(editor => {
+      new Quill(editor, {
+        theme: 'snow'
+      });
+    });
+  </script>
 
   <script>
     (() => {
@@ -1958,7 +2001,6 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         });
       });
     })();
-
   </script>
 
 {{-- <script>
