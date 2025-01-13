@@ -92,6 +92,9 @@
         }
     </style>
 </head>
+@php
+$setting = \App\settings::where('id', 1)->first();
+@endphp
 <body class="body"
       style="background-color: #f8f8f9; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
 <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation"
@@ -162,7 +165,7 @@
                                             <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
                                                     <div style="max-width: 560px;"><img alt="I'm an image" height="auto"
-                                                                                        src="{{ url('email-assets') }}/images/arweqah_sa_cover.jpeg"
+                                                                                        src="{{ $setting->header ? asset('images/logo/' . $setting->header) : asset('images/logo/logo.jpeg') }}"
                                                                                         style="display: block; height: auto; border: 0; width: 100%;"
                                                                                         title="I'm an image"
                                                                                         width="560"/></div>
@@ -340,7 +343,7 @@
                                             <td class="pad" style="width:100%;">
                                                 <div align="center" class="alignment" style="line-height:10px">
                                                     <div style="max-width: 640px;"><img alt="I'm an image" height="auto"
-                                                                                        src="{{ url('email-assets') }}/images/footer.png"
+                                                                                        src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}"
                                                                                         style="display: block; height: auto; border: 0; width: 100%;"
                                                                                         title="I'm an image"
                                                                                         width="640"/></div>
