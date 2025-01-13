@@ -1,10 +1,24 @@
 @extends('layouts.admin')
 
 @section('style')
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   {{-- <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css"> --}}
   {{-- <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css"> --}}
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <style>
+     input[type="file"]::file-selector-button {
+      background-color: #FFFF;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid lightgray;
+    }
+    input[type="file"]::file-selector-button:hover {
+      background-color: lightgray;
+    }
     .program-card {
       height: auto;
     }
@@ -615,8 +629,17 @@
   @include('admin.programs.partials._edit_program_modal', ['mode' => 'create'])
 @stop
 
+@section('scripts')
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+@stop
+
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find(0))
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  <script src="/vuexy/assets/js/forms-tagify.js"></scrip
   {{-- <script src="/app-assets/js/scripts/pages/page-users.js"></script>
   <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
   <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
@@ -625,6 +648,19 @@
 
   <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script> --}}
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
+
+  <script>
+    const lang = '{{ $l }}';
+  </script>
+  <script>
+    const quillEditors = document.querySelectorAll('#text-editor');
+    quillEditors.forEach(editor => {
+      new Quill(editor, {
+        theme: 'snow'
+      });
+    });
+  </script>
+
   <script>
     $('.date').datetimepicker({
       timepicker: false,
