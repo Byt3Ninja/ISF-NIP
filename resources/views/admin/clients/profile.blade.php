@@ -21,6 +21,7 @@
             </div>
             <div class="user-profile-header d-flex flex-column flex-lg-row text-sm-start text-center mb-5">
               <div class="flex-shrink-0 mx-sm-0 mx-auto">
+               
                 <img 
                   src="{{ $client->image_url ? $client->image_url : '/images/user-placeholder.jpeg' }}" 
                   alt="user image" 
