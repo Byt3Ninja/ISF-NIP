@@ -38,7 +38,7 @@ class ChangeCycle extends Notification
     {
 
 
-        // Log::info('Mail data:', ['emailCompany' => $this->data['emailCompany']]);
+        Log::info('Mail data:', ['emailCompany' => $this->data['emailCompany']]);
         return (new MailMessage)
             ->subject('Your Startup Progress Update - Stage Transition Notification')
             ->markdown('emails.emailCycle', $this->data);

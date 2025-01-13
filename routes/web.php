@@ -266,7 +266,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('index.cycle');
     Route::get('cycles/{id}/registered', 'CyclesController@users');
-    Route::post('cycles/modify', 'CyclesController@modify');
+    Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
     Route::post('cycles/save', 'CyclesController@saveForm');
     Route::get('cycles/my/{id}', 'CyclesController@my');

@@ -241,8 +241,8 @@ class ScreeningController extends Controller
             ChangeStep::dispatch($data);
 
             $recipients = collect([$company_owner])
-                ->merge(User::role("Mentor")->get())
-                ->merge(User::role("Registered")->get());
+                // ->merge(User::role("Mentor")->where('email', $company_owner->email)->get())
+                ->merge(User::role("Registered")->where('email', $company_owner->email)->get());
 
             // Notify all recipients
             foreach ($recipients as $recipient) {
