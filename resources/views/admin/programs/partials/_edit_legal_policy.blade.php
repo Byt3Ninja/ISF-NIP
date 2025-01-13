@@ -1,4 +1,4 @@
-<form action="" method="POST" enctype="multipart/form-data">
+<form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
   @csrf
   <div class="form-group mb-4">
     <label for="legal_policy" class="form-label fs-6 fw-semibold">{{ __('cycles.Legal_Policy_Description') }}</label>
@@ -49,8 +49,7 @@
         name="legal_policy_pdf" 
         id="legal_policy_pdf" 
         class="form-control-file" 
-        accept="application/pdf" 
-        required>
+        accept="application/pdf" >
     </div>
   </div>
   <div class="d-flex align-items-center justify-content-end gap-3 mt-12">

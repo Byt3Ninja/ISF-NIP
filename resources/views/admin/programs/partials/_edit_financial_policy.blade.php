@@ -1,4 +1,4 @@
-<form action="" method="POST" enctype="multipart/form-data">
+<form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
   @csrf
   <div class="row mb-4">
     <div class="col-8">
@@ -30,10 +30,7 @@
       </div>
     </div>
   </div>
-  <div class="form-group mb-4">
-    <label for="budget_categories" class="form-label fs-6 fw-semibold">{{ __('cycles.Budget_Categories') }}</label>
-    <input id="budget_categories" name="budget_categories" class="form-control" placeholder="{{ __('cycles.Select_Budget_Categories') }}" value="" />
-  </div>
+
   <div class="form-group mb-4">
     <label for="financial_policy" class="form-label fs-6 fw-semibold">{{ __('cycles.Financial_Policy') }}</label>
     <textarea 
