@@ -9,6 +9,10 @@
         class="form-control" 
         placeholder="{{ __('cycles.Budget_Allocation') }}"
       />
+      <input type="hidden" name="type" id="type">
+      <input type="hidden" name="cycleid" id="cycleid">
+      <input type="hidden" name="tab_id" value="3">
+      <input type="hidden" name="organization_id" value="{{ $mode == 'create'? $cycle->organization_id : '' }}">
     </div>
   </div>
   <div class="col-4">
@@ -28,10 +32,7 @@
     </div>
   </div>
 </div>
-<div class="form-group mb-4">
-  <label for="budget_categories" class="form-label fs-6 fw-semibold">{{ __('cycles.Budget_Categories') }}</label>
-  <input id="budget_categories" name="budget_categories" class="form-control" placeholder="{{ __('cycles.Select_Budget_Categories') }}" value="" />
-</div>
+
 <div class="form-group mb-4">
   <label for="financial_policy" class="form-label fs-6 fw-semibold">{{ __('cycles.Financial_Policy') }}</label>
   <textarea 

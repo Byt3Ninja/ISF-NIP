@@ -12,13 +12,14 @@
         <label for="organization" class="form-label fs-6 fw-semibold">
           {{ __('cycles.Select_Organization') }}
         </label>
-        <select 
-          class="form-select" 
-          id="organization" 
-          name="organization" 
-          data-placeholder="{{ __('cycles.Select_Organization') }}"
-        >
-          <option value="">{{ __('cycles.Select_Organization') }}</option>
+        <select  class="form-select" id="organization" name="organization_id" 
+          data-placeholder="{{ __('cycles.Select_Organization') }}">
+          @php
+           use App\Organization;
+          @endphp
+             @foreach (Organization::all() as $org)
+                 <option value="{{ $org->id }}">{{ $org->{'name_'.app()->getLocale()} }}</option>
+             @endforeach
         </select>
       </div>
       <div class="mb-3">
@@ -28,10 +29,11 @@
         <input type="hidden" name="type" id="type">
         <input type="hidden" name="cycleid" id="cycleid">
         <input type="hidden" name="tab_id" value="1">
+ 
         <input 
           type="text" 
           class="form-control" 
-          id="program-title" 
+          id="title" 
           name="program-title" 
           placeholder="{{ __('cycles.Cycle title') }}"
           oninput="this.value = this.value.trimStart()"
@@ -87,8 +89,8 @@
           <input 
             class="form-check-input" 
             type="checkbox" 
-            id="external-participation" 
-            name="external-participation"
+            id="allow_non_company" 
+            name="allow_non_company"
           />
         </div>
       </div>
@@ -99,8 +101,8 @@
         <input 
           class="form-check-input" 
           type="checkbox" 
-          id="private-link" 
-          name="private-link"
+          id="private" 
+          name="private"
         />
       </div>
     </div>

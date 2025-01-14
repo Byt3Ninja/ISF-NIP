@@ -21,6 +21,10 @@
       class="form-control-file" 
       accept="application/pdf" 
     />
+    <input type="hidden" name="type" id="type">
+    <input type="hidden" name="cycleid" id="cycleid">
+    <input type="hidden" name="tab_id" value="4">
+    <input type="hidden" name="organization_id" value="{{ $mode == 'create'? $cycle->organization_id : '' }}">
   </div>
 </div>
 <div class="form-group mb-4">
@@ -44,11 +48,11 @@
   <div class="d-flex justify-content-end align-items-center border rounded p-4">
     <input 
       type="file" 
-      name="legal_policy_pdf" 
+      name="delegation_pdf" 
       id="legal_policy_pdf" 
       class="form-control-file" 
       accept="application/pdf" 
-      required>
+      >
   </div>
 </div>
 

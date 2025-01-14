@@ -3,14 +3,18 @@
     {{ __('cycles.Program_Guideline') }}
   </label>
   <textarea 
-    name="program-guideline" 
+    name="program_guideline" 
     id="text-editor" 
     class="form-control" 
     rows="5"
     placeholder="{{ __('cycles.Enter_Program_Guideline') }}"
-    required
+    
   >
   </textarea>
+  <input type="hidden" name="type" id="type">
+  <input type="hidden" name="cycleid" id="cycleid">
+  <input type="hidden" name="tab_id" value="2">
+  <input type="hidden" name="organization_id" value="{{ $mode == 'create'? $cycle->organization_id : '' }}">
 </div>
 <div class="form-group mb-6">
   <label for="program-guideline-pdf" class="form-label fs-6 fw-semibold">
@@ -23,7 +27,7 @@
       id="program-guideline-pdf" 
       class="form-control-file" 
       accept="application/pdf" 
-      required
+      
     >
   </div>
 </div>

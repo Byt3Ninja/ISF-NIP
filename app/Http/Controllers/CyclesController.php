@@ -349,7 +349,6 @@ class CyclesController extends Controller
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 2) {
-            // dd($request->all());
             $private = null;
             if ($request->private) {
                 $private = sha1(now());
@@ -386,7 +385,7 @@ class CyclesController extends Controller
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 4) {
-            // dd($request->all());
+
             $private = null;
             if ($request->private) {
                 $private = sha1(now());
