@@ -96,6 +96,7 @@
 
     $user_id = Auth::id();
     $circle_ids = Auth::user()->mentorCycles()->get()->pluck('id');
+    
     if( Auth::user()->hasRole('Mentor') )
   {
     /// Rating
@@ -107,13 +108,16 @@
     if( !$circle_ids->isEmpty() )
     {
         $myMentorships = \App\MentorshipRequest::where('mentor_id', $user_id)->whereIn('cycle_id', $circle_ids)->where('approved', 'Yes')->get();
-
+        
+  if( !empty($myMentorships) )
+  {
     foreach( $myMentorships as $mentorship )
     {
       if( empty( $mentorship->zoom_date ) || empty( $mentorship->period ) ) { continue; }
       else
       {
         $endAt = Carbon\carbon::parse($mentorship->zoom_date)->addMinutes($mentorship->period)->format('Y-m-d H:i:s');
+        
         if( now() > $endAt )
         {
           $surveyEligible[] = [
@@ -125,8 +129,10 @@
         }
       }
     }
+  
     
     $surveyEligible = collect($surveyEligible)->groupBy('triggered_on')->toArray();
+  }
       $surveysToAdd = [];
       
       // $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['mentor', 'both'])->with(['myResponses'])->get();
@@ -139,7 +145,7 @@
     $surveysByCycle = $surveys->groupBy('cycle_id');
 
     
-    
+    if( !empty($myMentorships) ){
       foreach( $surveys as $survey_scope )
       {
         
@@ -220,7 +226,7 @@
         }
         
       }
-      
+    }
     
     
       if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
