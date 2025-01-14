@@ -132,16 +132,6 @@ class CyclesController extends Controller
                 'start' => Carbon::parse($request->start),
                 'end' => Carbon::parse($request->end),
                 'private' => $private,
-                'allow_non_company' => $request->has('allow_non_company') ? 1 : 0,
-                'program_guideline' => $request->program_guideline,
-                'program_guideline_file' => $request->file('program_guideline_pdf')?->store('guidelines', 'public'),
-                'financial_guideline' => $request->financial_policy,
-                'financial_guideline_file' => $request->file('financial_policy_pdf')?->store('guidelines', 'public'),
-                'legal_guideline' => $request->legal_policy,
-                'legal_guideline_file' => $request->file('legal_policy_pdf')?->store('guidelines', 'public'),
-                'delegation_file' => $request->file('delegation_file')?->store('delegations', 'public'),
-                'budget_allocation' => $request->budget_allocation,
-                'currency_type' => $request->currency_type,
             ]);
             return redirect()->back()->with('message', 'Saved');
         } elseif ($type == 2) {
@@ -158,16 +148,6 @@ class CyclesController extends Controller
                 'start' => Carbon::parse($request->start),
                 'end' => Carbon::parse($request->end),
                 'private' => $private,
-                'allow_non_company' => $request->has('allow_non_company') ? 1 : 0,
-                'program_guideline' => $request->program_guideline,
-                'program_guideline_file' => $request->file('program_guideline_pdf')?->store('programs', 'public'),
-                'financial_guideline' => $request->financial_policy,
-                'financial_guideline_file' => $request->file('financial_policy_pdf')?->store('financials', 'public'),
-                'legal_guideline' => $request->legal_policy,
-                'legal_guideline_file' => $request->file('legal_policy_pdf')?->store('legal', 'public'),
-                'delegation_file' => $request->file('delegation_file')?->store('delegations', 'public'),
-                'budget_allocation' => $request->budget_allocation,
-                'currency_type' => $request->currency_type,
             ]);
 
             return redirect()->back()->with('message', 'Saved');
@@ -353,12 +333,92 @@ class CyclesController extends Controller
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
             return redirect()->back()->with('message', 'Saved');
+        } elseif ($request->tab_id == 1) {
+            $private = null;
+            if ($request->private) {
+                $private = sha1(now());
+            }
+            $cycle = new Cycle();
+            $cycle->organization_id = $request->organization_id;
+            $cycle->title = $request->title;
+            $cycle->description = $request->description;
+            $cycle->start = Carbon::parse($request->start);
+            $cycle->end = Carbon::parse($request->end);
+            $cycle->private = $private;
+            $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
+            $cycle->save();
+            return redirect()->back()->with('message', 'Saved');
+        } elseif ($request->tab_id == 2) {
+            // dd($request->all());
+            $private = null;
+            if ($request->private) {
+                $private = sha1(now());
+            }
+            // Check if file is uploaded
+            $programGuidelineFile = null;
+            if ($request->hasFile('program-guideline-pdf')) {
+                $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'public');
+            }
+            $cycle = new Cycle();
+            $cycle->organization_id = $request->organization_id;
+            $cycle->program_guideline = $request->program_guideline;
+            $cycle->program_guideline_file = $programGuidelineFile;
+            $cycle->save();
+            return redirect()->back()->with('message', 'Saved');
+        } elseif ($request->tab_id == 3) {
+            $private = null;
+            if ($request->private) {
+                $private = sha1(now());
+            }
+
+            // Check if file is uploaded
+            $financialGuidelineFile = null;
+            if ($request->hasFile('financial_policy_pdf')) {
+                $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'public');
+            }
+
+            $cycle = new Cycle();
+            $cycle->organization_id = $request->organization_id;
+            $cycle->budget_allocation = $request->budget_allocation;
+            $cycle->currency_type = $request->currency_type;
+            $cycle->financial_guideline = $request->financial_policy;
+            $cycle->financial_guideline_file = $financialGuidelineFile;
+            $cycle->save();
+            return redirect()->back()->with('message', 'Saved');
+        } elseif ($request->tab_id == 4) {
+            // dd($request->all());
+            $private = null;
+            if ($request->private) {
+                $private = sha1(now());
+            }
+
+            // Handle file uploads
+            $legalPolicyPath = null;
+            if ($request->hasFile('legal_policy_pdf')) {
+                $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'public');
+            }
+
+            $delegationPdfPath = null;
+            if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
+                $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
+            }
+
+            $cycle = new Cycle();
+            $cycle->organization_id = $request->organization_id;
+            $cycle->legal_guideline = $request->legal_policy;
+            $cycle->legal_guideline_file = $legalPolicyPath;
+            $cycle->private = $private;
+            $cycle->delegation_file = $delegationPdfPath;
+            $cycle->save();
+
+            return redirect()->back()->with('message', 'Saved');
         } else {
             // Show Cycle
             $cycles = Cycle::where('id', $id)->first()->toArray();
             return response()->json($cycles);
         }
     }
+
 
     function view($c, Request $request)
     {

@@ -373,14 +373,19 @@
                               style="background-color: #d9edee; border-radius: 15px;"
                             >
                               <i class="ti ti-calendar-clock ti-28px;" style="color: blue;"></i>
-                              <span class="fw-bold text-black mx-2">{{ $cycle->start->format('Y-m-d') }}</span>
+                              <span class="fw-bold text-black mx-2">
+                                {{ $cycle->start ?  $cycle->start->format('Y-m-d') : ''}}
+                              </span>
                             </div>
                             <div 
                               class="px-1 py-2 d-flex"
                               style="background-color: #d9edee; border-radius: 15px;"
                             >
                               <i class="ti ti-calendar-clock ti-28px;" style="color: blue;"></i>
-                              <span class="fw-bold text-black mx-2">{{ $cycle->end->format('Y-m-d') }}</span>
+                              <span class="fw-bold text-black mx-2">
+                                {{ $cycle->end ?  $cycle->end->format('Y-m-d') : ''}}
+
+                                </span>
                             </div>
                           </div>
                         </div>
@@ -745,16 +750,16 @@
             }
           });
           break;
-        case 2:
-          $('#title').val('');
-          $('#description').val('');
-          $('#cycleid').val('');
-          $('#type').val(2);
-          $('#start').val('');
-          $('#end').val('');
-          $('#customSwitch3').removeAttr('checked');
-          $('#cycleForm').modal('show');
-          break;
+          case 2:
+      $('#title').val('');
+      $('#description').val('');
+      $('#cycleid').val('');
+      $('#type').val('');
+      $('#start').val('');
+      $('#end').val('');
+      $('#customSwitch3').removeAttr('checked');
+      $('#cycleForm').modal('show');
+      break;
         case 3:
           if (confirm('{{ __('cycles.sure delete cycle') }}?')) {
             if (confirm('{{ __('cycles.cant undo') }}')) {

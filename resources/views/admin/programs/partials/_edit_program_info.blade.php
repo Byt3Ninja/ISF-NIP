@@ -27,6 +27,7 @@
         </label>
         <input type="hidden" name="type" id="type">
         <input type="hidden" name="cycleid" id="cycleid">
+        <input type="hidden" name="tab_id" value="1">
         <input 
           type="text" 
           class="form-control" 
