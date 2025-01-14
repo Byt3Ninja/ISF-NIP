@@ -1,7 +1,5 @@
-<form action="{{ URL::to('dashboard/cycles/modify') }}" method="POST">
-  @csrf
   <div class="row">
-    <div class="col-12 col-md-2 text-center text-md-start mb-4">
+    <div class="col-12 text-center mb-4">
       <img 
         src="/images/background/logo.png" 
         class="border" 
@@ -9,30 +7,32 @@
         style="width: 100px; height: 90px; object-fit: contain; border-radius: 15px;"
       >
     </div>
-    <div class="col-12 col-md-10">
+    <div class="col-12">
       <div class="mb-3">
         <label for="organization" class="form-label fs-6 fw-semibold">
-          Select Organization
+          {{ __('cycles.Select_Organization') }}
         </label>
-        <select class="form-select" id="organization" name="organization_id" 
-          data-placeholder="Select Organization">
-          @foreach (\App\Organization::all() as $org)
-           <option value="{{ $org->id }}">{{ $org->{'name_'.app()->getLocale()} }}</option>
-           @endforeach
+        <select 
+          class="form-select" 
+          id="organization" 
+          name="organization" 
+          data-placeholder="{{ __('cycles.Select_Organization') }}"
+        >
+          <option value="">{{ __('cycles.Select_Organization') }}</option>
         </select>
       </div>
       <div class="mb-3">
-        <label for="title" class="form-label fs-6 fw-semibold">
-          Program Title
+        <label for="program-title" class="form-label fs-6 fw-semibold">
+          {{ __('cycles.Cycle title') }}
         </label>
         <input type="hidden" name="type" id="type">
         <input type="hidden" name="cycleid" id="cycleid">
         <input 
           type="text" 
           class="form-control" 
-          id="title" 
-          name="title" 
-          placeholder="Enter Program Title"
+          id="program-title" 
+          name="program-title" 
+          placeholder="{{ __('cycles.Cycle title') }}"
           oninput="this.value = this.value.trimStart()"
           {{-- value="{{ $mode == 'edit' ? $program->title : '' }}" --}}
         >
@@ -41,7 +41,7 @@
         <div class="col-12 col-md-6">
           <div class="mb-3">
             <label for="valid-from" class="form-label fs-6 fw-semibold">
-              Valid From
+              {{ __('cycles.Valid from') }}
             </label>
             <input 
               type="date" 
@@ -54,7 +54,7 @@
         <div class="col-12 col-md-6">
           <div class="mb-3">
             <label for="valid-to" class="form-label fs-6 fw-semibold">
-              Valid To
+              {{ __('cycles.Valid to') }}
             </label>
             <input 
               type="date" 
@@ -67,56 +67,40 @@
       </div>
       <div class="mb-3">
         <label for="description" class="form-label fs-6 fw-semibold">
-          Description
+          {{ __('cycles.Description') }}
         </label>
         <textarea 
           class="form-control" 
           id="description" 
           name="description" 
-          placeholder="Enter description" 
+          placeholder="{{ __('cycles.Description') }}" 
           oninput="this.value = this.value.trimStart()"
           rows="3"
         ></textarea>
       </div>
-      <div class="mb-6">
-        <span class="form-label fs-6 fw-semibold" for="private-link">
-          Enable or disable participations for external participants
-        </span>
+      <div class="mb-3">
         <div class="form-check form-switch mt-2">
+          <label class="form-check-label" for="external-participation">
+            {{ __('cycles.External_Participation_Label') }}
+          </label>
           <input 
             class="form-check-input" 
             type="checkbox" 
             id="external-participation" 
-            name="allow_non_company"
-          >
-          <label class="form-check-label" for="external-participation">
-            Enable External Participation
-          </label>
+            name="external-participation"
+          />
         </div>
       </div>
-      <div class="form-check mb-3">
+      <div class="form-check form-switch mb-3">
+        <label class="form-check-label" for="private-link">
+          {{ __('cycles.Private Link') }}
+        </label>
         <input 
           class="form-check-input" 
           type="checkbox" 
           id="private-link" 
-          name="private"
-        >
-        <label class="form-check-label" for="private-link">
-          Private Link
-        </label>
+          name="private-link"
+        />
       </div>
     </div>
   </div>
-  <div class="d-flex align-items-center justify-content-end gap-3 mt-12">
-    <button 
-      type="button" 
-      class="btn btn-secondary me-2 w-px-100" 
-      data-bs-dismiss="modal"
-    >
-      {{ __('cycles.Cancel') }}
-    </button>
-    <button type="submit" class="btn btn-primary w-px-100">
-      {{ __('cycles.Save') }}
-    </button>
-  </div>
-</form>

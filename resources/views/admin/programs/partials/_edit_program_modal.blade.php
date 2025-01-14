@@ -8,12 +8,15 @@
 @endphp
 
 <style>
-  button span { font-size: 0.60rem; }
+  .nav-pills .nav-link { padding: 0.4rem 0.55rem !important; }
   .nav-pills .nav-link:not(.active) { background-color: white; }
-  .rounded-pill { padding: 0.5rem 0.75rem !important; }
+  .nav-item button span { font-size: 0.67rem; }
+  .modal-content { background-color: var(--bs-white); }
+
   @media (min-width: 768px) {
-    button span { font-size: 1rem; }
-    .rounded-pill { padding: 0.5rem 1.5rem !important; }
+    .modal-content { background-color: #ebebed; }
+    .nav-pills .nav-link { padding: 0.35rem 1.1rem !important; }
+    .nav-item button span { font-size: 0.80rem; }
   }
   @media (max-width: 767.98px) {
     .modal-dialog { max-width: 100%; margin: 0; }
@@ -22,45 +25,59 @@
 </style>
 
 <div class="modal fade" id="{{$mode}}-program-modal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content" style="padding: 1rem !important;">
-      @include('partials.modal.modal-header')
-      <div class="modal-body mt-3" style="padding: 0 !important;">
-        <ul
-          class="nav nav-pills border-bottom pb-3 mb-3 flex-nowrap flex-md-wrap justify-content-center"
-          id="pills-tab"
-          role="tablist"
-        >
-          @foreach ($tabs as $tab)
-            <li class="nav-item me-1 me-md-3" role="presentation">
-              <button
-                class="nav-link rounded-pill shadow-sm {{ $tab['active'] ? 'active' : '' }}"
-                id="pills-{{ $tab['id'] }}-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#pills-{{ $tab['id'] }}"
-                type="button"
-                role="tab"
-                aria-controls="pills-{{ $tab['id'] }}"
-                aria-selected="{{ $tab['active'] ? 'true' : 'false' }}"
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content rounded p-0 p-md-4">
+      @include('partials.modal.modal-header', ['title' => __('cycles.' . $mode . '_program')])
+      <form>
+        <div class="rounded bg-white border-0 border-md-1 border-secondary py-4 px-2">
+          <ul
+            class="nav nav-pills flex-nowrap justify-content-center py-1 bg-label-light rounded-pill gap-1 gap-md-2"
+            style="margin-bottom: -10px;"
+            id="pills-tab"
+            role="tablist"
+          >
+            @foreach ($tabs as $tab)
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link rounded-pill shadow-sm {{ $tab['active'] ? 'active' : '' }}"
+                  id="pills-{{ $tab['id'] }}-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-{{ $tab['id'] }}"
+                  type="button"
+                  role="tab"
+                  aria-controls="pills-{{ $tab['id'] }}"
+                  aria-selected="{{ $tab['active'] ? 'true' : 'false' }}"
+                >
+                  <span class="fw-semibold">{{ $tab['label'] }}</span>
+                </button>
+              </li>
+            @endforeach
+          </ul>
+          <hr />
+          <div class="tab-content shadow-none p-4" id="pills-tabContent">
+            @foreach ($tabs as $tab)
+              <div
+                class="tab-pane fade {{ $tab['active'] ? 'show active' : '' }}"
+                id="pills-{{ $tab['id'] }}"
+                role="tabpanel"
+                aria-labelledby="pills-{{ $tab['id'] }}-tab"
               >
-                <span>{{ $tab['label'] }}</span>
-              </button>
-            </li>
-          @endforeach
-        </ul>
-        <div class="tab-content shadow-none p-0 p-md-4" id="pills-tabContent">
-          @foreach ($tabs as $tab)
-            <div
-              class="tab-pane fade {{ $tab['active'] ? 'show active' : '' }}"
-              id="pills-{{ $tab['id'] }}"
-              role="tabpanel"
-              aria-labelledby="pills-{{ $tab['id'] }}-tab"
-            >
-              @include('admin.programs.partials._edit_' . $tab['id'], ['mode' => $mode])
-            </div>
-          @endforeach
+                @include('admin.programs.partials._edit_' . $tab['id'], ['mode' => $mode])
+              </div>
+            @endforeach
+          </div>            
         </div>
-      </div>
+        <div class="d-flex align-items-center justify-content-end gap-3 mt-4 p-4 p-md-0">
+          <button type="submit" class="btn btn-primary w-px-100">
+            {{ __('cycles.Save') }}
+            <i class="ti ti-circle-check ms-2"></i>
+          </button>
+          <button type="button" class="btn btn-outline-secondary w-px-100" data-bs-dismiss="modal">
+            {{ __('cycles.Cancel') }}
+            <i class="ti ti-circle-x ms-2"></i>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

@@ -285,5 +285,9 @@ return [
     'Legal_Policy_Description' => 'Legal policy description',
     'Delegation_Option' => 'Delegation Option',
     'Attach_Delegation_Document' => 'Attach delegation document',
+    'edit_program' => 'Edit Program',
+    'create_program' => 'Create New Program',
+    'External_Participation_Label' => 'Non-Company Participation Option',
+    'Select_Organization' => 'Select Organization',
 ];
 

@@ -33,7 +33,7 @@ return [
     'from' => 'من',
     'to' => 'إلى',
     'Valid from' => 'متاحة من',
-    'Valid to' => 'متاحة حتى',
+    'Valid to' => 'متاحة الى',
     'Description' => 'الوصف',
     'Close' => 'إغلاق',
     'Submit' => 'حفظ',
@@ -282,5 +282,9 @@ return [
     'Legal_Policy_Description' => 'وصف السياسة القانونية',
     'Delegation_Option' => 'خيار التفويض',
     'Attach_Delegation_Document' => 'إرفاق وثيقة التفويض',
-    ];
+    'edit_program' => 'تعديل البرنامج',
+    'create_program' => 'إنشاء برنامج جديد',
+    'External_Participation_Label' => 'خيار المشاركة الخارجية',
+    'Select_Organization' => 'اختر المنظمة',
+  ];
 
