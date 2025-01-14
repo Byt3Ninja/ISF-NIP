@@ -115,7 +115,6 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
-
         $this->preProcessingCheck('edit_cycles');
         $id = $request->cycleid;
         $type = $request->type;
@@ -349,10 +348,6 @@ class CyclesController extends Controller
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 2) {
-            $private = null;
-            if ($request->private) {
-                $private = sha1(now());
-            }
             // Check if file is uploaded
             $programGuidelineFile = null;
             if ($request->hasFile('program-guideline-pdf')) {
@@ -365,11 +360,6 @@ class CyclesController extends Controller
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 3) {
-            $private = null;
-            if ($request->private) {
-                $private = sha1(now());
-            }
-
             // Check if file is uploaded
             $financialGuidelineFile = null;
             if ($request->hasFile('financial_policy_pdf')) {
@@ -385,12 +375,6 @@ class CyclesController extends Controller
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 4) {
-
-            $private = null;
-            if ($request->private) {
-                $private = sha1(now());
-            }
-
             // Handle file uploads
             $legalPolicyPath = null;
             if ($request->hasFile('legal_policy_pdf')) {
@@ -406,7 +390,6 @@ class CyclesController extends Controller
             $cycle->organization_id = $request->organization_id;
             $cycle->legal_guideline = $request->legal_policy;
             $cycle->legal_guideline_file = $legalPolicyPath;
-            $cycle->private = $private;
             $cycle->delegation_file = $delegationPdfPath;
             $cycle->save();
 

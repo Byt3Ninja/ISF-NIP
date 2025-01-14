@@ -1,3 +1,5 @@
+<form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
+  @csrf
   <div class="row">
     <div class="col-12 text-center mb-4">
       <img 
@@ -34,7 +36,7 @@
           type="text" 
           class="form-control" 
           id="title" 
-          name="program-title" 
+          name="title" 
           placeholder="{{ __('cycles.Cycle title') }}"
           oninput="this.value = this.value.trimStart()"
           {{-- value="{{ $mode == 'edit' ? $program->title : '' }}" --}}
@@ -105,5 +107,16 @@
           name="private"
         />
       </div>
+      <div class="d-flex align-items-center justify-content-end gap-3 mt-4 p-4 p-md-0">
+        <button type="submit" class="btn btn-primary w-px-100">
+          {{ __('cycles.Save') }}
+          <i class="ti ti-circle-check ms-2"></i>
+        </button>
+        <button type="button" class="btn btn-outline-secondary w-px-100" data-bs-dismiss="modal">
+          {{ __('cycles.Cancel') }}
+          <i class="ti ti-circle-x ms-2"></i>
+        </button>
+      </div>
     </div>
   </div>
+</form>
