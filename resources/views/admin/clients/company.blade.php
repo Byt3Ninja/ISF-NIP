@@ -442,28 +442,32 @@
 
 <script>
   // Initialize the phone input
-  const phoneInput = document.getElementById("phone");
+const phoneInput = document.getElementById("phone");
 const whatsappInput = document.getElementById("WhatsApp");
 const phoneError = document.getElementById('phone-error');
 const whatsappError = document.getElementById('whatsapp-error');
 
+// Initialize intl-tel-input
 const iti = intlTelInput(phoneInput, {
-    initialCountry: "eg",
-    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-    separateDialCode: true,
-    autoPlaceholder: "aggressive",
-    customPlaceholder: (placeholder) => "e.g. " + placeholder,
+  initialCountry: "eg",
+  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+  formatOnDisplay: false,
+  separateDialCode: true,
+  autoPlaceholder: "aggressive",
+  customPlaceholder: (placeholder) => "e.g. " + placeholder,
 });
 
 const whatsappIti = intlTelInput(whatsappInput, {
-    initialCountry: "eg",
-    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-    separateDialCode: true,
-    autoPlaceholder: "aggressive",
-    customPlaceholder: (placeholder) => "e.g. " + placeholder,
+  initialCountry: "eg",
+  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+  separateDialCode: true,
+  formatOnDisplay: false,
+  autoPlaceholder: "aggressive",
+  customPlaceholder: (placeholder) => "e.g. " + placeholder,
 });
+
 
 // حقل مخفي للكود الدولي للواتساب
 const countryCodeWAInput = document.createElement("input");
