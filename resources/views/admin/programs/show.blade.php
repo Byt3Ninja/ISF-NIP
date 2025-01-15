@@ -395,8 +395,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                             </button>
                           </li>
                           <li>
-                            <button id="editButton" class="dropdown-item ccycle text-dark" 
-                              data-bs-toggle="modal" data-bs-target="#edit-program-modal">
+                            <button 
+                              id="editButton" 
+                              class="dropdown-item ccycle text-dark" 
+                              onclick="onEditProgramClick()"  
+                            >
                               <i class="ti ti-edit me-2 text-info"></i>
                               {{ __('cycles.Edit_Program') }}
                             </button>
@@ -1974,9 +1977,15 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
   <script src="/vuexy/assets/js/forms-tagify.js"></script>
 
   <script>
+    // Set Language
     const lang = '{{ $l }}';
-  </script>
-  <script>
+
+    // Handle Edit Program
+    const onEditProgramClick = () => {
+      $('#edit-program-modal').modal('show');
+    }
+  
+    // Initialize Quill editors
     const quillEditors = document.querySelectorAll('#text-editor');
     quillEditors.forEach(editor => {
       new Quill(editor, {

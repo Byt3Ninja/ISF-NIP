@@ -105,15 +105,15 @@
               <button
                 class="btn btn-primary btn-sm d-sm-inline-block d-md-none" 
                 style="border-radius: 15px;"
-                data-bs-toggle="modal" data-bs-target="#create-program-modal"
-                >
-                  <span class="mx-2">{{__('admin.New Program')}}</span>
-                  <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
+                onclick="onCreateProgramClick()"
+              >
+                <span class="mx-2">{{__('admin.New Program')}}</span>
+                <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
               <button 
                 class="btn btn-primary d-none d-md-inline-block"
                 style="border-radius: 15px; text-wrap: nowrap;"
-                data-bs-toggle="modal" data-bs-target="#create-program-modal"
+                onclick="onCreateProgramClick()"
                 >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
@@ -164,7 +164,7 @@
               <h6 class="text-center text-secondary">{{ __('admin.No_Cycles_Description') }}</h6>
               <!-- Add New Program Button -->
               <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;"
-                data-bs-toggle="modal" data-bs-target="#create-program-modal"
+                onclick="onCreateProgramClick()"
               >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
@@ -440,16 +440,19 @@
                               </button>
                               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <li>
-                                  <button class="dropdown-item ccycle" set="1" do="{{ $cycle->id }}"
-                                    onclick="DoChange(1, {{ $cycle->id }})">
-                                    <i class="ti ti-pencil me-2"></i>
+                                  <button 
+                                    class="dropdown-item ccycle" set="1" 
+                                    do="{{ $cycle->id }}"
+                                    onclick="onEditProgramClick()"
+                                  >
+                                    <i class="ti ti-edit me-2 text-info"></i>
                                     {{ __('cycles.Edit') }}
                                   </button>
                                 </li>
                                 <li>
                                   @can('delete_user')
                                     <button class="dropdown-item" onclick="DoChange(3, {{ $cycle->id }})">
-                                      <i class="ti ti-trash me-2"></i>
+                                      <i class="ti ti-trash me-2 text-danger"></i>
                                       {{ __('cycles.Delete') }}
                                     </button>
                                   @endcan
@@ -634,6 +637,7 @@
   </div>
 
   @include('admin.programs.partials._edit_program_modal', ['mode' => 'create'])
+  @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit'])
 @stop
 
 @section('scripts')
@@ -646,20 +650,29 @@
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find(0))
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/vuexy/assets/js/forms-tagify.js"></scrip
-  {{-- <script src="/app-assets/js/scripts/pages/page-users.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-  <script src="/app-assets/js/scripts/datatables/datatable.js"></script>
-  <script src="/app-assets/js/scripts/modal/components-modal.js"></script>
-
-  <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script> --}}
+  <script src="/vuexy/assets/js/forms-tagify.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
-
+  {{-- <script src="/app-assets/js/scripts/pages/page-users.js"></script> --}}
+  {{-- <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script> --}}
+  {{-- <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script> --}}
+  {{-- <script src="/app-assets/js/scripts/datatables/datatable.js"></script> --}}
+  {{-- <script src="/app-assets/js/scripts/modal/components-modal.js"></script> --}}
+  {{-- <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script> --}}
   <script>
+    // Set Language
     const lang = '{{ $l }}';
-  </script>
-  <script>
+
+    // Handle Create Program
+    const onCreateProgramClick = () => {
+      $('#create-program-modal').modal('show');
+    }
+
+    // Handle Edit Program
+    const onEditProgramClick = () => {
+      $('#edit-program-modal').modal('show');
+    }
+
+    // Initialize Quill Editors
     const quillEditors = document.querySelectorAll('#text-editor');
     quillEditors.forEach(editor => {
       new Quill(editor, {

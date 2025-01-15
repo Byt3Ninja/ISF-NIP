@@ -11,10 +11,10 @@
   .nav-pills .nav-link { padding: 0.4rem 0.55rem !important; }
   .nav-pills .nav-link:not(.active) { background-color: white; }
   .nav-item button span { font-size: 0.67rem; }
-  .modal-content { background-color: var(--bs-white); }
+  #modal-content { background-color: var(--bs-white); }
 
   @media (min-width: 768px) {
-    .modal-content { background-color: #ebebed; }
+    #modal-content { background-color: #ebebed; }
     .nav-pills .nav-link { padding: 0.35rem 1.1rem !important; }
     .nav-item button span { font-size: 0.80rem; }
   }
@@ -26,7 +26,7 @@
 
 <div class="modal fade" id="{{$mode}}-program-modal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content rounded p-0 p-md-4">
+    <div class="modal-content rounded p-0 p-md-4" id="modal-content">
       @include('partials.modal.modal-header', ['title' => __('cycles.' . $mode . '_program')])
       {{-- <form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data"> --}}
         {{-- @csrf --}}
@@ -34,19 +34,19 @@
           <ul
             class="nav nav-pills flex-nowrap justify-content-center py-1 bg-label-light rounded-pill gap-1 gap-md-2"
             style="margin-bottom: -10px;"
-            id="pills-tab"
+            id="pills-tab-{{ $mode }}"
             role="tablist"
           >
             @foreach ($tabs as $tab)
               <li class="nav-item" role="presentation">
                 <button
                   class="nav-link rounded-pill shadow-sm {{ $tab['active'] ? 'active' : '' }}"
-                  id="pills-{{ $tab['id'] }}-tab"
+                  id="pills-{{ $tab['id'] }}-tab-{{ $mode }}"
                   data-bs-toggle="pill"
-                  data-bs-target="#pills-{{ $tab['id'] }}"
+                  data-bs-target="#pills-{{ $tab['id'] }}-{{ $mode }}"
                   type="button"
                   role="tab"
-                  aria-controls="pills-{{ $tab['id'] }}"
+                  aria-controls="pills-{{ $tab['id'] }}-{{ $mode }}"
                   aria-selected="{{ $tab['active'] ? 'true' : 'false' }}"
                 >
                   <span class="fw-semibold">{{ $tab['label'] }}</span>
@@ -55,13 +55,13 @@
             @endforeach
           </ul>
           <hr />
-          <div class="tab-content shadow-none p-4" id="pills-tabContent">
+          <div class="tab-content shadow-none p-4" id="pills-tabContent-{{ $mode }}">
             @foreach ($tabs as $tab)
               <div
                 class="tab-pane fade {{ $tab['active'] ? 'show active' : '' }}"
-                id="pills-{{ $tab['id'] }}"
+                id="pills-{{ $tab['id'] }}-{{ $mode }}"
                 role="tabpanel"
-                aria-labelledby="pills-{{ $tab['id'] }}-tab"
+                aria-labelledby="pills-{{ $tab['id'] }}-tab-{{ $mode }}"
               >
                 @include('admin.programs.partials._edit_' . $tab['id'], ['mode' => $mode])
               </div>
