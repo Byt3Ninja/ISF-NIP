@@ -333,6 +333,13 @@ class CyclesController extends Controller
             }
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {
+            $request->validate([
+                'organization_id' => 'required|exists:organizations,id',
+                'title' => 'required|string|max:250',
+                'description' => 'required|string|max:2000',
+                'start' => 'required|date|before:end',
+                'end' => 'required|date|after:start',
+            ]);
             $private = null;
             if ($request->private) {
                 $private = sha1(now());
