@@ -54,7 +54,9 @@
             type="email"
             value="{{ $client->company ? $client->company->email : old('email') }}"
             style="direction: ltr;" placeholder="{{ __('admin.E-mail') }} *"
-             autocomplete="email">
+            autocomplete="email"
+            oninput="this.value = this.value.trimStart()"
+          >
       </div>
     </div>
     <div class="row">
