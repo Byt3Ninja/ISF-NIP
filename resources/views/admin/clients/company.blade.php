@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+
   <style>
     #contentWrapper {
       margin-bottom: 5rem;
@@ -170,6 +172,7 @@
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
 @stop
 
 @section('pagescripts')
@@ -178,6 +181,7 @@
   </script>
 
   <script src="/vuexy/assets/js/forms-selects.js"></script>
+  <script src="/vuexy/assets/js/forms-tagify.js"></script>
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
 
   <script>
