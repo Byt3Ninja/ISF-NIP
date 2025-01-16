@@ -1126,7 +1126,7 @@ return [
 	'Password_Requirements' => 'متطلبات كلمة المرور',
 	'Upload_New_Image' => 'تحميل صورة جديدة',
 	'Reset' => 'إعادة تعيين',
-	'Image_Format' => 'السماح بـ JPG أو GIF أو PNG. الحجم الأقصى لـ 800 كيلوبايت',
+	'Image_Format' => 'السماح بـ JPG أو JPEG أو PNG. الحجم الأقصى لـ 2048 كيلوبايت',
 	'Save_Changes' => 'حفظ التغييرات',
 	'Required_Field' => 'هذا الحقل مطلوب',
 	'NoHavePermission' => 'لا يمكنك الوصول لهذه الصفحة',
@@ -1148,4 +1148,8 @@ return [
 	'No_Assessment' => 'لا يوجد تقييم',
 	'No_Assessment_right_now' => 'لا يوجد تقييم حالياً',
 	'No_Activity_Found' => 'لا يوجد اى نشاطات',
+	'employees' => 'الموظفين',
+	'Self-employed' => 'مستقل',
+	'founder_email_exist' => 'عنوان البريد الالكتروني موجود بالفعل',
+	'founder_linkedin_exist' => 'الرابط المستخدم لللينكدان موجود بالفعل',
 ];

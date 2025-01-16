@@ -93,6 +93,9 @@ class RegisterController extends Controller
             'linkedin' => $data['Linkedin'],
         ]);
 
+        if(!empty($data['expertise'])){
+            
+        
         // معالجة الخبرات كمصفوفة
         $expertises = [];
         foreach ($data['expertise'] as $expertiseId) {
@@ -101,12 +104,13 @@ class RegisterController extends Controller
                 'mentor_id' => $user->id
             ];
         }
-
+    }
         $user->title_en = $data['title_en'];
         $user->save();
-        
+        if(!empty($data['expertise'])){
         // إدراج الخبرات دفعة واحدة
         DB::table('mentor_expertise')->insert($expertises);
+        }
     }
     }else{
 
@@ -128,7 +132,7 @@ $user = User::create([
             'bio_en' => $data['userbio'],
             'linkedin' => $data['Linkedin'],
         ]);
-
+        if(!empty($data['expertise'])){
         // معالجة الخبرات كمصفوفة
         $expertises = [];
         foreach ($data['expertise'] as $expertiseId) {
@@ -137,9 +141,10 @@ $user = User::create([
                 'mentor_id' => $user->id
             ];
         }
-        
+    
         // إدراج الخبرات دفعة واحدة
         DB::table('mentor_expertise')->insert($expertises);
+    }
     }
 
 

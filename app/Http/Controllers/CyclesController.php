@@ -428,6 +428,8 @@ class CyclesController extends Controller
         } else {
             // Show Cycle
             $cycles = Cycle::where('id', $id)->first()->toArray();
+
+            $cycles['basename_guideline'] = basename($cycles['program_guideline_file']);
             return response()->json($cycles);
         }
     }

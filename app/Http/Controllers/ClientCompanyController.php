@@ -1526,6 +1526,21 @@ class ClientCompanyController extends Controller
                 ], 422); // حالة الخطأ 422
             }
 
+            $email = $request->input('founder_email');
+            $mail = Team_member::where('Email', $email)->first();
+            if ($mail) {
+                return response()->json([
+                    'state' => __('admin.founder_email_exist'),
+                ]);
+            }
+            $linkedin = $request->input('founder_linkedin');
+            $linked = Team_member::where('LinkedIn', $linkedin)->first();
+            if ($linked) {
+                return response()->json([
+                    'state' => __('admin.founder_linkedin_exist'),
+                ]);
+            }
+
             $founder = 'Founder';
             // إنشاء وحفظ بيانات العضو في قاعدة البيانات
             $teamMember = new Team_member(); // افترض أن لديك موديل اسمه TeamMember

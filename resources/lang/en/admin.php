@@ -1109,7 +1109,7 @@ return [
 	'Change_Password' => 'Change Password',
 	'Password_Requirements' => 'Password Requirements',
 	'Upload_New_Image' => 'Upload New Image',
-	'Image_Format' => 'Allowed JPG, GIF or PNG. Max size of 800K',
+	'Image_Format' => 'Allowed JPG, JPEG or PNG. Max size of 2048K',
 	'Save_Changes' => 'Save Changes',
 	'Required_Field' => 'This field is required',
 	'NoHavePermission' => '	You do not have permission to access this page',
@@ -1131,4 +1131,8 @@ return [
 	"No_Assessment" => "No Assessment",
 	'No_Assessment_right_now' => 'You do not have any assessments right now',
 	'No_Activity_Found' => 'No Activity Found',
+	'employees' => 'Employees',
+	'Self-employed' => 'Self-employed',
+	'founder_email_exist' => 'The email address already exists',
+	'founder_linkedin_exist' => 'The linkedin account already exists',
 ];
