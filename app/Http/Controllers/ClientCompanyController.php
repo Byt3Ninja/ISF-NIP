@@ -1536,7 +1536,7 @@ class ClientCompanyController extends Controller
             $linkedin = $request->input('founder_linkedin');
             $linked = Team_member::where('LinkedIn', $linkedin)->first();
             if ($linked) {
-                return response()->json([
+                return response()->json(data: [
                     'state' => __('admin.founder_linkedin_exist'),
                 ]);
             }

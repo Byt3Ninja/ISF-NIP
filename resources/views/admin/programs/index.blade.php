@@ -695,7 +695,7 @@
     },
     success: function(response) {
       console.log(response); 
-      
+    
       $('#edit-program-modal #title').val(response.title ?? '');
       $('#edit-program-modal #description').val(response.description ?? '');
       $('#edit-program-modal #cycleid').val(cycleId); 
@@ -715,9 +715,9 @@
       <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-3">
           <i class="ti ti-file fs-1 text-warning"></i>
-          <span>(`+ response.program_guideline_file +`) </span>
+          <span>(`+ response.basename_guideline +`) </span>
         </div> 
-        <a class="btn btn-transparent" href="/storage/" + response.program_guideline_file target="_blank" download>
+         <a class="btn btn-transparent" href="/storage/`+ response.program_guideline_file +`" target="_blank" download>
           <i class="ti ti-download fs-3 text-primary"></i>
         </a>
       </div>
