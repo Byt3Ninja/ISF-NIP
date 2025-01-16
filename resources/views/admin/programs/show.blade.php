@@ -58,17 +58,17 @@
 @stop
 
 @php
- $totalSteps = app(\App\Step::class)->where('cycle_id', '=', $program->id)->count();
- $totalStepsFinish = app(\App\Step::class)->where('to', '>', Carbon\Carbon::now())->where('cycle_id', '=', $program->id)->count();
- $totalcompany = app(\App\Company::class)->where('cycle', '=', $program->id)->count();
- $orgid = App\Organization::where('id','=', $program->organization_id)->get();
+ $totalSteps = app(\App\Step::class)->where('cycle_id', '=', $cycle->id)->count();
+ $totalStepsFinish = app(\App\Step::class)->where('to', '>', Carbon\Carbon::now())->where('cycle_id', '=', $cycle->id)->count();
+ $totalcompany = app(\App\Company::class)->where('cycle', '=', $cycle->id)->count();
+ $orgid = App\Organization::where('id','=', $cycle->organization_id)->get();
         foreach ($orgid as  $org) {
           $mentortotals = App\User::where('id','=',$org->user_id)->get();
           $mentor_Count = $mentortotals->count();
         }
-  $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->count();
-  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->sum('period');
-  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->whereNotNull('rating')->avg('rating');
+  $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->count();
+  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->sum('period');
+  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
 foreach ($steps as  $step) {
@@ -87,7 +87,7 @@ foreach ($steps as  $step) {
           ->count();
 
 }
-$mentors = $program->mentors()->distinct()->get();
+$mentors = $cycle->mentors()->distinct()->get();
 
 if($totalStepsIdsCount > 0){
   $totalStepsIdsCount = $totalStepsIdsCount;
@@ -233,16 +233,16 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     @endif
     <!-- / Alert -->
     <div class="row">
-      <input type="hidden" id="ccycleOrg" value="{{ $program->organization_id }}" >
+      <input type="hidden" id="ccycleOrg" value="{{ $cycle->organization_id }}" >
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
             <div class="d-flex gap-6">
               <div class="d-none d-md-flex flex-shrink-0 w-px-100">
                 <div class="w-px-70 h-px-100">
-                  @if(!empty($program->organization->image_url))
+                  @if(!empty($cycle->organization->image_url))
                   @php
-                  $imageUrl = $program->organization->image_url;
+                  $imageUrl = $cycle->organization->image_url;
               
                    // استخراج المسار من الرابط
                    $imagePath = parse_url($imageUrl, PHP_URL_PATH);
@@ -262,7 +262,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               </div>
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between mb-2">
-                  <h4 class="text-primary mb-0">{{ $program->title }}</h4>
+                  <h4 class="text-primary mb-0">{{ $cycle->title }}</h4>
                   {{-- <a href="#" class="btn btn-primary">
                     <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                   </a> --}}
@@ -274,11 +274,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   </div>
                 </div> --}}
                 <div class="d-flex justify-content-between mb-4">
-                  <h5 class="mb-0">{{ $program->organization['name_' . $l] }}</h5>
+                  <h5 class="mb-0">{{ $cycle->organization['name_' . $l] }}</h5>
                   
-                  @if(!empty($program->private))
+                  @if(!empty($cycle->private))
                         <a 
-                          href="cycles/view/{{ $program->private }}"
+                          href="cycles/view/{{ $cycle->private }}"
                           class="btn btn-transparent"
                           target="_blank"
                           id="private-link"
@@ -335,8 +335,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       </div>
                       <div class="d-flex flex-wrap align-items-center ps-7">
                         <p class="text-muted">
-                          @if(!empty($program->description))
-                              {{ $program->description }}
+                          @if(!empty($cycle->description))
+                              {{ $cycle->description }}
                               @else
                               {{__('cycles.NA')}}
                               @endif
@@ -350,11 +350,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
                         <div class="badge bg-label-secondary">
                           <i class="ti ti-calendar ti-20px text-info"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $program->start->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ $cycle->start->format('Y-m-d') }}</span>
                         </div>
                         <div class="badge bg-label-secondary">
                           <i class="ti ti-calendar ti-20px text-danger"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $program->end->format('Y-m-d') }}</span>
+                          <span class="fw-bold text-dark mx-2">{{ $cycle->end->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -1972,7 +1972,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 @stop
 
 @section('pagescripts')
-  @php($ccycle = \App\Cycle::find($program->id))
+  @php($ccycle = \App\Cycle::find($cycle->id))
   <script src="/vuexy/assets/js/forms-selects.js"></script>
   <script src="/vuexy/assets/js/forms-tagify.js"></script>
 

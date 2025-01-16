@@ -1,5 +1,4 @@
-<form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
-  @csrf
+
 <div class="row mb-4">
   <div class="col-8">
     <div class="form-group">
@@ -13,8 +12,7 @@
       />
       <input type="hidden" name="type" id="type">
       <input type="hidden" name="cycleid" id="cycleid">
-      <input type="hidden" name="tab_id" value="3">
-      <input type="hidden" name="organization_id" value="{{ $mode == 'create'? $cycle->organization_id : '' }}">
+      <input type="hidden" name="organization_id" value="{{ $cycle ? $cycle->organization_id : '' }}">
     </div>
   </div>
   <div class="col-4">
@@ -29,7 +27,6 @@
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
         <option value="GBP">GBP</option>
-        <!-- Add more currencies as needed -->
       </select>
     </div>
   </div>
@@ -40,7 +37,7 @@
   <textarea 
     name="financial_policy" 
     id="text-editor" 
-    class="form-control" 
+    class="form-control policy" 
     rows="5" 
     oninput="this.value = this.value.trimStart()"
   ></textarea>
@@ -59,18 +56,7 @@
     />
   </div>
 </div>
-<div class="d-flex align-items-center justify-content-end gap-3 mt-4 p-4 p-md-0">
-  <button type="submit" class="btn btn-primary w-px-100">
-    {{ __('cycles.Save') }}
-    <i class="ti ti-circle-check ms-2"></i>
-  </button>
-  <button type="button" class="btn btn-outline-secondary w-px-100" data-bs-dismiss="modal">
-    {{ __('cycles.Cancel') }}
-    <i class="ti ti-circle-x ms-2"></i>
-  </button>
-</div>
 
-</form>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const budgetCategoriesInput = document.querySelector('#budget_categories');
