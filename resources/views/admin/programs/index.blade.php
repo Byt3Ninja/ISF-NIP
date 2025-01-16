@@ -443,7 +443,7 @@
                                   <button 
                                     class="dropdown-item ccycle" set="1" 
                                     do="{{ $cycle->id }}"
-                                    onclick="onEditProgramClick()"
+                                    onclick="onEditProgramClick({{ $cycle->id }})"
                                   >
                                     <i class="ti ti-edit me-2 text-info"></i>
                                     {{ __('cycles.Edit') }}
@@ -664,13 +664,87 @@
 
     // Handle Create Program
     const onCreateProgramClick = () => {
-      $('#create-program-modal').modal('show');
-    }
+      $('#title').val('');
+      $('#description').val('');
+      $('#cycleid').val('');
+      $('#type').val('');
+      $('#start').val('');
+      $('#end').val('');
 
-    // Handle Edit Program
-    const onEditProgramClick = () => {
-      $('#edit-program-modal').modal('show');
+     $('#create-program-modal').modal('show');
+   }
+
+   
+ 
+   // Handle Edit Program
+   const onEditProgramClick = (cycleId) => {
+    if(cycleId){
+
+    $('#edit-program-modal').modal('show');
+  $.ajaxSetup({
+    headers: {
+      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
+  });
+
+  $.ajax({
+    type: "POST",
+    url: "/dashboard/cycles/modify",
+    data: {
+      "cycleid": cycleId,
+    },
+    success: function(response) {
+      console.log(response); 
+      
+      $('#edit-program-modal #title').val(response.title ?? '');
+      $('#edit-program-modal #description').val(response.description ?? '');
+      $('#edit-program-modal #cycleid').val(cycleId); 
+      $('#edit-program-modal #type').val(1);
+      $('#edit-program-modal #start').val(response.start ?? '');
+      $('#edit-program-modal #end').val(response.end ?? '');
+      $('#edit-program-modal #organization_id').val(response.organization_id ?? '');
+      $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
+      $('#edit-program-modal #private').val(response.private ?? '');
+      $('#edit-program-modal .guidline').val(response.program_guideline	 ?? '');
+      $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
+      $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
+      $('#edit-program-modal .policy').val(response.financial_guideline ?? '');
+      $('#edit-program-modal .legal').val(response.legal_guideline ?? '');
+      $('#edit-program-modal #guidline').append(`
+    <div class="d-flex align-items-center">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+          <i class="ti ti-file fs-1 text-warning"></i>
+          <span>(`+ response.program_guideline_file +`) </span>
+        </div> 
+        <a class="btn btn-transparent" href="/storage/" + response.program_guideline_file target="_blank" download>
+          <i class="ti ti-download fs-3 text-primary"></i>
+        </a>
+      </div>
+    </div>
+ 
+`);
+
+      if (response.private) {
+        $('#customSwitch3').prop('checked', true);
+        $('#cyclelink').html('{{ __('cycles.Join URL') }}');
+        $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
+      }
+      
+      
+     
+    },
+    error: function(error) {
+      console.log(error);
+      alert("Error Occurred, Try again!");
+    }
+  });
+  
+}
+
+  
+};
+  
 
     // Initialize Quill Editors
     const quillEditors = document.querySelectorAll('#text-editor');

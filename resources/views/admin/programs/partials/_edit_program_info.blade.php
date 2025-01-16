@@ -1,5 +1,4 @@
-<form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
-  @csrf
+
   <div class="row">
     <div class="col-12 text-center mb-4">
       <img 
@@ -20,7 +19,7 @@
            use App\Organization;
           @endphp
              @foreach (Organization::all() as $org)
-                 <option value="{{ $org->id }}">{{ $org->{'name_'.app()->getLocale()} }}</option>
+                 <option value="{{ $org->id }}" {{ $org->id == $cycle->organization_id ? 'selected' : ''}}>{{ $org->{'name_'.app()->getLocale()} }}</option>
              @endforeach
         </select>
       </div>
@@ -107,7 +106,7 @@
           name="private"
         />
       </div>
-      <div class="d-flex align-items-center justify-content-end gap-3 mt-4 p-4 p-md-0">
+      {{-- <div class="d-flex align-items-center justify-content-end gap-3 mt-4 p-4 p-md-0">
         <button type="submit" class="btn btn-primary w-px-100">
           {{ __('cycles.Save') }}
           <i class="ti ti-circle-check ms-2"></i>
@@ -116,7 +115,6 @@
           {{ __('cycles.Cancel') }}
           <i class="ti ti-circle-x ms-2"></i>
         </button>
-      </div>
+      </div> --}}
     </div>
   </div>
-</form>

@@ -5,7 +5,7 @@
   <textarea 
     name="legal_policy" 
     id="text-editor" 
-    class="form-control" 
+    class="form-control legal" 
     placeholder="{{ __('cycles.Legal_Policy_Description') }}"
     rows="5" 
     oninput="this.value = this.value.trimStart()">
@@ -25,8 +25,7 @@
     />
     <input type="hidden" name="type" id="type">
     <input type="hidden" name="cycleid" id="cycleid">
-    <input type="hidden" name="tab_id" value="4">
-    <input type="hidden" name="organization_id" value="{{ $mode == 'create'? $cycle->organization_id : '' }}">
+    <input type="hidden" name="organization_id" value="{{ $cycle ? $cycle->organization_id : '' }}">
   </div>
 </div>
 <div class="form-group mb-4">
@@ -58,17 +57,8 @@
   </div>
 
 </div>
-<div class="d-flex align-items-center justify-content-end gap-3 mt-4 p-4 p-md-0">
-  <button type="submit" class="btn btn-primary w-px-100">
-    {{ __('cycles.Save') }}
-    <i class="ti ti-circle-check ms-2"></i>
-  </button>
-  <button type="button" class="btn btn-outline-secondary w-px-100" data-bs-dismiss="modal">
-    {{ __('cycles.Cancel') }}
-    <i class="ti ti-circle-x ms-2"></i>
-  </button>
-</div>
-</form>
+
+
 
 
 <script>
