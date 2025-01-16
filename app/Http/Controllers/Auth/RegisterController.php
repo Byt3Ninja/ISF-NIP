@@ -78,6 +78,8 @@ class RegisterController extends Controller
         $user = User::create([
             'first_name_en' => $data['first_name_en'],
             'last_name_en' => $data['last_name_en'],
+            'first_name_ar' => $data['first_name_en'],
+            'last_name_ar' => $data['last_name_en'],
             'gender' =>  $data['gender'],
             'phone' => $data['phone'],
             'email' => $data['email'],
@@ -117,6 +119,8 @@ class RegisterController extends Controller
 $user = User::create([
             'first_name_en' => $data['first_name_en'],
             'last_name_en' => $data['last_name_en'],
+            'first_name_ar' => $data['first_name_en'],
+            'last_name_ar' => $data['last_name_en'],
             'gender' =>  $data['gender'],
             'phone' => $data['phone'],
             'email' => $data['email'],
