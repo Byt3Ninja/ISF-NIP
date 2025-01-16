@@ -102,6 +102,7 @@ $passwordRules = [
             <x-alert type="danger" message="{{ $error }}" />
           @endforeach
         @endif
+        
         <!-- /Alerts -->
 
         <!-- Tab Content -->
@@ -127,7 +128,7 @@ $passwordRules = [
                         <span class="d-none d-sm-block">{{ __('admin.Upload_New_Image') }}</span>
                         <i class="ti ti-upload d-block d-sm-none"></i>
                         <input hidden type="file" name="img_url" class="account-file-input" id="upload"
-                          accept="image/*" />
+                          accept="image/png, image/jpg, image/jpeg" />
                       </label>
                       <button type="button" class="btn btn-label-secondary account-image-reset mb-4">
                         <i class="ti ti-refresh-dot d-block d-sm-none"></i>
@@ -144,25 +145,25 @@ $passwordRules = [
                       <label for="first_name_en" class="form-label fs-6 fw-bold">{{ __('admin.English UserName') }}</label>
                       <input value="{{ $client->first_name_en }}" name="first_name_en" type="text" class="form-control"
                         id="first_name_en" style="direction: ltr;" placeholder="{{ __('admin.First Name') }}" required
-                        autocomplete="first_name_en" autofocus />
+                        autocomplete="first_name_en" autofocus max="255" min="2" />
                     </div>
                     <div class="mb-4 col-md-6">
                       <label for="last_name_en" class="form-label fs-6 fw-bold">{{ __('admin.Last Name') }}</label>
                       <input value="{{ $client->last_name_en }}" name="last_name_en" type="text" class="form-control"
                         id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required
-                        autocomplete="last_name_en" />
+                        autocomplete="last_name_en" max="255" min="2" />
                     </div>
                     <div class="mb-4 col-md-6">
                       <label for="first_name_ar" class="form-label fs-6 fw-bold">{{ __('admin.Arabic First Name') }}</label> <input
                         value="{{ $client->first_name_ar }}" name="first_name_ar" type="text" class="form-control"
                         id="first_name_ar" style="direction: rtl;" placeholder="{{ __('admin.First Name') }}" required
-                        autocomplete="first_name_ar" autofocus />
+                        autocomplete="first_name_ar" max="255" min="2" autofocus />
                     </div>
                     <div class="mb-4 col-md-6">
                       <label for="last_name_ar" class="form-label fs-6 fw-bold">{{ __('admin.Arabic Last Name') }}</label>
                       <input value="{{ $client->last_name_ar }}" name="last_name_ar" type="text"
                         class="form-control" id="last_name_ar" style="direction: rtl;"
-                        placeholder="{{ __('admin.Last Name') }}" required autocomplete="last_name_ar" />
+                        placeholder="{{ __('admin.Last Name') }}" required autocomplete="last_name_ar" max="255" min="2" />
                     </div>
                     <div class="mb-4 col-md-6">
                       <label for="email" class="form-label fs-6 fw-bold">{{ __('admin.E-mail') }}</label>

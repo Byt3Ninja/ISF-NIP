@@ -29,6 +29,7 @@ class UpdateClientProfileRequest extends FormRequest
         return [
             'first_name_en' => ['required', 'string', 'max:255'],
             'last_name_en' => ['required', 'string', 'max:255'],
+            'img_url' => 'nullable|mimes:jpeg,png,jpg',
             'phone' => ['required'],
             'email' => [
                             'required',

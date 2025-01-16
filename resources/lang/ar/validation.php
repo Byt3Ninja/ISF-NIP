@@ -55,7 +55,7 @@ return [
         'string'  => 'يجب أن يكون طول النص :attribute على الأقل :value حروفٍ/حرفًا.',
         'array'   => 'يجب أن يحتوي :attribute على الأقل على :value عُنصرًا/عناصر.',
     ],
-    'image'    => 'يجب أن يكون :attribute صورةً.',
+    // 'image'    => 'يجب أن يكون :attribute صورةً.',
     'in'       => ':attribute غير موجود.',
     'in_array' => ':attribute غير موجود في :other.',
     'integer'  => 'يجب أن يكون :attribute عددًا صحيحًا.',
@@ -81,7 +81,7 @@ return [
         'string'  => 'يجب أن لا يتجاوز طول النّص :attribute :max حروفٍ/حرفًا.',
         'array'   => 'يجب أن لا يحتوي :attribute على أكثر من :max عناصر/عنصر.',
     ],
-    'mimes'     => 'يجب أن يكون ملفًا من نوع : :values.',
+    'mimes'     => 'صيغة الملف غير مدعومة',
     'mimetypes' => 'يجب أن يكون ملفًا من نوع : :values.',
     'min'       => [
         'numeric' => 'يجب أن تكون قيمة :attribute مساوية أو أكبر من :min.',
