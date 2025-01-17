@@ -371,7 +371,7 @@
                           </div>
                          
                           <div class="d-none d-md-flex flex-column">
-                            <span class="fs-6 fw-bold mx-2 mb-2 mb-md-0">{{__('admin.Duration')}}</span>
+                            <span class="fs-6 fw-bold mx-2 mb-2">{{__('admin.Duration')}}</span>
                             <div 
                               class="px-2 py-1 d-flex mb-1 rounded"
                               style="background-color: #d9edee;"
