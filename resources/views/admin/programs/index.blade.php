@@ -1,10 +1,11 @@
 @extends('layouts.admin')
 
 @section('style')
-  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-  {{-- <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css"> --}}
-  {{-- <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css"> --}}
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
@@ -21,6 +22,12 @@
     }
     .program-card {
       height: auto;
+    }
+    .line-clamp-4 {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     @media screen and (min-width: 768px) {
@@ -173,7 +180,7 @@
           @else
             <section>
               @foreach ($cycles as $cycle)
-                <div style="border-radius: 30px;">
+                <div style="border-radius: 30px; height: fit-content;">
                   @php
                     $totalSteps = app(\App\Step::class)
                         ->where('cycle_id', '=', $cycle->id)
@@ -301,7 +308,6 @@
                           </div>
                           <div  style="width: fit-content">
                             <div class="d-flex align-items-center g-1" style="height: 55px;">
-                              
                               <div class="bg-label-info p-2 d-flex align-items-center justify-content-center rounded mx-1">
                                 <i class="ti ti-stack-2 ti-24px"></i>
                               </div>
@@ -340,83 +346,69 @@
                         </div>
                         <!-- / Count Row -->
                         <!-- Mentors Row -->
-                        <div 
-                          class="d-flex justify-content-between align-items-end w-100 mb-2"
-                        >
-                          <div class="d-flex flex-column mt-1">
-                            <div class="d-flex align-items-center mb-2">
-                              <i class="ti ti-user-circle text-primary ti-24px"></i>
-                              <span class="fs-6 fw-bold mx-2">{{__('admin.Responsible')}}</span>
+                        <div class="d-flex justify-content-between w-100 mt-3 mb-3 mb-md-0">
+                          <div class="d-flex gap-2">
+                            <i class="ti ti-user-circle text-primary ti-24px"></i>
+                            <div class="d-flex flex-column">
+                              <span class="fs-6 fw-bold mb-2">{{__('admin.Responsible')}}</span>
+                              @foreach($mentortotal as $mentor)
+                                <div class="d-flex flex-wrap gap-2 align-items-center" style="width: 100%">
+                                  <a 
+                                    class="btn btn-sm btn-outline-primary rounded-pill"
+                                    target="_blank"
+                                    href="{{route('show_mentor_profile', $mentor->id)}}"
+                                  >
+                                    @if(!empty($mentor->image_url))
+                                      <img src="{{$mentor->image_url}}" width="20" height="20" class="rounded-circle" />
+                                    @else
+                                      <img src="/icons/avatar.svg" width="20" height="20" class="rounded-circle" />
+                                    @endif
+                                    <span class="mx-1">{{$mentor->name}}</span>
+                                  </a>
+                                </div>
+                              @endforeach
                             </div>
-                            
-                            @foreach($mentortotal as $mentor)
-                            <div class="d-flex flex-wrap align-items-center px-4" style="width: 100%">
-                              
-                                <a class="btn btn-sm btn-outline-primary rounded-pill"
-                                 style="margin: 2px;" 
-                                 target="_blank"
-                                 href="{{route('show_mentor_profile', $mentor->id)}}"
-                                >
-                                @if(!empty($mentor->image_url))
-                                  <img src="{{$mentor->image_url}}" width="20" height="20" class="rounded-circle" />
-@else
-<img src="/icons/avatar.svg" width="20" height="20" class="rounded-circle" />
-@endif
-                                  <span class="mx-1">{{$mentor->name}}</span>
-                                </a>
-                             
-                            </div>
-                            @endforeach
                           </div>
-                          <div class="d-none d-md-flex flex-column" style="margin-bottom: -60px;">
-                            <span class="fs-6 fw-bold mx-2 mb-2">{{__('admin.Duration')}}</span>
+                         
+                          <div class="d-none d-md-flex flex-column">
+                            <span class="fs-6 fw-bold mx-2 mb-2 mb-md-0">{{__('admin.Duration')}}</span>
                             <div 
-                              class="px-1 py-2 d-flex mb-2"
-                              style="background-color: #d9edee; border-radius: 15px;"
+                              class="px-2 py-1 d-flex mb-1 rounded"
+                              style="background-color: #d9edee;"
                             >
-                              <i class="ti ti-calendar-clock ti-28px;" style="color: blue;"></i>
-                              <span class="fw-bold text-black mx-2">
+                              <i class="ti ti-calendar text-info ti-16px"></i>
+                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
                                 {{ $cycle->start ?  $cycle->start->format('Y-m-d') : ''}}
                               </span>
                             </div>
                             <div 
-                              class="px-1 py-2 d-flex"
-                              style="background-color: #d9edee; border-radius: 15px;"
+                              class="px-2 py-1 d-flex rounded"
+                              style="background-color: #d9edee;"
                             >
-                              <i class="ti ti-calendar-clock ti-28px;" style="color: blue;"></i>
-                              <span class="fw-bold text-black mx-2">
+                              <i class="ti ti-calendar text-danger ti-16px"></i>
+                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
                                 {{ $cycle->end ?  $cycle->end->format('Y-m-d') : ''}}
-
-                                </span>
+                              </span>
                             </div>
                           </div>
                         </div>
                         <!-- / Mentors Row -->
                         <!-- Program Description -->
-                       
-                        <div class="d-flex flex-column">
-                          <div class="d-flex align-items-center my-2">
+                       @if (!empty($cycle->description))
+                          <div class="d-flex gap-2">
                             <i class="ti ti-message text-primary ti-24px"></i>
-                            <span class="fs-6 fw-bold mx-2">{{__('admin.Description')}}</span>
+                            <div class="d-flex flex-column">
+                              <span class="fs-6 fw-bold mb-1">{{__('admin.Description')}}</span>
+                              <p class="text-secondary line-clamp-4">{{ $cycle->description }}</p>
+                            </div>
                           </div>
-                          <div class="d-flex flex-wrap align-items-center px-4" style="width: 85%;">
-                            <p class="text-secondary">
-                              @if(!empty($cycle->description))
-                              {{ $cycle->description }}
-                              @else
-{{__('cycles.NA')}}
-                              @endif
-                            </p>
-                          </div>
-                        </div>
+                        @endif
                         <!-- / Program Description -->
                         <!-- Progress Bar -->
                         @php
-    // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
-    $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
-@endphp
-
-
+                          // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
+                          $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
+                        @endphp
                         <div class="d-flex align-items-center">
                           <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
                           <div style="width: 100%; height: 7px;" class="progress rounded-pill">
@@ -462,6 +454,27 @@
                           </div>
                         </di>
                         <!-- / Progress Bar -->
+                        <div class="d-flex d-md-none mt-3 mt-md-0">
+                          <span class="fs-6 fw-bold mx-2">{{__('admin.Duration')}}</span>
+                          <div 
+                            class="px-2 py-1 me-3 d-flex rounded"
+                            style="background-color: #d9edee;"
+                          >
+                            <i class="ti ti-calendar text-info ti-16px"></i>
+                            <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                              {{ $cycle->start ?  $cycle->start->format('Y-m-d') : ''}}
+                            </span>
+                          </div>
+                          <div 
+                            class="px-2 py-1 d-flex rounded"
+                            style="background-color: #d9edee;"
+                          >
+                            <i class="ti ti-calendar text-danger ti-16px"></i>
+                            <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                              {{ $cycle->end ?  $cycle->end->format('Y-m-d') : ''}}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     {{-- <div
                       class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
@@ -641,118 +654,162 @@
 @stop
 
 @section('scripts')
-  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+  {{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
   <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 @stop
 
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find(0))
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/vuexy/assets/js/forms-tagify.js"></script>
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
-  {{-- <script src="/app-assets/js/scripts/pages/page-users.js"></script> --}}
-  {{-- <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script> --}}
-  {{-- <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script> --}}
-  {{-- <script src="/app-assets/js/scripts/datatables/datatable.js"></script> --}}
-  {{-- <script src="/app-assets/js/scripts/modal/components-modal.js"></script> --}}
-  {{-- <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script> --}}
+  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
   <script>
     // Set Language
     const lang = '{{ $l }}';
 
-    // Handle Create Program
-    const onCreateProgramClick = () => {
-      $('#title').val('');
-      $('#description').val('');
-      $('#cycleid').val('');
-      $('#type').val('');
-      $('#start').val('');
-      $('#end').val('');
-
-     $('#create-program-modal').modal('show');
-   }
-
-   
- 
-   // Handle Edit Program
-   const onEditProgramClick = (cycleId) => {
-    if(cycleId){
-
-    $('#edit-program-modal').modal('show');
-  $.ajaxSetup({
-    headers: {
-      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    }
-  });
-
-  $.ajax({
-    type: "POST",
-    url: "/dashboard/cycles/modify",
-    data: {
-      "cycleid": cycleId,
-    },
-    success: function(response) {
-      console.log(response); 
-    
-      $('#edit-program-modal #title').val(response.title ?? '');
-      $('#edit-program-modal #description').val(response.description ?? '');
-      $('#edit-program-modal #cycleid').val(cycleId); 
-      $('#edit-program-modal #type').val(1);
-      $('#edit-program-modal #start').val(response.start ?? '');
-      $('#edit-program-modal #end').val(response.end ?? '');
-      $('#edit-program-modal #organization_id').val(response.organization_id ?? '');
-      $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
-      $('#edit-program-modal #private').val(response.private ?? '');
-      $('#edit-program-modal .guidline').val(response.program_guideline	 ?? '');
-      $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
-      $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
-      $('#edit-program-modal .policy').val(response.financial_guideline ?? '');
-      $('#edit-program-modal .legal').val(response.legal_guideline ?? '');
-      $('#edit-program-modal #guidline').append(`
-    <div class="d-flex align-items-center">
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-3">
-          <i class="ti ti-file fs-1 text-warning"></i>
-          <span>(`+ response.basename_guideline +`) </span>
-        </div> 
-         <a class="btn btn-transparent" href="/storage/`+ response.program_guideline_file +`" target="_blank" download>
-          <i class="ti ti-download fs-3 text-primary"></i>
-        </a>
-      </div>
-    </div>
- 
-`);
-
-      if (response.private) {
-        $('#customSwitch3').prop('checked', true);
-        $('#cyclelink').html('{{ __('cycles.Join URL') }}');
-        $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
-      }
-      
-      
-     
-    },
-    error: function(error) {
-      console.log(error);
-      alert("Error Occurred, Try again!");
-    }
-  });
-  
-}
-
-  
-};
-  
-
-    // Initialize Quill Editors
-    const quillEditors = document.querySelectorAll('#text-editor');
-    quillEditors.forEach(editor => {
-      new Quill(editor, {
-        theme: 'snow'
+    // Initialize guideline-editor
+    const guidelineEditors = document.querySelectorAll('#guideline-editor');
+    guidelineEditors.forEach(editor => {
+      const quill = new Quill(editor, {
+      theme: 'snow',
+      placeholder: '{{ __('cycles.Program_Guideline') }}'
+      });
+      quill.on('text-change', function() {
+        $('#program_guideline').val(quill.root.innerHTML);
       });
     });
+    
+    // Initialize financial-editor
+    const financialEditors = document.querySelectorAll('#financial-editor');
+    financialEditors.forEach(editor => {
+      const quill = new Quill(editor, {
+      theme: 'snow',
+      placeholder: '{{ __('cycles.Financial_Policy') }}'
+      });
+      quill.on('text-change', function() {
+        $('#financial_policy').val(quill.root.innerHTML);
+      });
+    });
+
+    // Initialize legal-editor
+    const legalEditors = document.querySelectorAll('#legal-editor');
+    legalEditors.forEach(editor => {
+      const quill = new Quill(editor, {
+      theme: 'snow',
+      placeholder: '{{ __('cycles.Legal_Policy_Description') }}'
+      });
+      quill.on('text-change', function() {
+        $('#legal_policy').val(quill.root.innerHTML);
+      });
+    });
+
+    // Handle Reset Values
+    const resetValues = () => {
+      console.log('Resetting Values');
+      $('#create-program-modal #title').val('');
+      $('#create-program-modal #description').val('');
+      $('#create-program-modal #cycleid').val('');
+      $('#create-program-modal #type').val('');
+      $('#create-program-modal #start').val('');
+      $('#create-program-modal #end').val('');
+      $('#create-program-modal #program_guideline').val('');
+      $('#create-program-modal #financial_policy').val('');
+      $('#create-program-modal #legal_policy').val('');
+      // $('#guideline-editor').html('');
+      // $('#financial-editor').html('');
+      // $('#legal-editor').html('');
+      $('#create-program-modal #program-guideline-pdf').val();
+      $('#create-program-modal #legal_policy_pdf').val();
+      $('#create-program-modal #financial_policy_pdf').val();
+      $('#create-program-modal #delegation_pdf').val();
+      $('#create-program-modal #private').prop('checked', false);
+    }
+
+    // Handle Create Program
+    const onCreateProgramClick = () => {
+      resetValues();
+      $('#create-program-modal').modal('show');
+    }
+
+    // Handle Edit Program
+    const onEditProgramClick = (cycleId) => {
+      resetValues();
+
+      if(cycleId){
+        $('#edit-program-modal').modal('show');
+      
+        $.ajaxSetup({
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          }
+        });
+
+        $.ajax({
+          type: "POST",
+          url: "/dashboard/cycles/modify",
+          data: {"cycleid": cycleId },
+          success: function(response) {
+            console.log(response); 
+          
+            $('#edit-program-modal #title').val(response.title ?? '');
+            $('#edit-program-modal #description').val(response.description ?? '');
+            $('#edit-program-modal #cycleid').val(cycleId); 
+            $('#edit-program-modal #type').val(1);
+            $('#edit-program-modal #start').val(response.start ?? '');
+            $('#edit-program-modal #end').val(response.end ?? '');
+            $('#edit-program-modal #organization_id').val(response.organization_id ?? '');
+            $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
+            if (response.private) {
+              $('#edit-program-modal #private').prop('checked', true);
+              $('#cyclelink').html('{{ __('cycles.Join URL') }}');
+              $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
+            }
+
+            // guidelineEditors.forEach(editor => {
+            //   editor.root.innerHTML = response.program_guideline ?? '';
+            // });
+            $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
+            $('#edit-program-modal #program-guideline-pdf').val(response.program_guideline_file	?? '');
+
+            // financialEditors.forEach(editor => {
+            //   ditor.root.innerHTML = response.financial_guideline ?? '';
+            // });
+            $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
+            $('#edit-program-modal #financial_policy_pdf').val(response.financial_guideline_file);
+            $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
+            $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
+            
+            // legalEditors.forEach(editor => {
+            //   ditor.root.innerHTML = response.legal_guideline ?? '';
+            // });
+            $('#edit-program-modal #legal_policy_pdf').val(response.legal_guideline_file);
+            $('#edit-program-modal #delegation_pdf').val(response.delegation_file);
+            
+            // $('#edit-program-modal #guidline').append(`
+            //   <div class="d-flex align-items-center">
+            //     <div class="d-flex justify-content-between align-items-center">
+            //       <div class="d-flex align-items-center gap-3">
+            //         <i class="ti ti-file fs-1 text-warning"></i>
+            //         <span>(`+ response.basename_guideline +`) </span>
+            //       </div> 
+            //       <a class="btn btn-transparent" href="/storage/`+ response.program_guideline_file +`" target="_blank" download>
+            //         <i class="ti ti-download fs-3 text-primary"></i>
+            //       </a>
+            //     </div>
+            //   </div>`);
+          },
+          error: function(error) {
+            console.log(error);
+            resetValues();
+            alert("Error Occurred, Try again!");
+          }
+        });
+      }
+    };
   </script>
 
   <script>

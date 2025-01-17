@@ -272,7 +272,7 @@ return [
     'Edit_Program'=>'تعديل البرنامج',
     'Program_Guideline' => 'دليل البرنامج',
     'Attach_Document'=>'إرفاق ملف',
-    'PDF_Only'=>'دليل البرنامج',
+    'PDF_Only'=>'PDF فقط',
     'Enter_Program_Guideline'=>'أدخل دليل البرنامج',
     'Financial_Policy' => 'سياسة الدفع',
     'Budget_Allocation' => 'تخصيص الميزانية',
