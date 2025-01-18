@@ -100,7 +100,7 @@
                           <img src="/icons/linkedin.svg" />
                         </a>
                       @endif
-                      <a href="{{ 'https://wa.me/' . $company->country_code . $company->whatsapp }}" target="_blank"
+                      <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}" target="_blank"
                         class="d-flex align-items-center">
                         <i class="fa-brands fa-whatsapp fs-3 text-success"></i>
                       </a>
