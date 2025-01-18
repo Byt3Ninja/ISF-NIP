@@ -128,7 +128,9 @@ $passwordRules = [
                         <span class="d-none d-sm-block">{{ __('admin.Upload_New_Image') }}</span>
                         <i class="ti ti-upload d-block d-sm-none"></i>
                         <input hidden type="file" name="img_url" class="account-file-input" id="upload"
-                          accept="image/png, image/jpg, image/jpeg" />
+                          accept="image/png, image/jpg, image/jpeg"
+                            max="2048" 
+                          />
                       </label>
                       <button type="button" class="btn btn-label-secondary account-image-reset mb-4">
                         <i class="ti ti-refresh-dot d-block d-sm-none"></i>
