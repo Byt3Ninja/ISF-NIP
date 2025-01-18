@@ -78,9 +78,14 @@
         <ul class="nav nav-pills flex-nowrap" role="tablist">
           @foreach ($tabs as $key => $tab)
             <li class="nav-item d-flex justify-content-center align-items-center">
-              <a href="#navs-left-{{ $tab['target'] }}"
+              <a 
+                id="company-tab"
+                href="#navs-left-{{ $tab['target'] }}"
                 class="nav-link {{ $key == 0 ? 'active' : '' }}"
-                data-bs-toggle="tab" role="tab">
+                data-bs-toggle="tab" 
+                role="tab"
+                {{-- onclick="handleTabClick({{ $key }});" --}}
+              >
                 <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                 {{ $tab['label'] }}
               </a>
@@ -98,9 +103,14 @@
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
               <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
-                <a href="#navs-left-{{ $tab['target'] }}"
+                <a 
+                  id="company-tab"
+                  href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
-                  data-bs-toggle="tab" role="tab">
+                  data-bs-toggle="tab"
+                  role="tab"
+                  {{-- onclick="handleTabClick({{ $key }});" --}}
+                >
                   <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                   {{ $tab['label'] }}
                 </a>
@@ -198,18 +208,25 @@
     });
   </script> 
 
-  <script>
-    document.getElementById('update-form').addEventListener('submit', function(
-      event) {
-      var button = document.getElementById('submit-button');
-      var buttonText = document.getElementById('button-text');
-      var buttonSpinner = document.getElementById('button-spinner');
+  {{-- <script>
+    const handleTabClick = (tab) => {
+      localStorage.setItem('activeCompanyTab', JSON.stringify(tab));
+    }
 
-      button.disabled = true;
-      buttonText.classList.add('d-none');
-      buttonSpinner.classList.remove('d-none');
+    document.addEventListener('DOMContentLoaded', function() {
+      const activeIndex = localStorage.getItem('activeCompanyTab');
+      if (activeIndex) {
+        const tabIndex = JSON.parse(activeIndex);
+        console.log('activeTab', tabIndex);
+        const companyTabs = document.querySelectorAll('#company-tab'); // Changed selector to class
+        companyTabs.forEach((tab, index) => {
+          if (index === tabIndex) {
+            tab.click();
+          }
+        });
+      }
     });
-  </script>
+  </script> --}}
 
   <script>
     $(document).ready(function() {
@@ -451,9 +468,15 @@ const whatsappInput = document.getElementById("WhatsApp");
 const phoneError = document.getElementById('phone-error');
 const whatsappError = document.getElementById('whatsapp-error');
 
+const countryCodeFromDB = "{{ $client->company->country_code }}".trim();
+const countryCodeWAFromDB = "{{ $client->company->country_code_w_a }}".trim();
+
+console.log('countryCodeFromDB', countryCodeFromDB);
+console.log('countryCodeWAFromDB', countryCodeWAFromDB);
+
 // Initialize intl-tel-input
 const iti = intlTelInput(phoneInput, {
-  initialCountry: "eg",
+  initialCountry: getCountryCode(countryCodeFromDB),
   preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
   utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
   formatOnDisplay: false,
@@ -462,8 +485,20 @@ const iti = intlTelInput(phoneInput, {
   customPlaceholder: (placeholder) => "e.g. " + placeholder,
 });
 
+function getCountryCode(code) {
+  let dialCode = code.toString().trim();
+  const countryData = intlTelInputGlobals.getCountryData();
+  const country = countryData.find(country => `+${country.dialCode}` === dialCode);
+
+  if (country) {
+    console.log("Country Code Found: " + country.iso2);
+    return country.iso2;
+  }
+  return "eg";
+}
+
 const whatsappIti = intlTelInput(whatsappInput, {
-  initialCountry: "eg",
+  initialCountry: getCountryCode(countryCodeWAFromDB),
   preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
   utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
   separateDialCode: true,
@@ -495,7 +530,6 @@ countryCodeInput.value = "{{ $client->company->country_code ?? '' }}";
 phoneInput.parentNode.appendChild(countryCodeInput);
 
 // ضبط الدولة الافتراضية
-const countryCodeFromDB = "{{ $client->company->country_code ?? '' }}".trim();
 if (countryCodeFromDB) {
     iti.setCountry(countryCodeFromDB);
     countryCodeInput.value = "+" + iti.getSelectedCountryData().dialCode;
