@@ -608,15 +608,15 @@
                 <label for="type" class="form-label">{{ __('dashboard.Choose type') }}:</label>
                 <select name="type" class="select2 form-select" id="type" onchange="SelectType(this.value)"
                   required>
-                  <option value="OneDay">{{ __('dashboard.Add one day') }}</option>
+                  {{-- <option value="OneDay">{{ __('dashboard.Add one day') }}</option> --}}
                   <option value="Weekly">{{ __('dashboard.Select weekly days and times') }}</option>
                   {{--  <option value="WorkingDays">{{__('dashboard.Add working days times')}}</option>  --}}
-                  <option value="Period">{{ __('dashboard.Add period') }}</option>
+                  {{-- <option value="Period">{{ __('dashboard.Add period') }}</option> --}}
                 </select>
               </div>
               <input type="hidden" name="rtype" value="0" id="rtype">
               <input type="hidden" name="id" value="0" id="sid">
-              <div id="showdays" class="mb-3" style="display: none">
+              <div id="showdays" class="mb-3" >
                 <label for="days" class="form-label"
                   style="text-transform: capitalize">{{ $l === 'ar' ? 'اختر الايام' : 'Selecte days' }}:</label>
                 <select name="days[]" class="select2 form-select" multiple id="days">
@@ -629,14 +629,14 @@
                   <option value="Fri">{{ __('dashboard.Friday') }}</option>
                 </select>
               </div>
-              <div class="mb-3" id="showdates">
+              {{-- <div class="mb-3" id="showdates">
                 <label for="dfrom" class="form-label">{{ __('dashboard.Date') }}:</label>
                 <input class="form-control" type="date" id="dfrom" name="dfrom" value="" required>
                 <div id="showtto" style="display: none">
                   <label for="dto" class="form-label">{{ __('dashboard.to') }}:</label>
                   <input class="form-control" type="date" id="dto" name="dto" value="">
                 </div>
-              </div>
+              </div> --}}
               <div class="mb-3">
                 <label for="tfrom" class="form-label">{{ __('dashboard.Time from') }}:</label>
                 <input class="form-control" type="time" id="tfrom" name="tfrom" value="" required>

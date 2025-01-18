@@ -81,7 +81,7 @@ return [
         'string'  => 'يجب أن لا يتجاوز طول النّص :attribute :max حروفٍ/حرفًا.',
         'array'   => 'يجب أن لا يحتوي :attribute على أكثر من :max عناصر/عنصر.',
     ],
-    'mimes'     => 'صيغة الملف غير مدعومة',
+    'mimes'     => 'صيغة الملف غير مدعومة.',
     'mimetypes' => 'يجب أن يكون ملفًا من نوع : :values.',
     'min'       => [
         'numeric' => 'يجب أن تكون قيمة :attribute مساوية أو أكبر من :min.',
@@ -113,7 +113,7 @@ return [
     'string'      => 'يجب أن يكون :attribute نصًا.',
     'timezone'    => 'يجب أن يكون :attribute نطاقًا زمنيًا صحيحًا.',
     'unique'      => 'قيمة :attribute مُستخدمة من قبل.',
-    'uploaded'    => 'فشل في تحميل الـ :attribute.',
+    // 'uploaded'    => 'فشل في تحميل الـ :attribute.',
     'url'         => 'صيغة الرابط :attribute غير صحيحة.',
     'uuid'        => ':attribute يجب أن يكون بصيغة UUID سليمة.',
 
