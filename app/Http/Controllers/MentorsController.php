@@ -428,6 +428,7 @@ class MentorsController extends Controller
 
 	public function modify(Request $request)
 	{
+		
 		// $this->preProcessingCheck('edit_mentorship'); /// modify permissions
 		try {
 			$type = $request->rtype;

@@ -1135,4 +1135,5 @@ return [
 	'Self-employed' => 'Self-employed',
 	'founder_email_exist' => 'The email address already exists',
 	'founder_linkedin_exist' => 'The linkedin account already exists',
+	'Manage_Assessments' => 'Manage Assessments',
 ];
