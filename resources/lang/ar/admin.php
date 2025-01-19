@@ -131,7 +131,7 @@ return [
 	'Edit user' => 'تعديل مستخدم',
 	'Change The account`s password' => 'تغير كلمة المرور',
 	'Users`s List' => 'بيانات المستخدمين',
-	'Address' => 'مقر الشركة',
+	'Address' => 'العنوان',
 	'Name' => 'الاسم',
 	'Contact Info' => 'معلومات الاتصال',
 	'Social Links' => 'روابط السوشيال ميديا',

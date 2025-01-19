@@ -23,7 +23,7 @@
           use App\Organization;
         @endphp
         @foreach (Organization::all() as $org)
-          <option value="{{ $org->id }}" {{ $org->id == $cycle->organization_id ? 'selected' : ''}}>{{ $org->{'name_'.app()->getLocale()} }}</option>
+        <option value="{{ $org->id }}">{{ $org->{'name_'.app()->getLocale()} }}</option>
         @endforeach
       </select>
     </div>

@@ -578,7 +578,7 @@
     </div>
   </div>
   <!--Cycle Modal -->
-  <div class="modal fade text-left" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
+  {{-- <div class="modal fade text-left" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
@@ -647,7 +647,7 @@
         </form>
       </div>
     </div>
-  </div>
+  </div> --}}
 
   @include('admin.programs.partials._edit_program_modal', ['mode' => 'create'])
   @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit'])
@@ -737,8 +737,7 @@
 
     // Handle Edit Program
     const onEditProgramClick = (cycleId) => {
-      resetValues();
-
+    
       if(cycleId){
         $('#edit-program-modal').modal('show');
       
@@ -761,7 +760,7 @@
             $('#edit-program-modal #type').val(1);
             $('#edit-program-modal #start').val(response.start ?? '');
             $('#edit-program-modal #end').val(response.end ?? '');
-            $('#edit-program-modal #organization_id').val(response.organization_id ?? '');
+            $('#edit-program-modal #organization').val(response.organization_id ?? '').change();
             $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
             if (response.private) {
               $('#edit-program-modal #private').prop('checked', true);
@@ -772,20 +771,22 @@
             // guidelineEditors.forEach(editor => {
             //   editor.root.innerHTML = response.program_guideline ?? '';
             // });
+            $('#edit-program-modal #guideline-editor').html(response.program_guideline ?? '');
             $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
-            $('#edit-program-modal #program-guideline-pdf').val(response.program_guideline_file	?? '');
+           
 
             // financialEditors.forEach(editor => {
             //   ditor.root.innerHTML = response.financial_guideline ?? '';
             // });
+            $('#edit-program-modal #financial-editor').html(response.financial_guideline ?? '');
             $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
-            $('#edit-program-modal #financial_policy_pdf').val(response.financial_guideline_file);
             $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
             $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
-            
             // legalEditors.forEach(editor => {
             //   ditor.root.innerHTML = response.legal_guideline ?? '';
             // });
+            $('#edit-program-modal #legal-editor').html(response.legal_guideline ?? '');
+            $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
             $('#edit-program-modal #legal_policy_pdf').val(response.legal_guideline_file);
             $('#edit-program-modal #delegation_pdf').val(response.delegation_file);
             
