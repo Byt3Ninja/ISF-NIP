@@ -22,7 +22,7 @@ class AssessmentController extends Controller
     {
         $assessments = Assessment::with('user')->get();
         $users = User::role('Registered')->get();
-        return view('admin.assessment', compact('assessments', 'users'));
+        return view('admin.Assessment.assessment', compact('assessments', 'users'));
     }
 
     /**
@@ -115,7 +115,31 @@ class AssessmentController extends Controller
      */
     public function show(string $id)
     {
-        //
+        
+        if (Auth::user()->hasRole('Admin')) {
+            
+            $l = app()->getLocale();
+            
+            $assessment_user = Assessment::where('id', $id)->first();
+            
+            if($assessment_user != null){
+             $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
+    
+            $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+            ->where('user_id', $assessment_user->user_id)
+            ->where('assessment_id', $assessment_user->id)->get();
+         
+            return view('admin/Assessment/analysis-assessment', compact('user_scores','categories','assessment_user'));
+            }else{
+               
+                $user_scores = [];
+                $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
+                return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
+            }
+    
+            }else{
+                return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+            }
     }
 
     /**
