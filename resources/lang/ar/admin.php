@@ -1153,5 +1153,6 @@ return [
 	'founder_email_exist' => 'عنوان البريد الالكتروني موجود بالفعل',
 	'founder_linkedin_exist' => 'الرابط المستخدم لللينكدان موجود بالفعل',
 	'Manage_Assessments' => 'ادارة التقييمات',
-	
+	'subcategory_Done_All' => 'تم الانتهاء',
+	'Assessment_completed_successfully' => 'تم الانتهاء من التقييم بنجاح',
 ];

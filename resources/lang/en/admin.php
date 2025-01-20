@@ -1136,4 +1136,6 @@ return [
 	'founder_email_exist' => 'The email address already exists',
 	'founder_linkedin_exist' => 'The linkedin account already exists',
 	'Manage_Assessments' => 'Manage Assessments',
+	'subcategory_Done_All' => 'Done All',
+	'Assessment_completed_successfully' => 'Assessment completed successfully!',
 ];
