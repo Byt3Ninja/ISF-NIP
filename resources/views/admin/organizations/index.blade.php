@@ -55,6 +55,9 @@
 												<th>{{__('admin.Image')}}</th>
 												<th>{{__('admin.Email')}}</th>
 												<th>{{__('admin.Phone')}}</th>
+												<th>{{__('admin.organization_manager')}}</th>
+												<th>{{__('admin.total_startups')}}</th>
+												<th>{{__('admin.total_programs')}}</th>
 												<th>@can('delete_user'){{__('admin.Delete')}}@endcan</th>
 											</tr>
 											</thead>
@@ -73,6 +76,11 @@
 												</td>
 												<td style="font-size: small;">{{$organization->user->email}}</td>
 												<td style="font-size: small;">{{$organization->user->phone}}</td>
+												<td style="font-size: small;">{{ $organization->user->name }}</td>
+												<td style="font-size: small;">{{ $organization->total_startups }}</td>
+												<td style="font-size: small;">
+													{{ $organization->cycles->count()}}
+												</td>
 												<td style="padding: 0px;font-size: small;">
 													@can('delete_user')
 														<button id='deleteAction' data-id='{{$organization->id}}' data-url="{{route('organizations.destroy', ['organization' => $organization->id])}}" type="button" class="btn btn-label-danger btn-sm">

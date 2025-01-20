@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Requests\UpdateClientProfileRequest;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
 use App\User;
 use App\Role as Roles;
 use App\Organization;
+use App\Company;
 use Storage;
 use \Spatie\Permission\Models\Role as Role;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -24,17 +26,26 @@ class organizationsController extends Controller
 	 *
 	 * @return void
 	 */
-	public function __construct() { $this->middleware('auth'); }
+	public function __construct()
+	{
+		$this->middleware('auth');
+	}
 
 	public function index()
 	{
-		$organizations = Organization::all();
+		$organizations = Organization::with(['user', 'cycles'])->get();
+
+		foreach ($organizations as $organization) {
+			$organization->total_startups = Company::whereHas('cycle', function ($query) use ($organization) {
+				$query->where('organization_id', $organization->id);
+			})->count();
+		}
 		return view('admin.organizations.index', compact('organizations'));
 	}
 
 	public function create()
 	{
-//		$roles = Role::all();
+		//		$roles = Role::all();
 		return view('admin.organizations.create');
 	}
 
@@ -50,40 +61,39 @@ class organizationsController extends Controller
 			'name_en' => ['required', 'string', 'max:255'],
 		]);
 		$role = Roles::where('name', 'organizationManager')->first();
-		if( empty( $role ) )
-		{
+		if (empty($role)) {
 			$role = new Roles;
 			$role->name = 'organizationManager';
 			$role->guard_name = 'web';
 			$role->save();
 		}
 		$user = User::create($request->except(['_token', 'name_en', 'name_ar', 'password_confirmation']));
-		$user->assignRole( $role->id );
-		
+		$user->assignRole($role->id);
+
 		$organization = new Organization;
 		$organization->name_ar = $request->name_ar;
 		$organization->name_en = $request->name_en;
-		$organization->status = intval( $request->status ) == 1 || $request->status === true ? 1 : 0;
+		$organization->status = intval($request->status) == 1 || $request->status === true ? 1 : 0;
 		$organization->user_id = $user->id;
 		$organization->color = $request->color;
-        
-            //store the image
-			if($request->input('img_url') != null){
-				$img_url = $request->input('img_url');
-			}else{
-				$img_url = '/images/background/logo.png';
-			}
-            //update
-             $organization->img_url= $img_url;
-        
+
+		//store the image
+		if ($request->input('img_url') != null) {
+			$img_url = $request->input('img_url');
+		} else {
+			$img_url = '/images/background/logo.png';
+		}
+		//update
+		$organization->img_url = $img_url;
+
 		$organization->save();
 
 		$user->organization_id = $organization->id;
-		$user->password = Hash::make( $request->password );
+		$user->password = Hash::make($request->password);
 		$user->email_verified_at = date('Y-m-d H:i:s');
-        $user->HaveCompany=0;
+		$user->HaveCompany = 0;
 		$user->save();
-		return redirect()->route('organizations.index')->with( ['msg' => 'StoredSuccessfully'] );
+		return redirect()->route('organizations.index')->with(['msg' => 'StoredSuccessfully']);
 	}
 
 	/**
@@ -106,9 +116,12 @@ class organizationsController extends Controller
 	 */
 	public function update($id, Request $request)
 	{
-		$organization = Organization::with(['user'])->find( $id );
+		$organization = Organization::with(['user'])->find($id);
 		$except = ['_token', '_method', 'name_en', 'name_ar', 'status', 'password_confirmation'];
-		if( $request->has('password') && isset( $request->password ) && trim( $request->password ) ) {  } else { $except[] = 'password'; }
+		if ($request->has('password') && isset($request->password) && trim($request->password)) {
+		} else {
+			$except[] = 'password';
+		}
 		$this->validate($request, [
 			'first_name_en' => ['required', 'string', 'max:255'],
 			'last_name_en' => ['required', 'string', 'max:255'],
@@ -119,50 +132,49 @@ class organizationsController extends Controller
 			'name_en' => ['required', 'string', 'max:255'],
 		]);
 
-		if( !in_array('password', $except) )
-		{
-			$request->merge(['password' => Hash::make( $request->password )]);
+		if (!in_array('password', $except)) {
+			$request->merge(['password' => Hash::make($request->password)]);
 		}
 		$organization->name_ar = $request->name_ar;
 		$organization->name_en = $request->name_en;
-		$organization->status = intval( $request->status ) == 1 || $request->status === true ? 1 : 0;
+		$organization->status = intval($request->status) == 1 || $request->status === true ? 1 : 0;
 		$organization->color = $request->color;
-        
 
-            //store the image
-			if($request->file('img_url') != false){
-				$img_file = $request->file('img_url'); // الملف المرفوع
-				// الحصول على اسم الصورة الأصلي أو اسم جديد حسب الحاجة
-				$counter = 1;
-				$imageName = str_replace( '.' . $img_file->getClientOriginalExtension(), '', $img_file->getClientOriginalName() ) . '-' . $counter++ . '.' . $img_file->getClientOriginalExtension();
-				$imageName = strtolower( str_replace(' ', '-', $imageName) );
-				// تخزين الصورة في المجلد المحدد في إعدادات التخزين 'UsersLFMPublic'
-				Storage::disk('UsersLFMPublic')->put($imageName, file_get_contents($img_file));
 
-				// الحصول على رابط الصورة المخزنة
-				$imagePath = Storage::disk('UsersLFMPublic')->url($imageName);
-			
-			}else{
-				$imagePath = $organization->img_url;
-			}
-			
-			
-            //update
-            $organization->img_url= $imagePath;
-        
+		//store the image
+		if ($request->file('img_url') != false) {
+			$img_file = $request->file('img_url'); // الملف المرفوع
+			// الحصول على اسم الصورة الأصلي أو اسم جديد حسب الحاجة
+			$counter = 1;
+			$imageName = str_replace('.' . $img_file->getClientOriginalExtension(), '', $img_file->getClientOriginalName()) . '-' . $counter++ . '.' . $img_file->getClientOriginalExtension();
+			$imageName = strtolower(str_replace(' ', '-', $imageName));
+			// تخزين الصورة في المجلد المحدد في إعدادات التخزين 'UsersLFMPublic'
+			Storage::disk('UsersLFMPublic')->put($imageName, file_get_contents($img_file));
+
+			// الحصول على رابط الصورة المخزنة
+			$imagePath = Storage::disk('UsersLFMPublic')->url($imageName);
+		} else {
+			$imagePath = $organization->img_url;
+		}
+
+
+		//update
+		$organization->img_url = $imagePath;
+
 		$organization->save();
 		$user = $organization->user;
-		$user->update( $request->except( $except ) );
-		return redirect()->route('organizations.index')->with( ['msg' => 'StoredSuccessfully'] );
+		$user->update($request->except($except));
+		return redirect()->route('organizations.index')->with(['msg' => 'StoredSuccessfully']);
 	}
 
-	public function destroy( $id )
+	public function destroy($id)
 	{
-		$organization = Organization::with(['user'])->find( $id );
-		if( !empty( $organization ) )
-		{
+		$organization = Organization::with(['user'])->find($id);
+		if (!empty($organization)) {
 			$user = $organization->user;
-			if( !empty( $user ) ) { $user->delete(); }
+			if (!empty($user)) {
+				$user->delete();
+			}
 			$organization->delete();
 		}
 	}
@@ -176,46 +188,48 @@ class organizationsController extends Controller
 	 */
 	public function updatePassword(UpdateClientProfilePasswordRequest $request)
 	{
-		try{
+		try {
 			$user = Auth::user();
 			$password = Hash::make($request->password);
 			$result = $user->where('id', $user->id)
-							->update(['password' => $password]);
-			if($result)
-				return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+				->update(['password' => $password]);
+			if ($result)
+				return redirect()->route('my_profile')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
 			else
-				return back()->withInput()->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
-		}catch (Exception $e){
+				return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+		} catch (Exception $e) {
 			//log what happend
 			Log::channel('system_exceptions')->info('Exceptions:', [$e]);
 			abort(500);
 		}
 	}
 
-	public function GetLFM( $path = null , $file = null )
+	public function GetLFM($path = null, $file = null)
 	{
-		
+
 		try {
 			$instance = Storage::disk('UsersLFMPublic');
 
 			// تحديد المسار الكامل الأساسي
 			$fullPath = '/' . $path . '/' . $file;
-	
+
 			// التحقق مما إذا كان الملف مفقودًا
 			if ($instance->missing($fullPath)) {
 				// إذا كان الملف مفقودًا، إزالة الجزء `'/'.$path` من المسار
 				$fullPath = '/' . $file;
-	
+
 				// التحقق مرة أخرى بعد تعديل المسار
 				if ($instance->missing($fullPath)) {
 					return response()->view('errors.404')->setStatusCode(404);
 				}
 			}
-	
+
 			// إذا كان الملف موجودًا، استرجاعه
 			$file = $instance->response($fullPath);
-	
+
 			return $file;
-		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+		} catch (\Throwable $th) {
+			return response()->view('errors.404')->setStatusCode(404);
+		}
 	}
 }
