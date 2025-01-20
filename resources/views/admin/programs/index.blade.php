@@ -452,7 +452,7 @@
                               </ul>
                             </div>
                           </div>
-                        </di>
+                        </div>
                         <!-- / Progress Bar -->
                         <div class="d-flex d-md-none mt-3 mt-md-0">
                           <span class="fs-6 fw-bold mx-2">{{__('admin.Duration')}}</span>
@@ -760,7 +760,7 @@
             $('#edit-program-modal #type').val(1);
             $('#edit-program-modal #start').val(response.start ?? '');
             $('#edit-program-modal #end').val(response.end ?? '');
-            $('#edit-program-modal #organization').val(response.organization_id ?? '').change();
+            $('#edit-program-modal #organization').val(response.organization_id ?? '');
             $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
             if (response.private) {
               $('#edit-program-modal #private').prop('checked', true);

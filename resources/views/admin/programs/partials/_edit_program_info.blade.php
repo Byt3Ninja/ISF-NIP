@@ -13,19 +13,11 @@
       <label for="organization" class="form-label fs-6 fw-semibold">
         {{ __('cycles.Select_Organization') }}
       </label>
-      <select  
-        class="form-select" 
-        id="organization" 
-        name="organization_id" 
-        data-placeholder="{{ __('cycles.Select_Organization') }}"
-      >
-        @php
-          use App\Organization;
-        @endphp
-        @foreach (Organization::all() as $org)
-        <option value="{{ $org->id }}">{{ $org->{'name_'.app()->getLocale()} }}</option>
+      <select class="form-select" id="organization" name="organization_id2" data-placeholder="{{ __('cycles.Select_Organization') }}">
+        @foreach (\App\Organization::all() as $org)
+            <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
         @endforeach
-      </select>
+    </select>
     </div>
     <div class="mb-3">
       <label for="program-title" class="form-label fs-6 fw-semibold">
@@ -33,8 +25,7 @@
       </label>
       <input type="hidden" name="type" id="type">
       <input type="hidden" name="cycleid" id="cycleid">
-      <input type="hidden" name="tab_id" value="1">
-
+    
       <input 
         type="text" 
         class="form-control" 

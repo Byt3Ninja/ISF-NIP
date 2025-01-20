@@ -115,10 +115,12 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
+
         $this->preProcessingCheck('edit_cycles');
         $id = $request->cycleid;
         $type = $request->type;
         if ($type == 1) {
+
             /// Edit Cycle
             $request->validate([
                 'organization_id' => 'required|exists:organizations,id',
@@ -129,10 +131,12 @@ class CyclesController extends Controller
             ]);
 
             $cycle = Cycle::find($id);
+
             $private = null;
             if ($request->private) {
                 $private = sha1(now());
             }
+
             // Check if file is uploaded
             $programGuidelineFile = null;
             if ($request->hasFile('program-guideline-pdf')) {
@@ -149,13 +153,14 @@ class CyclesController extends Controller
                 $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'public');
             }
 
+
             $delegationPdfPath = null;
             if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
                 $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
             }
 
 
-            $cycle->organization_id = $request->organization_id;
+            $cycle->organization_id = $request->organization_id2;
             $cycle->title = $request->title;
             $cycle->description = $request->description;
             $cycle->start = Carbon::parse($request->start);
@@ -174,6 +179,7 @@ class CyclesController extends Controller
             $cycle->legal_guideline = $request->legal_policy;
             $cycle->legal_guideline_file = $legalPolicyPath;
             $cycle->delegation_file = $delegationPdfPath;
+
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
         } elseif ($type == 2) {
@@ -367,6 +373,7 @@ class CyclesController extends Controller
             return redirect()->back()->with('message', 'Saved');
         } elseif ($request->tab_id == 1) {
 
+
             $request->validate([
                 'organization_id' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
@@ -379,7 +386,7 @@ class CyclesController extends Controller
                 $private = sha1(now());
             }
             $cycle = new Cycle();
-            $cycle->organization_id = $request->organization_id;
+            $cycle->organization_id = $request->organization_id2;
             $cycle->title = $request->title;
             $cycle->description = $request->description;
             $cycle->start = Carbon::parse($request->start);
@@ -392,7 +399,6 @@ class CyclesController extends Controller
                 $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'public');
             }
 
-            $cycle->organization_id = $request->organization_id;
             $cycle->program_guideline = $request->program_guideline;
             $cycle->program_guideline_file = $programGuidelineFile;
 
@@ -402,7 +408,6 @@ class CyclesController extends Controller
                 $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'public');
             }
 
-            $cycle->organization_id = $request->organization_id;
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
@@ -419,7 +424,6 @@ class CyclesController extends Controller
                 $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
             }
 
-            $cycle->organization_id = $request->organization_id;
             $cycle->legal_guideline = $request->legal_policy;
             $cycle->legal_guideline_file = $legalPolicyPath;
             $cycle->delegation_file = $delegationPdfPath;
@@ -430,7 +434,7 @@ class CyclesController extends Controller
             $cycles = Cycle::where('id', $id)->first()->toArray();
 
             $cycles['basename_guideline'] = basename($cycles['program_guideline_file']);
-            
+
             return response()->json($cycles);
         }
     }
