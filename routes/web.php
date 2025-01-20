@@ -176,6 +176,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
     Route::post('/answer-assessment', 'AssessmentController@AnswerAssessment')->name('answer-assessment');
 
+    Route::get('/assessment-admin/{id}', 'AssessmentController@assessmentAdmin')->name('question-assessment_admin');
 
     // LFM File Manager Imges
     Route::get('/LFMGet/{idUser?}/{files?}', 'organizationsController@GetLFM')->name('LFMGet');

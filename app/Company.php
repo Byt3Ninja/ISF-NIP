@@ -147,7 +147,7 @@ class Company extends Model
         return $this->hasOne(User::class);
     }
 
-    public function sector()
+    public function sectoR()
     {
         return $this->belongsTo(Sector::class, 'sector');
     }
@@ -177,7 +177,7 @@ class Company extends Model
         return $this->belongsTo(Cycle::class, 'cycle');
     }
 
-    public function stage()
+    public function stagE()
     {
         return $this->belongsTo(Stage::class, 'stage');
     }
