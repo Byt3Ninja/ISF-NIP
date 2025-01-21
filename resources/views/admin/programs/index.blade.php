@@ -1,12 +1,33 @@
 @extends('layouts.admin')
 
 @section('style')
-  {{-- <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css"> --}}
-  {{-- <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css"> --}}
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <style>
+     input[type="file"]::file-selector-button {
+      background-color: #FFFF;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid lightgray;
+    }
+    input[type="file"]::file-selector-button:hover {
+      background-color: lightgray;
+    }
     .program-card {
       height: auto;
+    }
+    .line-clamp-4 {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     @media screen and (min-width: 768px) {
@@ -28,12 +49,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         @endif
-        @if (session()->has('message2'))
-          <div class="alert alert-danger alert-dismissible" role="alert">
-            {{ __('admin.' . session()->get('message2')) }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        @endif
+       
+    @if ($errors->any())
+       <div class="alert alert-danger alert-dismissible" role="alert">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+             @endforeach
+      </div>
+    @endif
         <h3 class="content-header-title">{{__('admin.Cycles')}}</h3>
       </div>
 
@@ -87,15 +110,18 @@
 
               <!-- Add New Program Button -->
               <button
-                class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;" onclick="DoChange(2)">
-                  <span class="mx-2">{{__('admin.New Program')}}</span>
-                  <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
+                class="btn btn-primary btn-sm d-sm-inline-block d-md-none" 
+                style="border-radius: 15px;"
+                onclick="onCreateProgramClick()"
+              >
+                <span class="mx-2">{{__('admin.New Program')}}</span>
+                <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
               <button 
                 class="btn btn-primary d-none d-md-inline-block"
                 style="border-radius: 15px; text-wrap: nowrap;"
-                 onclick="DoChange(2)"
-              >
+                onclick="onCreateProgramClick()"
+                >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
@@ -144,7 +170,9 @@
               <h3 class="text-center mt-4">{{ __('admin.No_Cycles') }}</h3>
               <h6 class="text-center text-secondary">{{ __('admin.No_Cycles_Description') }}</h6>
               <!-- Add New Program Button -->
-              <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;">
+              <button class="btn btn-primary btn-lg" style="border-radius: 15px; width: 214px;"
+                onclick="onCreateProgramClick()"
+              >
                 <span class="mx-2">{{__('admin.New Program')}}</span>
                 <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
               </button>
@@ -152,7 +180,7 @@
           @else
             <section>
               @foreach ($cycles as $cycle)
-                <div style="border-radius: 30px;">
+                <div style="border-radius: 30px; height: fit-content;">
                   @php
                     $totalSteps = app(\App\Step::class)
                         ->where('cycle_id', '=', $cycle->id)
@@ -262,7 +290,7 @@
                         @endif
                         <!-- / Company Name -->
                         <!-- Count Row -->
-                        <div class="row">
+                        <div class="row mt-1">
                           <div  style="width: fit-content">
                             <div class="d-flex align-items-center g-1" style="height: 55px;">
                               <div class="bg-label-primary p-2 d-flex align-items-center justify-content-center rounded mx-1">
@@ -280,7 +308,6 @@
                           </div>
                           <div  style="width: fit-content">
                             <div class="d-flex align-items-center g-1" style="height: 55px;">
-                              
                               <div class="bg-label-info p-2 d-flex align-items-center justify-content-center rounded mx-1">
                                 <i class="ti ti-stack-2 ti-24px"></i>
                               </div>
@@ -319,120 +346,137 @@
                         </div>
                         <!-- / Count Row -->
                         <!-- Mentors Row -->
-                        <div 
-                          class="d-flex justify-content-between align-items-end w-100 mb-2"
-                        >
-                          <div class="d-flex flex-column">
-                            <div class="d-flex align-items-center mb-2">
-                              <i class="ti ti-user-circle text-primary ti-24px"></i>
-                              <span class="fs-6 fw-bold mx-2">{{__('admin.Responsible')}}</span>
+                        <div class="d-flex justify-content-between w-100 mt-3 mb-3 mb-md-0">
+                          <div class="d-flex gap-2">
+                            <i class="ti ti-user-circle text-primary ti-24px"></i>
+                            <div class="d-flex flex-column">
+                              <span class="fs-6 fw-bold mb-2">{{__('admin.Responsible')}}</span>
+                              @foreach($mentortotal as $mentor)
+                                <div class="d-flex flex-wrap gap-2 align-items-center" style="width: 100%">
+                                  <a 
+                                    class="btn btn-sm btn-outline-primary rounded-pill"
+                                    target="_blank"
+                                    href="{{route('show_mentor_profile', $mentor->id)}}"
+                                  >
+                                    @if(!empty($mentor->image_url))
+                                      <img src="{{$mentor->image_url}}" width="20" height="20" class="rounded-circle" />
+                                    @else
+                                      <img src="/icons/avatar.svg" width="20" height="20" class="rounded-circle" />
+                                    @endif
+                                    <span class="mx-1">{{$mentor->name}}</span>
+                                  </a>
+                                </div>
+                              @endforeach
                             </div>
-                            
-                            @foreach($mentortotal as $mentor)
-                            <div class="d-flex flex-wrap align-items-center px-4" style="width: 100%">
-                              
-                                <a class="btn btn-sm btn-outline-primary rounded-pill"
-                                 style="margin: 2px;" 
-                                 target="_blank"
-                                 href="{{route('show_mentor_profile', $mentor->id)}}"
-                                >
-                                @if(!empty($mentor->image_url))
-                                  <img src="{{$mentor->image_url}}" width="20" height="20" class="rounded-circle" />
-@else
-<img src="/icons/avatar.svg" width="20" height="20" class="rounded-circle" />
-@endif
-                                  <span class="mx-1">{{$mentor->name}}</span>
-                                </a>
-                             
-                            </div>
-                            @endforeach
                           </div>
-                          <div class="d-none d-md-flex flex-column" style="margin-bottom: -60px;">
+                         
+                          <div class="d-none d-md-flex flex-column">
                             <span class="fs-6 fw-bold mx-2 mb-2">{{__('admin.Duration')}}</span>
                             <div 
-                              class="px-1 py-2 d-flex mb-2"
-                              style="background-color: #d9edee; border-radius: 15px;"
+                              class="px-2 py-1 d-flex mb-1 rounded"
+                              style="background-color: #d9edee;"
                             >
-                              <i class="ti ti-calendar-clock ti-28px;" style="color: blue;"></i>
-                              <span class="fw-bold text-black mx-2">{{ $cycle->start->format('Y-m-d') }}</span>
+                              <i class="ti ti-calendar text-info ti-16px"></i>
+                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                                {{ $cycle->start ?  $cycle->start->format('Y-m-d') : ''}}
+                              </span>
                             </div>
                             <div 
-                              class="px-1 py-2 d-flex"
-                              style="background-color: #d9edee; border-radius: 15px;"
+                              class="px-2 py-1 d-flex rounded"
+                              style="background-color: #d9edee;"
                             >
-                              <i class="ti ti-calendar-clock ti-28px;" style="color: blue;"></i>
-                              <span class="fw-bold text-black mx-2">{{ $cycle->end->format('Y-m-d') }}</span>
+                              <i class="ti ti-calendar text-danger ti-16px"></i>
+                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                                {{ $cycle->end ?  $cycle->end->format('Y-m-d') : ''}}
+                              </span>
                             </div>
                           </div>
                         </div>
                         <!-- / Mentors Row -->
                         <!-- Program Description -->
-                       
-                        <div class="d-flex flex-column">
-                          <div class="d-flex align-items-center my-2">
+                       @if (!empty($cycle->description))
+                          <div class="d-flex gap-2">
                             <i class="ti ti-message text-primary ti-24px"></i>
-                            <span class="fs-6 fw-bold mx-2">{{__('admin.Description')}}</span>
+                            <div class="d-flex flex-column">
+                              <span class="fs-6 fw-bold mb-1">{{__('admin.Description')}}</span>
+                              <p class="text-secondary line-clamp-4">{{ $cycle->description }}</p>
+                            </div>
                           </div>
-                          <div class="d-flex flex-wrap align-items-center px-4" style="width: 85%;">
-                            <p class="text-secondary">
-                              @if(!empty($cycle->description))
-                              {{ $cycle->description }}
-                              @else
-{{__('cycles.NA')}}
-                              @endif
-                            </p>
-                          </div>
-                        </div>
+                        @endif
                         <!-- / Program Description -->
                         <!-- Progress Bar -->
                         @php
-    // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
-    $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
-@endphp
-
-
-                        <div class="d-flex align-items-center">
-                          <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
-                          <div style="width: 100%; height: 7px;" class="progress rounded-pill">
-                            <div 
-                              class="progress-bar bg-primary" 
-                              role="progressbar" 
-                              style="width: {{ number_format($presSteps, 2) }}%;" 
-                              aria-valuenow="{{ number_format($presSteps, 2) }}" 
-                              aria-valuemin="0" 
-                              aria-valuemax="100"
-                            ></div>
-                          </div>
-                          <span class="fw-bold mx-1">{{$totalSteps}}/{{$totalStepsFinish}}</span>
-                          <div class="mx-2 position-relative">
-                            <div class="dropdown"></div>
-                             <button
-                                class="bg-transparent border-none" 
-                                type="button" id="dropdownMenuButton"   
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="ti ti-dots-vertical ti-24px"></i>
-                              </button>
-                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <li>
-                                  <button class="dropdown-item ccycle" set="1" do="{{ $cycle->id }}"
-                                    onclick="DoChange(1, {{ $cycle->id }})">
-                                    <i class="ti ti-pencil me-2"></i>
-                                    {{ __('cycles.Edit') }}
-                                  </button>
-                                </li>
-                                <li>
-                                  @can('delete_user')
-                                    <button class="dropdown-item" onclick="DoChange(3, {{ $cycle->id }})">
-                                      <i class="ti ti-trash me-2"></i>
-                                      {{ __('cycles.Delete') }}
+                          // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
+                          $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
+                        @endphp
+                        <div class="d-flex flex-column">
+                          <div class="d-flex align-items-center">
+                            <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
+                            <div style="width: 100%; height: 7px;" class="progress rounded-pill">
+                              <div 
+                                class="progress-bar bg-primary" 
+                                role="progressbar" 
+                                style="width: {{ number_format($presSteps, 2) }}%;" 
+                                aria-valuenow="{{ number_format($presSteps, 2) }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100"
+                              ></div>
+                            </div>
+                            <span class="fw-bold mx-1">{{$totalSteps}}/{{$totalStepsFinish}}</span>
+                            <div class="mx-2 position-relative">
+                              <div class="dropdown"></div>
+                               <button
+                                  class="bg-transparent border-none" 
+                                  type="button" id="dropdownMenuButton"   
+                                  data-bs-toggle="dropdown" aria-expanded="false">
+                                  <i class="ti ti-dots-vertical ti-24px"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                  <li>
+                                    <button 
+                                      class="dropdown-item ccycle" set="1" 
+                                      do="{{ $cycle->id }}"
+                                      onclick="onEditProgramClick({{ $cycle->id }})"
+                                    >
+                                      <i class="ti ti-edit me-2 text-info"></i>
+                                      {{ __('cycles.Edit') }}
                                     </button>
-                                  @endcan
-                                </li>
-                              </ul>
+                                  </li>
+                                  <li>
+                                    @can('delete_user')
+                                      <button class="dropdown-item" onclick="DoChange(3, {{ $cycle->id }})">
+                                        <i class="ti ti-trash me-2 text-danger"></i>
+                                        {{ __('cycles.Delete') }}
+                                      </button>
+                                    @endcan
+                                  </li>
+                                </ul>
+                              </div>
                             </div>
                           </div>
-                        </di>
-                        <!-- / Progress Bar -->
+                          <!-- / Progress Bar -->
+                          <div class="d-flex d-md-none mt-3 mt-md-0">
+                            <span class="fs-6 fw-bold mx-2">{{__('admin.Duration')}}</span>
+                            <div 
+                              class="px-2 py-1 me-3 d-flex rounded"
+                              style="background-color: #d9edee;"
+                            >
+                              <i class="ti ti-calendar text-info ti-16px"></i>
+                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                                {{ $cycle->start ?  $cycle->start->format('Y-m-d') : ''}}
+                              </span>
+                            </div>
+                            <div 
+                              class="px-2 py-1 d-flex rounded"
+                              style="background-color: #d9edee;"
+                            >
+                              <i class="ti ti-calendar text-danger ti-16px"></i>
+                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                                {{ $cycle->end ?  $cycle->end->format('Y-m-d') : ''}}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     {{-- <div
                       class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
@@ -536,7 +580,7 @@
     </div>
   </div>
   <!--Cycle Modal -->
-  <div class="modal fade text-left" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
+  {{-- <div class="modal fade text-left" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
@@ -605,31 +649,201 @@
         </form>
       </div>
     </div>
-  </div>
+  </div> --}}
 
+  @include('admin.programs.partials._edit_program_modal', ['mode' => 'create'])
+  @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit'])
+@stop
+
+@section('scripts')
+  <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  {{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 @stop
 
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find(0))
-  {{-- <script src="/app-assets/js/scripts/pages/page-users.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-  <script src="/app-assets/js/scripts/datatables/datatable.js"></script>
-  <script src="/app-assets/js/scripts/modal/components-modal.js"></script>
-
-  <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script> --}}
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
   <script>
-    $('.date').datetimepicker({
-      timepicker: false,
-      format: 'Y-m-d'
+    // Set Language
+    const lang = '{{ $l }}';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const validDates = document.querySelectorAll('.valid-date');
+      // Initialize Flatpickr Date
+      if (validDates) {
+        validDates.forEach(element => {
+          flatpickr(element, {
+            monthSelectorType: 'static',
+            dateFormat: 'Y-m-d'
+          });
+        });
+      }
     });
-    $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
-      format: 'Y-m-d',
-      minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
-      maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
-      timepicker: false
-    });
+
+    // Initialize Quill Editor
+    const editorConfig = { theme: 'snow' };
+      const guidelineEditor = new Quill('#create-program-modal #guideline-editor', editorConfig);
+      const financialEditor = new Quill('#create-program-modal #financial-editor', editorConfig);
+      const legalEditor = new Quill('#create-program-modal #legal-editor', editorConfig);
+      const editGuidelineEditor = new Quill('#edit-program-modal #guideline-editor', editorConfig);
+      const editFinancialEditor = new Quill('#edit-program-modal #financial-editor', editorConfig);
+      const editLegalEditor = new Quill('#edit-program-modal #legal-editor', editorConfig);
+
+      // Clear Editor
+      guidelineEditor.root.innerHTML = '';
+      financialEditor.root.innerHTML = '';
+      legalEditor.root.innerHTML = '';
+      editGuidelineEditor.root.innerHTML = '';
+      editFinancialEditor.root.innerHTML = '';
+      editLegalEditor.root.innerHTML = '';
+
+      // Handle Editor Change
+      const handleEditorChange = (editor, input) => {
+        editor.on('text-change', function() {
+          $(input).val(editor.root.innerHTML);
+        });
+      };
+      handleEditorChange(guidelineEditor, '#create-program-modal #program_guideline');
+      handleEditorChange(financialEditor, '#create-program-modal #financial_policy');
+      handleEditorChange(legalEditor, '#create-program-modal #legal_policy');
+      handleEditorChange(editGuidelineEditor, '#edit-program-modal #program_guideline');
+      handleEditorChange(editFinancialEditor, '#edit-program-modal #financial_policy');
+      handleEditorChange(editLegalEditor, '#edit-program-modal #legal_policy');
+
+    // Handle Reset Values
+    const resetValues = () => {
+      console.log('Resetting Values');
+      $('#create-program-modal #title').val('');
+      $('#create-program-modal #description').val('');
+      $('#create-program-modal #cycleid').val('');
+      $('#create-program-modal #type').val('');
+      $('#create-program-modal #start').val('');
+      $('#create-program-modal #end').val('');
+      $('#create-program-modal #program_guideline').val('');
+      $('#create-program-modal #financial_policy').val('');
+      $('#create-program-modal #legal_policy').val('');
+      $('#create-program-modal #program-guideline-pdf').val();
+      $('#create-program-modal #legal_policy_pdf').val();
+      $('#create-program-modal #financial_policy_pdf').val();
+      $('#create-program-modal #delegation_pdf').val();
+      $('#create-program-modal #delegation_option').prop('checked', false);
+      $('#create-program-modal #private').prop('checked', false);
+    };
+
+    // Handle Append File
+    const appendFile = (mode, file, conainerId) => {
+      console.log('file', file)
+      if (file) {
+        const fileName = file.split('/').pop();
+        const content = (`
+          <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <i class="ti ti-file fs-4 text-warning"></i>
+              <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
+            </div> 
+            <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
+              <i class="ti ti-download fs-5"></i>
+            </a>
+          </div>`
+        );
+        $(`#${mode}-program-modal ${conainerId}`).append(content);
+      }
+    };
+
+    // Handle Create Program
+    const onCreateProgramClick = () => {
+      resetValues();
+      $('#create-program-modal').modal('show');
+    }
+
+    // Handle Edit Program
+    const onEditProgramClick = (cycleId) => {
+      if(cycleId){
+        $('#edit-program-modal').modal('show');
+      
+        $.ajaxSetup({
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+          }
+        });
+
+        $.ajax({
+          type: "POST",
+          url: "/dashboard/cycles/modify",
+          data: {"cycleid": cycleId },
+          success: function(response) {
+            console.log(response); 
+            $('#edit-program-modal #title').val(response.title ?? '');
+            $('#edit-program-modal #description').val(response.description ?? '');
+            $('#edit-program-modal #cycleid').val(cycleId); 
+            $('#edit-program-modal #type').val(1);
+            $('#edit-program-modal #start').val(response.start ?? '');
+            $('#edit-program-modal #end').val(response.end ?? '');
+            $('#edit-program-modal #organization').val(response.organization_id ?? '');
+            $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
+            if (response.private) {
+              $('#edit-program-modal #private').prop('checked', true);
+              $('#cyclelink').html('{{ __('cycles.Join URL') }}');
+              $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
+            }
+
+            if (editGuidelineEditor) {
+              editGuidelineEditor.root.innerHTML = response.program_guideline ?? '';
+            }
+
+            $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
+
+            if (editFinancialEditor) {
+              editFinancialEditor.root.innerHTML = response.financial_guideline ?? '';
+            }
+            $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
+            $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
+            $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
+
+            if (editLegalEditor) {
+              editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
+            }
+            $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
+            const guidelineFile = response?.program_guideline_file;
+            const financialFile = response.financial_guideline_file;
+            const legalFile = response?.legal_guideline_file;
+            const delegationFile = response.delegation_file;
+            
+            appendFile('edit', guidelineFile, '#guideline-file-container');
+            appendFile('edit', financialFile, '#financial-file-container');
+            appendFile('edit', legalFile, '#legal-file-container');
+
+            if (delegationFile) {
+              appendFile('edit', delegationFile, '#delegation-file-container');
+              $('#edit-program-modal delegation_option').prop('checked', true);
+            }
+          },
+          error: function(error) {
+            console.log(error);
+            resetValues();
+            alert("Error Occurred, Try again!");
+          }
+        });
+      }
+    }; 
+  </script>
+  <script>
+    // $('.date').datetimepicker({
+    //   timepicker: false,
+    //   format: 'Y-m-d'
+    // });
+    // $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
+    //   format: 'Y-m-d',
+    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
+    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
+    //   timepicker: false
+    // });
     $(document).ready(function() {
       let drake = dragula([document.getElementById('basic-list-group')]);
       drake.on('drop', function(el) {
@@ -703,16 +917,16 @@
             }
           });
           break;
-        case 2:
-          $('#title').val('');
-          $('#description').val('');
-          $('#cycleid').val('');
-          $('#type').val(2);
-          $('#start').val('');
-          $('#end').val('');
-          $('#customSwitch3').removeAttr('checked');
-          $('#cycleForm').modal('show');
-          break;
+          case 2:
+      $('#title').val('');
+      $('#description').val('');
+      $('#cycleid').val('');
+      $('#type').val('');
+      $('#start').val('');
+      $('#end').val('');
+      $('#customSwitch3').removeAttr('checked');
+      $('#cycleForm').modal('show');
+      break;
         case 3:
           if (confirm('{{ __('cycles.sure delete cycle') }}?')) {
             if (confirm('{{ __('cycles.cant undo') }}')) {

@@ -88,7 +88,7 @@
       const pusherAppKey = "{{ env('MIX_PUSHER_APP_KEY') }}";
       const pusherCluster = "{{ env('MIX_PUSHER_APP_CLUSTER') }}";
 
-      Pusher.logToConsole = true;
+      Pusher.logToConsole = false;
 
       const pusher = new Pusher(pusherAppKey, {
         cluster: pusherCluster,
@@ -104,11 +104,11 @@
 
       window.Echo.channel('step-changes')
         .listen('ChangeStep', (e) => {
-          console.log(`The step has been changed for ${e.company_name} from "${e.last_step}" to "${e.new_step}" by ${e.organization_name}.`);
+          // console.log(`The step has been changed for ${e.company_name} from "${e.last_step}" to "${e.new_step}" by ${e.organization_name}.`);
         });
 
-      console.log('pusherAppKey', pusherAppKey);
-      console.log('pusherCluster', pusherCluster);
+      // console.log('pusherAppKey', pusherAppKey);
+      // console.log('pusherCluster', pusherCluster);
     </script>
     <!--/ Pusher scripts -->
 

@@ -18,13 +18,14 @@
       <div class="col-md-6 col-12 mb-6">
         <div class="d-grid">
           <div class="d-grid gap-2">
-            <label class="form-label fs-6 fw-bold"
-              for="phone">{{ __('auth.Phone') }}</label>
-              <input class="form-control phone-input" id="phone"
+            <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
+              <input 
+                class="form-control phone-input" id="phone"
                 name="phone" type="tel"
-                value="{{ $client->company ? $client->company->phone : old('phone') }}"
+                value="{{ trim($client->company ? $client->company->phone : old('phone')) }}"
                 placeholder="{{ __('auth.Phone') }}" autocomplete="phone"
-                 />
+                oninput="this.value = this.value.trim()"
+              />
             <span class="text-danger" id="phone-error"
               style="display: none;"></span>
           </div>
@@ -39,6 +40,7 @@
                   name="WhatsApp" type="tel"
                   value="{{ $client->company ? $client->company->whatsapp : old('WhatsApp') }}"
                   placeholder="{{ __('admin.WhatsApp') }}" autocomplete="WhatsApp"
+                  oninput="this.value = this.value.trim()"
                    />
             <span class="text-danger" id="whatsapp-error"
               style="display: none;"></span>
@@ -52,7 +54,9 @@
             type="email"
             value="{{ $client->company ? $client->company->email : old('email') }}"
             style="direction: ltr;" placeholder="{{ __('admin.E-mail') }} *"
-             autocomplete="email">
+            autocomplete="email"
+            oninput="this.value = this.value.trimStart()"
+          >
       </div>
     </div>
     <div class="row">

@@ -118,6 +118,8 @@ class ZoomService implements OnlineMeetingServiceInterface
                     'participant_video' => ($data['participant_video'] == "1") ? true : false,
                     'waiting_room'      => false,
                     'auto_recording' => 'cloud',
+                    "share_recording" => "publicly",
+                    "viewer_download" => true
                 ],
             ]),
         ];

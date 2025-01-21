@@ -2,8 +2,8 @@
 
 @section('vendorstyle')
 <!-- Vendors CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
-
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
@@ -11,13 +11,25 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
-
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 @stop
 
 @section('style')
 <style>
+   input[type="file"]::file-selector-button {
+    background-color: #FFFF;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid lightgray;
+  }
+  input[type="file"]::file-selector-button:hover {
+    background-color: lightgray;
+  }
   .radius-15 {
     border-radius: 15px;
   }
@@ -46,17 +58,17 @@
 @stop
 
 @php
- $totalSteps = app(\App\Step::class)->where('cycle_id', '=', $program->id)->count();
- $totalStepsFinish = app(\App\Step::class)->where('to', '>', Carbon\Carbon::now())->where('cycle_id', '=', $program->id)->count();
- $totalcompany = app(\App\Company::class)->where('cycle', '=', $program->id)->count();
- $orgid = App\Organization::where('id','=', $program->organization_id)->get();
+ $totalSteps = app(\App\Step::class)->where('cycle_id', '=', $cycle->id)->count();
+ $totalStepsFinish = app(\App\Step::class)->where('to', '>', Carbon\Carbon::now())->where('cycle_id', '=', $cycle->id)->count();
+ $totalcompany = app(\App\Company::class)->where('cycle', '=', $cycle->id)->count();
+ $orgid = App\Organization::where('id','=', $cycle->organization_id)->get();
         foreach ($orgid as  $org) {
           $mentortotals = App\User::where('id','=',$org->user_id)->get();
           $mentor_Count = $mentortotals->count();
         }
-  $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->count();
-  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->sum('period');
-  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $program->id)->whereNotNull('rating')->avg('rating');
+  $totalMentorRequest = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->count();
+  $totalMentorperiod = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->sum('period');
+  $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
 foreach ($steps as  $step) {
@@ -75,7 +87,7 @@ foreach ($steps as  $step) {
           ->count();
 
 }
-$mentors = $program->mentors()->distinct()->get();
+$mentors = $cycle->mentors()->distinct()->get();
 
 if($totalStepsIdsCount > 0){
   $totalStepsIdsCount = $totalStepsIdsCount;
@@ -221,16 +233,16 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     @endif
     <!-- / Alert -->
     <div class="row">
-      <input type="hidden" id="ccycleOrg" value="{{ $program->organization_id }}" >
+      <input type="hidden" id="ccycleOrg" value="{{ $cycle->organization_id }}" >
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
             <div class="d-flex gap-6">
               <div class="d-none d-md-flex flex-shrink-0 w-px-100">
                 <div class="w-px-70 h-px-100">
-                  @if(!empty($program->organization->image_url))
+                  @if(!empty($cycle->organization->image_url))
                   @php
-                  $imageUrl = $program->organization->image_url;
+                  $imageUrl = $cycle->organization->image_url;
               
                    // استخراج المسار من الرابط
                    $imagePath = parse_url($imageUrl, PHP_URL_PATH);
@@ -250,7 +262,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               </div>
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between mb-2">
-                  <h4 class="text-primary mb-0">{{ $program->title }}</h4>
+                  <h4 class="text-primary mb-0">{{ $cycle->title }}</h4>
                   {{-- <a href="#" class="btn btn-primary">
                     <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                   </a> --}}
@@ -262,11 +274,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   </div>
                 </div> --}}
                 <div class="d-flex justify-content-between mb-4">
-                  <h5 class="mb-0">{{ $program->organization['name_' . $l] }}</h5>
+                  <h5 class="mb-0">{{ $cycle->organization['name_' . $l] }}</h5>
                   
-                  @if(!empty($program->private))
+                  @if(!empty($cycle->private))
                         <a 
-                          href="cycles/view/{{ $program->private }}"
+                          href="cycles/view/{{ $cycle->private }}"
                           class="btn btn-transparent"
                           target="_blank"
                           id="private-link"
@@ -323,8 +335,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       </div>
                       <div class="d-flex flex-wrap align-items-center ps-7">
                         <p class="text-muted">
-                          @if(!empty($program->description))
-                              {{ $program->description }}
+                          @if(!empty($cycle->description))
+                              {{ $cycle->description }}
                               @else
                               {{__('cycles.NA')}}
                               @endif
@@ -336,13 +348,13 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     <div class="d-flex align-items-end justify-content-end w-100">
                       <div class="d-flex flex-md-column gap-1" style="width: fit-content;">
                         <h6 class="mb-1 me-2 text-center fw-semibold">{{__('admin.Duration')}}</h6>
-                        <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $program->start->format('Y-m-d') }}</span>
+                        <div class="badge bg-label-secondary">
+                          <i class="ti ti-calendar ti-20px text-info"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $cycle->start->format('Y-m-d') }}</span>
                         </div>
-                        <div class="badge bg-label-info">
-                          <i class="ti ti-calendar-clock ti-20px"></i>
-                          <span class="fw-bold text-dark mx-2">{{ $program->end->format('Y-m-d') }}</span>
+                        <div class="badge bg-label-secondary">
+                          <i class="ti ti-calendar ti-20px text-danger"></i>
+                          <span class="fw-bold text-dark mx-2">{{ $cycle->end->format('Y-m-d') }}</span>
                         </div>
                       </div>
                     </div>
@@ -371,15 +383,31 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                           <li>
-                            <button id="editButton" class="dropdown-item ccycle text-primary">
-                              <i class="ti ti-edit me-2"></i>
-                              {{ __('cycles.Edit') }}
+                            <button id="editButton" class="dropdown-item text-dark">
+                              <i class="ti ti-file-export me-2 text-info"></i>
+                              {{ __('cycles.Export_Data') }}
+                            </button>
+                          </li>
+                          <li>
+                            <button id="editButton" class="dropdown-item text-dark">
+                              <i class="ti ti-stack-2 me-2 text-danger"></i>
+                              {{ __('cycles.Edit_Step') }}
+                            </button>
+                          </li>
+                          <li>
+                            <button 
+                              id="editButton" 
+                              class="dropdown-item ccycle text-dark" 
+                              onclick="onEditProgramClick()"  
+                            >
+                              <i class="ti ti-edit me-2 text-info"></i>
+                              {{ __('cycles.Edit_Program') }}
                             </button>
                           </li>
                           <li>
                             @can('delete_user')
-                            <button class="dropdown-item text-danger" id="deleteButton">
-                              <i class="ti ti-trash me-2"></i>
+                            <button class="dropdown-item text-dark" id="deleteButton">
+                              <i class="ti ti-trash me-2 text-danger"></i>
                               {{ __('cycles.Delete') }}
                             </button>
                             @endcan
@@ -1921,6 +1949,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     </div>
   </div> --}}
 <!-- / Final Screening Step Modal -->
+
+  @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit'])
 @stop
 
 @section('scripts')
@@ -1928,6 +1958,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 {{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
 {{-- <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script> --}}
 <!-- Vendors JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
@@ -1935,12 +1966,33 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
+<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+<script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 @stop
 
 @section('pagescripts')
-  @php($ccycle = \App\Cycle::find($program->id))
-  {{-- <script src="/vuexy/assets/js/forms-selects.js"></script> --}}
-  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
+  @php($ccycle = \App\Cycle::find($cycle->id))
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  <script src="/vuexy/assets/js/forms-tagify.js"></script>
+
+  <script>
+    // Set Language
+    const lang = '{{ $l }}';
+
+    // Handle Edit Program
+    const onEditProgramClick = () => {
+      $('#edit-program-modal').modal('show');
+    }
+  
+    // Initialize Quill editors
+    const quillEditors = document.querySelectorAll('#text-editor');
+    quillEditors.forEach(editor => {
+      new Quill(editor, {
+        theme: 'snow'
+      });
+    });
+  </script>
 
   <script>
     (() => {
@@ -1958,7 +2010,6 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
         });
       });
     })();
-
   </script>
 
 {{-- <script>

@@ -35,24 +35,24 @@ class ProgramController extends Controller
     {
         $search = $request->input('search'); // التحقق من وجود البحث في الطلب
 
-    if (Auth()->user()->hasRole('Admin')) {
-        // إذا كان المستخدم Admin
-        $cycles = Cycle::when($search, function ($query, $search) {
-            return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
-        })->get();
-    } else {
-        // إذا كان المستخدم ليس Admin
-        $Organization = Organization::where('user_id', auth()->user()->id)->first();
-
-        if (!empty($Organization)) {
-            $cycles = Cycle::where('organization_id', $Organization->id)
-                ->when($search, function ($query, $search) {
-                    return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
-                })->get();
+        if (Auth()->user()->hasRole('Admin')) {
+            // إذا كان المستخدم Admin
+            $cycles = Cycle::when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+            })->get();
         } else {
-            $cycles = Cycle::where('id', 0)->get(); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
+            // إذا كان المستخدم ليس Admin
+            $Organization = Organization::where('user_id', auth()->user()->id)->first();
+
+            if (!empty($Organization)) {
+                $cycles = Cycle::where('organization_id', $Organization->id)
+                    ->when($search, function ($query, $search) {
+                        return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+                    })->get();
+            } else {
+                $cycles = Cycle::where('id', 0)->get(); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
+            }
         }
-    }
         return view('admin.programs.index', compact('cycles'));
     }
 
@@ -77,26 +77,26 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        $program = Cycle::where('id', $id)->first();
-        $steps = Step::where('cycle_id', $program->id)->orderBy('arr','ASC')->get();
-        
+        $cycle = Cycle::where('id', $id)->first();
+        $steps = Step::where('cycle_id', $cycle->id)->orderBy('arr', 'ASC')->get();
+
         // $id = $program->pluck('id')[0];
         //         $steps = Step::where('cycle_id', $id)->orderBy('arr','ASC')->get();
 
-                $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
-                
-               $stepsData = [];
-                foreach ($steps as $step) {
-                    $stepsData[] = [
-                        'step_id' => $step->id,
-                        'total_companies' => Company::where('step', $step->id)->count(),
-                    ];
-                }
+        $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
 
-               
+        $stepsData = [];
+        foreach ($steps as $step) {
+            $stepsData[] = [
+                'step_id' => $step->id,
+                'total_companies' => Company::where('step', $step->id)->count(),
+            ];
+        }
 
 
-        return view('admin.programs.show', compact('program','steps', 'judges', 'stepsData'));
+
+
+        return view('admin.programs.show', compact('cycle', 'steps', 'judges', 'stepsData'));
     }
 
     /**
@@ -130,45 +130,43 @@ class ProgramController extends Controller
         try {
             // جلب جميع final screenings المرتبطة بـ step->id
             $finalScreenings = Finalscreening::where('step_id', '=', $request->step)->get();
-        
+
             // جلب جميع المحكمين المرتبطين
             $allJudges = collect();
-        
+
             foreach ($finalScreenings as $screening) {
                 $finaljudges = is_string($screening->judges) ? json_decode($screening->judges, true) : $screening->judges;
-        
+
                 if (is_array($finaljudges)) {
                     $judgeData = User::whereIn('id', $finaljudges)->get();
                     $allJudges = $allJudges->merge($judgeData);
                 }
             }
-        
+
             // إزالة التكرارات بين المحكمين
             $allJudges = $allJudges->unique('id');
 
-        $cstep = Step::findOrFail($request->step);
-                foreach ($allJudges  as $rname) {
-                    $judgeData = User::whereIn('id', $finaljudges)->get();
+            $cstep = Step::findOrFail($request->step);
+            foreach ($allJudges  as $rname) {
+                $judgeData = User::whereIn('id', $finaljudges)->get();
                 $user = new User();
                 $user->email = $rname->email;
                 $user->id = $rname->id;
-                $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
+                $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
                 $MSG = new TemplateEmail;
-                $MSG->Message=["New judging - VI portal","Dear ".$rfullname.",","Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from ".$cstep->from->format('d-m-Y').
-                    " to ". $cstep->to->format('d-m-Y') .", Check your account for more details.","/dashboard"];
-                $user->notify($MSG); }
-                 // تخزين رسالة نجاح في الجلسة
-    Session::flash('message', 'Email_sent_notify');
+                $MSG->Message = ["New judging - VI portal", "Dear " . $rfullname . ",", "Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') .
+                    " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.", "/dashboard"];
+                $user->notify($MSG);
+            }
+            // تخزين رسالة نجاح في الجلسة
+            Session::flash('message', 'Email_sent_notify');
+        } catch (\Exception $e) {
+            // تخزين رسالة خطأ في الجلسة إذا حدثت مشكلة
+            Session::flash('message2', 'An error occurred while sending emails. Please try again.');
+        }
 
-} catch (\Exception $e) {
-    // تخزين رسالة خطأ في الجلسة إذا حدثت مشكلة
-    Session::flash('message2', 'An error occurred while sending emails. Please try again.');
-}
-
-// إعادة التوجيه إلى الصفحة المطلوبة
-return redirect()->back(); // استبدل `your_desired_route` بالمسار المطلوب.
+        // إعادة التوجيه إلى الصفحة المطلوبة
+        return redirect()->back(); // استبدل `your_desired_route` بالمسار المطلوب.
 
     }
-
-
 }

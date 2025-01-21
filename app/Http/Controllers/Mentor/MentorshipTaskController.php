@@ -23,17 +23,17 @@ class MentorshipTaskController extends Controller
 	 */
 	public function index(Request $request)
 	{
-		
-		if( !$request->has('mentorship_id') ) { abort( 404 ); }
-		else
-		{
+
+		if (!$request->has('mentorship_id')) {
+			abort(404);
+		} else {
 			$lang = app()->getLocale();
 			$condition = "mentorship_tasks.mentorship_request_id = $request->mentorship_id ";
 			$tasks = $this->handleTask($lang, $condition, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
-			$session = $this->getSession( $lang, $request->mentorship_id );
+			$session = $this->getSession($lang, $request->mentorship_id);
 			$session_id = $session['id'];
 			$mentor = $session['mentor'];
 			$users = $session['startups'];
@@ -41,10 +41,13 @@ class MentorshipTaskController extends Controller
 			$labels = $session['labels'];
 
 			$_tasks = $tasks->groupBy('status');
-			foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+			foreach ($available_statuses as $status) {
+				if (!$_tasks->has($status)) {
+					$_tasks->put($status, collect([]));
+				}
+			}
 			$kanban = [];
-			foreach( $available_statuses as $status )
-			{
+			foreach ($available_statuses as $status) {
 				$kanban[] = [
 					'id' => $status . '-board',
 					'title' => __('admin.boardTitle' . ucfirst($status)),
@@ -69,7 +72,7 @@ class MentorshipTaskController extends Controller
 	public function create(Request $request)
 	{
 		$mentorship = MentorshipRequest::findOrFail($request->mentorship_id);
-		return view('mentor.mentorshipTasks.create',compact('mentorship'));
+		return view('mentor.mentorshipTasks.create', compact('mentorship'));
 	}
 
 	public function addTask(Request $request)
@@ -87,34 +90,32 @@ class MentorshipTaskController extends Controller
 		]);
 
 		$id = $request->mentorship_request_id;
-		$assignee = intval( $request->assignee );
+		$assignee = intval($request->assignee);
 		$labels = collect($request->input('labels', []));
-		$session = $this->getSession( $lang, $id );
+		$session = $this->getSession($lang, $id);
 
 		$mentor = $session['mentor'];
 		$users = $session['startups'];
 		$company = $session['company'];
 		$stored_labels = $session['labels'];
 
-		if( !in_array( $assignee, $users->pluck('id')->toArray() ) )
-		{
+		if (!in_array($assignee, $users->pluck('id')->toArray())) {
 			$output = [
 				'message' => 'Assignee not in session',
 				'errors' => ['assignee' => 'Assignee not in session']
 			];
 			return response()->json($output, 422);
-		}
-		else
-		{
+		} else {
 			$labelsToAdd = [];
 			$allowedLabels = [];
-			foreach( $labels as $label )
-			{
-				if( !array_key_exists('id', $label) ) { $labelsToAdd[] = ['name' => $label['value'], 'user_id' => $user->id, 'company_id' => $company['id']]; }
-				else
-				{
+			foreach ($labels as $label) {
+				if (!array_key_exists('id', $label)) {
+					$labelsToAdd[] = ['name' => $label['value'], 'user_id' => $user->id, 'company_id' => $company['id']];
+				} else {
 					$isLabelExist = $stored_labels->where('id', $label['id'])->first();
-					if( !empty( $isLabelExist ) ) { $allowedLabels[] = $label['id']; }
+					if (!empty($isLabelExist)) {
+						$allowedLabels[] = $label['id'];
+					}
 				}
 			}
 
@@ -126,32 +127,34 @@ class MentorshipTaskController extends Controller
 			$task->user_id = $assignee;
 			$task->title = $request->title;
 			$task->description = $request->description;
-			$task->due_date = trim( $request->due_date ) ? $request->due_date : null;
+			$task->due_date = trim($request->due_date) ? $request->due_date : null;
 			$task->done_date = $request->input('done_date', null);
 			$task->status = $request->status;
 			$task->priority = $request->priority;
 			$task->reported_by = $user->id;
 			$task->save();
-			
+
 			$task_id = $task->id;
 			$stored_labels = $stored_labels->toArray();
-			foreach( $labelsToAdd as $label )
-			{
-				$createdLabel = Label::create( $label );
+			foreach ($labelsToAdd as $label) {
+				$createdLabel = Label::create($label);
 				$allowedLabels[] = $createdLabel->id;
 				$stored_labels[] = ['id' => $createdLabel->id, 'value' => $label['name']];
 			}
-			$task->labels()->sync( $allowedLabels );
+			$task->labels()->sync($allowedLabels);
 
 			$condition = "mentorship_tasks.mentorship_request_id = $id ";
 			$tasks = $this->handleTask($lang, $condition, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
 			$_tasks = $tasks->groupBy('status');
-			foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+			foreach ($available_statuses as $status) {
+				if (!$_tasks->has($status)) {
+					$_tasks->put($status, collect([]));
+				}
+			}
 			$kanban = [];
-			foreach( $available_statuses as $status )
-			{
+			foreach ($available_statuses as $status) {
 				$kanban[] = [
 					'id' => $status . '-board',
 					'title' => __('admin.boardTitle' . ucfirst($status)),
@@ -185,40 +188,37 @@ class MentorshipTaskController extends Controller
 		]);
 
 		$task_id = $request->moved_task_id;
-		$task = MentorshipTask::find( $task_id );
-		$status = trim( strtolower( str_replace('-board', '', $request->new_board) ) );
-		$old_status = trim( strtolower( str_replace('-board', '', $request->old_board) ) );
+		$task = MentorshipTask::find($task_id);
+		$status = trim(strtolower(str_replace('-board', '', $request->new_board)));
+		$old_status = trim(strtolower(str_replace('-board', '', $request->old_board)));
 
 		$log = new MentorshipTaskLog;
 		$log->mentorship_task_id = $task->id;
 		$log->user_id = $user->id;
 		$log->action = 'update';
 
-		if( $status == $old_status )
-		{
+		if ($status == $old_status) {
 			$old = $task->row_no;
 			$log->column = 'row_no';
-			$new = array_search( $task_id, $request->board_ids ) + 1;
+			$new = array_search($task_id, $request->board_ids) + 1;
 
 			$get_tasks = MentorshipTask::where('mentorship_request_id', $task->mentorship_request_id)->where('status', $status)->orderBy('row_no', 'asc')->get();
-			foreach( $get_tasks as $get_task )
-			{
-				$row_no = array_search( $get_task->id, $request->board_ids ) + 1;
+			foreach ($get_tasks as $get_task) {
+				$row_no = array_search($get_task->id, $request->board_ids) + 1;
 				$get_task->row_no = $row_no;
 				$get_task->save();
 			}
-		}
-		else
-		{
+		} else {
 			$old = $task->status;
 			$task->status = $status;
+			$task->done_date = now();
 			$task->save();
-	
-			
+
+
 			$log->column = 'status';
 			$new = $status;
 		}
-		
+
 		$log->new = $new;
 		$log->was = $old;
 		$log->save();
@@ -228,10 +228,13 @@ class MentorshipTaskController extends Controller
 		$tasks = $tasks->sortBy('row_no')->values();
 		$available_statuses = ['pending', 'progress', 'review', 'completed'];
 		$_tasks = $tasks->groupBy('status');
-		foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+		foreach ($available_statuses as $status) {
+			if (!$_tasks->has($status)) {
+				$_tasks->put($status, collect([]));
+			}
+		}
 		$kanban = [];
-		foreach( $available_statuses as $status )
-		{
+		foreach ($available_statuses as $status) {
 			$kanban[] = [
 				'id' => $status . '-board',
 				'title' => __('admin.boardTitle' . ucfirst($status)),
@@ -261,9 +264,8 @@ class MentorshipTaskController extends Controller
 			'status' => 'required|in:pending,progress,review,completed',
 			'priority' => 'required|in:low,medium,high',
 		]);
-		$task = MentorshipTask::where('mentorship_request_id', $request->mentorship_request_id)->find( $request->task_id );
-		if( empty( $task ) )
-		{
+		$task = MentorshipTask::where('mentorship_request_id', $request->mentorship_request_id)->find($request->task_id);
+		if (empty($task)) {
 			$output = [
 				'message' => 'Task could not be found',
 				'errors' => ['task_id' => 'Task could not be found']
@@ -272,43 +274,39 @@ class MentorshipTaskController extends Controller
 		}
 
 		$id = $request->mentorship_request_id;
-		$assignee = intval( $request->assignee );
+		$assignee = intval($request->assignee);
 		$labels = collect($request->input('labels', []));
-		$session = $this->getSession( $lang, $id );
+		$session = $this->getSession($lang, $id);
 
 		$mentor = $session['mentor'];
 		$users = $session['startups'];
 		$company = $session['company'];
 		$stored_labels = $session['labels'];
 
-		if( !in_array( $assignee, $users->pluck('id')->toArray() ) )
-		{
+		if (!in_array($assignee, $users->pluck('id')->toArray())) {
 			$output = [
 				'message' => 'Assignee not in session',
 				'errors' => ['assignee' => 'Assignee not in session']
 			];
 			return response()->json($output, 422);
-		}
-		else
-		{
+		} else {
 			$labelsToAdd = [];
 			$allowedLabels = [];
-			foreach( $labels as $label )
-			{
-				if( !array_key_exists('id', $label) ) { $labelsToAdd[] = ['name' => $label['value'], 'user_id' => $user->id, 'company_id' => $company['id']]; }
-				else
-				{
+			foreach ($labels as $label) {
+				if (!array_key_exists('id', $label)) {
+					$labelsToAdd[] = ['name' => $label['value'], 'user_id' => $user->id, 'company_id' => $company['id']];
+				} else {
 					$isLabelExist = $stored_labels->where('id', $label['id'])->first();
-					if( !empty( $isLabelExist ) ) { $allowedLabels[] = $label['id']; }
+					if (!empty($isLabelExist)) {
+						$allowedLabels[] = $label['id'];
+					}
 				}
 			}
 
 			$logsToAdd = [];
 			$columns = ['user_id', 'title', 'description', 'due_date', 'done_date', 'status', 'priority'];
-			foreach( $columns as $column )
-			{
-				if( $request->has( $column ) && $request->$column != $task->$column )
-				{
+			foreach ($columns as $column) {
+				if ($request->has($column) && $request->$column != $task->$column) {
 					$logData = [
 						'mentorship_task_id' => $task->id,
 						'user_id' => $user->id,
@@ -324,31 +322,37 @@ class MentorshipTaskController extends Controller
 			$task->user_id = $assignee;
 			$task->title = $request->title;
 			$task->description = $request->description;
-			if( $request->has('due_date') && trim( $request->due_date ) ) { $task->due_date = $request->due_date; }
-			if( $request->has('done_date') && trim( $request->done_date ) ) { $task->done_date = $request->done_date; }
+			if ($request->has('due_date') && trim($request->due_date)) {
+				$task->due_date = $request->due_date;
+			}
+			if ($request->has('done_date') && trim($request->done_date)) {
+				$task->done_date = $request->done_date;
+			}
 			$task->status = $request->status;
 			$task->priority = $request->priority;
 			$task->save();
 			$task_id = $task->id;
 			$stored_labels = $stored_labels->toArray();
-			foreach( $labelsToAdd as $label )
-			{
-				$createdLabel = Label::create( $label );
+			foreach ($labelsToAdd as $label) {
+				$createdLabel = Label::create($label);
 				$allowedLabels[] = $createdLabel->id;
 				$stored_labels[] = ['id' => $createdLabel->id, 'value' => $label['name']];
 			}
-			$task->labels()->sync( $allowedLabels );
-			MentorshipTaskLog::insert( $logsToAdd );
+			$task->labels()->sync($allowedLabels);
+			MentorshipTaskLog::insert($logsToAdd);
 
 			$condition = "mentorship_tasks.mentorship_request_id = $id ";
 			$tasks = $this->handleTask($lang, $condition, 'list');
 			$tasks = $tasks->sortBy('row_no')->values();
 			$available_statuses = ['pending', 'progress', 'review', 'completed'];
 			$_tasks = $tasks->groupBy('status');
-			foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+			foreach ($available_statuses as $status) {
+				if (!$_tasks->has($status)) {
+					$_tasks->put($status, collect([]));
+				}
+			}
 			$kanban = [];
-			foreach( $available_statuses as $status )
-			{
+			foreach ($available_statuses as $status) {
 				$kanban[] = [
 					'id' => $status . '-board',
 					'title' => __('admin.boardTitle' . ucfirst($status)),
@@ -379,9 +383,8 @@ class MentorshipTaskController extends Controller
 			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
 		]);
 		$id = $request->mentorship_request_id;
-		$task = MentorshipTask::where('mentorship_request_id', $id)->find( $request->task_id );
-		if( empty( $task ) )
-		{
+		$task = MentorshipTask::where('mentorship_request_id', $id)->find($request->task_id);
+		if (empty($task)) {
 			$output = [
 				'message' => 'Task could not be found',
 				'errors' => ['task_id' => 'Task could not be found']
@@ -394,10 +397,13 @@ class MentorshipTaskController extends Controller
 		$tasks = $tasks->sortBy('row_no')->values();
 		$available_statuses = ['pending', 'progress', 'review', 'completed'];
 		$_tasks = $tasks->groupBy('status');
-		foreach( $available_statuses as $status ) { if( !$_tasks->has( $status ) ) { $_tasks->put($status, collect([])); } }
+		foreach ($available_statuses as $status) {
+			if (!$_tasks->has($status)) {
+				$_tasks->put($status, collect([]));
+			}
+		}
 		$kanban = [];
-		foreach( $available_statuses as $status )
-		{
+		foreach ($available_statuses as $status) {
 			$kanban[] = [
 				'id' => $status . '-board',
 				'title' => __('admin.boardTitle' . ucfirst($status)),
@@ -427,9 +433,8 @@ class MentorshipTaskController extends Controller
 			'comment' => 'required',
 		]);
 		$id = $request->mentorship_request_id;
-		$task = MentorshipTask::where('mentorship_request_id', $id)->find( $request->task_id );
-		if( empty( $task ) )
-		{
+		$task = MentorshipTask::where('mentorship_request_id', $id)->find($request->task_id);
+		if (empty($task)) {
 			$output = [
 				'message' => 'Task could not be found',
 				'errors' => ['task_id' => 'Task could not be found']
@@ -443,7 +448,7 @@ class MentorshipTaskController extends Controller
 		$comment->attached = null; // keep it null for now
 		$comment->edited = false;
 		$comment->save();
-		
+
 		return response()->json([
 			'status' => true,
 			'title' => 'Done',
@@ -458,36 +463,33 @@ class MentorshipTaskController extends Controller
 			'mentorship_request_id' => 'required|integer|exists:mentorship_requests,id',
 			'task_id' => 'required|integer|exists:mentorship_tasks,id'
 		]);
-		$task = MentorshipTask::where('mentorship_request_id', $request->mentorship_request_id)->find( $request->task_id );
-		if( empty( $task ) ) { return response()->json(['status' => false, 'title' => 'Failure', 'message' => 'Task not found'], 200); }
-		else
-		{
+		$task = MentorshipTask::where('mentorship_request_id', $request->mentorship_request_id)->find($request->task_id);
+		if (empty($task)) {
+			return response()->json(['status' => false, 'title' => 'Failure', 'message' => 'Task not found'], 200);
+		} else {
 			$card = $task->id;
 			$session = $task->mentorship_request_id;
 			$instance = Storage::disk('mentorship_tasks');
 			$target = "$session/$card";
-			if( !$instance->directoryExists( $session ) )
-			{
+			if (!$instance->directoryExists($session)) {
 				$instance->makeDirectory("$session");
 				$instance->makeDirectory($target);
-			}
-			elseif( !$instance->directoryExists($target) )
-			{
+			} elseif (!$instance->directoryExists($target)) {
 				$instance->makeDirectory($target);
 			}
 			$filesToAdd = [];
-			foreach( $request->attachments as $attachment )
-			{
-				$check_file = $instance->missing( $target . '/' . $attachment->getClientOriginalName() );
-				if( !$check_file )
-				{
+			foreach ($request->attachments as $attachment) {
+				$check_file = $instance->missing($target . '/' . $attachment->getClientOriginalName());
+				if (!$check_file) {
 					$counter = 1;
 					do {
-						$file_name = str_replace( '.' . $attachment->getClientOriginalExtension(), '', $attachment->getClientOriginalName() ) . '-' . $counter++ . '.' . $attachment->getClientOriginalExtension();
-						$check_file = $instance->missing( $target . '/' .  $file_name );
-					} while ( !$check_file );
-				} else { $file_name = $attachment->getClientOriginalName(); }
-				$file_name = strtolower( str_replace(' ', '-', $file_name) );
+						$file_name = str_replace('.' . $attachment->getClientOriginalExtension(), '', $attachment->getClientOriginalName()) . '-' . $counter++ . '.' . $attachment->getClientOriginalExtension();
+						$check_file = $instance->missing($target . '/' .  $file_name);
+					} while (!$check_file);
+				} else {
+					$file_name = $attachment->getClientOriginalName();
+				}
+				$file_name = strtolower(str_replace(' ', '-', $file_name));
 				$filesToAdd[] = [
 					'mentorship_request_id' => $task->mentorship_request_id,
 					'mentorship_task_id' => $task->id,
@@ -497,7 +499,7 @@ class MentorshipTaskController extends Controller
 				];
 				$path = $instance->putFileAs($target, $attachment, $file_name);
 			}
-			MentorshipTaskFile::insert( $filesToAdd );
+			MentorshipTaskFile::insert($filesToAdd);
 			$lang = app()->getLocale();
 			$condition = "mentorship_tasks.id = $card ";
 			$tasks = $this->handleTask($lang, $condition, 'show');
@@ -513,16 +515,18 @@ class MentorshipTaskController extends Controller
 
 	public function deAttach(Request $request)
 	{
-		$file = MentorshipTaskFile::find( $request->file );
-		if( empty( $file ) ) { return response()->json(['status' => false, 'message' => 'File not found']); }
-		else
-		{
+		$file = MentorshipTaskFile::find($request->file);
+		if (empty($file)) {
+			return response()->json(['status' => false, 'message' => 'File not found']);
+		} else {
 			$instance = Storage::disk('mentorship_tasks');
 			$session = $file->mentorship_request_id;
 			$card = $file->mentorship_task_id;
 			$target = "$session/$card";
-			$check_file = $instance->missing( $target . '/' . $file->file );
-			if( !$check_file ) { $instance->delete( $target . '/' . $file->file ); }
+			$check_file = $instance->missing($target . '/' . $file->file);
+			if (!$check_file) {
+				$instance->delete($target . '/' . $file->file);
+			}
 			$file->delete();
 			return response()->json(['status' => true, 'message' => 'File deleted successfully']);
 		}
@@ -536,33 +540,33 @@ class MentorshipTaskController extends Controller
 		try {
 			$mentorship = MentorshipRequest::find($request->mentorship_request_id);
 			$labelNames = $request->label; // أسماء الـ labels المدخلة من الطلب
-			if( $labelNames != null )
-			{
+			if ($labelNames != null) {
 				$jsonArray = $labelNames;
 
 				// تحويل النص JSON إلى مصفوفة PHP
 				$array = json_decode($jsonArray, true);
 
 				// استخراج القيم داخل الفاليو
-				$values = array_map(function($item) { return $item['value']; }, $array);
+				$values = array_map(function ($item) {
+					return $item['value'];
+				}, $array);
 
 
 				// تحويل إلى مصفوفة إذا لم يكن كذلك
-				if (!is_array($values)) { $values = [$values]; }
+				if (!is_array($values)) {
+					$values = [$values];
+				}
 
 				$labelIds = []; // مصفوفة لتخزين معرفات الـ labels
 
-				if ($values)
-				{
+				if ($values) {
 					$user = auth()->user();
-					foreach ($values as $labelName)
-					{
+					foreach ($values as $labelName) {
 						// تحقق إذا كانت الـ label موجودة في جدول labels
 						$label = Label::where('name', $labelName)->first();
 
 						// إذا لم تكن موجودة، قم بإنشائها في جدول labels
-						if (!$label)
-						{
+						if (!$label) {
 							$label = new Label();
 							$label->name = $labelName;
 							$label->user_id = $user->id;
@@ -588,10 +592,8 @@ class MentorshipTaskController extends Controller
 			]);
 
 			// ربط المعرفات من جدول label_tasks يدويًا
-			if (!empty($labelIds))
-			{
-				foreach ($labelIds as $labelId)
-				{
+			if (!empty($labelIds)) {
+				foreach ($labelIds as $labelId) {
 					// إضافة السجل إلى جدول label_tasks يدويًا
 					DB::table('mentorship_task_labels')->insert([
 						'mentorship_tasks_id' => $result->id,
@@ -601,10 +603,11 @@ class MentorshipTaskController extends Controller
 					]);
 				}
 			}
-			if($result)
-			{
-				return redirect(route('mentorshipTasks.index',['mentorship_id'=>$request->mentorship_request_id]))->with( ['message' => 'StoredSuccessfully'] );
-			} else { return back()->withInput()->with( ['message2' => 'FailedStore'] ); }
+			if ($result) {
+				return redirect(route('mentorshipTasks.index', ['mentorship_id' => $request->mentorship_request_id]))->with(['message' => 'StoredSuccessfully']);
+			} else {
+				return back()->withInput()->with(['message2' => 'FailedStore']);
+			}
 		} catch (Exception $e) {
 			// log what happend
 			Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -618,19 +621,16 @@ class MentorshipTaskController extends Controller
 		$condition = "mentorship_tasks.id = $id ";
 		$instance = Storage::disk('mentorship_tasks');
 		$tasks = $this->handleTask($lang, $condition, 'show');
-		if( $tasks == '404' ) { abort( 404 ); }
-		else
-		{
+		if ($tasks == '404') {
+			abort(404);
+		} else {
 			$task = $tasks->first();
 			$session = $task['request_id'];
 			$card = $task['id'];
-			if( !$instance->directoryExists( $session ) )
-			{
+			if (!$instance->directoryExists($session)) {
 				$instance->makeDirectory("$session");
 				$instance->makeDirectory("$session/$card");
-			}
-			elseif( !$instance->directoryExists("$session/$card") )
-			{
+			} elseif (!$instance->directoryExists("$session/$card")) {
 				$instance->makeDirectory("$session/$card");
 			}
 			return $task;
@@ -645,11 +645,11 @@ class MentorshipTaskController extends Controller
 		$lang = app()->getLocale();
 		$condition = "mentorship_tasks.id = $id ";
 		$tasks = $this->handleTask($lang, $condition, 'show');
-		if( $tasks == '404' ) { abort( 404 ); }
-		else
-		{
+		if ($tasks == '404') {
+			abort(404);
+		} else {
 			$task = $tasks->first();
-			return view('mentor.mentorshipTasks.show',compact('task'));
+			return view('mentor.mentorshipTasks.show', compact('task'));
 		}
 	}
 
@@ -658,8 +658,8 @@ class MentorshipTaskController extends Controller
 	 */
 	public function edit(string $id)
 	{
-		$task=MentorshipTask::findOrFail($id);
-		return view('mentor.mentorshipTasks.edit',compact('task'));
+		$task = MentorshipTask::findOrFail($id);
+		return view('mentor.mentorshipTasks.edit', compact('task'));
 	}
 
 	/**
@@ -667,17 +667,18 @@ class MentorshipTaskController extends Controller
 	 */
 	public function update(TaskRequest $request, string $id)
 	{
-		try
-		{
-			$task= MentorshipTask::findOrFail($id);
+		try {
+			$task = MentorshipTask::findOrFail($id);
 			$result = $task->update($request->validated());
-			if($result) { return redirect(route('mentorshipTasks.index',['mentorship_id'=>$task->mentorship_request_id]))->with( ['message' => 'StoredSuccessfully'] ); }
-			else { return back()->withInput()->with( ['message2' => 'FailedStore'] ); }
+			if ($result) {
+				return redirect(route('mentorshipTasks.index', ['mentorship_id' => $task->mentorship_request_id]))->with(['message' => 'StoredSuccessfully']);
+			} else {
+				return back()->withInput()->with(['message2' => 'FailedStore']);
+			}
 		} catch (Exception $e) {
 			// log what happend
 			Log::channel('system_exceptions')->info('Exceptions:', [$e]);
 			abort(500);
-
 		}
 	}
 
@@ -686,23 +687,23 @@ class MentorshipTaskController extends Controller
 	 */
 	public function destroy(string $id)
 	{
-		if (!$task = MentorshipTask::find($id)) { return back()->with('class', 'alert alert-danger')->with('message', trans('dash.try_2_access_not_found_content')); }
+		if (!$task = MentorshipTask::find($id)) {
+			return back()->with('class', 'alert alert-danger')->with('message', trans('dash.try_2_access_not_found_content'));
+		}
 		$task->delete();
 		return back()->with('class', 'alert alert-success')->with('message', trans('dash.deleted_successfully'));
 	}
 
 	public function sendComment(Request $request)
 	{
-		try
-		{
-			$task= MentorshipTask::findOrFail($request->mentorship_task_id);
-			$result = $task->comments()->create(['user_id'=>auth()->id(),'comment'=>$request->comment]);
+		try {
+			$task = MentorshipTask::findOrFail($request->mentorship_task_id);
+			$result = $task->comments()->create(['user_id' => auth()->id(), 'comment' => $request->comment]);
 
-			if($result)
-				return redirect()->back()->with( ['message' => 'StoredSuccessfully'] );
+			if ($result)
+				return redirect()->back()->with(['message' => 'StoredSuccessfully']);
 			else
-				return back()->withInput()->with( ['message2' => 'FailedStore'] );
-
+				return back()->withInput()->with(['message2' => 'FailedStore']);
 		} catch (Exception $e) {
 			//log what happend
 			Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -712,38 +713,38 @@ class MentorshipTaskController extends Controller
 
 	public function updateWith(TaskRequest $request)
 	{
-		try{
+		try {
 			$mentorship = MentorshipRequest::find($request->mentorship_request_id);
 			$mentorshipTask = MentorshipTask::findOrFail($request->MTaskId);
-			
+
 			$labelNames = $request->label; // أسماء الـ labels المدخلة من الطلب
-			if($labelNames != null)
-			{
+			if ($labelNames != null) {
 				$jsonArray = $labelNames;
 
 				// تحويل النص JSON إلى مصفوفة PHP
 				$array = json_decode($jsonArray, true);
 
 				// استخراج القيم داخل الفاليو
-				$values = array_map(function($item) { return $item['value']; }, $array);
+				$values = array_map(function ($item) {
+					return $item['value'];
+				}, $array);
 
 				// تحويل إلى مصفوفة إذا لم يكن كذلك
-				if (!is_array($values)) { $values = [$values]; }
+				if (!is_array($values)) {
+					$values = [$values];
+				}
 
 				$labelIds = []; // مصفوفة لتخزين معرفات الـ labels
-			
-				if ($values)
-				{
+
+				if ($values) {
 					$user = auth()->user();
 
-					foreach ($values as $labelName)
-					{
+					foreach ($values as $labelName) {
 						// تحقق إذا كانت الـ label موجودة في جدول labels
 						$label = Label::where('name', $labelName)->first();
 
 						// إذا لم تكن موجودة، قم بإنشائها في جدول labels
-						if (!$label)
-						{
+						if (!$label) {
 							$label = new Label();
 							$label->name = $labelName;
 							$label->user_id = $user->id;
@@ -770,10 +771,8 @@ class MentorshipTaskController extends Controller
 			$result = $mentorshipTask->fresh();
 
 			// ربط المعرفات من جدول label_tasks يدويًا
-			if (!empty($labelIds))
-			{
-				foreach ($labelIds as $labelId)
-				{
+			if (!empty($labelIds)) {
+				foreach ($labelIds as $labelId) {
 					// إضافة السجل إلى جدول label_tasks يدويًا
 					DB::table('mentorship_task_labels')->insert([
 						'mentorship_tasks_id' => $result->id,
@@ -784,8 +783,7 @@ class MentorshipTaskController extends Controller
 				}
 			}
 			// إضافة تعليق إذا كان موجودًا
-			if (!empty($request->comment))
-			{
+			if (!empty($request->comment)) {
 				$mentorshipTask->comments()->create([
 					'user_id' => auth()->id(),
 					'comment' => $request->comment,
@@ -794,8 +792,7 @@ class MentorshipTaskController extends Controller
 			}
 
 			// إضافة تعليق إذا كانت المرفقات موجودة فقط
-			if (!empty($request->attachments) && empty($request->comment))
-			{
+			if (!empty($request->attachments) && empty($request->comment)) {
 				$mentorshipTask->comments()->create([
 					'user_id' => auth()->id(),
 					'comment' => 'Attached', // إذا لم يكن هناك تعليق، يمكن وضع نص ثابت
@@ -803,8 +800,11 @@ class MentorshipTaskController extends Controller
 				]);
 			}
 
-			if($result) { return redirect(route('mentorshipTasks.index',['mentorship_id'=>$request->mentorship_request_id]))->with( ['message' => 'StoredSuccessfully'] ); }
-			else { return back()->withInput()->with( ['message2' => 'FailedStore'] ); }
+			if ($result) {
+				return redirect(route('mentorshipTasks.index', ['mentorship_id' => $request->mentorship_request_id]))->with(['message' => 'StoredSuccessfully']);
+			} else {
+				return back()->withInput()->with(['message2' => 'FailedStore']);
+			}
 		} catch (Exception $e) {
 			//log what happend
 			Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -812,9 +812,11 @@ class MentorshipTaskController extends Controller
 		}
 	}
 
-	private function getImage( $image = null )
+	private function getImage($image = null)
 	{
-		if( !$image ) { return URL::to('/images/placeholder.jpg'); }
+		if (!$image) {
+			return URL::to('/images/placeholder.jpg');
+		}
 		return URL::to("/191014/$image");
 	}
 
@@ -899,29 +901,32 @@ class MentorshipTaskController extends Controller
 				AND mentorship_tasks.parent_id IS null
 		";
 		$tasks = DB::select($query);
-		if( empty($tasks) && $type == 'show' ) { return '404'; }
-		else
-		{
+		if (empty($tasks) && $type == 'show') {
+			return '404';
+		} else {
 			$tasks = collect($tasks);
 			$ids_to_search = [];
-			$tasks->where('log_action', 'update')->where('log_column', 'user_id')->each(function( $task ) use( &$ids_to_search ) {
-				$was = intval( $task->log_was );
-				$new = intval( $task->log_new );
-				if( !in_array( $was, $ids_to_search ) ) { $ids_to_search[] = $was; }
-				if( !in_array( $new, $ids_to_search ) ) { $ids_to_search[] = $new; }
+			$tasks->where('log_action', 'update')->where('log_column', 'user_id')->each(function ($task) use (&$ids_to_search) {
+				$was = intval($task->log_was);
+				$new = intval($task->log_new);
+				if (!in_array($was, $ids_to_search)) {
+					$ids_to_search[] = $was;
+				}
+				if (!in_array($new, $ids_to_search)) {
+					$ids_to_search[] = $new;
+				}
 			});
 			$users = collect([]);
-			if( count( $ids_to_search ) )
-			{
-				$users = collect(DB::select("SELECT id, CONCAT(TRIM(COALESCE(first_name_$lang, '')), ' ', TRIM(COALESCE(last_name_$lang, ''))) AS name, img_url FROM users WHERE id IN (".implode( ",", $ids_to_search ).")" ))->map(function($user) {
-					$user->img_url = $this->getImage( $user->img_url );
+			if (count($ids_to_search)) {
+				$users = collect(DB::select("SELECT id, CONCAT(TRIM(COALESCE(first_name_$lang, '')), ' ', TRIM(COALESCE(last_name_$lang, ''))) AS name, img_url FROM users WHERE id IN (" . implode(",", $ids_to_search) . ")"))->map(function ($user) {
+					$user->img_url = $this->getImage($user->img_url);
 					return $user;
 				});
 			}
-	
-			$tasks = $tasks->groupBy('id')->map(function( $groupedTasks ) use ( $users ) {
+
+			$tasks = $tasks->groupBy('id')->map(function ($groupedTasks) use ($users) {
 				$task = $groupedTasks->first();
-				$labels = $groupedTasks->filter(function( $task ) {
+				$labels = $groupedTasks->filter(function ($task) {
 					return $task->label_id !== null;
 				})->map(function ($task) {
 					return [
@@ -929,11 +934,11 @@ class MentorshipTaskController extends Controller
 						'name' => $task->label_name,
 					];
 				})->unique('id')->values()->whereNotNull('id');
-				$comments = $groupedTasks->whereNull('deleted_at')->map(function( $task ) {
+				$comments = $groupedTasks->whereNull('deleted_at')->map(function ($task) {
 					return [
 						'id' => $task->comment_id,
 						'comment' => $task->comment,
-						'commenter' => ['id' => $task->commenter_id, 'name' => $task->commenter, 'photo' => $this->getImage( $task->commenter_img )],
+						'commenter' => ['id' => $task->commenter_id, 'name' => $task->commenter, 'photo' => $this->getImage($task->commenter_img)],
 						'attached' => $task->attachment,
 						'edited' => $task->edited,
 						'created_at' => $task->comment_created_at,
@@ -941,26 +946,22 @@ class MentorshipTaskController extends Controller
 						'created_since' => Carbon::parse($task->comment_created_at)->diffForHumans(),
 					];
 				})->unique('id')->values()->whereNotNull('id');
-				$logs = $groupedTasks->sortByDesc('log_created_at')->map(function ( $log ) use ( $users ) {
+				$logs = $groupedTasks->sortByDesc('log_created_at')->map(function ($log) use ($users) {
 					$footprint = '';
-					if( $log->log_action == 'create' )
-					{
+					if ($log->log_action == 'create') {
 						$footprint = __('dashboard.logTaskCreated', ['url' => URL::to('dashboard/users/' . $log->log_user_id . '/edit'), 'user' => $log->log_user]);
-					}
-					elseif( $log->log_action == 'update' )
-					{
-						if( $log->log_column != 'user_id' )
-						{
-							if( $log->log_column == 'status' )
-							{
-								$old = __('admin.boardTitle' . ucfirst( strtolower( $log->log_was ) ));
-								$new = __('admin.boardTitle' . ucfirst( strtolower( $log->log_new ) ));
+					} elseif ($log->log_action == 'update') {
+						if ($log->log_column != 'user_id') {
+							if ($log->log_column == 'status') {
+								$old = __('admin.boardTitle' . ucfirst(strtolower($log->log_was)));
+								$new = __('admin.boardTitle' . ucfirst(strtolower($log->log_new)));
+							} elseif ($log->log_column == 'priority') {
+								$old = __('admin.priority' . ucfirst(strtolower($log->log_was)));
+								$new = __('admin.priority' . ucfirst(strtolower($log->log_new)));
+							} else {
+								$old = $log->log_was;
+								$new = $log->log_new;
 							}
-							elseif( $log->log_column == 'priority' )
-							{
-								$old = __('admin.priority' . ucfirst( strtolower( $log->log_was ) ));
-								$new = __('admin.priority' . ucfirst( strtolower( $log->log_new ) ));
-							} else { $old = $log->log_was; $new = $log->log_new; } 
 							$changes = [
 								'old' => $old,
 								'new' => $new,
@@ -968,9 +969,7 @@ class MentorshipTaskController extends Controller
 								'url' => URL::to('dashboard/users/' . $log->log_user_id . '/edit'),
 							];
 							$footprint = __('dashboard.logTaskUpdate' . ucfirst($log->log_column), $changes);
-						}
-						else
-						{
+						} else {
 							$was_id = $log->log_was;
 							$new_id = $log->log_new;
 							$old = $users->where('id', $was_id)->first();
@@ -979,38 +978,31 @@ class MentorshipTaskController extends Controller
 								'user' => $log->log_user,
 								'url' => URL::to('dashboard/users/' . $log->log_user_id . '/edit'),
 							];
-							if( !empty( $was_id ) && !empty( $old ) && !empty( $new_id ) && !empty( $new ) )
-							{
+							if (!empty($was_id) && !empty($old) && !empty($new_id) && !empty($new)) {
 								$changes['old_user'] = $old->name;
 								$changes['old_url'] = URL::to('dashboard/users/' . $old->id . '/edit');
 								$changes['new_user'] = $new->name;
 								$changes['new_url'] = URL::to('dashboard/users/' . $new->id . '/edit');
-	
+
 								$footprint = __('dashboard.logTaskUpdateUserChange', $changes);
-							}
-							elseif( !empty( $was_id ) && !empty( $old ) && empty( $new_id ) && empty( $new ) )
-							{
+							} elseif (!empty($was_id) && !empty($old) && empty($new_id) && empty($new)) {
 								$changes['old_user'] = $old->name;
 								$changes['old_url'] = URL::to('dashboard/users/' . $old->id . '/edit');
-	
+
 								$footprint = __('dashboard.logTaskUpdateUserRemove', $changes);
-							}
-							elseif( empty( $was_id ) && empty( $old ) && !empty( $new_id ) && !empty( $new ) )
-							{
+							} elseif (empty($was_id) && empty($old) && !empty($new_id) && !empty($new)) {
 								$changes['new_user'] = $new->name;
 								$changes['new_url'] = URL::to('dashboard/users/' . $new->id . '/edit');
-	
+
 								$footprint = __('dashboard.logTaskUpdateUserAdd', $changes);
 							}
 						}
-					}
-					elseif( $log->log_action == 'delete' )
-					{
+					} elseif ($log->log_action == 'delete') {
 						//
 					}
 					return [
 						'id' => $log->log_id,
-						'user' => ['id' => $log->log_user_id, 'name' => $log->log_user, 'photo' => $this->getImage( $log->log_img )],
+						'user' => ['id' => $log->log_user_id, 'name' => $log->log_user, 'photo' => $this->getImage($log->log_img)],
 						'action' => $log->log_action,
 						'column' => $log->log_column,
 						'was' => $log->log_was,
@@ -1020,14 +1012,14 @@ class MentorshipTaskController extends Controller
 						'footprint' => $footprint
 					];
 				})->unique('id')->values()->whereNotNull('id');
-				$files = $groupedTasks->filter(function( $file ) {
+				$files = $groupedTasks->filter(function ($file) {
 					return $file->file !== null;
 				})->map(function ($task) {
 					return [
 						'id' => $task->file_id,
 						'name' => $task->file_name,
 						'url' => URL::to('dashboard/uploads/tasks/' . $task->request_id . '/cards/' . $task->id . '/' . $task->file),
-						'uploader' => ['id' => $task->uploader_id, 'name' => $task->uploader, 'photo' => $this->getImage( $task->uploader_img )],
+						'uploader' => ['id' => $task->uploader_id, 'name' => $task->uploader, 'photo' => $this->getImage($task->uploader_img)],
 					];
 				})->unique('id')->values()->whereNotNull('id');
 				return [
@@ -1035,16 +1027,16 @@ class MentorshipTaskController extends Controller
 					'request_id' => $task->request_id,
 					'name' => $task->title,
 					'content' => $task->description,
-					'due_date' => !empty( $task->due_at ) && trim( $task->due_at ) ? trim( $task->due_at ) : null,
-					'done_date' => !empty( $task->done_at ) && trim( $task->done_at ) ? trim( $task->done_at ) : null,
+					'due_date' => !empty($task->due_at) && trim($task->due_at) ? trim($task->due_at) : null,
+					'done_date' => !empty($task->done_at) && trim($task->done_at) ? trim($task->done_at) : null,
 					'status' => $task->status,
 					'row_no' => $task->row_no,
-					'visible_status' => __('admin.boardTitle'. ucfirst($task->status)),
+					'visible_status' => __('admin.boardTitle' . ucfirst($task->status)),
 					'priority' => $task->priority,
-					'priority_visible' => __('admin.priority'. ucfirst($task->priority)),
-					'mentor' => ['id' => $task->mentor_id, 'name' => $task->mentor, 'photo' => $this->getImage( $task->mentor_img )],
-					'assignee' => ['id' => $task->user_id, 'name' => $task->assignee, 'photo' => $this->getImage( $task->assignee_img )],
-					'reporter' => ['id' => $task->reported_by, 'name' => $task->reporter, 'photo' => $this->getImage( $task->reporter_img )],
+					'priority_visible' => __('admin.priority' . ucfirst($task->priority)),
+					'mentor' => ['id' => $task->mentor_id, 'name' => $task->mentor, 'photo' => $this->getImage($task->mentor_img)],
+					'assignee' => ['id' => $task->user_id, 'name' => $task->assignee, 'photo' => $this->getImage($task->assignee_img)],
+					'reporter' => ['id' => $task->reported_by, 'name' => $task->reporter, 'photo' => $this->getImage($task->reporter_img)],
 					'reported_at' => $task->reported_at,
 					'updated_at' => $task->updated_at,
 					'labels' => $labels,
@@ -1054,12 +1046,12 @@ class MentorshipTaskController extends Controller
 					'files' => $files,
 				];
 			})->values();
-	
+
 			return $tasks;
 		}
 	}
 
-	private function getSession( $lang, $id )
+	private function getSession($lang, $id)
 	{
 		$sessions = "SELECT
 				mr.id,
@@ -1086,15 +1078,19 @@ class MentorshipTaskController extends Controller
 			WHERE
 				mr.id = $id
 		";
-		$sessions = collect( DB::select( $sessions ) );
-		$sessions = $sessions->groupBy('id')->map(function( $groupedSession ) {
+		$sessions = collect(DB::select($sessions));
+		$sessions = $sessions->groupBy('id')->map(function ($groupedSession) {
 			$session = $groupedSession->first();
 			return [
 				'id' => $session->id,
 				'mentor' => ['id' => $session->mentor_id, 'name' => $session->mentor],
 				'company' => ['id' => $session->company_id, 'name' => $session->company],
-				'startups' => $groupedSession->map(function ( $item ) { return ['id' => $item->startup_id, 'value' => $item->startup]; })->unique('id')->values()->whereNotNull('id'),
-				'labels' => $groupedSession->map(function ( $item ) { return ['id' => $item->label_id, 'value' => $item->label]; })->unique('id')->values()->whereNotNull('id'),
+				'startups' => $groupedSession->map(function ($item) {
+					return ['id' => $item->startup_id, 'value' => $item->startup];
+				})->unique('id')->values()->whereNotNull('id'),
+				'labels' => $groupedSession->map(function ($item) {
+					return ['id' => $item->label_id, 'value' => $item->label];
+				})->unique('id')->values()->whereNotNull('id'),
 			];
 		})->values()->first();
 		return $sessions;
@@ -1107,12 +1103,18 @@ class MentorshipTaskController extends Controller
 			// Storage::disk('mentorship_tasks')->makeDirectory("$result->id/BusinessPlans");
 			$instance = Storage::disk('mentorship_tasks');
 			$fullPath = $id . '/' . $card_id . '/' . $path;
-			if( $instance->directoryExists( $fullPath ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
-			$file = $instance->response( $fullPath );
-			$mimeType = $instance->mimeType( $fullPath );
-			if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
+			if ($instance->directoryExists($fullPath)) {
+				return response()->view('errors.404')->setStatusCode(404);
+			}
+			$file = $instance->response($fullPath);
+			$mimeType = $instance->mimeType($fullPath);
+			if ($mimeType == 'image/svg') {
+				$mimeType = 'image/svg+xml';
+			}
 			$file->headers->set('Content-Type', $mimeType);
 			return $file;
-		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+		} catch (\Throwable $th) {
+			return response()->view('errors.404')->setStatusCode(404);
+		}
 	}
 }

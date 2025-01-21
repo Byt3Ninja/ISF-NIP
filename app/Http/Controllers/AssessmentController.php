@@ -22,7 +22,7 @@ class AssessmentController extends Controller
     {
         $assessments = Assessment::with('user')->get();
         $users = User::role('Registered')->get();
-        return view('admin.assessment', compact('assessments', 'users'));
+        return view('admin.Assessment.assessment', compact('assessments', 'users'));
     }
 
     /**
@@ -115,7 +115,31 @@ class AssessmentController extends Controller
      */
     public function show(string $id)
     {
-        //
+        
+        if (Auth::user()->hasRole('Admin')) {
+            
+            $l = app()->getLocale();
+            
+            $assessment_user = Assessment::where('id', $id)->first();
+             
+            if($assessment_user != null){
+             $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
+    
+            $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+            ->where('user_id', $assessment_user->user_id)
+            ->where('assessment_id', $assessment_user->id)->get();
+         
+            return view('admin/Assessment/analysis-assessment', compact('user_scores','categories','assessment_user'));
+            }else{
+               
+                $user_scores = [];
+                $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
+                return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
+            }
+    
+            }else{
+                return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+            }
     }
 
     /**
@@ -328,6 +352,7 @@ public function MakeAssessment()
 
     public function AnswerAssessment(Request $request)
     {
+        $update = [];
         $userid = auth()->user()->id;
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
 
@@ -375,14 +400,33 @@ public function MakeAssessment()
                  $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
         
                  $user_scores = $categories->map(function ($category) use ($assessment_user) {
-                     $questions = $category->question->where('assessment_id', $assessment_user->id);
-                     $subcategories = $category->subcategory;
-                     $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
-                         $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
-                         return $subcategory;
-                     });
-                     $category->subcategories = $subcategories;
-                     return $category;
+                    // تصفية الأسئلة بناءً على التقييم
+                    $questions = $category->question->where('assessment_id', $assessment_user->id);
+                
+                    // حساب الأجوبة التي تم الرد عليها والتي لم يتم الرد عليها على مستوى الفئة
+                    $category->contAnswered = $questions->where('score', '!=', '0')->count();
+                    $category->contNotAnswered = $questions->where('score', '=', '0')->count();
+                
+                    // معالجة التصنيفات الفرعية
+                    $subcategories = $category->subcategory->map(function ($subcategory) use ($questions) {
+                        // تصفية الأسئلة حسب التصنيف الفرعي
+                        $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
+                
+                        // حساب الأجوبة التي تم الرد عليها والتي لم يتم الرد عليها على مستوى التصنيف الفرعي
+                        $subcategory->contAnswered = $subcategory_questions->where('score', '!=', '0')->count();
+                        $subcategory->contNotAnswered = $subcategory_questions->where('score', '=', '0')->count();
+                
+                        // إرفاق الأسئلة المفلترة
+                        $subcategory->questions = $subcategory_questions;
+                
+                        return $subcategory;
+                    });
+                
+                    // إرفاق التصنيفات الفرعية المفلترة
+                    $category->subcategories = $subcategories;
+                
+                    return $category;
+               
                  });
         
             // استخراج الإجابات
@@ -400,12 +444,22 @@ public function MakeAssessment()
                 }else{
                     return redirect()->route('analysis-assessment');
                 }
+
+
+                $countanswered = UserScore::where('assessment_id', $user_score->assessment_id)->where('score', '!=', '0')->count();
+                $countNotanswered = UserScore::where('assessment_id', $user_score->assessment_id)->where('score', '=', '0')->count();
+                $totalQuestions = $countanswered + $countNotanswered;
+                $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+                $update['countanswered'] = $countanswered;
+                $update['countNotanswered'] = $countNotanswered;
+                $update['totalQuestions'] = $totalQuestions;
+                $update['progress'] = $progress;
                 
                 return response()->json(['success' => true,
                  'message' => 'تم تحديث الإجابة بنجاح',
                  'user_scores' => $user_scores,
                  'answers' => $answers,
-                 'assessment_user' => $assessment_user
+                 'assessment_user' => $assessment_user,
             
             ]);
             
@@ -422,6 +476,53 @@ public function MakeAssessment()
 
     }
     
+    public function assessmentAdmin($id)
+    {
+        
+        if (Auth::user()->hasRole('Admin')) {
+            
+        $l = app()->getLocale();
+       
+        $assessment_user = Assessment::where('id', $id)->first();
+
+        if($assessment_user != null){
+
+         $categories = Category::where('category_type', 'Assesment')->with(['subcategory', 'question'])->get();
+
+         $user_scores = $categories->map(function ($category) use ($assessment_user) {
+             $questions = $category->question->where('assessment_id', $assessment_user->id);
+             $subcategories = $category->subcategory;
+             $subcategories = $subcategories->map(function ($subcategory) use ($questions, $assessment_user) {
+                 $subcategory->questions = $questions->where('subcategory_id', $subcategory->id)->where('assessment_id', $assessment_user->id);
+                 return $subcategory;
+             });
+             $category->subcategories = $subcategories;
+             return $category;
+         });
+
+    // استخراج الإجابات
+    $answers = $user_scores->pluck('Answers')->map(function ($answer) {
+        return json_decode($answer, true);
+    })->filter()->toArray();
+
+    $countanswered = $user_scores->whereNotNull('Result_assessment')->count();
+    $countNotanswered = $user_scores->whereNull('Result_assessment')->count();
+    $totalQuestions = $countanswered + $countNotanswered;
+
+    $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+         
+    
+        }else{
+            return redirect()->route('analysis-assessment');
+        }
+        
+
+        return view('admin/Assessment/assessment-history',compact('user_scores','answers', 'assessment_user'));
+
+    }else{
+        return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
+    }
+    }
 
 
 

@@ -308,7 +308,7 @@
                   <label class="form-label fs-6 fw-bold" for="expertise">{{ __('admin.Industry Expertise') }}</label>
                   <div class="form-group">
                     <select name="expertise[]" class="select2 form-select" multiple="multiple" id="expertise"
-                      data-placeholder="{{__('admin.Select Expertise')}}" value="" required>
+                      data-placeholder="{{__('admin.Select Expertise')}}" required>
                       @php
                       $expertises = App\Expertise::where('parent_id', null)->get();
                       @endphp

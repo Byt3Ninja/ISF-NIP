@@ -29,7 +29,15 @@
         <label for="Sustainable_development"
           class="form-label">{{ __('admin.Sustainable_development') }}</label>
         <div class="position-relative">
-          <select name="Sustainable_development[]"
+          <input 
+            type="text" 
+            id="sustainable_development"
+            name="Sustainable_development[]"
+            class="form-control border-light light-shadow px-10"
+            placeholder="{{ __('admin.Sustainable_development') }}"
+            value="@if($client->company){{ $client->company->Sustainable_development }}@endif"
+          />
+          {{-- <select name="Sustainable_development[]"
             class="form-select select2 border-light light-shadow px-10"
             multiple="multiple">
             <option value="no_poverty"
@@ -168,7 +176,7 @@
                           'partnership_goals',
                           json_decode($client->company->Sustainable_development, true))) selected @endif @endif>
               {{ __('admin.partnership_goals') }}</option>
-          </select>
+          </select> --}}
 
         </div>
       </div>
@@ -186,3 +194,34 @@
     </form>
   </div>
 </div>
+
+<script>
+  const sustainabiltyWhiteList = '{{ $client->company->Sustainable_development }}';
+  const decodeHtmlEntities = (str) => {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str;
+    return txt.value;
+  };
+  const sustainabiltyWhiteListArray = JSON.parse(decodeHtmlEntities(sustainabiltyWhiteList));
+  // console.log('sustainabiltyWhiteListArray', sustainabiltyWhiteListArray);
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const sustainabiltyInput = document.querySelector('#sustainable_development');
+    TagsCustomInlineSuggestion = new Tagify(sustainabiltyInput, {
+      whitelist: sustainabiltyWhiteListArray,
+      dropdown: {
+      maxItems: 20,
+      classname: 'tags-inline',
+      enabled: 0,
+      closeOnSelect: false
+      }
+    });
+
+    // Set the initial value of the Tagify input with the selected whitelist
+    // TagsCustomInlineSuggestion.addTags(sustainabiltyWhiteListArray);
+    // }).on('change', handleTagifyChange);
+    // function handleTagifyChange(e) {
+    //   selected_Sustainable_development =  e.detail.value.trim() ? selected_Sustainable_development = JSON.parse( e.detail.value ) : [];
+    // }
+  });      
+</script>

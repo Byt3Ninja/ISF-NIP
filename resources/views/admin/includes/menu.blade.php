@@ -373,9 +373,14 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
   </li> --}}
 
 
+  <li class="{{ Request::is('*assessments') ? 'active' : '' }} menu-item">
+    <a href="{{ route('assessments.index') }}" class="menu-link">
+      <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+      <span class="menu-item"> {{ __('admin.Manage_Assessments') }}</span>
+    </a>
+  </li>
 
-
-  <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
+  {{-- <li class="{{ Request::is('dashboard/question-assessment*') ? 'active' : '' }} menu-item">
     <a href="{{ route('question-assessment') }}" class="menu-link">
       <span class="menu-item">{{ __('admin.Question_Assessment') }}</span>
       <i class="bx bx-message"></i>
@@ -393,7 +398,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
       <span class="menu-item">{{ __('admin.History_Assessment') }}</span>
       <i class="bx bx-message"></i>
     </a>
-  </li>
+  </li> --}}
 
 </ul>
 </li>
@@ -508,12 +513,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             </a>
           </li>
           
-          <li class="{{ Request::is('*assessments') ? 'active' : '' }} menu-item">
-            <a href="{{ route('assessments.index') }}" class="menu-link">
-              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
-              <span class="menu-item"> {{ __('admin.Assessments') }}</span>
-            </a>
-          </li>
+          
         {{-- @endif --}}
 
         </ul>

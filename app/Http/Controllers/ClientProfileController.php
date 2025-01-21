@@ -11,6 +11,7 @@ use App\Expertise;
 use App\CyclesMentors;
 use App\MentorshipTask;
 use App\MentorshipRequest;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\ConfirmEmailUpdate;
 use Illuminate\Support\Facades\Log;
@@ -138,6 +139,8 @@ class ClientProfileController extends Controller
     {           
         
         try{
+            $first_name_ar = substr($request->first_name_ar, 0, 250);
+            $last_name_ar = substr($request->last_name_ar, 0, 250);
             
             $user = Auth::user();
 
@@ -171,8 +174,12 @@ class ClientProfileController extends Controller
                 //resize
                 Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function($con) {$con->aspectRatio();})->save();
                 //update
-                $result = $user->update($request->except(['img_url','password','email']) + ['img_url' => $img_url]);
-                }else{
+                
+                $result = $user->update($request->except(['img_url','password','email','first_name_ar','last_name_ar']) + ['img_url' => $img_url]);
+                $user->first_name_ar = $first_name_ar;
+                    $user->last_name_ar = $last_name_ar;
+                    $user->save();
+            }else{
                     // if email changed send email verification
                     //store the image
                 $img_url = $request->file('img_url');
@@ -181,8 +188,10 @@ class ClientProfileController extends Controller
                 //resize
                 Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function($con) {$con->aspectRatio();})->save();
                 //update
-                $result = $user->update($request->except(['img_url','password','email']) + ['img_url' => $img_url]);
-
+                $result = $user->update($request->except(['img_url','password','email','first_name_ar','last_name_ar']) + ['img_url' => $img_url]);
+                $user->first_name_ar = $first_name_ar;
+                $user->last_name_ar = $last_name_ar;
+              
                     $user->new_email = $request->email;
                     $user->save();
                      // إرسال رابط التحقق
@@ -199,9 +208,16 @@ class ClientProfileController extends Controller
                 $getemail = User::where('id', $user->id)->first();
 
                 if($request->email == $getemail->email){
-                    $result = $user->update($request->except(['password','email']));
+                    
+                    $result = $user->update($request->except(['password','email','first_name_ar','last_name_ar']));
+                    $user->first_name_ar = $first_name_ar;
+                    $user->last_name_ar = $last_name_ar;
+                    $user->save();
                 }else{
-                    $result = $user->update($request->except(['password','email']));
+                    $result = $user->update($request->except(['password','email','first_name_ar','last_name_ar']));
+                    $user->first_name_ar = $first_name_ar;
+                    $user->last_name_ar = $last_name_ar;
+              
                     $user->new_email = $request->email;
                     $user->save();
                      // إرسال رابط التحقق

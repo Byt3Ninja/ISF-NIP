@@ -112,7 +112,7 @@
   <!-- Toggle theme and language -->
   <nav 
     class="container-xxl navbar navbar-expand-xl align-items-center"
-    style="{{ $l == 'ar' ? 'left: 1rem' : 'right: 1rem' }}"
+    style="right: 1rem;"
     id="switcher-container"
   >
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
@@ -124,7 +124,7 @@
             <i class="ti ti-language rounded-circle ti-md"></i>
           </a>
           <ul class="dropdown-menu dropdown-menu-end" 
-            style="position: absolute; left: {{$l == 'ar' ? '2rem' : '-8rem'}}; top: 2rem;"
+            style="position: absolute; left: -8rem; top: 2rem;"
           >
             <li class="dropdown dropdown-language nav-item">
               @if ($l == 'ar')
@@ -150,7 +150,7 @@
             <i class="ti ti-md"></i>
           </a>
           <ul class="dropdown-menu dropdown-menu-end dropdown-styles" 
-            style="position: absolute; left: {{$l == 'ar' ? '2rem' : '-8rem'}}; top: 2rem; width: 150px;"
+            style="position: absolute; left: -8rem; width: 150px;"
           >
             <li>
               <a class="dropdown-item" href="javascript:void(0);" data-theme="light">

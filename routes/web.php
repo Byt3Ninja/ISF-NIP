@@ -176,6 +176,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
     Route::post('/answer-assessment', 'AssessmentController@AnswerAssessment')->name('answer-assessment');
 
+    Route::get('/assessment-admin/{id}', 'AssessmentController@assessmentAdmin')->name('question-assessment_admin');
 
     // LFM File Manager Imges
     Route::get('/LFMGet/{idUser?}/{files?}', 'organizationsController@GetLFM')->name('LFMGet');
@@ -266,7 +267,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('index.cycle');
     Route::get('cycles/{id}/registered', 'CyclesController@users');
-    Route::post('cycles/modify', 'CyclesController@modify');
+    Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
     Route::post('cycles/save', 'CyclesController@saveForm');
     Route::get('cycles/my/{id}', 'CyclesController@my');
@@ -355,8 +356,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('training/session-report/{id}', 'TrainingController@sessionReport')->name('training.session-report');
     Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.session-record');
     Route::get('training/session-attendance-report/{id}', 'TrainingController@attendanceReport')->name('training.attendance-report');
-    Route::get('session/report/{id}', 'TrainingController@getReports')->name('training.get-reports');
-    Route::get('session/record/{id}', 'TrainingController@getRecordings')->name('training.get-recordings');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
@@ -429,7 +428,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('mentorshipTasks/show/{mentorshipTask}', 'MentorshipTaskController@show')->name('mentorshipTasks.show');
         Route::post('mentorshipTasks/complete/{mentorshipTask}', 'MentorshipTaskController@complete')->name('mentorshipTasks.complete');
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorshipTasks.sendComment');
-        
+
         Route::resource('fundingRounds', 'FundingRoundController')->except(['index']);
     });
 

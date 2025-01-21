@@ -62,6 +62,8 @@
                           <td>{{$assessment->user->name }}</td>
                           <td>{{$assessment->created_at}}</td>
                           <td>
+                            <a href="{{ route('assessments.show', $assessment->id) }}"><div class="btn btn-info" >{{ __('admin.Show') }}</div></a>
+                            <a href="{{ route('question-assessment_admin', $assessment->id) }}"><div class="btn btn-primary" >{{ __('admin.Assessment') }}</div></a>
                             <div class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#EditAssessment{{ $assessment->id }}">{{__('admin.Edit')}}</div>
                             <form action="{{ route('assessments.destroy', $assessment->id) }}" method="POST" style="display: inline-block;">
                               @csrf
