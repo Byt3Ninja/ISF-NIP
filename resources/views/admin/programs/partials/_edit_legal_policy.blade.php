@@ -30,6 +30,7 @@
       <input type="hidden" name="organization_id" value="{{ $cycle ? $cycle->organization_id : '' }}">
     </div>
   </div>
+  <div id="legal-file-container" class="mb-4"></div>
   <div class="form-group mb-4">
     <div class="form-check form-switch">
       <input 
@@ -57,17 +58,20 @@
         accept="application/pdf" 
       />
     </div>
+    <div id="delegation-file-container" class="mb-4"></div>
   </div>
 </div>
 
 <script>
   function toggleFormGroup(radio) {
     // console.log(radio.checked);
-    const formGroup = document.querySelector('#delegation-form-group');
-    if (radio.checked) {
-      formGroup.style.display = 'block';
-    } else {
-      formGroup.style.display = 'none';
-    }
+    const formGroups = document.querySelectorAll('#delegation-form-group');
+    formGroups.forEach(formGroup => {
+      if (radio.checked) {
+        formGroup.style.display = 'block';
+      } else {
+        formGroup.style.display = 'none';
+      }
+    });
   }
 </script>

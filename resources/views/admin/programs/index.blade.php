@@ -409,70 +409,72 @@
                           // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
                           $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
                         @endphp
-                        <div class="d-flex align-items-center">
-                          <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
-                          <div style="width: 100%; height: 7px;" class="progress rounded-pill">
-                            <div 
-                              class="progress-bar bg-primary" 
-                              role="progressbar" 
-                              style="width: {{ number_format($presSteps, 2) }}%;" 
-                              aria-valuenow="{{ number_format($presSteps, 2) }}" 
-                              aria-valuemin="0" 
-                              aria-valuemax="100"
-                            ></div>
-                          </div>
-                          <span class="fw-bold mx-1">{{$totalSteps}}/{{$totalStepsFinish}}</span>
-                          <div class="mx-2 position-relative">
-                            <div class="dropdown"></div>
-                             <button
-                                class="bg-transparent border-none" 
-                                type="button" id="dropdownMenuButton"   
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="ti ti-dots-vertical ti-24px"></i>
-                              </button>
-                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <li>
-                                  <button 
-                                    class="dropdown-item ccycle" set="1" 
-                                    do="{{ $cycle->id }}"
-                                    onclick="onEditProgramClick({{ $cycle->id }})"
-                                  >
-                                    <i class="ti ti-edit me-2 text-info"></i>
-                                    {{ __('cycles.Edit') }}
-                                  </button>
-                                </li>
-                                <li>
-                                  @can('delete_user')
-                                    <button class="dropdown-item" onclick="DoChange(3, {{ $cycle->id }})">
-                                      <i class="ti ti-trash me-2 text-danger"></i>
-                                      {{ __('cycles.Delete') }}
+                        <div class="d-flex flex-column">
+                          <div class="d-flex align-items-center">
+                            <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
+                            <div style="width: 100%; height: 7px;" class="progress rounded-pill">
+                              <div 
+                                class="progress-bar bg-primary" 
+                                role="progressbar" 
+                                style="width: {{ number_format($presSteps, 2) }}%;" 
+                                aria-valuenow="{{ number_format($presSteps, 2) }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100"
+                              ></div>
+                            </div>
+                            <span class="fw-bold mx-1">{{$totalSteps}}/{{$totalStepsFinish}}</span>
+                            <div class="mx-2 position-relative">
+                              <div class="dropdown"></div>
+                               <button
+                                  class="bg-transparent border-none" 
+                                  type="button" id="dropdownMenuButton"   
+                                  data-bs-toggle="dropdown" aria-expanded="false">
+                                  <i class="ti ti-dots-vertical ti-24px"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                  <li>
+                                    <button 
+                                      class="dropdown-item ccycle" set="1" 
+                                      do="{{ $cycle->id }}"
+                                      onclick="onEditProgramClick({{ $cycle->id }})"
+                                    >
+                                      <i class="ti ti-edit me-2 text-info"></i>
+                                      {{ __('cycles.Edit') }}
                                     </button>
-                                  @endcan
-                                </li>
-                              </ul>
+                                  </li>
+                                  <li>
+                                    @can('delete_user')
+                                      <button class="dropdown-item" onclick="DoChange(3, {{ $cycle->id }})">
+                                        <i class="ti ti-trash me-2 text-danger"></i>
+                                        {{ __('cycles.Delete') }}
+                                      </button>
+                                    @endcan
+                                  </li>
+                                </ul>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <!-- / Progress Bar -->
-                        <div class="d-flex d-md-none mt-3 mt-md-0">
-                          <span class="fs-6 fw-bold mx-2">{{__('admin.Duration')}}</span>
-                          <div 
-                            class="px-2 py-1 me-3 d-flex rounded"
-                            style="background-color: #d9edee;"
-                          >
-                            <i class="ti ti-calendar text-info ti-16px"></i>
-                            <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
-                              {{ $cycle->start ?  $cycle->start->format('Y-m-d') : ''}}
-                            </span>
-                          </div>
-                          <div 
-                            class="px-2 py-1 d-flex rounded"
-                            style="background-color: #d9edee;"
-                          >
-                            <i class="ti ti-calendar text-danger ti-16px"></i>
-                            <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
-                              {{ $cycle->end ?  $cycle->end->format('Y-m-d') : ''}}
-                            </span>
+                          <!-- / Progress Bar -->
+                          <div class="d-flex d-md-none mt-3 mt-md-0">
+                            <span class="fs-6 fw-bold mx-2">{{__('admin.Duration')}}</span>
+                            <div 
+                              class="px-2 py-1 me-3 d-flex rounded"
+                              style="background-color: #d9edee;"
+                            >
+                              <i class="ti ti-calendar text-info ti-16px"></i>
+                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                                {{ $cycle->start ?  $cycle->start->format('Y-m-d') : ''}}
+                              </span>
+                            </div>
+                            <div 
+                              class="px-2 py-1 d-flex rounded"
+                              style="background-color: #d9edee;"
+                            >
+                              <i class="ti ti-calendar text-danger ti-16px"></i>
+                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                                {{ $cycle->end ?  $cycle->end->format('Y-m-d') : ''}}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -671,41 +673,48 @@
     // Set Language
     const lang = '{{ $l }}';
 
-    // Initialize guideline-editor
-    const guidelineEditors = document.querySelectorAll('#guideline-editor');
-    guidelineEditors.forEach(editor => {
-      const quill = new Quill(editor, {
-      theme: 'snow',
-      placeholder: '{{ __('cycles.Program_Guideline') }}'
-      });
-      quill.on('text-change', function() {
-        $('#program_guideline').val(quill.root.innerHTML);
-      });
-    });
-    
-    // Initialize financial-editor
-    const financialEditors = document.querySelectorAll('#financial-editor');
-    financialEditors.forEach(editor => {
-      const quill = new Quill(editor, {
-      theme: 'snow',
-      placeholder: '{{ __('cycles.Financial_Policy') }}'
-      });
-      quill.on('text-change', function() {
-        $('#financial_policy').val(quill.root.innerHTML);
-      });
+    document.addEventListener('DOMContentLoaded', () => {
+      const validDates = document.querySelectorAll('.valid-date');
+      // Initialize Flatpickr Date
+      if (validDates) {
+        validDates.forEach(element => {
+          flatpickr(element, {
+            monthSelectorType: 'static',
+            dateFormat: 'Y-m-d'
+          });
+        });
+      }
     });
 
-    // Initialize legal-editor
-    const legalEditors = document.querySelectorAll('#legal-editor');
-    legalEditors.forEach(editor => {
-      const quill = new Quill(editor, {
-      theme: 'snow',
-      placeholder: '{{ __('cycles.Legal_Policy_Description') }}'
-      });
-      quill.on('text-change', function() {
-        $('#legal_policy').val(quill.root.innerHTML);
-      });
-    });
+    // Initialize Quill Editor
+    const editorConfig = { theme: 'snow' };
+      const guidelineEditor = new Quill('#create-program-modal #guideline-editor', editorConfig);
+      const financialEditor = new Quill('#create-program-modal #financial-editor', editorConfig);
+      const legalEditor = new Quill('#create-program-modal #legal-editor', editorConfig);
+      const editGuidelineEditor = new Quill('#edit-program-modal #guideline-editor', editorConfig);
+      const editFinancialEditor = new Quill('#edit-program-modal #financial-editor', editorConfig);
+      const editLegalEditor = new Quill('#edit-program-modal #legal-editor', editorConfig);
+
+      // Clear Editor
+      guidelineEditor.root.innerHTML = '';
+      financialEditor.root.innerHTML = '';
+      legalEditor.root.innerHTML = '';
+      editGuidelineEditor.root.innerHTML = '';
+      editFinancialEditor.root.innerHTML = '';
+      editLegalEditor.root.innerHTML = '';
+
+      // Handle Editor Change
+      const handleEditorChange = (editor, input) => {
+        editor.on('text-change', function() {
+          $(input).val(editor.root.innerHTML);
+        });
+      };
+      handleEditorChange(guidelineEditor, '#create-program-modal #program_guideline');
+      handleEditorChange(financialEditor, '#create-program-modal #financial_policy');
+      handleEditorChange(legalEditor, '#create-program-modal #legal_policy');
+      handleEditorChange(editGuidelineEditor, '#edit-program-modal #program_guideline');
+      handleEditorChange(editFinancialEditor, '#edit-program-modal #financial_policy');
+      handleEditorChange(editLegalEditor, '#edit-program-modal #legal_policy');
 
     // Handle Reset Values
     const resetValues = () => {
@@ -719,15 +728,33 @@
       $('#create-program-modal #program_guideline').val('');
       $('#create-program-modal #financial_policy').val('');
       $('#create-program-modal #legal_policy').val('');
-      // $('#guideline-editor').html('');
-      // $('#financial-editor').html('');
-      // $('#legal-editor').html('');
       $('#create-program-modal #program-guideline-pdf').val();
       $('#create-program-modal #legal_policy_pdf').val();
       $('#create-program-modal #financial_policy_pdf').val();
       $('#create-program-modal #delegation_pdf').val();
+      $('#create-program-modal #delegation_option').prop('checked', false);
       $('#create-program-modal #private').prop('checked', false);
-    }
+    };
+
+    // Handle Append File
+    const appendFile = (mode, file, conainerId) => {
+      console.log('file', file)
+      if (file) {
+        const fileName = file.split('/').pop();
+        const content = (`
+          <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <i class="ti ti-file fs-4 text-warning"></i>
+              <span class="text-truncate" style="max-width: 200px;">`+ fileName +`</span>
+            </div> 
+            <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/`+ file +`" target="_blank" download>
+              <i class="ti ti-download fs-5"></i>
+            </a>
+          </div>`
+        );
+        $(`#${mode}-program-modal ${conainerId}`).append(content);
+      }
+    };
 
     // Handle Create Program
     const onCreateProgramClick = () => {
@@ -737,7 +764,6 @@
 
     // Handle Edit Program
     const onEditProgramClick = (cycleId) => {
-    
       if(cycleId){
         $('#edit-program-modal').modal('show');
       
@@ -753,7 +779,6 @@
           data: {"cycleid": cycleId },
           success: function(response) {
             console.log(response); 
-          
             $('#edit-program-modal #title').val(response.title ?? '');
             $('#edit-program-modal #description').val(response.description ?? '');
             $('#edit-program-modal #cycleid').val(cycleId); 
@@ -768,40 +793,36 @@
               $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
             }
 
-            // guidelineEditors.forEach(editor => {
-            //   editor.root.innerHTML = response.program_guideline ?? '';
-            // });
-            $('#edit-program-modal #guideline-editor').html(response.program_guideline ?? '');
-            $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
-           
+            if (editGuidelineEditor) {
+              editGuidelineEditor.root.innerHTML = response.program_guideline ?? '';
+            }
 
-            // financialEditors.forEach(editor => {
-            //   ditor.root.innerHTML = response.financial_guideline ?? '';
-            // });
-            $('#edit-program-modal #financial-editor').html(response.financial_guideline ?? '');
+            $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
+
+            if (editFinancialEditor) {
+              editFinancialEditor.root.innerHTML = response.financial_guideline ?? '';
+            }
             $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
             $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
             $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
-            // legalEditors.forEach(editor => {
-            //   ditor.root.innerHTML = response.legal_guideline ?? '';
-            // });
-            $('#edit-program-modal #legal-editor').html(response.legal_guideline ?? '');
+
+            if (editLegalEditor) {
+              editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
+            }
             $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
-            $('#edit-program-modal #legal_policy_pdf').val(response.legal_guideline_file);
-            $('#edit-program-modal #delegation_pdf').val(response.delegation_file);
+            const guidelineFile = response?.program_guideline_file;
+            const financialFile = response.financial_guideline_file;
+            const legalFile = response?.legal_guideline_file;
+            const delegationFile = response.delegation_file;
             
-            // $('#edit-program-modal #guidline').append(`
-            //   <div class="d-flex align-items-center">
-            //     <div class="d-flex justify-content-between align-items-center">
-            //       <div class="d-flex align-items-center gap-3">
-            //         <i class="ti ti-file fs-1 text-warning"></i>
-            //         <span>(`+ response.basename_guideline +`) </span>
-            //       </div> 
-            //       <a class="btn btn-transparent" href="/storage/`+ response.program_guideline_file +`" target="_blank" download>
-            //         <i class="ti ti-download fs-3 text-primary"></i>
-            //       </a>
-            //     </div>
-            //   </div>`);
+            appendFile('edit', guidelineFile, '#guideline-file-container');
+            appendFile('edit', financialFile, '#financial-file-container');
+            appendFile('edit', legalFile, '#legal-file-container');
+
+            if (delegationFile) {
+              appendFile('edit', delegationFile, '#delegation-file-container');
+              $('#edit-program-modal delegation_option').prop('checked', true);
+            }
           },
           error: function(error) {
             console.log(error);
@@ -810,20 +831,19 @@
           }
         });
       }
-    };
+    }; 
   </script>
-
   <script>
-    $('.date').datetimepicker({
-      timepicker: false,
-      format: 'Y-m-d'
-    });
-    $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
-      format: 'Y-m-d',
-      minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
-      maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
-      timepicker: false
-    });
+    // $('.date').datetimepicker({
+    //   timepicker: false,
+    //   format: 'Y-m-d'
+    // });
+    // $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
+    //   format: 'Y-m-d',
+    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
+    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
+    //   timepicker: false
+    // });
     $(document).ready(function() {
       let drake = dragula([document.getElementById('basic-list-group')]);
       drake.on('drop', function(el) {

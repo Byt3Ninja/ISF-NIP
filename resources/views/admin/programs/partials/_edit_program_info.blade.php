@@ -1,4 +1,3 @@
-
 <div class="row">
   <div class="col-12 text-center mb-4">
     <img 
@@ -33,7 +32,6 @@
         name="title" 
         placeholder="{{ __('cycles.Cycle title') }}"
         oninput="this.value = this.value.trimStart()"
-        {{-- value="{{ $mode == 'edit' ? $program->title : '' }}" --}}
       >
     </div>
     <div class="row">
@@ -51,7 +49,7 @@
               placeholder="YYYY-MM-DD"
             />
             <span class="input-group-text">
-              <i class="ti ti-calendar"></i>
+              <i class="ti ti-calendar text-light"></i>
             </span>
           </div>
         </div>
@@ -70,7 +68,7 @@
               placeholder="YYYY-MM-DD"
             />
             <span class="input-group-text">
-              <i class="ti ti-calendar"></i>
+              <i class="ti ti-calendar text-light"></i>
             </span>
           </div>
         </div>
@@ -115,14 +113,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const validDate = document.querySelectorAll('.valid-date');
-    if (validDate) {
-      validDate.flatpickr({
-        monthSelectorType: 'static'
-      });
-    }
-  });
-</script>
