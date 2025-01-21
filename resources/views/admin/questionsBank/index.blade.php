@@ -45,9 +45,21 @@
                 <div class="card-header mb-2 border-bottom">
                   <h4 class="card-title">{{__('admin.Questions Bank List')}}</h4>
                 </div>
+				
 								<div class="card-body">
+
+									
 									<!-- datatable start -->
 									<div class="table-responsive">
+										<div class="" style="width: 40%;">
+											<label for="filterGroup">{{ __('admin.Choose_Type') }}</label>
+											<select id="filterGroup" class="form-select Type wight-40">
+												<option value="all">{{ __('admin.All') }}</option>
+												<option value="quiz">{{ __('admin.Quiz') }}</option>
+												<option value="survey">{{ __('admin.Survey') }}</option>
+												<option value="assessment">{{ __('admin.Assessment') }}</option>
+											</select>
+										</div>
 										<table id="organizations-list-datatable" class="table">
 											<thead>
 											<tr class="table-light">
@@ -61,7 +73,7 @@
 											</thead>
 											<tbody>
 												@foreach( $questions as $question )
-													<tr>
+													<tr data-group="{{ $question->group }}">
 														<td><a href="{{ URL::to('dashboard/questions-bank/' . $question->id . '/edit') }}">{{ $question->id }}</a></td>
 														<td>{{ $question->question }}</td>
 														<td>
@@ -154,5 +166,23 @@
 				}
 			})
 		});
+
+		$(document).ready(function() {
+			$('.Type').change(function () {
+        var selectedGroup = $(this).val(); // القيمة المختارة من القائمة
+		
+        $('#organizations-list-datatable tbody tr').each(function () {
+            var group = $(this).data('group'); // قراءة قيمة data-group من الصف
+			
+            if (selectedGroup === 'all' || group === selectedGroup) {
+                $(this).show(); // عرض الصف
+            } else {
+                $(this).hide(); // إخفاء الصف
+            }
+        });
+    });
+
+		});
+		
 	</script>
 @stop
