@@ -77,9 +77,9 @@ foreach ($steps as  $step) {
 
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
   $totalDurationSum += $TotalStepsDuration;
-
+  $answerspinding = 0;
   $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
-          $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNull('screening')->orWhere('screening', '{}')->count();
+          $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNotNull('screening')->orWhere('screening', '{}')->count();
           $answersdone = app(App\Formdata::class)
           ->where('step_id', $step->id)
           ->whereNotNull('screening') // الحقل ليس NULL
@@ -94,6 +94,7 @@ if($totalStepsIdsCount > 0){
 }else{
   $totalStepsIdsCount = 0;
 }
+
 if($answerspinding > 0){
   $answerspinding = $answerspinding;
 }else{
