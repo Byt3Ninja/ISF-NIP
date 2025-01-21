@@ -468,8 +468,8 @@ const whatsappInput = document.getElementById("WhatsApp");
 const phoneError = document.getElementById('phone-error');
 const whatsappError = document.getElementById('whatsapp-error');
 
-const countryCodeFromDB = "{{ $client->company->country_code }}".trim();
-const countryCodeWAFromDB = "{{ $client->company->country_code_w_a }}".trim();
+const countryCodeFromDB = "{{ $client->company ? $client->company->country_code : '' }}".trim();
+const countryCodeWAFromDB = "{{ $client->company ? $client->company->country_code_w_a : '' }}".trim();
 
 console.log('countryCodeFromDB', countryCodeFromDB);
 console.log('countryCodeWAFromDB', countryCodeWAFromDB);
@@ -512,7 +512,7 @@ const whatsappIti = intlTelInput(whatsappInput, {
 const countryCodeWAInput = document.createElement("input");
 countryCodeWAInput.type = "hidden";
 countryCodeWAInput.name = "country_code_w_a";
-countryCodeWAInput.value = "{{ $client->company->country_code_w_a ?? '' }}";
+countryCodeWAInput.value = "{{ $client->company ? ( $client->company->country_code_w_a ?? '' ) : '' }}";
 whatsappInput.parentNode.appendChild(countryCodeWAInput);
 
 // تحديث الحقل المخفي عند تغيير الدولة في الواتساب
@@ -526,7 +526,7 @@ whatsappInput.addEventListener("countrychange", () => {
 const countryCodeInput = document.createElement("input");
 countryCodeInput.type = "hidden";
 countryCodeInput.name = "country_code";
-countryCodeInput.value = "{{ $client->company->country_code ?? '' }}";
+countryCodeInput.value = "{{ $client->company ? ( $client->company->country_code ?? '' ) : '' }}";
 phoneInput.parentNode.appendChild(countryCodeInput);
 
 // ضبط الدولة الافتراضية

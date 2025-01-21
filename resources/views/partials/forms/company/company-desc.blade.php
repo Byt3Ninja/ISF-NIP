@@ -195,6 +195,7 @@
   </div>
 </div>
 
+@if( !empty( $client->company ) )
 <script>
   const sustainabiltyWhiteList = '{{ $client->company->Sustainable_development }}';
   const decodeHtmlEntities = (str) => {
@@ -225,3 +226,4 @@
     // }
   });      
 </script>
+@endif

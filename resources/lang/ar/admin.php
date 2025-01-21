@@ -1158,4 +1158,6 @@ return [
 	'Manage_Assessments' => 'ادارة التقييمات',
 	'subcategory_Done_All' => 'تم الانتهاء',
 	'Assessment_completed_successfully' => 'تم الانتهاء من التقييم بنجاح',
+	'Choose_Type' => 'اختر نوع',
+	'Quiz' => 'اختبار',
 ];
