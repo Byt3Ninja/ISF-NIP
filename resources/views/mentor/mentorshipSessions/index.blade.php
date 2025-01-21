@@ -12,15 +12,15 @@
       <div class="content-overlay"></div>
       <div class="content-body">
         <section id="multiple-column-form">
-          @if(session()->has('message'))
+          @if(session()->has('message') || session()->has('msg'))
           <div class="alert alert-success alert-dismissible mb-2" role="alert">
-            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
+            {{-- <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
-            </button>
+            </button> --}}
             <div class="d-flex align-items-center">
               <i class="ti ti-check"></i>
               <span>
-                {{ __('admin.'.session()->get('message')) }}
+                {{ __('admin.' . session()->get('message', session()->get('msg'))) }}
               </span>
             </div>
           </div>
