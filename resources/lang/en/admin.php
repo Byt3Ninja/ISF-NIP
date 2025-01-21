@@ -1141,4 +1141,6 @@ return [
 	'Manage_Assessments' => 'Manage Assessments',
 	'subcategory_Done_All' => 'Done All',
 	'Assessment_completed_successfully' => 'Assessment completed successfully!',
+	'Choose_Type' => 'Choose Type',
+	'Quiz' => 'Quiz',
 ];
