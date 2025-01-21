@@ -745,9 +745,9 @@
           <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
             <div class="d-flex align-items-center gap-2">
               <i class="ti ti-file fs-4 text-warning"></i>
-              <span class="text-truncate" style="max-width: 200px;">`+ fileName +`</span>
+              <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
             </div> 
-            <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/`+ file +`" target="_blank" download>
+            <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
               <i class="ti ti-download fs-5"></i>
             </a>
           </div>`
