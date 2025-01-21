@@ -235,13 +235,12 @@ class ScreeningController extends Controller
             $data['company_name_en'] = $company_owner->company->name_en;
             $data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
             $data['organization_name_en'] = $cstep->cycle->organization->name_en;
+            $data['emailCompany'] = $company_owner->email;
 
             // Broadcast Event //
             ChangeStep::dispatch($data);
 
-            $recipients = collect([$company_owner])
-                ->merge(User::role("Mentor")->get())
-                ->merge(User::role("Registered")->get());
+            $recipients = User::role("Registered")->where('email', $company_owner->email)->get();
 
             // Notify all recipients
             foreach ($recipients as $recipient) {

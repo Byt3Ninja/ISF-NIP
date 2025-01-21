@@ -148,13 +148,28 @@
               <label class="form-label fs-6 fw-semibold" for="email">{{ __('auth.E-Mail') }}</label>
               <input class="form-control @error('email') is-invalid @enderror" id="email" name="email" type="email"
                 value="{{ $email ?? old('email') }}" readonly required autocomplete="email" autofocus>
+               
             </div>
+            <div class="mb-2">
+              @error('forget')
+              <span class="invalid-feedback" role="alert">
+                 <strong>{{ $message }}</strong>
+              </span>
+              @enderror
+            </div>
+           
             <div class="mb-6 form-password-toggle">
               <label class="form-label fs-6 fw-semibold" for="password">{{ $pwdLabel }}</label>
               <div class="input-group input-group-merge">
                 <input class="form-control" id="password" name="password" type="password" aria-describedby="password"
                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
                 <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                @error('password')
+                      <span class="invalid-feedback" role="alert">
+                             <strong>{{ $message }}</strong>
+                      </span>
+                @enderror
+
               </div>
             </div>
             <div class="mb-6 form-password-toggle">

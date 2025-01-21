@@ -406,7 +406,7 @@
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <div class="bg-label-secondary px-1 rounded">
                         <span
-                          class="text-xxs text-primary fw-bold">{{ $company->sector ? __('admin.' . $company->sector) : __('admin.N/A') }}</span>
+                          class="text-xxs text-primary fw-bold">{{ $company->sector ?  optional($company->sectoR)->{'name_' . $l} : __('admin.N/A') }}</span>
                       </div>
 
 
@@ -417,7 +417,7 @@
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <div class="bg-label-warning px-1 rounded">
                         <span
-                          class="text-xxs text-warning fw-bold">{{ $company->stage ? __('admin.stage_' . $company->stage) : __('admin.N/A') }}</span>
+                          class="text-xxs text-warning fw-bold">{{ $company->stage ?  optional($company->stagE)->{'name_' . $l} : __('admin.N/A') }}</span>
                       </div>
 
                     </div>

@@ -689,7 +689,7 @@ class TrainingController extends Controller
         if ($id == 0) {
             $id = $steps->pluck('id')->first();
         }
-        $sessions = TrainingSession::where('step_id', $id)->orderBy('datetime', 'ASC')->get();
+        $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC')->get();
         $online = Training::get();
         return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'online'));
     }
@@ -926,78 +926,101 @@ class TrainingController extends Controller
                     ]
                 );
             }
-
-            return response()->json(['success' => true, 'message' => 'Session Report Saved Successfully.'], 200);
+            return redirect()->back();
         }
-
-        return response()->json(['success' => false, 'message' => $response['message']], 500);
     }
 
-    public function getReports($id)
-    {
-        $session = TrainingSession::find($id);
 
-        if (!$session) {
-            return redirect()->back()->with('error', 'Session Not Found.');
-        }
+    // public function sessionRecord($id)
+    // {
+    //     $session = TrainingSession::find($id);
 
-        $reports = SessionReport::where('session_id', $id)->get();
+    //     if (!$session || !$session->zoom_id) {
+    //         return redirect()->back()->withErrors([
+    //             'error' => 'Session Not Found',
+    //         ]);
+    //     }
 
-        return view('training.session_report', compact('session', 'reports'));
-    }
+    //     $response = $this->meetingService->getSessionRecord($session->zoom_id);
+    //     dd($response);
 
+    //     if (!$response['success']) {
+    //         return redirect()->back()->withErrors([
+    //             'error' => 'Session Recording Not Found',
+    //         ]);
+    //     }
+
+    //     $recordingFiles = $response['data']['recording_files'] ?? [];
+
+    //     foreach ($recordingFiles as $file) {
+    //         $recordingTime = isset($file['recording_start'])
+    //             ? Carbon::parse($file['recording_start'])->toDateTimeString()
+    //             : null;
+
+    //         SessionRecording::updateOrCreate(
+    //             [
+    //                 'recording_id' => $file['id'],
+    //             ],
+    //             [
+    //                 'session_id' => $session->id,
+    //                 'recording_type' => $file['recording_type'] ?? null,
+    //                 'recording_view_url' => $file['play_url'] ?? null,
+    //                 'recording_download_url' => $file['download_url'] ?? null,
+    //                 'recording_time' => $recordingTime,
+    //             ]
+    //         );
+    //     }
+
+    //     return redirect()->back();
+    // }
 
     public function sessionRecord($id)
     {
         $session = TrainingSession::find($id);
 
         if (!$session || !$session->zoom_id) {
-            return response()->json(['success' => false, 'message' => 'Session not found or invalid Zoom ID'], 404);
+            return redirect()->back()->withErrors([
+                'error' => 'Session Not Found',
+            ]);
         }
 
         $response = $this->meetingService->getSessionRecord($session->zoom_id);
 
         if (!$response['success']) {
-            return response()->json(['success' => false, 'message' => $response['message']], 500);
+            return redirect()->back()->withErrors([
+                'error' => 'Session Recording Not Found',
+            ]);
         }
 
         $recordingFiles = $response['data']['recording_files'] ?? [];
+        $password = $response['data']['password'] ?? null;
 
-        foreach ($recordingFiles as $file) {
-            $recordingTime = isset($file['recording_start'])
-                ? Carbon::parse($file['recording_start'])->toDateTimeString()
+        $firstFile = $recordingFiles[0] ?? null;
+
+        if ($firstFile) {
+            $recordingTime = isset($firstFile['recording_start'])
+                ? Carbon::parse($firstFile['recording_start'])->toDateTimeString()
                 : null;
 
             SessionRecording::updateOrCreate(
                 [
-                    'recording_id' => $file['id'],
+                    'recording_id' => $firstFile['id'],
                 ],
                 [
                     'session_id' => $session->id,
-                    'recording_type' => $file['recording_type'] ?? null,
-                    'recording_view_url' => $file['play_url'] ?? null,
-                    'recording_download_url' => $file['download_url'] ?? null,
+                    'recording_type' => $firstFile['recording_type'] ?? null,
+                    'recording_view_url' => $firstFile['play_url'] ?? null,
+                    'recording_download_url' => $firstFile['download_url'] ?? null,
                     'recording_time' => $recordingTime,
+                    'passcode' => $password,
                 ]
             );
         }
 
-        return response()->json(['success' => true, 'message' => 'Session Recordings Saved Successfully.'], 200);
+        return redirect()->back();
     }
 
-    public function getRecordings($id)
-    {
-        $session = TrainingSession::find($id);
 
-        if (!$session) {
-            return redirect()->back()->with('error', 'Session Not Found.');
-        }
-
-        $recordings = SessionRecording::where('session_id', $id)->get();
-        dd($recordings);
-
-        return view('training.session_report', compact('session', 'recordings'));
-    }
 
 
 

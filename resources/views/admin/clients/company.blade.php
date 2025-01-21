@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+
   <style>
     #contentWrapper {
       margin-bottom: 5rem;
@@ -76,9 +78,14 @@
         <ul class="nav nav-pills flex-nowrap" role="tablist">
           @foreach ($tabs as $key => $tab)
             <li class="nav-item d-flex justify-content-center align-items-center">
-              <a href="#navs-left-{{ $tab['target'] }}"
+              <a 
+                id="company-tab"
+                href="#navs-left-{{ $tab['target'] }}"
                 class="nav-link {{ $key == 0 ? 'active' : '' }}"
-                data-bs-toggle="tab" role="tab">
+                data-bs-toggle="tab" 
+                role="tab"
+                {{-- onclick="handleTabClick({{ $key }});" --}}
+              >
                 <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                 {{ $tab['label'] }}
               </a>
@@ -96,9 +103,14 @@
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
               <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
-                <a href="#navs-left-{{ $tab['target'] }}"
+                <a 
+                  id="company-tab"
+                  href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
-                  data-bs-toggle="tab" role="tab">
+                  data-bs-toggle="tab"
+                  role="tab"
+                  {{-- onclick="handleTabClick({{ $key }});" --}}
+                >
                   <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                   {{ $tab['label'] }}
                 </a>
@@ -170,6 +182,7 @@
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
 @stop
 
 @section('pagescripts')
@@ -178,6 +191,7 @@
   </script>
 
   <script src="/vuexy/assets/js/forms-selects.js"></script>
+  <script src="/vuexy/assets/js/forms-tagify.js"></script>
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
 
   <script>
@@ -194,18 +208,25 @@
     });
   </script> 
 
-  <script>
-    document.getElementById('update-form').addEventListener('submit', function(
-      event) {
-      var button = document.getElementById('submit-button');
-      var buttonText = document.getElementById('button-text');
-      var buttonSpinner = document.getElementById('button-spinner');
+  {{-- <script>
+    const handleTabClick = (tab) => {
+      localStorage.setItem('activeCompanyTab', JSON.stringify(tab));
+    }
 
-      button.disabled = true;
-      buttonText.classList.add('d-none');
-      buttonSpinner.classList.remove('d-none');
+    document.addEventListener('DOMContentLoaded', function() {
+      const activeIndex = localStorage.getItem('activeCompanyTab');
+      if (activeIndex) {
+        const tabIndex = JSON.parse(activeIndex);
+        console.log('activeTab', tabIndex);
+        const companyTabs = document.querySelectorAll('#company-tab'); // Changed selector to class
+        companyTabs.forEach((tab, index) => {
+          if (index === tabIndex) {
+            tab.click();
+          }
+        });
+      }
     });
-  </script>
+  </script> --}}
 
   <script>
     $(document).ready(function() {
@@ -442,86 +463,109 @@
 
 <script>
   // Initialize the phone input
-  const phoneInput = document.getElementById("phone");
-  const whatsappInput = document.getElementById("WhatsApp");
-  const phoneError = document.getElementById('phone-error');
-  const whatsappError = document.getElementById('whatsapp-error');
+const phoneInput = document.getElementById("phone");
+const whatsappInput = document.getElementById("WhatsApp");
+const phoneError = document.getElementById('phone-error');
+const whatsappError = document.getElementById('whatsapp-error');
 
-  const iti = intlTelInput(phoneInput, {
-    initialCountry: "eg", // Default country
-    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
-    separateDialCode: true, // عرض مفتاح الدولة بشكل منفصل
-    autoPlaceholder: "aggressive", // Show placeholder
-    customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
-        return "e.g. " + selectedCountryPlaceholder;
-    },
+const countryCodeFromDB = "{{ $client->company->country_code }}".trim();
+const countryCodeWAFromDB = "{{ $client->company->country_code_w_a }}".trim();
+
+console.log('countryCodeFromDB', countryCodeFromDB);
+console.log('countryCodeWAFromDB', countryCodeWAFromDB);
+
+// Initialize intl-tel-input
+const iti = intlTelInput(phoneInput, {
+  initialCountry: getCountryCode(countryCodeFromDB),
+  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+  formatOnDisplay: false,
+  separateDialCode: true,
+  autoPlaceholder: "aggressive",
+  customPlaceholder: (placeholder) => "e.g. " + placeholder,
 });
 
-// إضافة حقل مخفي
+function getCountryCode(code) {
+  let dialCode = code.toString().trim();
+  const countryData = intlTelInputGlobals.getCountryData();
+  const country = countryData.find(country => `+${country.dialCode}` === dialCode);
+
+  if (country) {
+    console.log("Country Code Found: " + country.iso2);
+    return country.iso2;
+  }
+  return "eg";
+}
+
+const whatsappIti = intlTelInput(whatsappInput, {
+  initialCountry: getCountryCode(countryCodeWAFromDB),
+  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+  separateDialCode: true,
+  formatOnDisplay: false,
+  autoPlaceholder: "aggressive",
+  customPlaceholder: (placeholder) => "e.g. " + placeholder,
+});
+
+
+// حقل مخفي للكود الدولي للواتساب
+const countryCodeWAInput = document.createElement("input");
+countryCodeWAInput.type = "hidden";
+countryCodeWAInput.name = "country_code_w_a";
+countryCodeWAInput.value = "{{ $client->company->country_code_w_a ?? '' }}";
+whatsappInput.parentNode.appendChild(countryCodeWAInput);
+
+// تحديث الحقل المخفي عند تغيير الدولة في الواتساب
+whatsappInput.addEventListener("countrychange", () => {
+    const dialCode = whatsappIti.getSelectedCountryData().dialCode;
+    countryCodeWAInput.value = "+" + dialCode; // تعيين الكود الدولي
+    console.log("WhatsApp Dial Code Updated: " + countryCodeWAInput.value);
+});
+
+// حقل مخفي للكود الدولي
 const countryCodeInput = document.createElement("input");
 countryCodeInput.type = "hidden";
 countryCodeInput.name = "country_code";
+countryCodeInput.value = "{{ $client->company->country_code ?? '' }}";
 phoneInput.parentNode.appendChild(countryCodeInput);
 
-// عند تحميل الصفحة، ضبط الدولة الافتراضية
-const countryCodeFromDB = "{{ $countryCode ?? '' }}";
+// ضبط الدولة الافتراضية
 if (countryCodeFromDB) {
-    iti.setCountry(countryCodeFromDB); // تعيين الدولة الافتراضية
-    countryCodeInput.value = "+" + iti.getSelectedCountryData().dialCode; // تحديث الحقل المخفي
+    iti.setCountry(countryCodeFromDB);
+    countryCodeInput.value = "+" + iti.getSelectedCountryData().dialCode;
 }
 
 // تحديث الحقل المخفي عند تغيير الدولة
-phoneInput.addEventListener("countrychange", function() {
+phoneInput.addEventListener("countrychange", () => {
     const dialCode = iti.getSelectedCountryData().dialCode;
-    console.log("Dial Code: " + dialCode); // طباعة للتأكد
-    countryCodeInput.value = "+" + dialCode; // تحديث الحقل
+    countryCodeInput.value = "+" + dialCode;
 });
 
-  // Optional: Handle validation
-  phoneInput.addEventListener("input", (e) => {
-    console.log(e.target.value);
-    const phoneNumber = e.target.value.replace(/\D/g, '');
-    if (isNaN(phoneNumber)) {
-      phoneError.style.display = 'block';
-      phoneError.innerText = lang == 'en' ? 'Phone should be numbers only' : 'يجب أن يكون الهاتف أرقام فقط';
-    } else if (iti.isValidNumber()) {
-      phoneError.style.display = 'none';
-      // console.log("Valid number:", iti.getNumber());
-    } else {
-      phoneError.style.display = 'block';
-      phoneError.innerText = lang == 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
-      // console.error("Invalid number");
-    }
-  });
+whatsappInput.addEventListener("countrychange", () => {
+    const dialCode = whatsappIti.getSelectedCountryData().dialCode;
+    console.log("WhatsApp Dial Code: " + dialCode);
+});
 
-  const whatsappInit = intlTelInput(whatsappInput, {
-    initialCountry: "eg", // Default country
-    preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
-    separateDialCode: true, // Separate dial code from the number
-    autoPlaceholder: "aggressive", // Show placeholder
-    customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
-    return "e.g. " + selectedCountryPlaceholder;
-    }
-  });
-
-  // Optional: Handle validation
-  whatsappInput.addEventListener("input", (e) => {
-    console.log(e.target.value);
-    const whatsappNumber = e.target.value.replace(/\D/g, '');
-    if (isNaN(whatsappNumber)) {
-      whatsappError.style.display = 'block';
-      whatsappError.innerText = lang == 'en' ? 'Whatsapp should be numbers only' : 'يجب أن يكون الواتساب أرقام فقط';
-    } else if (iti.isValidNumber()) {
-      whatsappError.style.display = 'none';
-      // console.log("Valid number:", iti.getNumber());
+// التحقق من صحة الرقم
+phoneInput.addEventListener("input", () => {
+    if (iti.isValidNumber()) {
+        phoneError.style.display = 'none';
     } else {
-      whatsappError.style.display = 'block';
-      whatsappError.innerText = lang == 'en' ? 'Invalid Whatsapp number' : 'رقم الواتساب غير صحيح';
-      // console.error("Invalid number");
+        phoneError.style.display = 'block';
+        phoneError.innerText = "Invalid phone number";
     }
-  });
+});
+
+whatsappInput.addEventListener("input", () => {
+    if (whatsappIti.isValidNumber()) {
+        whatsappError.style.display = 'none';
+    } else {
+        whatsappError.style.display = 'block';
+        whatsappError.innerText = "Invalid WhatsApp number";
+    }
+});
+
+
 </script>
 @stop
 

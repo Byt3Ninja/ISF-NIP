@@ -52,7 +52,7 @@ class ResetPasswordController extends Controller
         $resetEntry = DB::table('password_resets')->where('email', $email)->orderBy('created_at', 'desc')->first();
 
         if (!$resetEntry || !Hash::check($token, $resetEntry->token)) {
-            return back()->withErrors(['email' => __('auth.expired_token')]);
+            return back()->withErrors(['forget' => __('auth.expired_token')]);
         }
 
         $response = $this->broker()->reset(
@@ -74,20 +74,18 @@ class ResetPasswordController extends Controller
 
         Auth::logout();
 
-        // إبطال الجلسة الحالية
+        // // إبطال الجلسة الحالية
         $request->session()->invalidate();
 
-        // تجديد توكن الحماية CSRF
+        // // تجديد توكن الحماية CSRF
         $request->session()->regenerateToken();
 
-        // إعادة التوجيه
-        return redirect('/login')->with('Reset', __('auth.password_reset_success'));
+        // // إعادة التوجيه
+        return to_route('login')->with('Reset', __('auth.password_reset_success'));
     }
 
     protected function sendResetFailedResponse(Request $request, $response)
     {
         return back()->withErrors(['email' => trans($response)]);
     }
-
- 
 }
