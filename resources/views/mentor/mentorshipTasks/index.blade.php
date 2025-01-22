@@ -194,11 +194,11 @@
 									<h6 class="fw-semibold mb-0"><i class="ti ti-paperclip text-primary ti-24px me-2"></i>{{ __('admin.Attachments') }}</h6>
 									<h6 class="mb-0"><span class="badge bg-white text-dark" id="attachmentCount">0</span></h6>
 								</div>
-								{{-- <input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" /> --}}
-								{{-- <button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
+								<input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)" data-task="" />
+								<button type="button" class="btn btn-sm btn-outline-info" style="width: 24px;"
 									onclick="document.getElementById('fileInput').click();">
 									<i class="ti ti-plus ti-16px"></i>
-								</button> --}}
+								</button>
 							</div>
 							<div class="d-flex flex-wrap gap-2" id="fileList"></div>
 						</div>
