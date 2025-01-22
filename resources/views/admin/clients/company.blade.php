@@ -471,9 +471,6 @@ const whatsappError = document.getElementById('whatsapp-error');
 const countryCodeFromDB = "{{ $client->company ? $client->company->country_code : '' }}".trim();
 const countryCodeWAFromDB = "{{ $client->company ? $client->company->country_code_w_a : '' }}".trim();
 
-console.log('countryCodeFromDB', countryCodeFromDB);
-console.log('countryCodeWAFromDB', countryCodeWAFromDB);
-
 // Initialize intl-tel-input
 const iti = intlTelInput(phoneInput, {
   initialCountry: getCountryCode(countryCodeFromDB),
