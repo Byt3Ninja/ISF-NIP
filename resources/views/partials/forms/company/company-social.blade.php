@@ -1,272 +1,238 @@
-<style>
-  .picker-container {
-    width: 100%;
-  }
-  .picker-container img {
-    width: 100%;
-    height: 120px;
-    cursor: pointer;
-  }
-
-  @media screen and (min-width: 768px) {
-    .picker-container {
-      width: 13%;
-    }
-    .picker-container img {
-      width: 90px;
-      height: 90px;
-    }
-  }
-</style>
-
 <div class="card">
   <div class="card-body">
-    <div class="border-bottom border-light mb-6">
+    <div class="border-bottom mb-4">
       <h5 class="card-title">{{ $tab['label'] }}</h5>
     </div>
-    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
-    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
-      enctype="multipart/form-data">
-@else
-<form method="post" action="{{ route('update_my_company') }}"
-  enctype="multipart/form-data">
-@endif
+    @php($action = Auth::user()->hasanyRole('Admin|organizationManager') ? route('update_my_company', $client->company->id) : route('update_my_company'))
+    <form 
+      method="post" 
+      id="company-social-form" 
+      onsubmit="return validateForm()"
+      enctype="multipart/form-data" 
+      action="{{ $action }}" 
+    >
       {!! csrf_field() !!}
-
       <input type="hidden" value="8" name="CompanyN">
-      <div class="d-flex flex-column flex-md-row align-items-center gap-4">
-
+      <div class="row">
         <!-- Upload Company Logo -->
-        <div
-          class="d-flex flex-column gap-1 justify-content-between align-items-center picker-container">
-          <span class="text-center text-black fw-medium">{{ __('admin.Logo') }}</span>
-          <div class="position-relative">
-            @if (isset($client->company->logo))
-            <div id="holder">
-              <img 
-                id="company-logo holder" 
-                src="{{ $client->company->logo }}"
-                alt="Company logo"
-                class="mb-2 radius-15"
-                 
+        <div class="col-12 col-md-2 justify-content-center d-flex">
+          <div class="d-flex flex-column" style="width: fit-content;">
+            <div class="w-px-100 text-center">
+              <label class="fs-6 form-label fw-semibold mb-1" class="form-label fw-medium">{{ __('admin.Logo') }}</label>
+            </div>
+            <div id="holder" class="company-picker-container">
+              <div class="position-relative w-px-100 h-px-100 mb-3 cursor-pointer">
+                <img 
+                  id="company-logo" 
+                  src="{{ $client->company->logo ?? '/images/logo-placeholder.png' }}" 
+                  onerror="this.src = '/images/logo-placeholder.png';"
+                  alt="Company logo" 
+                  class="img-fluid rounded border w-px-100 h-px-100" 
+                />
+                <i class="ti ti-camera-plus position-absolute bottom-0 end-0 p-2"></i>
+              </div>
+              <input 
+                type="file" 
+                class="form-control mt-2 d-none" 
+                id="file1" 
+                name="img_url" 
+                accept="image/*" 
               />
             </div>
-            @else
-            <div id="holder">
-              <img 
-                id="company-logo" 
-                src="/images/background/logo.png"
-                alt="Default logo"
-                style="width: 90px; height: 90px; border-radius: 10px; cursor: pointer;"
-                class="mb-2"
-                 
-              />
-            </div>
+            @if ($client->company->logo) 
+              <div class="w-px-100 text-center">
+                <button
+                  type="button" 
+                  id="reset-company-logo"
+                  onclick="document.querySelector('#company-logo').src = '/images/logo-placeholder.png'; document.querySelector('#file1').value = '';"
+                  class="btn btn-label-secondary btn-sm"
+                >
+                  {{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
+                </button>
+              </div>
             @endif
-              <input type="text" class="form-control d-none" id="file1"
-                name="img_url"  />
-            <!-- right bottom-icon -->
-            
-          </div>
-          <div 
-            class="btn btn-outline-primary rounded-pill btn-sm lfm" data-input="file1" data-preview="holder" >
-            {{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
           </div>
         </div>
-        <!-- / Upload Company Logo -->
+        <!-- /Upload Company Logo -->
 
-        <div class="d-flex flex-column mt-8">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="position-relative">
-                <input type="text"
-                  class="form-control px-10 input-shadow border-light mb-4"
-                  {{-- style="height: 42px;" --}} id="linkedin"
-                  placeholder="{{ __('admin.Linkedin') }}"
-                  value="{{ $client->company ? $client->company->linkedin : old('linkedin') }}"
-                  name="linkedin" autocomplete="new-linkedin">
-                <img src="/icons/linkedin.svg"
-                  style="height: 20px; width: 20px; left: 7px;"
-                  class="position-absolute top-50 translate-middle-y me-3" />
+        <!-- Social Media Links -->
+        <div class="col-md-10">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="linkedin">{{ __('admin.Linkedin') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="linkedin" 
+                    name="linkedin" 
+                    placeholder="{{ $l == 'en' ? 'LinkedIn URL' : 'رابط لينكد إن' }}" 
+                    value="{{ $client->company->linkedin ?? old('linkedin') }}" 
+                    pattern="https://www.linkedin.com/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-linkedin"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid LinkedIn URL' : 'رابط لينكد إن غير صالح' }}</div>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="position-relative">
-                <input type="text"
-                  class="form-control px-10 input-shadow border-light mb-4"
-                  {{-- style="height: 42px;" --}} id="twitter"
-                  placeholder="{{ __('admin.Twitter') }}"
-                  value="{{ $client->company ? $client->company->twitter : old('twitter') }}"
-                  name="twitter" autocomplete="twitter">
-                <i class="fa-brands fa-twitter fs-5 position-absolute top-50 translate-middle-y me-3 text-info"
-                  style="left: 7px;"></i>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="twitter">{{ __('admin.Twitter') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="twitter" 
+                    name="twitter" 
+                    placeholder="{{ $l == 'en' ? 'Twitter URL' : 'رابط تويتر' }}" 
+                    value="{{ $client->company->twitter ?? old('twitter') }}" 
+                    pattern="https://twitter.com/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Twitter URL.' : 'يرجى إدخال رابط تويتر صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-twitter"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Twitter URL' : 'رابط تويتر غير صالح' }}.</div>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="position-relative">
-                <input type="text"
-                  class="form-control px-10 input-shadow border-light mb-4"
-                  {{-- style="height: 42px;" --}} id="facebook"
-                  placeholder="{{ __('admin.Facebook') }}"
-                  value="{{ $client->company ? $client->company->facebook : old('facebook') }}"
-                  name="facebook" autocomplete="facebook">
-                <i class="fa-brands fa-facebook-f fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
-                  style="left: 7px;"></i>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="facebook">{{ __('admin.Facebook') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="facebook" 
+                    name="facebook" 
+                    placeholder="{{ $l == 'en' ? 'Facebook URL' : 'رابط فيسبوك' }}" 
+                    value="{{ $client->company->facebook ?? old('facebook') }}" 
+                    pattern="https://www.facebook.com/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Facebook URL.' : 'يرجى إدخال رابط فيسبوك صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-facebook"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Facebook URL' : 'رابط فيسبوك غير صالح' }}.</div>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="position-relative">
-                <input type="text"
-                  class="form-control px-10 input-shadow border-light mb-4"
-                  {{-- style="height: 42px;" --}} id="youtube"
-                  placeholder="{{ __('admin.Youtube') }}"
-                  value="{{ $client->company ? $client->company->youtube : old('youtube') }}"
-                  name="youtube" autocomplete="new-youtube">
-                <i class="fa-brands fa-youtube position-absolute top-50 translate-middle-y me-3 text-danger"
-                  style="left: 7px;"></i>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="youtube">{{ __('admin.Youtube') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="youtube" 
+                    name="youtube" 
+                    placeholder="{{ $l == 'en' ? 'YouTube URL' : 'رابط يوتيوب' }}" 
+                    value="{{ $client->company->youtube ?? old('youtube') }}" 
+                    pattern="https://www.youtube.com/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid YouTube URL.' : 'يرجى إدخال رابط يوتيوب صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-youtube"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid YouTube URL' : 'رابط يوتيوب غير صالح' }}.</div>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="position-relative">
-                <input type="text"
-                  class="form-control px-10 input-shadow border-light mb-4"
-                  {{-- style="height: 42px;" --}} id="website"
-                  placeholder="{{ __('admin.Website') }}"
-                  value="{{ $client->company ? $client->company->website : old('website') }}"
-                  name="website" autocomplete="website">
-                <i class="ti ti-world position-absolute top-50 translate-middle-y me-3 text-primary"
-                  style="left: 7px;"></i>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="website">{{ __('admin.Website') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="website" 
+                    name="website" 
+                    placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}" 
+                    value="{{ $client->company->website ?? old('website') }}" 
+                    pattern="https?://.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid website URL.' : 'يرجى إدخال رابط موقع صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-world"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Website URL' : 'رابط الموقع غير صالح' }}.</div>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="position-relative">
-                <input type="text"
-                  class="form-control px-10 input-shadow border-light mb-4"
-                  {{-- style="height: 42px;" --}} id="google_map" name="google_map"
-                  placeholder="{{ __('admin.Google Map full URL') }}"
-                  value="{{ $client->company ? $client->company->google_map : old('google_map') }}">
-                <i class="ti ti-map-pin position-absolute top-50 translate-middle-y me-3 text-primary"
-                  style="left: 7px;"></i>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="google_map">{{ __('admin.Google Map full URL') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="google_map" 
+                    name="google_map" 
+                    placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}" 
+                    value="{{ $client->company->google_map ?? old('google_map') }}" 
+                    pattern="https://www.google.com/maps/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Google Map URL.' : 'يرجى إدخال رابط خريطة جوجل صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Google Map URL' : 'رابط خريطة جوجل غير صالح' }}.</div>
               </div>
-            </div>
-          </div>
-          {{-- <div class="row">
-          <div class="col-md-6 col-12">
-            <div class="position-relative">
-              <label class="fw-medium mb-1"
-                for="name_en">{{ __('admin.English Name') }} *</label>
-              <div class="position-relative">
-                <input
-                  value="{{ $client->company ? $client->company->name_en : old('name_en') }}"
-                  name="name_en" type="text"
-                  class="form-control px-10 input-shadow border-light mb-4"
-                  id="name_en" placeholder="{{ __('admin.English Name') }} *"
-                  required autocomplete="name_en" />
-                <i class="ti ti-building-skyscraper position-absolute top-50 translate-middle-y me-3 text-primary"
-                  style="left: 7px;"></i>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6 col-12">
-            <div class="position-relative">
-              <label class="fw-medium mb-1"
-                for="name_ar">{{ __('admin.Arabic Name') }} *</label>
-              <div class="position-relative">
-                <input style="direction: rtl;"
-                  value="{{ $client->company ? $client->company->name_ar : old('name_ar') }}"
-                  name="name_ar" type="text"
-                  class="form-control px-10 input-shadow border-light mb-4"
-                  id="name_ar" placeholder="{{ __('admin.Arabic Name') }} *"
-                  required autocomplete="name_ar" />
-                <i class="ti ti-building-skyscraper position-absolute top-50 translate-middle-y me-3 text-primary"
-                  style="left: 7px;"></i>
-              </div>
-            </div>
-          </div>
-        </div> --}}
-          <div class="row mt-4">
-            <div class="col-12 d-flex justify-content-end">
-              <button type="submit" class="btn btn-primary"
-                style="border-radius: 10px;">
-                {{ __('admin.Update') }}
-              </button>
             </div>
           </div>
         </div>
-
       </div>
 
-
-      {{-- <div class="input-group">
-      <span class="input-group-btn">
-        <a data-input="thumbnail" data-preview="holderimg"
-          class="btn btn-primary lfm">
-          <i class="fa fa-picture-o"></i> {{ __('admin.Choose') }}
-        </a>
-      </span>
-      <input id="thumbnail" class="form-control" type="text" name="img_url">
-    </div>
-    <div id="holderimg" style="margin-top:15px;max-height:100px;"></div> --}}
-
-      {{-- <div class="col-md-6 col-12 mb-3 ">
-      <div class="form-label-group">
-        <label class="fs-6 mb-2"
-          for="facebook">{{ __('admin.Website') }}</label>
-        <input style="direction: ltr" type="text" class="form-control mt-2"
-          id="facebook" placeholder="{{ __('admin.Website') }}"
-          value="{{ $client->company ? $client->company->website : old('website') }}"
-          name="website" autocomplete="website">
+      <!-- Submit Button -->
+      <div class="mt-12 text-end">
+        <button type="submit" class="btn btn-primary">
+          {{ __('admin.Update') }}
+          <i class="ti ti-edit ms-2"></i>
+        </button>
       </div>
-    </div> --}}
-      {{-- <div class="col-md-6 col-12 mb-3 ">
-      <div class="form-label-group">
-        <label class="fs-6 mb-2"
-          for="facebook">{{ __('admin.Facebook') }}</label>
-        <input style="direction: ltr" type="text" class="form-control mt-2"
-          id="facebook" placeholder="{{ __('admin.Facebook') }}"
-          value="{{ $client->company ? $client->company->facebook : old('facebook') }}"
-          name="facebook" autocomplete="facebook">
-      </div>
-    </div> --}}
-      {{-- <div class="col-md-6 col-12 mb-3 ">
-      <div class="form-label-group">
-        <label class="fs-6 mb-2"
-          for="twitter">{{ __('admin.Twitter') }}</label>
-        <input style="direction: ltr" type="text" class="form-control mt-2"
-          id="twitter" placeholder="{{ __('admin.Twitter') }}"
-          value="{{ $client->company ? $client->company->twitter : old('twitter') }}"
-          name="twitter" autocomplete="twitter">
-      </div>
-    </div> --}}
-      {{-- <div class="col-md-6 col-12 mb-3 ">
-      <div class="form-label-group">
-        <label class="fs-6 mb-2"
-          for="linkedin">{{ __('admin.Linkedin') }}</label>
-        <input style="direction: ltr" type="text" class="form-control mt-2"
-          id="linkedin" placeholder="{{ __('admin.Linkedin') }}"
-          value="{{ $client->company ? $client->company->linkedin : old('linkedin') }}"
-          name="linkedin" autocomplete="new-linkedin">
-      </div>
-    </div> --}}
-      {{-- <div class="col-md-6 col-12 mb-3 ">
-      <div class="form-label-group">
-        <label class="fs-6 mb-2"
-          for="youtube">{{ __('admin.Youtube') }}</label>
-        <input style="direction: ltr" type="text" class="form-control mt-2"
-          id="youtube" placeholder="{{ __('admin.Youtube') }}"
-          value="{{ $client->company ? $client->company->youtube : old('youtube') }}"
-          name="youtube" autocomplete="new-youtube">
-      </div>
-    </div> --}}
-      {{-- <div class="col-md-6 col-12 mb-3 ">
-      <div class="form-group">
-        <label class="fs-6 mb-2"
-          for="google_map">{{ __('admin.Google Map') }}</label>
-        <textarea style="direction: ltr" class="form-control height-100" id="google_map"
-          name='google_map' placeholder="{{ __('admin.Google Map full URL') }}">{{ $client->company ? $client->company->google_map : old('google_map') }}</textarea>
-      </div>
-    </div> --}}
     </form>
-
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const pickerContainer = document.querySelector('.company-picker-container');
+    const fileInput = document.querySelector('#file1');
+
+    pickerContainer.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (event) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.querySelector('#company-logo').src = e.target.result;
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    });
+  });
+  
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#company-social-form');
+    const inputs = form.querySelectorAll('#company-social-form input[type="url"]');
+
+    inputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const parent = input.closest('.input-group');
+        if (input.checkValidity()) {
+          parent.classList.remove('is-invalid');
+        } else {
+          parent.classList.add('is-invalid');
+        }
+      });
+    });
+
+    form.addEventListener('submit', (e) => {
+      let isValid = true;
+      inputs.forEach(input => {
+        const parent = input.closest('.input-group');
+        if (!input.checkValidity()) {
+          e.preventDefault();
+          parent.classList.add('is-invalid');
+          isValid = false;
+        }
+      });
+      if (!isValid) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
