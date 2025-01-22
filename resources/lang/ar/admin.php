@@ -1158,10 +1158,8 @@ return [
 	'Manage_Assessments' => 'ادارة التقييمات',
 	'subcategory_Done_All' => 'تم الانتهاء',
 	'Assessment_completed_successfully' => 'تم الانتهاء من التقييم بنجاح',
-<<<<<<< Updated upstream
 	'Choose_Type' => 'اختر نوع',
 	'Quiz' => 'اختبار',
-=======
 	'Roles_List' => 'قائمة الأدوار',
 	'Roles_Description_1' => 'يوفر الدور وصولًا إلى القوائم والميزات المحددة مسبقًا بحيث يمكن للمسؤول حسب',
 	'Roles_Description_2' => 'الدور المعين الوصول إلى ما يحتاجه المستخدم.',
@@ -1170,5 +1168,4 @@ return [
 	'Edit_Role' => 'تعديل الدور',
 	'USERS' => 'مستخدمين',
 	'TOTAL' => 'الإجمالي',
->>>>>>> Stashed changes
 ];

@@ -1141,10 +1141,8 @@ return [
 	'Manage_Assessments' => 'Manage Assessments',
 	'subcategory_Done_All' => 'Done All',
 	'Assessment_completed_successfully' => 'Assessment completed successfully!',
-<<<<<<< Updated upstream
 	'Choose_Type' => 'Choose Type',
 	'Quiz' => 'Quiz',
-=======
 	'Roles_List' => 'Roles List',
 	'Roles_Description_1' => 'A role provided access to predefined menus and features so that depending on',
 	'Roles_Description_2' => 'assigned role an administrator can have access to what user needs.',
@@ -1153,5 +1151,4 @@ return [
 	'Edit_Role' => 'Edit Role',
 	'USERS', 'Users',
 	'TOTAL', 'Total',
->>>>>>> Stashed changes
 ];
