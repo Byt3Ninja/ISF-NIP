@@ -126,13 +126,13 @@
                 </div>
                 @if (!in_array($role->id, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
                   <button 
-                    class="btn btn-sm btn-icon btn-label-danger" 
+                    class="btn btn-xs btn-icon btn-label-danger" 
                     id='deleteAction' 
                     data-id='{{ $role->id }}'
                     data-url="{{ route('roles.destroy', ['role' => $role->id]) }}" 
                     type="button"
                   >
-                    <i class="ti ti-trash"></i>
+                    <i class="ti ti-trash ti-16px"></i>
                   </button>
                 @endif
               </div>
