@@ -633,7 +633,7 @@ class ClientCompanyController extends Controller
 
                     $validator = Validator::make($request->all(), [
                         'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
-                        'img_url' => 'nullable|url', // يجب أن يكون رابط صالح
+                        'img_url' => 'nullable', // يجب أن يكون رابط صالح
                         'facebook' => 'nullable|url', // يجب أن يكون إما نعم أو لا
                         'twitter' => 'nullable|url', // نص من 500 حرف كحد أقصى
                         'linkedin' => 'nullable|url', // نص من 500 حرف كحد أقصى
