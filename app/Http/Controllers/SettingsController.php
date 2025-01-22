@@ -364,6 +364,8 @@ class SettingsController extends Controller
         return redirect()->back()->with('message', 'StoredSuccessfully');
     }
 
+
+
     public function update_settinglogo(Request $request)
     {
         $id = $request->input('id');
@@ -377,13 +379,7 @@ class SettingsController extends Controller
             $logoFile = $request->file('logo');
             $logoName = 'logo.' . $logoFile->getClientOriginalExtension();
 
-            // Delete the old file if it exists
-            if (Storage::disk('public')->exists('uploads/' . $logoName)) {
-                Storage::disk('public')->delete('uploads/' . $logoName);
-            }
-
-            // Store the new file
-            $logoPath = $logoFile->storeAs('uploads', $logoName, 'public');
+            $logoFile->move(public_path('images/logo'), $logoName);
         } else {
             $logoName = $updateSittings->Logo;
         }
@@ -392,29 +388,17 @@ class SettingsController extends Controller
             $headerFile = $request->file('header');
             $headerName = 'mailheader.' . $headerFile->getClientOriginalExtension();
 
-            // Delete the old file if it exists
-            if (Storage::disk('public')->exists('uploads/' . $headerName)) {
-                Storage::disk('public')->delete('uploads/' . $headerName);
-            }
-
-            // Store the new file
-            $headerPath = $headerFile->storeAs('uploads', $headerName, 'public');
+            $headerFile->move(public_path('images/logo'), $headerName);
         } else {
             $headerName = $updateSittings->header;
         }
-
 
         if ($request->hasFile('footer')) {
             $footerFile = $request->file('footer');
             $footerName = 'mailfooter.' . $footerFile->getClientOriginalExtension();
 
-            // Delete the old file if it exists
-            if (Storage::disk('public')->exists('uploads/' . $footerName)) {
-                Storage::disk('public')->delete('uploads/' . $footerName);
-            }
 
-            // Store the new file
-            $footerPath = $footerFile->storeAs('uploads', $footerName, 'public');
+            $footerFile->move(public_path('images/logo'), $footerName);
         } else {
             $footerName = $updateSittings->footer;
         }
@@ -424,8 +408,10 @@ class SettingsController extends Controller
         $updateSittings->header = $headerName;
         $updateSittings->footer = $footerName;
         $updateSittings->save();
+
         return redirect()->back()->with('message', 'StoredSuccessfully');
     }
+
 
     public function update_settingstwo(Request $request)
     {

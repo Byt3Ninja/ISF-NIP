@@ -197,7 +197,8 @@
         </div>
         <div class="col-12 d-flex justify-content-end">
           <button class="btn btn-primary" id="submit-button" type="submit">
-            <span id="button-text">{{ __('admin.Update') }}</span>
+            <span id="button-text"> {{ __('admin.Update') }}
+              <i class="ti ti-edit ms-2"></i></span>
             <span class="spinner-border spinner-border-sm d-none" id="button-spinner" role="status" aria-hidden="true"></span>
           </button>
         </div>
