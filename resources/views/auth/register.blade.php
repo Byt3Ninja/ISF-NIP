@@ -362,7 +362,7 @@
                   <div class="divider-text">{{ $l == 'ar' ? 'او' : 'OR' }}</div>
                 </div>
 
-                @if (app()->environment('local', 'dev'))
+                {{-- @if (app()->environment('local', 'dev')) --}}
                   <a 
                     id="linkedin-sign-in"
                     href="{{ route('linkedin.login') }}" 
@@ -372,7 +372,7 @@
                     <i class="fa-brands fa-linkedin-in me-2"></i> 
                     <span class="fw-semibold">{{ $linkdinSignIn }}</span>
                   </a>
-                @endif
+                {{-- @endif --}}
               </div>
             </div>
           </div>
