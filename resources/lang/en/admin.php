@@ -1159,4 +1159,6 @@ return [
 	'Youtube' => 'YouTube',
 	'Google Map' => 'Google Map',
 	'Website' => 'Website',
+	'Whatsapp' => 'WhatsApp',
+	'Verify' => 'Verify',
 ];

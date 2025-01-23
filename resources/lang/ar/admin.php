@@ -1174,4 +1174,6 @@ return [
 	'Youtube' => 'يوتيوب',
 	'Google Map' => 'خرائط جوجل',
 	'Website' => 'الموقع الإلكتروني',
+	'Whatsapp' => 'واتساب',
+	'Verify' => 'تحقق',
 ];
