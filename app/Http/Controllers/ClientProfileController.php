@@ -8,6 +8,9 @@ use App\Currency;
 use App\Schedule;
 use App\UsersBio;
 use App\Expertise;
+use Carbon\Carbon;
+use App\Otp;
+use App\Services\WhatsAppService;
 use App\CyclesMentors;
 use App\MentorshipTask;
 use App\MentorshipRequest;
@@ -24,13 +27,15 @@ use App\Http\Requests\UpdateClientProfilePasswordRequest;
 
 class ClientProfileController extends Controller
 {
+    protected $whatsAppService;
      /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(){
+    public function __construct(WhatsAppService $whatsAppService){
         $this->middleware('auth');
+        $this->whatsAppService = $whatsAppService;
     }
      /**
      * Show the form for editing the specified resource.
@@ -396,6 +401,120 @@ class ClientProfileController extends Controller
 
     }
 
+
+    public function savePhoneSession(Request $request)
+    {
+       
+        // $request->session()->forget('phone');
+        $request->session()->put('phone', $request->phone);
+        
+        return response()->json(['message' => 'تم حفظ رقم الهاتف بنجاح.']);
+
+    }
+    public function sendCode(Request $request)
+    {
+        $userId = Auth::user()->id;
+         // جلب الـ OTPs السابقة التي تم إرسالها والتي هي "غير صالحة" (bad == 0)
+        $otpget = Otp::where('user_id', $userId)
+        ->where('bad', '0')
+        ->where('created_at', '>=', now()->subHours(6)) // تحقق من المحاولات في آخر 6 ساعات
+        ->get();
+
+        // إذا كان عدد المحاولات أكثر من 2 خلال 6 ساعات، يجب الانتظار 6 ساعات
+        if ($otpget->count() >= 2) {
+        return response()->json(['error' => 'Wait for 6 hours'], 500);
+        }
+
+        $phoneNumber = session('phone');
+        
+        $otp = $this->generateOtp();
+
+        $otpsave = new Otp();
+        $otpsave->user_id = $userId;
+        $otpsave->phone = $phoneNumber;
+        $otpsave->otp_code = $otp;
+        $otpsave->save();
+        
+        $result = $this->whatsAppService->sendOTP($phoneNumber, $otp);
+        if ($result) {
+            $otpsave->otp_sent = true;
+            $otpsave->save();
+            $request->session()->put('otp', $otp);
+            return response()->json(['otp' => $otp]);
+        } else {
+            return response()->json(['error' => 'Failed to send OTP'], 500);
+        }
+
+
+
+
+    }
+
+    public function verifyCode(Request $request)
+    {
+        $codeFromUser = $request->code;
+        $otpFromSession = session('otp');
+        $userId = Auth::user()->id;
+    
+        if ($codeFromUser == $otpFromSession) {
+            // إذا كان الرمز صحيحًا
+            $otpget = Otp::where('user_id', $userId)
+                ->where('bad', '0')
+                ->where('expires_at', '>=', now()) // تأكد أن OTP لم تنته صلاحيته
+                ->orderBy('created_at', 'desc')
+                ->first();
+    
+            if ($otpget) {
+                // وضع علامة "سيء" على الـ OTP
+                $otpget->bad = 1;
+                $otpget->save();
+
+                $user = User::find($userId);
+                $user->whatsapp = $otpget->phone;
+                $user->whatsapp_verified = 1;
+                $user->save();
+    
+                return response()->json(['message' => 'التحقق بنجاح.']);
+            } else {
+                return response()->json(['error' => 'No valid OTP found or OTP expired.'], 400);
+            }
+        } else {
+            // إذا كان الرمز غير صحيح
+            $otpget2 = Otp::where('user_id', $userId)
+                ->where('bad', '0')
+                ->where('expires_at', '>=', now()) // تأكد أن OTP لم تنته صلاحيته
+                ->orderBy('created_at', 'desc')
+                ->first();
+    
+            if ($otpget2) {
+                // زيادة المحاولات الخاطئة
+                $otpget2->wrong_attempts += 1;
+    
+                if ($otpget2->wrong_attempts >= 3) {
+                    // قفل المحاولات لمدة 6 ساعات
+                    $otpget2->created_at = now()->addHours(6);
+                    $otpget2->save();
+    
+                    return response()->json(['error' => 'تم الوصول إلى الحد الأقصى للمحاولات. انتظر 6 ساعات قبل المحاولة مرة أخرى.'], 400);
+                } else {
+                    // حفظ المحاولات الخاطئة
+                    $otpget2->save();
+    
+                    return response()->json([
+                        'error' => 'رمز التحقق غير صحيح.',
+                        'remaining_attempts' => 3 - $otpget2->wrong_attempts,
+                    ], 400);
+                }
+            } else {
+                return response()->json(['error' => 'لا يوجد OTP صالح أو انتهت صلاحيته.'], 400);
+            }
+        }
+    }
+
+    private function generateOtp()
+    {
+        return mt_rand(100000, 999999);
+    }
 
 
 }
