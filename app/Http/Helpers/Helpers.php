@@ -1,16 +1,20 @@
 <?php
+
+use Illuminate\Support\Facades\DB;
+
 if (! function_exists('in_array_2d')) {
-    function in_array_2d($key, $array) {
+    function in_array_2d($key, $array)
+    {
 
-        if(!is_array($array))
+        if (!is_array($array))
             return false;
-        
-        foreach($array as $row){
 
-            if(!is_array($row))
+        foreach ($array as $row) {
+
+            if (!is_array($row))
                 return false;
 
-            if(in_array($key, $row))
+            if (in_array($key, $row))
                 return true;
         }
 
@@ -19,19 +23,26 @@ if (! function_exists('in_array_2d')) {
 }
 
 if (! function_exists('lang')) {
-    function lang($name = null) {
-        
+    function lang($name = null)
+    {
+
         if (session()->has('locale'))
             \App::setLocale(session()->get('locale'));
 
         $language = app()->getLocale();
-        
-        if(empty($language)) 
+
+        if (empty($language))
             $language = "en";
-        if(empty($name)) 
+        if (empty($name))
             return $language;
 
-        return $name .'_'. $language;
+        return $name . '_' . $language;
     }
 }
-?>
+
+if (!function_exists('getPusherConfig')) {
+    function getPusherConfig()
+    {
+        return DB::table('settings')->select('MIX_PUSHER_APP_KEY', 'MIX_PUSHER_APP_CLUSTER')->first();
+    }
+}
