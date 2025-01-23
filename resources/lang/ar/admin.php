@@ -11,6 +11,8 @@ return [
 	'directory' => 'الدليل',
 	'myinterests' => 'إهتماماتي',
 	'recording_passcode' => ' كلمة مرور التسجيل',
+	'report_not_found' => 'جلسة التقارير غير موجودة',
+	'recording_not_found' => 'تقرير الجلسة غير موجود',
 	'session_recordings' => 'تسجيل الاجتماع',
 	'update_reports' => 'تعديل التقارير',
 	'update_recordings' => 'تعديل التسجيلات',
