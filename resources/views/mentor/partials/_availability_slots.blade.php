@@ -39,9 +39,9 @@
                   <div class="periods-container bg-white" data-day="{{ $day }}" style="display: none;">
                     <div class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
                       <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
-                      <input class="form-control me-2 mb-2 mb-md-0" type="time" name="periods[{{ $day }}][from][]">
+                      <input class="form-control me-2 mb-2 mb-md-0" id="tfrom" type="time" name="periods[{{ $day }}][from][]">
                       <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
-                      <input class="form-control me-2 mb-2 mb-md-0" type="time" name="periods[{{ $day }}][to][]">
+                      <input class="form-control me-2 mb-2 mb-md-0" id="tto" type="time" name="periods[{{ $day }}][to][]">
                       <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{ __('admin.Min') }}</span>
                       <div class="ps-4 d-flex flex-nowrap">
                         <button 

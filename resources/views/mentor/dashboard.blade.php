@@ -749,6 +749,7 @@
           },
           success: function(response) {
             switchtypes(response.type);
+            console.log(response);
             $('#sid').val(response.id);
             $('#rtype').val(4);
             $('#type').val(response.type);
