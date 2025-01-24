@@ -593,7 +593,9 @@
       <!--/ Mentor Sessions Table -->
     </div>
 
-    <!-- Modal -->
+    @include('mentor.partials._availability_slots')
+
+    <!-- Modal
     <div class="modal fade" id="SendRequest" tabindex="-1" aria-labelledby="sendrequest" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -659,6 +661,7 @@
         </div>
       </div>
     </div>
+     -->
     <!-- / Modal -->
   </div>
   <!-- / Content wrapper -->
@@ -755,7 +758,7 @@
             $('#tfrom').val(response.tfrom);
             $('#tto').val(response.tto);
             $('#notes').val(response.notes);
-            $('#SendRequest').modal('show');
+            $('#availabilty-modal').modal('show');
           },
           error: function(error) {
             console.log(error);
@@ -767,7 +770,7 @@
         $('#sid, #type, #days, #dfrom, #dto, #tfrom, #tto, #notes').val();
         $('#rtype').val('0');
         switchtypes(type);
-        $('#SendRequest').modal('show');
+        $('#availabilty-modal').modal('show');
       }
     }
 
