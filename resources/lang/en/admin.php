@@ -1161,4 +1161,10 @@ return [
 	'Website' => 'Website',
 	'Whatsapp' => 'WhatsApp',
 	'Verify' => 'Verify',
+	'Add_Availabilty_Slots' => 'Add Availabilty Slots',
+	'Add_Slot' => 'Add Slot',
+	'Remove_Slot' => 'Remove Slot',
+	'Min' => 'Min',
+	'Add_Period' => 'Add Period',
+	'Remove_Period' => 'Remove Period',
 ];
