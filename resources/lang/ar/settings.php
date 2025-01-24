@@ -123,4 +123,5 @@ return [
 	'ZOOM_ACCOUNT_ID'=>'ZOOM ACCOUNT ID',
 	'Choose'=>'اختر',
 	'SocialMediaLogin'=>' اعدادات الدخول ',
+	'MentorList'=>'قائمة المدربين',
 ];

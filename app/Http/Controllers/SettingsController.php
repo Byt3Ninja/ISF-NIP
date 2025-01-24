@@ -345,6 +345,12 @@ class SettingsController extends Controller
             $homePage = '0';
         }
 
+        if ($request->MentorList == 'on') {
+            $MentorList = '1';
+        } else {
+            $MentorList = '0';
+        }
+
         $updateSittings = Settings::where('id', $id)->first();
 
         $updateSittings->ar_title = $site_ar_title;
@@ -358,6 +364,7 @@ class SettingsController extends Controller
         $updateSittings->timezone = $timezone;
         $updateSittings->Currency = $Currency;
         $updateSittings->HomePage = $homePage;
+        $updateSittings->mentor_list = $MentorList;
         $updateSittings->save();
 
 
