@@ -146,11 +146,11 @@
             <input class="form-control me-2 mb-2 mb-md-0" type="time" name="periods[${$day.data('day')}][to][]" required>
             <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 min</span>
             <div class="ps-6 d-flex flex-nowrap">
-              <button type="button" class="btn btn-label-success btn-sm rounded-circle btn-icon me-2 add-period">
+              <button type="button" class="btn btn-label-success btn-xs rounded-circle btn-icon me-2 add-period">
                 <i class="ti ti-plus text-16px"></i>
               </button>
               <div id="remove-period">
-                <button type="button" class="btn btn-label-danger btn-sm rounded-circle btn-icon remove-period">
+                <button type="button" class="btn btn-label-danger btn-xs rounded-circle btn-icon remove-period">
                   <i class="ti ti-trash text-16px"></i>
                 </button>
               </div>
