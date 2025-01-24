@@ -1161,10 +1161,14 @@ return [
 	'Website' => 'Website',
 	'Whatsapp' => 'WhatsApp',
 	'Verify' => 'Verify',
+<<<<<<< Updated upstream
 	'Add_Availabilty_Slots' => 'Add Availabilty Slots',
 	'Add_Slot' => 'Add Slot',
 	'Remove_Slot' => 'Remove Slot',
 	'Min' => 'Min',
 	'Add_Period' => 'Add Period',
 	'Remove_Period' => 'Remove Period',
+=======
+	'ChooseYourStageFirst' => 'Choose Your Development Stage First',
+>>>>>>> Stashed changes
 ];

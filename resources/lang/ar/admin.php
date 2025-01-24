@@ -1176,10 +1176,14 @@ return [
 	'Website' => 'الموقع الإلكتروني',
 	'Whatsapp' => 'واتساب',
 	'Verify' => 'تحقق',
+<<<<<<< Updated upstream
 	'Add_Availabilty_Slots' => 'إضافة فترات التواجد',
 	'Add_Slot' => 'إضافة فترة',
 	'Remove_Slot' => 'إزالة الفترة',
 	'Min' => 'دقيقة',
 	'Add_Period' => 'إضافة الفترة',
 	'Remove_Period' => 'إزالة الفترة',
+=======
+	'ChooseYourStageFirst' => 'اختر (مرحلة التطوير) اولا',
+>>>>>>> Stashed changes
 ];

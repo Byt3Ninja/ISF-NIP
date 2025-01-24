@@ -268,15 +268,15 @@ public function MakeAssessment()
                 
                 $questions = QuestionsBank::where('group', 'assessment')->get();
 
-                if($company->stage == null){
+                if($company->stage == null && !is_numeric($company->stage) && !empty($company->stage)){
                     $assessment = Assessment::find($assessmentId);
                     $assessment->delete();
-                    return redirect()->route('my_company')->with(['class'=>'danger', 'msg'=>__('NotStage')]);
+                    return redirect()->route('my_company')->with(['class'=>'danger', 'msg'=>__('ChooseYourStageFirst')]);
                 }
 
                 foreach($questions as $question){
                     $weight = Weight::where('stage_id', $company->stage)->where('category_id', $question->ascategory_id)->where('subcategory_id', $question->subcategory_id)->first();
-                    
+                    if($weight != null){
                     $userscoreadded = UserScore::create([
                         'user_id' => $userid,
                         'category_id' => $question->ascategory_id,
@@ -290,6 +290,11 @@ public function MakeAssessment()
                         'Answers' => $question->answers, 
                         'company_id' => $companyid,
                     ]);
+                }else{
+                    $assessment = Assessment::find($assessmentId);
+                    $assessment->delete();
+                    return redirect()->route('my_company')->with(['class'=>'danger', 'msg'=>__('ChooseYourStageFirst')]);
+                }
                 }
 
 
