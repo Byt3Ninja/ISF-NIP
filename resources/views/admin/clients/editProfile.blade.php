@@ -795,7 +795,6 @@ const countryCodeInput = document.createElement("input");
 countryCodeInput.type = "hidden";
 countryCodeInput.name = "country_code";
 countryCodeInput.value = "{{ $client->country_code ? ( $client->country_code ?? '' ) : '' }}";
-countryCodeInput.className = "phonewhatsapp"; // إضافة الخاصية class
 phoneInput.parentNode.appendChild(countryCodeInput);
 
 // ضبط الدولة الافتراضية
@@ -837,7 +836,6 @@ whatsappInput.addEventListener("input", () => {
 
 $('#whatsapp').on('blur', function() {
 var number = $(this).val();
-alert(number);
 var countryCode = whatsappIti.getSelectedCountryData().dialCode;
 if (number.startsWith('0')) {
     number = number.substring(1); // إزالة أول حرف (الصفر)
