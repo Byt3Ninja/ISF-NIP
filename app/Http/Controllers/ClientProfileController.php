@@ -1,22 +1,23 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Otp;
 use App\User;
 use App\Cycle;
 use App\Country;
 use App\Currency;
 use App\Schedule;
+use App\Settings;
 use App\UsersBio;
 use App\Expertise;
 use Carbon\Carbon;
-use App\Otp;
-use App\Services\WhatsAppService;
 use App\CyclesMentors;
 use App\MentorshipTask;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\ConfirmEmailUpdate;
+use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -349,13 +350,16 @@ class ClientProfileController extends Controller
     }
 
     public function showMintors(Request $request){
+        $setting = Settings::where('id', 1)->first();
 
+        
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
         $ExpertiesSearch = $request->input('ExpertiesSearch');
 
         
-        
+        if($setting->mentor_list == 1){
+            if (Auth::user()->hasanyRole('Mentor|Registered|Admin')){
     $l = app()->getLocale();
     
     // إعداد الأعمدة الصحيحة بناءً على اللغة
@@ -389,15 +393,58 @@ class ClientProfileController extends Controller
         }
     }
 
-
     // جلب النتائج
     $mentors = $mentors->get();
         // $mentors = User::role('mentor')->get();
         
-        
-
             return view('admin/clients/Mentors', compact('mentors'));
+}
+        }else{
 
+            if (Auth::user()->hasanyRole('Admin')){
+                $l = app()->getLocale();
+                
+                // إعداد الأعمدة الصحيحة بناءً على اللغة
+                $firstNameColumn = $l == 'ar' ? 'first_name_ar' : 'first_name_en';
+                $lastNameColumn = $l == 'ar' ? 'last_name_ar' : 'last_name_en';
+            
+                // البحث في الموجهين
+                $mentors = User::role('mentor')
+                    ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
+            
+                if ($rateSearch > 0) {
+                    $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
+                        $q->where(function ($q2) {
+                            $q2->where('approved', 'Yes')
+                               ->orWhereNull('approved');
+                        })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
+                    });
+                }
+                
+                if (!empty($ExpertiesSearch)) {
+                    // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
+                    $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
+            
+                    if ($expertiesMentor) { // تأكد من وجود الخبرة
+                        $expid = $expertiesMentor->id;
+            
+                        // تصفية الموجهين بناءً على الخبرة
+                        $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
+                            $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
+                        });
+                    }
+                }
+            
+                // جلب النتائج
+                $mentors = $mentors->get();
+                    // $mentors = User::role('mentor')->get();
+                    
+                        return view('admin/clients/Mentors', compact('mentors'));
+            }else{
+                return redirect()->route('dashboard');
+            }
+
+        }
 
     }
 
