@@ -981,7 +981,7 @@ return [
 	'Email_sent_notify' => ' Email Sent Notify ',
 	'Project_Status_Over_Time' => 'Business Model',
 	'Target_Market_Analysis' => 'Startups Target Markets',
-	'User_distribution_by_country' => 'User Distribution by Country',
+	'User_distribution_by_country' => 'Startup’s HQ',
 	'Sector_Breakdown' => 'Sector Breakdown',
 	'Total_company_by_SDG' => 'Startups by SDG’s',
 	'Development_Stage' => 'Startups Development Stage',
