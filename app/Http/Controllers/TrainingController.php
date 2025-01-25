@@ -742,7 +742,7 @@ class TrainingController extends Controller
             $mail['title'] = $topic;
             $mail['date'] = $datetime;
             $mail['organization_name_en'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_en ?? 'Unknown Organization';
-            $mail['organization_name_ar'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';;
+            $mail['organization_name_ar'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';
             $MSG = new TrainerEmail($mail);
             \Notification::route('mail', $request->trainer_email)
                 ->notify($MSG);
@@ -896,10 +896,20 @@ class TrainingController extends Controller
         $session = TrainingSession::find($id);
 
         if (!$session || !$session->zoom_id) {
-            return response()->json(['success' => false, 'message' => 'Session not found'], 404);
+            return redirect()->back()->with([
+                'message' => 'report_not_found',
+                'class' => 'danger',
+            ]);
         }
 
         $response = $this->meetingService->getSessionReport($session->zoom_id);
+
+        if (!$response['success']) {
+            return redirect()->back()->with([
+                'message' => 'report_not_found',
+                'class' => 'danger',
+            ]);
+        }
 
         if ($response['success']) {
             $participants = $response['data']['participants'] ?? [];
@@ -926,69 +936,27 @@ class TrainingController extends Controller
                     ]
                 );
             }
-            return redirect()->back();
+            return back()->with(['message' => 'Saved', 'class' => 'success']);
         }
     }
-
-
-    // public function sessionRecord($id)
-    // {
-    //     $session = TrainingSession::find($id);
-
-    //     if (!$session || !$session->zoom_id) {
-    //         return redirect()->back()->withErrors([
-    //             'error' => 'Session Not Found',
-    //         ]);
-    //     }
-
-    //     $response = $this->meetingService->getSessionRecord($session->zoom_id);
-    //     dd($response);
-
-    //     if (!$response['success']) {
-    //         return redirect()->back()->withErrors([
-    //             'error' => 'Session Recording Not Found',
-    //         ]);
-    //     }
-
-    //     $recordingFiles = $response['data']['recording_files'] ?? [];
-
-    //     foreach ($recordingFiles as $file) {
-    //         $recordingTime = isset($file['recording_start'])
-    //             ? Carbon::parse($file['recording_start'])->toDateTimeString()
-    //             : null;
-
-    //         SessionRecording::updateOrCreate(
-    //             [
-    //                 'recording_id' => $file['id'],
-    //             ],
-    //             [
-    //                 'session_id' => $session->id,
-    //                 'recording_type' => $file['recording_type'] ?? null,
-    //                 'recording_view_url' => $file['play_url'] ?? null,
-    //                 'recording_download_url' => $file['download_url'] ?? null,
-    //                 'recording_time' => $recordingTime,
-    //             ]
-    //         );
-    //     }
-
-    //     return redirect()->back();
-    // }
 
     public function sessionRecord($id)
     {
         $session = TrainingSession::find($id);
 
         if (!$session || !$session->zoom_id) {
-            return redirect()->back()->withErrors([
-                'error' => 'Session Not Found',
+            return redirect()->back()->with([
+                'message' => 'recording_not_found',
+                'class' => 'danger',
             ]);
         }
 
         $response = $this->meetingService->getSessionRecord($session->zoom_id);
 
         if (!$response['success']) {
-            return redirect()->back()->withErrors([
-                'error' => 'Session Recording Not Found',
+            return redirect()->back()->with([
+                'message' => 'recording_not_found',
+                'class' => 'danger',
             ]);
         }
 
@@ -1017,7 +985,7 @@ class TrainingController extends Controller
             );
         }
 
-        return redirect()->back();
+        return back()->with(['message' => 'Saved', 'class' => 'success']);
     }
 
 

@@ -17,14 +17,14 @@
       <div class="content-body">
         <section id="multiple-column-form">
           @if (session()->has('message'))
-            <div 
-              class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
-              role="alert"
-            >
-              {{ __('admin.' . session()->get('message')) }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          @endif
+          <div 
+            class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
+            role="alert"
+          >
+            {{ __('admin.' . session()->get('message')) }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+      @endif
         </section>
         @if (count($steps) > 0)
           <section id="multiple-column-form">
