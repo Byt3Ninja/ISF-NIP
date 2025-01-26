@@ -1183,4 +1183,6 @@ return [
 	'Add_Period' => 'إضافة الفترة',
 	'Remove_Period' => 'إزالة الفترة',
 	'ChooseYourStageFirst' => 'اختر (مرحلة التطوير) اولا',
+	'Tiktok' => ' تيكتوك',
+	'Instagram' => ' انستقرام',
 ];

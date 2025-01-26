@@ -636,6 +636,8 @@ class ClientCompanyController extends Controller
                         'linkedin' => 'nullable|url', // نص من 500 حرف كحد أقصى
                         'youtube' => 'nullable|url', // نص من 500 حرف كحد أقصى
                         'google_map' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                        'instagram' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                        'tiktok' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
                     ],  [
                         'website.url' => __('admin.Website_Not_URL'),
                         'img_url.url' => __('admin.img_url_Not_URL'),
@@ -644,8 +646,10 @@ class ClientCompanyController extends Controller
                         'linkedin.url' => __('admin.linkedin_Not_URL'),
                         'youtube.url' => __('admin.youtube_Not_URL'),
                         'google_map.url' => __('admin.google_map_Not_URL'),
+                        'instagram.url' => __('admin.instagram_url_Not_URL'),
+                        'tiktok.url' => __('admin.tiktok_url_Not_URL'),
                     ]);
-
+                    
                     // في الميثود التي تعالج الطلب
                     if ($request->hasFile('img_url')) {
                         // الحصول على الصورة
@@ -654,11 +658,13 @@ class ClientCompanyController extends Controller
                         // حفظ الصورة في المجلد المطلوب
                         $path = $image->store('images', 'public');
 
+                    }else{
+                        $path = $user->company->logo;
                     }
-                   
+                    
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
-
+                       
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'website' => $data['website'],
@@ -668,7 +674,10 @@ class ClientCompanyController extends Controller
                             'linkedin' => $data['linkedin'],
                             'youtube' => $data['youtube'],
                             'google_map' => $data['google_map'],
+                            'instagram' => $data['instagram'],
+                            'tiktok' => $data['tiktok'],
                         ]);
+                        
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
@@ -680,6 +689,8 @@ class ClientCompanyController extends Controller
                             'linkedin' => $data['linkedin'],
                             'youtube' => $data['youtube'],
                             'google_map' => $data['google_map'],
+                            'instagram' => $data['instagram'],
+                            'tiktok' => $data['tiktok'],
                         ]);
                         $msgtype = 'NewComp';
                     }
@@ -1452,6 +1463,7 @@ class ClientCompanyController extends Controller
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
+            dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);
