@@ -287,12 +287,10 @@ class ClientCompanyController extends Controller
 
                     $validatedData = $request->validate([
                         'name_en' => 'required|string|max:255',
-                        'name_ar' => 'required|string|max:255',
                         'country_id' => 'required|exists:countries,id',
                         'state_id' => 'required|exists:states,id',
                         'sector' => 'required|string|max:255',
                         'address_en' => 'required|string|max:500',
-                        'address_ar' => 'required|string|max:500',
                         'est_date' => 'required|date',
                         'years_of_operations' => 'required|string',
                         'product_or_service' => 'required|string|in:Product,Service,Product + Service',
@@ -301,14 +299,12 @@ class ClientCompanyController extends Controller
                         'other_category' => 'nullable|string|max:255',
                     ], [
                         'name_en.required' => __('admin.English Name is required'),
-                        'name_ar.required' => __('admin.Arabic Name is required'),
                         'country_id.required' => __('admin.Country is required'),
                         'country_id.exists' => __('admin.Invalid Country selected'),
                         'state_id.required' => __('admin.State is required'),
                         'state_id.exists' => __('admin.Invalid State selected'),
                         'sector.required' => __('admin.Sector is required'),
                         'address_en.required' => __('admin.English Address is required'),
-                        'address_ar.required' => __('admin.Arabic Address is required'),
                         'est_date.required' => __('admin.Established Date must be a valid date'),
                         'years_of_operations.required' => __('admin.Years of Operations is required'),
                         'product_or_service.required' => __('admin.Product or Service is required'),
@@ -349,12 +345,12 @@ class ClientCompanyController extends Controller
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'name_en' => $data['name_en'],
-                            'name_ar' => $data['name_ar'],
+                            'name_ar' => $data['name_en'],
                             'country_id' => $data['country_id'],
                             'state_id' => $data['state_id'],
                             'sector' => $data['sector'],
                             'address_en' => $data['address_en'],
-                            'address_ar' => $data['address_ar'],
+                            'address_ar' => $data['address_en'],
                             'est_date' => $data['est_date'],
                             'years_of_operations' => $data['years_of_operations'],
                             'product_or_service' => $data['product_or_service'],
@@ -631,6 +627,7 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 8) {
 
+                    
                     $validator = Validator::make($request->all(), [
                         'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                         'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -639,6 +636,8 @@ class ClientCompanyController extends Controller
                         'linkedin' => 'nullable|url', // نص من 500 حرف كحد أقصى
                         'youtube' => 'nullable|url', // نص من 500 حرف كحد أقصى
                         'google_map' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                        'instagram' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                        'tiktok' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
                     ],  [
                         'website.url' => __('admin.Website_Not_URL'),
                         'img_url.url' => __('admin.img_url_Not_URL'),
@@ -647,32 +646,51 @@ class ClientCompanyController extends Controller
                         'linkedin.url' => __('admin.linkedin_Not_URL'),
                         'youtube.url' => __('admin.youtube_Not_URL'),
                         'google_map.url' => __('admin.google_map_Not_URL'),
+                        'instagram.url' => __('admin.instagram_url_Not_URL'),
+                        'tiktok.url' => __('admin.tiktok_url_Not_URL'),
                     ]);
+                    
+                    // في الميثود التي تعالج الطلب
+                    if ($request->hasFile('img_url')) {
+                        // الحصول على الصورة
+                        $image = $request->file('img_url');
 
+                        // حفظ الصورة في المجلد المطلوب
+                        $path = $image->store('images', 'public');
+
+                    }else{
+                        $path = $user->company->logo;
+                    }
+                    
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
-
+                       
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'website' => $data['website'],
-                            'logo' => $data['img_url'],
+                            'logo' => $path,
                             'facebook' => $data['facebook'],
                             'twitter' => $data['twitter'],
                             'linkedin' => $data['linkedin'],
                             'youtube' => $data['youtube'],
                             'google_map' => $data['google_map'],
+                            'instagram' => $data['instagram'],
+                            'tiktok' => $data['tiktok'],
                         ]);
+                        
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
                             'website' => $data['website'],
-                            'logo' => $data['img_url'],
+                            'logo' => $path,
                             'facebook' => $data['facebook'],
                             'twitter' => $data['twitter'],
                             'linkedin' => $data['linkedin'],
                             'youtube' => $data['youtube'],
                             'google_map' => $data['google_map'],
+                            'instagram' => $data['instagram'],
+                            'tiktok' => $data['tiktok'],
                         ]);
                         $msgtype = 'NewComp';
                     }

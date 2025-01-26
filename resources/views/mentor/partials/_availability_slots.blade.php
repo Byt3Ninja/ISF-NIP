@@ -37,9 +37,9 @@
                     </button>
                   </div>
                   <div class="periods-container bg-white" data-day="{{ $day }}" style="display: none;">
-                    <div class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
+                    <div id="{{$day}}-period-row" class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
                       <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
-                      <input class="form-control me-2 mb-2 mb-md-0" id="tfrom" type="time" name="periods[{{ $day }}][from][]">
+                      <input class="form-control me-2 mb-2 mb-md-0" id="{{$day}}-from" type="time" name="periods[{{ $day }}][from][]">
                       <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
                       <input class="form-control me-2 mb-2 mb-md-0" id="tto" type="time" name="periods[{{ $day }}][to][]">
                       <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{ __('admin.Min') }}</span>
@@ -50,7 +50,7 @@
                           bs-toggle="tooltip"
                           title="{{ __('admin.Add_Period') }}"
                         >
-                          <i class="ti ti-plus ti-16px"></i>
+                          <i class="ti ti-plus ti-13px"></i>
                         </button>
                         <div id="remove-period">
                           <button 
@@ -59,7 +59,7 @@
                             bs-toggle="tooltip"
                             title="{{ __('admin.Remove_Period') }}"
                           >
-                          <i class="ti ti-trash ti-16px"></i>
+                          <i class="ti ti-trash ti-13px"></i>
                           </button>
                         </div>
                       </div>
@@ -100,9 +100,9 @@
         var from = new Date('1970-01-01T' + fromTime + 'Z');
         var to = new Date('1970-01-01T' + toTime + 'Z');
         var diff = (to - from) / 60000; // difference in minutes
-        $periodRow.find('.total-time').text(diff + ' min');
+        $periodRow.find('.total-time').text(diff + ' {{__('admin.Min')}}');
       } else {
-        $periodRow.find('.total-time').text('0 min');
+        $periodRow.find('.total-time').text('0 {{__('admin.Min')}}');
       }
     }
 
@@ -128,23 +128,26 @@
       console.log('add-slot');
       var $day = $(this).closest('.day-section').find('.periods-container');
       if ($day.is(':visible')) {
+        checkFormChanges();
         $day.hide();
-        $(this).html('{{ __('admin.Add_Slot') }} <i class="ti ti-plus ti-16px ms-2"></i>');
+        $(this).html('{{ __('admin.Add_Slot') }} <i class="ti ti-plus ti-13px ms-2"></i>');
         if ($day.find('.period-row').length > 0) {
           $day.find('.period-row').remove();
         }
       } else {
         $day.show();
-        $(this).html('{{ __('admin.Remove_Slot') }} <i class="ti ti-x ti-16px ms-2"></i>');
+        $(this).html('{{ __('admin.Remove_Slot') }} <i class="ti ti-x ti-13px ms-2"></i>');
         if ($day.find('.period-row').length === 0) {
           $day.find('.period-row').first().clone().appendTo($day);
         }
         if ($day.find('.period-row').length === 0) {
         var newPeriodRow = `
           <div class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
+            <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
             <input class="form-control me-2 mb-2 mb-md-0" type="time" name="periods[${$day.data('day')}][from][]" required>
+            <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
             <input class="form-control me-2 mb-2 mb-md-0" type="time" name="periods[${$day.data('day')}][to][]" required>
-            <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 min</span>
+            <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{__('admin.Min')}}</span>
             <div class="ps-6 d-flex flex-nowrap">
               <button type="button" class="btn btn-label-success btn-xs rounded-circle btn-icon me-2 add-period">
                 <i class="ti ti-plus text-16px"></i>
@@ -166,7 +169,7 @@
       console.log('add-period');
       var $templateRow = $(this).closest('.periods-container').find('.period-row').first().clone();
       $templateRow.find('input').val('');
-      $templateRow.find('.total-time').text('0 min');
+      $templateRow.find('.total-time').text('0 {{__('admin.Min')}}');
       $(this).closest('.periods-container').append($templateRow);
       calculateTotalTime($templateRow); // Ensure total time is calculated for the new period
       checkFormChanges();

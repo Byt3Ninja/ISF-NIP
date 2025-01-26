@@ -333,7 +333,7 @@
   </script>
     
   <script>
-    $('#logo').filemanager(['image']);
+    // $('#logo').filemanager(['image']);
 
     function ssector(selection) {
       if (selection === 'other') {

@@ -29,4 +29,13 @@ return [
 	'Registration Disabled' => 'تم إيقاف التسجيل بشكل مؤقت',
 	'auth_error' => 'لم نتكمن من إكمال المصادقة بسبب ":reason"',
 	'password_reset_success' => 'تم تغيير كلمة المرور بنجاح',
+	'Verify' => 'تأكيد',
+	'Verfied' => 'تم التأكيد',
+	'Invalid_Phone_Number' => 'رقم الهاتف غير صحيح',
+	'Invalid_WhatsApp_Number' => 'رقم الواتساب غير صحيح',
+	'Verify_Number_With_Code' => 'تأكيد الرقم',
+	'Enter_Code_Sent' => 'أدخل الكود المرسل إلى رقم هاتفك',
+	'Verify_Code' => 'تأكيد الكود',
+	'Enter_Code' => 'أدخل الكود',
+	'Cancel' => 'إلغاء',
 ];

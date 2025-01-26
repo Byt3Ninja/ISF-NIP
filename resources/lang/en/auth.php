@@ -30,4 +30,13 @@ return [
 	'Registration Disabled' => 'Registration Disabled Temporary',
 	'auth_error' => 'Unable to complete authentication because ":reason"',
 	'password_reset_success' => 'Password reset successfully',
+	'Verify' => 'Verify',
+	'Verfied' => 'Verified',
+	'Invalid_Phone_Number' => 'Invalid Phone Number',
+	'Invalid_WhatsApp_Number' => 'Invalid WhatsApp Number',
+	'Verify_Number_With_Code' => 'Verify Number',
+	'Enter_Code_Sent' => 'Enter the code sent to your phone number',
+	'Verify_Code' => 'Verify Code',
+	'Enter_Code' => 'Enter Code',
+	'Cancel' => 'Cancel',
 ];

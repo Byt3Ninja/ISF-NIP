@@ -147,4 +147,5 @@ return [
     'logTaskUpdateUserRemove' => '<a target="_blank" href=":url">:user</a> released <a target="_blank" href=":old_url">:old_user</a> from the task',
     'logTaskUpdateRow_no' => '<a target="_blank" href=":url">:user</a> changed task sorting order from ":old" to ":new"',
     'Survey' => 'Survey',
+    'Schedule' => 'Schedule',
 ];
