@@ -287,12 +287,10 @@ class ClientCompanyController extends Controller
 
                     $validatedData = $request->validate([
                         'name_en' => 'required|string|max:255',
-                        'name_ar' => 'required|string|max:255',
                         'country_id' => 'required|exists:countries,id',
                         'state_id' => 'required|exists:states,id',
                         'sector' => 'required|string|max:255',
                         'address_en' => 'required|string|max:500',
-                        'address_ar' => 'required|string|max:500',
                         'est_date' => 'required|date',
                         'years_of_operations' => 'required|string',
                         'product_or_service' => 'required|string|in:Product,Service,Product + Service',
@@ -301,14 +299,12 @@ class ClientCompanyController extends Controller
                         'other_category' => 'nullable|string|max:255',
                     ], [
                         'name_en.required' => __('admin.English Name is required'),
-                        'name_ar.required' => __('admin.Arabic Name is required'),
                         'country_id.required' => __('admin.Country is required'),
                         'country_id.exists' => __('admin.Invalid Country selected'),
                         'state_id.required' => __('admin.State is required'),
                         'state_id.exists' => __('admin.Invalid State selected'),
                         'sector.required' => __('admin.Sector is required'),
                         'address_en.required' => __('admin.English Address is required'),
-                        'address_ar.required' => __('admin.Arabic Address is required'),
                         'est_date.required' => __('admin.Established Date must be a valid date'),
                         'years_of_operations.required' => __('admin.Years of Operations is required'),
                         'product_or_service.required' => __('admin.Product or Service is required'),
@@ -349,12 +345,12 @@ class ClientCompanyController extends Controller
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'name_en' => $data['name_en'],
-                            'name_ar' => $data['name_ar'],
+                            'name_ar' => $data['name_en'],
                             'country_id' => $data['country_id'],
                             'state_id' => $data['state_id'],
                             'sector' => $data['sector'],
                             'address_en' => $data['address_en'],
-                            'address_ar' => $data['address_ar'],
+                            'address_ar' => $data['address_en'],
                             'est_date' => $data['est_date'],
                             'years_of_operations' => $data['years_of_operations'],
                             'product_or_service' => $data['product_or_service'],
@@ -1445,7 +1441,6 @@ class ClientCompanyController extends Controller
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
-            dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);
