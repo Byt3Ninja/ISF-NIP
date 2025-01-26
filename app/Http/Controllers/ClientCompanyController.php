@@ -627,6 +627,7 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 8) {
 
+                    
                     $validator = Validator::make($request->all(), [
                         'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                         'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -645,13 +646,23 @@ class ClientCompanyController extends Controller
                         'google_map.url' => __('admin.google_map_Not_URL'),
                     ]);
 
+                    // في الميثود التي تعالج الطلب
+                    if ($request->hasFile('img_url')) {
+                        // الحصول على الصورة
+                        $image = $request->file('img_url');
+
+                        // حفظ الصورة في المجلد المطلوب
+                        $path = $image->store('images', 'public');
+
+                    }
+                   
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
 
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'website' => $data['website'],
-                            'logo' => $data['img_url'],
+                            'logo' => $path,
                             'facebook' => $data['facebook'],
                             'twitter' => $data['twitter'],
                             'linkedin' => $data['linkedin'],
@@ -663,7 +674,7 @@ class ClientCompanyController extends Controller
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
                             'website' => $data['website'],
-                            'logo' => $data['img_url'],
+                            'logo' => $path,
                             'facebook' => $data['facebook'],
                             'twitter' => $data['twitter'],
                             'linkedin' => $data['linkedin'],
