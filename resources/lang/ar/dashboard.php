@@ -147,4 +147,5 @@ return [
     'logTaskUpdateUserRemove' => 'قام <a target="_blank" href=":url">:user</a> بإزالة <a target="_blank" href=":old_url">:old_user</a> من المهمة',
     'logTaskUpdateRow_no' => 'قام <a target="_blank" href=":url">:user</a> بتغيير ترتيب فرز المهام من ":old" إلى ":new"',
     "Survey" => "الاستبيان",
+    'Schedule' => 'اضافة مواعيد',
 ];

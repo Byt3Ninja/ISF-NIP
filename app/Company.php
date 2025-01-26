@@ -52,6 +52,8 @@ class Company extends Model
         'linkedin',
         'youtube',
         'google_map',
+        'instagram',
+        'tiktok',
         'logo',
         'cycle',
         'step',

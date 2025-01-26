@@ -296,7 +296,7 @@
 
       <div class="row g-3">
         <!-- Latest Services -->
-        <div class="col-sm-6 col-12 mb-6">
+        <div class="col-sm-6 col-12 mb-6 rounded" style="max-height: 400px; overflow-y: auto;">
           <div class="card">
             <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
               <div class="d-flex align-items-center py-2">
@@ -306,22 +306,26 @@
             </div>
             <div class="card-body">
               @if (count($services_latest) > 0)
-                @foreach ($services_latest as $serv)
-                  <div class="d-flex justify-content-between align-items-center my-2">
+                @foreach ($services_latest as $key => $serv)
+                  <div 
+                    class="d-flex justify-content-between align-items-center mb-3 pb-2 
+                    {{ $key !== count($services_latest) - 1 ? 'border-bottom' : '' }}
+                    "
+                  >
                     <div class="widget-todo-title-area d-flex align-items-center">
                       <a href="/dashboard/directory?find={{ $serv->{'name_' . $l} }}">
-                        <span class="widget-todo-title ml-50 text-secondary">
-                          <i class="ti ti-link"></i>
-                          {{ $serv->{'name_' . $l} }}</span>
+                        <span class="text-secondary">
+                          <i class="ti ti-link me-2"></i>
+                          {{ $serv->{'name_' . $l} }}
+                        </span>
                       </a>
                     </div>
                     <div class="widget-todo-item-action d-flex align-items-center">
-                      <div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-conetnt-center"
-                        style="width: 200px; height: 30px">
+                      <button class="btn btn-sm btn-label-primary" style="width: 156px;">
                         <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
                           {{ $serv->serviceCategory->{'name_' . $l} }}
                         </a>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 @endforeach
@@ -339,120 +343,125 @@
         </div>
         <!-- / Latest Services -->
 
-        <!-- Latest Events -->
-        <div class="col-sm-6 col-12 mb-6">
-          <div class="card">
-            <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom">
-              <div class="d-flex align-items-center py-2">
-                <i class="ti ti-calendar-event ti-24px"></i>
-                <h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest Events') }}</h5>
+        <!-- / Latest Survey -->
+        @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
+          @if( Auth::user()->hasRole('Mentor') )
+          <div class="col-sm-6 col-12 mb-6" style="max-height: 355px; overflow-y: auto; border-radius: 1rem;">
+            <div class="card">
+              <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
+                <div class="d-flex align-items-center py-2">
+                  <i class="ti ti-user-question mr-1"></i>
+                  <h5 class="card-title mb-0 mx-2">{{ __('dashboard.availableSurveysList') }}</h5>
+                </div>
               </div>
-            </div>
-            <div class="card-body">
-              @if (count($event_latest) > 0)
-                @foreach ($event_latest as $event)
-                  <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
-                    <div class="widget-todo-title-area d-flex align-items-center">
-                      <a href="/dashboard/calendar">
-                        <span class="widget-todo-title ml-50 text-secondary">
-                          <i class="ti ti-link"></i>
-                          {{ $event->title }}
-                        </span>
+              <div class="card-body py-6">
+                <div class="container-fluid px-0">
+                  @foreach( $available_surveys as $survey )
+                  <div class="row border-bottom mb-2 pb-2 d-flex align-items-center">
+                    <div class="col-9">
+                      @if( $survey->triggered_on == 'mentorship' )
+                      <i class="ti ti-bulb mx-1"></i> 
+                      @elseif( $survey->triggered_on == 'training' )
+                      <i class="ti ti-presentation mx-1"></i> 
+                      @endif
+                      {{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on) . ucFirst($survey->triggered_by) ) }} 
+                      @php
+                        $middleware = collect([]);
+                        if( $survey->triggered_on == 'mentorship' )
+                        {
+                          if( $survey->triggered_by == 'session' ) { $middleware = $survey->mentorship_session; }
+                          if( $survey->triggered_by == 'due' ) { $middleware = $survey->mentorship_step; }
+                        }
+                        elseif( $survey->triggered_on == 'training' )
+                        {
+                          if( $survey->triggered_by == 'session' ) { $middleware = $survey->training_session; }
+                          if( $survey->triggered_by == 'due' ) { $middleware = $survey->training_step; }
+                          if( $survey->triggered_by == 'quiz' ) { $middleware = $survey->training_quiz; }
+                        }
+                      @endphp
+                      @if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on) ) }} @endif
+                      @if( $survey->triggered_on == 'mentorship' )
+                        @if( $survey->triggered_by == 'session' )
+                        {{ __('dashboard.with') }} 
+                          @php $mentor = $middleware->mentor; @endphp
+                          {{ $survey->mentorship_session->user->company->{'name_' . $l} }}
+                        @elseif( $survey->triggered_by == 'due' )
+                          - {{ $middleware->title }}
+                        @else
+                          -
+                        @endif
+                      @elseif( $survey->triggered_on == 'training' )
+                        @if( $survey->triggered_by == 'session' )
+                          {{ '(' . __('cycles.' . $middleware->type ) . ')' }} {{ $middleware->title }}
+                        @elseif( $survey->triggered_by == 'due' )
+                          - {{ $middleware->title }}
+                        @elseif( $survey->triggered_by == 'quiz' )
+                          - {{ $middleware->title }}
+                        @else
+                          -
+                        @endif
+                      @endif
+                    </div>
+                    <div class="col-3 text-end">
+                      <a 
+                        href="{{ route('surveys.taking', ['id' => $survey->id]) }}" 
+                        class="btn btn-sm btn-label-primary"
+                      >
+                        {{ __('dashboard.startSurvey') }}
                       </a>
                     </div>
-                    <div
-                      class="btn btn-label-success text-success py-1 rounded d-flex align-items-center justify-conetnt-center"
-                      style="width: 200px; height: 30px;">
-                      {{ date('d-m-Y', strtotime($event->start)) }}
-                    </div>
                   </div>
-                @endforeach
-              @else
+                  @endforeach
+                </div>
+              </div>
+            </div>
+          </div>
+          @endif
+        @endif
+        <!-- Latest Survey -->
+      </div>
+      <!-- Latest Events -->
+      <div class="col-12 mb-6">
+        <div class="card">
+          <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom">
+            <div class="d-flex align-items-center py-2">
+              <i class="ti ti-calendar-event ti-24px"></i>
+              <h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest Events') }}</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            @if (count($event_latest) > 0)
+              @foreach ($event_latest as $event)
                 <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
                   <div class="widget-todo-title-area d-flex align-items-center">
-                    <span class="widget-todo-title ml-50">
-                      <i class="bx bxs-bell-ring text-danger"></i>
-                      {{ __('dashboard.No Events added') }} '<a
-                        href="/dashboard/calendar">{{ __('dashboard.Add yours now') }}</a>'.</span>
+                    <a href="/dashboard/calendar">
+                      <span class="widget-todo-title ml-50 text-secondary">
+                        <i class="ti ti-link"></i>
+                        {{ $event->title }}
+                      </span>
+                    </a>
+                  </div>
+                  <div
+                    class="btn btn-label-success text-success py-1 rounded d-flex align-items-center justify-conetnt-center"
+                    style="width: 200px; height: 30px;">
+                    {{ date('d-m-Y', strtotime($event->start)) }}
                   </div>
                 </div>
-              @endif
-            </div>
-          </div>
-        </div>
-        <!-- / Latest Events -->
-      </div>
-
-      @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
-    
-    
-    @if( Auth::user()->hasRole('Mentor') )
-    <div class="col-12 mb-6" style="max-height: 500px; overflow-y: auto;">
-      <div class="card">
-        <div class="card-header border-bottom py-3">
-          <h5 class="card-title m-0">
-            <i class="ti ti-user-question mr-1"></i> {{ __('dashboard.availableSurveysList') }}
-          </h5>
-        </div>
-        <div class="card-body py-6">
-          <div class="container-fluid px-0">
-            @foreach( $available_surveys as $survey )
-            <div class="row my-3 border-bottom pb-3">
-              <div class="col-9 py-1">
-                @if( $survey->triggered_on == 'mentorship' )
-                <i class="ti ti-bulb mx-1"></i> 
-                @elseif( $survey->triggered_on == 'training' )
-                <i class="ti ti-presentation mx-1"></i> 
-                @endif
-                {{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on) . ucFirst($survey->triggered_by) ) }} 
-                @php
-                  $middleware = collect([]);
-                  if( $survey->triggered_on == 'mentorship' )
-                  {
-                    if( $survey->triggered_by == 'session' ) { $middleware = $survey->mentorship_session; }
-                    if( $survey->triggered_by == 'due' ) { $middleware = $survey->mentorship_step; }
-                  }
-                  elseif( $survey->triggered_on == 'training' )
-                  {
-                    if( $survey->triggered_by == 'session' ) { $middleware = $survey->training_session; }
-                    if( $survey->triggered_by == 'due' ) { $middleware = $survey->training_step; }
-                    if( $survey->triggered_by == 'quiz' ) { $middleware = $survey->training_quiz; }
-                  }
-                @endphp
-                @if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on) ) }} @endif
-                @if( $survey->triggered_on == 'mentorship' )
-                  @if( $survey->triggered_by == 'session' )
-                  {{ __('dashboard.with') }} 
-                    @php $mentor = $middleware->mentor; @endphp
-                    {{ $survey->mentorship_session->user->company->{'name_' . $l} }}
-                  @elseif( $survey->triggered_by == 'due' )
-                    - {{ $middleware->title }}
-                  @else
-                    -
-                  @endif
-                @elseif( $survey->triggered_on == 'training' )
-                  @if( $survey->triggered_by == 'session' )
-                    {{ '(' . __('cycles.' . $middleware->type ) . ')' }} {{ $middleware->title }}
-                  @elseif( $survey->triggered_by == 'due' )
-                    - {{ $middleware->title }}
-                  @elseif( $survey->triggered_by == 'quiz' )
-                    - {{ $middleware->title }}
-                  @else
-                    -
-                  @endif
-                @endif
+              @endforeach
+            @else
+              <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
+                <div class="widget-todo-title-area d-flex align-items-center">
+                  <span class="widget-todo-title ml-50">
+                    <i class="bx bxs-bell-ring text-danger"></i>
+                    {{ __('dashboard.No Events added') }} '<a
+                      href="/dashboard/calendar">{{ __('dashboard.Add yours now') }}</a>'.</span>
+                </div>
               </div>
-              <div class="col-3 text-end">
-                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
-              </div>
-            </div>
-            @endforeach
+            @endif
           </div>
         </div>
       </div>
-    </div>
-    @endif
-    @endif
+      <!-- / Latest Events -->
 
       <!-- Schdule Meetings Tabls -->
       <div class="card mt-10">
@@ -461,8 +470,15 @@
             <i class="ti ti-calendar-plus ti-24px"></i>
             {{ __('dashboard.My current schedule') }}
           </span>
-          <button onclick="modify(0,0,0)" type="button" class="btn-sm btn-label-primary rounded">
-            <i class="ti ti-plus ti-24px"></i>
+          <button
+            id="addSchedule" 
+            onclick="
+              this.querySelector('.spinner-border').classList.remove('d-none');
+              modify(1, undefined, 0)" type="button" class="btn btn-sm btn-label-primary"
+          >
+            {{ __('dashboard.Schedule') }}
+            <i class="ti ti-calendar ms-2"></i>
+            <span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
           </button>
         </h5>
         @if (count($myschedules))
@@ -678,21 +694,11 @@
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 
   <!-- Page JS -->
-  <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+  {{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
 @stop
 
 @section('pagescripts')
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-
-  <script>
-    $(document).ready(function() {
-      $('#dfrom, #dto').datepicker({
-        format: 'yyyy-mm-dd',
-        autoclose: true,
-        todayHighlight: true
-      });
-    });
-  </script>
 
   <script>
     function modify(type, id, stat) {
@@ -701,110 +707,204 @@
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
       });
-      if (type === 3) {
-        //delete
-        if (confirm("{{ __('dashboard.sure del schedule') }}")) {
-          $.ajax({
-            type: "POST",
-            url: "/dashboard/mentors/modify",
-            data: {
-              "id": id,
-              "rtype": type,
-            },
-            success: function(response) {
-              location.reload();
-            },
-            error: function(error) {
-              console.log(error);
-              alert("Error Occurred, Try again!");
+
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/mentors/modify",
+        data: {
+          "id": id ? id : undefined,
+          "rtype": type,
+        },
+        success: function(response) {
+          // console.log('response', response);
+
+          $('#availabilty-modal').modal('show'); // Show the modal
+
+          // Hide the spinner
+          $('#addSchedule').find('.spinner-border').addClass('d-none');
+          
+          const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+          daysOfWeek.forEach(day => {
+            // Filter the response to get the periods for the current day
+            const dayPeriods = response.filter(item => item?.days === day) || [];
+
+            if (dayPeriods.length > 0) {
+              const dayRow = $(`#availabilty-modal #${day}-period-row`)[0];
+              
+              if (dayRow) {
+                const periodContainer = dayRow.closest('.periods-container');
+                const slotButton = periodContainer.closest('.day-section').querySelector('#add-slot');
+                if (slotButton) {
+                  console.log('slotButton', slotButton);
+                  slotButton.innerHTML = '{{ __('admin.Remove_Slot') }} <i class="ti ti-x ti-13px ms-2"></i>';
+                }
+
+                periodContainer.style.display = 'block'; // Show the row
+                periodContainer.innerHTML = ''; // Clear existing rows
+
+                for (let i = 0; i < dayPeriods.length; i++) {
+                  const newPeriodRow = `
+                    <div class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
+                      <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
+                      <input 
+                        required
+                        value="${dayPeriods[i].tfrom}"
+                        class="form-control me-2 mb-2 mb-md-0" type="time" name="periods['${day}'][from][]"
+                      />
+                      <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
+                      <input 
+                        required
+                        value="${dayPeriods[i].tto}"
+                        class="form-control me-2 mb-2 mb-md-0" type="time" name="periods['${day}'][to][]"
+                      />
+                      <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{__('admin.Min')}}</span>
+                      <div class="ps-6 d-flex flex-nowrap">
+                        <button type="button" class="btn btn-label-success btn-xs rounded-circle btn-icon me-2 add-period">
+                          <i class="ti ti-plus text-16px"></i>
+                        </button>
+                        <div id="remove-period">
+                          <button type="button" class="btn btn-label-danger btn-xs rounded-circle btn-icon remove-period">
+                            <i class="ti ti-trash text-16px"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>`
+                  ;
+                  periodContainer.innerHTML += newPeriodRow; // Append the new rows
+                }
+              }
             }
           });
+        },
+        error: function(error) {
+          console.log(error);
+          // Hide the spinner
+          $('#addSchedule').find('.spinner-border').addClass('d-none');
+          alert("Error Occurred, Try again!"); // Show an alert
         }
-      } else if (type === 2) {
-        //Enable-disable
-        $.ajax({
-          type: "POST",
-          url: "/dashboard/mentors/modify",
-          data: {
-            "id": id,
-            "rtype": type,
-            "stat": stat
-          },
-          success: function(response) {
-            location.reload();
-          },
-          error: function(error) {
-            console.log(error);
-            alert("Error Occurred, Try again!");
-          }
-        });
-      } else if (type === 1) {
-        // Edit current
-        $.ajax({
-          type: "POST",
-          url: "/dashboard/mentors/modify",
-          data: {
-            "id": id,
-            "rtype": type,
-          },
-          success: function(response) {
-            switchtypes(response.type);
-            console.log(response);
-            $('#sid').val(response.id);
-            $('#rtype').val(4);
-            $('#type').val(response.type);
-            $('#days').val(response.days);
-            $('#dfrom').val(response.dfrom);
-            $('#dto').val(response.dto);
-            $('#tfrom').val(response.tfrom);
-            $('#tto').val(response.tto);
-            $('#notes').val(response.notes);
-            $('#availabilty-modal').modal('show');
-          },
-          error: function(error) {
-            console.log(error);
-            alert("Error Occurred, Try again!");
-          }
-        });
-      } else {
-        //show from as new
-        $('#sid, #type, #days, #dfrom, #dto, #tfrom, #tto, #notes').val();
-        $('#rtype').val('0');
-        switchtypes(type);
-        $('#availabilty-modal').modal('show');
-      }
+      });
     }
+  </script>
 
-    function SelectType(type) {
-      switchtypes(type);
-    }
+  <script>
+    // $(document).ready(function() {
+    //   $('#dfrom, #dto').datepicker({
+    //     format: 'yyyy-mm-dd',
+    //     autoclose: true,
+    //     todayHighlight: true
+    //   });
+    // });
 
-    function switchtypes(type) {
-      switch (type) {
-        case 'OneDay':
-          $('#showdates').show();
-          $('#showtto, #showdays').hide();
-          $("#dfrom").prop('required', true);
-          $("#days, #dto").prop('required', false);
-          break;
-        case 'Weekly':
-          $('#showdates').hide();
-          $('#showdays').show();
-          $("#days").prop('required', true);
-          $("#dfrom, #dto").prop('required', false);
-          break;
-        case 'WorkingDays':
-          $('#showdates, #showdays').hide();
-          $("#dfrom, #dto, #days").prop('required', false);
-          break;
-        case 'Period':
-          $('#showtto,#showdates').show();
-          $('#showdays').hide();
-          $("#dfrom, #dto").prop('required', true);
-          $("#days").prop('required', false);
-          break;
-      }
-    }
+    // function modify(type, id, stat) {
+    //   $.ajaxSetup({
+    //     headers: {
+    //       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //     }
+    //   });
+    //   if (type === 3) {
+    //     //delete
+    //     if (confirm("{{ __('dashboard.sure del schedule') }}")) {
+    //       $.ajax({
+    //         type: "POST",
+    //         url: "/dashboard/mentors/modify",
+    //         data: {
+    //           "id": id,
+    //           "rtype": type,
+    //         },
+    //         success: function(response) {
+    //           location.reload();
+    //         },
+    //         error: function(error) {
+    //           console.log(error);
+    //           alert("Error Occurred, Try again!");
+    //         }
+    //       });
+    //     }
+    //   } else if (type === 2) {
+    //     //Enable-disable
+    //     $.ajax({
+    //       type: "POST",
+    //       url: "/dashboard/mentors/modify",
+    //       data: {
+    //         "id": id,
+    //         "rtype": type,
+    //         "stat": stat
+    //       },
+    //       success: function(response) {
+    //         location.reload();
+    //       },
+    //       error: function(error) {
+    //         console.log(error);
+    //         alert("Error Occurred, Try again!");
+    //       }
+    //     });
+    //   } else if (type === 1) {
+    //     // Edit current
+    //     $.ajax({
+    //       type: "POST",
+    //       url: "/dashboard/mentors/modify",
+    //       data: {
+    //         "id": id,
+    //         "rtype": type,
+    //       },
+    //       success: function(response) {
+    //         switchtypes(response.type);
+    //         console.log(response);
+    //         $('#sid').val(response.id);
+    //         $('#rtype').val(4);
+    //         $('#type').val(response.type);
+    //         $('#days').val(response.days);
+    //         $('#dfrom').val(response.dfrom);
+    //         $('#dto').val(response.dto);
+    //         $('#tfrom').val(response.tfrom);
+    //         $('#tto').val(response.tto);
+    //         $('#notes').val(response.notes);
+    //         $('#availabilty-modal').modal('show');
+    //       },
+    //       error: function(error) {
+    //         console.log(error);
+    //         alert("Error Occurred, Try again!");
+    //       }
+    //     });
+    //   } else {
+    //     //show from as new
+    //     $('#sid, #type, #days, #dfrom, #dto, #tfrom, #tto, #notes').val();
+    //     $('#rtype').val('0');
+    //     switchtypes(type);
+    //     $('#availabilty-modal').modal('show');
+    //   }
+    // }
+
+    // function SelectType(type) {
+    //   switchtypes(type);
+    // }
+
+    // function switchtypes(type) {
+    //   switch (type) {
+    //     case 'OneDay':
+    //       $('#showdates').show();
+    //       $('#showtto, #showdays').hide();
+    //       $("#dfrom").prop('required', true);
+    //       $("#days, #dto").prop('required', false);
+    //       break;
+    //     case 'Weekly':
+    //       $('#showdates').hide();
+    //       $('#showdays').show();
+    //       $("#days").prop('required', true);
+    //       $("#dfrom, #dto").prop('required', false);
+    //       break;
+    //     case 'WorkingDays':
+    //       $('#showdates, #showdays').hide();
+    //       $("#dfrom, #dto, #days").prop('required', false);
+    //       break;
+    //     case 'Period':
+    //       $('#showtto,#showdates').show();
+    //       $('#showdays').hide();
+    //       $("#dfrom, #dto").prop('required', true);
+    //       $("#days").prop('required', false);
+    //       break;
+    //   }
+    // }
 
     $('.start_meeting').click(function () {
         $.ajax({

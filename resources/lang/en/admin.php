@@ -1168,4 +1168,6 @@ return [
 	'Add_Period' => 'Add Period',
 	'Remove_Period' => 'Remove Period',
 	'ChooseYourStageFirst' => 'Choose Your Development Stage First',
+	'Tiktok' => 'Tiktok',
+	'Instagram' => 'Instagram',
 ];
