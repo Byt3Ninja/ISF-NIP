@@ -371,13 +371,13 @@ class ClientCompanyController extends Controller
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
                             'name_en' => $data['name_en'],
-                            'name_ar' => $data['name_ar'],
+                            'name_ar' => $data['name_en'],
                             'country_id' => $data['country_id'],
                             'state_id' => $data['state_id'],
                             'sector' => $data['sector'],
                             'business_categories' => $validatedData['business_categories'],
                             'address_en' => $data['address_en'],
-                            'address_ar' => $data['address_ar'],
+                            'address_ar' => $data['address_en'],
                             'est_date' => $data['est_date'],
                             'years_of_operations' => $data['years_of_operations'],
                             'product_or_service' => $data['product_or_service'],
@@ -454,12 +454,9 @@ class ClientCompanyController extends Controller
                     $validatedData = $request->validate([
                         'company_description' => 'required|string|max:500',
                         'Sustainable_development' => 'nullable|array',
-                        'Sustainable_development.*' => 'in:no_poverty,zero_hunger,good_health,quality_education,gender_equality,clean_water,clean_energy,decent_work,industry_innovation,reduced_inequalities,sustainable_cities,responsible_consumption,climate_action,life_below_water,life_on_land,peace_justice,partnership_goals',
                     ], [
                         'company_description.required' => __('admin.Company description must not exceed'),
                         'company_description.max' => __('admin.Company description must not exceed 500 characters'),
-                        'Sustainable_development.required' => __('admin.sustainable development is Empty'),
-                        'Sustainable_development.*.in' => __('admin.sustainable development option'),
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
