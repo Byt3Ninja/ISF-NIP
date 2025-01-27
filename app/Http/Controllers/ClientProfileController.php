@@ -18,12 +18,13 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\ConfirmEmailUpdate;
 use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\UpdateClientProfileRequest;
 use Intervention\Image\ImageManagerStatic as Image;
-use Storage, Hash, DB, Exception, Session, URL, File;
+use Storage, Hash, Exception, Session, URL, File;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
 
 class ClientProfileController extends Controller
@@ -461,15 +462,24 @@ class ClientProfileController extends Controller
     public function sendCode(Request $request)
     {
         $userId = Auth::user()->id;
+
+        DB::table('otps')
+        ->where('created_at', '<', Carbon::now()->subHours(6))
+        ->where('bad', '0')
+        ->delete();
+        
          // جلب الـ OTPs السابقة التي تم إرسالها والتي هي "غير صالحة" (bad == 0)
         $otpget = Otp::where('user_id', $userId)
         ->where('bad', '0')
-        ->where('created_at', '>=', now()->subHours(6)) // تحقق من المحاولات في آخر 6 ساعات
+        ->where('created_at', '>=', DB::raw('created_at - INTERVAL 6 HOUR')) // تحقق من المحاولات في آخر 6 ساعات
         ->get();
+       
+        
+
 
         // إذا كان عدد المحاولات أكثر من 2 خلال 6 ساعات، يجب الانتظار 6 ساعات
         if ($otpget->count() >= 2) {
-        return response()->json(['error' => 'Wait for 6 hours'], 500);
+        return response()->json(['error' => __('admin.OTP_limit_exceeded_wait_6_hours')]);
         }
 
         $phoneNumber = session('phone');
@@ -487,9 +497,9 @@ class ClientProfileController extends Controller
             $otpsave->otp_sent = true;
             $otpsave->save();
             $request->session()->put('otp', $otp);
-            return response()->json(['otp' => $otp]);
+            return response()->json(['success' =>  __('admin.OTP_sent_successfully')]);
         } else {
-            return response()->json(['error' => 'Failed to send OTP'], 500);
+            return response()->json(['error' =>  __('admin.Failed_to_send_OTP') ]);
         }
 
 
@@ -521,9 +531,9 @@ class ClientProfileController extends Controller
                 $user->whatsapp_verified = 1;
                 $user->save();
     
-                return response()->json(['message' => 'التحقق بنجاح.']);
+                return response()->json(['success' => __('admin.OTP_verified_successfully')]);
             } else {
-                return response()->json(['error' => 'No valid OTP found or OTP expired.'], 400);
+                return response()->json(['error' => __('admin.No_valid_OTP_found_or_OTP_expired')]);
             }
         } else {
             // إذا كان الرمز غير صحيح
@@ -542,18 +552,17 @@ class ClientProfileController extends Controller
                     $otpget2->created_at = now()->addHours(6);
                     $otpget2->save();
     
-                    return response()->json(['error' => 'تم الوصول إلى الحد الأقصى للمحاولات. انتظر 6 ساعات قبل المحاولة مرة أخرى.'], 400);
+                    return response()->json(['error' => __('admin.max_attempts_reached')]);
                 } else {
-                    // حفظ المحاولات الخاطئة
                     $otpget2->save();
     
                     return response()->json([
-                        'error' => 'رمز التحقق غير صحيح.',
+                        'error' => __('admin.invalid_verification_code'),
                         'remaining_attempts' => 3 - $otpget2->wrong_attempts,
-                    ], 400);
+                    ]);
                 }
             } else {
-                return response()->json(['error' => 'لا يوجد OTP صالح أو انتهت صلاحيته.'], 400);
+                return response()->json(['error' => __('admin.No_valid_OTP_found_or_OTP_expired')]);
             }
         }
     }
