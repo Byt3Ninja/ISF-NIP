@@ -22,9 +22,10 @@
             </div>
             <div id="holder" class="company-picker-container">
               <div class="position-relative w-px-100 h-px-100 mb-3 cursor-pointer">
+                
                 <img 
                   id="company-logo" 
-                  src="{{ $client->company->logo ?? '/images/logo-placeholder.png' }}" 
+                  src="{{ $client->company ? asset($client->company->logo) : '/images/logo-placeholder.png' }}" 
                   onerror="this.src = '/images/logo-placeholder.png';"
                   alt="Company logo" 
                   class="img-fluid rounded border w-px-100 h-px-100" 
@@ -39,7 +40,8 @@
                 accept="image/*" 
               />
             </div>
-            @if ($client->company->logo) 
+
+            @if ($client->company && $client->company->logo) 
               <div class="w-px-100 text-center">
                 <button
                   type="button" 
@@ -172,6 +174,51 @@
                 <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Google Map URL' : 'رابط خريطة جوجل غير صالح' }}.</div>
               </div>
             </div>
+
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="instagram">{{ __('admin.Instagram') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="instagram" 
+                    name="instagram" 
+                    placeholder="{{ $l == 'en' ? 'Instagram URL' : 'رابط انستجرام' }}" 
+                    value="{{ $client->company->instagram ?? old('instagram') }}" 
+                    pattern="https://www.instagram.com.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}.</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="tiktok">{{ __('admin.Tiktok') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="tiktok" 
+                    name="tiktok" 
+                    placeholder="{{ $l == 'en' ? 'Tiktok URL' : 'رابط انستجرام' }}" 
+                    value="{{ $client->company->tiktok ?? old('tiktok') }}" 
+                    pattern="https://www.tiktok.com.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}.</div>
+              </div>
+            </div>
+
+
+
+
           </div>
         </div>
       </div>

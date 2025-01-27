@@ -15,8 +15,7 @@ return [
     |
     */
 
-
-    'default' => config('broadcasting.connections.pusher.BROADCAST_DRIVER', 'null'),
+    'default' => config('broadcasting.default', 'pusher'),
     /*
     |--------------------------------------------------------------------------
     | Broadcast Connections
@@ -32,11 +31,12 @@ return [
 
         'pusher' => [
             'driver' => 'pusher',
-            'key' => config('broadcasting.connections.pusher.PUSHER_APP_KEY'),
-            'secret' => config('broadcasting.connections.pusher.PUSHER_APP_SECRET'),
-            'app_id' => config('broadcasting.connections.pusher.PUSHER_APP_ID'),
+            'key' => config('broadcasting.connections.pusher.key'),
+            'secret' => config('broadcasting.connections.pusher.secret'),
+            'app_id' => config('broadcasting.connections.pusher.app_id'),
             'options' => [
-                'cluster' => config('broadcasting.connections.pusher.PUSHER_APP_CLUSTER'),
+                'cluster' => config('broadcasting.connections.pusher.cluster'),
+                'encrypted' => true,
                 'useTLS' => true,
             ],
 

@@ -523,11 +523,35 @@ class MentorsController extends Controller
 				Schedule::where('user_id', Auth::id())->where('id', $request->id)->update(['active' => $stat]);
 				return response()->json(['state' => 'success']);
 			} elseif ($type == 1) {
-				$my = Schedule::where('user_id', Auth::id())->where('id', $request->id)->first();
+				$my = Schedule::where('user_id', Auth::id())->get();
 				return response()->json($my);
 			} else {
 
-				Schedule::create($request->all() + ['user_id' => Auth::id()]);
+				// Schedule::create($request->all() + ['user_id' => Auth::id()]);
+				$userId = Auth::id();
+				$periods = $request->input('periods');
+
+				foreach ($periods as $day => $times) {
+					// التحقق من وجود بيانات "from" و "to"
+					if (isset($times['from']) && isset($times['to'])) {
+						foreach ($times['from'] as $index => $from) {
+							$to = $times['to'][$index] ?? null; // تأكد من وجود القيمة المقابلة في "to"
+
+							// تجاهل إذا كانت القيم فارغة
+							if (!is_null($from) && !is_null($to)) {
+								Schedule::create([
+									'user_id' => $userId,
+									'type'=> $request->input('type'),
+									'days' => $day,
+									'tfrom' => $from,
+									'tto' => $to,
+									'notes'=> $request->input('notes'),
+									
+								]);
+							}
+						}
+					}
+				}
 				return back()->with(['msg' => 'Saved', 'class' => 'success']);
 			}
 		} catch (Exception $e) {

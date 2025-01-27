@@ -156,6 +156,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('email.confirm');
 
 
+    Route::post('/save-phone-session', 'ClientProfileController@savePhoneSession')->name('save.phone.session');
+    Route::post('/send-code', 'ClientProfileController@sendCode')->name('send.code');
+    Route::post('/verify-code', 'ClientProfileController@verifyCode')->name('verify.code');
+   
     Route::resource('Tags', 'TagsController');
     Route::resource('Labels', 'LabelController');
     Route::resource('TimeSheet', 'TimeSheetController');

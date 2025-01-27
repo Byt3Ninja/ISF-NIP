@@ -24,16 +24,10 @@
       {!! csrf_field() !!}
       <input name="CompanyN" type="hidden" value="1">
       <div class="row">
-        <div class="col-md-6 col-12 mb-3">
+        <div class="col-12 mb-3">
           <div class="form-group">
             <label class="form-label fs-6 fw-semibold mb-2" for="name_en">{{ __('admin.English Name') }} *</label>
             <input class="form-control" id="name_en" name="name_en" type="text" value="{{ $client->company ? $client->company->name_en : old('name_en') }}" style="direction: ltr;" placeholder="{{ __('admin.English Name') }} *" required autocomplete="name_en">
-          </div>
-        </div>
-        <div class="col-md-6 col-12 mb-3">
-          <div class="form-group">
-            <label class="form-label fs-6 fw-semibold mb-2" for="name_ar">{{ __('admin.Arabic Name') }} *</label>
-            <input class="form-control" id="name_ar" name="name_ar" type="text" value="{{ $client->company ? $client->company->name_ar : old('name_ar') }}" style="direction: rtl;" placeholder="{{ __('admin.Arabic Name') }} *" required autocomplete="name_ar">
           </div>
         </div>
         @php
@@ -116,12 +110,7 @@
             <textarea class="form-control" id="address_en" name="address_en" style="direction: ltr;" required placeholder="{{ __('admin.English Address') }} *">{{ $client->company ? $client->company->address_en : old('address_en') }}</textarea>
           </div>
         </div>
-        <div class="col-md-12 col-12 mb-4">
-          <div class="form-group">
-            <label class="form-label fs-6 fw-semibold mb-2" for="address_ar">{{ __('admin.Arabic Address') }} *</label>
-            <textarea class="form-control" id="address_ar" name="address_ar" style="direction: rtl;" required placeholder="{{ __('admin.Arabic Address') }} *">{{ $client->company ? $client->company->address_ar : old('address_ar') }}</textarea>
-          </div>
-        </div>
+       
         <div class="col-md-12 col-12 mb-4">
           <div class="form-group">
             <label class="form-label fs-6 fw-semibold mb-2" for="est_date">{{ __('admin.est_date') }}</label>

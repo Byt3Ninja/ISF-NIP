@@ -30,22 +30,19 @@ class ChangeStep implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('step-changes');
-    }
-
-    public function broadcastAs()
-    {
-        return 'ChangeStep';
+        return [
+            new Channel('step-changes'),
+        ];
     }
 
 
     public function broadcastWith()
     {
         return [
-            'company_name' => $this->data['company_name_en'] ?? 'Unknown Company',
-            'last_step' => $this->data['last_step'] ?? 'N/A',
-            'new_step' => $this->data['new_step'] ?? 'N/A',
-            'organization_name' => $this->data['organization_name_en'] ?? 'Unknown Organization',
+            'message' => 'The Step has been Changed For ' . ($this->data['company_name_en'] ?? 'N/A') .
+                ' from ' . ($this->data['last_step'] ?? 'N/A') .
+                ' to ' . ($this->data['new_step'] ?? 'N/A') .
+                ' by ' . ($this->data['organization_name_en'] ?? 'N/A'),
         ];
     }
 }

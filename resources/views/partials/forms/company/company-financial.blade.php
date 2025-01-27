@@ -190,6 +190,27 @@
           <label for="financial_plan" class="form-label">{{ __('admin.financial_plan') }}
             *</label>
           <div class="position-relative">
+
+            @if (optional($client->company)->financial_plan != null)
+                      <div class="card shadow-sm"
+                        style="border-radius: 15px; max-height: 300px;  overflow-y: auto;">
+                        <div class="card-body">
+                          <div
+                            class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                              <i class="ti ti-file fs-1 text-warning"></i>
+                              <span>{{ basename($client->company->financial_plan) }}</span>
+                            </div>
+                            <a class="btn btn-transparent"
+                              href="{{ $client->company->financial_plan }}" target="_blank"
+                              download>
+                              <i class="ti ti-download fs-3 text-primary"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    @endif
+
               <div class="mt-3" style="display: grid; place-items: center;">
                   <input id="financial_plan" readonly
                     class="form-control border-light light-shadow px-8 "

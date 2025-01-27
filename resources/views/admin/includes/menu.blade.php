@@ -185,6 +185,7 @@
       </a>
     </li>
     @endif
+    @if($setting->mentor_list == 1)
     @if (Auth::user()->hasanyRole('Mentor|Registered|Admin'))
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
           href="/dashboard/show/Mentors" class="menu-link">
@@ -192,6 +193,19 @@
           <div>{{ __('admin.Mentors') }}</div>
         </a>
       </li>
+    @endif
+
+    @else
+    @if (Auth::user()->hasanyRole('Admin'))
+    <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
+        href="/dashboard/show/Mentors" class="menu-link">
+        <i class="ti ti-users ti-md me-2 me-lg-4 ti-lg"></i>
+        <div>{{ __('admin.Mentors') }}</div>
+      </a>
+    </li>
+  @endif
+
+
     @endif
     @role('Mentor')
       <li 
