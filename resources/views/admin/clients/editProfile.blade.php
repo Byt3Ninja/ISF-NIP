@@ -1012,7 +1012,7 @@ function sendCode(type) {
 // Verify code of phone
 function verifyCode() {
   var code = $('#OTP').val();
-  alert(code);
+
   $.ajax({
     url: '{{ route('verify.code') }}',
     type: 'POST',
@@ -1048,7 +1048,7 @@ function verifyCode() {
 // Verify code of WhatsApp
 function verifyWhatsappCode() {
   var code = $('#OTPWA').val();
-  alert(code);
+
   $.ajax({
     url: '{{ route('verify.code') }}',
     type: 'POST',
