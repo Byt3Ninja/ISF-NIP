@@ -1185,4 +1185,6 @@ return [
 	'ChooseYourStageFirst' => 'اختر (مرحلة التطوير) اولا',
 	'Tiktok' => ' تيكتوك',
 	'Instagram' => ' انستقرام',
+	'Password_should_be_strong' => 'يجب أن تكون كلمة المرور قوية',
+	'Passwords_do_not_match' => 'كلمات المرور غير متطابقة',
 ];

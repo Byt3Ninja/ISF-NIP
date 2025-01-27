@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 @stop
 
 @section('style')
@@ -53,12 +54,6 @@ if (auth()->user()->hasRole('Mentor')) {
 $tabsList = collect($tabs)->map(function ($tab) {
   return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
 })->toArray();
-
-$passwordRules = [
-  $l == 'en' ? 'Minimum 8 characters long - the more, the better' : 'الحد الأدنى 8 أحرف - كلما زادت الأحرف كلما كان أفضل',
-  $l == 'en' ? 'At least one lowercase character' : 'على الأقل حرف صغير واحد',
-  $l == 'en' ? 'At least one number, symbol, or whitespace character' : 'على الأقل رقم أو رمز أو مسافة واحدة',
-];
 @endphp
 
 @section('content')
@@ -373,46 +368,7 @@ $passwordRules = [
 
           <!-- Security section -->
           <div class="tab-pane fade" id="securitySection">
-            <div id="securitySection">
-              <!-- Change Password -->
-              <h5 class="card-header">{{ __('admin.Change_Password') }}</h5>
-              <div class="card-body pt-1">
-                <form method="post" action="{{ route('update_my_profile_password') }}" enctype="multipart/form-data">
-                  {!! csrf_field() !!}
-                  <div class="row">
-                    <div class="mb-6 col-md-6 form-password-toggle">
-                      <label class="form-label fs-6 fw-bold" for="password">{{ __('admin.Password') }}
-                      </label>
-                      <div class="input-group input-group-merge">
-                        <input type="password" class="form-control" id="password"
-                          placeholder="{{ __('admin.Password') }}" name="password" required autocomplete="new-password">
-                        <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-                      </div>
-                    </div>
-                    <div class="mb-6 col-md-6 form-password-toggle">
-                      <label class="form-label fs-6 fw-bold" for="password-confirm">{{ __('admin.Confirm') }}</label>
-                      <div class="input-group input-group-merge">
-                        <input type="password" class="form-control" id="password-confirm"
-                          placeholder="{{ __('admin.Password') }}" name="password_confirmation" required
-                          autocomplete="new-password">
-                        <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-                      </div>
-                    </div>
-                  </div>
-                  <h6 class="text-body">{{ __('admin.Password_Requirements') }}:</h6>
-                  <ul class="ps-4 mb-0">
-                    @foreach ($passwordRules as $key => $rule)
-                    <li class="{{ $key != array_key_last($passwordRules) ? 'mb-4' : '' }}">{{ $rule }}</li>
-                    @endforeach
-                  </ul>
-                  <div class="mt-6">
-                    <button type="submit" class="btn btn-primary me-3">{{ __('admin.Save_Changes') }}</button>
-                    <button type="reset" class="btn btn-label-secondary">{{ __('admin.Reset') }}</button>
-                  </div>
-                </form>
-              </div>
-              <!--/ Change Password -->
-            </div>
+            @include('admin.clients.profile.partials._security_form')
           </div>
           <!-- /Security section -->
           
@@ -711,7 +667,7 @@ $passwordRules = [
 @section('pagescripts')
 <!-- Page JS -->
 <script src="/vuexy/assets/js/forms-selects.js"></script>
-<script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+{{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
 
 <script>
   $(document).ready(function() {
