@@ -557,7 +557,7 @@ $tabsList = collect($tabs)->map(function ($tab) {
   <!-- / Content -->
 
   <!-- Verfiy Code Modal -->
-  <div class="modal fade" id="verifyCodeModal" tabindex="-1" aria-labelledby="verifyCodeModalLabel" aria-hidden="true">
+  {{-- <div class="modal fade" id="verifyCodeModal" tabindex="-1" aria-labelledby="verifyCodeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content">
         <div class="modal-header d-grid gap-2">
@@ -577,9 +577,9 @@ $tabsList = collect($tabs)->map(function ($tab) {
               required 
               autocomplete="otp" 
               autofocus
-            />
+            /> --}}
             {{-- <label for="OTP" class="focus-label">{{ __('auth.Add_OTP') }}</label> --}}
-            @error('OTP')
+            {{-- @error('OTP')
               <span class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>
               </span>
@@ -598,7 +598,7 @@ $tabsList = collect($tabs)->map(function ($tab) {
         </div>
       </div>
     </div>
-  </div>
+  </div> --}}
   <!--/ Verfiy Code Modal -->
   
   <!-- Verfiy Whatsapp Code Modal -->
@@ -613,7 +613,7 @@ $tabsList = collect($tabs)->map(function ($tab) {
         <div class="modal-body">
           <div class="form-group form-focus">
             <input 
-              id="OTP" 
+              id="OTPWA" 
               type="text" 
               class="form-control floating @error('OTP') is-invalid @enderror" 
               placeholder="{{ __('auth.Enter_Code') }}"
@@ -941,11 +941,24 @@ function sendCode(type) {
         _token: '{{ csrf_token() }}'
       },
       success: function(response) {
-        $('#sentMessage').text("Message Sent Successfully!");
-        $('#sentMessage').show();
+        console.log(response);
+        if (response.success && response.success !== "") {
+        // عرض رسالة النجاح
+        $('#sentMessageotp').text(response.success).show();
+        $('#whatsapp-error').hide(); // إخفاء رسالة الخطأ إذا ظهرت مسبقًا
+    } else if (response.error && response.error !== "") {
+        // عرض رسالة الخطأ
+        $('#whatsapp-error').text(response.error).show();
+        $('#sentMessageotp').hide(); // إخفاء رسالة النجاح إذا ظهرت مسبقًا
+        $('#verifyWhatsappCodeModal').modal('hide'); // إخفاء رسالة النجاح إذا ظهرت مسبقًا
+    } else {
+        console.warn("رد غير متوقع من السيرفر: ", response);
+        // إغلاق المودال كإجراء احتياطي
+        $('#verifyWhatsappCodeModal').modal('hide');
+    }
+        
       },
       error: function(xhr, status, error) {
-        console.log(error);
         $('#error').text('Not Successfully: ' + error);
         $('#error').show();
       }
@@ -955,6 +968,7 @@ function sendCode(type) {
 // Verify code of phone
 function verifyCode() {
   var code = $('#OTP').val();
+  alert(code);
   $.ajax({
     url: '{{ route('verify.code') }}',
     type: 'POST',
@@ -963,9 +977,21 @@ function verifyCode() {
       _token: '{{ csrf_token() }}'
     },
     success: function(response) {
-      $('#sentMessageotp').text("Successfully!");
-      $('#sentMessageotp').show();
-      location.reload();
+      console.log(response);
+      if (response.success && response.success !== "") {
+        // عرض رسالة النجاح
+        $('#sentMessageotp').text(response.success).show();
+        $('#errorotp').hide(); // إخفاء رسالة الخطأ إذا ظهرت مسبقًا
+        location.reload();
+    } else if (response.error && response.error !== "") {
+        // عرض رسالة الخطأ
+        $('#errorotp').text(response.error).show();
+        $('#sentMessageotp').hide(); // إخفاء رسالة النجاح إذا ظهرت مسبقًا
+    } else {
+        console.warn("رد غير متوقع من السيرفر: ", response);
+    }
+
+      
         
     },
     error: function(xhr, status, error) {
@@ -977,7 +1003,8 @@ function verifyCode() {
 
 // Verify code of WhatsApp
 function verifyWhatsappCode() {
-  var code = $('#OTP').val();
+  var code = $('#OTPWA').val();
+  alert(code);
   $.ajax({
     url: '{{ route('verify.code') }}',
     type: 'POST',
@@ -986,11 +1013,22 @@ function verifyWhatsappCode() {
         _token: '{{ csrf_token() }}'
     },
     success: function(response) {
-      $('#sentMessageotp').text("Successfully!");
-      $('#sentMessageotp').show();
-      location.reload();
+      console.log(response);
+      if (response.success && response.success !== "") {
+        // عرض رسالة النجاح
+        $('#sentMessageotp').text(response.success).show();
+        $('#errorotp').hide(); // إخفاء رسالة الخطأ إذا ظهرت مسبقًا
+        location.reload();
+    } else if (response.error && response.error !== "") {
+        // عرض رسالة الخطأ
+        $('#errorotp').text(response.error).show();
+        $('#sentMessageotp').hide(); // إخفاء رسالة النجاح إذا ظهرت مسبقًا
+    } else {
+        console.warn("رد غير متوقع من السيرفر: ", response);
+    }
     },
     error: function(xhr, status, error) {
+      console.log(error);
       $('#errorotp').text('حدث خطأ أثناء التحقق من الرمز: ' + error);
       $('#errorotp').show();
     }
@@ -1056,30 +1094,30 @@ function verifyWhatsappCode() {
 // });
 
 
-// $('#whatsapp').on('blur', function() {
-// var number = $(this).val();
-// var countryCode = whatsappIti.getSelectedCountryData().dialCode;
-// if (number.startsWith('0')) {
-//     number = number.substring(1); // إزالة أول حرف (الصفر)
-// }
-// var number = countryCode + number;
+$('#whatsapp').on('blur', function() {
+var number = $(this).val();
+var countryCode = whatsappIti.getSelectedCountryData().dialCode;
+if (number.startsWith('0')) {
+    number = number.substring(1); // إزالة أول حرف (الصفر)
+}
+var number = countryCode + number;
 
-// $.ajax({
-// url: '{{ route('save.phone.session') }}',
-// type: 'POST',
-// data: {
-// phone: number,
-// _token: '{{ csrf_token() }}'
-// },
-// success: function(response) {
+$.ajax({
+url: '{{ route('save.phone.session') }}',
+type: 'POST',
+data: {
+phone: number,
+_token: '{{ csrf_token() }}'
+},
+success: function(response) {
   
 // $('#whatsapp').prop('readonly', true);
-// },
-// error: function(xhr, status, error) {
-//   console.log(error);
-// alert('حدث خطأ أثناء التنفيذ: ' + error);
-// }
-// });
-// });
+},
+error: function(xhr, status, error) {
+  console.log(error);
+alert('حدث خطأ أثناء التنفيذ: ' + error);
+}
+});
+});
 </script>
 @stop
