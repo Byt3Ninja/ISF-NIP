@@ -45,8 +45,8 @@
       ['team-info', 'ti-users', $l == 'en' ? 'Team Info' : ' الفريق'],
       ['pitch-deck', 'ti-presentation', $l == 'en' ? 'Pitch Deck' : 'الوثائق'],
       ['company-milestones', 'ti-flag', $l == 'en' ? 'Milestones' : 'الإنجازات'],
-      ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
-      ['about_problem', 'ti-presentation', $l == 'en' ? 'About Problem' : ' حول المشكلة '],
+      // ['company-social', 'ti-brand-facebook', $l == 'en' ? 'Logo & Social' : 'الشعار والتواصل'],
+      // ['about_problem', 'ti-presentation', $l == 'en' ? 'About Problem' : ' حول المشكلة '],
       ['business_model', 'ti-presentation', $l == 'en' ? 'Business Model' : ' نموذج الاعمال '],
   ])
       ->map(function ($tab) {
@@ -148,12 +148,12 @@
                 @case('company-milestones')
                   @include('partials.forms.company.company-milestones', ['heading' => $tab['label']])
                 @break
-                @case('company-social')
+                {{-- @case('company-social')
                   @include('partials.forms.company.company-social', ['heading' => $tab['label']])
-                @break
-                @case('about_problem')
+                @break --}}
+                {{-- @case('about_problem')
                   @include('partials.forms.company.about_problem', ['heading' => $tab['label']])
-                @break
+                @break --}}
                 @case('business_model')
                   @include('partials.forms.company.business_model', ['heading' => $tab['label']])
                 @break
