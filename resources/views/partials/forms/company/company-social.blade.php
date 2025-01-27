@@ -25,7 +25,7 @@
                 
                 <img 
                   id="company-logo" 
-                  src="{{ asset('storage/' .$client->company->logo) ?? '/images/logo-placeholder.png' }}" 
+                  src="{{ $client->company ? asset($client->company->logo) : '/images/logo-placeholder.png' }}" 
                   onerror="this.src = '/images/logo-placeholder.png';"
                   alt="Company logo" 
                   class="img-fluid rounded border w-px-100 h-px-100" 
@@ -40,7 +40,8 @@
                 accept="image/*" 
               />
             </div>
-            @if ($client->company->logo) 
+
+            @if ($client->company && $client->company->logo) 
               <div class="w-px-100 text-center">
                 <button
                   type="button" 
