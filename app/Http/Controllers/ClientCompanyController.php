@@ -651,15 +651,14 @@ class ClientCompanyController extends Controller
                     if ($request->hasFile('img_url')) {
                         // الحصول على الصورة
                         $image = $request->file('img_url');
+                        // حفظ الصورة داخل القرص 'public_uploads'
+                        $img_path = $image->store('images/logo', 'public_uploads');
 
-                       // تحديد اسم الملف
-                        $filename = time() . '.' . $image->getClientOriginalExtension();
-
-                        // حفظ الصورة في المجلد المطلوب مع اسم مخصص
-                        $path = $image->storeAs('images', $filename, 'public');
-
+                        // إنشاء رابط الصورة
+                        $img_url = Storage::disk('public_uploads')->url($img_path);
+                
                     }else{
-                        $path = $user->company->logo;
+                        $img_url = $user->company->logo;
                     }
                     
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
@@ -668,7 +667,7 @@ class ClientCompanyController extends Controller
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'website' => $data['website'],
-                            'logo' => $path,
+                            'logo' => $img_url,
                             'facebook' => $data['facebook'],
                             'twitter' => $data['twitter'],
                             'linkedin' => $data['linkedin'],
@@ -683,7 +682,7 @@ class ClientCompanyController extends Controller
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
                             'website' => $data['website'],
-                            'logo' => $path,
+                            'logo' => $img_url,
                             'facebook' => $data['facebook'],
                             'twitter' => $data['twitter'],
                             'linkedin' => $data['linkedin'],
