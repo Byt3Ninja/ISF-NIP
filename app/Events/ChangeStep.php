@@ -39,7 +39,10 @@ class ChangeStep implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'message' => 'The Step has been Changed For ' . $this->data['company_name_en'] . ' from' . $this->data['last_step'] . ' to ' . $this->data['new_step'] . 'by ' . $this->data['organization_name_en'],
+            'message' => 'The Step has been Changed For ' . ($this->data['company_name_en'] ?? 'N/A') .
+                ' from ' . ($this->data['last_step'] ?? 'N/A') .
+                ' to ' . ($this->data['new_step'] ?? 'N/A') .
+                ' by ' . ($this->data['organization_name_en'] ?? 'N/A'),
         ];
     }
 }

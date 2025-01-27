@@ -207,8 +207,8 @@ return [
 	'totalregisteredusers' => 'إجمالي المستخدمين المسجلين',
 	'registeredusers' => 'المستخدمين المسجلين',
 	'totalusersmf' => 'نسبة الذكور / الإناث',
-	'JobTitleAr' => 'التخصص باللغة العربية',
-	'JobTitleEn' => 'التخصص باللغة الإنجليزية',
+	'JobTitleAr' => 'المسمى الوظيقي باللغة العربية',
+	'JobTitleEn' => 'الامسمى الوظيفي باللغة الإنجليزية',
 	'Chamber' => 'الغرفة الصناعية',
 	'RoomMembershipNumber' => 'رقم عضوية الغرفة',
 	'CommercialRecord' => 'رقم السجل التجاري',
@@ -1185,4 +1185,6 @@ return [
 	'ChooseYourStageFirst' => 'اختر (مرحلة التطوير) اولا',
 	'Tiktok' => ' تيكتوك',
 	'Instagram' => ' انستقرام',
+	'Password_should_be_strong' => 'يجب أن تكون كلمة المرور قوية',
+	'Passwords_do_not_match' => 'كلمات المرور غير متطابقة',
 ];
