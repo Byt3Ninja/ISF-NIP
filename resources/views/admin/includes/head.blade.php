@@ -81,6 +81,9 @@
 <!-- BEGIN: Custom CSS-->
 <!-- END: Custom CSS-->
 
+<!-- Jquery Js -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- Helpers -->
 <script src="/vuexy/assets/vendor/js/helpers.js"></script>
 <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->

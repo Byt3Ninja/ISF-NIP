@@ -66,7 +66,7 @@ class ClientProfileController extends Controller
                 $country->emoji = $emoji;
                 return $country;
             });
-            return view('admin/clients/editProfile', compact('client','Currencies', 'countries','expertises'));
+            return view('admin/clients/profile/editProfile', compact('client','Currencies', 'countries','expertises'));
         }
         catch (Exception $e)
         {
