@@ -238,7 +238,8 @@ class ScreeningController extends Controller
             $data['emailCompany'] = $company_owner->email;
 
             // Broadcast Event //
-            ChangeStep::dispatch($data);
+            broadcast(new ChangeStep($data));
+
 
             $recipients = User::role("Registered")->where('email', $company_owner->email)->get();
 
