@@ -1,8 +1,6 @@
 <div class="card">
   <div class="card-body">
-    <div class="border-bottom border-light mb-6">
-      <h5 class="card-title">{{ $tab['label'] }}</h5>
-    </div>
+    
     @if(Auth::user()->hasanyRole('Admin|organizationManager'))
     <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
@@ -13,7 +11,9 @@
       {!! csrf_field() !!}
       <input type="hidden" value="3" name="CompanyN">
 
-
+      <div class="border-bottom border-light mb-6">
+        <h5 class="card-title">{{ __('admin.About_Problem') }}</h5>
+      </div>
       <div class="row">
         <div class="col-md-6 col-12 mb-6">
             <label for="about_problem"
@@ -61,6 +61,9 @@
       </div>
     </div>
 
+    <div class="border-bottom border-light mb-6">
+      <h5 class="card-title">{{ $tab['label'] }}</h5>
+    </div>
       <div class="form-group mb-3">
         <label for="About_the_Company"
           class="form-label">{{ __('admin.About_the_Company') }}</label>

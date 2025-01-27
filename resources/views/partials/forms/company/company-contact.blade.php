@@ -1,8 +1,6 @@
 <div class="card">
   <div class="card-body">
-    <div class="border-bottom border-light mb-6">
-      <h5 class="card-title fw-semibold">{{ $tab['label'] }}</h5>
-    </div>
+    
     @if (Auth::user()->hasanyRole('Admin|organizationManager'))
       <form method="post"
         action="{{ route('update_my_company', $client->company->id) }}"
@@ -15,7 +13,9 @@
     {!! csrf_field() !!}
     <input name="CompanyN" type="hidden" value="2">
     <div class="row">
-
+      <div class="border-bottom mb-4">
+        <h5 class="card-title">{{ __('admin.Logo_Social') }} </h5>
+      </div>
       <div class="row">
         <!-- Upload Company Logo -->
         <div class="col-12 col-md-2 justify-content-center d-flex">
@@ -227,7 +227,9 @@
       </div>
 
 
-
+      <div class="border-bottom border-light mb-6">
+        <h5 class="card-title fw-semibold">{{ $tab['label'] }}</h5>
+      </div>
 
       <div class="col-md-6 col-12 mb-6">
         <div class="d-grid">
