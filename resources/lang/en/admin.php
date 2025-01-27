@@ -1178,5 +1178,7 @@ return [
 	'OTP_verified_successfully' => 'OTP verified successfully',
 	'max_attempts_reached' => 'You have reached the maximum number of attempts. Please wait 6 hours before trying again.',
     'invalid_verification_code' => 'The verification code is incorrect.',
+	'Logo_Social' => 'Logo & Social',
+	'About_Problem' => 'About Problem',
 
 ];
