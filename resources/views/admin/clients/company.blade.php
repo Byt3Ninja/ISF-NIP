@@ -38,7 +38,7 @@
 @php
   $name = 'name_' . $l;
   $tabs = collect([
-      ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Company Info' : 'معلومات الشركة'],
+      ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
       ['company-contact-info', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
       ['company-description', 'ti-file-description', $l == 'en' ? 'Description' : 'الوصف'],
       ['company-financial-info', 'ti-currency-dollar', $l == 'en' ? 'Financial' : ' المالية'],
