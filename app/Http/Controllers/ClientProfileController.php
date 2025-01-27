@@ -490,6 +490,7 @@ class ClientProfileController extends Controller
         $otpsave->user_id = $userId;
         $otpsave->phone = $phoneNumber;
         $otpsave->otp_code = $otp;
+        $otpsave->expires_at = Carbon::now()->addMinutes(10);
         $otpsave->save();
         
         $result = $this->whatsAppService->sendOTP($phoneNumber, $otp);
