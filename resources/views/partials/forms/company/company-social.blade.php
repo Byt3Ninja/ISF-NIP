@@ -25,7 +25,7 @@
                 
                 <img 
                   id="company-logo" 
-                  src="{{ asset('storage/' .$client->company->logo) ?? '/images/logo-placeholder.png' }}" 
+                  src="{{ asset('storage/' .$client->company->logo_url) ?? '/images/logo-placeholder.png' }}" 
                   onerror="this.src = '/images/logo-placeholder.png';"
                   alt="Company logo" 
                   class="img-fluid rounded border w-px-100 h-px-100" 

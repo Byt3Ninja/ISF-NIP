@@ -655,8 +655,11 @@ class ClientCompanyController extends Controller
                         // الحصول على الصورة
                         $image = $request->file('img_url');
 
-                        // حفظ الصورة في المجلد المطلوب
-                        $path = $image->store('images', 'public');
+                       // تحديد اسم الملف
+                        $filename = time() . '.' . $image->getClientOriginalExtension();
+
+                        // حفظ الصورة في المجلد المطلوب مع اسم مخصص
+                        $path = $image->storeAs('images', $filename, 'public');
 
                     }else{
                         $path = $user->company->logo;
