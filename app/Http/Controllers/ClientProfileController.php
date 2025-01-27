@@ -453,7 +453,7 @@ class ClientProfileController extends Controller
     public function savePhoneSession(Request $request)
     {
        
-        // $request->session()->forget('phone');
+        $request->session()->forget('phone');
         $request->session()->put('phone', $request->phone);
         
         return response()->json(['message' => 'تم حفظ رقم الهاتف بنجاح.']);
