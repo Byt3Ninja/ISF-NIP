@@ -43,6 +43,6 @@ if (! function_exists('lang')) {
 if (!function_exists('getPusherConfig')) {
     function getPusherConfig()
     {
-        return DB::table('settings')->select('MIX_PUSHER_APP_KEY', 'MIX_PUSHER_APP_CLUSTER')->first();
+        return DB::table('settings')->select('PUSHER_APP_KEY', 'PUSHER_APP_CLUSTER')->first();
     }
 }

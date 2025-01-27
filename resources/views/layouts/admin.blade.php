@@ -77,32 +77,32 @@
   <!-- Main Page JS -->
   <!-- End Main JS-->
 
+@if(auth()->user()->hasRole('Registered'))
+  <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+  <script>
+  const pusherConfig = @json(getPusherConfig());
+  const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
+  const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
+  Pusher.logToConsole = true;
+
+  const pusher = new Pusher(pusherAppKey, {
+     cluster: pusherCluster,
+     forceTLS: true,
+ });
+
+    const channel = pusher.subscribe('step-changes');
+    channel.bind('ChangeStep', function(event) {
+      console.log(event.message);
+    });
+</script>
+@endif
+
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
   @hasanyrole('Admin|Manager')
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
       integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <!-- Pusher scripts -->
-    {{-- <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/laravel-echo/1.11.3/echo.iife.js"></script> --}}
-    @role('Registered')
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-    <script>
-     const pusherConfig = @json(getPusherConfig());
-     const pusherAppKey = pusherConfig.MIX_PUSHER_APP_KEY;
-     const pusherCluster = pusherConfig.MIX_PUSHER_APP_CLUSTER;
-     Pusher.logToConsole = true;
- 
-     const pusher = new Pusher(pusherAppKey, {
-         cluster: pusherCluster,
-         forceTLS: true,
-     });
- 
-     const channel = pusher.subscribe('step-changes');
-     channel.bind('ChangeStep', function(e) {
-         console.log('New Notification:', e);
-     });
-   </script>
-   @endrole
+   
   <!--/ Pusher scripts -->
 
       {{-- <script>
