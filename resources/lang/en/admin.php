@@ -1170,6 +1170,8 @@ return [
 	'ChooseYourStageFirst' => 'Choose Your Development Stage First',
 	'Tiktok' => 'Tiktok',
 	'Instagram' => 'Instagram',
+	'Password_should_be_strong' => 'Password should be strong',
+	'Passwords_do_not_match' => 'Passwords do not match',
 	'OTP_sent_successfully' => 'OTP sent successfully',
 	'OTP_limit_exceeded_wait_6_hours' => 'OTP limit exceeded. Please wait 6 hours',
 	'Failed_to_send_OTP' => 'Failed to send OTP',
