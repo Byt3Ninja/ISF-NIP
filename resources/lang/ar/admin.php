@@ -1193,4 +1193,6 @@ return [
 	'OTP_verified_successfully' => 'تم التحقق من OTP بنجاح',
 	'No_valid_OTP_found_or_OTP_expired' => 'OTP منتهية الصلاحية', 
 	'max_attempts_reached' => 'تم الوصول إلى الحد الأقصى للمحاولات. انتظر 6 ساعات قبل المحاولة مرة أخرى.',
+	'Logo_Social' => 'الشعار والتواصل',
+	'About_Problem' => 'حول المشكلة',
 ];
