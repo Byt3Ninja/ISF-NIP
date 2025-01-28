@@ -16,10 +16,11 @@
       </div>
         <div class="form-group mb-3">
           <label for="About_the_Company"
-            class="form-label">{{ __('admin.About_the_Company') }}</label>
+            class="form-label mb-1 fw-semibold fs-6">{{ __('admin.About_the_Company') }}</label>
           <div class="position-relative">
             <textarea class="form-control border-light light-shadow px-10"
               id="About_the_Company" maxlength="500" name="company_description"
+              rows="5"
               placeholder="{{ __('admin.About_the_Company') }}">@if($client->company){{ $client->company->info_company }}@endif</textarea>
             <i class="ti ti-info-circle fs-5 position-absolute me-3 text-primary"
               style="left: 7px; top: 10px;"></i>
@@ -28,17 +29,17 @@
   
         <div class="form-group mb-3">
           <label for="Sustainable_development"
-            class="form-label">{{ __('admin.Sustainable_development') }}</label>
+            class="form-label mb-1 fw-semibold fs-6">{{ __('admin.Sustainable_development') }}</label>
           <div class="position-relative">
-            <input 
+            {{-- <input 
               type="text" 
               id="sustainable_development"
               name="Sustainable_development[]"
               class="form-control border-light light-shadow px-10"
               placeholder="{{ __('admin.Sustainable_development') }}"
               value="@if($client->company){{ $client->company->Sustainable_development }}@endif"
-            />
-            {{-- <select name="Sustainable_development[]"
+            /> --}}
+            <select name="Sustainable_development[]"
               class="form-select select2 border-light light-shadow px-10"
               multiple="multiple">
               <option value="no_poverty"
@@ -177,17 +178,17 @@
                             'partnership_goals',
                             json_decode($client->company->Sustainable_development, true))) selected @endif @endif>
                 {{ __('admin.partnership_goals') }}</option>
-            </select> --}}
+            </select>
   
           </div>
         </div>
-      <div class="border-bottom border-light mb-6">
+      <div class="border-bottom border-light my-8">
         <h5 class="card-title">{{ __('admin.About_Problem') }}</h5>
       </div>
       <div class="row">
         <div class="col-md-6 col-12 mb-6">
             <label for="about_problem"
-              class="form-label">{{ __('admin.about_problem') }}*</label>
+              class="form-label mb-1 fw-semibold fs-6">{{ __('admin.about_problem') }}*</label>
             <div class="position-relative">
               <i class="ti ti-alert-circle fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
               <textarea class="form-control border-light light-shadow px-8" id="about_problem" placeholder="{{ __('admin.about_problem') }}*" name="about_problem" required autocomplete="about_problem" rows="4">{{ $client->company ? $client->company->about_problem : old('about_problem') }}</textarea>
@@ -196,7 +197,7 @@
 
           <div class="col-md-6 col-12 mb-6">
             <label for="about_market_opportunity"
-              class="form-label">{{ __('admin.about_market_opportunity') }}*</label>
+              class="form-label mb-1 fw-semibold fs-6">{{ __('admin.about_market_opportunity') }}*</label>
             <div class="position-relative">
               <i class="ti ti-chart-bar fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
               <textarea class="form-control border-light light-shadow px-8" id="about_market_opportunity" placeholder="{{ __('admin.about_market_opportunity') }}*" name="about_market_opportunity" required autocomplete="about_market_opportunity" rows="4">{{ $client->company ? $client->company->about_market_opportunity : old('about_market_opportunity') }}</textarea>
@@ -205,7 +206,7 @@
 
       <div class="col-md-6 col-12 mb-6">
         <label for="about_competitors"
-          class="form-label">{{ __('admin.about_competitors') }}*</label>
+          class="form-label mb-1 fw-semibold fs-6">{{ __('admin.about_competitors') }}*</label>
         <div class="position-relative">
           <i class="ti ti-flag fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
           <textarea class="form-control border-light light-shadow px-8" id="about_competitors" placeholder="{{ __('admin.about_competitors') }}*" name="about_competitors" required autocomplete="about_competitors" rows="4">{{ $client->company ? $client->company->about_competitors : old('about_competitors') }}</textarea>
@@ -213,7 +214,7 @@
       </div>
 
       <div class="col-md-6 col-12 mb-6">
-        <label for="about_monetize" class="form-label">{{ __('admin.about_monetize') }}
+        <label for="about_monetize" class="form-label mb-1 fw-semibold fs-6">{{ __('admin.about_monetize') }}
           *</label>
         <div class="position-relative">
           <i class="ti ti-cash fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
@@ -222,7 +223,7 @@
       </div>
 
       <div class="col-md-6 col-12 mb-6">
-        <label for="about_challenges" class="form-label">{{ __('admin.about_challenges') }}
+        <label for="about_challenges" class="form-label mb-1 fw-semibold fs-6">{{ __('admin.about_challenges') }}
           *</label>
         <div class="position-relative">
           <i class="ti ti-target fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
@@ -248,7 +249,7 @@
   </div>
 </div>
 
-@if( !empty( $client->company ) )
+{{-- @if( !empty( $client->company ) )
 <script>
   const sustainabiltyWhiteList = '{{ $client->company->Sustainable_development }}';
   const decodeHtmlEntities = (str) => {
@@ -279,4 +280,4 @@
     // }
   });      
 </script>
-@endif
+@endif --}}
