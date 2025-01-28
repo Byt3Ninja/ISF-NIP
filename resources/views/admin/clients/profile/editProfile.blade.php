@@ -193,8 +193,8 @@ $tabsList = collect($tabs)->map(function ($tab) {
                     <hr class="w-75 my-3" />
 
                     <!-- Phone -->
-                    <div class="mb-6 col-12 mt-3">
-                      <div class="w-100">
+                    <div class="mb-6 col-12 col-md-6">
+                      {{-- <div class="w-100"> --}}
                         <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
                         <div class="d-flex align-items-center flex-wrap gap-4">
                           <input  type="hidden"  name="country_code"  id="country_code"  value="{{ $client->country_code }}" />
@@ -202,28 +202,27 @@ $tabsList = collect($tabs)->map(function ($tab) {
                             id="phone" 
                             type="tel"
                             class="form-control" 
-                            style="width: 300px;"
+                            style="width: 350px;"
                             placeholder="{{ __('auth.Phone') }}"
                             value="{{ $client->phone }}" 
                             name="phone" 
                             autocomplete="phone" 
                             oninput="this.value = this.value.trim()" 
-                            required 
                           />
-                          <button type="button" id="sendButton" onclick="sendCode('phone')" class="btn btn-sm btn-primary">
+                          {{-- <button type="button" id="sendButton" onclick="sendCode('phone')" class="btn btn-sm btn-primary">
                             {{ __('auth.Verify') }}
-                          </button>
+                          </button> --}}
                         </div>
                         <span class="text-danger text-start" id="phone-error" style="display: none;"></span>
-                      </div>
+                      {{-- </div> --}}
                     </div>
                     <!--/ Phone -->
 
-                    <hr class="w-75" />
+                    {{-- <hr class="w-75" /> --}}
                     
                     <!-- Whatsapp -->
-                    <div class="mb-6 col-12">
-                      <div class="w-100">
+                    <div class="mb-6 col-12 col-md-6">
+                      {{-- <div class="w-100"> --}}
                         <label class="form-label fs-6 fw-bold" for="whatsapp">{{ __('admin.WhatsApp') }}</label>
                         <div class="d-flex align-items-center flex-wrap gap-4">
                           <input type="hidden" name="country_code_w_a" id="country_code_w_a" value="{{ $client->country_code_w_a }}" />
@@ -232,19 +231,18 @@ $tabsList = collect($tabs)->map(function ($tab) {
                             name="whatsapp" 
                             type="tel"
                             class="form-control" 
-                            style="width: 300px;"
+                            style="width: 350px;"
                             placeholder="{{ __('admin.WhatsApp') }}"
                             value="{{ $client->whatsapp ? $client->whatsapp : old('whatsapp') }}"
                             autocomplete="whatsapp" 
                             oninput="this.value = this.value.trim()" 
-                            required 
                           />
                           <button type="button" id="sendButton" onclick="sendCode('whatsapp')" class="btn btn-sm btn-primary">
                             {{ __('auth.Verify') }}
                           </button>
                         </div>
                         <span class="text-danger" id="whatsapp-error" style="display: none;"></span>
-                      </div>
+                      {{-- </div> --}}
                     </div>
                     <!--/ Whatsapp -->
 
@@ -611,6 +609,8 @@ $tabsList = collect($tabs)->map(function ($tab) {
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <div id="errorotp" class="alert alert-danger mb-2" style="display: none"></div>
+          <div id="sentMessageotp" class="alert alert-success mb-2" style="display: none"></div>
           <div class="form-group form-focus">
             <input 
               id="OTPWA" 
@@ -630,8 +630,11 @@ $tabsList = collect($tabs)->map(function ($tab) {
               </span>
             @enderror
           </div>
-          <div id="errorotp" class="alert alert-danger" style="display: none"></div>
-          <div id="sentMessageotp" class="alert alert-success" style="display: none"></div>
+          <div class="d-flex justify-content-center mt-3">
+            <button type="button" onclick="sendCode('whatsapp')" class="btn btn-link">
+              {{ __('auth.Resend_Code') }}
+            </button>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-light" data-bs-dismiss="modal">
@@ -920,11 +923,11 @@ whatsappInput.addEventListener("countrychange", () => {
 // Send code
 function sendCode(type) {
   console.log('type', type);
-    if (type === 'phone' && !iti.isValidNumber()) {
-      phoneError.style.display = 'block';
-      phoneError.innerText = '{{ __('auth.Invalid_Phone_Number') }}';
-      return;
-    }
+    // if (type === 'phone' && !iti.isValidNumber()) {
+    //   phoneError.style.display = 'block';
+    //   phoneError.innerText = '{{ __('auth.Invalid_Phone_Number') }}';
+    //   return;
+    // }
     
     if (type === 'whatsapp' && !whatsappIti.isValidNumber()) {
       whatsappError.style.display = 'block';
