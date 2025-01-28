@@ -34,7 +34,7 @@ return [
 	'Invalid_Phone_Number' => 'رقم الهاتف غير صحيح',
 	'Invalid_WhatsApp_Number' => 'رقم الواتساب غير صحيح',
 	'Verify_Number_With_Code' => 'تأكيد الرقم',
-	'Enter_Code_Sent' => 'أدخل الكود المرسل إلى رقم هاتفك',
+	'Enter_Code_Sent' => 'أدخل الكود المرسل إلى رقم الواتساب',
 	'Verify_Code' => 'تأكيد الكود',
 	'Enter_Code' => 'أدخل الكود',
 	'Cancel' => 'إلغاء',
