@@ -246,7 +246,9 @@
               <div class="col-12 mb-3">
                 <label for="username" class="form-label fs-6 fw-bold">{{ $firstName }}</label>
                 <div class="input-group input-group-merge">
-                  <input value="{{ old('first_name_en') }}" name="first_name_en" type="text" class="form-control"
+                  <input 
+                    {{-- value="{{ old('first_name_en') }}" --}}
+                     name="first_name_en" type="text" class="form-control"
                     id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required
                     autocomplete="first_name_en" autofocus />
                 </div>
@@ -254,7 +256,9 @@
               <div class="col-12 mb-3">
                 <label for="last_name_en" class="form-label fs-6 fw-bold">{{ $secondName }}</label>
                 <div class="input-group input-group-merge">
-                  <input value="{{ old('last_name_en') }}" name="last_name_en" type="text" class="form-control"
+                  <input 
+                    {{-- value="{{ old('last_name_en') }}" --}}
+                     name="last_name_en" type="text" class="form-control"
                     id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required
                     autocomplete="last_name_en" />
                 </div>
@@ -262,15 +266,17 @@
               <div class="col-12 mb-3">
                 <label for="email" class="form-label fs-6 fw-bold">{{ __('auth.E-Mail') }}</label>
                 <div class="input-group input-group-merge">
-                  <input value="{{ old('email') }}" name="email" type="email" class="form-control"
-                    placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" />
+                  <input 
+                     {{-- value="{{ old('email') }}" --}}
+                     name="email" type="email" class="form-control"
+                    placeholder="{{ __('auth.E-Mail') }}" required />
                 </div>
               </div>
               <div class="col-12 mb-4 form-password-toggle">
                 <label class="form-label fs-6 fw-bold" for="password">{{ __('auth.Password') }}</label>
                 <div class="input-group input-group-merge">
                   <input type="password" class="form-control" id="password" placeholder="{{ __('auth.Password') }}"
-                    name="password" required autocomplete="password" aria-describedby="password" />
+                    name="password" required aria-describedby="password" />
                   <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                 </div>
               </div>
@@ -279,7 +285,7 @@
                 <div class="input-group input-group-merge">
                   <input type="password" class="form-control" id="password_confirmation"
                     placeholder="{{ __('auth.Password') }}" name="password_confirmation" required
-                    autocomplete="new-password" aria-describedby="new-password" />
+                     aria-describedby="new-password" />
                   <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
                 </div>
               </div>
@@ -293,15 +299,20 @@
               <div class="col-12 mb-4 d-grid">
                 <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
                 <input id="phone" type="tel" class="form-control" placeholder="{{ __('auth.Phone') }}"
-                  value="{{ old('phone') }}" name="phone" autocomplete="phone" required />
-                  <span class="text-danger" id="phone-error" style="display: none;"></span>
+                  {{-- value="{{ old('phone') }}" --}}
+                   name="phone" required />
+                  <small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
               </div>
               <div id="mentorInputsWrapper" style="display: none;">
                 <div class="col-12 mb-3">
                   <label for="Title" class="form-label fs-6 fw-bold">{{ __('admin.JobTitleEn') }}</label>
                   <div class="input-group input-group-merge">
-                    <input value="{{ old('Title') }}" name="title_en" type="text" class="form-control" id="Title"
-                      placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" />
+                    <input 
+                      {{-- value="{{ old('Title') }}" --}}
+                       name="title_en" type="text" class="form-control" id="Title"
+                      placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" 
+                      oninput="this.value = this.value.trimStart()"  
+                    />
                   </div>
                 </div>
                 <div class="col-12 mb-3">
@@ -325,8 +336,17 @@
                 <div class="col-12 mb-3">
                   <label for="userbio" class="form-label fs-6 fw-bold">{{ __('admin.userbio') }}</label>
                   <div class="input-group">
-                    <textarea name="userbio" type="text" class="form-control" id="userbio"
-                      placeholder="{{ __('admin.userbio') }}" autocomplete="userbio">{{ old('userbio') }}</textarea>
+                    <textarea
+                    name="userbio" 
+                      type="text" 
+                      class="form-control" 
+                      id="userbio"
+                      placeholder="{{ __('admin.userbio') }}" 
+                      autocomplete="userbio"
+                      oninput="this.value = this.value.trimStart()"
+                    >
+                      {{-- {{ old('userbio') }} --}}
+                    </textarea>
                   </div>
                 </div>
                 <div class="col-12 mb-3">
@@ -427,25 +447,23 @@
     const phoneError = document.getElementById('phone-error');
 
     const iti = intlTelInput(phoneInput, {
-      initialCountry: "eg", // Default country
-      preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"], // Preferred countries
-      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js", // Utilities for formatting
-      separateDialCode: true, // Separate dial code from the number
-      autoPlaceholder: "aggressive", // Show placeholder
-      customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
-      return "e.g. " + selectedCountryPlaceholder;
-      }
+      initialCountry: 'eg',
+      preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      formatOnDisplay: false,
+      separateDialCode: true,
+      autoPlaceholder: "aggressive",
+      customPlaceholder: (placeholder) => "e.g. " + placeholder,
     });
 
     // Optional: Handle validation
     phoneInput.addEventListener("input", (e) => {
       console.log(e.target.value);
-      if (iti.isValidNumber()) {
-        phoneError.style.display = 'none';
-        // console.log("Valid number:", iti.getNumber());
-      } else {
+      if (!iti.isValidNumber()) {
         phoneError.style.display = 'block';
         phoneError.innerText = lang == 'en' ? 'Invalid phone number' : 'رقم الهاتف غير صحيح';
+      } else {
+        phoneError.style.display = 'none';
         // console.error("Invalid number");
       }
     });

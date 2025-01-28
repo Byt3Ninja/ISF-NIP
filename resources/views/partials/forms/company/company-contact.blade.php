@@ -3,6 +3,7 @@
     
     @if (Auth::user()->hasanyRole('Admin|organizationManager'))
       <form method="post"
+        id="contact-form" 
         action="{{ route('update_my_company', $client->company->id) }}"
         enctype="multipart/form-data">
       @else
@@ -16,7 +17,7 @@
       <div class="border-bottom mb-4">
         <h5 class="card-title">{{ __('admin.Logo_Social') }} </h5>
       </div>
-      <div class="row">
+      <div class="row mb-8">
         <!-- Upload Company Logo -->
         <div class="col-12 col-md-2 justify-content-center d-flex">
           <div class="d-flex flex-column" style="width: fit-content;">
@@ -72,7 +73,8 @@
                     class="form-control" 
                     id="linkedin" 
                     name="linkedin" 
-                    placeholder="{{ $l == 'en' ? 'LinkedIn URL' : 'رابط لينكد إن' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'LinkedIn URL' : 'رابط لينكد إن' }}"  --}}
+                    placeholder="e.g. https://www.linkedin.com/" 
                     value="{{ $client->company->linkedin ?? old('linkedin') }}" 
                     pattern="https://www.linkedin.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
@@ -91,9 +93,10 @@
                     class="form-control" 
                     id="twitter" 
                     name="twitter" 
-                    placeholder="{{ $l == 'en' ? 'Twitter URL' : 'رابط تويتر' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Twitter or x URL' : 'رابط تويتر' }}"  --}}
+                    placeholder="e.g. https://x.com/" 
                     value="{{ $client->company->twitter ?? old('twitter') }}" 
-                    pattern="https://twitter.com/.*" 
+                    pattern="https://twitter.com/.*|https://x.com/.*|https://X.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Twitter URL.' : 'يرجى إدخال رابط تويتر صالح.' }}"
                   />
                   <span class="input-group-text text-light"><i class="ti ti-brand-twitter"></i></span>
@@ -110,7 +113,8 @@
                     class="form-control" 
                     id="facebook" 
                     name="facebook" 
-                    placeholder="{{ $l == 'en' ? 'Facebook URL' : 'رابط فيسبوك' }}" 
+                    placeholder="e.g. https://www.facebook.com/" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Facebook URL' : 'رابط فيسبوك' }}"  --}}
                     value="{{ $client->company->facebook ?? old('facebook') }}" 
                     pattern="https://www.facebook.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Facebook URL.' : 'يرجى إدخال رابط فيسبوك صالح.' }}"
@@ -129,7 +133,8 @@
                     class="form-control" 
                     id="youtube" 
                     name="youtube" 
-                    placeholder="{{ $l == 'en' ? 'YouTube URL' : 'رابط يوتيوب' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'YouTube URL' : 'رابط يوتيوب' }}"  --}}
+                    placeholder="e.g. https://www.youtube.com/" 
                     value="{{ $client->company->youtube ?? old('youtube') }}" 
                     pattern="https://www.youtube.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid YouTube URL.' : 'يرجى إدخال رابط يوتيوب صالح.' }}"
@@ -148,7 +153,8 @@
                     class="form-control" 
                     id="website" 
                     name="website" 
-                    placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}"  --}}
+                    placeholder="e.g. https?://" 
                     value="{{ $client->company->website ?? old('website') }}" 
                     pattern="https?://.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid website URL.' : 'يرجى إدخال رابط موقع صالح.' }}"
@@ -167,9 +173,10 @@
                     class="form-control" 
                     id="google_map" 
                     name="google_map" 
-                    placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}" 
+                    placeholder="e.g. https://maps.app.goo.gl/" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}"  --}}
                     value="{{ $client->company->google_map ?? old('google_map') }}" 
-                    pattern="https://www.google.com/maps/.*" 
+                    pattern="https://maps.app.goo.gl/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Google Map URL.' : 'يرجى إدخال رابط خريطة جوجل صالح.' }}"
                   />
                   <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
@@ -177,7 +184,6 @@
                 <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Google Map URL' : 'رابط خريطة جوجل غير صالح' }}.</div>
               </div>
             </div>
-
 
             <div class="col-md-6">
               <div class="form-group">
@@ -188,12 +194,13 @@
                     class="form-control" 
                     id="instagram" 
                     name="instagram" 
-                    placeholder="{{ $l == 'en' ? 'Instagram URL' : 'رابط انستجرام' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Instagram URL' : 'رابط انستجرام' }}"  --}}
+                    placeholder="e.g. https://www.instagram.com/" 
                     value="{{ $client->company->instagram ?? old('instagram') }}" 
                     pattern="https://www.instagram.com.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}"
                   />
-                  <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
+                  <span class="input-group-text text-light"><i class="ti ti-brand-instagram"></i></span>
                 </div>
                 <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}.</div>
               </div>
@@ -208,24 +215,20 @@
                     class="form-control" 
                     id="tiktok" 
                     name="tiktok" 
-                    placeholder="{{ $l == 'en' ? 'Tiktok URL' : 'رابط انستجرام' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Tiktok URL' : 'رابط انستجرام' }}"  --}}
+                    placeholder="e.g. https://www.tiktok.com" 
                     value="{{ $client->company->tiktok ?? old('tiktok') }}" 
                     pattern="https://www.tiktok.com.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}"
                   />
-                  <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
+                  <span class="input-group-text text-light"><i class="ti ti-brand-tiktok"></i></span>
                 </div>
                 <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}.</div>
               </div>
             </div>
-
-
-
-
           </div>
         </div>
       </div>
-
 
       <div class="border-bottom border-light mb-6">
         <h5 class="card-title fw-semibold">{{ $tab['label'] }}</h5>
@@ -264,25 +267,24 @@
         </div>
       </div>
       <div class="col-md-6 col-12 mb-6">
-        <label class="form-label fs-6 fw-bold"
-          for="email">{{ __('admin.E-mail') }}</label>
-          <input class="form-control" id="email" name="email"
-            type="email"
-            value="{{ $client->company ? $client->company->email : old('email') }}"
-            style="direction: ltr;" placeholder="{{ __('admin.E-mail') }} *"
-            autocomplete="email"
-            oninput="this.value = this.value.trimStart()"
-          >
+        <div class="form-group">
+          <label class="form-label fs-6 fw-bold"
+          for="email">{{ __('admin.E-mail') }}</label>          <div class="input-group input-group-merge">
+            <input class="form-control" id="email" name="email"
+              type="email"
+              value="{{ $client->company ? $client->company->email : old('email') }}"
+              style="direction: ltr;" placeholder="{{ __('admin.E-mail') }} *"
+              autocomplete="email"
+              oninput="this.value = this.value.trimStart()"
+              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+            />
+            <span class="input-group-text text-light"><i class="ti ti-mail"></i></span>
+          </div>
+          <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid email.' : 'يرجى إدخال بريد إلكتروني صالح.' }}.</div>
+        </div>
       </div>
-
-
-
-
-
-
-
-      
     </div>
+
     <div class="row">
       <div class="col-12 d-flex justify-content-end">
         <button class="btn btn-primary" id="submit-button" type="submit">
@@ -316,8 +318,18 @@
   });
   
   document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('#company-social-form');
-    const inputs = form.querySelectorAll('#company-social-form input[type="url"]');
+    const form = document.querySelector('#contact-form');
+    const inputs = form.querySelectorAll('#contact-form input[type="url"]');
+    const emailInput = form.querySelector('#email');
+
+    emailInput.addEventListener('input', () => {
+     const parent = emailInput.closest('.input-group');
+      if (emailInput.checkValidity()) {
+        parent.classList.remove('is-invalid');
+      } else {
+        parent.classList.add('is-invalid');
+      }
+    });
 
     inputs.forEach(input => {
       input.addEventListener('input', () => {
@@ -332,6 +344,18 @@
 
     form.addEventListener('submit', (e) => {
       let isValid = true;
+
+      emailInput.addEventListener('input', () => {
+        const parent = emailInput.closest('.input-group');
+        if (emailInput.checkValidity()) {
+          isValid = true;
+          parent.classList.remove('is-invalid');
+        } else {
+          isValid = false;
+          parent.classList.add('is-invalid');
+        }
+      });
+
       inputs.forEach(input => {
         const parent = input.closest('.input-group');
         if (!input.checkValidity()) {

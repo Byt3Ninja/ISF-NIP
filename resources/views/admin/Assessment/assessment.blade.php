@@ -28,14 +28,14 @@
         <section class="row">
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
-              <div class="card-header">
+              {{-- <div class="card-header">
                 <button 
                   class="btn btn-primary" 
                   data-bs-toggle="modal" data-bs-target="#CreateAssessment">
                   {{ __('admin.Add new Assessment') }}
                   <i class="ti ti-plus mx-2"></i>
                 </button>
-              </div>
+              </div> --}}
               <div class="card-body">
                 <div class="card-text">
                   <div class="table-responsive">

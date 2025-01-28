@@ -39,4 +39,5 @@ return [
 	'Verify_Code' => 'Verify Code',
 	'Enter_Code' => 'Enter Code',
 	'Cancel' => 'Cancel',
+	'Resend_Code' => 'Resend Code',
 ];

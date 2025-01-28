@@ -522,10 +522,10 @@
                           <i class="ti ti-dots-vertical"></i>
                         </button>
                         <div class="dropdown-menu">
-                          <button class="dropdown-item" onclick="modify(1,{{ $schedule->id }},0)" type="button">
+                          <button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button">
                             <i class="ti ti-pencil me-2"></i> Edit
                           </button>
-                          <button class="dropdown-item" onclick="modify(2,{{ $schedule->id }},{{ $schedule->active }})"
+                          <button class="dropdown-item" onclick="modify(2, {{ $schedule->id }}, {{ $schedule->active }})"
                             type="button">
                             <i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
                             {{ $schedule->active ? 'Deactivate' : 'Activate' }}
@@ -718,63 +718,77 @@
         success: function(response) {
           // console.log('response', response);
 
-          $('#availabilty-modal').modal('show'); // Show the modal
+          if (type === 1) {
+            $('#availabilty-modal').modal('show'); // Show the modal
+            // Hide the spinner
+            $('#addSchedule').find('.spinner-border').addClass('d-none');
 
-          // Hide the spinner
-          $('#addSchedule').find('.spinner-border').addClass('d-none');
-          
-          const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-          daysOfWeek.forEach(day => {
-            // Filter the response to get the periods for the current day
-            const dayPeriods = response.filter(item => item?.days === day) || [];
-
-            if (dayPeriods.length > 0) {
-              const dayRow = $(`#availabilty-modal #${day}-period-row`)[0];
-              
-              if (dayRow) {
-                const periodContainer = dayRow.closest('.periods-container');
-                const slotButton = periodContainer.closest('.day-section').querySelector('#add-slot');
-                if (slotButton) {
-                  console.log('slotButton', slotButton);
-                  slotButton.innerHTML = '{{ __('admin.Remove_Slot') }} <i class="ti ti-x ti-13px ms-2"></i>';
-                }
-
-                periodContainer.style.display = 'block'; // Show the row
-                periodContainer.innerHTML = ''; // Clear existing rows
-
-                for (let i = 0; i < dayPeriods.length; i++) {
-                  const newPeriodRow = `
-                    <div class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
-                      <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
-                      <input 
-                        required
-                        value="${dayPeriods[i].tfrom}"
-                        class="form-control me-2 mb-2 mb-md-0" type="time" name="periods['${day}'][from][]"
-                      />
-                      <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
-                      <input 
-                        required
-                        value="${dayPeriods[i].tto}"
-                        class="form-control me-2 mb-2 mb-md-0" type="time" name="periods['${day}'][to][]"
-                      />
-                      <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{__('admin.Min')}}</span>
-                      <div class="ps-6 d-flex flex-nowrap">
-                        <button type="button" class="btn btn-label-success btn-xs rounded-circle btn-icon me-2 add-period">
-                          <i class="ti ti-plus text-16px"></i>
-                        </button>
-                        <div id="remove-period">
-                          <button type="button" class="btn btn-label-danger btn-xs rounded-circle btn-icon remove-period">
-                            <i class="ti ti-trash text-16px"></i>
+            const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            daysOfWeek.forEach(day => {
+              // Filter the response to get the periods for the current day
+              const dayPeriods = response.filter(item => item?.days === day) || [];
+  
+              if (dayPeriods.length > 0) {
+                const dayRow = $(`#availabilty-modal #${day}-period-row`)[0];
+                
+                if (dayRow) {
+                  const periodContainer = dayRow.closest('.periods-container');
+                  const slotButton = periodContainer.closest('.day-section').querySelector('#add-slot');
+                  if (slotButton) {
+                    console.log('slotButton', slotButton);
+                    slotButton.innerHTML = '{{ __('admin.Remove_Slot') }} <i class="ti ti-x ti-13px ms-2"></i>';
+                  }
+  
+                  periodContainer.style.display = 'block'; // Show the row
+                  periodContainer.innerHTML = ''; // Clear existing rows
+  
+                  for (let i = 0; i < dayPeriods.length; i++) {
+                    const newPeriodRow = `
+                      <div class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
+                        <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
+                        <input 
+                          required
+                          value="${dayPeriods[i].tfrom}"
+                          class="form-control me-2 mb-2 mb-md-0" type="time" name="periods['${day}'][from][]"
+                        />
+                        <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
+                        <input 
+                          required
+                          value="${dayPeriods[i].tto}"
+                          class="form-control me-2 mb-2 mb-md-0" type="time" name="periods['${day}'][to][]"
+                        />
+                        <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{__('admin.Min')}}</span>
+                        <div class="ps-6 d-flex flex-nowrap">
+                          <button type="button" class="btn btn-label-success btn-xs rounded-circle btn-icon me-2 add-period">
+                            <i class="ti ti-plus text-16px"></i>
                           </button>
+                          <div id="remove-period">
+                            <button type="button" class="btn btn-label-danger btn-xs rounded-circle btn-icon remove-period">
+                              <i class="ti ti-trash text-16px"></i>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </div>`
-                  ;
-                  periodContainer.innerHTML += newPeriodRow; // Append the new rows
+                      </div>`
+                    ;
+                    periodContainer.innerHTML += newPeriodRow; // Append the new rows
+                  }
                 }
               }
-            }
-          });
+            });
+          } else if (type === 2) {
+            location.reload();
+            } else if (type === 3) {
+            Swal.fire({
+              title: 'Deleted!',
+              text: 'The schedule has been deleted successfully.',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            }).then((result) => {
+              if (result.isConfirmed) {
+              location.reload();
+              }
+            });
+          }
         },
         error: function(error) {
           console.log(error);
