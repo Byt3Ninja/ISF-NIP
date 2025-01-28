@@ -3,6 +3,7 @@
     
     @if (Auth::user()->hasanyRole('Admin|organizationManager'))
       <form method="post"
+        id="contact-form" 
         action="{{ route('update_my_company', $client->company->id) }}"
         enctype="multipart/form-data">
       @else
@@ -16,7 +17,7 @@
       <div class="border-bottom mb-4">
         <h5 class="card-title">{{ __('admin.Logo_Social') }} </h5>
       </div>
-      <div class="row">
+      <div class="row mb-8">
         <!-- Upload Company Logo -->
         <div class="col-12 col-md-2 justify-content-center d-flex">
           <div class="d-flex flex-column" style="width: fit-content;">
@@ -169,7 +170,7 @@
                     name="google_map" 
                     placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}" 
                     value="{{ $client->company->google_map ?? old('google_map') }}" 
-                    pattern="https://www.google.com/maps/.*" 
+                    pattern="https://maps.app.goo.gl/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Google Map URL.' : 'يرجى إدخال رابط خريطة جوجل صالح.' }}"
                   />
                   <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
@@ -264,25 +265,24 @@
         </div>
       </div>
       <div class="col-md-6 col-12 mb-6">
-        <label class="form-label fs-6 fw-bold"
-          for="email">{{ __('admin.E-mail') }}</label>
-          <input class="form-control" id="email" name="email"
-            type="email"
-            value="{{ $client->company ? $client->company->email : old('email') }}"
-            style="direction: ltr;" placeholder="{{ __('admin.E-mail') }} *"
-            autocomplete="email"
-            oninput="this.value = this.value.trimStart()"
-          >
+        <div class="form-group">
+          <label class="form-label fs-6 fw-bold"
+          for="email">{{ __('admin.E-mail') }}</label>          <div class="input-group input-group-merge">
+            <input class="form-control" id="email" name="email"
+              type="email"
+              value="{{ $client->company ? $client->company->email : old('email') }}"
+              style="direction: ltr;" placeholder="{{ __('admin.E-mail') }} *"
+              autocomplete="email"
+              oninput="this.value = this.value.trimStart()"
+              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+            />
+            <span class="input-group-text text-light"><i class="ti ti-mail"></i></span>
+          </div>
+          <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid email.' : 'يرجى إدخال بريد إلكتروني صالح.' }}.</div>
+        </div>
       </div>
-
-
-
-
-
-
-
-      
     </div>
+
     <div class="row">
       <div class="col-12 d-flex justify-content-end">
         <button class="btn btn-primary" id="submit-button" type="submit">
@@ -316,8 +316,18 @@
   });
   
   document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('#company-social-form');
-    const inputs = form.querySelectorAll('#company-social-form input[type="url"]');
+    const form = document.querySelector('#contact-form');
+    const inputs = form.querySelectorAll('#contact-form input[type="url"]');
+    const emailInput = form.querySelector('#email');
+
+    emailInput.addEventListener('input', () => {
+     const parent = emailInput.closest('.input-group');
+      if (emailInput.checkValidity()) {
+        parent.classList.remove('is-invalid');
+      } else {
+        parent.classList.add('is-invalid');
+      }
+    });
 
     inputs.forEach(input => {
       input.addEventListener('input', () => {
@@ -332,6 +342,18 @@
 
     form.addEventListener('submit', (e) => {
       let isValid = true;
+
+      emailInput.addEventListener('input', () => {
+        const parent = emailInput.closest('.input-group');
+        if (emailInput.checkValidity()) {
+          isValid = true;
+          parent.classList.remove('is-invalid');
+        } else {
+          isValid = false;
+          parent.classList.add('is-invalid');
+        }
+      });
+
       inputs.forEach(input => {
         const parent = input.closest('.input-group');
         if (!input.checkValidity()) {
