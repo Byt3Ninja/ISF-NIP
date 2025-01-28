@@ -164,10 +164,10 @@ function getValidationConfig(lang, isMentor) {
           notEmpty: {
             message: translations[lang].phone.notEmpty
           },
-          regexp: {
-            regexp: /^[0-9]+$/,
-            message: translations[lang].phone.phone
-          }
+          // regexp: {
+          //   regexp: /^[0-9]+$/,
+          //   message: translations[lang].phone.phone
+          // }
         }
       },
       email: {
@@ -219,13 +219,6 @@ function getValidationConfig(lang, isMentor) {
           },
         }
       },
-      'expertise[]': {
-        validators: {
-          notEmpty: {
-            message: translations[lang].expertise.notEmpty
-          }
-        }
-      }
     },
     plugins: {
       trigger: new FormValidation.plugins.Trigger(),
@@ -311,6 +304,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
           validationConfig = getValidationConfig(lang, true);
           initializeValidation(validationConfig);
           mentorInputsWrapper.style.display = 'block';
+          // Remove 'expertise[]' validation once a value is selected
+          const expertiseField = registerForm.querySelector('[name="expertise[]"]');
+          if (expertiseField) {
+            $(expertiseField).select2();
+            $(expertiseField).on('change', () => {
+            validationInstance.updateFieldStatus('expertise[]', 'NotValidated');
+          });
+          }
         }
       });
     }
@@ -329,15 +330,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
         }
       });
     }
-
-     // Remove 'expertise[]' validation once a value is selected
-     const expertiseField = registerForm.querySelector('[name="expertise[]"]');
-     if (expertiseField) {
-       $(expertiseField).select2();
-       $(expertiseField).on('change', () => {
-          validationInstance.updateFieldStatus('expertise[]', 'NotValidated');
-       });
-     }
 
     //  Two Steps Verification
     const numeralMask = document.querySelectorAll('.numeral-mask');
