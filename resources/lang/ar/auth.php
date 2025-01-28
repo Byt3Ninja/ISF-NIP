@@ -38,4 +38,6 @@ return [
 	'Verify_Code' => 'تأكيد الكود',
 	'Enter_Code' => 'أدخل الكود',
 	'Cancel' => 'إلغاء',
+	'Resend_Code' => 'إعادة إرسال الكود',
 ];
+
