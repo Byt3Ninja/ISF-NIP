@@ -74,7 +74,7 @@
                     id="linkedin" 
                     name="linkedin" 
                     {{-- placeholder="{{ $l == 'en' ? 'LinkedIn URL' : 'رابط لينكد إن' }}"  --}}
-                    placeholder="https://www.linkedin.com/.*" 
+                    placeholder="e.g. https://www.linkedin.com/" 
                     value="{{ $client->company->linkedin ?? old('linkedin') }}" 
                     pattern="https://www.linkedin.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
@@ -94,9 +94,9 @@
                     id="twitter" 
                     name="twitter" 
                     {{-- placeholder="{{ $l == 'en' ? 'Twitter or x URL' : 'رابط تويتر' }}"  --}}
-                    placeholder="https://twitter.com/.* | https://x.com/.*" 
+                    placeholder="e.g. https://twitter.com/ | https://x.com/" 
                     value="{{ $client->company->twitter ?? old('twitter') }}" 
-                    pattern="https://twitter.com/.*|https://x.com/.*" 
+                    pattern="https://twitter.com/.*|https://x.com/.*|https://X.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Twitter URL.' : 'يرجى إدخال رابط تويتر صالح.' }}"
                   />
                   <span class="input-group-text text-light"><i class="ti ti-brand-twitter"></i></span>
@@ -113,7 +113,7 @@
                     class="form-control" 
                     id="facebook" 
                     name="facebook" 
-                    placeholder="https://www.facebook.com/.*" 
+                    placeholder="e.g. https://www.facebook.com/" 
                     {{-- placeholder="{{ $l == 'en' ? 'Facebook URL' : 'رابط فيسبوك' }}"  --}}
                     value="{{ $client->company->facebook ?? old('facebook') }}" 
                     pattern="https://www.facebook.com/.*" 
@@ -134,7 +134,7 @@
                     id="youtube" 
                     name="youtube" 
                     {{-- placeholder="{{ $l == 'en' ? 'YouTube URL' : 'رابط يوتيوب' }}"  --}}
-                    placeholder="https://www.youtube.com/.*" 
+                    placeholder="e.g. https://www.youtube.com/" 
                     value="{{ $client->company->youtube ?? old('youtube') }}" 
                     pattern="https://www.youtube.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid YouTube URL.' : 'يرجى إدخال رابط يوتيوب صالح.' }}"
@@ -154,7 +154,7 @@
                     id="website" 
                     name="website" 
                     {{-- placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}"  --}}
-                    placeholder="https?://.*" 
+                    placeholder="e.g. https?://" 
                     value="{{ $client->company->website ?? old('website') }}" 
                     pattern="https?://.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid website URL.' : 'يرجى إدخال رابط موقع صالح.' }}"
@@ -173,7 +173,7 @@
                     class="form-control" 
                     id="google_map" 
                     name="google_map" 
-                    placeholder="https://maps.app.goo.gl/.*" 
+                    placeholder="e.g. https://maps.app.goo.gl/" 
                     {{-- placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}"  --}}
                     value="{{ $client->company->google_map ?? old('google_map') }}" 
                     pattern="https://maps.app.goo.gl/.*" 
@@ -185,7 +185,6 @@
               </div>
             </div>
 
-
             <div class="col-md-6">
               <div class="form-group">
                 <label class="fs-6 form-label fw-semibold mb-1" for="instagram">{{ __('admin.Instagram') }}</label>
@@ -196,7 +195,7 @@
                     id="instagram" 
                     name="instagram" 
                     {{-- placeholder="{{ $l == 'en' ? 'Instagram URL' : 'رابط انستجرام' }}"  --}}
-                    placeholder="https://www.instagram.com.*" 
+                    placeholder="e.g. https://www.instagram.com/" 
                     value="{{ $client->company->instagram ?? old('instagram') }}" 
                     pattern="https://www.instagram.com.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}"
@@ -217,7 +216,7 @@
                     id="tiktok" 
                     name="tiktok" 
                     {{-- placeholder="{{ $l == 'en' ? 'Tiktok URL' : 'رابط انستجرام' }}"  --}}
-                    placeholder="https://www.tiktok.com.*" 
+                    placeholder="e.g. https://www.tiktok.com" 
                     value="{{ $client->company->tiktok ?? old('tiktok') }}" 
                     pattern="https://www.tiktok.com.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}"
@@ -227,14 +226,9 @@
                 <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}.</div>
               </div>
             </div>
-
-
-
-
           </div>
         </div>
       </div>
-
 
       <div class="border-bottom border-light mb-6">
         <h5 class="card-title fw-semibold">{{ $tab['label'] }}</h5>
