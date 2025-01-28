@@ -73,7 +73,8 @@
                     class="form-control" 
                     id="linkedin" 
                     name="linkedin" 
-                    placeholder="{{ $l == 'en' ? 'LinkedIn URL' : 'رابط لينكد إن' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'LinkedIn URL' : 'رابط لينكد إن' }}"  --}}
+                    placeholder="https://www.linkedin.com/.*" 
                     value="{{ $client->company->linkedin ?? old('linkedin') }}" 
                     pattern="https://www.linkedin.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
@@ -92,9 +93,10 @@
                     class="form-control" 
                     id="twitter" 
                     name="twitter" 
-                    placeholder="{{ $l == 'en' ? 'Twitter URL' : 'رابط تويتر' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Twitter or x URL' : 'رابط تويتر' }}"  --}}
+                    placeholder="https://twitter.com/.* | https://x.com/.*" 
                     value="{{ $client->company->twitter ?? old('twitter') }}" 
-                    pattern="https://twitter.com/.*" 
+                    pattern="https://twitter.com/.*|https://x.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Twitter URL.' : 'يرجى إدخال رابط تويتر صالح.' }}"
                   />
                   <span class="input-group-text text-light"><i class="ti ti-brand-twitter"></i></span>
@@ -111,7 +113,8 @@
                     class="form-control" 
                     id="facebook" 
                     name="facebook" 
-                    placeholder="{{ $l == 'en' ? 'Facebook URL' : 'رابط فيسبوك' }}" 
+                    placeholder="https://www.facebook.com/.*" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Facebook URL' : 'رابط فيسبوك' }}"  --}}
                     value="{{ $client->company->facebook ?? old('facebook') }}" 
                     pattern="https://www.facebook.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Facebook URL.' : 'يرجى إدخال رابط فيسبوك صالح.' }}"
@@ -130,7 +133,8 @@
                     class="form-control" 
                     id="youtube" 
                     name="youtube" 
-                    placeholder="{{ $l == 'en' ? 'YouTube URL' : 'رابط يوتيوب' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'YouTube URL' : 'رابط يوتيوب' }}"  --}}
+                    placeholder="https://www.youtube.com/.*" 
                     value="{{ $client->company->youtube ?? old('youtube') }}" 
                     pattern="https://www.youtube.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid YouTube URL.' : 'يرجى إدخال رابط يوتيوب صالح.' }}"
@@ -149,7 +153,8 @@
                     class="form-control" 
                     id="website" 
                     name="website" 
-                    placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}"  --}}
+                    placeholder="https?://.*" 
                     value="{{ $client->company->website ?? old('website') }}" 
                     pattern="https?://.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid website URL.' : 'يرجى إدخال رابط موقع صالح.' }}"
@@ -168,7 +173,8 @@
                     class="form-control" 
                     id="google_map" 
                     name="google_map" 
-                    placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}" 
+                    placeholder="https://maps.app.goo.gl/.*" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}"  --}}
                     value="{{ $client->company->google_map ?? old('google_map') }}" 
                     pattern="https://maps.app.goo.gl/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Google Map URL.' : 'يرجى إدخال رابط خريطة جوجل صالح.' }}"
@@ -189,7 +195,8 @@
                     class="form-control" 
                     id="instagram" 
                     name="instagram" 
-                    placeholder="{{ $l == 'en' ? 'Instagram URL' : 'رابط انستجرام' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Instagram URL' : 'رابط انستجرام' }}"  --}}
+                    placeholder="https://www.instagram.com.*" 
                     value="{{ $client->company->instagram ?? old('instagram') }}" 
                     pattern="https://www.instagram.com.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}"
@@ -209,7 +216,8 @@
                     class="form-control" 
                     id="tiktok" 
                     name="tiktok" 
-                    placeholder="{{ $l == 'en' ? 'Tiktok URL' : 'رابط انستجرام' }}" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Tiktok URL' : 'رابط انستجرام' }}"  --}}
+                    placeholder="https://www.tiktok.com.*" 
                     value="{{ $client->company->tiktok ?? old('tiktok') }}" 
                     pattern="https://www.tiktok.com.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}"
