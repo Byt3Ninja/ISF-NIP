@@ -42,6 +42,7 @@
                 rows="3" 
                 dir="rtl"
                 placeholder="{{ __('admin.writebioar') }}"
+                oninput="this.value = this.value.trimStart()"
               >{{ $client->bio->bio_ar ?? '' }}</textarea>
             </div>
           </div>
@@ -57,6 +58,7 @@
                 rows="3" 
                 dir="ltr"
                 placeholder="{{ __('admin.writebioen') }}"
+                oninput="this.value = this.value.trimStart()"
               >{{ $client->bio->bio_en ?? '' }}</textarea>
             </div>
           </div>
@@ -123,8 +125,11 @@
           id="basicTextarea" 
           rows="8" 
           name="entrepreneurial_experience_brief"
+          oninput="this.value = this.value.trimStart()"
           required
-        >{{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }}</textarea>
+        >
+          {{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }}
+        </textarea>
         <label for="tcontent" class="mt-2">
           {{ __('admin.Entrepreneurial Experience Brief') }}
         </label>
@@ -228,51 +233,31 @@
   const translations = {
     en: {
       linkedin: {
-        notEmpty: 'Please enter LinkedIn URL',
         uri: 'Please enter valid linkedin URL'
       },
       bio_ar: {
-        notEmpty: 'Please enter Arabic Bio'
+        arOnly: 'Please enter Arabic Bio'
       },
       bio_en: {
-        notEmpty: 'Please enter English Bio'
+        enOnly: 'Please enter English Bio'
       },
       entrepreneurial_experience_brief: {
-        notEmpty: 'Please enter Entrepreneurial Experience Brief'
-      },
-      mentorship_approach: {
-        notEmpty: 'Please select mentorship approach'
-      },
-      selectExpertises: {
-        notEmpty: 'Please select expertises'
-      },
-      entrepreneurial_experience: {
-        notEmpty: 'Please select entrepreneurial experience'
-      },
+        notEmpty: 'The entrepreneurial experience brief is required'
+      }
     },
     ar: {
       linkedin: {
-        notEmpty: 'يرجى إدخال رابط لينكد ان',
         uri: 'يرجى ادخال رابط  لينكد ان صحيح'
       },
       bio_ar: {
-        notEmpty: 'يرجى إدخال السيرة الذاتية باللغة العربية'
+        arOnly: 'يرجى إدخال السيرة الذاتية باللغة العربية'
       },
       bio_en: {
-        notEmpty: 'يرجى إدخال السيرة الذاتية باللغة الإنجليزية'
+        enOnly: 'يرجى إدخال السيرة الذاتية باللغة الإنجليزية'
       },
       entrepreneurial_experience_brief: {
-        notEmpty: 'يرجى إدخال ملخص الخبرة الريادية'
-      },
-      mentorship_approach: {
-        notEmpty: 'يرجى تحديد نهج الإرشاد'
-      },
-      selectExpertises: {
-        notEmpty: 'يرجى تحديد التخصصات'
-      },
-      entrepreneurial_experience: {
-        notEmpty: 'يرجى تحديد الخبرة الريادية'
-      },
+        notEmpty: 'الخبرة الريادية مطلوبة'
+      }
     }
   };
 
@@ -290,6 +275,29 @@
               }
             },
           },
+          bio_ar: {
+            validators: {
+              regexp: {
+                regexp: /^[\u0600-\u06FF\s,|-]*$/i,
+                message: translations['{{ $l }}'].bio_ar.arOnly
+            }
+          },
+        },
+          bio_en: {
+            validators: {
+              regexp: {
+                regexp: /^[a-zA-Z\s,|-]*$/i,
+                message: translations['{{ $l }}'].bio_en.enOnly
+              }
+            }
+          },
+          entrepreneurial_experience_brief: {
+            validators: {
+              notEmpty: {
+                message: translations['{{ $l }}'].entrepreneurial_experience_brief.notEmpty
+              }
+            }
+          }
         },
         plugins: {
           trigger: new FormValidation.plugins.Trigger(),
