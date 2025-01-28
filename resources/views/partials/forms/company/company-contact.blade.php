@@ -94,7 +94,7 @@
                     id="twitter" 
                     name="twitter" 
                     {{-- placeholder="{{ $l == 'en' ? 'Twitter or x URL' : 'رابط تويتر' }}"  --}}
-                    placeholder="e.g. https://twitter.com/ | https://x.com/" 
+                    placeholder="e.g. https://x.com/" 
                     value="{{ $client->company->twitter ?? old('twitter') }}" 
                     pattern="https://twitter.com/.*|https://x.com/.*|https://X.com/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Twitter URL.' : 'يرجى إدخال رابط تويتر صالح.' }}"
