@@ -166,7 +166,7 @@
                     name="google_map" 
                     placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}" 
                     value="{{ $client->company->google_map ?? old('google_map') }}" 
-                    pattern="https://www.google.com/maps/.*" 
+                    pattern="https://maps.app.goo.gl/LmV6vEbR9obgCYn3A/.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Google Map URL.' : 'يرجى إدخال رابط خريطة جوجل صالح.' }}"
                   />
                   <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
