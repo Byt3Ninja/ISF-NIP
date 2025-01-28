@@ -218,6 +218,13 @@ function getValidationConfig(lang, isMentor) {
             message: translations[lang].password_confirmation.strong
           },
         }
+      },
+      'expertise[]': {
+        validators: {
+          notEmpty: {
+            message: translations[lang].expertise.notEmpty
+          }
+        }
       }
     },
     plugins: {
@@ -251,7 +258,7 @@ function getValidationConfig(lang, isMentor) {
         }
       }
     };
-    config.fields.expertise = {
+    config.fields['expertise[]'] = {
       validators: {
         notEmpty: {
           message: translations[lang].expertise.notEmpty
@@ -322,6 +329,15 @@ document.addEventListener('DOMContentLoaded', function (e) {
         }
       });
     }
+
+     // Remove 'expertise[]' validation once a value is selected
+     const expertiseField = registerForm.querySelector('[name="expertise[]"]');
+     if (expertiseField) {
+       $(expertiseField).select2();
+       $(expertiseField).on('change', () => {
+          validationInstance.updateFieldStatus('expertise[]', 'NotValidated');
+       });
+     }
 
     //  Two Steps Verification
     const numeralMask = document.querySelectorAll('.numeral-mask');
