@@ -200,7 +200,7 @@
                     pattern="https://www.instagram.com.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}"
                   />
-                  <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
+                  <span class="input-group-text text-light"><i class="ti ti-brand-instagram"></i></span>
                 </div>
                 <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}.</div>
               </div>
@@ -221,7 +221,7 @@
                     pattern="https://www.tiktok.com.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}"
                   />
-                  <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
+                  <span class="input-group-text text-light"><i class="ti ti-brand-tiktok"></i></span>
                 </div>
                 <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}.</div>
               </div>
