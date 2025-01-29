@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
@@ -159,7 +160,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('/save-phone-session', 'ClientProfileController@savePhoneSession')->name('save.phone.session');
     Route::post('/send-code', 'ClientProfileController@sendCode')->name('send.code');
     Route::post('/verify-code', 'ClientProfileController@verifyCode')->name('verify.code');
-   
+
     Route::resource('Tags', 'TagsController');
     Route::resource('Labels', 'LabelController');
     Route::resource('TimeSheet', 'TimeSheetController');
@@ -451,6 +452,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
         Route::get('microsoft-sync-events', 'MicrosoftCalendarController@syncEvents')->name('calender.MicrosoftsyncEvents');
     });
 
+    /* Start of Gemini SWOT Analysis Routes */
+    Route::get('/swot-analysis', [GeminiController::class, 'generateSwotAnalysis'])->name('swot.generate');
+    Route::post('/swot-analysis/save', [GeminiController::class, 'saveSwotAnalysis'])->name('swot.save');
+    Route::get('/swot-analysis/export', [GeminiController::class, 'exportToPdf'])->name('swot.export');
+    /* End of Gemini SWOT Analysis Routes */
 
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'], function () {
