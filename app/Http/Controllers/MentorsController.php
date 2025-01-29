@@ -527,6 +527,7 @@ class MentorsController extends Controller
 				return response()->json($my);
 			} else {
 
+				Schedule::where('user_id', Auth::id())->delete();
 				// Schedule::create($request->all() + ['user_id' => Auth::id()]);
 				$userId = Auth::id();
 				$periods = $request->input('periods');
