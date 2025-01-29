@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Settings;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
@@ -13,12 +14,13 @@ class WhatsAppService
 
     public function __construct()
     {
+        $settings = Settings::where('id', 1)->first();
         $this->client = new Client([
-            'base_uri' => 'https://app.wawp.net/api/',
+            'base_uri' => $settings->whatsApp_URL_callback ?? 'https://app.wawp.net/api/',
         ]);
 
-        $this->instanceId = env('WAWP_INSTANCE_ID');
-        $this->accessToken = env('WAWP_ACCESS_TOKEN');
+        $this->instanceId = $settings->whatsApp_INSTANCE_ID ?? '';
+        $this->accessToken = $settings->whatsApp_ACCESS_TOKEN ?? '';
     }
 
     public function sendOTP($phoneNumber, $otp)

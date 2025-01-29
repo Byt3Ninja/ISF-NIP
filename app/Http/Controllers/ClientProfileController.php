@@ -455,6 +455,7 @@ class ClientProfileController extends Controller
        
         $request->session()->forget('phone');
         $request->session()->put('phone', $request->phone);
+        $request->session()->put('countryCode', $request->countryCode);
         
         return response()->json(['message' => 'تم حفظ رقم الهاتف بنجاح.']);
 
@@ -478,11 +479,17 @@ class ClientProfileController extends Controller
 
 
         // إذا كان عدد المحاولات أكثر من 2 خلال 6 ساعات، يجب الانتظار 6 ساعات
-        if ($otpget->count() >= 2) {
+        if ($otpget->count() >= 5) {
         return response()->json(['error' => __('admin.OTP_limit_exceeded_wait_6_hours')]);
         }
 
-        $phoneNumber = session('phone');
+        $request->session()->forget('otp');
+        $request->session()->forget('phone');
+        $request->session()->forget('countryCode');
+        $request->session()->put('phone', $request->phone);
+        $request->session()->put('countryCode', $request->countryCode);
+
+        $phoneNumber = $request->countryCode . $request->phone;
         
         $otp = $this->generateOtp();
 
@@ -512,6 +519,8 @@ class ClientProfileController extends Controller
     {
         $codeFromUser = $request->code;
         $otpFromSession = session('otp');
+        $phone = session('phone');
+        $countryCode = session('countryCode');
         $userId = Auth::user()->id;
     
         if ($codeFromUser == $otpFromSession) {
@@ -528,7 +537,8 @@ class ClientProfileController extends Controller
                 $otpget->save();
 
                 $user = User::find($userId);
-                $user->whatsapp = $otpget->phone;
+                $user->country_code_w_a = $countryCode;
+                $user->whatsapp = $phone;
                 $user->whatsapp_verified = 1;
                 $user->save();
     

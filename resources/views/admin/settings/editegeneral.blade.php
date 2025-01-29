@@ -27,6 +27,7 @@
     ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
     ['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],
     ['HomePage', 'ti-home', __('admin.HomePageSetting')],
+    ['WhatsApp', 'ti-home', __('admin.WhatsApp')],
   ])->map(function ($tab) {
     return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
   })->toArray();
@@ -125,6 +126,9 @@
                       @break
                     @case('HomePage')
                       @include('partials.forms.home-settings-form')
+                      @break
+                      @case('WhatsApp')
+                      @include('partials.forms.whatsapp-settings-form')
                       @break
                   @endswitch
                 </div>
