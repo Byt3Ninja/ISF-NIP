@@ -515,7 +515,7 @@ whatsappInput.parentNode.appendChild(countryCodeWAInput);
 // تحديث الحقل المخفي عند تغيير الدولة في الواتساب
 whatsappInput.addEventListener("countrychange", () => {
     const dialCode = whatsappIti.getSelectedCountryData().dialCode;
-    countryCodeWAInput.value = "+" + dialCode; // تعيين الكود الدولي
+    countryCodeWAInput.value =  dialCode; // تعيين الكود الدولي
     console.log("WhatsApp Dial Code Updated: " + countryCodeWAInput.value);
 });
 
@@ -529,13 +529,13 @@ phoneInput.parentNode.appendChild(countryCodeInput);
 // ضبط الدولة الافتراضية
 if (countryCodeFromDB) {
     iti.setCountry(countryCodeFromDB);
-    countryCodeInput.value = "+" + iti.getSelectedCountryData().dialCode;
+    countryCodeInput.value =  iti.getSelectedCountryData().dialCode;
 }
 
 // تحديث الحقل المخفي عند تغيير الدولة
 phoneInput.addEventListener("countrychange", () => {
     const dialCode = iti.getSelectedCountryData().dialCode;
-    countryCodeInput.value = "+" + dialCode;
+    countryCodeInput.value =  dialCode;
 });
 
 whatsappInput.addEventListener("countrychange", () => {
