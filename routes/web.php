@@ -124,6 +124,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::put('settings/UpdateLogin', 'SettingsController@update_settingsLogin')->name('updateSMLogin');
     Route::put('settings/UpdateimgHome', 'SettingsController@update_settingsImgHome')->name('updateSMImgHome');
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('updateSMAchiev');
+    Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('updateSMWhatsApp');
+
 
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
