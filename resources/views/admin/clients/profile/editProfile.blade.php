@@ -484,11 +484,21 @@ function sendCode(type) {
     }
     
     $(type == 'phone' ? '#verifyCodeModal' : '#verifyWhatsappCodeModal').modal('show');
+    let number = $('#whatsapp').val();
+    let countryCode = whatsappIti.getSelectedCountryData().dialCode;
+    if (number.startsWith('0') && countryCode == '20') {
+        number = number.substring(1); // Remove the first character (the zero)
+    }else{
+        number = number;
+    }
 
+    console.log(countryCode, number);
     $.ajax({
       url: '{{ route('send.code') }}',
       type: 'POST',
       data: {
+        countryCode: countryCode,
+        phone: number,
         _token: '{{ csrf_token() }}'
       },
       success: function(response) {
@@ -519,7 +529,7 @@ function sendCode(type) {
 // Verify code of phone
 function verifyCode() {
   var code = $('#OTP').val();
-  alert(code);
+  
   $.ajax({
     url: '{{ route('verify.code') }}',
     type: 'POST',
@@ -555,7 +565,7 @@ function verifyCode() {
 // Verify code of WhatsApp
 function verifyWhatsappCode() {
   var code = $('#OTPWA').val();
-  alert(code);
+ 
   $.ajax({
     url: '{{ route('verify.code') }}',
     type: 'POST',
@@ -645,30 +655,31 @@ function verifyWhatsappCode() {
 // });
 
 
-$('#whatsapp').on('blur', function() {
-var number = $(this).val();
-var countryCode = whatsappIti.getSelectedCountryData().dialCode;
-if (number.startsWith('0')) {
-    number = number.substring(1); // إزالة أول حرف (الصفر)
-}
-var number = countryCode + number;
+// $('#whatsapp').on('blur', function() {
+// var number = $(this).val();
+// var countryCode = whatsappIti.getSelectedCountryData().dialCode;
+// if (number.startsWith('0')) {
+//     number = number.substring(1); // إزالة أول حرف (الصفر)
+// }
+// var number = countryCode + number;
 
-$.ajax({
-url: '{{ route('save.phone.session') }}',
-type: 'POST',
-data: {
-phone: number,
-_token: '{{ csrf_token() }}'
-},
-success: function(response) {
-  
-// $('#whatsapp').prop('readonly', true);
-},
-error: function(xhr, status, error) {
-  console.log(error);
-alert('حدث خطأ أثناء التنفيذ: ' + error);
-}
-});
-});
+// $.ajax({
+// url: '{{ route('save.phone.session') }}',
+// type: 'POST',
+// data: {
+//   countryCode: countryCode,
+// phone: number,
+// _token: '{{ csrf_token() }}'
+// },
+// success: function(response) {
+//   alert(response);
+// // $('#whatsapp').prop('readonly', true);
+// },
+// error: function(xhr, status, error) {
+//   console.log(error);
+// alert('حدث خطأ أثناء التنفيذ: ' + error);
+// }
+// });
+// });
 </script>
 @stop
