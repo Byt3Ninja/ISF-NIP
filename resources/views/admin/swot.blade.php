@@ -15,13 +15,9 @@
     @endif
 
 
+
     <!-- Generate SWOT Analysis --> 
     <button id="generate-swot" class="btn btn-warning mt-4">{{__('admin.generate')}}</button>
-
-
-    <!-- Export to PDF -->
-    <a href="{{ route('swot.export') }}" class="btn btn-success mt-4">{{__('admin.export')}}</a>
-
     <form action="{{ route('swot.save') }}" method="POST">
         @csrf
 
