@@ -1170,15 +1170,21 @@ return [
 	'ChooseYourStageFirst' => 'Choose Your Development Stage First',
 	'Tiktok' => 'Tiktok',
 	'Instagram' => 'Instagram',
+<<<<<<< Updated upstream
 	'Password_should_be_strong' => 'Password should be strong',
 	'Passwords_do_not_match' => 'Passwords do not match',
+=======
+>>>>>>> Stashed changes
 	'OTP_sent_successfully' => 'OTP sent successfully',
 	'OTP_limit_exceeded_wait_6_hours' => 'OTP limit exceeded. Please wait 6 hours',
 	'Failed_to_send_OTP' => 'Failed to send OTP',
 	'OTP_verified_successfully' => 'OTP verified successfully',
 	'max_attempts_reached' => 'You have reached the maximum number of attempts. Please wait 6 hours before trying again.',
     'invalid_verification_code' => 'The verification code is incorrect.',
+<<<<<<< Updated upstream
 	'Logo_Social' => 'Logo & Social',
 	'About_Problem' => 'About Problem',
+=======
+>>>>>>> Stashed changes
 
 ];
