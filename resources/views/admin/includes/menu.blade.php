@@ -267,6 +267,13 @@
         </a>
       </li>
       @endif
+
+      <li class="{{ Request::is('dashboard/swot-analysis*') ? 'active' : '' }} menu-item">
+        <a href="{{ route('swot.view') }}" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
+          <div>{{ __('admin.swot_analysis') }}</div>
+        </a>
+      </li>
       
     @endrole
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
