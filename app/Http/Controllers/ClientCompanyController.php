@@ -447,8 +447,7 @@ class ClientCompanyController extends Controller
 
                         // إنشاء رابط الصورة
                         $img_url = Storage::disk('public_uploads')->url($img_path);
-                
-                    }else{
+                    } else {
                         $img_url = $user->company->logo;
                     }
 
@@ -505,7 +504,6 @@ class ClientCompanyController extends Controller
                     $validatedData = $request->validate([
                         'company_description' => 'required|string|max:500',
                         'Sustainable_development' => 'nullable|array',
-<<<<<<< Updated upstream
                         'about_problem' => 'required',
                         'about_market_opportunity' => 'required',
                         'about_competitors' => 'required',
@@ -519,11 +517,6 @@ class ClientCompanyController extends Controller
                         'about_competitors.required' => __('admin.about_competitors is required'),
                         'about_monetize.required' => __('admin.about_monetize is required'),
                         'about_challenges.required' => __('admin.about_challenges is required'),
-=======
-                    ], [
-                        'company_description.required' => __('admin.Company description must not exceed'),
-                        'company_description.max' => __('admin.Company description must not exceed 500 characters'),
->>>>>>> Stashed changes
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
@@ -701,7 +694,7 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 8) {
 
-                    
+
                     $validator = Validator::make($request->all(), [
                         'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                         'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -723,7 +716,7 @@ class ClientCompanyController extends Controller
                         'instagram.url' => __('admin.instagram_url_Not_URL'),
                         'tiktok.url' => __('admin.tiktok_url_Not_URL'),
                     ]);
-                    
+
                     // في الميثود التي تعالج الطلب
                     if ($request->hasFile('img_url')) {
                         // الحصول على الصورة
@@ -733,14 +726,13 @@ class ClientCompanyController extends Controller
 
                         // إنشاء رابط الصورة
                         $img_url = Storage::disk('public_uploads')->url($img_path);
-                
-                    }else{
+                    } else {
                         $img_url = $user->company->logo;
                     }
-                    
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
-                       
+
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'website' => $data['website'],
@@ -753,7 +745,7 @@ class ClientCompanyController extends Controller
                             'instagram' => $data['instagram'],
                             'tiktok' => $data['tiktok'],
                         ]);
-                        
+
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد

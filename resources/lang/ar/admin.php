@@ -10,6 +10,16 @@ return [
 	'Reports' => 'التقارير',
 	'directory' => 'الدليل',
 	'myinterests' => 'إهتماماتي',
+	'strengths'  => 'نقاط القوة',
+	'weaknesses'  => 'نقاط الضعف',
+	'opportunities'  => 'فرص',
+	'threats'  => 'التهديدات',
+	'strengths_recommendations' => 'توصيات نقاط القوة',
+	'weaknesses_recommendations' => 'توصيات نقاط الضعف',
+	'opportunities_recommendations' => 'توصيات الفرص',
+	'threats_recommendations' => 'توصيات التهديدات',
+	'swot_analysis' => 'تحليل SWOT',
+	'stored' => 'تم الحفظ بنجاح',
 	'recording_passcode' => ' كلمة مرور التسجيل',
 	'report_not_found' => 'جلسة التقارير غير موجودة',
 	'recording_not_found' => 'تقرير الجلسة غير موجود',
@@ -1185,21 +1195,16 @@ return [
 	'ChooseYourStageFirst' => 'اختر (مرحلة التطوير) اولا',
 	'Tiktok' => ' تيكتوك',
 	'Instagram' => ' انستقرام',
-<<<<<<< Updated upstream
 	'Password_should_be_strong' => 'يجب أن تكون كلمة المرور قوية',
 	'Passwords_do_not_match' => 'كلمات المرور غير متطابقة',
-=======
->>>>>>> Stashed changes
 	'OTP_sent_successfully' => 'تم ارسال OTP بنجاح',
 	'OTP_limit_exceeded_wait_6_hours' => 'تم تجاوز حد المحاولات. يجب الانتظار 6 ساعات',
 	'Failed_to_send_OTP' => 'فشل في ارسال OTP',
 	'OTP_verified_successfully' => 'تم التحقق من OTP بنجاح',
-	'No_valid_OTP_found_or_OTP_expired' => 'OTP منتهية الصلاحية', 
+	'No_valid_OTP_found_or_OTP_expired' => 'OTP منتهية الصلاحية',
 	'max_attempts_reached' => 'تم الوصول إلى الحد الأقصى للمحاولات. انتظر 6 ساعات قبل المحاولة مرة أخرى.',
-<<<<<<< Updated upstream
 	'Logo_Social' => 'الشعار والتواصل',
 	'About_Problem' => 'حول المشكلة',
-=======
-	
->>>>>>> Stashed changes
+
+
 ];
