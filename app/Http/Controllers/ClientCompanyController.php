@@ -505,6 +505,7 @@ class ClientCompanyController extends Controller
                     $validatedData = $request->validate([
                         'company_description' => 'required|string|max:500',
                         'Sustainable_development' => 'nullable|array',
+<<<<<<< Updated upstream
                         'about_problem' => 'required',
                         'about_market_opportunity' => 'required',
                         'about_competitors' => 'required',
@@ -518,6 +519,11 @@ class ClientCompanyController extends Controller
                         'about_competitors.required' => __('admin.about_competitors is required'),
                         'about_monetize.required' => __('admin.about_monetize is required'),
                         'about_challenges.required' => __('admin.about_challenges is required'),
+=======
+                    ], [
+                        'company_description.required' => __('admin.Company description must not exceed'),
+                        'company_description.max' => __('admin.Company description must not exceed 500 characters'),
+>>>>>>> Stashed changes
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
