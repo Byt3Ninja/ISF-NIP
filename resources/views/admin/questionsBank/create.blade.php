@@ -103,14 +103,24 @@
 											{!! csrf_field() !!}
 											<fieldset class="form-group mb-4">
 												<label class="fs-6 form-label mb-2" for ="organization_id">{{ __('admin.Organization') }}</label>
-												<select class="form-control form-select select2" name="organization_id[]" id="organization_id" multiple required>
+												<div class="row">
 													@foreach ($organizations as $organization)
-														<option value="{{ $organization->id }}" 
-															{{ !empty(old('organization_id')) && in_array($organization->id, (array)old('organization_id')) ? 'selected' : '' }}>
-															{{ $organization->{'name_' . $l} }}
-														</option>
+														<div class="col-md-4">
+															<div class="form-check">
+																<input type="checkbox" 
+																	   class="form-check-input" 
+																	   name="organization_id[]" 
+																	   id="org_{{ $organization->id }}" 
+																	   value="{{ $organization->id }}" 
+																	   {{ !empty(old('organization_id')) && in_array($organization->id, (array)old('organization_id')) ? 'checked' : '' }}>
+																
+																<label class="form-check-label" for="org_{{ $organization->id }}">
+																	{{ $organization->{'name_' . $l} }}
+																</label>
+															</div>
+														</div>
 													@endforeach
-												</select>
+												</div>
 											</fieldset>
 											<fieldset class="form-group mb-4">
 												<label class="fs-6 form-label mb-2" for ="question">{{ __('admin.question') }}</label>
