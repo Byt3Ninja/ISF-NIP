@@ -6,15 +6,24 @@ use App\SwotAnalysis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class GeminiController extends Controller
 {
+    public function showSwotAnalysis()
+    {
+        $user = auth()->user();
+        $company = $user->company;
+        $swotAnalysis = SwotAnalysis::where('company_id', $company->id)->first();
+
+        return view('admin.swot', compact('swotAnalysis'));
+    }
+
     public function generateSwotAnalysis(Request $request)
     {
         $user = auth()->user();
         $company = $user->company;
 
-        // Required Fields
         $requiredFields = [
             'info_company',
             'about_problem',
@@ -37,7 +46,7 @@ class GeminiController extends Controller
 
         if (!empty($missingFields)) {
             return response()->json([
-                'error' => 'Please complete the following fields Before Generating the SWOT Analysis:',
+                'error' => 'Please complete the Following Fields From Your Profile Before Generating the SWOT Analysis:',
                 'missing_fields' => $missingFields
             ], 400);
         }
@@ -146,39 +155,39 @@ class GeminiController extends Controller
 
     public function saveSwotAnalysis(Request $request)
     {
-        $user = auth()->user();
-        $company = $user->company;
+        $companyId = $request->company_id;
 
-        $validatedData = $request->validate([
-            'strength' => 'nullable|array',
-            'weakness' => 'nullable|array',
-            'opportunity' => 'nullable|array',
-            'threat' => 'nullable|array',
-            'srecommendation' => 'nullable|array',
-            'wrecommendation' => 'nullable|array',
-            'orecommendation' => 'nullable|array',
-            'trecommendation' => 'nullable|array'
-        ]);
+        $swotAnalysis = SwotAnalysis::firstOrNew(['company_id' => $companyId]);
 
-        SwotAnalysis::updateOrCreate(
-            ['company_id' => $company->id],
-            [
-                'strength' => json_encode($validatedData['strength'] ?? []),
-                'weakness' => json_encode($validatedData['weakness'] ?? []),
-                'opportunity' => json_encode($validatedData['opportunity'] ?? []),
-                'threat' => json_encode($validatedData['threat'] ?? []),
-                'srecommendation' => json_encode($validatedData['srecommendation'] ?? []),
-                'wrecommendation' => json_encode($validatedData['wrecommendation'] ?? []),
-                'orecommendation' => json_encode($validatedData['orecommendation'] ?? []),
-                'trecommendation' => json_encode($validatedData['trecommendation'] ?? [])
-            ]
-        );
-        return redirect()->back()->with('success', 'SWOT Analysis Saved Successfully.');
+        $swotAnalysis->strength = $request->strength;
+        $swotAnalysis->weakness = $request->weakness;
+        $swotAnalysis->opportunity = $request->opportunity;
+        $swotAnalysis->threat = $request->threat;
+        $swotAnalysis->srecommendation = $request->srecommendation;
+        $swotAnalysis->wrecommendation = $request->wrecommendation;
+        $swotAnalysis->orecommendation = $request->orecommendation;
+        $swotAnalysis->trecommendation = $request->trecommendation;
+        $swotAnalysis->save();
+
+        return redirect()->back()->with('success', __('admin.stored'));
     }
 
     public function exportToPdf()
     {
-        // $pdf = Pdf::loadView('swot-analysis', ['swotAnalysis' => $company->swot_analysis]);
-        // return $pdf->download("SWOT_Analysis_{$company->name_en}.pdf");
+        $user = auth()->user();
+        $company = $user->company;
+        $swotAnalysis = SwotAnalysis::where('company_id', $company->id)->first();
+        $pdf = Pdf::loadView('admin.swot-pdf', [
+            'strength' => $swotAnalysis->strength,
+            'srecommendation' => $swotAnalysis->srecommendation,
+            'weakness' => $swotAnalysis->weakness,
+            'wrecommendation' => $swotAnalysis->wrecommendation,
+            'opportunity' => $swotAnalysis->opportunity,
+            'orecommendation' => $swotAnalysis->orecommendation,
+            'threat' => $swotAnalysis->threat,
+            'trecommendation' => $swotAnalysis->trecommendation
+        ]);
+
+        return $pdf->download("SWOT-Analysis.pdf");
     }
 }
