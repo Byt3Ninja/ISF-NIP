@@ -103,9 +103,10 @@
 											{!! csrf_field() !!}
 											<fieldset class="form-group mb-4">
 												<label class="fs-6 form-label mb-2" for ="organization_id">{{ __('admin.Organization') }}</label>
-												<select class="form-control form-select select2" name="organization_id" id="organization_id" required>
+												<select class="form-control form-select select2" name="organization_id[]" id="organization_id" multiple required>
 													@foreach ($organizations as $organization)
-														<option value="{{ $organization->id }}" {{ !empty(old('organization_id')) && old('organization_id') == $organization->id ? 'selected' : '' }}>
+														<option value="{{ $organization->id }}" 
+															{{ !empty(old('organization_id')) && in_array($organization->id, (array)old('organization_id')) ? 'selected' : '' }}>
 															{{ $organization->{'name_' . $l} }}
 														</option>
 													@endforeach
