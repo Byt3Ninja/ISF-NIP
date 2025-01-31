@@ -1192,5 +1192,6 @@ return [
     'invalid_verification_code' => 'The verification code is incorrect.',
 	'Logo_Social' => 'Logo & Social',
 	'About_Problem' => 'About Problem',
+	'program_not_found' => 'Program not found',
 
 ];
