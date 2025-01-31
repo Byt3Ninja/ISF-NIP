@@ -25,11 +25,7 @@
                 
                 <img 
                   id="company-logo" 
-<<<<<<< Updated upstream
                   src="{{ $client->company ? asset($client->company->logo) : '/images/logo-placeholder.png' }}" 
-=======
-                  src="{{ $client->company ? asset('storage/' .$client->company->logo) : '/images/logo-placeholder.png' }}" 
->>>>>>> Stashed changes
                   onerror="this.src = '/images/logo-placeholder.png';"
                   alt="Company logo" 
                   class="img-fluid rounded border w-px-100 h-px-100" 
