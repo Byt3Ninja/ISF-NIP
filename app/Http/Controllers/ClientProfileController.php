@@ -479,11 +479,7 @@ class ClientProfileController extends Controller
 
 
         // إذا كان عدد المحاولات أكثر من 2 خلال 6 ساعات، يجب الانتظار 6 ساعات
-<<<<<<< Updated upstream
         if ($otpget->count() >= 5) {
-=======
-        if ($otpget->count() >= 2) {
->>>>>>> Stashed changes
         return response()->json(['error' => __('admin.OTP_limit_exceeded_wait_6_hours')]);
         }
 
