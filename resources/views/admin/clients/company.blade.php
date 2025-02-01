@@ -79,7 +79,7 @@
           @foreach ($tabs as $key => $tab)
             <li class="nav-item d-flex justify-content-center align-items-center">
               <a 
-                id="company-tab"
+                {{-- id="company-tab" --}}
                 href="#navs-left-{{ $tab['target'] }}"
                 class="nav-link {{ $key == 0 ? 'active' : '' }}"
                 data-bs-toggle="tab" 
@@ -106,7 +106,7 @@
                 <a 
                   id="company-tab"
                   href="#navs-left-{{ $tab['target'] }}"
-                  class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
+                  class="nav-link py-3"
                   data-bs-toggle="tab"
                   role="tab"
                   {{-- onclick="handleTabClick({{ $key }});" --}}
@@ -120,11 +120,13 @@
           <!-- / Tabs -->
         </nav>
         <!-- Tab Content On Tab Click -->
-        <div class="tab-content p-0 overflow-y-auto custom-container mb-6" 
+        <div 
+          id="company-tab-content"
+          class="tab-content p-0 overflow-y-auto custom-container mb-6" 
           style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
         >
           @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}"
+            <div class="tab-pane fade "
               id="navs-left-{{ $tab['target'] }}">
               @switch($tab['target'])
                 @case('company-info')
@@ -210,6 +212,40 @@
       }
     });
   </script> 
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabs = document.querySelectorAll('#company-tab');
+      const tabsContent = document.querySelectorAll('#company-tab-content .tab-pane');
+      const activeCompanyTab = localStorage.getItem('activeCompanyTab');
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
+        });
+
+        if (!activeCompanyTab) {
+          tabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('active');
+        }
+      });
+
+      tabsContent.forEach((tab, index) => {
+        if (!activeCompanyTab) {
+          tabsContent[0].classList.add('fade', 'show', 'active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('fade', 'show', 'active');
+        }
+      });
+    });
+  </script>
 
   {{-- <script>
     const handleTabClick = (tab) => {
