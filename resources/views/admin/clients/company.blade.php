@@ -493,7 +493,7 @@
       });
   });
 </script> --}}
-
+{{-- 
 <script>
   // Initialize the phone input
 const phoneInput = document.getElementById("phone");
@@ -596,7 +596,7 @@ whatsappInput.addEventListener("input", () => {
 });
 
 
-</script>
+</script> --}}
 @stop
 
 
