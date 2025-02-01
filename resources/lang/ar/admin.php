@@ -84,7 +84,7 @@ return [
 	'Edit your profile information' => 'تعديل بياناتك الشخصيه',
 	'First Name' => 'الاسم الاول',
 	'Arabic First Name' => 'الاسم الاول باللغة العربية',
-	'Last Name' => 'الاسم الاخير باللغة الإنجليزية',
+	'Last Name' => 'الاسم الاخير',
 	'Arabic Last Name' => 'الاسم الاخير باللغة العربية',
 	'E-mail' => 'البريد الإلكتروني',
 	'Email' => 'البريد الإلكتروني',
@@ -218,7 +218,7 @@ return [
 	'registeredusers' => 'المستخدمين المسجلين',
 	'totalusersmf' => 'نسبة الذكور / الإناث',
 	'JobTitleAr' => 'المسمى الوظيقي باللغة العربية',
-	'JobTitleEn' => 'الامسمى الوظيفي باللغة الإنجليزية',
+	'JobTitleEn' => 'الامسمى الوظيفي',
 	'Chamber' => 'الغرفة الصناعية',
 	'RoomMembershipNumber' => 'رقم عضوية الغرفة',
 	'CommercialRecord' => 'رقم السجل التجاري',
@@ -1206,5 +1206,5 @@ return [
 	'Logo_Social' => 'الشعار والتواصل',
 	'About_Problem' => 'حول المشكلة',
 	'program_not_found' => 'هذا البرنامج غير موجود',
-	
+	'Reset' => 'إعادة تعيين',	
 ];

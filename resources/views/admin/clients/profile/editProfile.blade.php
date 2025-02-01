@@ -216,9 +216,13 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
 @stop
 
 @section('pagescripts')
+<script>
+  const lang = '{{ $l }}';
+</script>
+
 <!-- Page JS -->
+<script src="/vuexy/assets/js/edit-profile.js"></script>
 <script src="/vuexy/assets/js/forms-selects.js"></script>
-{{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
 
 <script>
   $(document).ready(function() {
@@ -382,16 +386,14 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
 @endrole
 
 <script>
-  const lang = '{{ $l }}';
-
   // Initialize the phone input
 const phoneInput = document.getElementById("phone");
 const whatsappInput = document.getElementById("whatsapp");
 const phoneError = document.getElementById('phone-error');
 const whatsappError = document.getElementById('whatsapp-error');
 
-const countryCodeFromDB = "+{{ $client->country_code ? $client->country_code : '' }}".trim();
-const countryCodeWAFromDB = "+{{ $client->country_code_w_a ? $client->country_code_w_a : '' }}".trim();
+const countryCodeFromDB = "+{{ $client->country_code ? $client->country_code : '' }}";
+const countryCodeWAFromDB = "+{{ $client->country_code_w_a ? $client->country_code_w_a : '' }}";
 
 // Get country code from dial code
 function getCountryCode(code) {
@@ -469,14 +471,7 @@ whatsappInput.addEventListener("countrychange", () => {
 });
 
 // Send code
-function sendCode(type) {
-  console.log('type', type);
-    // if (type === 'phone' && !iti.isValidNumber()) {
-    //   phoneError.style.display = 'block';
-    //   phoneError.innerText = '{{ __('auth.Invalid_Phone_Number') }}';
-    //   return;
-    // }
-    
+function sendCode(type) {    
     if (type === 'whatsapp' && !whatsappIti.isValidNumber()) {
       whatsappError.style.display = 'block';
       whatsappError.innerText = '{{ __('auth.Invalid_WhatsApp_Number') }}';
@@ -524,42 +519,6 @@ function sendCode(type) {
         $('#error').show();
       }
     });
-}
-
-// Verify code of phone
-function verifyCode() {
-  var code = $('#OTP').val();
-  
-  $.ajax({
-    url: '{{ route('verify.code') }}',
-    type: 'POST',
-    data: {
-      code: code,
-      _token: '{{ csrf_token() }}'
-    },
-    success: function(response) {
-      console.log(response);
-      if (response.success && response.success !== "") {
-        // عرض رسالة النجاح
-        $('#sentMessageotp').text(response.success).show();
-        $('#errorotp').hide(); // إخفاء رسالة الخطأ إذا ظهرت مسبقًا
-        location.reload();
-    } else if (response.error && response.error !== "") {
-        // عرض رسالة الخطأ
-        $('#errorotp').text(response.error).show();
-        $('#sentMessageotp').hide(); // إخفاء رسالة النجاح إذا ظهرت مسبقًا
-    } else {
-        console.warn("رد غير متوقع من السيرفر: ", response);
-    }
-
-      
-        
-    },
-    error: function(xhr, status, error) {
-      $('#errorotp').text('حدث خطأ أثناء التحقق من الرمز: ' + error);
-      $('#errorotp').show();
-    }
-  });
 }
 
 // Verify code of WhatsApp

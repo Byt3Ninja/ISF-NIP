@@ -1193,5 +1193,5 @@ return [
 	'Logo_Social' => 'Logo & Social',
 	'About_Problem' => 'About Problem',
 	'program_not_found' => 'Program not found',
-
+	'Reset' => 'Reset',
 ];
