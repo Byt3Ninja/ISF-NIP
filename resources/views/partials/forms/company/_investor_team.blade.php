@@ -128,7 +128,7 @@
 
           <!-- Edit Investor Modal -->
           <div class="modal fade" id="EditTeams{{ $Investor->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+            <div class="modal-dialog modal-md modal-simple modal-edit-user">
               <div class="modal-content">
                 <form id="edit-investor-form" class="modal-body">
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
