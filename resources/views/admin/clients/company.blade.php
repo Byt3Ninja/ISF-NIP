@@ -79,12 +79,11 @@
           @foreach ($tabs as $key => $tab)
             <li class="nav-item d-flex justify-content-center align-items-center">
               <a 
-                {{-- id="company-tab" --}}
+                id="mobile-company-tab"
                 href="#navs-left-{{ $tab['target'] }}"
-                class="nav-link {{ $key == 0 ? 'active' : '' }}"
+                class="nav-link"
                 data-bs-toggle="tab" 
                 role="tab"
-                {{-- onclick="handleTabClick({{ $key }});" --}}
               >
                 <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                 {{ $tab['label'] }}
@@ -109,7 +108,6 @@
                   class="nav-link py-3"
                   data-bs-toggle="tab"
                   role="tab"
-                  {{-- onclick="handleTabClick({{ $key }});" --}}
                 >
                   <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                   {{ $tab['label'] }}
@@ -126,7 +124,7 @@
           style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
         >
           @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade "
+            <div class="tab-pane fade"
               id="navs-left-{{ $tab['target'] }}">
               @switch($tab['target'])
                 @case('company-info')
@@ -216,8 +214,24 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const tabs = document.querySelectorAll('#company-tab');
+      const mobileTabs = document.querySelectorAll('#mobile-company-tab');
       const tabsContent = document.querySelectorAll('#company-tab-content .tab-pane');
       const activeCompanyTab = localStorage.getItem('activeCompanyTab');
+
+      mobileTabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
+        });
+
+        if (!activeCompanyTab) {
+          mobileTabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('active');
+        }
+      });
 
       tabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
@@ -236,7 +250,7 @@
 
       tabsContent.forEach((tab, index) => {
         if (!activeCompanyTab) {
-          tabsContent[0].classList.add('fade', 'show', 'active');
+          tabsContent[0].classList.add('show', 'active');
           return;
         }
 
@@ -246,27 +260,7 @@
       });
     });
   </script>
-
-  {{-- <script>
-    const handleTabClick = (tab) => {
-      localStorage.setItem('activeCompanyTab', JSON.stringify(tab));
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const activeIndex = localStorage.getItem('activeCompanyTab');
-      if (activeIndex) {
-        const tabIndex = JSON.parse(activeIndex);
-        console.log('activeTab', tabIndex);
-        const companyTabs = document.querySelectorAll('#company-tab'); // Changed selector to class
-        companyTabs.forEach((tab, index) => {
-          if (index === tabIndex) {
-            tab.click();
-          }
-        });
-      }
-    });
-  </script> --}}
-
+  
   <script>
     $(document).ready(function() {
       $('.roundBtn').click(function() {
