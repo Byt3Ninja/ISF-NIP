@@ -1,7 +1,7 @@
 @php
 $passwordRules = [
   $l == 'en' ? 'Should be between 8 and 20 characters' : 'يجب أن تكون بين 8 و 20 حرفًا',
-  $l == 'en' ? 'At least one lowercase character' : 'على الأقل حرف صغير واحد',
+  $l == 'en' ? 'At least one uppercase character' : 'على الأقل حرف كبير واحد',
   $l == 'en' ? 'At least one number or symbol' : 'على الأقل رقم أو رمز',
 ];
 @endphp

@@ -71,6 +71,8 @@
   $totalMentorrating = app(\App\MentorshipRequest::class)->where('cycle_id', '=', $cycle->id)->whereNotNull('rating')->avg('rating');
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
+  $answerspinding = 0;
+  $answers = 0;
 foreach ($steps as  $step) {
   $TotalStepsIds = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->count();
   $totalStepsIdsCount += $TotalStepsIds;

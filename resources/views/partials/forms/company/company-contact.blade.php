@@ -238,6 +238,7 @@
         <div class="d-grid">
           <div class="d-grid gap-2">
             <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
+              <input type="hidden" name="country_code" id="country_code" value="{{ $client->company->country_code ? $client->company->country_code : old('country_code') }}">
               <input 
                 class="form-control phone-input" id="phone"
                 name="phone" type="tel"
@@ -255,6 +256,7 @@
           <div class="d-grid gap-2">
             <label class="form-label fs-6 fw-bold"
               for="WhatsApp">{{ __('admin.WhatsApp') }}</label>
+                <input type="hidden" name="country_code_w_a" id="country_code_w_a" value="{{ $client->company->country_code_w_a ? $client->company->country_code_w_a : old('country_code_w_a') }}">
                 <input class="form-control phone-input" id="WhatsApp"
                   name="WhatsApp" type="tel"
                   value="{{ $client->company ? $client->company->whatsapp : old('WhatsApp') }}"
@@ -318,6 +320,87 @@
   });
   
   document.addEventListener('DOMContentLoaded', function () {
+    const phoneInput = document.querySelector('#phone');
+    const whatsappInput = document.querySelector('#WhatsApp');
+    const phoneError = document.getElementById('phone-error');
+    const whatsappError = document.getElementById('whatsapp-error');
+    const countryCodeFromDB = "{{ $client->company ? $client->company->country_code : '' }}";
+    const countryCodeWAFromDB = "{{ $client->company ? $client->company->country_code_w_a : '' }}";
+
+    function getCountryShortcut(code) {
+      let dialCode = code.toString().trim();
+      const countryData = intlTelInputGlobals.getCountryData();
+      const country = countryData.find(country => `+${country.dialCode}` === dialCode);
+
+      if (country) {
+        console.log("Country Code Found: " + country.iso2);
+        return country.iso2;
+      }
+      return "eg";
+    }
+
+    // Initialize intl-tel-input
+    const iti = intlTelInput(phoneInput, {
+      initialCountry: getCountryShortcut(countryCodeFromDB),
+      preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      formatOnDisplay: false,
+      separateDialCode: true,
+      autoPlaceholder: "aggressive",
+      customPlaceholder: (placeholder) => "e.g. " + placeholder,
+    });
+
+    const whatsappIti = intlTelInput(whatsappInput, {
+      initialCountry: getCountryShortcut(countryCodeWAFromDB),
+      preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      separateDialCode: true,
+      formatOnDisplay: false,
+      autoPlaceholder: "aggressive",
+      customPlaceholder: (placeholder) => "e.g. " + placeholder,
+    });
+
+    // Reset phone input value on select another country code
+    phoneInput.addEventListener("countrychange", () => {
+      phoneInput.value = '';
+    });
+
+    // Access the phone number with code
+    phoneInput.addEventListener('input', function() {
+      const fullPhoneNumber = iti.getNumber();
+      const countryCode = iti.getSelectedCountryData().dialCode;
+      const countryCodeInput = document.getElementById('country_code');
+      console.log('countryCodeInput', countryCodeInput)
+      countryCodeInput.value = countryCode;
+
+      if (!iti.isValidNumber() && fullPhoneNumber.length !== 0) {
+        phoneError.style.display = 'block';
+        phoneError.innerText = '{{ __('auth.Invalid_Phone_Number') }}';
+      } else {
+        phoneError.style.display = 'none';
+      }
+    });
+
+    // Access the WhatsApp number with code
+    whatsappInput.addEventListener('input', function() {
+      const fullPhoneNumber = whatsappIti.getNumber();
+      const countryCode = whatsappIti.getSelectedCountryData().dialCode;
+      const countryCodeInput = document.getElementById('country_code_w_a');
+      countryCodeInput.value = countryCode;
+
+      if (!whatsappIti.isValidNumber() && fullPhoneNumber.length !== 0) {
+        whatsappError.style.display = 'block';
+        whatsappError.innerText = '{{ __('auth.Invalid_WhatsApp_Number') }}';
+      } else {
+        whatsappError.style.display = 'none';
+      }
+    });
+
+    // Reset WhatsApp input value on select another country code
+    whatsappInput.addEventListener("countrychange", () => {
+      whatsappInput.value = '';
+    });
+
     const form = document.querySelector('#contact-form');
     const inputs = form.querySelectorAll('#contact-form input[type="url"]');
     const emailInput = form.querySelector('#email');
