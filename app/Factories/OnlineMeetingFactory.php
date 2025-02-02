@@ -10,7 +10,12 @@ class OnlineMeetingFactory
     public static function create(): OnlineMeetingServiceInterface
     {
         $Setting = \App\Settings::where('id', 1)->first();
-        $service = $Setting->Meeting;
+        if($Setting->Meeting == null){
+            $service = 'Zoom';
+        }else{
+            $service = $Setting->Meeting;
+        }
+        
 
         switch ($service) {
             case 'Zoom':
