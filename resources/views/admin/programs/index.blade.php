@@ -49,6 +49,12 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         @endif
+        @if (session()->has('message2'))
+          <div class="alert alert-danger alert-dismissible" role="alert">
+            {{ __('admin.' . session()->get('message2')) }} {{ Session::forget('message2') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        @endif
        
     @if ($errors->any())
        <div class="alert alert-danger alert-dismissible" role="alert">
