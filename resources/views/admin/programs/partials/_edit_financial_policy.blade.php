@@ -12,7 +12,7 @@
       />
       <input type="hidden" name="type" id="type">
       <input type="hidden" name="cycleid" id="cycleid">
-      <input type="hidden" name="organization_id" value="{{ $cycle ? $cycle->organization_id : '' }}">
+      <input type="hidden" name="organization_id" value="@if(isset($cycle)) {{ optional($cycle)->organization_id }} @else 0 @endif">
     </div>
   </div>
   <div class="col-4 mb-4">

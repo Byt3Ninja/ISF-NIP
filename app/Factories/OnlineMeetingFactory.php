@@ -15,7 +15,7 @@ class OnlineMeetingFactory
         }else{
             $service = $Setting->Meeting;
         }
-        
+
 
         switch ($service) {
             case 'Zoom':

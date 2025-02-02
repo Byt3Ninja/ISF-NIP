@@ -123,7 +123,7 @@ class CyclesController extends Controller
 
             /// Edit Cycle
             $request->validate([
-                'organization_id' => 'required|exists:organizations,id',
+                'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date|before:end',
@@ -375,7 +375,7 @@ class CyclesController extends Controller
 
 
             $request->validate([
-                'organization_id' => 'required|exists:organizations,id',
+                'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:2000',
                 'start' => 'required|date|before:end',
