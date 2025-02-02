@@ -60,51 +60,22 @@
         </div>
         <div class="mb-4 col-md-6">
           <label for="last_name_en" class="form-label fs-6 fw-bold">{{ __('admin.Last Name') }}</label>
-          <input
-            value="{{ $client->last_name_en }}"
-            name="last_name_en"
-            type="text"
-            class="form-control"
-            id="last_name_en"
-            {{-- style="direction: ltr;" --}}
-            placeholder="{{ __('admin.Last Name') }}"
-            required
-            autocomplete="last_name_en"
-            oninput="this.value = this.value.trimStart()"
-          />
+          <input value="{{ $client->last_name_en }}" name="last_name_en" type="text" class="form-control"
+            id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required
+            autocomplete="last_name_en" max="255" min="2" />
         </div>
         {{-- <div class="mb-4 col-md-6">
-          <label for="first_name_ar" class="form-label fs-6 fw-bold">{{ __('admin.Arabic First Name') }}</label>
-          <input
-            value="{{ $client->first_name_ar }}"
-            name="first_name_ar"
-            type="text"
-            class="form-control"
-            id="first_name_ar"
-            style="direction: rtl;"
-            placeholder="{{ __('admin.First Name') }}"
-            required
-            autocomplete="first_name_ar"
-            max="255"
-            min="2"
-            autofocus
-          />
+          <label for="first_name_ar" class="form-label fs-6 fw-bold">{{ __('admin.Arabic First Name')
+            }}</label> <input value="{{ $client->first_name_ar }}" name="first_name_ar" type="text" class="form-control"
+            id="first_name_ar" style="direction: rtl;" placeholder="{{ __('admin.First Name') }}" required
+            autocomplete="first_name_ar" max="255" min="2" autofocus />
         </div> --}}
         {{-- <div class="mb-4 col-md-6">
-          <label for="last_name_ar" class="form-label fs-6 fw-bold">{{ __('admin.Arabic Last Name') }}</label>
-          <input
-            value="{{ $client->last_name_ar }}"
-            name="last_name_ar"
-            type="text"
-            class="form-control"
-            id="last_name_ar"
-            style="direction: rtl;"
-            placeholder="{{ __('admin.Last Name') }}"
-            required
-            autocomplete="last_name_ar"
-            max="255"
-            min="2"
-          />
+          <label for="last_name_ar" class="form-label fs-6 fw-bold">{{ __('admin.Arabic Last Name')
+            }}</label>
+          <input value="{{ $client->last_name_ar }}" name="last_name_ar" type="text" class="form-control"
+            id="last_name_ar" style="direction: rtl;" placeholder="{{ __('admin.Last Name') }}" required
+            autocomplete="last_name_ar" max="255" min="2" />
         </div> --}}
         <div class="mb-4 col-md-6">
           <label for="email" class="form-label fs-6 fw-bold">{{ __('admin.E-mail') }}</label>
