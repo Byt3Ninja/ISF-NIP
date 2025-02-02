@@ -35,7 +35,7 @@ return [
 	'Invalid_Phone_Number' => 'Invalid Phone Number',
 	'Invalid_WhatsApp_Number' => 'Invalid WhatsApp Number',
 	'Verify_Number_With_Code' => 'Verify Number',
-	'Enter_Code_Sent' => 'Enter the code sent to your phone number',
+	'Enter_Code_Sent' => 'Enter the code sent to your whatsapp number',
 	'Verify_Code' => 'Verify Code',
 	'Enter_Code' => 'Enter Code',
 	'Cancel' => 'Cancel',

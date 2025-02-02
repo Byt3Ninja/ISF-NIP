@@ -975,6 +975,7 @@
 
       <!-- My Mentors -->
       @if (Auth::user()->company->approved ?? null && count($mentors))
+      
         <div class="card mt-10">
           <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">

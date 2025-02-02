@@ -447,8 +447,7 @@ class ClientCompanyController extends Controller
 
                         // إنشاء رابط الصورة
                         $img_url = Storage::disk('public_uploads')->url($img_path);
-                
-                    }else{
+                    } else {
                         $img_url = $user->company->logo;
                     }
 
@@ -555,29 +554,28 @@ class ClientCompanyController extends Controller
                 if ($data['CompanyN'] == 4) {
 
                     $request->validate([
-                        'Currency' => 'required',
-                        'pre_money_valuation' => 'required|numeric|min:0',
-                        'raised_fund' => 'required|numeric|min:0',
-                        'Funding_Target' => 'required|numeric|min:0',
-                        'stage' => 'required',
-                        'development_stage' => 'required',
-                        'targeted_market.*' => 'required',
-                        'business_type' => 'required',
+                        'Currency' => 'nullable',
+                        'pre_money_valuation' => 'nullable|numeric|min:0',
+                        'raised_fund' => 'nullable|numeric|min:0',
+                        'Funding_Target' => 'nullable|numeric|min:0',
+                        'stage' => 'nullable',
+                        'development_stage' => 'nullable',
+                        'targeted_market.*' => 'nullable',
+                        'business_type' => 'nullable',
                     ], [
-                        'Currency.required' => __('admin.Currency is required'),
 
-                        'pre_money_valuation.required' => __('admin.Pre-money valuation is required'),
                         'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
                         'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
-                        'raised_fund.required' => __('admin.Raised fund is required'),
                         'raised_fund.numeric' => __('admin.Raised fund must be a number'),
                         'raised_fund.min' => __('admin.Raised fund must be a positive number'),
-                        'stage.required' => __('admin.Stage is required'),
-                        'development_stage.required' => __('admin.development_stage is required'),
-                        'targeted_market.*.required' => __('admin.Targeted market is required'),
-                        'business_type.required' => __('admin.Business type is required'),
                     ]);
 
+                    if($data['Funding_Target'] == null) {
+                        $data['Funding_Target'] = 0;
+                    }
+                    if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
+                        $data['targeted_market'] = ['null'];
+                    }
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
 
@@ -695,7 +693,7 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 8) {
 
-                    
+
                     $validator = Validator::make($request->all(), [
                         'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                         'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -717,7 +715,7 @@ class ClientCompanyController extends Controller
                         'instagram.url' => __('admin.instagram_url_Not_URL'),
                         'tiktok.url' => __('admin.tiktok_url_Not_URL'),
                     ]);
-                    
+
                     // في الميثود التي تعالج الطلب
                     if ($request->hasFile('img_url')) {
                         // الحصول على الصورة
@@ -727,14 +725,13 @@ class ClientCompanyController extends Controller
 
                         // إنشاء رابط الصورة
                         $img_url = Storage::disk('public_uploads')->url($img_path);
-                
-                    }else{
+                    } else {
                         $img_url = $user->company->logo;
                     }
-                    
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
-                       
+
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'website' => $data['website'],
@@ -747,7 +744,7 @@ class ClientCompanyController extends Controller
                             'instagram' => $data['instagram'],
                             'tiktok' => $data['tiktok'],
                         ]);
-                        
+
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
@@ -1166,29 +1163,29 @@ class ClientCompanyController extends Controller
                 if ($data['CompanyN'] == 4) {
 
                     $request->validate([
-                        'Currency' => 'required',
-                        'pre_money_valuation' => 'required|numeric|min:0',
-                        'raised_fund' => 'required|numeric|min:0',
-                        'Funding_Target' => 'required|numeric|min:0',
-                        'stage' => 'required',
-                        'development_stage' => 'required',
-                        'targeted_market.*' => 'required',
-                        'business_type' => 'required',
+                        'Currency' => 'nullable',
+                        'pre_money_valuation' => 'nullable|numeric|min:0',
+                        'raised_fund' => 'nullable|numeric|min:0',
+                        'Funding_Target' => 'nullable|numeric|min:0',
+                        'stage' => 'nullable',
+                        'development_stage' => 'nullable',
+                        'targeted_market.*' => 'nullable',
+                        'business_type' => 'nullable',
                     ], [
-                        'Currency.required' => __('admin.Currency is required'),
+                        
 
-                        'pre_money_valuation.required' => __('admin.Pre-money valuation is required'),
                         'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
                         'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
-                        'raised_fund.required' => __('admin.Raised fund is required'),
                         'raised_fund.numeric' => __('admin.Raised fund must be a number'),
                         'raised_fund.min' => __('admin.Raised fund must be a positive number'),
-                        'stage.required' => __('admin.Stage is required'),
-                        'development_stage.required' => __('admin.development_stage is required'),
-                        'targeted_market.*.required' => __('admin.Targeted market is required'),
-                        'business_type.required' => __('admin.Business type is required'),
                     ]);
 
+                    if($data['Funding_Target'] == null) {
+                        $data['Funding_Target'] = 0;
+                    }
+                    if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
+                        $data['targeted_market'] = ['null'];
+                    }
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
 

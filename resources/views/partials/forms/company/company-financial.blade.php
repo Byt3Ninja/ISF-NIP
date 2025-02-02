@@ -233,7 +233,7 @@
             class="form-label">{{ __('admin.financial_plan_description') }}*</label>
           <div class="position-relative">
               <textarea class="form-control border-light light-shadow px-10"
-              id="financial_plan_description" placeholder="{{ __('admin.financial_plan_description') }}*" name="financial_plan_description" required autocomplete="financial_plan_description">{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}</textarea>
+              id="financial_plan_description" placeholder="{{ __('admin.financial_plan_description') }}*" name="financial_plan_description" autocomplete="financial_plan_description">{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}</textarea>
             <i class="ti ti-chart-bar fs-5 position-absolute top-50 translate-middle-y me-3 text-primary"
               style="left: 7px;"></i>
           </div>

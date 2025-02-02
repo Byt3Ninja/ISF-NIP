@@ -455,7 +455,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     });
 
     /* Start of Gemini SWOT Analysis Routes */
-    Route::get('/swot-analysis', [GeminiController::class, 'generateSwotAnalysis'])->name('swot.generate');
+    Route::get('/swot-analysis', [GeminiController::class, 'showSwotAnalysis'])->name('swot.view');
+    Route::post('/swot-analysis/generate', [GeminiController::class, 'generateSwotAnalysis'])->name('swot.generate');
     Route::post('/swot-analysis/save', [GeminiController::class, 'saveSwotAnalysis'])->name('swot.save');
     Route::get('/swot-analysis/export', [GeminiController::class, 'exportToPdf'])->name('swot.export');
     /* End of Gemini SWOT Analysis Routes */
