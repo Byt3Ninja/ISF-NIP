@@ -447,8 +447,7 @@ class ClientCompanyController extends Controller
 
                         // إنشاء رابط الصورة
                         $img_url = Storage::disk('public_uploads')->url($img_path);
-                
-                    }else{
+                    } else {
                         $img_url = $user->company->logo;
                     }
 
@@ -695,7 +694,7 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 8) {
 
-                    
+
                     $validator = Validator::make($request->all(), [
                         'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                         'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -717,7 +716,7 @@ class ClientCompanyController extends Controller
                         'instagram.url' => __('admin.instagram_url_Not_URL'),
                         'tiktok.url' => __('admin.tiktok_url_Not_URL'),
                     ]);
-                    
+
                     // في الميثود التي تعالج الطلب
                     if ($request->hasFile('img_url')) {
                         // الحصول على الصورة
@@ -727,14 +726,13 @@ class ClientCompanyController extends Controller
 
                         // إنشاء رابط الصورة
                         $img_url = Storage::disk('public_uploads')->url($img_path);
-                
-                    }else{
+                    } else {
                         $img_url = $user->company->logo;
                     }
-                    
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
-                       
+
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
                             'website' => $data['website'],
@@ -747,7 +745,7 @@ class ClientCompanyController extends Controller
                             'instagram' => $data['instagram'],
                             'tiktok' => $data['tiktok'],
                         ]);
-                        
+
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
