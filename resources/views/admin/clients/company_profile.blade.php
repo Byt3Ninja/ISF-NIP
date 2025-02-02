@@ -76,7 +76,7 @@
               <div class="d-flex align-items-center" style="gap: 1rem;">
                 <div class="border d-flex radius-15 d-flex flex-shrink-0" style="width: 90px; height: 90px;">
                   
-                  <img src="{{ asset('storage/' .$company->logo) }}" class="img-fluid m-auto" alt="logo"
+                  <img src="{{ asset( $company->logo) }}" class="img-fluid m-auto" alt="logo"
                     style="width: 90px; height: 90px; border-radius: 15px;" />
                 </div>
                 <div class="d-flex flex-column pt-3">
