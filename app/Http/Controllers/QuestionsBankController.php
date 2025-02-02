@@ -116,7 +116,7 @@ class QuestionsBankController extends Controller
 			$category_id = null;
 
 			$question = new QuestionsBank;
-			$question->organization_id = json_encode($request->organization_id, JSON_NUMERIC_CHECK);
+			$question->organization_id = json_encode($request->organization_id);
 			$question->group = $request->question_group;
 			if ($request->question_group == 'quiz') {
 				$type = $request->type;
@@ -270,7 +270,7 @@ class QuestionsBankController extends Controller
 				} else {
 					$surveyType = $request->survey_type;
 				}
-				$question->organization_id = json_encode($request->organization_id, JSON_NUMERIC_CHECK);
+				$question->organization_id = json_encode($request->organization_id);
 				$question->category_id = $request->category_id;
 				$question->group = $request->question_group;
 				$question->question = $request->question;

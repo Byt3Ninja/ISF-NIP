@@ -98,32 +98,36 @@
 											<div class="col-12">
 												<fieldset class="form-group">
 													@php
-    												if (is_array($question->organization_id)) {
-        												$selectedOrganizations = $question->organization_id;
-   													 } elseif (is_numeric($question->organization_id)) {
-        													$selectedOrganizations = [$question->organization_id];
-   													 } else {
-        													$selectedOrganizations = json_decode($question->organization_id, true) ?? [];
-    													}
-													@endphp
-														 <div class="row">
-															@foreach ($organizations as $organization)
-																<div class="col-md-4">
-																	<div class="form-check">
-																		<input type="checkbox" 
-																			   class="form-check-input" 
-																			   name="organization_id[]" 
-																			   id="organization_id_{{ $organization->id }}" 
-																			   value="{{ $organization->id }}" 
-																			   {{ in_array($organization->id, $selectedOrganizations) ? 'checked' : '' }}>
-																			   
-																		<label class="form-check-label" for="organization_id_{{ $organization->id }}">
-																			{{ $organization->{'name_' . $l} }}
-																		</label>
-																	</div>
-																</div>
-															@endforeach
-														</div>		
+													// Normalize organization_id to an array
+													if (is_array($question->organization_id)) {
+														$selectedOrganizations = $question->organization_id;
+													} elseif (is_numeric($question->organization_id)) {
+														// Handle old integer value
+														$selectedOrganizations = [(int) $question->organization_id];
+													} else {
+														$decoded = json_decode($question->organization_id, true);
+														$selectedOrganizations = is_array($decoded) ? $decoded : [];
+													}
+												@endphp
+											
+												<div class="row">
+													@foreach ($organizations as $organization)
+														<div class="col-md-4">
+															<div class="form-check">
+																<input type="checkbox" 
+																	   class="form-check-input" 
+																	   name="organization_id[]" 
+																	   id="organization_id_{{ $organization->id }}" 
+																	   value="{{ $organization->id }}" 
+																	   {{ (in_array($organization->id, $selectedOrganizations) || (is_numeric($question->organization_id) && $organization->id == $question->organization_id)) ? 'checked' : '' }}>
+											
+																<label class="form-check-label" for="organization_id_{{ $organization->id }}">
+																	{{ $organization->{'name_' . $l} }}
+																</label>
+															</div>
+														</div>
+													@endforeach
+												</div>
 											
 												</fieldset>
 											</div>

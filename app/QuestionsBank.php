@@ -35,7 +35,6 @@ class QuestionsBank extends Model
 	];
 
 	protected $casts = [
-		'organization_id' => 'array',
 		'category_id' => 'integer',
 		'group' => 'string',
 		'question' => 'string',
