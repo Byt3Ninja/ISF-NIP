@@ -78,16 +78,16 @@ class GeminiController extends Controller
         ### Instructions:
         Generate a SWOT analysis with strengths, weaknesses, opportunities, and threats. Provide actionable recommendations for each category to guide the startup's strategic planning.
         **Strengths:**  
-        - [List the internal advantages the startup has, such as unique technology, skilled team, or market differentiation.]
+        - List the internal advantages the startup has, such as unique technology, skilled team, or market differentiation.
 
         **Weaknesses:**  
-        - [List internal limitations, such as funding constraints, operational gaps, or skills shortages.]
+        - List internal limitations, such as funding constraints, operational gaps, or skills shortages.
 
         **Opportunities:**  
-        - [List external opportunities, such as growing markets, emerging trends, or unmet customer needs.]
+        - List external opportunities, such as growing markets, emerging trends, or unmet customer needs.
 
         **Threats:**  
-        - [List external risks, such as competition, regulatory challenges, or economic changes.]
+        - List external risks, such as competition, regulatory challenges, or economic changes.
 
         ### Output Format:
         ```json
@@ -108,6 +108,10 @@ class GeminiController extends Controller
     ";
 
         $apiKey = env("GEMINI_API_KEY");
+
+        if (!$apiKey) {
+            return response()->json(['error' => 'API key not Configured']);
+        }
 
         $data = [
             'contents' => [
@@ -155,21 +159,36 @@ class GeminiController extends Controller
 
     public function saveSwotAnalysis(Request $request)
     {
-        $companyId = $request->company_id;
+        $validated = $request->validate([
+            'company_id' => 'required|exists:companies,id',
+            'strength' => 'nullable|string',
+            'weakness' => 'nullable|string',
+            'opportunity' => 'nullable|string',
+            'threat' => 'nullable|string',
+            'srecommendation' => 'nullable|string',
+            'wrecommendation' => 'nullable|string',
+            'orecommendation' => 'nullable|string',
+            'trecommendation' => 'nullable|string',
+        ]);
+
+        $companyId = $validated['company_id'];
 
         $swotAnalysis = SwotAnalysis::firstOrNew(['company_id' => $companyId]);
 
-        $swotAnalysis->strength = $request->strength;
-        $swotAnalysis->weakness = $request->weakness;
-        $swotAnalysis->opportunity = $request->opportunity;
-        $swotAnalysis->threat = $request->threat;
-        $swotAnalysis->srecommendation = $request->srecommendation;
-        $swotAnalysis->wrecommendation = $request->wrecommendation;
-        $swotAnalysis->orecommendation = $request->orecommendation;
-        $swotAnalysis->trecommendation = $request->trecommendation;
+        $swotAnalysis->strength = $validated['strength'];
+        $swotAnalysis->weakness = $validated['weakness'];
+        $swotAnalysis->opportunity = $validated['opportunity'];
+        $swotAnalysis->threat = $validated['threat'];
+        $swotAnalysis->srecommendation = $validated['srecommendation'];
+        $swotAnalysis->wrecommendation = $validated['wrecommendation'];
+        $swotAnalysis->orecommendation = $validated['orecommendation'];
+        $swotAnalysis->trecommendation = $validated['trecommendation'];
         $swotAnalysis->save();
 
-        return redirect()->back()->with('success', __('admin.stored'));
+        return response()->json([
+            'success' => true,
+            'message' => __('admin.stored')
+        ]);
     }
 
     public function exportToPdf()

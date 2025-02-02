@@ -8,16 +8,19 @@
 @section('content')
 
 <div class="container">
-   
-    
+
     @if (session('success'))
         <div class="alert alert-success mt-3">{{ session('success') }}</div>
     @endif
 
-
+    <div id="error-message" class="alert alert-danger d-none mt-3"></div>
 
     <!-- Generate SWOT Analysis --> 
     <button id="generate-swot" class="btn btn-warning mt-4">{{__('admin.generate')}}</button>
+
+     <!-- Export to PDF -->
+     <a href="{{ route('swot.export') }}" class="btn btn-success mt-3">{{__('admin.export')}}</a>
+
     <form action="{{ route('swot.save') }}" method="POST">
         @csrf
 
@@ -71,45 +74,49 @@
 
 @section('pagescripts')
 <script>
-    document.getElementById('generate-swot').addEventListener('click', function () {
-        fetch("{{ route('swot.generate') }}", {
-            method: "GET",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                "Content-Type": "application/json"
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                Swal.fire({
-                    title: "Error!",
-                    text: data.error + "\n" + data.missing_fields.join(", "),
-                    icon: "error",
-                    confirmButtonText: "OK"
-                });
-            } else {
-                Swal.fire({
-                    title: "Success!",
-                    text: "SWOT Analysis Generated Successfully.",
-                    icon: "success",
-                    confirmButtonText: "OK"
-                }).then(() => {
-                    location.reload();
-                });
-            }
-        })
-        .catch(error => {
-            console.error("Error generating SWOT:", error);
+document.getElementById('generate-swot').addEventListener('click', function () {
+    fetch("{{ route('swot.generate') }}", {
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
             Swal.fire({
                 title: "Error!",
-                text: "Something went wrong while generating the SWOT Analysis.",
+                text: data.error + (data.missing_fields ? "\n" + data.missing_fields.join(", ") : ""),
                 icon: "error",
                 confirmButtonText: "OK"
             });
-        });
+        } else {
+           
+            Swal.fire({
+                title: "Success!",
+                text: "SWOT Analysis Generated Successfully.",
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then(() => {
+                location.reload();
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error generating SWOT:", error);
+        
+        let errorMessageDiv = document.createElement('div');
+        errorMessageDiv.className = 'alert alert-danger mt-3';
+        errorMessageDiv.innerHTML = "Something went wrong while generating the SWOT Analysis.";
+
+        // Append error message to the container
+        document.querySelector('.container').prepend(errorMessageDiv);
     });
+});
+
 </script>
+
  
 @endsection
 
