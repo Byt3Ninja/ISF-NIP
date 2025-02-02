@@ -976,7 +976,7 @@
       <!-- My Mentors -->
       @if (Auth::user()->company->approved ?? null && count($mentors))
         <div class="card mt-10">
-          {{-- <div class="card-header border-bottom">
+          <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">
               <i class="ti ti-school ti-24px"></i>
               <span class="mx-2">{{ __('dashboard.Mentors') }}
@@ -992,7 +992,7 @@
                 @endif
               </span>
             </h5>
-          </div> --}}
+          </div>
 
           <section>
 			<div class="row">
