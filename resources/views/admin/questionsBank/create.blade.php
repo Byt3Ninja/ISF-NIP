@@ -110,9 +110,7 @@
 																<input type="checkbox" 
 																	   class="form-check-input" 
 																	   name="organization_id[]" 
-																	   id="org_{{ $organization->id }}" 
-																	   value="{{ $organization->id }}" 
-																	   {{ !empty(old('organization_id')) && in_array($organization->id, (array)old('organization_id')) ? 'checked' : '' }}>
+																	   id="organization_id">
 																
 																<label class="form-check-label" for="org_{{ $organization->id }}">
 																	{{ $organization->{'name_' . $l} }}

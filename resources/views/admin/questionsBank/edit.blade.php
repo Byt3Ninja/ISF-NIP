@@ -97,12 +97,34 @@
 										<div class="row">
 											<div class="col-12">
 												<fieldset class="form-group">
-													<label class="fs-6 form-label mb-2 fw-bold" for="organization_id">{{ __('admin.Organization')}}</label>
-													<select class="select2 form-select" name="organization_id" id="organization_id" required>
-														@foreach( $organizations as $organization )
-															<option value="{{ $organization->id }}" {{ $question->organization_id == $organization->id ? 'selected' : '' }}>{{ $organization->{'name_' . $l} }}</option>
-														@endforeach
-													</select>
+													@php
+    												if (is_array($question->organization_id)) {
+        												$selectedOrganizations = $question->organization_id;
+   													 } elseif (is_numeric($question->organization_id)) {
+        													$selectedOrganizations = [$question->organization_id];
+   													 } else {
+        													$selectedOrganizations = json_decode($question->organization_id, true) ?? [];
+    													}
+													@endphp
+														 <div class="row">
+															@foreach ($organizations as $organization)
+																<div class="col-md-4">
+																	<div class="form-check">
+																		<input type="checkbox" 
+																			   class="form-check-input" 
+																			   name="organization_id[]" 
+																			   id="organization_id_{{ $organization->id }}" 
+																			   value="{{ $organization->id }}" 
+																			   {{ in_array($organization->id, $selectedOrganizations) ? 'checked' : '' }}>
+																			   
+																		<label class="form-check-label" for="organization_id_{{ $organization->id }}">
+																			{{ $organization->{'name_' . $l} }}
+																		</label>
+																	</div>
+																</div>
+															@endforeach
+														</div>		
+											
 												</fieldset>
 											</div>
 											<div class="col-12">
