@@ -72,6 +72,7 @@
   $totalStepsIdsCount = 0;
   $totalDurationSum = 0;
   $answerspinding = [];
+  $answerspinding = 0;
   $answers=0;
 foreach ($steps as  $step) {
   $TotalStepsIds = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->count();
