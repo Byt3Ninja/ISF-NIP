@@ -146,8 +146,8 @@ class ClientProfileController extends Controller
     {           
         
         try{
-            $first_name_ar = substr($request->first_name_ar, 0, 250);
-            $last_name_ar = substr($request->last_name_ar, 0, 250);
+            $first_name_ar = substr($request->first_name_en, 0, 250);
+            $last_name_ar = substr($request->last_name_en, 0, 250);
             
             $user = Auth::user();
 

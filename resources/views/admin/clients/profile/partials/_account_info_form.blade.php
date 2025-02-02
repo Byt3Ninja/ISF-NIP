@@ -192,8 +192,8 @@
         <div class="mb-4 col-md-6">
           <label for="HaveCompany" class="form-label fs-6 fw-bold">{{ __('auth.DoYouHaveCompany') }}</label>
           <select name="HaveCompany" id="HaveCompany" class="select2 form-select">
-            <option value="1" {{ $client->HaveCompany ? 'selected' : '' }}>{{ __('Yes') }}</option>
-            <option value="" {{ $client->HaveCompany ? '' : 'selected' }}>{{ __('No') }}</option>
+            <option value="1" {{ $client->HaveCompany == 1 ? 'selected' : '' }}>{{ __('Yes') }}</option>
+            <option value="0" {{ $client->HaveCompany == 0 ? 'selected' : '' }}>{{ __('No') }}</option>
           </select>
         </div>
         <div class="mb-4 col-md-6">
