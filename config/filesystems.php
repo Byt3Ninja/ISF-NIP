@@ -56,6 +56,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'pitch_dick' => [
+            'driver' => 'local',
+            'root'   => public_path('pitch_dicks'),
+            'url' => env('APP_URL') . '/pitch_dicks',
+            'visibility' => 'public',
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
