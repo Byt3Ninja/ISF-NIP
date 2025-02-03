@@ -777,10 +777,10 @@ class ClientCompanyController extends Controller
                     
                         // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
                         $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_dick'
+                            'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck = 'pitch_dick/'. $path . $originalName;
+                        $pitch_deck = 'pitch_deck/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                     }
@@ -817,10 +817,10 @@ class ClientCompanyController extends Controller
                     
                         // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
                         $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_dick'
+                            'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck_video = 'pitch_dick/'. $path . $originalName;
+                        $pitch_deck_video = 'pitch_deck/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
                     }
@@ -871,10 +871,10 @@ class ClientCompanyController extends Controller
                     
                                 // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
                                 $file->storeAs($path, $originalName, [
-                                    'disk' => 'pitch_dick'
+                                    'disk' => 'pitch_deck'
                                 ]);
                     
-                                $uploadedFiles[] = 'pitch_dick/' . $path . $originalName;
+                                $uploadedFiles[] = 'pitch_deck/' . $path . $originalName;
                             }
                         }
                     }else{
@@ -1427,10 +1427,10 @@ class ClientCompanyController extends Controller
                     
                         // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
                         $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_dick'
+                            'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck = 'pitch_dick/'. $path . $originalName;
+                        $pitch_deck = 'pitch_deck/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                     }
@@ -1466,10 +1466,10 @@ class ClientCompanyController extends Controller
                     
                         // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
                         $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_dick'
+                            'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck_video = 'pitch_dick/'. $path . $originalName;
+                        $pitch_deck_video = 'pitch_deck/'. $path . $originalName;
                     }else{
                         
                         return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
@@ -1519,10 +1519,10 @@ class ClientCompanyController extends Controller
                     
                                 // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
                                 $file->storeAs($path, $originalName, [
-                                    'disk' => 'pitch_dick'
+                                    'disk' => 'pitch_deck'
                                 ]);
                     
-                                $uploadedFiles[] = 'pitch_dick/' . $path . $originalName;
+                                $uploadedFiles[] = 'pitch_deck/' . $path . $originalName;
                             }
                         }
                     }else{
@@ -2184,7 +2184,7 @@ class ClientCompanyController extends Controller
         $company->save();
 
         // حذف الملف من التخزين
-        Storage::disk('pitch_dick')->delete($document);
+        Storage::disk('pitch_deck')->delete($document);
         
         return response()->json(['success' => true]);
     }
