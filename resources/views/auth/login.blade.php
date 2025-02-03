@@ -98,7 +98,11 @@
 <body>
   <!-- Content -->
   @php
-    $formHeading = $l == 'ar' ? 'مرحبًا بعودتك' : 'Welcome to GrowthLabs';
+
+    $setting = App\Settings::first();
+    $platformName = $setting ? $setting->Platform_Name : '';
+
+    $formHeading = $l == 'ar' ? 'مرحبًا بعودتك إلى ' . $platformName : 'Welcome to ' . $platformName;
     $formSubHeading =
     $l == 'ar'
     ? 'الرجاء تسجيل الدخول إلى حسابك وابدأ المغامرة'
