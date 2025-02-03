@@ -256,7 +256,7 @@
           <div class="d-grid gap-2">
             <label class="form-label fs-6 fw-bold"
               for="WhatsApp">{{ __('admin.WhatsApp') }}</label>
-                <input type="hidden" name="country_code_w_a" id="country_code_w_a" value="{{ $client->company->country_code_w_a ? $client->company->country_code_w_a : old('country_code_w_a') }}">
+                <input type="hidden" name="country_code_w_a" id="country_code_w_a" value="{{ $client->company ? ( $client->company->country_code_w_a ? $client->company->country_code_w_a : old('country_code_w_a') ) : old('country_code_w_a') }}">
                 <input class="form-control phone-input" id="WhatsApp"
                   name="WhatsApp" type="tel"
                   value="{{ $client->company ? $client->company->whatsapp : old('WhatsApp') }}"
