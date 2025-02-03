@@ -772,20 +772,20 @@ class ClientCompanyController extends Controller
                     if ($request->hasFile('pitch_deck')) {
                         $file = $request->file('pitch_deck');
                         $path = $file->store('pitch_decks', 'public'); // تخزين الملف في مجلد storage/app/public/pitch_decks
-                        $company->pitch_deck = 'storage/' . $path;
+                        $pitch_deck = 'storage/' . $path;
                     }
 
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
-                            'pitch_deck' => $data['pitch_deck'],
+                            'pitch_deck' => $pitch_deck,
                         ]);
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
-                            'pitch_deck' => $data['pitch_deck'],
+                            'pitch_deck' => $pitch_deck,
                         ]);
                         $msgtype = 'NewComp';
                     }
@@ -796,19 +796,26 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 10) {
                     $validator = Validator::make($request->all(), [
-                        'pitch_deck_video' => 'nullable|url',
+                        'pitch_deck_video' => 'nullable|mimetypes:video/mp4,video/avi,video/mpeg|max:20480', // يجب أن يكون ملف PDF او PPT وحجمه لا يتجاوز 20MB
                     ]);
+
+                    if ($request->hasFile('pitch_deck_video')) {
+                        $file = $request->file('pitch_deck_video');
+                        $path = $file->store('pitch_decks', 'public'); // تخزين الملف في مجلد storage/app/public/pitch_decks
+                        $pitch_deck_video = 'storage/' . $path;
+                    }
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
-                            'pitch_deck_video' => $data['pitch_deck_video'],
+                            'pitch_deck_video' => $pitch_deck_video,
                         ]);
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
-                            'pitch_deck_video' => $data['pitch_deck_video'],
+                            'pitch_deck_video' => $pitch_deck_video,
                         ]);
                         $msgtype = 'NewComp';
                     }
@@ -825,19 +832,37 @@ class ClientCompanyController extends Controller
                     //     'documents.*.max' => __('admin.Documents max size is 20MB'),
                     // ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
+
+                    if ($request->hasFile('documents')) {
+                        $files = $request->file('documents'); 
+                        $uploadedFiles = []; 
+                    
+                        foreach ($files as $file) {
+                            $folder = match (true) {
+                                $file->isValid() && str_starts_with($file->getMimeType(), 'image/') => 'images',
+                                $file->isValid() && str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                                $file->isValid() && in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                                default => 'others',
+                            };
+                    
+                            $path = $file->store('pitch_decks/' . $folder, 'public');
+                            $uploadedFiles[] = 'storage/' . $path; 
+                        }
+                    }
+
                     if ($companyId) {
 
                         // dd($data['documents']);
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
-                            'documents' =>  $data['documents'],
+                            'documents' =>  json_encode($uploadedFiles),
                         ]);
 
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
-                            'documents' => $data['documents'],
+                            'documents' => json_encode($uploadedFiles),
                         ]);
                         $msgtype = 'NewComp';
                     }
