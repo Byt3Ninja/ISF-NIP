@@ -238,7 +238,7 @@
         <div class="d-grid">
           <div class="d-grid gap-2">
             <label class="form-label fs-6 fw-bold" for="phone">{{ __('auth.Phone') }}</label>
-              <input type="hidden" name="country_code" id="country_code" value="{{ $client->company->country_code ? $client->company->country_code : old('country_code') }}">
+              <input type="hidden" name="country_code" id="country_code" value="{{ optional($client->company)->country_code ? optional($client->company)->country_code : old('country_code') }}">
               <input 
                 class="form-control phone-input" id="phone"
                 name="phone" type="tel"
