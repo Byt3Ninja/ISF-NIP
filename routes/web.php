@@ -209,6 +209,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('/AddCompanyMileStone/{id?}', 'ClientCompanyController@AddMileStone')->name('AddMileStone_Comp');
     Route::post('/EditCompanyMileStone/{id?}', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
     Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
+    Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('delete.document');
+
     //like a service
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');
     //Users  Manager routes
