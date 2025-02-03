@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('questions_bank', function (Blueprint $table) {
-            $table->string('organization_id')->nullable()->change();
+            $table->string('organization_id', 255)->nullable()->after('category_id');
         });
     }
 
@@ -21,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('questions_bank', function (Blueprint $table) {
+            //
+        });
     }
 };

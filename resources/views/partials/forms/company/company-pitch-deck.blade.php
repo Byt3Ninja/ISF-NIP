@@ -15,11 +15,12 @@
         <div class="p-3">
           <h5 class="card-title">{{ __('admin.Pitch_Deck') }}</h5>
           <div class="card-body text-center">
+            
             <div
               class="d-flex h-100 flex-column justify-content-between align-items-center">
               @if($client->company)
               @if ($client->company->pitch_deck != null)
-                <iframe src="{{ url($client->company->pitch_deck) }}"
+                <iframe src="{{ asset($client->company->pitch_deck) }}"
                   target="_blank" width="100%" height="250px"
                   style="border: none;">
                   <p>Your browser does not support iframes.</p>
@@ -30,15 +31,11 @@
                   style="width: 350px; height: 250px;" />
               @endif
               {{-- <img id="deck-image" src="/images/deck.svg" class="radius-15 img-fluid" style="width: 350px; height: 350px;" /> --}}
+
               <div class="mt-auto d-flex flex-column">
-                <input id="file"
-                  class="form-control border-light light-shadow px-8 d-none"
-                  type="text" name="pitch_deck">
-                <span class="text-muted mt-2">To get analysis for your pitch
-                  deck please</span>
-                <a href="#" data-input="file" data-preview="holderfile"
-                  class="lfm text-primary fw-medium text-decoration-underline mt-1">{{ __('admin.Click_here') }}</a>
-                <span id="file-name" class="mt-1"></span>
+                <input 
+                  class="form-control border-light light-shadow px-8"
+                  type="file" name="pitch_deck" accept="application/pdf">
               </div>
 
             </div>
@@ -80,7 +77,7 @@
               @if($client->company)
               @if ($client->company->pitch_deck_video != null)
                 <video width="100%" controls>
-                  <source src="{{ $client->company->pitch_deck_video }}"
+                  <source src="{{ asset($client->company->pitch_deck_video) }}"
                     type="video/mp4">
                   Your browser does not support the video tag.
                 </video>
@@ -92,14 +89,9 @@
 
               <div class="mt-auto d-flex flex-column justify-content-between">
                 <input id="video"
-                  class="form-control border-light light-shadow px-8 d-none"
-                  type="text" name="pitch_deck_video">
-                <span class="text-muted mt-2">To get analysis for your pitch
-                  deck please upload your pitch deck video</span>
-                <a data-input="video" data-preview="holdervideo"
-                  href="javascript:void(0)"
-                  class="lfm text-primary fw-medium text-decoration-underline mt-1">{{ __('admin.Click_here') }}</a>
-                <span id="video-name" class="mt-1"></span>
+                  class="form-control border-light light-shadow px-8"
+                  type="file" name="pitch_deck_video" accept="video/*">
+               
               </div>
             </div>
             <div class=" mt-6">
@@ -138,17 +130,23 @@
             @if($client->company)
             @php
 
-              // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-              $documents = explode(',', $client->company->documents);
-              // استخراج اسم كل ملف من الروابط
-              $fileNames = array_map(function ($url) {
+if($client->company->documents){
+  // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+  $documents = json_decode($client->company->documents, true);
+  // استخراج اسم كل ملف من الروابط
+  $fileNames = array_map(function ($url) {
                   return basename($url); // استخراج اسم الملف من الرابط
               }, $documents);
+}else{
+  $documents = [];
+}
+              
+              
 
             @endphp
             @foreach ($documents as $index => $document)
               @if (is_string($document) && !empty($document))
-                <div class="card shadow-sm" style="border-radius: 15px;">
+                <div class="card shadow-sm file-card" style="border-radius: 15px;" data-index="{{ $index }}" data-file="{{ $document }}">
                   <div class="card-body">
                     <div
                       class="d-flex justify-content-between align-items-center">
@@ -157,9 +155,14 @@
                         <span>{{ $fileNames[$index] }}</span>
                       </div>
                       <a class="btn btn-transparent"
-                        href="{{ $document }}" target="_blank" download>
+                        href="{{ asset($document) }}" target="_blank" download="{{ $fileNames[$index] }}">
                         <i class="ti ti-download fs-3 text-primary"></i>
                       </a>
+
+                      <span class="btn btn-transparent text-danger delete-file" data-index="{{ $index }}" data-file="{{ $document }}">
+                        <i class="ti ti-trash fs-3"></i>
+                    </span>
+
                     </div>
                   </div>
                 </div>
@@ -170,14 +173,8 @@
 
 
               <input id="document"
-                class="form-control border-light light-shadow px-8 d-none"
-                type="text" name="documents">
-              <a data-input="document" data-preview="holderdocument"
-                href="#"
-                class="lfm btn btn-outline-primary text-black fw-bold rounded-pill">
-                <i
-                  class="ti ti-plus me-3"></i>{{ __('admin.Add new document') }}
-              </a>
+                class="form-control border-light light-shadow px-8"
+                type="file" multiple name="documents[]" >
             </div>
 
             <div class="">
@@ -201,10 +198,10 @@
     @if(Auth::user()->hasanyRole('Admin|organizationManager'))
     <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
-@else
-<form method="post" action="{{ route('update_my_company') }}"
-  enctype="multipart/form-data">
-@endif
+    @else
+    <form method="post" action="{{ route('update_my_company') }}"
+      enctype="multipart/form-data">
+    @endif
       {!! csrf_field() !!}
       <input type="hidden" value="6" name="CompanyN">
       <div class="card shadow-sm" style="border-radius: 15px;">
@@ -324,4 +321,33 @@
       reader.readAsDataURL(input.files[0]);
     }
   }
+
+  $(document).on('click', '.delete-file', function () {
+        var fileIndex = $(this).data('index');  // رقم الفهرس
+        var filePath = $(this).data('file');    // مسار الملف
+        var cardElement = $(this).closest('.file-card'); // العنصر الذي يحتوي على الملف
+
+        if (confirm('هل أنت متأكد من حذف هذا الملف؟')) {
+            $.ajax({
+                url: '{{ route("delete.document") }}',  // تأكد من أن هذا هو المسار الصحيح
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    index: fileIndex,
+                    file: filePath
+                },
+                success: function (response) {
+                    if (response.success) {
+                        cardElement.remove(); // حذف العنصر من الواجهة
+                        alert('تم حذف الملف بنجاح.');
+                    } else {
+                        alert('حدث خطأ أثناء الحذف.');
+                    }
+                },
+                error: function () {
+                    alert('تعذر الاتصال بالخادم.');
+                }
+            });
+        }
+    });
 </script>
