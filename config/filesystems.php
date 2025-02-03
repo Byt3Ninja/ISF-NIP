@@ -56,10 +56,10 @@ return [
             'visibility' => 'public',
         ],
 
-        'pitch_dick' => [
+        'pitch_deck' => [
             'driver' => 'local',
-            'root'   => public_path('pitch_dicks'),
-            'url' => env('APP_URL') . '/pitch_dicks',
+            'root'   => public_path('pitch_decks'),
+            'url' => env('APP_URL') . '/pitch_deck',
             'visibility' => 'public',
         ],
 
