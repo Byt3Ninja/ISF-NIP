@@ -30,15 +30,11 @@
                   style="width: 350px; height: 250px;" />
               @endif
               {{-- <img id="deck-image" src="/images/deck.svg" class="radius-15 img-fluid" style="width: 350px; height: 350px;" /> --}}
+
               <div class="mt-auto d-flex flex-column">
-                <input id="file"
-                  class="form-control border-light light-shadow px-8 d-none"
-                  type="text" name="pitch_deck">
-                <span class="text-muted mt-2">To get analysis for your pitch
-                  deck please</span>
-                <a href="#" data-input="file" data-preview="holderfile"
-                  class="lfm text-primary fw-medium text-decoration-underline mt-1">{{ __('admin.Click_here') }}</a>
-                <span id="file-name" class="mt-1"></span>
+                <input 
+                  class="form-control border-light light-shadow px-8"
+                  type="file" name="pitch_deck" accept="application/pdf">
               </div>
 
             </div>
@@ -92,14 +88,9 @@
 
               <div class="mt-auto d-flex flex-column justify-content-between">
                 <input id="video"
-                  class="form-control border-light light-shadow px-8 d-none"
-                  type="text" name="pitch_deck_video">
-                <span class="text-muted mt-2">To get analysis for your pitch
-                  deck please upload your pitch deck video</span>
-                <a data-input="video" data-preview="holdervideo"
-                  href="javascript:void(0)"
-                  class="lfm text-primary fw-medium text-decoration-underline mt-1">{{ __('admin.Click_here') }}</a>
-                <span id="video-name" class="mt-1"></span>
+                  class="form-control border-light light-shadow px-8"
+                  type="file" name="pitch_deck_video" accept="video/*">
+               
               </div>
             </div>
             <div class=" mt-6">
@@ -170,14 +161,8 @@
 
 
               <input id="document"
-                class="form-control border-light light-shadow px-8 d-none"
-                type="text" name="documents">
-              <a data-input="document" data-preview="holderdocument"
-                href="#"
-                class="lfm btn btn-outline-primary text-black fw-bold rounded-pill">
-                <i
-                  class="ti ti-plus me-3"></i>{{ __('admin.Add new document') }}
-              </a>
+                class="form-control border-light light-shadow px-8"
+                type="file" multiple name="documents[]" >
             </div>
 
             <div class="">
