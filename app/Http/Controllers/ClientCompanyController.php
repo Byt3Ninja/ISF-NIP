@@ -781,6 +781,8 @@ class ClientCompanyController extends Controller
                         ]);
                     
                         $pitch_deck = 'pitch_dick/'. $path . $originalName;
+                    }else{
+                        return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                     }
 
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
@@ -819,6 +821,8 @@ class ClientCompanyController extends Controller
                         ]);
                     
                         $pitch_deck_video = 'pitch_dick/'. $path . $originalName;
+                    }else{
+                        return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
                     }
 
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
@@ -873,6 +877,8 @@ class ClientCompanyController extends Controller
                                 $uploadedFiles[] = 'pitch_dick/' . $path . $originalName;
                             }
                         }
+                    }else{
+                        return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                     }
 
                     if ($companyId) {
@@ -1413,16 +1419,32 @@ class ClientCompanyController extends Controller
 
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
+
+                    if ($request->hasFile('pitch_deck')) {
+                        $file = $request->file('pitch_deck');
+                        $originalName = $file->getClientOriginalName();
+                        $path = $companyId . '/pitch_decks/';
+                    
+                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'pitch_dick'
+                        ]);
+                    
+                        $pitch_deck = 'pitch_dick/'. $path . $originalName;
+                    }else{
+                        return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
+                    }
+
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
-                            'pitch_deck' => $data['pitch_deck'],
+                            'pitch_deck' => $pitch_deck,
                         ]);
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
-                            'pitch_deck' => $data['pitch_deck'],
+                            'pitch_deck' => $pitch_deck,
                         ]);
                         $msgtype = 'NewComp';
                     }
@@ -1433,19 +1455,35 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 10) {
                     $validator = Validator::make($request->all(), [
-                        'pitch_deck_video' => 'nullable|url',
+                        'pitch_deck_video' => 'nullable|mimes:mp4,ogg,webm|max:10240', // يجب أن يكون ملف MP4, OGG, WEBM وحجمه لا يتجاوز 10MB
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
+
+                    if ($request->hasFile('pitch_deck_video')) {
+                        $file = $request->file('pitch_deck_video');
+                        $originalName = $file->getClientOriginalName();
+                        $path = $companyId . '/pitch_decks/';
+                    
+                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'pitch_dick'
+                        ]);
+                    
+                        $pitch_deck_video = 'pitch_dick/'. $path . $originalName;
+                    }else{
+                        
+                        return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
+                    }
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
-                            'pitch_deck_video' => $data['pitch_deck_video'],
+                            'pitch_deck_video' => $pitch_deck_video,
                         ]);
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
-                            'pitch_deck_video' => $data['pitch_deck_video'],
+                            'pitch_deck_video' => $pitch_deck_video,
                         ]);
                         $msgtype = 'NewComp';
                     }
@@ -1462,19 +1500,48 @@ class ClientCompanyController extends Controller
                     //     'documents.*.max' => __('admin.Documents max size is 20MB'),
                     // ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
+
+                    if ($request->hasFile('documents')) {
+                        $files = $request->file('documents'); 
+                        $uploadedFiles = []; 
+                    
+                        foreach ($files as $file) {
+                            if ($file->isValid()) {
+                                $originalName = $file->getClientOriginalName();
+                                $folder = match (true) {
+                                    str_starts_with($file->getMimeType(), 'image/') => 'images',
+                                    str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                                    in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                                    default => 'others',
+                                };
+                    
+                                $path = $companyId . '/pitch_decks/' . $folder . '/';
+                    
+                                // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
+                                $file->storeAs($path, $originalName, [
+                                    'disk' => 'pitch_dick'
+                                ]);
+                    
+                                $uploadedFiles[] = 'pitch_dick/' . $path . $originalName;
+                            }
+                        }
+                    }else{
+                        return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
+                    }
+
                     if ($companyId) {
 
                         // dd($data['documents']);
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
-                            'documents' =>  $data['documents'],
+                            'documents' =>  json_encode($uploadedFiles),
                         ]);
 
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
-                            'documents' => $data['documents'],
+                            'documents' => json_encode($uploadedFiles),
                         ]);
                         $msgtype = 'NewComp';
                     }

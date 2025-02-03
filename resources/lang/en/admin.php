@@ -1194,4 +1194,6 @@ return [
 	'About_Problem' => 'About Problem',
 	'program_not_found' => 'Program not found',
 	'Reset' => 'Reset',
+	'No_Video_Found' => 'No Video Found',
+	'No_Document_Found' => 'No Document Found',
 ];
