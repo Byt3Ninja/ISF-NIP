@@ -768,6 +768,13 @@ class ClientCompanyController extends Controller
                         'pitch_deck.max' => __('admin.Pitch_Deck max size is 10MB'),
 
                     ]);
+
+                    if ($request->hasFile('pitch_deck')) {
+                        $file = $request->file('pitch_deck');
+                        $path = $file->store('pitch_decks', 'public'); // تخزين الملف في مجلد storage/app/public/pitch_decks
+                        $company->pitch_deck = 'storage/' . $path;
+                    }
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId

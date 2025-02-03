@@ -19,71 +19,11 @@ class CountryStateCitySeeder extends Seeder
         $json = File::get(base_path('database/dbFiles/countries+states+cities.json'));
         $data = json_decode($json);
 
-        $counties[]=array_values(array_filter($data,function ($q){
+        $iso3Codes = ['EGY', 'SAU', 'ARE', 'KWT', 'QAT', 'BHR', 'NGA', 'TCD', 'SDN', 'LBY', 'ZMB', 'TGO', 'NER', 'ZWE', 'MLI', 'TUN'];
 
-            return $q->iso3=='EGY' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='SAU' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='ARE' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='KWT' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='QAT' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='BHR' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='NGA' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='TCD' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='SDN' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='LBY' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='ZMB' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='TGO' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='NER' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='ZWE' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='MLI' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
-        $counties[]=array_values(array_filter($data,function ($q){
-
-            return $q->iso3=='TUN' /*$q->iso3=='EGY'|| $q->iso3=='SAU'|| $q->iso3=='ARE'|| $q->iso3=='KWT'|| $q->iso3=='QAT'|| $q->iso3=='BHR'*/;
-        }));
+        $counties = array_filter($data, function ($q) use ($iso3Codes) {
+            return in_array($q->iso3, $iso3Codes);
+        });
         foreach ($counties as $value) {
             $country =  Country::create(['name_ar' => $value->native, 'name_en' => $value->name, 'iso3' => $value->iso3, 'phone_code' => $value->phone_code]);
             foreach ($value->states as $key) {
