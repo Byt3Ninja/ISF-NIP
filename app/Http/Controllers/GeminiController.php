@@ -185,10 +185,7 @@ class GeminiController extends Controller
         $swotAnalysis->trecommendation = $validated['trecommendation'];
         $swotAnalysis->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => __('admin.stored')
-        ]);
+        return redirect()->back()->with('success', __('admin.Saved'));
     }
 
     public function exportToPdf()
