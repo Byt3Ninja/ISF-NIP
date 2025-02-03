@@ -326,7 +326,7 @@ class QuestionsBankController extends Controller
 			}
 
 
-			return back()->withInput()->with('success', 'StoredSuccessfully');
+			return redirect()->route('questions-bank.index')->with('success', 'StoredSuccessfully');
 		}
 	}
 
