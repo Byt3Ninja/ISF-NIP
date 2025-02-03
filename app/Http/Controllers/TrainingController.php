@@ -144,6 +144,7 @@ class TrainingController extends Controller
     }
     public function store(Request $request)
     {
+        
         $this->preProcessingCheck('edit_cycles');
         if ($request->hasFile('image')) {
             $img_url = $request->file('image');

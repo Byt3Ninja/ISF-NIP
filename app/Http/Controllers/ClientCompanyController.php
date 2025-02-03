@@ -502,21 +502,13 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 3) {
                     $validatedData = $request->validate([
-                        'company_description' => 'required|string|max:500',
+                        'company_description' => 'nullable|string|max:500',
                         'Sustainable_development' => 'nullable|array',
-                        'about_problem' => 'required',
-                        'about_market_opportunity' => 'required',
-                        'about_competitors' => 'required',
-                        'about_monetize' => 'required',
-                        'about_challenges' => 'required',
-                    ], [
-                        'company_description.required' => __('admin.Company description must not exceed'),
-                        'company_description.max' => __('admin.Company description must not exceed 500 characters'),
-                        'about_problem.required' => __('admin.about_problem is required'),
-                        'about_market_opportunity.required' => __('admin.about_market_opportunity is required'),
-                        'about_competitors.required' => __('admin.about_competitors is required'),
-                        'about_monetize.required' => __('admin.about_monetize is required'),
-                        'about_challenges.required' => __('admin.about_challenges is required'),
+                        'about_problem' => 'nullable',
+                        'about_market_opportunity' => 'nullable',
+                        'about_competitors' => 'nullable',
+                        'about_monetize' => 'nullable',
+                        'about_challenges' => 'nullable',
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
@@ -1437,17 +1429,11 @@ class ClientCompanyController extends Controller
                 if ($data['CompanyN'] == 12) {
 
                     $request->validate([
-                        'about_problem' => 'required',
-                        'about_market_opportunity' => 'required',
-                        'about_competitors' => 'required',
-                        'about_monetize' => 'required',
-                        'about_challenges' => 'required',
-                    ], [
-                        'about_problem.required' => __('admin.about_problem is required'),
-                        'about_market_opportunity.required' => __('admin.about_market_opportunity is required'),
-                        'about_competitors.required' => __('admin.about_competitors is required'),
-                        'about_monetize.required' => __('admin.about_monetize is required'),
-                        'about_challenges.required' => __('admin.about_challenges is required'),
+                        'about_problem' => 'nullable',
+                        'about_market_opportunity' => 'nullable',
+                        'about_competitors' => 'nullable',
+                        'about_monetize' => 'nullable',
+                        'about_challenges' => 'nullable',
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
@@ -1481,13 +1467,9 @@ class ClientCompanyController extends Controller
                 if ($data['CompanyN'] == 13) {
 
                     $request->validate([
-                        'business_model' => 'required',
-                        'business_model_description' => 'required',
-                        'business_plan' => 'required',
-                    ], [
-                        'business_model.required' => __('admin.business_model is required'),
-                        'business_model_description.required' => __('admin.business_model_description is required'),
-                        'business_plan.required' => __('admin.business_plan is required'),
+                        'business_model' => 'nullable',
+                        'business_model_description' => 'nullable',
+                        'business_plan' => 'nullable',
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {

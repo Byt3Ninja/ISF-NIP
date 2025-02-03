@@ -319,6 +319,7 @@
                     </div>
                     <div class="form-group mb-3 mt-4">
                       <label class="form-label fs-6">{{ $visibilityStatus }}</label>
+                      <input type="hidden" name="Status" id="Status" value="0">
                       <div 
                         style="height: 45px; width: fit-content; background-color: #F5F3FF; padding: 0 0.5rem;" 
                         class="row align-items-center rounded-pill"
@@ -327,7 +328,7 @@
                           id="statusButton"
                           type="button"
                           style="width: 140px; height: 30px; font-size: 12px;"
-                          class="rounded-pill border-none Val0 text-primary fw-bold mx-1"
+                          class="rounded-pill border-none Val0 text-primary fw-bold mx-1 StatusDraft"
                         >
                           {{ __('cycles.Draft') }}
                         </button>
@@ -335,7 +336,7 @@
                           id="statusButton"
                           type="button"
                           style="width: 140px; height: 30px; font-size: 12px;"
-                          class="rounded-pill border-none Val1 text-primary fw-bold"
+                          class="rounded-pill border-none Val1 text-primary fw-bold StatusPublished"
                         >
                           {{ __('cycles.Published') }}
                         </button>
@@ -368,7 +369,7 @@
                         </div>
                       </div>
                     </div> --}}
-                    <input class="getVal" name="Status" type="hidden" >
+                    {{-- <input class="getVal" name="Status" type="hidden" > --}}
                     <div class="form-group mb-3">
                       <label class="form-label fs-6">{{ __('cycles.Add a description') }}</label>
                       <textarea 
@@ -530,5 +531,16 @@
       $('.datewithouttime').datetimepicker({
         format: 'Y-m-d'
       });
+
+      $('.StatusDraft').click(function() {
+        $('#Status').val(0);
+      });
+
+      $('.StatusPublished').click(function() {
+        $('#Status').val(1);
+      });
+
+
+
   </script>
 @stop
