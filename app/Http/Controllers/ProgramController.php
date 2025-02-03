@@ -78,6 +78,7 @@ class ProgramController extends Controller
     public function show(string $id)
     {
         $cycle = Cycle::where('id', $id)->first();
+        if(empty($cycle)) return redirect()->route('programlist.index')->with(['message2' => 'program_not_found', 'class' => 'danger']);
         $steps = Step::where('cycle_id', $cycle->id)->orderBy('arr', 'ASC')->get();
 
         // $id = $program->pluck('id')[0];

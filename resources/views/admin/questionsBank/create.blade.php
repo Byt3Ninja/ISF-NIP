@@ -103,13 +103,22 @@
 											{!! csrf_field() !!}
 											<fieldset class="form-group mb-4">
 												<label class="fs-6 form-label mb-2" for ="organization_id">{{ __('admin.Organization') }}</label>
-												<select class="form-control form-select select2" name="organization_id" id="organization_id" required>
+												<div class="row">
 													@foreach ($organizations as $organization)
-														<option value="{{ $organization->id }}" {{ !empty(old('organization_id')) && old('organization_id') == $organization->id ? 'selected' : '' }}>
-															{{ $organization->{'name_' . $l} }}
-														</option>
+														<div class="col-md-4">
+															<div class="form-check">
+																<input type="checkbox" 
+																	   class="form-check-input" 
+																	   name="organization_id[]" 
+																	   id="organization_id_{{ $organization->id }}" value="{{ $organization->id }}">
+																
+																<label class="form-check-label" for="organization_id_{{ $organization->id }}">
+																	{{ $organization->{'name_' . $l} }}
+																</label>
+															</div>
+														</div>
 													@endforeach
-												</select>
+												</div>
 											</fieldset>
 											<fieldset class="form-group mb-4">
 												<label class="fs-6 form-label mb-2" for ="question">{{ __('admin.question') }}</label>
@@ -161,7 +170,7 @@
 
 												  <fieldset class="col-lg-6 col-md-6 col-sm-12 assessment-type">
 													<label class="fs-6 form-label mb-2" for ="explanation_QA_ar">{{ __('admin.explanation_QA_ar') }}</label>
-													<textarea class="form-control" id="explanation_QA_ar" name="explanation_QA_ar" rows="2" name="explanation_QA_ar">{{ old('explanation_QA_ar') }}</textarea>
+													<textarea class="form-control" id="explanation_QA_ar" name="explanation_QA_ar" rows="2">{{ old('explanation_QA_ar') }}</textarea>
 												</fieldset>
 
 												<fieldset class="col-lg-6 col-md-6 col-sm-12 assessment-type">
@@ -171,12 +180,12 @@
 
 												<fieldset class="col-lg-6 col-md-6 col-sm-12 assessment-type">
 													<label class="fs-6 form-label mb-2" for ="explanation_AA_ar">{{ __('admin.explanation_AA_ar') }}</label>
-													<textarea class="form-control" id="explanation_AA_ar" name="explanation_AA_ar" rows="2" name="explanation_AA_ar">{{ old('explanation_AA_ar') }}</textarea>
+													<textarea class="form-control" id="explanation_AA_ar" name="explanation_AA_ar" rows="2">{{ old('explanation_AA_ar') }}</textarea>
 												</fieldset>
 
 												<fieldset class="col-lg-6 col-md-6 col-sm-12 assessment-type">
 													<label class="fs-6 form-label mb-2" for ="explanation_AA_en">{{ __('admin.explanation_AA_en') }}</label>
-													<textarea class="form-control" id="explanation_AA_en" name="explanation_AA_en" rows="2" name="explanation_AA_en">{{ old('explanation_AA_en') }}</textarea>
+													<textarea class="form-control" id="explanation_AA_en" name="explanation_AA_en" rows="2" >{{ old('explanation_AA_en') }}</textarea>
 												</fieldset>
 
 												<div class="col-lg-6 col-md-6 col-sm-12">

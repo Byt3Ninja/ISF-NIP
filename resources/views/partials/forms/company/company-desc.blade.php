@@ -191,7 +191,7 @@
               class="form-label mb-1 fw-semibold fs-6">{{ __('admin.about_problem') }}*</label>
             <div class="position-relative">
               <i class="ti ti-alert-circle fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
-              <textarea class="form-control border-light light-shadow px-8" id="about_problem" placeholder="{{ __('admin.about_problem') }}*" name="about_problem" required autocomplete="about_problem" rows="4">{{ $client->company ? $client->company->about_problem : old('about_problem') }}</textarea>
+              <textarea class="form-control border-light light-shadow px-8" id="about_problem" placeholder="{{ __('admin.about_problem') }}*" name="about_problem" autocomplete="about_problem" rows="4">{{ $client->company ? $client->company->about_problem : old('about_problem') }}</textarea>
             </div>
           </div>
 
@@ -200,7 +200,7 @@
               class="form-label mb-1 fw-semibold fs-6">{{ __('admin.about_market_opportunity') }}*</label>
             <div class="position-relative">
               <i class="ti ti-chart-bar fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
-              <textarea class="form-control border-light light-shadow px-8" id="about_market_opportunity" placeholder="{{ __('admin.about_market_opportunity') }}*" name="about_market_opportunity" required autocomplete="about_market_opportunity" rows="4">{{ $client->company ? $client->company->about_market_opportunity : old('about_market_opportunity') }}</textarea>
+              <textarea class="form-control border-light light-shadow px-8" id="about_market_opportunity" placeholder="{{ __('admin.about_market_opportunity') }}*" name="about_market_opportunity" autocomplete="about_market_opportunity" rows="4">{{ $client->company ? $client->company->about_market_opportunity : old('about_market_opportunity') }}</textarea>
             </div>
           </div>
 
@@ -209,7 +209,7 @@
           class="form-label mb-1 fw-semibold fs-6">{{ __('admin.about_competitors') }}*</label>
         <div class="position-relative">
           <i class="ti ti-flag fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
-          <textarea class="form-control border-light light-shadow px-8" id="about_competitors" placeholder="{{ __('admin.about_competitors') }}*" name="about_competitors" required autocomplete="about_competitors" rows="4">{{ $client->company ? $client->company->about_competitors : old('about_competitors') }}</textarea>
+          <textarea class="form-control border-light light-shadow px-8" id="about_competitors" placeholder="{{ __('admin.about_competitors') }}*" name="about_competitors" autocomplete="about_competitors" rows="4">{{ $client->company ? $client->company->about_competitors : old('about_competitors') }}</textarea>
         </div>
       </div>
 
@@ -218,7 +218,7 @@
           *</label>
         <div class="position-relative">
           <i class="ti ti-cash fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
-          <textarea class="form-control border-light light-shadow px-8" id="about_monetize" placeholder="{{ __('admin.about_monetize') }} *" name="about_monetize" required autocomplete="about_monetize" rows="4">{{ $client->company ? $client->company->about_monetize : old('about_monetize') }}</textarea>
+          <textarea class="form-control border-light light-shadow px-8" id="about_monetize" placeholder="{{ __('admin.about_monetize') }} *" name="about_monetize" autocomplete="about_monetize" rows="4">{{ $client->company ? $client->company->about_monetize : old('about_monetize') }}</textarea>
         </div>
       </div>
 
@@ -227,7 +227,7 @@
           *</label>
         <div class="position-relative">
           <i class="ti ti-target fs-5 position-absolute me-3 text-primary" style="{{$l == 'en' ? 'left: 7px;' : 'right: 7px;'}} top: 0.65rem;"></i>
-          <textarea class="form-control border-light light-shadow px-8" id="about_challenges" placeholder="{{ __('admin.about_challenges') }} *" name="about_challenges" required autocomplete="about_challenges" rows="4" style="padding-left: 40px;">{{ $client->company ? $client->company->about_challenges : old('about_challenges') }}</textarea>
+          <textarea class="form-control border-light light-shadow px-8" id="about_challenges" placeholder="{{ __('admin.about_challenges') }} *" name="about_challenges" autocomplete="about_challenges" rows="4" style="padding-left: 40px;">{{ $client->company ? $client->company->about_challenges : old('about_challenges') }}</textarea>
         </div>
       </div>
     </div>

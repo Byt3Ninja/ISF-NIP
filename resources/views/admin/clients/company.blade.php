@@ -79,12 +79,11 @@
           @foreach ($tabs as $key => $tab)
             <li class="nav-item d-flex justify-content-center align-items-center">
               <a 
-                id="company-tab"
+                id="mobile-company-tab"
                 href="#navs-left-{{ $tab['target'] }}"
-                class="nav-link {{ $key == 0 ? 'active' : '' }}"
+                class="nav-link"
                 data-bs-toggle="tab" 
                 role="tab"
-                {{-- onclick="handleTabClick({{ $key }});" --}}
               >
                 <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                 {{ $tab['label'] }}
@@ -106,10 +105,9 @@
                 <a 
                   id="company-tab"
                   href="#navs-left-{{ $tab['target'] }}"
-                  class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
+                  class="nav-link py-3"
                   data-bs-toggle="tab"
                   role="tab"
-                  {{-- onclick="handleTabClick({{ $key }});" --}}
                 >
                   <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                   {{ $tab['label'] }}
@@ -120,11 +118,13 @@
           <!-- / Tabs -->
         </nav>
         <!-- Tab Content On Tab Click -->
-        <div class="tab-content p-0 overflow-y-auto custom-container mb-6" 
+        <div 
+          id="company-tab-content"
+          class="tab-content p-0 overflow-y-auto custom-container mb-6" 
           style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
         >
           @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}"
+            <div class="tab-pane fade"
               id="navs-left-{{ $tab['target'] }}">
               @switch($tab['target'])
                 @case('company-info')
@@ -193,6 +193,9 @@
   <script src="/vuexy/assets/js/forms-selects.js"></script>
   <script src="/vuexy/assets/js/forms-tagify.js"></script>
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
+  <script src="/vuexy/assets/js/founder-form.js"></script>
+  <script src="/vuexy/assets/js/shareholder-form.js"></script>
+  <script src="/vuexy/assets/js/investor-form.js"></script>
 
   <script>
     document.getElementById('img_url').addEventListener('change', function(
@@ -208,26 +211,56 @@
     });
   </script> 
 
-  {{-- <script>
-    const handleTabClick = (tab) => {
-      localStorage.setItem('activeCompanyTab', JSON.stringify(tab));
-    }
-
+  <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const activeIndex = localStorage.getItem('activeCompanyTab');
-      if (activeIndex) {
-        const tabIndex = JSON.parse(activeIndex);
-        console.log('activeTab', tabIndex);
-        const companyTabs = document.querySelectorAll('#company-tab'); // Changed selector to class
-        companyTabs.forEach((tab, index) => {
-          if (index === tabIndex) {
-            tab.click();
-          }
-        });
-      }
-    });
-  </script> --}}
+      const tabs = document.querySelectorAll('#company-tab');
+      const mobileTabs = document.querySelectorAll('#mobile-company-tab');
+      const tabsContent = document.querySelectorAll('#company-tab-content .tab-pane');
+      const activeCompanyTab = localStorage.getItem('activeCompanyTab');
 
+      mobileTabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
+        });
+
+        if (!activeCompanyTab) {
+          mobileTabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('active');
+        }
+      });
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activeCompanyTab', JSON.stringify(index));
+        });
+
+        if (!activeCompanyTab) {
+          tabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('active');
+        }
+      });
+
+      tabsContent.forEach((tab, index) => {
+        if (!activeCompanyTab) {
+          tabsContent[0].classList.add('show', 'active');
+          return;
+        }
+
+        if (index === JSON.parse(activeCompanyTab)) {
+          tab.classList.add('fade', 'show', 'active');
+        }
+      });
+    });
+  </script>
+  
   <script>
     $(document).ready(function() {
       $('.roundBtn').click(function() {
@@ -460,7 +493,7 @@
       });
   });
 </script> --}}
-
+{{-- 
 <script>
   // Initialize the phone input
 const phoneInput = document.getElementById("phone");
@@ -563,7 +596,7 @@ whatsappInput.addEventListener("input", () => {
 });
 
 
-</script>
+</script> --}}
 @stop
 
 

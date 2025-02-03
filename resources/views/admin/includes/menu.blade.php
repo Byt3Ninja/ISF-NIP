@@ -86,6 +86,13 @@
               </span>
             </a>
           </li>
+
+          <li class="{{ Request::is('dashboard/swot-analysis*') ? 'active' : '' }} menu-item">
+            <a href="{{ route('swot.view') }}" class="menu-link">
+              <div>{{ __('admin.swot_analysis') }}</div>
+            </a>
+          </li>
+        
           {{-- @endif --}}
         </ul>
       </li>
@@ -111,6 +118,12 @@
             <span class="menu-item">
               {{ $l == 'en' ? 'Analysis & Assessment' : 'تحليل وتقييم' }}
             </span>
+          </a>
+        </li>
+
+        <li class="{{ Request::is('dashboard/swot-analysis*') ? 'active' : '' }} menu-item">
+          <a href="{{ route('swot.view') }}" class="menu-link">
+            <div>{{ __('admin.swot_analysis') }}</div>
           </a>
         </li>
         {{-- @endif --}}
@@ -267,7 +280,8 @@
         </a>
       </li>
       @endif
-      
+
+    
     @endrole
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
       <a href="/dashboard/myFiles" class="menu-link">
@@ -372,6 +386,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
   <i class="ti ti-circle-dashed-check ti-md me-3"></i>
   <div>{{ __('admin.Assessments') }}</div>
   </a>
+  
 <ul class="menu-sub">
   {{-- <li class="{{ Request::is('dashboard/questions*') ? 'active' : '' }} menu-item">
     <a href="{{ route('questions.index') }}" class="menu-link">
