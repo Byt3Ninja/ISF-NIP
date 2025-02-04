@@ -116,7 +116,7 @@ class QuestionsBankController extends Controller
 			$category_id = null;
 
 			$question = new QuestionsBank;
-			$question->organization_id = json_encode($request->organization_id);
+			$question->organization_id = auth()->user()->organization_id;
 			$question->group = $request->question_group;
 			if ($request->question_group == 'quiz') {
 				$type = $request->type;
@@ -135,6 +135,7 @@ class QuestionsBankController extends Controller
 			$question->difficulty = $request->difficulty;
 			$question->tags = $request->has('tags') && !empty($request->tags) ? explode(',', $request->tags) : [];
 			$question->save();
+			$question->organizations()->attach($request->organization_id);
 		} else {
 
 			$rules = [
@@ -192,6 +193,7 @@ class QuestionsBankController extends Controller
 	public function edit($id)
 	{
 		$question = QuestionsBank::find($id);
+		$selectedOrganizations = $question->organizations->pluck('id')->toArray();
 		$user = auth()->user();
 		$organizations = new Organization;
 		if (isset($user->organization_id) && !empty($user->organization_id)) {
@@ -200,7 +202,7 @@ class QuestionsBankController extends Controller
 		$organizations = $organizations->with(['questionsCategories'])->get();
 		$categories = Category::where('category_type', 'Assesment')->get();
 		$subcategories = SubCategory::where('Type', 'Assesment')->get();
-		return view('admin.questionsBank.edit', compact('organizations', 'question', 'categories', 'subcategories'));
+		return view('admin.questionsBank.edit', compact('organizations', 'question', 'categories', 'subcategories', 'selectedOrganizations'));
 	}
 
 	/**
@@ -270,7 +272,7 @@ class QuestionsBankController extends Controller
 				} else {
 					$surveyType = $request->survey_type;
 				}
-				$question->organization_id = json_encode($request->organization_id);
+				$question->organization_id = auth()->user()->organization_id;
 				$question->category_id = $request->category_id;
 				$question->group = $request->question_group;
 				$question->question = $request->question;
@@ -282,6 +284,7 @@ class QuestionsBankController extends Controller
 				$question->difficulty = $request->difficulty;
 				$question->tags = $request->has('tags') && !empty($request->tags) ? explode(',', $request->tags) : [];
 				$question->save();
+				$question->organizations()->sync($request->organization_id);
 			} else {
 
 				$rules = [
