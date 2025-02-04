@@ -189,7 +189,12 @@
               </a>
             </div>
             <!-- /Logo -->
-            <h4 class="mb-2 text-center lh-base text-capitalize">{!! str_replace('Platform', 'Platform <br/>', $formHeading) !!}</h4>
+            <h4 
+              class="mb-2 text-center lh-base text-capitalize"
+              style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+            >
+              {!! str_replace('Platform', 'Platform <br/>', $formHeading) !!}
+            </h4>
             <p class="mb-6 text-center">{{ $formSubHeading }}</p>
 
             <!-- Auth Errors -->
