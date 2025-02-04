@@ -42,5 +42,7 @@ return [
 	'New on our platform' => 'جديد على منصتنا؟',
 	'Create_new_account' => 'إنشاء حساب جديد',
 	'or' => 'أو',
+	'I agree to' => 'أوافق على',
+	'Privacy policy & terms' => 'سياسة الخصوصية والشروط',
 ];
 

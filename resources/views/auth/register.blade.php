@@ -312,6 +312,17 @@
                     </div>
                   </div>
                 </div>
+                <div class="mb-6 mt-2">
+                  <div class="form-check mb-0 ms-2">
+                    <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
+                    <label class="form-check-label" for="terms-conditions">
+                      {{ __('auth.I agree to') }}
+                      <a href="https://growthlabs.app/terms-and-condition/">
+                        {{ __('auth.Privacy policy & terms') }}
+                      </a>
+                    </label>
+                  </div>
+                </div>
                 <div class="col-12">
                   <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
                 </div>

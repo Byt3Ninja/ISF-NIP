@@ -43,4 +43,6 @@ return [
 	'New on our platform' => 'New on our platform?',
 	'Create_new_account' => 'Create new account',
 	'or' => 'or',
+	'I agree to' => 'I agree to',
+	'Privacy policy & terms' => 'Privacy policy & terms',
 ];
