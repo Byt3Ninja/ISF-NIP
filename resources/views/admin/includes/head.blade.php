@@ -28,6 +28,9 @@
 <!-- Favicon -->
 <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
+<!-- Flag Icons CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">

@@ -87,11 +87,13 @@
             </a>
           </li>
 
+          @if( in_array(env('APP_ENV', 'local'), ['dev', 'local']) )
           <li class="{{ Request::is('dashboard/swot-analysis*') ? 'active' : '' }} menu-item">
             <a href="{{ route('swot.view') }}" class="menu-link">
               <div>{{ __('admin.swot_analysis') }}</div>
             </a>
           </li>
+          @endif
         
           {{-- @endif --}}
         </ul>
@@ -121,11 +123,13 @@
           </a>
         </li>
 
+        @if( in_array(env('APP_ENV', 'local'), ['dev', 'local']) )
         <li class="{{ Request::is('dashboard/swot-analysis*') ? 'active' : '' }} menu-item">
           <a href="{{ route('swot.view') }}" class="menu-link">
             <div>{{ __('admin.swot_analysis') }}</div>
           </a>
         </li>
+        @endif
         {{-- @endif --}}
       </ul>
     </li>

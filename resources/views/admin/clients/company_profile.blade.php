@@ -272,12 +272,14 @@ if($company->team_num == '1'){
             <div class="col-6 col-md-4 mb-4">
               <div class="card shadow-sm" style="background-color: #c4b5fd; border-radius: 15px;">
                 <div class="card-body">
-                  <div class="align-self-center d-flex flex-column text-center">
+                  <div class="align-self-center d-flex flex-column text-center align-items-center">
                     <div class="text-center">
                       <img class="card-icon mb-2" src="/icons/development-stages.svg" alt="icon" />
                     </div>
-                    <span class="text-black fs-5">{{ __('admin.Funding_Stage') }}</span>
-                    <span class="text-primary">{{ $company->development_stage ? __('admin.' . $company->development_stage) : __('admin.N/A') }}</span>
+                    <h5 class="mb-1 fw-semibold">{{ __('admin.Funding_Stage') }}</h5>
+                    <span class="fs-6 badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4" style="width: fit-content;">
+                      {{ $company->development_stage ? __('admin.' . $company->development_stage) : __('admin.N/A') }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -285,12 +287,16 @@ if($company->team_num == '1'){
             <div class="col-6 col-md-4 mb-4">
               <div class="card shadow-sm" style="background-color: #7dd3fc; border-radius: 15px;">
                 <div class="card-body">
-                  <div class="align-self-center d-flex flex-column text-center">
+                  <div class="align-self-center d-flex flex-column text-center align-items-center">
                     <div class="text-center">
                       <img class="card-icon mb-2" src="/icons/headquarter.svg" alt="icon" />
                     </div>
-                    <span class="text-black fs-5">{{ __('admin.Country') }}</span>
-                    <span class="text-primary">{{ optional($company->country)->{'name_' . $l} }}</span>
+                    <h5 class="mb-1 fw-semibold">{{ __('admin.Country') }}</h5>
+                    <span class="fs-6 badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4" style="width: fit-content;">
+                      {{-- <i class="flag-icon flag-icon-eg" style="font-size: 10px;"></i> --}}
+                      {{ optional($company->country)->{'name_' . $l} }}
+                      <i class="ti ti-flag ti-16px"></i>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -298,19 +304,19 @@ if($company->team_num == '1'){
             <div class="col-6 col-md-4 mb-4">
               <div class="card shadow-sm" style="background-color: #fdba74; border-radius: 15px;">
                 <div class="card-body">
-                  <div class="align-self-center d-flex flex-column text-center">
+                  <div class="align-self-center d-flex flex-column text-center align-items-center">
                     <div class="text-center">
                       <img class="card-icon mb-2" src="/icons/coin.svg" alt="icon" />
                     </div>
                     @php
                       $stage = App\Stage::where('id', $company->stage)->first();
                     @endphp
-                    <span class="text-black fs-5">{{ __('admin.development_stage') }}</span>
+                    <h5 class="mb-1 fw-semibold">{{ __('admin.development_stage') }}</h5>
                 
                     @if(!is_numeric($company->stage))
-                    <span class="text-primary">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
+                    <span class="fs-6 badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4" style="width: fit-content;">{{ $company->stage ? __('admin.stage_'.$company->stage) : __('admin.N/A') }}</span>
                     @else
-                    <span class="text-primary">{{ $stage != null ? $stage->{'name_' . $l} : __('admin.N/A') }}</span>
+                    <span class="fs-6 badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4" style="width: fit-content;">{{ $stage != null ? $stage->{'name_' . $l} : __('admin.N/A') }}</span>
                     @endif
                   </div>
                 </div>
@@ -319,11 +325,11 @@ if($company->team_num == '1'){
             <div class="col-6 col-md-4 mb-4">
               <div class="card shadow-sm" style="background-color: #5eead4; border-radius: 15px;">
                 <div class="card-body">
-                  <div class="align-self-center d-flex flex-column text-center">
+                  <div class="align-self-center d-flex flex-column text-center align-items-center">
                     <div class="text-center">
                       <img class="card-icon mb-2" src="/icons/target-market.svg" alt="icon" />
                     </div>
-                    <span class="text-black fs-5">{{ __('admin.Targeted_Market') }}</span>
+                    <h5 class="mb-1 fw-semibold">{{ __('admin.Targeted_Market') }}</h5>
                     <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
                       @php
                         $countryIds = json_decode($company->targeted_market, true);
@@ -334,12 +340,12 @@ if($company->team_num == '1'){
                           $targetedCountries = App\Country::whereIn('id', $countryIds)->get()->keyBy('id');
                         @endphp
                         @foreach ($countryIds as $countryId)
-                          <button class="btn btn-outline-primary btn-xs rounded-pill">
+                          <span class="fs-6 badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4" style="width: fit-content;">
                             {{ $targetedCountries[$countryId]->{'name_' . $l} ?? __('admin.N/A') }}
-                          </button>
+                          </span>
                         @endforeach
                       @else
-                        <p>{{ __('admin.N/A') }}</p>
+                        <span class="fs-6 badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4" style="width: fit-content;">{{ __('admin.N/A') }}</span>
                       @endif
                     </div>
                   </div>
@@ -349,14 +355,14 @@ if($company->team_num == '1'){
             <div class="col-6 col-md-4 mb-4">
               <div class="card shadow-sm" style="background-color: #fca5a5; border-radius: 15px;">
                 <div class="card-body">
-                  <div class="align-self-center d-flex flex-column text-center">
+                  <div class="align-self-center d-flex flex-column text-center align-items-center">
                     <div class="text-center">
                       <img class="card-icon mb-2" src="/icons/business-modal.svg" alt="icon" />
                     </div>
-                    <span class="text-black fs-5">{{ __('admin.Business Type') }}</span>
+                    <h5 class="mb-1 fw-semibold">{{ __('admin.Business Type') }}</h5>
                     <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
-                      <button
-                        class="btn btn-outline-primary btn-xs rounded-pill">{{ $company->business_type ?? __('admin.N/A') }}</button>
+                      <span
+                      class="fs-6 badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4" style="width: fit-content;">{{ $company->business_type ?? __('admin.N/A') }}</span>
                     </div>
                   </div>
                 </div>
@@ -365,17 +371,17 @@ if($company->team_num == '1'){
             <div class="col-6 col-md-4 mb-4">
               <div class="card bg-light">
                 <div class="card-body">
-                  <div class="align-self-center d-flex flex-column text-center">
+                  <div class="align-self-center d-flex flex-column text-center align-items-center">
                     <div class="text-center">
                       <img class="card-icon mb-2" src="/icons/industries.svg" alt="icon" />
                     </div>
-                    <span class="text-black fs-5">{{ __('admin.Sector') }}</span>
+                    <h5 class="mb-1 fw-semibold">{{ __('admin.Sector') }}</h5>
                     <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
                       @php
                         $sector = App\Sector::where('id', $company->sector)->first();
                       @endphp
-                      <button
-                        class="btn btn-outline-primary btn-xs rounded-pill">{{ $sector->name_en ?? __('admin.N/A') }}</button>
+                      <span
+                      class="fs-6 badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4" style="width: fit-content;">{{ $sector->name_en ?? __('admin.N/A') }}</span>
                     </div>
                   </div>
                 </div>
