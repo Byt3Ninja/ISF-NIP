@@ -40,4 +40,7 @@ return [
 	'Enter_Code' => 'Enter Code',
 	'Cancel' => 'Cancel',
 	'Resend_Code' => 'Resend Code',
+	'New on our platform' => 'New on our platform?',
+	'Create_new_account' => 'Create new account',
+	'or' => 'or',
 ];

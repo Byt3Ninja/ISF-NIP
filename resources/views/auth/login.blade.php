@@ -267,14 +267,16 @@
             </form>
 
             <p class="text-center">
-              <span>New on our platform?</span>
+              <span>
+                {{ __('auth.New on our platform') }}
+              </span>
               <a href="{{ route('register') }}">
-                <span>Create an account</span>
+                <span>{{ __('auth.Create_new_account') }}</span>
               </a>
             </p>
 
             <div class="divider my-6 mx-auto" style="width: 80%;">
-              <div class="divider-text">or</div>
+              <div class="divider-text">{{ __('auth.or') }}</div>
             </div>
 
             <div class="d-flex justify-content-center">
