@@ -39,5 +39,10 @@ return [
 	'Enter_Code' => 'أدخل الكود',
 	'Cancel' => 'إلغاء',
 	'Resend_Code' => 'إعادة إرسال الكود',
+	'New on our platform' => 'جديد على منصتنا؟',
+	'Create_new_account' => 'إنشاء حساب جديد',
+	'or' => 'أو',
+	'I agree to' => 'أوافق على',
+	'Privacy policy & terms' => 'سياسة الخصوصية والشروط',
 ];
 

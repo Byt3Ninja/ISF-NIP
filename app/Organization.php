@@ -56,4 +56,9 @@ class Organization extends Model
 	{
 		return $this->hasMany(Cycle::class);
 	}
+
+	public function questions()
+	{
+		return $this->belongsToMany(QuestionsBank::class, 'organization_question_bank', 'organization_id', 'question_id');
+	}
 }
