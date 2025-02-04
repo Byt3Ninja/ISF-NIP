@@ -65,4 +65,9 @@ class QuestionsBank extends Model
 	{
 		return $this->belongsTo(SubCategory::class, 'subcategory_id');
 	}
+
+	public function organizations()
+	{
+		return $this->belongsToMany(Organization::class, 'organization_question_bank', 'question_id', 'organization_id');
+	}
 }
