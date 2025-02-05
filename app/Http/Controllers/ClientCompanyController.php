@@ -590,6 +590,12 @@ class ClientCompanyController extends Controller
                     
                             $uploadedFile = 'financial_plan/' . $path . $originalName;
                         }
+                    }else{
+                        $uploadedFile = $user->company->financial_plan;
+                    }
+                    
+                    if($data['financial_plan_description'] == null) {
+                        $data['financial_plan_description'] = '0';
                     }
 
 
@@ -1292,7 +1298,7 @@ class ClientCompanyController extends Controller
                     if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
                         $data['targeted_market'] = ['null'];
                     }
-
+                    
                     if ($request->hasFile('financial_plan')) {
                         $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
                     
@@ -1314,6 +1320,12 @@ class ClientCompanyController extends Controller
                     
                             $uploadedFile = 'financial_plan/' . $path . $originalName;
                         }
+                    }else{
+                        $uploadedFile = $user->company->financial_plan;
+                    }
+                    
+                    if($data['financial_plan_description'] == null) {
+                        $data['financial_plan_description'] = '0';
                     }
 
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);

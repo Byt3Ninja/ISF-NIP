@@ -63,9 +63,9 @@
                 <textarea 
                   oninput="this.value = this.value.trimStart()"
                   pattern="[A-Za-z\s]*"
+                  maxlength="255"
                   class="form-control" id="working_team_summary" placeholder="{{ __('admin.Working_Team_Details') }}" value="" name="working_team_summary" autocomplete="new-working_team_summary">
-                  {{ $client->company ? $client->company->working_team_summary : old('working_team_summary') }}
-                </textarea>
+                  {{ $client->company ? $client->company->working_team_summary : old('working_team_summary') }}</textarea>
               </div>
             </div>
             <div class="col-12">
