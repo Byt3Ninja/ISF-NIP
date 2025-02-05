@@ -39,7 +39,8 @@ class TaskNotification extends Notification
             ->subject('مرحبًا بك')
             ->markdown('emails.mentor-task', [
                 'data' => $this->data,
-                'notifiable' => $notifiable
+                'notifiable' => $notifiable,
+                'action' => $this->data['action']
             ]);
     }
 

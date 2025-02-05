@@ -159,8 +159,9 @@ class MentorshipTaskController extends Controller
 			$data = [
 				'task' => $task,
 				'message' => $message,
+				'action' => 'add'
 			];
-		
+
 			Notification::send([$mentor, $startup], new TaskNotification($data));
 
 			$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
@@ -265,6 +266,7 @@ class MentorshipTaskController extends Controller
 		$data = [
 			'task' => $task,
 			'message' => $message,
+			'action' => 'move'
 		];
 		Notification::send([$mentor, $startup], new TaskNotification($data));
 
@@ -506,6 +508,7 @@ class MentorshipTaskController extends Controller
 		$data = [
 			'task' => $task,
 			'message' => $message,
+			'action' => 'comment'
 		];
 		Notification::send([$mentor, $startup], new TaskNotification($data));
 
