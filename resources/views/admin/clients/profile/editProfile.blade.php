@@ -13,6 +13,15 @@
 
 @section('style')
 <style>
+  #phone, #whatsapp {
+    width: 100%;
+  }
+
+  @media screen and (min-width: 768px) {
+    #phone, #whatsapp {
+      width: 350px;
+    }
+  }
   .iti__country-list {
     position: absolute;
     left: 1rem;
@@ -175,14 +184,19 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
             </label>
             <div class="d-flex justify-content-between w-100">
               @for ($i = 0; $i < 6; $i++)
-                <input type="text" class="form-control otp-input" maxlength="1" style="width: 2.4rem;" required />
+                <input 
+                  type="text" 
+                  onchange="this.value ? this.classList.remove('is-invalid') : this.classList.add('is-invalid')"
+                  class="form-control otp-input" 
+                  maxlength="1" 
+                  style="width: 2.4rem;" 
+                  required 
+                />
               @endfor
             </div>
-            @error('OTP')
-            <span class="invalid-feedback" role="alert">
-              <strong>{{ $message }}</strong>
-            </span>
-            @enderror
+            <div id="otp-error" class="invalid-feedback">
+              {{ $message ?? '' }}
+            </div>
           </div>
           <div class="mt-4">
             <button type="button" onclick="verifyWhatsappCode()" class="btn btn-primary w-100 tracking-wide">
@@ -484,6 +498,9 @@ function sendCode(type) {
     
     $(type == 'phone' ? '#verifyCodeModal' : '#verifyWhatsappCodeModal').modal('show');
     let number = $('#whatsapp').val();
+
+    console.log('number', number);
+
     let countryCode = whatsappIti.getSelectedCountryData().dialCode;
     if (number.startsWith('0') && countryCode == '20') {
         number = number.substring(1); // Remove the first character (the zero)
@@ -531,6 +548,23 @@ function verifyWhatsappCode() {
   $('.otp-input').each(function() {
     code += $(this).val();
   });
+
+  if (code.length !== 6) {
+    $('#otp-error').text('{{ __('auth.Please_enter_otp') }}').show();
+
+    $('.otp-input').each(function() {
+      $(this).addClass('is-invalid');
+    });
+    
+    return;
+  }
+
+  $('#otp-error').hide();
+  $('.otp-input').each(function() {
+    $(this).removeClass('is-invalid');
+  });
+
+  console.log('code', code)
 
   $.ajax({
     url: '{{ route('verify.code') }}',

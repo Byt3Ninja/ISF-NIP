@@ -47,4 +47,5 @@ return [
 	'Didnt_Receive_Code' => "Didn't receive?",
 	'Enter_Code_Sent' => 'We sent a verification code to your whatsapp number. Enter the code below',
 	'otp_label' => 'Enter you 6 digit security code',
+	'Please_enter_otp' => 'Please enter OTP',
 ];
