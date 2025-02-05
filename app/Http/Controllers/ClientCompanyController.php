@@ -568,6 +568,32 @@ class ClientCompanyController extends Controller
                     if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
                         $data['targeted_market'] = ['null'];
                     }
+
+                    if ($request->hasFile('financial_plan')) {
+                        $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
+                    
+                        if ($file->isValid()) {
+                            $originalName = $file->getClientOriginalName();
+                            $folder = match (true) {
+                                str_starts_with($file->getMimeType(), 'image/') => 'images',
+                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                                default => 'others',
+                            };
+                    
+                            $path = $companyId . '/financial_plan/' . $folder . '/';
+                    
+                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
+                            $file->storeAs($path, $originalName, [
+                                'disk' => 'pitch_deck'
+                            ]);
+                    
+                            $uploadedFile = 'financial_plan/' . $path . $originalName;
+                        }
+                    }
+
+
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
 
@@ -581,7 +607,7 @@ class ClientCompanyController extends Controller
                             'development_stage' => $data['development_stage'],
                             'targeted_market' => json_encode($data['targeted_market']),
                             'business_type' => $data['business_type'],
-                            'financial_plan' => $data['financial_plan'],
+                            'financial_plan' => $uploadedFile,
                             'financial_plan_description' => $data['financial_plan_description'],
                         ]);
 
@@ -598,7 +624,7 @@ class ClientCompanyController extends Controller
                             'development_stage' => $data['development_stage'],
                             'targeted_market' => json_encode($data['targeted_market']),
                             'business_type' => $data['business_type'],
-                            'financial_plan' => $data['financial_plan'],
+                            'financial_plan' => $uploadedFile,
                             'financial_plan_description' => $data['financial_plan_description'],
                         ]);
                         $msgtype = 'NewComp';
@@ -951,12 +977,37 @@ class ClientCompanyController extends Controller
                     $request->validate([
                         'business_model' => 'required',
                         'business_model_description' => 'required|string|max:255',
-                        'business_plan' => 'required',
+                        'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:2048',
                     ], [
                         'business_model.required' => __('admin.business_model is required'),
                         'business_model_description.required' => __('admin.business_model_description is required'),
-                        'business_plan.required' => __('admin.business_plan is required'),
                     ]);
+
+                    if ($request->hasFile('business_plan')) {
+                        $file = $request->file('business_plan'); // التعامل مع ملف واحد فقط
+                    
+                        if ($file->isValid()) {
+                            $originalName = $file->getClientOriginalName();
+                            $folder = match (true) {
+                                str_starts_with($file->getMimeType(), 'image/') => 'images',
+                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                                default => 'others',
+                            };
+                    
+                            $path = $companyId . '/business_plan/' . $folder . '/';
+                    
+                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
+                            $file->storeAs($path, $originalName, [
+                                'disk' => 'pitch_deck'
+                            ]);
+                    
+                            $uploadedFile = 'business_plan/' . $path . $originalName;
+                        }
+                    }
+
+
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
@@ -964,7 +1015,7 @@ class ClientCompanyController extends Controller
                             'business_model' => $data['business_model'],
                             'other_business_model' => $data['other_business_model'],
                             'business_model_description' => $data['business_model_description'],
-                            'business_plan' => $data['business_plan'],
+                            'business_plan' => $uploadedFile,
                         ]);
                         $msgtype = 'UpdateComp';
                     } else {
@@ -973,7 +1024,7 @@ class ClientCompanyController extends Controller
                             'business_model' => $data['business_model'],
                             'other_business_model' => $data['other_business_model'],
                             'business_model_description' => $data['business_model_description'],
-                            'business_plan' => $data['business_plan'],
+                            'business_plan' => $uploadedFile,
                         ]);
                         $msgtype = 'NewComp';
                     }
@@ -1241,6 +1292,30 @@ class ClientCompanyController extends Controller
                     if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
                         $data['targeted_market'] = ['null'];
                     }
+
+                    if ($request->hasFile('financial_plan')) {
+                        $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
+                    
+                        if ($file->isValid()) {
+                            $originalName = $file->getClientOriginalName();
+                            $folder = match (true) {
+                                str_starts_with($file->getMimeType(), 'image/') => 'images',
+                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                                default => 'others',
+                            };
+                    
+                            $path = $companyId . '/financial_plan/' . $folder . '/';
+                    
+                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
+                            $file->storeAs($path, $originalName, [
+                                'disk' => 'pitch_deck'
+                            ]);
+                    
+                            $uploadedFile = 'financial_plan/' . $path . $originalName;
+                        }
+                    }
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
 
@@ -1254,7 +1329,7 @@ class ClientCompanyController extends Controller
                             'development_stage' => $data['development_stage'],
                             'targeted_market' => json_encode($data['targeted_market']),
                             'business_type' => $data['business_type'],
-                            'financial_plan' => $data['financial_plan'],
+                            'financial_plan' => $uploadedFile,
                             'financial_plan_description' => $data['financial_plan_description'],
                         ]);
 
@@ -1271,7 +1346,7 @@ class ClientCompanyController extends Controller
                             'development_stage' => $data['development_stage'],
                             'targeted_market' => json_encode($data['targeted_market']),
                             'business_type' => $data['business_type'],
-                            'financial_plan' => $data['financial_plan'],
+                            'financial_plan' => $uploadedFile,
                             'financial_plan_description' => $data['financial_plan_description'],
                         ]);
                         $msgtype = 'NewComp';
@@ -1595,6 +1670,30 @@ class ClientCompanyController extends Controller
                         'business_model_description' => 'nullable',
                         'business_plan' => 'nullable',
                     ]);
+
+                    if ($request->hasFile('business_plan')) {
+                        $file = $request->file('business_plan'); // التعامل مع ملف واحد فقط
+                    
+                        if ($file->isValid()) {
+                            $originalName = $file->getClientOriginalName();
+                            $folder = match (true) {
+                                str_starts_with($file->getMimeType(), 'image/') => 'images',
+                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                                default => 'others',
+                            };
+                    
+                            $path = $companyId . '/business_plan/' . $folder . '/';
+                    
+                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
+                            $file->storeAs($path, $originalName, [
+                                'disk' => 'pitch_deck'
+                            ]);
+                    
+                            $uploadedFile = 'business_plan/' . $path . $originalName;
+                        }
+                    }
+
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
@@ -1602,7 +1701,7 @@ class ClientCompanyController extends Controller
                             'business_model' => $data['business_model'],
                             'other_business_model' => $data['other_business_model'],
                             'business_model_description' => $data['business_model_description'],
-                            'business_plan' => $data['business_plan'],
+                            'business_plan' => $uploadedFile,
                         ]);
                         $msgtype = 'UpdateComp';
                     } else {
@@ -1611,7 +1710,7 @@ class ClientCompanyController extends Controller
                             'business_model' => $data['business_model'],
                             'other_business_model' => $data['other_business_model'],
                             'business_model_description' => $data['business_model_description'],
-                            'business_plan' => $data['business_plan'],
+                            'business_plan' => $uploadedFile,
                         ]);
                         $msgtype = 'NewComp';
                     }

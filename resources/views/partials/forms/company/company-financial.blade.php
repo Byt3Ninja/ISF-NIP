@@ -203,7 +203,7 @@
                             </div>
                             <a class="btn btn-transparent"
                               href="{{ $client->company->financial_plan }}" target="_blank"
-                              download>
+                              download="{{ basename($client->company->financial_plan) }}">
                               <i class="ti ti-download fs-3 text-primary"></i>
                             </a>
                           </div>
@@ -212,15 +212,10 @@
                     @endif
 
               <div class="mt-3" style="display: grid; place-items: center;">
-                  <input id="financial_plan" readonly
+                  <input id="financial_plan"
                     class="form-control border-light light-shadow px-8 "
-                    type="text" name="financial_plan" value="">
-                  <a data-input="financial_plan" data-preview="financial_plan"
-                    href="#"
-                    class="lfm btn btn-outline-primary text-black fw-bold rounded-pill">
-                    <i
-                      class="ti ti-plus me-3"></i>{{ __('admin.Add new document') }}
-                  </a>
+                    type="file" name="financial_plan" value="">
+                  
                 </div>
           </div>
         </div>
