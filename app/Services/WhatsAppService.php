@@ -44,7 +44,7 @@ class WhatsAppService
     }
 
 
-    public function sendMassage($phoneNumber, $Massage)
+    public function sendMessage($phoneNumber, $Massage)
     {
         try {
             $response = $this->client->post("send", [
