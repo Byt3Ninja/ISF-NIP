@@ -156,7 +156,12 @@ class MentorshipTaskController extends Controller
 			$startup = User::find($task->user_id);
 			// Send Notification To Mentor & Startup
 			$message = "New Task: " . $task->title;
-			Notification::send([$mentor, $startup], new TaskNotification($task, $message));
+			$data = [
+				'task' => $task,
+				'message' => $message,
+			];
+		
+			Notification::send([$mentor, $startup], new TaskNotification($data));
 
 			$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
 			$Massage = "New Task Created ( " . $task->title . " )";
@@ -257,7 +262,11 @@ class MentorshipTaskController extends Controller
 		$startup = User::find($task->user_id);
 
 		$message = "Task Updated: " . $task->title;
-		Notification::send([$mentor, $startup], new TaskNotification($task, $message));
+		$data = [
+			'task' => $task,
+			'message' => $message,
+		];
+		Notification::send([$mentor, $startup], new TaskNotification($data));
 
 		$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
 		$Massage = "Task Updated";
@@ -494,7 +503,11 @@ class MentorshipTaskController extends Controller
 		$startup = User::find($task->user_id);
 
 		$message = "New Comment: " . $task->title;
-		Notification::send([$mentor, $startup], new TaskNotification($task, $message));
+		$data = [
+			'task' => $task,
+			'message' => $message,
+		];
+		Notification::send([$mentor, $startup], new TaskNotification($data));
 
 		$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
 		$Massage = "Comment Added ( " . $comment->comment . " )";

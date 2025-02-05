@@ -11,15 +11,13 @@ class TaskNotification extends Notification
 {
     use Queueable;
 
-    protected $task;
-    protected $message;
+    protected $data;
     /**
      * Create a new notification instance.
      */
-    public function __construct($task, $message)
+    public function __construct($data)
     {
-        $this->task = $task;
-        $this->message = $message;
+        $this->data = $data;
     }
 
     /**
@@ -38,10 +36,11 @@ class TaskNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->greeting('Hello ' . $notifiable->name . ',')
-            ->line($this->message)
-            ->line('Task Title: ' . $this->task->title)
-            ->line('Thank you for being part of our mentorship program!');
+            ->subject('مرحبًا بك')
+            ->markdown('emails.mentor-task', [
+                'data' => $this->data,
+                'notifiable' => $notifiable
+            ]);
     }
 
     /**
@@ -52,9 +51,9 @@ class TaskNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'task_id' => $this->task->id,
-            'title' => $this->task->title,
-            'message' => $this->message,
+            'task_id' => $this->data['task']->id,
+            'title' => $this->data['task']->title,
+            'message' => $this->data['message'],
         ];
     }
 }
