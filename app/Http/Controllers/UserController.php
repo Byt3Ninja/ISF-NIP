@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
+use App\Cycle;
 use App\Company;
 use App\Country;
-use App\Cycle;
+use App\Team_member;
 use Illuminate\Http\Request;
-use \Spatie\Permission\Models\Role as Role;
+use App\Mail\WelcomeJudgerMail;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserPasswordRequest;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Illuminate\Support\Facades\Hash;
-use App\User;
-use Illuminate\Support\Facades\Auth;
+use \Spatie\Permission\Models\Role as Role;
 use DB, Log, Exception, Session, URL, File;
-use App\Team_member;
+use App\Http\Requests\UpdateUserPasswordRequest;
+use App\Notifications\WelcomeJudgerNotification;
 use Illuminate\Support\Facades\Log as FacadesLog;
 
 class UserController extends Controller
@@ -105,12 +107,25 @@ class UserController extends Controller
             Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
 
             $result->assignRole($request->role);
+            $data =[];
+            $name = $result->first_name_en . ' ' . $result->last_name_en;
+            if($request->role == 'Judger'){
+                // إرسال الإيميل الترحيبي
+                $data = [
+                    'name' => $name,
+                    'email' => $result->email,
+                ];
+            
+                // إرسال الإشعار
+                $result->notify(new WelcomeJudgerNotification($data));
+            }
 
             if ($result)
                 return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);
             else
                 return back()->withInput()->with(['msg' => 'FailedStore']);
         } catch (Exception $e) {
+            dd($e);
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
