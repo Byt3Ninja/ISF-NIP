@@ -74,6 +74,7 @@
           </div>
         </div>
         <div class="col-12 text-end mt-3" style="height: 40px;">
+          <input type="hidden" name="TeamsNo" value="Shareholders" />
           <button
             type="submit"
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"

@@ -4,6 +4,27 @@
   }
 </style>
 
+
+@if( session()->has('success') )
+<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <div class="d-flex align-items-center">
+    <i class="ti ti-thumb-up me-3 ti-md"></i>
+    <span> {{ session()->get('success') }} </span>
+  </div>
+</div>
+@endif
+
+@if( session()->has('error') )
+<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="d-flex align-items-center">
+      <i class="ti ti-alert-triangle me-3 ti-md"></i>
+      <span> {{ session()->get('error') }} </span>
+    </div>
+</div>
+@endif
+
 <div class="row TapPageTeam">
   @include('partials.forms.company._founder_team')
   @include('partials.forms.company._shareholder_team')
