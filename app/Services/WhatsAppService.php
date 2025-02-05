@@ -42,4 +42,31 @@ class WhatsAppService
             return false;
         }
     }
+
+
+    public function sendMassage($phoneNumber, $Massage)
+    {
+        try {
+            $response = $this->client->post("send", [
+                'json' => [
+                    'number' => $phoneNumber,
+                    'type' => 'text',
+                    'message' => $Massage,
+                    'instance_id' => $this->instanceId,
+                    'access_token' => $this->accessToken,
+                ]
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (\Exception $e) {
+            Log::error('Failed to send Massage via WhatsApp: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+
+
+
+
 }
