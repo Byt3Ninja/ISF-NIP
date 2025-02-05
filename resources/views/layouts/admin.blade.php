@@ -77,27 +77,45 @@
   <!-- Main Page JS -->
   <!-- End Main JS-->
 
-
   @auth
   @if (env('ENABLE_CHAT', false))
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <script>
         (function(d, t) {
           var BASE_URL = "https://app.chatwoot.com";
+          var websiteToken = '{{ env("CHATWOOT_WEBSITE_TOKEN") }}';
+
+          // Load the Chatwoot SDK
           var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
           g.src = BASE_URL + "/packs/js/sdk.js";
           g.defer = true;
           g.async = true;
           s.parentNode.insertBefore(g, s);
+
           g.onload = function() {
             window.chatwootSDK.run({
-              websiteToken: '{{ env("CHATWOOT_WEBSITE_TOKEN") }}',
+              websiteToken: websiteToken,
               baseUrl: BASE_URL,
             });
-          }
+
+            window.$chatwoot.on("widget:toggle", function() {
+              if (!websiteToken.trim()) {
+                window.$chatwoot.hide();
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Configuration Error',
+                  text: 'You must configure the Chatbot AI Token in the .env file!',
+                  confirmButtonColor: '#d33',
+                  confirmButtonText: 'Got it!'
+                });
+              }
+            });
+          };
         })(document, "script");
       </script>
   @endif
 @endauth
+
 
 
 @if(auth()->user()->hasRole('Registered'))
