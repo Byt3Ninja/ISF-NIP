@@ -34,8 +34,7 @@ return [
 	'Verfied' => 'Verified',
 	'Invalid_Phone_Number' => 'Invalid Phone Number',
 	'Invalid_WhatsApp_Number' => 'Invalid WhatsApp Number',
-	'Verify_Number_With_Code' => 'Verify Number',
-	'Enter_Code_Sent' => 'Enter the code sent to your whatsapp number',
+	'Verify_Number_With_Code' => 'Verify whatsapp number',
 	'Verify_Code' => 'Verify Code',
 	'Enter_Code' => 'Enter Code',
 	'Cancel' => 'Cancel',
@@ -45,4 +44,7 @@ return [
 	'or' => 'or',
 	'I agree to' => 'I agree to',
 	'Privacy policy & terms' => 'Privacy policy & terms',
+	'Didnt_Receive_Code' => "Didn't receive?",
+	'Enter_Code_Sent' => 'We sent a verification code to your whatsapp number. Enter the code below',
+	'otp_label' => 'Enter you 6 digit security code',
 ];

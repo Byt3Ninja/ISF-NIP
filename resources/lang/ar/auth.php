@@ -34,7 +34,6 @@ return [
 	'Invalid_Phone_Number' => 'رقم الهاتف غير صحيح',
 	'Invalid_WhatsApp_Number' => 'رقم الواتساب غير صحيح',
 	'Verify_Number_With_Code' => 'تأكيد الرقم',
-	'Enter_Code_Sent' => 'أدخل الكود المرسل إلى رقم الواتساب',
 	'Verify_Code' => 'تأكيد الكود',
 	'Enter_Code' => 'أدخل الكود',
 	'Cancel' => 'إلغاء',
@@ -44,5 +43,8 @@ return [
 	'or' => 'أو',
 	'I agree to' => 'أوافق على',
 	'Privacy policy & terms' => 'سياسة الخصوصية والشروط',
+	'Didnt_Receive_Code' => 'لم تستلم الكود؟',
+	'Enter_Code_Sent' => 'لقد قمنا بإرسال رمز التحقق إلى رقم الواتساب الخاص بك. أدخل الرمز في الأسفل',
+	'otp_label' => 'أدخل رمز الأمان المكون من 6 أرقام',
 ];
 
