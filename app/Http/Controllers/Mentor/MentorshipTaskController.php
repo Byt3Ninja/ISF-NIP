@@ -2,20 +2,23 @@
 
 namespace App\Http\Controllers\Mentor;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Mentor\MentorshipTask\TaskRequest;
+use App\User;
 use App\Label;
-use App\MentorshipRequest;
+use Carbon\Carbon;
 use App\MentorshipTask;
+use Exception, Log, URL;
+use App\MentorshipRequest;
 use App\MentorshipTaskLog;
 use App\MentorshipTaskFile;
-use App\MentorshipTaskComment;
 use Illuminate\Http\Request;
-use Exception, Log, URL;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
+use App\MentorshipTaskComment;
 use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Notifications\TaskNotification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+use App\Http\Requests\Mentor\MentorshipTask\TaskRequest;
 
 class MentorshipTaskController extends Controller
 {
@@ -23,15 +26,16 @@ class MentorshipTaskController extends Controller
 
 
 	protected $whatsAppService;
-     /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct(WhatsAppService $whatsAppService){
-        $this->middleware('auth');
-        $this->whatsAppService = $whatsAppService;
-    }
+	/**
+	 * Create a new controller instance.
+	 *
+	 * @return void
+	 */
+	public function __construct(WhatsAppService $whatsAppService)
+	{
+		$this->middleware('auth');
+		$this->whatsAppService = $whatsAppService;
+	}
 	/**
 	 * Display a listing of the resource.
 	 */
@@ -148,8 +152,14 @@ class MentorshipTaskController extends Controller
 			$task->reported_by = $user->id;
 			$task->save();
 
+			$mentor = User::find($task->mentor_id);
+			$startup = User::find($task->user_id);
+			// Send Notification To Mentor & Startup
+			$message = "New Task: " . $task->title;
+			Notification::send([$mentor, $startup], new TaskNotification($task, $message));
+
 			$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
-			$Massage = "New Task Created ( " . $task->title ." )";
+			$Massage = "New Task Created ( " . $task->title . " )";
 			$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
 
 
@@ -242,9 +252,16 @@ class MentorshipTaskController extends Controller
 		$log->was = $old;
 		$log->save();
 
+		// Send Notification To Mentor & Startup
+		$mentor = User::find($task->mentor_id);
+		$startup = User::find($task->user_id);
+
+		$message = "Task Updated: " . $task->title;
+		Notification::send([$mentor, $startup], new TaskNotification($task, $message));
+
 		$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
-			$Massage = "Task Updated";
-			$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
+		$Massage = "Task Updated";
+		$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
 
 		$condition = "mentorship_tasks.mentorship_request_id = $task->mentorship_request_id ";
 		$tasks = $this->handleTask($lang, $condition, 'list');
@@ -382,7 +399,7 @@ class MentorshipTaskController extends Controller
 					'item' => $_tasks->get($status),
 				];
 			}
-			
+
 
 			return response()->json([
 				'status' => true,
@@ -473,10 +490,15 @@ class MentorshipTaskController extends Controller
 		$comment->edited = false;
 		$comment->save();
 
+		$mentor = User::find($task->mentor_id);
+		$startup = User::find($task->user_id);
+
+		$message = "New Comment: " . $task->title;
+		Notification::send([$mentor, $startup], new TaskNotification($task, $message));
 
 		$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
-			$Massage = "Comment Added ( " . $comment->comment ." )";
-			$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
+		$Massage = "Comment Added ( " . $comment->comment . " )";
+		$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
 
 		return response()->json([
 			'status' => true,
