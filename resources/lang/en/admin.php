@@ -351,6 +351,7 @@ return [
 	'Page Manager' => 'Page Manager',
 	'Manager' => 'Manager',
 	'Judger' => 'Judger',
+	'judger' => 'Judger',
 	'Pages Editor' => 'Pages Editor',
 	'End' => 'End',
 	'Event Updated Successfully' => 'Event Updated Successfully',
@@ -1196,4 +1197,5 @@ return [
 	'Reset' => 'Reset',
 	'No_Video_Found' => 'No Video Found',
 	'No_Document_Found' => 'No Document Found',
+	'no_tags_found' => 'No tags found',
 ];

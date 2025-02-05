@@ -350,6 +350,7 @@ return [
 	'Page Manager' => 'مدير صفحة',
 	'Manager' => 'مدير',
 	'Judger' => 'محكم',
+	'judger' => 'محكم',
 	'Pages Editor' => 'مشرف صفحة',
 	'End' => 'ينتهي',
 	'Event Updated Successfully' => 'تم التحديث بنجاح',
@@ -1209,4 +1210,5 @@ return [
 	'Reset' => 'إعادة تعيين',	
 	'No_Video_Found' => 'لا يوجد فيديو',
 	'No_Document_Found' => 'لا يوجد مستند',
+	'no_tags_found' => 'لا يوجد اوسام',
 ];
