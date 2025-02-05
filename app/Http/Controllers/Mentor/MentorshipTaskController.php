@@ -15,9 +15,23 @@ use Exception, Log, URL;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use App\Services\WhatsAppService;
 
 class MentorshipTaskController extends Controller
 {
+
+
+
+	protected $whatsAppService;
+     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct(WhatsAppService $whatsAppService){
+        $this->middleware('auth');
+        $this->whatsAppService = $whatsAppService;
+    }
 	/**
 	 * Display a listing of the resource.
 	 */
@@ -134,6 +148,11 @@ class MentorshipTaskController extends Controller
 			$task->reported_by = $user->id;
 			$task->save();
 
+			$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+			$Massage = "New Task Created ( " . $task->title ." )";
+			$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
+
+
 			$task_id = $task->id;
 			$stored_labels = $stored_labels->toArray();
 			foreach ($labelsToAdd as $label) {
@@ -222,6 +241,10 @@ class MentorshipTaskController extends Controller
 		$log->new = $new;
 		$log->was = $old;
 		$log->save();
+
+		$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+			$Massage = "Task Updated";
+			$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
 
 		$condition = "mentorship_tasks.mentorship_request_id = $task->mentorship_request_id ";
 		$tasks = $this->handleTask($lang, $condition, 'list');
@@ -359,6 +382,7 @@ class MentorshipTaskController extends Controller
 					'item' => $_tasks->get($status),
 				];
 			}
+			
 
 			return response()->json([
 				'status' => true,
@@ -448,6 +472,11 @@ class MentorshipTaskController extends Controller
 		$comment->attached = null; // keep it null for now
 		$comment->edited = false;
 		$comment->save();
+
+
+		$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+			$Massage = "Comment Added ( " . $comment->comment ." )";
+			$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
 
 		return response()->json([
 			'status' => true,
