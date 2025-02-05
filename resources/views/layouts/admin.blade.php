@@ -77,6 +77,29 @@
   <!-- Main Page JS -->
   <!-- End Main JS-->
 
+
+  @auth
+  @if (env('ENABLE_CHAT', false))
+      <script>
+        (function(d, t) {
+          var BASE_URL = "https://app.chatwoot.com";
+          var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+          g.src = BASE_URL + "/packs/js/sdk.js";
+          g.defer = true;
+          g.async = true;
+          s.parentNode.insertBefore(g, s);
+          g.onload = function() {
+            window.chatwootSDK.run({
+              websiteToken: '{{ env("CHATWOOT_WEBSITE_TOKEN") }}',
+              baseUrl: BASE_URL,
+            });
+          }
+        })(document, "script");
+      </script>
+  @endif
+@endauth
+
+
 @if(auth()->user()->hasRole('Registered'))
   <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
   <script>
