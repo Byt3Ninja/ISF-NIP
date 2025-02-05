@@ -98,19 +98,17 @@
 <body>
   <!-- Content -->
   @php
-
     $setting = App\Settings::first();
     $platformName = $setting ? $setting->Platform_Name : '';
-
     $formHeading = $l == 'ar' ? 'مرحبًا بعودتك إلى ' . $platformName : 'Welcome to ' . $platformName;
     $formSubHeading =
     $l == 'ar'
-    ? 'الرجاء تسجيل الدخول إلى حسابك وابدأ المغامرة'
-    : 'Please sign-in to your account and
+      ? 'الرجاء تسجيل الدخول إلى حسابك وابدأ المغامرة'
+      : 'Please sign-in to your account and
     start the adventure';
     $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
     $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
-    @endphp
+  @endphp
 
   <!-- Content -->
   <!-- Toggle theme and language -->
@@ -178,154 +176,130 @@
     </div>
   </nav>
   <!-- Toggle theme and language -->  
-
-  <div class="authentication-wrapper authentication-cover">
-    <!-- Logo -->
-    <a href="/dashboard" class="app-brand auth-cover-brand">
-      <img src="/images/logo/growthlab.png" alt="avatar" height="50" width="150">
-    </a>
-    <!-- /Logo -->
-    <div class="authentication-inner row m-0">
-      <!-- /Left Text -->
-      <div class="d-none d-lg-flex col-lg-8 p-0">
-        <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
-          <img src="/vuexy/assets/img/illustrations/auth-login-illustration-light.png" alt="auth-login-cover"
-            class="my-5 auth-illustration" data-app-light-img="illustrations/auth-login-illustration-light.png"
-            data-app-dark-img="illustrations/auth-login-illustration-dark.png" 
-            loading="lazy"
-          />
-
-          <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-login-cover" class="platform-bg"
-            data-app-light-img="illustrations/bg-shape-image-light.png"
-            data-app-dark-img="illustrations/bg-shape-image-dark.png" 
-            loading="lazy"
-          />
-        </div>
-      </div>
-      <!-- /Left Text -->
-
-      <!-- Login -->
-      <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
-        <div class="w-px-400 mx-auto pt-3">
-          <h3 class="mb-1">{{ $formHeading }}</h3>
-          <p class="mb-6">{{ $formSubHeading }}</p>
-          
-          <!-- Auth Errors -->
-          <div>
-            @if (session('error'))
-              <div class="row">
-                <div class="col-md-12">
-                  <div class="alert alert-danger">
-                    <ul>
-                      <li>{{ session('error') }} </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            @endif
-
-            @if (session('Reset'))
-              <div class="row">
-                <div class="col-md-12">
-                  <div class="alert alert-success">
-                    <ul>
-                      <li>{{ session('Reset') }} </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            @endif
-  
-            @if ($errors->has('social'))
-              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
-                {{ __('You already have an account, Login with your email, or reset your account') }}!!
-              </div>
-            @elseif ($errors->has('email'))
-              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
-                {{ $errors->first('email') }}
-              </div>
-            @elseif ($errors->has('password'))
-              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
-                {{ $errors->first('password') }}
-              </div>
-            @endif
-            <!-- / Auth Errors -->
-          </div>
-
-          <form id="formAuthentication" class="mb-4" method="POST" action="{{ route('login') }}">
-            @csrf
-            <div class="mb-4">
-              <label for="email" class="form-label fs-6 fw-semibold">{{ __('auth.E-Mail') }}</label>
-              <input value="{{ old('email') }}" name="email" type="email" class="form-control" id="email"
-                placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" autofocus />
+  <div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+      <div class="authentication-inner py-md-6 mt-10 mt-md-0">
+        <!-- Login -->
+        <div class="card">
+          <div class="px-4 px-md-4 py-6">
+            <!-- Logo -->
+            <div class="app-brand justify-content-center mb-4">
+              <a href="/dashboard" class="app-brand-link">
+                <img src="/images/background/logo.png" alt="avatar"  width="150">
+              </a>
             </div>
-            <div class="mb-4 form-password-toggle">
-              <label class="form-label fs-6 fw-semibold" for="password">{{ __('auth.Password') }}</label>
-              <div class="input-group input-group-merge">
-                <input type="password" id="password" class="form-control" placeholder="{{ __('auth.Password') }}"
-                  name="password" required aria-describedby="password" autocomplete="current-password" />
-                <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-              </div>
-            </div>
-            <div class="my-4">
-              <div class="d-flex justify-content-between">
-                <div class="form-check mb-0 ms-2">
-                  <input class="form-check-input" type="checkbox" id="remember-me"
-                    {{ old('remember') ? 'checked' : '' }} name="remember" />
-                  <label class="form-check-label" for="remember-me">{{ __('auth.Remember') }}</label>
-                </div>
-                <a href="{{ route('password.request') }}">
-                  <p class="mb-0">{{ __('Forgot Password?') }}</p>
-                </a>
-              </div>
-            </div>
-            <div class="mb-4">
-              <button class="btn btn-primary d-grid w-100" type="submit">{{ __('auth.Login') }}</button>
-            </div>
-          </form>
-
-          <p class="text-center">
-            <span>{{ __("Don't have an account") }}{{ $l == 'ar' ? '؟' : '?' }}</span>
-            <a href="/register">
-              <span>{{ __('Sign up') }}</span>
-            </a>
-          </p>
-
-          <div class="divider">
-            <div class="divider-text">{{ $l == 'ar' ? 'او' : 'OR' }}</div>
-          </div>
-
-          <a 
-            id="google-sign-in"
-            href="{{ url('/auth/redirect/google') }}" 
-            class="btn btn-transparent shadow-sm border btn-block d-flex align-items-center justify-content-center"
-          >
-            <img src="/icons/google-icon.svg" alt="google" width="20" height="20" class="me-2">
-            <span class="fw-semibold">{{ $googleSignIn }}</span>
-          </a>
-          
-          <div class="divider">
-            <div class="divider-text">{{ $l == 'ar' ? 'او' : 'OR' }}</div>
-          </div>
-
-          {{-- @if (app()->environment('local', 'dev')) --}}
-            <a 
-              id="linkedin-sign-in"
-              href="{{ route('linkedin.login') }}" 
-              class="btn btn-block shadow-sm d-flex align-items-center justify-content-center"
-              style="color: #fff;"
+            <!-- /Logo -->
+            <h4 
+              class="mb-2 text-center lh-base text-capitalize"
+              style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }}"
             >
-              <i class="fa-brands fa-linkedin-in me-2"></i> 
-              <span class="fw-semibold">{{ $linkdinSignIn }}</span>
-            </a>
-          {{-- @endif --}}
+              {!! str_replace('Platform', 'Platform <br/>', $formHeading) !!}
+            </h4>
+            <p class="mb-6 text-center">{{ $formSubHeading }}</p>
 
+            <!-- Auth Errors -->
+            <div>
+              @if (session('error'))
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="alert alert-danger">
+                      <ul>
+                        <li>{{ session('error') }} </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              @endif
+
+              @if (session('Reset'))
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="alert alert-success">
+                      <ul>
+                        <li>{{ session('Reset') }} </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              @endif
+    
+              @if ($errors->has('social'))
+                <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                  {{ __('You already have an account, Login with your email, or reset your account') }}!!
+                </div>
+              @elseif ($errors->has('email'))
+                <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                  {{ $errors->first('email') }}
+                </div>
+              @elseif ($errors->has('password'))
+                <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                  {{ $errors->first('password') }}
+                </div>
+              @endif
+              <!-- / Auth Errors -->
+            </div>
+
+            <form id="formAuthentication" class="mb-4 px-md-10" method="POST" action="{{ route('login') }}">
+              @csrf
+              <div class="mb-4">
+                <label for="email" class="form-label fs-6 fw-semibold">{{ __('auth.E-Mail') }}</label>
+                <input value="{{ old('email') }}" name="email" type="email" class="form-control" id="email"
+                  placeholder="{{ __('auth.E-Mail') }}" required autocomplete="email" autofocus />
+              </div>
+              <div class="mb-4 form-password-toggle">
+                <label class="form-label fs-6 fw-semibold" for="password">{{ __('auth.Password') }}</label>
+                <div class="input-group input-group-merge">
+                  <input type="password" id="password" class="form-control" placeholder="{{ __('auth.Password') }}"
+                    name="password" required aria-describedby="password" autocomplete="current-password" />
+                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                </div>
+              </div>
+              <div class="my-4">
+                <div class="d-flex justify-content-between">
+                  <div class="form-check mb-0 ms-2">
+                    <input class="form-check-input" type="checkbox" id="remember-me"
+                      {{ old('remember') ? 'checked' : '' }} name="remember" />
+                    <label class="form-check-label" for="remember-me">{{ __('auth.Remember') }}</label>
+                  </div>
+                  <a href="{{ route('password.request') }}">
+                    <p class="mb-0">{{ __('Forgot Password?') }}</p>
+                  </a>
+                </div>
+              </div>
+              <div class="mb-4">
+                <button class="btn btn-primary d-grid w-100" type="submit">{{ __('auth.Login') }}</button>
+              </div>
+            </form>
+
+            <p class="text-center">
+              <span>
+                {{ __('auth.New on our platform') }}
+              </span>
+              <a href="{{ route('register') }}">
+                <span>{{ __('auth.Create_new_account') }}</span>
+              </a>
+            </p>
+
+            <div class="divider my-6 mx-auto" style="width: 80%;">
+              <div class="divider-text">{{ __('auth.or') }}</div>
+            </div>
+
+            <div class="d-flex justify-content-center">
+              <a href="{{ route('linkedin.login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
+                <i class="fa-brands fa-linkedin-in text-white"></i> 
+              </a>
+              <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
+                <img src="/icons/google-icon.svg" alt="google" width="20" height="20">
+              </a>
+            </div>
+          </div>
         </div>
+        <!-- /Register -->
       </div>
-      <!-- /Login -->
     </div>
   </div>
-  <!-- /Content -->
+
+  <!-- / Content -->
 
   <!-- Core JS -->
   <!-- build:js assets/vendor/js/core.js -->

@@ -45,8 +45,8 @@
               id="start" 
               type="text" 
               name="start" 
-              class="form-control valid-date" 
-              placeholder="YYYY-MM-DD"
+              class="form-control valid-from" 
+              placeholder="{{ __('cycles.Valid from') }}"
             />
             <span class="input-group-text">
               <i class="ti ti-calendar text-light"></i>
@@ -64,8 +64,8 @@
               id="end" 
               type="text" 
               name="end" 
-              class="form-control valid-date" 
-              placeholder="YYYY-MM-DD"
+              class="form-control valid-to" 
+              placeholder="{{ __('cycles.Valid to') }}"
             />
             <span class="input-group-text">
               <i class="ti ti-calendar text-light"></i>

@@ -1207,4 +1207,6 @@ return [
 	'About_Problem' => 'حول المشكلة',
 	'program_not_found' => 'هذا البرنامج غير موجود',
 	'Reset' => 'إعادة تعيين',	
+	'No_Video_Found' => 'لا يوجد فيديو',
+	'No_Document_Found' => 'لا يوجد مستند',
 ];

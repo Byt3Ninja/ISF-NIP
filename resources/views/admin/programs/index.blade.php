@@ -679,17 +679,33 @@
     // Set Language
     const lang = '{{ $l }}';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const validDates = document.querySelectorAll('.valid-date');
-      // Initialize Flatpickr Date
-      if (validDates) {
-        validDates.forEach(element => {
-          flatpickr(element, {
-            monthSelectorType: 'static',
-            dateFormat: 'Y-m-d'
-          });
-        });
-      }
+    const validFrom = document.querySelector('#create-program-modal .valid-from');
+    const validTo = document.querySelector('#create-program-modal .valid-to');
+    const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
+    const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
+    
+    const fpTo = flatpickr(validTo, {
+      monthSelectorType: 'static',
+      dateFormat: 'Y-m-d',
+      minDate: 'today',
+    });
+
+    const fpFrom = flatpickr(validFrom, {
+      monthSelectorType: 'static',
+      dateFormat: 'Y-m-d',
+      minDate: 'today',
+    });
+
+    const editFpTo = flatpickr(editValidalidTo, {
+      monthSelectorType: 'static',
+      dateFormat: 'Y-m-d',
+      minDate: 'today',
+    });
+
+    const editFpFrom = flatpickr(editValidFrom, {
+      monthSelectorType: 'static',
+      dateFormat: 'Y-m-d',
+      minDate: 'today',
     });
 
     // Initialize Quill Editor
@@ -725,12 +741,12 @@
     // Handle Reset Values
     const resetValues = () => {
       console.log('Resetting Values');
+      $('#create-program-modal #start').val('');
+      $('#create-program-modal #end').val('');
       $('#create-program-modal #title').val('');
       $('#create-program-modal #description').val('');
       $('#create-program-modal #cycleid').val('');
       $('#create-program-modal #type').val('');
-      $('#create-program-modal #start').val('');
-      $('#create-program-modal #end').val('');
       $('#create-program-modal #program_guideline').val('');
       $('#create-program-modal #financial_policy').val('');
       $('#create-program-modal #legal_policy').val('');
@@ -785,12 +801,12 @@
           data: {"cycleid": cycleId },
           success: function(response) {
             console.log(response); 
+            $('#edit-program-modal #start').val(response.start ?? '');
+            $('#edit-program-modal #end').val(response.end ?? '');
             $('#edit-program-modal #title').val(response.title ?? '');
             $('#edit-program-modal #description').val(response.description ?? '');
             $('#edit-program-modal #cycleid').val(cycleId); 
             $('#edit-program-modal #type').val(1);
-            $('#edit-program-modal #start').val(response.start ?? '');
-            $('#edit-program-modal #end').val(response.end ?? '');
             $('#edit-program-modal #organization').val(response.organization_id ?? '');
             $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
             if (response.private) {
