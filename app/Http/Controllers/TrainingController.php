@@ -153,6 +153,8 @@ class TrainingController extends Controller
                 $con->aspectRatio();
             })->save();
 
+           
+
             $training = Training::updateOrCreate(
                 ['id' => $request->id],
                 [
@@ -184,7 +186,8 @@ class TrainingController extends Controller
             // إدراج الخبرات دفعة واحدة
             DB::table('categories_training')->insert($expertises);
 
-
+            if (!empty(array_filter($request->Tags))) {
+               
             $tags = [];
             foreach ($request->Tags as $tagName) {
                 // تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
@@ -199,11 +202,13 @@ class TrainingController extends Controller
                     'training_id' => $training->id
                 ];
             }
+
             DB::table('tag_training')
                 ->where('training_id', $training->id)
                 ->delete();
             // إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
             DB::table('tag_training')->insert($tags);
+        }
         } else {
 
 
@@ -238,7 +243,7 @@ class TrainingController extends Controller
             // إدراج الخبرات دفعة واحدة
             DB::table('categories_training')->insert($expertises);
 
-
+            if (!empty(array_filter($request->Tags))) {
             $tags = [];
             foreach ($request->Tags as $tagName) {
                 // تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
@@ -259,6 +264,7 @@ class TrainingController extends Controller
                 ->delete();
             // إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
             DB::table('tag_training')->insert($tags);
+        }
         }
 
         return redirect('/dashboard/training/all/')->with(['class' => 'success', 'message' => 'Saved']);

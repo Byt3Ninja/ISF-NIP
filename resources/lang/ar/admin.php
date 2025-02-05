@@ -1209,4 +1209,5 @@ return [
 	'Reset' => 'إعادة تعيين',	
 	'No_Video_Found' => 'لا يوجد فيديو',
 	'No_Document_Found' => 'لا يوجد مستند',
+	'no_tags_found' => 'لا يوجد اوسام',
 ];
