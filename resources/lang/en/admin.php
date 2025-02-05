@@ -1196,4 +1196,5 @@ return [
 	'Reset' => 'Reset',
 	'No_Video_Found' => 'No Video Found',
 	'No_Document_Found' => 'No Document Found',
+	'no_tags_found' => 'No tags found',
 ];
