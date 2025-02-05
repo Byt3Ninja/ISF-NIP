@@ -13,6 +13,15 @@
 
 @section('style')
 <style>
+  #phone, #whatsapp {
+    width: 100%;
+  }
+
+  @media screen and (min-width: 768px) {
+    #phone, #whatsapp {
+      width: 350px;
+    }
+  }
   .iti__country-list {
     position: absolute;
     left: 1rem;
@@ -158,39 +167,48 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
   <div class="modal fade" id="verifyWhatsappCodeModal" tabindex="-1" aria-labelledby="verifyCodeModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-      <div class="modal-content">
-        <div class="modal-header d-grid gap-2">
-          <h4 class="modal-title" id="verifyCodeModalLabel">{{ __('auth.Verify_Number_With_Code') }}</h4>
-          <h6 class="text-secondary" id="verifyCodeModalLabel">{{ __('auth.Enter_Code_Sent') }}</h6>
+      <div class="modal-content" style="padding: 0.9rem !important;">
+        <div class="modal-header position-relative d-grid gap-2">
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h4 class="modal-title" id="verifyCodeModalLabel">{{ __('auth.Verify_Number_With_Code') }}</h4>
+          <h6 class="text-secondary mb-0" id="verifyCodeModalLabel">{{ __('auth.Enter_Code_Sent') }}.</h6>
         </div>
         <div class="modal-body">
-          <div id="errorotp" class="alert alert-danger mb-2" style="display: none"></div>
-          <div id="sentMessageotp" class="alert alert-success mb-2" style="display: none"></div>
-          <div class="form-group form-focus">
-            <input id="OTPWA" type="text" class="form-control floating @error('OTP') is-invalid @enderror"
-              placeholder="{{ __('auth.Enter_Code') }}" name="otp" value="{{ old('otp') }}" required autocomplete="otp"
-              autofocus />
-            {{-- <label for="OTP" class="focus-label">{{ __('auth.Add_OTP') }}</label> --}}
-            @error('OTP')
-            <span class="invalid-feedback" role="alert">
-              <strong>{{ $message }}</strong>
-            </span>
-            @enderror
+          <div class="mb-2">
+            <div id="errorotp" class="alert alert-danger mb-2" style="display: none"></div>
+            <div id="sentMessageotp" class="alert alert-success" style="display: none"></div>
           </div>
-          <div class="d-flex justify-content-center mt-3">
-            <button type="button" onclick="sendCode('whatsapp')" class="btn btn-link">
-              {{ __('auth.Resend_Code') }}
+          <div class="w-100">
+            <label class="fs-6 mb-2 text-secondary">
+              {{ (__('auth.otp_label')) }}
+            </label>
+            <div class="d-flex justify-content-between w-100">
+              @for ($i = 0; $i < 6; $i++)
+                <input 
+                  type="text" 
+                  onchange="this.value ? this.classList.remove('is-invalid') : this.classList.add('is-invalid')"
+                  class="form-control otp-input" 
+                  maxlength="1" 
+                  style="width: 2.4rem;" 
+                  required 
+                />
+              @endfor
+            </div>
+            <div id="otp-error" class="invalid-feedback">
+              {{ $message ?? '' }}
+            </div>
+          </div>
+          <div class="mt-4">
+            <button type="button" onclick="verifyWhatsappCode()" class="btn btn-primary w-100 tracking-wide">
+              {{ __('auth.Verify_Code') }}
             </button>
+            <div class="d-flex justify-content-center align-items-center gap-1 mt-6 w-100">
+              <span>{{ __('auth.Didnt_Receive_Code') }}</span>
+              <button type="button" onclick="sendCode('whatsapp')" class="btn btn-link p-0">
+                {{ __('auth.Resend_Code') }}
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-            {{ __('auth.Cancel') }}
-          </button>
-          <button type="button" onclick="verifyWhatsappCode()" class="btn btn-primary">
-            {{ __('auth.Verify_Code') }}
-          </button>
         </div>
       </div>
     </div>
@@ -480,6 +498,9 @@ function sendCode(type) {
     
     $(type == 'phone' ? '#verifyCodeModal' : '#verifyWhatsappCodeModal').modal('show');
     let number = $('#whatsapp').val();
+
+    console.log('number', number);
+
     let countryCode = whatsappIti.getSelectedCountryData().dialCode;
     if (number.startsWith('0') && countryCode == '20') {
         number = number.substring(1); // Remove the first character (the zero)
@@ -523,8 +544,28 @@ function sendCode(type) {
 
 // Verify code of WhatsApp
 function verifyWhatsappCode() {
-  var code = $('#OTPWA').val();
- 
+  var code = '';
+  $('.otp-input').each(function() {
+    code += $(this).val();
+  });
+
+  if (code.length !== 6) {
+    $('#otp-error').text('{{ __('auth.Please_enter_otp') }}').show();
+
+    $('.otp-input').each(function() {
+      $(this).addClass('is-invalid');
+    });
+    
+    return;
+  }
+
+  $('#otp-error').hide();
+  $('.otp-input').each(function() {
+    $(this).removeClass('is-invalid');
+  });
+
+  console.log('code', code)
+
   $.ajax({
     url: '{{ route('verify.code') }}',
     type: 'POST',
@@ -555,90 +596,11 @@ function verifyWhatsappCode() {
   });
 }
 
-
-// // حقل مخفي للكود الدولي للواتساب
-// const countryCodeWAInput = document.createElement("input");
-// countryCodeWAInput.type = "hidden";
-// countryCodeWAInput.name = "country_code_w_a";
-// countryCodeWAInput.value = "{{ $client->country_code_w_a ? ( $client->country_code_w_a ?? '' ) : '' }}";
-// whatsappInput.parentNode.appendChild(countryCodeWAInput);
-
-// // تحديث الحقل المخفي عند تغيير الدولة في الواتساب
-// whatsappInput.addEventListener("countrychange", () => {
-//     const dialCode = whatsappIti.getSelectedCountryData().dialCode;
-//     countryCodeWAInput.value = dialCode; // تعيين الكود الدولي
-//     console.log("WhatsApp Dial Code Updated: " + countryCodeWAInput.value);
-// });
-
-// // حقل مخفي للكود الدولي
-// const countryCodeInput = document.createElement("input");
-// countryCodeInput.type = "hidden";
-// countryCodeInput.name = "country_code";
-// countryCodeInput.value = "{{ $client->country_code ? ( $client->country_code ?? '' ) : '' }}";
-// phoneInput.parentNode.appendChild(countryCodeInput);
-
-// // ضبط الدولة الافتراضية
-// if (countryCodeFromDB) {
-//     iti.setCountry(countryCodeFromDB);
-//     countryCodeInput.value = iti.getSelectedCountryData().dialCode;
-// }
-
-// // تحديث الحقل المخفي عند تغيير الدولة
-// phoneInput.addEventListener("countrychange", () => {
-//     const dialCode = iti.getSelectedCountryData().dialCode;
-//     countryCodeInput.value =  dialCode;
-// });
-
-// whatsappInput.addEventListener("countrychange", () => {
-//     const dialCode = whatsappIti.getSelectedCountryData().dialCode;
-//     console.log("WhatsApp Dial Code: " + dialCode);
-// });
-
-// // التحقق من صحة الرقم
-// phoneInput.addEventListener("input", () => {
-//     if (iti.isValidNumber()) {
-//         phoneError.style.display = 'none';
-//     } else {
-//         phoneError.style.display = 'block';
-//         phoneError.innerText = "Invalid phone number";
-//     }
-// });
-
-// whatsappInput.addEventListener("input", () => {
-//     if (whatsappIti.isValidNumber()) {
-//         whatsappError.style.display = 'none';
-//     } else {
-//         whatsappError.style.display = 'block';
-//         whatsappError.innerText = "Invalid WhatsApp number";
-//     }
-// });
-
-
-// $('#whatsapp').on('blur', function() {
-// var number = $(this).val();
-// var countryCode = whatsappIti.getSelectedCountryData().dialCode;
-// if (number.startsWith('0')) {
-//     number = number.substring(1); // إزالة أول حرف (الصفر)
-// }
-// var number = countryCode + number;
-
-// $.ajax({
-// url: '{{ route('save.phone.session') }}',
-// type: 'POST',
-// data: {
-//   countryCode: countryCode,
-// phone: number,
-// _token: '{{ csrf_token() }}'
-// },
-// success: function(response) {
-//   alert(response);
-// // $('#whatsapp').prop('readonly', true);
-// },
-// error: function(xhr, status, error) {
-//   console.log(error);
-// alert('حدث خطأ أثناء التنفيذ: ' + error);
-// }
-// });
-// });
+// Automatically focus on the next input
+$(document).on('input', '.otp-input', function() {
+  if (this.value.length === this.maxLength) {
+    $(this).next('.otp-input').focus();
+  }
+});
 </script>
 @stop

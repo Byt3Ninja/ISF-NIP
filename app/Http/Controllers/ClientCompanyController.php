@@ -358,7 +358,7 @@ class ClientCompanyController extends Controller
                             'CreatedTax' => $CreatedTax,
                             'Commercial_Register' => $Commercial_Register,
                             'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg,
+                            'Country_Register_id' => $cuntryReg ?? 0,
                         ]);
 
 
@@ -384,7 +384,7 @@ class ClientCompanyController extends Controller
                             'CreatedTax' => $CreatedTax,
                             'Commercial_Register' => $Commercial_Register,
                             'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg,
+                            'Country_Register_id' => $cuntryReg ?? 0,
                             'institutions' => $institutions,
                             'email' => $email,
                             'phone' => $phone,
@@ -1142,7 +1142,7 @@ class ClientCompanyController extends Controller
                             'CreatedTax' => $CreatedTax,
                             'Commercial_Register' => $Commercial_Register,
                             'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg,
+                            'Country_Register_id' => $cuntryReg ?? 0,
                         ]);
 
 
@@ -1168,7 +1168,7 @@ class ClientCompanyController extends Controller
                             'CreatedTax' => $CreatedTax,
                             'Commercial_Register' => $Commercial_Register,
                             'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg,
+                            'Country_Register_id' => $cuntryReg ?? 0,
                             'institutions' => $institutions,
                             'email' => $email,
                             'phone' => $phone,
@@ -1735,7 +1735,7 @@ class ClientCompanyController extends Controller
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
-            dd($e);
+            // dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);
@@ -1784,7 +1784,7 @@ class ClientCompanyController extends Controller
             else
                 return $this->unknownErrorHappenedMsg();
         } catch (Exception $e) {
-            dd($e);
+            // dd($e);
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
