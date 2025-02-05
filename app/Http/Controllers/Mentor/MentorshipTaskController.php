@@ -152,6 +152,7 @@ class MentorshipTaskController extends Controller
 			$task->reported_by = $user->id;
 			$task->save();
 
+<<<<<<< Updated upstream
 			$mentor = User::find($task->mentor_id);
 			$startup = User::find($task->user_id);
 			// Send Notification To Mentor & Startup
@@ -167,6 +168,22 @@ class MentorshipTaskController extends Controller
 			$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
 			$Massage = "New Task Created ( " . $task->title . " )";
 			$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
+=======
+			
+			if ($task->user->country_code_w_a && $task->user->whatsapp) {
+				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+				$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company->cycledata->title . ", the mentor " . $task->mentor->name . " has created a new Task ( " . $task->title ." )";
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			}
+			
+			if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
+				$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
+				$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company->cycledata->title . ", the startup " . $task->user->name . " has created a new Task ( " . $task->title ." )";
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			}
+>>>>>>> Stashed changes
 
 
 			$task_id = $task->id;
@@ -258,6 +275,7 @@ class MentorshipTaskController extends Controller
 		$log->was = $old;
 		$log->save();
 
+<<<<<<< Updated upstream
 		// Send Notification To Mentor & Startup
 		$mentor = User::find($task->mentor_id);
 		$startup = User::find($task->user_id);
@@ -273,6 +291,22 @@ class MentorshipTaskController extends Controller
 		$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
 		$Massage = "Task Updated";
 		$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
+=======
+
+				if ($task->user->country_code_w_a && $task->user->whatsapp) {
+					$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+					$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company->cycledata->title . " The Task name : " . $task->title . " status has been changed From " . $old . " To " . $new;
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+				}
+				
+				if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
+					$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
+					$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company->cycledata->title . " The Task name : " . $task->title . " status has been changed From " . $old . " To " . $new;
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
+				}
+>>>>>>> Stashed changes
 
 		$condition = "mentorship_tasks.mentorship_request_id = $task->mentorship_request_id ";
 		$tasks = $this->handleTask($lang, $condition, 'list');
@@ -501,6 +535,7 @@ class MentorshipTaskController extends Controller
 		$comment->edited = false;
 		$comment->save();
 
+<<<<<<< Updated upstream
 		$mentor = User::find($task->mentor_id);
 		$startup = User::find($task->user_id);
 
@@ -515,6 +550,21 @@ class MentorshipTaskController extends Controller
 		$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
 		$Massage = "Comment Added ( " . $comment->comment . " )";
 		$result = $this->whatsAppService->sendMassage($phoneNumber, $Massage);
+=======
+		if ($task->user->country_code_w_a && $task->user->whatsapp) {
+			$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;
+			$Massage = "Dear " . $task->user->name . ", This Is notification from " . $task->company->cycledata->title . " Comment Added in Task Name " . $task->title . " ( " . $comment->comment ." )";
+			$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+			Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+		}
+		
+		if ($task->mentor->country_code_w_a && $task->mentor->whatsapp) {
+			$phoneNumber = $task->mentor->country_code_w_a . $task->mentor->whatsapp;
+			$Massage = "Dear " . $task->mentor->name . ", This Is notification from " . $task->company->cycledata->title . " Comment Added in Task Name " . $task->title . " ( " . $comment->comment ." )";
+			$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+			\Log::info('Message sent to mentor: ' . $phoneNumber . ' Result: ' . json_encode($result));
+		}
+>>>>>>> Stashed changes
 
 		return response()->json([
 			'status' => true,
