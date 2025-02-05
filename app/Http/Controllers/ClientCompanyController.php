@@ -806,7 +806,7 @@ class ClientCompanyController extends Controller
                             'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck = 'pitch_deck/'. $path . $originalName;
+                        $pitch_deck = 'pitch_decks/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                     }
@@ -846,7 +846,7 @@ class ClientCompanyController extends Controller
                             'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck_video = 'pitch_deck/'. $path . $originalName;
+                        $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
                     }
@@ -900,7 +900,7 @@ class ClientCompanyController extends Controller
                                     'disk' => 'pitch_deck'
                                 ]);
                     
-                                $uploadedFiles[] = 'pitch_deck/' . $path . $originalName;
+                                $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
                             }
                         }
                     }else{
@@ -1505,7 +1505,7 @@ class ClientCompanyController extends Controller
                             'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck = 'pitch_deck/'. $path . $originalName;
+                        $pitch_deck = 'pitch_decks/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                     }
@@ -1544,7 +1544,7 @@ class ClientCompanyController extends Controller
                             'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck_video = 'pitch_deck/'. $path . $originalName;
+                        $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
                     }else{
                         
                         return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
@@ -1597,7 +1597,7 @@ class ClientCompanyController extends Controller
                                     'disk' => 'pitch_deck'
                                 ]);
                     
-                                $uploadedFiles[] = 'pitch_deck/' . $path . $originalName;
+                                $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
                             }
                         }
                     }else{
