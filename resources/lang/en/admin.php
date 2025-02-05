@@ -351,6 +351,7 @@ return [
 	'Page Manager' => 'Page Manager',
 	'Manager' => 'Manager',
 	'Judger' => 'Judger',
+	'judger' => 'Judger',
 	'Pages Editor' => 'Pages Editor',
 	'End' => 'End',
 	'Event Updated Successfully' => 'Event Updated Successfully',

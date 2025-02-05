@@ -350,6 +350,7 @@ return [
 	'Page Manager' => 'مدير صفحة',
 	'Manager' => 'مدير',
 	'Judger' => 'محكم',
+	'judger' => 'محكم',
 	'Pages Editor' => 'مشرف صفحة',
 	'End' => 'ينتهي',
 	'Event Updated Successfully' => 'تم التحديث بنجاح',
