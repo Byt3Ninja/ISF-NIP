@@ -26,10 +26,6 @@
 @endif
 
 <div class="row TapPageTeam">
-  @include('partials.forms.company._founder_team')
-  @include('partials.forms.company._shareholder_team')
-  @include('partials.forms.company._investor_team')
-
   <div class="col-md-12 mb-3">
     <div class="card shadow-sm" style="border-radius: 15px;">
       <div class="p-4">
@@ -88,6 +84,10 @@
       </div>
     </div>
   </div>
+  @include('partials.forms.company._founder_team')
+  @include('partials.forms.company._shareholder_team')
+  @include('partials.forms.company._investor_team')
+
 </div>
 
 <script>
