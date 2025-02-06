@@ -506,18 +506,19 @@ $('.AddTeams').click(function(event) {
 });
 
 
-$('.EditTeams').click(function() {
+$('.EditTeams').click(function(event) {
+    event.preventDefault();
     var id = $(this).attr('do');
     var company = $(this).attr('company');
     
-  var founder_name = $('.founder_name'+id).val();
-  var founder_email = $('.founder_email'+id).val();
-  var founder_linkedin = $('.founder_linkedin'+id).val();
-  var shareholder_name = $('.shareholder_name'+id).val();
-  var shareholder_role = $('.shareholder_role'+id).val();
-  var shareholder_ownership_percentage = $('.shareholder_ownership_percentage'+id).val();
-  var investor_name = $('.investor_name'+id).val();
-  var investment_type = $('.investment_type'+id).val();
+  var founder_name = $('#founder_name'+id).val();
+  var founder_email = $('#founder_email'+id).val();
+  var founder_linkedin = $('#founder_linkedin'+id).val();
+  var shareholder_name = $('#shareholder_name'+id).val();
+  var shareholder_role = $('#shareholder_role'+id).val();
+  var shareholder_ownership_percentage = $('#shareholder_ownership_percentage'+id).val();
+  var investor_name = $('#investor_name'+id).val();
+  var investment_type = $('#investment_type'+id).val();
 
       $.ajax({
           url: '/dashboard/AddCompanyEdit/'+company, 

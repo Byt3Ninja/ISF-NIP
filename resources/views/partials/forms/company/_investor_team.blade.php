@@ -113,7 +113,7 @@
                           <input type="hidden" value="{{ $Investor->id }}" name="id">
                           <button
                             class="d-flex align-items-center gap-2 p-2 cursor-pointer border-0 bg-transparent w-100 text-start"
-                            type="submit"
+                            {{--  type="submit"  --}}
                             onclick="return confirm('Are you sure you want to delete this ?')"
                           >
                             <i class="ti ti-trash text-danger fs-6"></i>
@@ -146,7 +146,7 @@
                           <input
                             type="text"
                             class="form-control investor_name"
-                            id="investor_name"
+                            id="investor_name{{ $Investor->id }}"
                             placeholder="{{ __('admin.investor_name') }}"
                             value="{{ $Investor->Name ? $Investor->Name : old('investor_name') }}"
                             name="investor_name"
@@ -166,7 +166,7 @@
                         <div class="input-group input-group-merge">
                           <select
                             class="form-select form-control investment_type{{ $Investor->id }}"
-                            id="investment_type"
+                            id="investment_type{{ $Investor->id }}"
                             name="investment_type"
                             aria-placeholder="{{ __('admin.investment_type') }}"
                             autocomplete="investment_type"
@@ -212,7 +212,12 @@
                     </div>
                   </div>
                   <div class="mt-6">
-                    <button type="submit" class="btn btn-primary me-3 data-submit EditTeams" do="{{ $Investor->id }}">
+                    <button 
+                      {{--  type="submit"   --}}
+                      class="btn btn-primary me-3 data-submit EditTeams" 
+                      do="{{ $Investor->id }}"
+                      company="{{ optional($client->company)->id }}"
+                    >
                       {{ __('admin.submit') }}
                     </button>
                     <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal">

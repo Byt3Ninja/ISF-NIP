@@ -1964,7 +1964,11 @@ class ClientCompanyController extends Controller
 
     public function EditTeams(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
+        if( isset( $id ) && !is_null( $id ) ) { $user = User::where('company_id', $id)->first(); }
+        else
+        {
+            $user = auth()->user();
+        }
         // $user = Auth::user();
         $companyId = $user->company_id;
 
