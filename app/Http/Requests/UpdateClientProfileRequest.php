@@ -27,17 +27,17 @@ class UpdateClientProfileRequest extends FormRequest
        $id = Auth::user()->id;
 
         return [
-            'first_name_en' => ['required', 'string', 'max:255'],
-            'last_name_en' => ['required', 'string', 'max:255'],
+            'first_name_en' => 'required|string|max:255',
+            'last_name_en' => 'required|string|max:255',
             'img_url' => 'nullable|mimes:jpeg,png,jpg',
-            'phone' => ['required'],
+            'phone' => 'required',
             'email' => [
                             'required',
                             'email',
                             'unique:users,email,' . $id,
                             'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
                         ],
-            'HaveCompany'=>['nullable','max:1'],
+            'HaveCompany'=>'nullable|max:1',
 
         ];
     }
