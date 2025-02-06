@@ -328,7 +328,7 @@
     const countryCodeWAFromDB = "{{ $client->company ? $client->company->country_code_w_a : '' }}";
 
     function getCountryShortcut(code) {
-      let dialCode = code.toString().trim();
+      let dialCode = `+${code.toString().trim()}`;
       const countryData = intlTelInputGlobals.getCountryData();
       const country = countryData.find(country => `+${country.dialCode}` === dialCode);
 
