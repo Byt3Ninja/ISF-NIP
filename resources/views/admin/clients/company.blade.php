@@ -189,6 +189,7 @@
   <script>
     const lang = '{{ $l }}';
   </script>
+  <script src="/app-assets/js/1.js"></script>
 
   <script src="/vuexy/assets/js/forms-selects.js"></script>
   <script src="/vuexy/assets/js/forms-tagify.js"></script>

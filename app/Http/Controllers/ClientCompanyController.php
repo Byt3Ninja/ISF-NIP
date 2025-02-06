@@ -1812,8 +1812,8 @@ class ClientCompanyController extends Controller
         }
         // $user = Auth::user();
         $companyId = $user->company_id;
-        if ($request->TeamsNo == "Founders") {
-           
+        if ($request->TeamsNo == "Founders")
+        {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'founder_name' => 'required|string|max:255',
@@ -1827,35 +1827,34 @@ class ClientCompanyController extends Controller
             ]);
 
             // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            // if( $validator->fails() )
-            // {
-            //    
-            //         return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput();
-            //    
-            // }
+            if ($validator->fails())
+            {
+                if( $request->ajax() )
+                {
+                    return response()->json([
+                        'errors' => $validator->errors(),
+                    ], 422); // حالة الخطأ 422
+                }
+                else
+                {
+                    return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput();
+                }
+            }
 
             $email = $request->input('founder_email');
             $mail = Team_member::where('Email', $email)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
-        
-            if ($mail != null) {
-                
-                // if( $request->wantsJson() )
-                // {
-                //     return response()->json(['state' => __('admin.founder_email_exist'),]);
-                // }
-                // else
-                // {
-                //     return redirect()->back()->with('error', __('admin.founder_email_exist'));
-                // }
-                return redirect()->back()->with('error', __('admin.founder_email_exist'));
+
+            if( $mail != null )
+            {
+                if( $request->ajax() ) { return response()->json(['state' => __('admin.founder_email_exist'),]); }
+                else { return redirect()->back()->with('error', __('admin.founder_email_exist')); }
             }
             $linkedin = $request->input('founder_linkedin');
             $linked = Team_member::where('LinkedIn', $linkedin)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
             if ($linked != null) 
             {
-                // if( $request->wantsJson() ) { return response()->json(data: ['state' => __('admin.founder_linkedin_exist'),]); }
-                // else { return redirect()->back()->with('error', __('admin.founder_linkedin_exist')); }
-                return redirect()->back()->with('error', __('admin.founder_linkedin_exist'));
+                if( $request->ajax() ) { return response()->json(data: ['state' => __('admin.founder_linkedin_exist'),]); }
+                else { return redirect()->back()->with('error', __('admin.founder_linkedin_exist')); }
             }
 
             $founder = 'Founder';
@@ -1869,12 +1868,11 @@ class ClientCompanyController extends Controller
             $teamMember->save();
 
             // استجابة بعد الحفظ
-            // if( $request->wantsJson() ) { return response()->json(['state' => __('admin.founder_added'),]); }
-            // else { return redirect()->back()->with('success', __('admin.founder_added')); }
-            return redirect()->back()->with('success', __('admin.founder_added'));
+            if( $request->ajax() ) { return response()->json(['state' => __('admin.founder_added'),]); }
+            else { return redirect()->back()->with('success', __('admin.founder_added')); }
         }
-        if ($request->TeamsNo == "Shareholders") {
-
+        if ($request->TeamsNo == "Shareholders")
+        {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'shareholder_name' => 'required|string|max:255',
@@ -1894,12 +1892,24 @@ class ClientCompanyController extends Controller
             // تحقق من أن النسبة المئوية الجديدة لا تتجاوز 100%
             if ($totalPercentage + $newPercentage > 100)
             {
-               return redirect()->back()->with('error', 'inputs error')->withErrors(__('admin.Total ownership percentage cannot exceed 100%'))->withInput(); 
+                if( $request->ajax() )
+                {
+                    return response()->json([
+                        'errors' => [
+                            'shareholder_ownership_percentage' => [__('admin.Total ownership percentage cannot exceed 100%')],
+                        ],
+                    ], 422); // حالة الخطأ 422
+                } else { return redirect()->back()->with('error', 'inputs error')->withErrors(__('admin.Total ownership percentage cannot exceed 100%'))->withInput(); } 
             }
             // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
             if ($validator->fails())
             {
-                return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput(); 
+                if( $request->ajax() )
+                {
+                    return response()->json([
+                        'errors' => $validator->errors(),
+                    ], 422); // حالة الخطأ 422
+                } else { return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput(); }
             }
             $founder = 'Shareholder';
             // إنشاء وحفظ بيانات العضو في قاعدة البيانات
@@ -1912,11 +1922,12 @@ class ClientCompanyController extends Controller
             $teamMember->save();
 
             // استجابة بعد الحفظ
-             return redirect()->back()->with('success', __('admin.Shareholder_added')); 
+            if( $request->ajax() ) { return response()->json(['state' => __('admin.Investor_added'),]); }
+            else { return redirect()->back()->with('success', __('admin.founder_added')); }
         }
 
-        if ($request->TeamsNo == "Investors") {
-
+        if ($request->TeamsNo == "Investors")
+        {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'investor_name' => 'required|string|max:255',
@@ -1926,14 +1937,16 @@ class ClientCompanyController extends Controller
                 'investment_type.required' => __('admin.Type is Required Investor'),
             ]);
 
-            
-                // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-                if ($validator->fails()) {
+            if ($validator->fails())
+            {
+                if( $request->ajax() )
+                {
                     return response()->json([
                         'errors' => $validator->errors(),
                     ], 422); // حالة الخطأ 422
-                }
-           
+                } else { return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput(); }
+            }
+
             $founder = 'Investor';
             // إنشاء وحفظ بيانات العضو في قاعدة البيانات
             $teamMember = new Team_member(); // افترض أن لديك موديل اسمه TeamMember
@@ -1943,12 +1956,10 @@ class ClientCompanyController extends Controller
             $teamMember->Company_id = $companyId;
             $teamMember->save();
 
-            // استجابة بعد الحفظ
-             return response()->json(['state' => __('admin.Investor_added'),]); 
-            
-            }
-            
-        
+            // استجابة بعد الحفظ 
+            if( $request->ajax() ) { return response()->json(['state' => __('admin.Investor_added'),]); }
+            else { return response()->json(['state' => __('admin.Investor_added'),]);  }
+        }
     }
 
     public function EditTeams(Request $request, $id = null)

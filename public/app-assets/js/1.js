@@ -411,18 +411,19 @@ $('.lfm').filemanager('file');
 
 
 
-$('.AddTeams').click(function() {
+$('.AddTeams').click(function(event) {
+    event.preventDefault();
       var TeamsNo = $(this).attr('do');
       var company = $(this).attr('company');
       
-    var founder_name = $('.founder_name').val();
-    var founder_email = $('.founder_email').val();
-    var founder_linkedin = $('.founder_linkedin').val();
-    var shareholder_name = $('.shareholder_name').val();
-    var shareholder_role = $('.shareholder_role').val();
-    var shareholder_ownership_percentage = $('.shareholder_ownership_percentage').val();
-    var investor_name = $('.investor_name').val();
-    var investment_type = $('.investment_type').val();
+    var founder_name = $('#founder_name').val();
+    var founder_email = $('#founder_email').val();
+    var founder_linkedin = $('#founder_linkedin').val();
+    var shareholder_name = $('#shareholder_name').val();
+    var shareholder_role = $('#shareholder_role').val();
+    var shareholder_ownership_percentage = $('#shareholder_ownership_percentage').val();
+    var investor_name = $('#investor_name').val();
+    var investment_type = $('#investment_type').val();
 
         $.ajax({
             url: '/dashboard/AddCompanyTeams/'+company, 
