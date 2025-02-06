@@ -129,20 +129,16 @@
           <div class="d-flex flex-column gap-2">
             @if($client->company)
             @php
-
-if($client->company->documents){
-  // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-  $documents = json_decode($client->company->documents, true);
-  // استخراج اسم كل ملف من الروابط
-  $fileNames = array_map(function ($url) {
-                  return basename($url); // استخراج اسم الملف من الرابط
-              }, $documents);
-}else{
-  $documents = [];
-}
-              
-              
-
+            if($client->company->documents && is_array($client->company->documents)){
+              // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+              $documents = json_decode($client->company->documents, true);
+              // استخراج اسم كل ملف من الروابط
+              $fileNames = array_map(function ($url) {
+                              return basename($url); // استخراج اسم الملف من الرابط
+                          }, $documents);
+            }else{
+              $documents = [];
+            }
             @endphp
             @foreach ($documents as $index => $document)
               @if (is_string($document) && !empty($document))
