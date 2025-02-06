@@ -114,60 +114,60 @@
   <!-- Documents Column -->
   <div class="col-md-6 mt-3">
     @if(Auth::user()->hasanyRole('Admin|organizationManager'))
-    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
-      enctype="multipart/form-data">
-@else
-<form method="post" action="{{ route('update_my_company') }}"
-  enctype="multipart/form-data">
-@endif
+      <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
+        enctype="multipart/form-data">
+      @else
+      <form method="post" action="{{ route('update_my_company') }}"
+        enctype="multipart/form-data">
+      @endif
       {!! csrf_field() !!}
       <input type="hidden" value="11" name="CompanyN">
-
       <div class="card shadow-sm" style="border-radius: 15px;">
         <div class="p-3">
           <h5 class="card-title">{{ __('admin.Documents') }}</h5>
           <div class="d-flex flex-column gap-2">
             @if($client->company)
-            @php
-            if($client->company->documents && is_array($client->company->documents)){
-              // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
-              $documents = json_decode($client->company->documents, true);
-              // استخراج اسم كل ملف من الروابط
-              $fileNames = array_map(function ($url) {
-                              return basename($url); // استخراج اسم الملف من الرابط
-                          }, $documents);
-            }else{
-              $documents = [];
-            }
-            @endphp
-            @foreach ($documents as $index => $document)
-              @if (is_string($document) && !empty($document))
-                <div class="card shadow-sm file-card" style="border-radius: 15px;" data-index="{{ $index }}" data-file="{{ $document }}">
-                  <div class="card-body">
-                    <div
-                      class="d-flex justify-content-between align-items-center">
-                      <div class="d-flex align-items-center gap-3">
-                        <i class="ti ti-file fs-1 text-warning"></i>
-                        <span>{{ $fileNames[$index] }}</span>
+              @php
+                if($client->company->documents && !is_null($client->company->documents)){
+                  // تحويل السلسلة إلى مصفوفة بعد إزالة الشرطات المائلة
+                  $documents = json_decode($client->company->documents, true);
+                  if( json_last_error() != JSON_ERROR_NONE ) {
+                    $documents = []; 
+                  }
+                  // استخراج اسم كل ملف من الروابط
+                  $fileNames = array_map(function ($url) {
+                      return basename($url); // استخراج اسم الملف من الرابط
+                  }, $documents);
+                } else{
+                  $documents = [];
+                }
+              @endphp
+              @foreach ($documents as $index => $document)
+                @if (is_string($document) && !empty($document))
+                  <div class="card shadow-sm file-card" style="border-radius: 15px;" data-index="{{ $index }}" data-file="{{ $document }}">
+                    <div class="card-body">
+                      <div
+                        class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3">
+                          <i class="ti ti-file fs-1 text-warning"></i>
+                          <span>{{ $fileNames[$index] }}</span>
+                        </div>
+                        <a class="btn btn-transparent"
+                          href="{{ asset($document) }}" target="_blank" download="{{ $fileNames[$index] }}">
+                          <i class="ti ti-download fs-3 text-primary"></i>
+                        </a>
+
+                        <span class="btn btn-transparent text-danger delete-file" data-index="{{ $index }}" data-file="{{ $document }}">
+                          <i class="ti ti-trash fs-3"></i>
+                      </span>
+
                       </div>
-                      <a class="btn btn-transparent"
-                        href="{{ asset($document) }}" target="_blank" download="{{ $fileNames[$index] }}">
-                        <i class="ti ti-download fs-3 text-primary"></i>
-                      </a>
-
-                      <span class="btn btn-transparent text-danger delete-file" data-index="{{ $index }}" data-file="{{ $document }}">
-                        <i class="ti ti-trash fs-3"></i>
-                    </span>
-
                     </div>
                   </div>
-                </div>
-              @endif
-            @endforeach
+                @endif
+              @endforeach
             @endif
             <div class="mt-3" style="display: grid; place-items: center;">
-
-
               <input id="document"
                 class="form-control border-light light-shadow px-8"
                 type="file" multiple name="documents[]" >
