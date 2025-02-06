@@ -1,6 +1,7 @@
 /node_modules
 # /public
 /public/storage
+/public/pitch_decks
 /public/191014
 /storage/*.key
 /vendor

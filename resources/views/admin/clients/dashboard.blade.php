@@ -118,7 +118,7 @@
           }
         }
       }
-      elseif( in_array($trainingSession->type, ['online', 'offline']) )
+      elseif( in_array($trainingSession->type, ['online', 'offline','sessions']) )
       {
         if( empty( $trainingSession->datetime ) ) { continue; }
         else
