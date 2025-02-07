@@ -215,10 +215,39 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const pitchTabs = document.querySelectorAll('#pitch-tab');
       const tabs = document.querySelectorAll('#company-tab');
       const mobileTabs = document.querySelectorAll('#mobile-company-tab');
       const tabsContent = document.querySelectorAll('#company-tab-content .tab-pane');
+      const pitchContent = document.querySelectorAll('#pitch-tab-content .tab-pane');
       const activeCompanyTab = localStorage.getItem('activeCompanyTab');
+      const activePitchTab = localStorage.getItem('activePitchTab');
+
+      pitchTabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activePitchTab', JSON.stringify(index));
+        });
+
+        if (!activePitchTab) {
+          pitchTabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activePitchTab)) {
+          tab.classList.add('active');
+        }
+      });
+
+      pitchContent.forEach((tab, index) => {
+        if (!activePitchTab) {
+          pitchContent[0].classList.add('show', 'active');
+          return;
+        }
+
+        if (index === JSON.parse(activePitchTab)) {
+          tab.classList.add('fade', 'show', 'active');
+        }
+      });
 
       mobileTabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
