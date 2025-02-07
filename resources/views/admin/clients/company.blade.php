@@ -60,19 +60,6 @@
   <div class="content-wrapper" id="contentWrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
-      <!-- Alert -->
-      @if (session()->has('msg'))
-        <x-alert type="{{ session()->get('class') ?? 'danger' }}"
-          message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
-      @endif
-      <!-- Validation messages -->
-      @if (count($errors) > 0)
-        @foreach ($errors->all() as $error)
-          <x-alert type="danger" message="{{ $error }}" />
-        @endforeach
-      @endif
-      <!-- / Alert -->
-
       <!-- Tabs (mobile) -->
       <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">
         <ul class="nav nav-pills flex-nowrap" role="tablist">
@@ -101,9 +88,9 @@
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
-                <a 
-                  id="company-tab"
+            <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
+              <a 
+              id="company-tab"
                   href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link py-3"
                   data-bs-toggle="tab"
@@ -123,10 +110,24 @@
           class="tab-content p-0 overflow-y-auto custom-container mb-6" 
           style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
         >
+          <!-- Alert -->
+          @if (session()->has('msg'))
+            <x-alert 
+              type="{{ session()->get('class') ?? 'danger' }}"
+              message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" 
+            />
+          @endif
+          <!-- Validation messages -->
+          @if (count($errors) > 0)
+            @foreach ($errors->all() as $error)
+              <x-alert type="danger" message="{{ $error }}" />
+            @endforeach
+          @endif
+          <!-- / Alert -->
+
           @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade"
-              id="navs-left-{{ $tab['target'] }}">
-              @switch($tab['target'])
+          <div class="tab-pane fade" id="navs-left-{{ $tab['target'] }}">
+            @switch($tab['target'])
                 @case('company-info')
                   @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
                 @break

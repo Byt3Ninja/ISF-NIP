@@ -809,7 +809,7 @@ return [
 	'WhatsApp.required' => 'WhatsApp is required',
 	'WhatsApp.numeric' => 'WhatsApp must be a valid number',
 	'WhatsApp.digits_between' => 'WhatsApp must be between 8 and 15 digits',
-
+	'WhatsApp' => 'Whatsapp',
 	'email.required' => 'E-mail is required',
 	'email.email' => 'Invalid E-mail format',
 	'email.max' => 'E-mail must not exceed 255 characters',
