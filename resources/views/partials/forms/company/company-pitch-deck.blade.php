@@ -365,6 +365,28 @@
     var input = document.getElementById(inputId);
     var dropzone = document.getElementById(dropzoneId);
 
+    if (inputId === 'pitch-deck-input') {
+      var allowedExtensions = /(\.pdf)$/i;
+      if (!allowedExtensions.exec(input.value)) {
+        alert('{{ __('admin.pitch_deck_should_be_pdf') }}')
+        return;
+      }
+    } else if (inputId === 'video') {
+      var allowedExtensions = /(\.mp4|\.mkv|\.avi|\.mov)$/i;
+      if (!allowedExtensions.exec(input.value)) {
+        alert('{{ __('admin.pitch_deck_video_should_be_video') }}')
+        return;
+      }
+    } else if (inputId === 'document') {
+      var allowedExtensions = /(\.pdf)$/i;
+      for (var i = 0; i < input.files.length; i++) {
+        if (!allowedExtensions.exec(input.files[i].name)) {
+          alert('{{ __('admin.documents_should_be_pdf') }}')
+          return;
+        }
+      }
+    }
+
     if (input.files && input.files[0]) {
       var file = input.files[0];
       var reader = new FileReader();

@@ -1213,4 +1213,7 @@ return [
 	'no_tags_found' => 'لا يوجد اوسام',
 	'upload_file' => 'ارفع الملف',
 	'upload_video' => 'ارفع الفيديو',
+	'pitch_deck_should_be_pdf' => 'يجب أن يكون ملف Pitch deck بصيغة PDF',
+	'pitch_deck_video_should_be_video' => 'يجب أن يكون فيديو Pitch deck بصيغة MP4، MKV، AVI، MOV',
+	'documents_should_be_pdf' => 'يجب أن تكون المستندات بصيغة PDF',
 ];

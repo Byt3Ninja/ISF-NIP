@@ -1200,4 +1200,7 @@ return [
 	'no_tags_found' => 'No tags found',
 	'upload_file' => 'Upload File',
 	'upload_video' => 'Upload Video',
+	'pitch_deck_should_be_pdf' => 'Pitch deck should be a PDF file',
+	'pitch_deck_video_should_be_video' => 'Pitch deck video should be MP4, MKV, AVI, MOV',
+	'documents_should_be_pdf' => 'Documents should be a PDF file',
 ];
