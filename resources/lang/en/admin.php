@@ -1198,4 +1198,6 @@ return [
 	'No_Video_Found' => 'No Video Found',
 	'No_Document_Found' => 'No Document Found',
 	'no_tags_found' => 'No tags found',
+	'upload_file' => 'Upload File',
+	'upload_video' => 'Upload Video',
 ];

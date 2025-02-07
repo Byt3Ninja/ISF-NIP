@@ -1211,4 +1211,6 @@ return [
 	'No_Video_Found' => 'لا يوجد فيديو',
 	'No_Document_Found' => 'لا يوجد مستند',
 	'no_tags_found' => 'لا يوجد اوسام',
+	'upload_file' => 'ارفع الملف',
+	'upload_video' => 'ارفع الفيديو',
 ];
