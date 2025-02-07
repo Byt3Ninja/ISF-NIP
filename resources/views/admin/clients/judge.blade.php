@@ -174,33 +174,28 @@
           </div>
         </section>
 
-        <section class="mt-10">
+        <section class="mt-5">
           <div class="card">
-            <div class="card-header border-bottom">
-              <h4 class="card-title d-flex align-items-center">
-                <i class="ti ti-device-desktop-analytics ti-24px"></i>
-                <span class="mx-3">{{ __('dashboard.Your Judging List') }}</span>
-              </h4>
+            <div class="card-header border-bottom d-flex align-items-center">
+              <i class="ti ti-device-desktop-analytics ti-24px"></i>
+              <h4 class="card-title mx-3">{{ __('dashboard.Your Judging List') }}</h4>
             </div>
-            <div>
+            <div class="card-body">
               @if (count($csteps) > 0)
                 @foreach ($csteps as $step)
-                  <div class="card border-light">
-                    <div class="card-header" style="margin-bottom: -10px">
-                      <h5>
+                  <div class="mt-6">
+                    <div class="card-header bg-label-light p-3 mb-2">
+                      <h5 class="mb-0">
                         <i class="ti ti-bell ti-24px"></i>
                         <span class="mx-2">
-                          {{ $step->title }} -
-                          ({{ $step->cycle->title }})
+                          {{ $step->title }} - ({{ $step->cycle->title }})
                           - {{ __('dashboard.start from') }} {{ $step->from->format('d-m-Y') }}
                           {{ __('dashboard.to') }} {{ $step->to->format('d-m-Y') }}
                         </span>
                       </h5>
                     </div>
                     <div class="card-body">
-                      <p class="card-text">
-                        {{ $step->description }}
-                      </p>
+                      <p class="card-text">{{ $step->description }}</p>
                       <small class="text-muted">{{ __('dashboard.This Cycle Start from') }}
                         {{ $step->cycle->start->format('d-m-Y') }} {{ __('dashboard.to') }}
                         {{ $step->cycle->end->format('d-m-Y') }}</small>
@@ -218,57 +213,40 @@
                         <tbody>
                           @php
                             $form = \App\Step::where('cycle_id', $step->cycle_id)
-                                ->where('stype', 1)
-                                ->where('arr', $step->arr - 1)
-                                ->first();
+                              ->where('stype', 1)
+                              ->where('arr', $step->arr - 1)
+                              ->first();
 
                             $groups = App\Screening::where('user_id', Auth::id())
-                                ->where('step_id', $step->id)
-                                ->pluck('users');
+                              ->where('step_id', $step->id)
+                              ->pluck('users');
                             $groups = json_decode('[' . str_replace(['[', ']'], ' ', json_encode($groups)) . ']');
-                            if (
-                                $mysteps
-                                    ->where('step_id', $step->id)
-                                    ->pluck('panel')
-                                    ->first() == 0
-                            ) {
-                                $companies = \App\Company::where('step', $step->id)->get();
+                            if ($mysteps->where('step_id', $step->id)->pluck('panel')->first() == 0) {
+                              $companies = \App\Company::where('step', $step->id)->get();
                             } else {
-                                $companies = \App\Company::where('step', $step->id)
-                                    ->whereIN('id', $groups ?? [])
-                                    ->get();
+                              $companies = \App\Company::where('step', $step->id)
+                                ->whereIN('id', $groups ?? [])
+                                ->get();
                             }
-
                           @endphp
 
                           @foreach ($companies as $company)
                             <tr>
                               <td>
                                 <div class="d-flex align-items-center">
-                                  <a class="media-left">
-                                    <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle"
-                                      height="40" width="40">
-                                  </a>
-                                  <a href="/dashboard/screening/{{ $form->id }}/{{ $company->id }}" class="mx-3">
-                                    <div class="d-flex align-items-center gap-1">
-                                      {{ $company->name }}
-                                    </div>
+                                  <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                                  <a href="/dashboard/screening/{{ $form->id }}/{{ $company->id }}" class="text-decoration-none">
+                                    {{ $company->name }}
                                   </a>
                                 </div>
                               </td>
                               <td>
                                 <div class="d-flex align-items-center">
-                                  <a class="media-left mr-50">
-                                    <img src="{{ $company->user->image_url }}" alt="avatar" class="rounded-circle"
-                                      height="40" width="40">
-                                  </a>
-                                  <a href="/dashboard/screening/{{ $form->id }}/{{ $company->id }}"
-                                    class="mx-3">
-                                    <div class="media-body">
-                                      <h6 class="media-heading mb-0">{{ $company->user->name }} </h6>
-                                      <span class="font-small-2">{{ $company->user->title }}</span>
-                                    </div>
-                                  </a>
+                                  <img src="{{ $company->user->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                                  <div>
+                                    <h6 class="mb-0">{{ $company->user->name }}</h6>
+                                    <small class="text-muted">{{ $company->user->title }}</small>
+                                  </div>
                                 </div>
                               </td>
                               @php
@@ -276,17 +254,12 @@
                                 $judgepercentage = $company->companyJudge($company->id, $form->id, Auth::id());
                               @endphp
                               <td>
-                                <div
-                                  class="progress progress-bar-{{ $judgepercentage < 50 ? 'danger' : ($judgepercentage < 75 ? 'warning' : 'success') }} progress-sm mb-0">
-                                  <div class="progress-bar" role="progressbar" aria-valuenow="52" aria-valuemin="80"
-                                    aria-valuemax="100" style="width:{{ $judgepercentage }}%;">
-                                  </div>
+                                <div class="progress">
+                                  <div class="progress-bar bg-{{ $judgepercentage < 50 ? 'danger' : ($judgepercentage < 75 ? 'warning' : 'success') }}" role="progressbar" style="width: {{ $judgepercentage }}%;" aria-valuenow="{{ $judgepercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                               </td>
                               <td>
-                                <span
-                                  class="btn btn-light-{{ $weight < 25 ? 'danger' : ($weight < 50 ? 'warning' : 'success') }}">
-                                  {{ $weight }} %</span>
+                                <span class="badge bg-{{ $weight < 25 ? 'danger' : ($weight < 50 ? 'warning' : 'success') }}">{{ $weight }}%</span>
                               </td>
                             </tr>
                           @endforeach
@@ -296,21 +269,22 @@
                   </div>
                 @endforeach
               @else
-                {{ __('dashboard.No screening started yet') }}.
+                <div class="d-flex flex-column justify-content-center align-items-center p-5">
+                  <img src="/icons/not-found.svg" width="130" height="130" alt="No screening started yet">
+                  <h6 class="text-center text-secondary mt-3">{{ __('dashboard.No screening started yet') }}</h6>
+                </div>
               @endif
             </div>
           </div>
         </section>
 
-        <section class="mt-10">
+        <section class="mt-5">
           <div class="card">
-            <div class="card-header border-bottom">
-              <h4 class="card-title d-flex align-items-center">
-                <i class="ti ti-device-laptop ti-24px"></i>
-                <span class="mx-3">{{ __('dashboard.Cycle final screening') }}</span>
-              </h4>
+            <div class="card-header border-bottom d-flex align-items-center">
+              <i class="ti ti-device-laptop ti-24px"></i>
+              <h4 class="card-title mx-3">{{ __('dashboard.Cycle final screening') }}</h4>
             </div>
-            <div>
+            <div class="card-body">
               @php
                 $today = date('Y-m-d');
                 $csteps = App\Step::whereRaw('"' . $today . '" BETWEEN `from` AND `to`')
@@ -319,22 +293,19 @@
               @endphp
               @if (count($fcompanies) > 0)
                 @foreach ($csteps as $step)
-                  <div>
-                    <div class="card-header" style="margin-bottom: -20px">
-                      <h5>
+                  <div class="mt-4">
+                    <div class="card-header bg-label-light p-3 mb-2">
+                      <h5 class="mb-0">
                         <i class="ti ti-bell ti-24px"></i>
                         <span class="mx-2">
-                          {{ $step->title }} -
-                          ({{ $step->cycle->title }})
+                          {{ $step->title }} - ({{ $step->cycle->title }})
                           - {{ __('dashboard.start from') }} {{ $step->from->format('d-M') }}
                           {{ __('dashboard.to') }} {{ $step->to->format('d-M-Y') }}
                         </span>
                       </h5>
                     </div>
-                    <div class="card-body bg-rgba-light">
-                      <p class="card-text">
-                        {{ $step->description }}
-                      </p>
+                    <div class="card-body">
+                      <p class="card-text">{{ $step->description }}</p>
                       <small class="text-muted">{{ __('dashboard.This Cycle Start from') }}
                         {{ $step->cycle->start->format('d-m') }} {{ __('dashboard.to') }}
                         {{ $step->cycle->end->format('d-m-Y') }}</small>
@@ -351,41 +322,28 @@
                           </tr>
                         </thead>
                         <tbody>
-
                           @foreach ($fcompanies as $fcompany)
                             <tr>
                               <td>
                                 <div class="d-flex align-items-center">
-                                  <a class="media-left mr-50">
-                                    <img src="{{ $fcompany->company->logo_url }}" alt="avatar"
-                                      class="rounded-circle" height="40" width="40">
-                                  </a>
-                                  <a href="/dashboard/companyProfile/{{ $fcompany->company_id }}" class="mx-3">
-                                    <div class="d-flex align-items-center gap-1">
-                                      {{ $fcompany->company->name }}
-                                    </div>
+                                  <img src="{{ $fcompany->company->logo_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                                  <a href="/dashboard/companyProfile/{{ $fcompany->company_id }}" class="text-decoration-none">
+                                    {{ $fcompany->company->name }}
                                   </a>
                                 </div>
                               </td>
                               <td>
                                 <div class="d-flex align-items-center">
-                                  <a class="media-left mr-50">
-                                    <img src="{{ $fcompany->company->user->image_url }}" alt="avatar"
-                                      class="rounded-circle" height="40" width="40">
-                                  </a>
-                                  <a href="/dashboard/companyProfile/{{ $fcompany->company_id }}" class="mx-3">
-                                    <div class="media-body">
-                                      <h6 class="media-heading mb-0">{{ $fcompany->company->user->name }}</h6>
-                                      <span class="font-small-2">{{ $fcompany->company->user->title }}</span>
-                                    </div>
-                                  </a>
+                                  <img src="{{ $fcompany->company->user->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                                  <div>
+                                    <h6 class="mb-0">{{ $fcompany->company->user->name }}</h6>
+                                    <small class="text-muted">{{ $fcompany->company->user->title }}</small>
+                                  </div>
                                 </div>
                               </td>
-
                               <td>
-                                <div class="progress progress-bar- progress-sm mb-0">
-                                  <div class="progress-bar" role="progressbar" aria-valuenow="52" aria-valuemin="80"
-                                    aria-valuemax="100"></div>
+                                <div class="progress">
+                                  <div class="progress-bar bg-{{ $fcompany->progress < 50 ? 'danger' : ($fcompany->progress < 75 ? 'warning' : 'success') }}" role="progressbar" style="width: {{ $fcompany->progress }}%;" aria-valuenow="{{ $fcompany->progress }}" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                               </td>
                               <td>
@@ -393,16 +351,11 @@
                               </td>
                               <td>
                                 @if ($fcompany->join_url)
-                                  <a href="{{ $fcompany->join_url }}" target="_blank">
-                                    <button title="Join" type="button"
-                                      class="btn btn-icon rounded-circle btn-label-primary">
-                                      <i class="ti ti-user"></i></button>
+                                  <a href="{{ $fcompany->join_url }}" target="_blank" class="btn btn-primary btn-sm">
+                                    <i class="ti ti-user"></i> {{ __('dashboard.Join') }}
                                   </a>
-                                  <a href="/dashboard/final/{{ $step->id }}/{{ $fcompany->company_id }}"
-                                    target="_blank">
-                                    <button title="Open form" type="button"
-                                      class="btn btn-icon rounded-circle btn-label-success">
-                                      <i class="ti ti-file"></i></button>
+                                  <a href="/dashboard/final/{{ $step->id }}/{{ $fcompany->company_id }}" target="_blank" class="btn btn-success btn-sm">
+                                    <i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
                                   </a>
                                 @else
                                   {{ __('dashboard.Not started') }}
@@ -416,7 +369,10 @@
                   </div>
                 @endforeach
               @else
-                {{ __('dashboard.No Final screening started yet') }}.
+                <div class="d-flex flex-column justify-content-center align-items-center p-5">
+                  <img src="/icons/not-found.svg" width="130" height="130" alt="No screening started yet">
+                  <h6 class="text-center text-secondary mt-3">{{ __('dashboard.No Final screening started yet') }}</h6>
+                </div>
               @endif
             </div>
           </div>
