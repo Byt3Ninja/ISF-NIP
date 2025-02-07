@@ -447,6 +447,12 @@
           isValid = false;
         }
       });
+
+      // Disable form submission if phoneError or whatsappError is displayed
+      if (phoneError.style.display === 'block' || whatsappError.style.display === 'block') {
+        isValid = false;
+      }
+
       if (!isValid) {
         e.preventDefault();
       }

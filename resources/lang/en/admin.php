@@ -809,7 +809,7 @@ return [
 	'WhatsApp.required' => 'WhatsApp is required',
 	'WhatsApp.numeric' => 'WhatsApp must be a valid number',
 	'WhatsApp.digits_between' => 'WhatsApp must be between 8 and 15 digits',
-
+	'WhatsApp' => 'Whatsapp',
 	'email.required' => 'E-mail is required',
 	'email.email' => 'Invalid E-mail format',
 	'email.max' => 'E-mail must not exceed 255 characters',
@@ -1198,4 +1198,9 @@ return [
 	'No_Video_Found' => 'No Video Found',
 	'No_Document_Found' => 'No Document Found',
 	'no_tags_found' => 'No tags found',
+	'upload_file' => 'Upload File',
+	'upload_video' => 'Upload Video',
+	'pitch_deck_should_be_pdf' => 'Pitch deck should be a PDF file',
+	'pitch_deck_video_should_be_video' => 'Pitch deck video should be MP4, MKV, AVI, MOV',
+	'documents_should_be_pdf' => 'Documents should be a PDF file',
 ];
