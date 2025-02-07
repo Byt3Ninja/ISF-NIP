@@ -1,7 +1,7 @@
 stages:
   - beta
 
-dev:
+beta:
   stage: beta
   image: ubuntu:latest
   allow_failure: true
@@ -15,7 +15,7 @@ dev:
     - ssh-keyscan -p22 13.38.47.66 >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh -p22 -o StrictHostKeyChecking=no ubuntu@13.38.47.66 "cd /home/app/incubator && git pull && sudo docker exec incubator-app php artisan migrate --force"
+    - ssh -p22 -o StrictHostKeyChecking=no ubuntu@13.38.47.66 "cd /home/ubuntu/app/incubator && git pull && sudo docker exec incubator-app php artisan migrate --force"
 
   only:
     - beta
