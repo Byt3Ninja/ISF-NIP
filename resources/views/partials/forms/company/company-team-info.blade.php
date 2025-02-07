@@ -4,11 +4,28 @@
   }
 </style>
 
-<div class="row TapPageTeam">
-  @include('partials.forms.company._founder_team')
-  @include('partials.forms.company._shareholder_team')
-  @include('partials.forms.company._investor_team')
 
+@if( session()->has('success') )
+<div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <div class="d-flex align-items-center">
+    <i class="ti ti-thumb-up me-3 ti-md"></i>
+    <span> {{ session()->get('success') }} </span>
+  </div>
+</div>
+@endif
+
+@if( session()->has('error') )
+<div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="d-flex align-items-center">
+      <i class="ti ti-alert-triangle me-3 ti-md"></i>
+      <span> {{ session()->get('error') }} </span>
+    </div>
+</div>
+@endif
+
+<div class="row TapPageTeam">
   <div class="col-md-12 mb-3">
     <div class="card shadow-sm" style="border-radius: 15px;">
       <div class="p-4">
@@ -46,9 +63,9 @@
                 <textarea 
                   oninput="this.value = this.value.trimStart()"
                   pattern="[A-Za-z\s]*"
+                  maxlength="255"
                   class="form-control" id="working_team_summary" placeholder="{{ __('admin.Working_Team_Details') }}" value="" name="working_team_summary" autocomplete="new-working_team_summary">
-                  {{ $client->company ? $client->company->working_team_summary : old('working_team_summary') }}
-                </textarea>
+                  {{ $client->company ? $client->company->working_team_summary : old('working_team_summary') }}</textarea>
               </div>
             </div>
             <div class="col-12">
@@ -67,6 +84,10 @@
       </div>
     </div>
   </div>
+  @include('partials.forms.company._founder_team')
+  @include('partials.forms.company._shareholder_team')
+  @include('partials.forms.company._investor_team')
+
 </div>
 
 <script>

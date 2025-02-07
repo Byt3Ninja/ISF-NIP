@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].name_en.notEmpty
           },
           regexp: {
-            regexp: /^[a-zA-Z\s]*$/i,
+            regexp:/^[\p{L}\d\s]+$/u,
             message: translations[lang].name_en.stringOnly
           }
         }
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].name_ar.notEmpty
           },
           regexp: {
-            regexp: /^[\u0621-\u064A\s]*$/i,
+            regexp:/^[\p{L}\d\s]+$/u,
             message: translations[lang].name_ar.stringOnly
           }
         }
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].address_en.notEmpty
           },
           regexp: {
-            regexp: /^(?!\s)[a-zA-Z0-9\s,;:-]*$/i,
+            regexp: /^(?!\s)[\p{L}\p{N}\s,;:-]*$/u,
             message: translations[lang].address_en.address
           }
         }
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].address_ar.notEmpty
           },
           regexp: {
-            regexp: /^(?!\s)[\u0621-\u064A0-9\s,;:-]*$/i,
+            regexp: /^(?!\s)[\p{L}\p{N}\s,;:-]*$/u,
             message: translations[lang].address_ar.address
           }
         }

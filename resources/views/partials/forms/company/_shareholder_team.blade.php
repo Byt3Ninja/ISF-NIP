@@ -74,8 +74,9 @@
           </div>
         </div>
         <div class="col-12 text-end mt-3" style="height: 40px;">
+          <input type="hidden" name="TeamsNo" value="Shareholders" />
           <button
-            type="submit"
+            {{--  type="submit"  --}}
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
             do="Shareholders"
             company="{{ optional($client->company)->id }}"
@@ -153,7 +154,7 @@
                           <input type="hidden" value="{{ $Shareholder->id }}" name="id">
                           <button
                             class="d-flex align-items-center gap-2 p-2 cursor-pointer border-0 bg-transparent w-100 text-start"
-                            type="submit"
+                            {{--  type="submit"  --}}
                             onclick="return confirm('Are you sure you want to delete this ?')"
                           >
                             <i class="ti ti-trash text-danger fs-6"></i>
@@ -185,7 +186,7 @@
                             <input
                               type="text"
                               class="form-control shareholder_name{{ $Shareholder->id }}"
-                              id="shareholder_name"
+                              id="shareholder_name{{ $Shareholder->id }}"
                               placeholder="{{ __('admin.shareholder_name') }}"
                               value="{{ $Shareholder->Name ? $Shareholder->Name : old('shareholder_name') }}"
                               name="shareholder_name"
@@ -205,7 +206,7 @@
                             <input
                               type="text"
                               class="form-control shareholder_role{{ $Shareholder->id }}"
-                              id="shareholder_role"
+                              id="shareholder_role{{ $Shareholder->id }}"
                               placeholder="{{ __('admin.shareholder_role') }}"
                               value="{{ $Shareholder->RoleShereholder ? $Shareholder->RoleShereholder : old('shareholder_role') }}"
                               name="shareholder_role"
@@ -225,7 +226,7 @@
                             <input
                               type="text"
                               class="form-control shareholder_ownership_percentage{{ $Shareholder->id }}"
-                              id="shareholder_ownership_percentage"
+                              id="shareholder_ownership_percentage{{ $Shareholder->id }}"
                               placeholder="{{ __('admin.shareholder_ownership_percentage') }}"
                               value="{{ $Shareholder->PresentagShereholder ? $Shareholder->PresentagShereholder : old('shareholder_ownership_percentage') }}"
                               name="shareholder_ownership_percentage"
@@ -240,7 +241,7 @@
                       </div>
                       <div class="mt-6">
                         <button
-                          type="submit"
+                          {{--  type="submit"  --}}
                           class="btn btn-primary me-3 data-submit EditTeams"
                           do="{{ $Shareholder->id }}"
                           company="{{ optional($client->company)->id }}"

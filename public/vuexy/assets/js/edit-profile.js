@@ -1,6 +1,6 @@
 'use strict';
 
-const translations = {
+const profileTranslations = {
   en: {
     first_name_en: {
       notEmpty: 'Please enter first name',
@@ -69,72 +69,72 @@ document.addEventListener('DOMContentLoaded', function () {
       first_name_en: {
         validators: {
           notEmpty: {
-            message: translations[lang].first_name_en.notEmpty
+            message: profileTranslations[lang].first_name_en.notEmpty
           },
           regexp: {
             regexp: /^[\p{L}\s]+$/u,
-            message: translations[lang].first_name_en.stringOnly
+            message: profileTranslations[lang].first_name_en.stringOnly
           },
           stringLength: {
             min: 2,
             max: 50,
-            message: translations[lang].first_name_en.stringLength
+            message: profileTranslations[lang].first_name_en.stringLength
           },
         }
       },
       last_name_en: {
         validators: {
           notEmpty: {
-            message: translations[lang].last_name_en.notEmpty
+            message: profileTranslations[lang].last_name_en.notEmpty
           },
           regexp: {
             regexp: /^[\p{L}\s]+$/u,
-            message: translations[lang].last_name_en.stringOnly
+            message: profileTranslations[lang].last_name_en.stringOnly
           },
           stringLength: {
             min: 2,
             max: 50,
-            message: translations[lang].last_name_en.stringLength
+            message: profileTranslations[lang].last_name_en.stringLength
           },
         }
       },
       phone: {
         validators: {
           notEmpty: {
-            message: translations[lang].phone.notEmpty
+            message: profileTranslations[lang].phone.notEmpty
           },
           // regexp: {
           //   regexp: /^[0-9]+$/,
-          //   message: translations[lang].phone.phone
+          //   message: profileTranslations[lang].phone.phone
           // }
         }
       },
       email: {
         validators: {
           notEmpty: {
-            message: translations[lang].email.notEmpty
+            message: profileTranslations[lang].email.notEmpty
           },
           regexp: {
             regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
-            message: translations[lang].email.emailAddress
+            message: profileTranslations[lang].email.emailAddress
           }
         }
       },
       title_en: {
         validators: {
           notEmpty: {
-            message: translations[lang].title_en.notEmpty
+            message: profileTranslations[lang].title_en.notEmpty
           },
           regexp: {
             regexp: /^[\p{L}\s]+$/u,
-            message: translations[lang].title_en.stringOnly
+            message: profileTranslations[lang].title_en.stringOnly
           }
         }
       },
       zip_code: {
         validators: {
           numeric: {
-            message: translations[lang].zip_code.zipCode
+            message: profileTranslations[lang].zip_code.zipCode
           }
         }
       },
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
           stringLength: {
             min: 2,
             max: 100,
-            message: translations[lang].address.stringLength
+            message: profileTranslations[lang].address.stringLength
           }
         }
       }

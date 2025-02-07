@@ -358,7 +358,7 @@ class ClientCompanyController extends Controller
                             'CreatedTax' => $CreatedTax,
                             'Commercial_Register' => $Commercial_Register,
                             'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg,
+                            'Country_Register_id' => $cuntryReg ?? 0,
                         ]);
 
 
@@ -384,7 +384,7 @@ class ClientCompanyController extends Controller
                             'CreatedTax' => $CreatedTax,
                             'Commercial_Register' => $Commercial_Register,
                             'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg,
+                            'Country_Register_id' => $cuntryReg ?? 0,
                             'institutions' => $institutions,
                             'email' => $email,
                             'phone' => $phone,
@@ -590,6 +590,12 @@ class ClientCompanyController extends Controller
                     
                             $uploadedFile = 'financial_plan/' . $path . $originalName;
                         }
+                    }else{
+                        $uploadedFile = $user->company->financial_plan;
+                    }
+                    
+                    if($data['financial_plan_description'] == null) {
+                        $data['financial_plan_description'] = '0';
                     }
 
 
@@ -806,7 +812,7 @@ class ClientCompanyController extends Controller
                             'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck = 'pitch_deck/'. $path . $originalName;
+                        $pitch_deck = 'pitch_decks/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                     }
@@ -846,7 +852,7 @@ class ClientCompanyController extends Controller
                             'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck_video = 'pitch_deck/'. $path . $originalName;
+                        $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
                     }
@@ -900,7 +906,7 @@ class ClientCompanyController extends Controller
                                     'disk' => 'pitch_deck'
                                 ]);
                     
-                                $uploadedFiles[] = 'pitch_deck/' . $path . $originalName;
+                                $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
                             }
                         }
                     }else{
@@ -1142,7 +1148,7 @@ class ClientCompanyController extends Controller
                             'CreatedTax' => $CreatedTax,
                             'Commercial_Register' => $Commercial_Register,
                             'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg,
+                            'Country_Register_id' => $cuntryReg ?? 0,
                         ]);
 
 
@@ -1168,7 +1174,7 @@ class ClientCompanyController extends Controller
                             'CreatedTax' => $CreatedTax,
                             'Commercial_Register' => $Commercial_Register,
                             'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg,
+                            'Country_Register_id' => $cuntryReg ?? 0,
                             'institutions' => $institutions,
                             'email' => $email,
                             'phone' => $phone,
@@ -1292,7 +1298,7 @@ class ClientCompanyController extends Controller
                     if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
                         $data['targeted_market'] = ['null'];
                     }
-
+                    
                     if ($request->hasFile('financial_plan')) {
                         $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
                     
@@ -1314,6 +1320,12 @@ class ClientCompanyController extends Controller
                     
                             $uploadedFile = 'financial_plan/' . $path . $originalName;
                         }
+                    }else{
+                        $uploadedFile = $user->company->financial_plan;
+                    }
+                    
+                    if($data['financial_plan_description'] == null) {
+                        $data['financial_plan_description'] = '0';
                     }
 
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
@@ -1505,7 +1517,7 @@ class ClientCompanyController extends Controller
                             'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck = 'pitch_deck/'. $path . $originalName;
+                        $pitch_deck = 'pitch_decks/'. $path . $originalName;
                     }else{
                         return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                     }
@@ -1544,7 +1556,7 @@ class ClientCompanyController extends Controller
                             'disk' => 'pitch_deck'
                         ]);
                     
-                        $pitch_deck_video = 'pitch_deck/'. $path . $originalName;
+                        $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
                     }else{
                         
                         return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
@@ -1597,7 +1609,7 @@ class ClientCompanyController extends Controller
                                     'disk' => 'pitch_deck'
                                 ]);
                     
-                                $uploadedFiles[] = 'pitch_deck/' . $path . $originalName;
+                                $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
                             }
                         }
                     }else{
@@ -1735,7 +1747,7 @@ class ClientCompanyController extends Controller
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
-            dd($e);
+            // dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);
@@ -1784,7 +1796,7 @@ class ClientCompanyController extends Controller
             else
                 return $this->unknownErrorHappenedMsg();
         } catch (Exception $e) {
-            dd($e);
+            // dd($e);
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
@@ -1793,10 +1805,15 @@ class ClientCompanyController extends Controller
 
     public function AddTeams(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
+        if( isset( $id ) && !is_null( $id ) ) { $user = User::where('company_id', $id)->first(); }
+        else
+        {
+            $user = auth()->user();
+        }
         // $user = Auth::user();
         $companyId = $user->company_id;
-        if ($request->TeamsNo == "Founders") {
+        if ($request->TeamsNo == "Founders")
+        {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'founder_name' => 'required|string|max:255',
@@ -1810,25 +1827,34 @@ class ClientCompanyController extends Controller
             ]);
 
             // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+            if ($validator->fails())
+            {
+                if( $request->ajax() )
+                {
+                    return response()->json([
+                        'errors' => $validator->errors(),
+                    ], 422); // حالة الخطأ 422
+                }
+                else
+                {
+                    return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput();
+                }
             }
 
             $email = $request->input('founder_email');
-            $mail = Team_member::where('Email', $email)->first();
-            if ($mail) {
-                return response()->json([
-                    'state' => __('admin.founder_email_exist'),
-                ]);
+            $mail = Team_member::where('Email', $email)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
+
+            if( $mail != null )
+            {
+                if( $request->ajax() ) { return response()->json(['state' => __('admin.founder_email_exist'),]); }
+                else { return redirect()->back()->with('error', __('admin.founder_email_exist')); }
             }
             $linkedin = $request->input('founder_linkedin');
-            $linked = Team_member::where('LinkedIn', $linkedin)->first();
-            if ($linked) {
-                return response()->json(data: [
-                    'state' => __('admin.founder_linkedin_exist'),
-                ]);
+            $linked = Team_member::where('LinkedIn', $linkedin)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
+            if ($linked != null) 
+            {
+                if( $request->ajax() ) { return response()->json(data: ['state' => __('admin.founder_linkedin_exist'),]); }
+                else { return redirect()->back()->with('error', __('admin.founder_linkedin_exist')); }
             }
 
             $founder = 'Founder';
@@ -1842,12 +1868,11 @@ class ClientCompanyController extends Controller
             $teamMember->save();
 
             // استجابة بعد الحفظ
-            return response()->json([
-                'state' => __('admin.founder_added'),
-            ]);
+            if( $request->ajax() ) { return response()->json(['state' => __('admin.founder_added'),]); }
+            else { return redirect()->back()->with('success', __('admin.founder_added')); }
         }
-        if ($request->TeamsNo == "Shareholders") {
-
+        if ($request->TeamsNo == "Shareholders")
+        {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'shareholder_name' => 'required|string|max:255',
@@ -1860,24 +1885,31 @@ class ClientCompanyController extends Controller
             ]);
 
             // تحقق من النسب المئوية الكلية
-            $totalPercentage = Team_member::where('Company_id', $companyId)
-                ->sum('PresentagShereholder');
+            $totalPercentage = Team_member::where('Company_id', $companyId)->sum('PresentagShereholder');
 
             $newPercentage = $request->shareholder_ownership_percentage;
 
             // تحقق من أن النسبة المئوية الجديدة لا تتجاوز 100%
-            if ($totalPercentage + $newPercentage > 100) {
-                return response()->json([
-                    'errors' => [
-                        'shareholder_ownership_percentage' => [__('admin.Total ownership percentage cannot exceed 100%')],
-                    ],
-                ], 422); // حالة الخطأ 422
+            if ($totalPercentage + $newPercentage > 100)
+            {
+                if( $request->ajax() )
+                {
+                    return response()->json([
+                        'errors' => [
+                            'shareholder_ownership_percentage' => [__('admin.Total ownership percentage cannot exceed 100%')],
+                        ],
+                    ], 422); // حالة الخطأ 422
+                } else { return redirect()->back()->with('error', 'inputs error')->withErrors(__('admin.Total ownership percentage cannot exceed 100%'))->withInput(); } 
             }
             // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+            if ($validator->fails())
+            {
+                if( $request->ajax() )
+                {
+                    return response()->json([
+                        'errors' => $validator->errors(),
+                    ], 422); // حالة الخطأ 422
+                } else { return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput(); }
             }
             $founder = 'Shareholder';
             // إنشاء وحفظ بيانات العضو في قاعدة البيانات
@@ -1890,13 +1922,12 @@ class ClientCompanyController extends Controller
             $teamMember->save();
 
             // استجابة بعد الحفظ
-            return response()->json([
-                'state' => __('admin.Shareholder_added'),
-            ]);
+            if( $request->ajax() ) { return response()->json(['state' => __('admin.Investor_added'),]); }
+            else { return redirect()->back()->with('success', __('admin.founder_added')); }
         }
 
-        if ($request->TeamsNo == "Investors") {
-
+        if ($request->TeamsNo == "Investors")
+        {
             // تحقق من صحة البيانات
             $validator = Validator::make($request->all(), [
                 'investor_name' => 'required|string|max:255',
@@ -1906,11 +1937,14 @@ class ClientCompanyController extends Controller
                 'investment_type.required' => __('admin.Type is Required Investor'),
             ]);
 
-            // إذا كانت البيانات غير صالحة، إرجاع الأخطاء إلى الجافا سكريبت
-            if ($validator->fails()) {
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ], 422); // حالة الخطأ 422
+            if ($validator->fails())
+            {
+                if( $request->ajax() )
+                {
+                    return response()->json([
+                        'errors' => $validator->errors(),
+                    ], 422); // حالة الخطأ 422
+                } else { return redirect()->back()->with('error', 'inputs error')->withErrors($validator)->withInput(); }
             }
 
             $founder = 'Investor';
@@ -1922,16 +1956,19 @@ class ClientCompanyController extends Controller
             $teamMember->Company_id = $companyId;
             $teamMember->save();
 
-            // استجابة بعد الحفظ
-            return response()->json([
-                'state' => __('admin.Investor_added'),
-            ]);
+            // استجابة بعد الحفظ 
+            if( $request->ajax() ) { return response()->json(['state' => __('admin.Investor_added'),]); }
+            else { return response()->json(['state' => __('admin.Investor_added'),]);  }
         }
     }
 
     public function EditTeams(Request $request, $id = null)
     {
-        $user = User::where('company_id', $id)->first();
+        if( isset( $id ) && !is_null( $id ) ) { $user = User::where('company_id', $id)->first(); }
+        else
+        {
+            $user = auth()->user();
+        }
         // $user = Auth::user();
         $companyId = $user->company_id;
 

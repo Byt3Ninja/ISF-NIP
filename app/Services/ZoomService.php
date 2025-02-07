@@ -48,6 +48,7 @@ class ZoomService implements OnlineMeetingServiceInterface
                 $ZOOM_CLIENT_SECRET = '';
                 $ZOOM_ACCOUNT_ID = '';
             }
+            if(empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) return '';
             $client = new Client([
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode($ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),

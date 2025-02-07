@@ -587,13 +587,16 @@ if($company->team_num == '1'){
                         style="width: 100%; height: 350px; object-fit:" class="img-fluid">
                         <p>Your browser does not support iframes.</p>
                       </iframe>
-                      {{-- <div class="mt-auto d-flex flex-column mb-6">
+                      <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">To get analysis for your pitch
                           deck please</span>
-                        <a href="{{ route('my_company') }}"
-                          class="text-primary fw-medium text-decoration-underline mt-1">Click
-                          here</a>
-                      </div> --}}
+                        <a 
+                          role="button"
+                          onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                          class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                          Click here
+                        </a>
+                      </div>
                     </div>
                   </div>
                 @else
@@ -603,9 +606,12 @@ if($company->team_num == '1'){
                       <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">To get analysis for your pitch
                           deck please</span>
-                        <a href="{{ route('my_company') }}"
-                          class="text-primary fw-medium text-decoration-underline mt-1">Click
-                          here</a>
+                        <a 
+                          role="button"
+                          onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                          class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                          Click here
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -629,9 +635,12 @@ if($company->team_num == '1'){
                           To get analysis for your pitch deck please upload your
                           pitch deck video
                         </span>
-                        <a href="{{ route('my_company') }}"
-                          class="text-primary fw-medium text-decoration-underline mt-1">Click
-                          here</a>
+                        <a 
+                          role="button"
+                          onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
+                          class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                          Click here
+                        </a>
                       </div>
                     </div>
                   </div>

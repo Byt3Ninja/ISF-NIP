@@ -90,8 +90,9 @@
           </div>
         </div>
         <div class="col-12 text-end mt-3" style="height: 40px;">
+          <input type="hidden" name="TeamsNo" value="Founders" />
           <button 
-            type="submit" 
+            {{--  type="submit"   --}}
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams" 
             do="Founders" 
             company="{{ optional($client->company)->id }}"
@@ -168,7 +169,7 @@
                       <input type="hidden" value="{{ $fonder->id }}" name="id">
                       <button 
                         class="d-flex align-items-center gap-2 p-2 cursor-pointer border-0 bg-transparent w-100 text-start" 
-                        type="submit" 
+                        {{--  type="submit"   --}}
                         onclick="return confirm('Are you sure you want to delete this ?')"
                       >
                         <i class="ti ti-trash text-danger fs-6"></i>
@@ -216,7 +217,7 @@
                         <input 
                           type="text" 
                           class="form-control founder_name{{ $fonder->id }}" 
-                          id="founder_name" 
+                          id="founder_name{{ $fonder->id }}" 
                           placeholder="{{ __('admin.founder_name') }}" 
                           value="{{ $fonder->Name ? $fonder->Name : old('founder_name') }}" 
                           name="founder_name" 
@@ -238,7 +239,7 @@
                         <input 
                           type="email" 
                           class="form-control founder_email{{ $fonder->id }}" 
-                          id="founder_email" 
+                          id="founder_email{{ $fonder->id }}" 
                           placeholder="{{ __('admin.founder_email') }}" 
                           value="{{ $fonder->Email ? $fonder->Email : old('founder_email') }}" 
                           name="founder_email" 
@@ -261,7 +262,7 @@
                           <input 
                             type="url" 
                             class="form-control founder_linkedin{{ $fonder->id }}" 
-                            id="founder_linkedin" 
+                            id="founder_linkedin{{ $fonder->id }}" 
                             value="{{ $fonder->LinkedIn ? $fonder->LinkedIn : old('founder_linkedin') }}" 
                             name="founder_linkedin" 
                             autocomplete="founder_linkedin" 
@@ -279,7 +280,7 @@
                   </div>
                   <div class="mt-6">
                     <button 
-                      type="submit" 
+                      {{--  type="submit"   --}}
                       class="btn btn-primary me-3 data-submit EditTeams" 
                       do="{{ $fonder->id }}" 
                       company="{{ optional($client->company)->id }}"
