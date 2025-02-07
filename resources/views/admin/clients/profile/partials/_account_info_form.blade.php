@@ -60,9 +60,18 @@
         </div>
         <div class="mb-4 col-md-6">
           <label for="last_name_en" class="form-label fs-6 fw-bold">{{ __('admin.Last Name') }}</label>
-          <input value="{{ $client->last_name_en }}" name="last_name_en" type="text" class="form-control"
-            id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required
-            autocomplete="last_name_en" max="255" min="2" />
+            <input
+              value="{{ $client->last_name_en }}"
+              name="last_name_en"
+              type="text"
+              class="form-control"
+              id="last_name_en"
+              style="direction: ltr;"
+              placeholder="{{ __('admin.Last Name') }}"
+              required
+              autocomplete="last_name_en"
+              oninput="this.value = this.value.trimStart()"
+            />
         </div>
         {{-- <div class="mb-4 col-md-6">
           <label for="first_name_ar" class="form-label fs-6 fw-bold">{{ __('admin.Arabic First Name')
