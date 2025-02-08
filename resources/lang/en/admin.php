@@ -1203,4 +1203,7 @@ return [
 	'pitch_deck_should_be_pdf' => 'Pitch deck should be a PDF file',
 	'pitch_deck_video_should_be_video' => 'Pitch deck video should be MP4, MKV, AVI, MOV',
 	'documents_should_be_pdf' => 'Documents should be a PDF file',
+	'Pitch_Deck_Video_must_be_a_valid_URL' => 'Pitch deck video must be a valid URL',
+	'Pitch_Deck_Video_max_size_is_25MB' => 'Pitch deck video max size is 10MB',
+	'pitch_deck_video_size_limit_exceeded' => 'Pitch deck video size limit exceeded',
 ];

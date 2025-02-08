@@ -55,7 +55,7 @@
                               <td>{{ $doc->arr }}</td>
                               <td>{{ $doc->menu_ar }}</td>
                               <td>{{ $doc->menu_en }}</td>
-                              <td>{{ __($doc->role) }}</td>
+                              <td>{{ __('admin.' . $doc->role) }}</td>
                               <td>
                                 <a title="View" target="_blank" href="/dashboard/documentation/{{ $doc->id }}"
                                   class="btn btn-icon rounded-circle btn-label-primary">

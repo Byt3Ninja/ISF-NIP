@@ -459,31 +459,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 ->count();
 
 
-        // Filter Screening
-        $finalScreenings = app(App\Finalscreening::class)->where('step_id', '=', $step->id)->get();
-        // حساب عدد السجلات لكل step_id
-          // حساب عدد السجلات لكل step_id
-          $totalFinalscreenCount = app(App\Finalscreening::class)
-              ->where('step_id', '=', $step->id)
-              ->count();
-
-          // حساب عدد company_id الفريدة لكل step_id
-          $totalDistinctCompanies = app(App\Finalscreening::class)
-              ->where('step_id', '=', $step->id)
-              ->distinct()
-              ->count('company_id');
-
-          // حساب عدد المحكمين
-          foreach ($finalScreenings as $screening) {
-            $finaljudges = is_string($screening->judges) ? json_decode($screening->judges, true) : $screening->judges;
-              $judgeData = app(App\User::class)->whereIn('id', $finaljudges)->get();
-              // إضافة بيانات المحكمين إلى المصفوفة
-              $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
-
-
-
-
-        }
+        
         @endphp
 
 
@@ -589,7 +565,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
       @endif
       @if($step->stype == 2)
       <!-- Screening Step -->
-          
+          @php
+
+        $countJudges = count(json_decode($step->list, true)??[]) ?? 0 ;///
+        $scoped_judges = $judges->whereIn('id', json_decode($step->list, true) ?? []);
+        
+          @endphp
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
           <div class="card-body">
@@ -644,7 +625,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                     <div class="d-flex align-items-center">
                       <span class="me-2 fw-medium text-capitalize fs-6 text-dark fw-semibold">{{ __('admin.Judgers') }}</span>
                       <small class="bg-light text-secondary py-1 px-2 rounded-pill">
-                        {{ $judges->count() }}
+                        {{ count($scoped_judges) }}
                       </small>
                     </div>
                   </div>
@@ -714,7 +695,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 </div>
                 <div class="d-flex justify-content-between w-100">
                   <div class="d-flex align-items-center gap-3 mb-3">
-                    @if (count($judges) > 0)
+                    @if (count($scoped_judges) > 0)
                       <div class="d-flex align-items-center">
                         <i class="ti ti-gavel text-primary ti-24px me-2"></i>
                         <h6 class="mb-0">{{ __('admin.Judgers') }}</span>
@@ -736,7 +717,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="col-md-9">
                     <div class="d-flex flex-column">
                       <div class="d-flex flex-wrap gap-1">
-                        @foreach($judges as $judge)
+                        @foreach($scoped_judges as $judge)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
                           href="{{route('show_mentor_profile', $judge->id)}}">
                           @if(!empty($judge->image_url))
@@ -1064,6 +1045,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
       @endif
       @if($step->stype == 4)
+     
       <!-- Training Step -->
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
@@ -1229,8 +1211,26 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
         @php
 
-          
-
+         // Filter Screening
+        $finalScreenings = App\Finalscreening::where('step_id', '=', $step->id)->first();
+       
+        // حساب عدد السجلات لكل step_id
+          // حساب عدد السجلات لكل step_id
+          $totalFinalscreenCount = app(App\Finalscreening::class)
+              ->where('step_id', '=', $step->id)
+              ->count();
+          // حساب عدد company_id الفريدة لكل step_id
+          $totalDistinctCompanies = app(App\Finalscreening::class)
+              ->where('step_id', '=', $step->id)
+              ->distinct()
+              ->count('company_id');
+              if(isset($finalScreenings->judges)){
+          // حساب عدد المحكمين
+            $finaljudges = is_string($finalScreenings->judges) ? json_decode($finalScreenings->judges, true) : $finalScreenings->judges;
+              $judgeData = app(App\User::class)->whereIn('id', $finaljudges)->get();
+              // إضافة بيانات المحكمين إلى المصفوفة
+              $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
+              }
           $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
           $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNull('screening')->orWhere('screening', '{}')->count();
           $answersdone = app(App\Formdata::class)

@@ -403,7 +403,7 @@ class ClientCompanyController extends Controller
 
                     $validatedData = $request->validate([
                         'phone' => 'required|numeric|digits_between:8,15',
-                        'WhatsApp' => 'required|numeric|digits_between:8,15',
+                        'WhatsApp' => 'nullable',
                         'email' => 'required|email|max:255',
                         'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                         'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -418,10 +418,6 @@ class ClientCompanyController extends Controller
                         'phone.required' => __('admin.Phone is required'),
                         'phone.numeric' => __('admin.Phone must be a valid number'),
                         'phone.digits_between' => __('admin.Phone must be between 8 and 15 digits'),
-
-                        'WhatsApp.required' => __('admin.WhatsApp is required'),
-                        'WhatsApp.numeric' => __('admin.WhatsApp must be a valid number'),
-                        'WhatsApp.digits_between' => __('admin.WhatsApp must be between 8 and 15 digits'),
 
                         'email.required' => __('admin.E-mail is required'),
                         'email.email' => __('admin.Invalid E-mail format'),
@@ -1193,17 +1189,13 @@ class ClientCompanyController extends Controller
 
                     $validatedData = $request->validate([
                         'phone' => 'required|numeric|digits_between:8,15',
-                        'WhatsApp' => 'required|numeric|digits_between:8,15',
+                        'WhatsApp' => 'nullable',
                         'email' => 'required|email|max:255|unique:companies,email,' . $id,
                     ], [
                         'phone.required' => __('admin.Phone is required'),
                         'phone.numeric' => __('admin.Phone must be a valid number'),
                         'phone.digits_between' => __('admin.Phone must be between 8 and 15 digits'),
-
-                        'WhatsApp.required' => __('admin.WhatsApp is required'),
-                        'WhatsApp.numeric' => __('admin.WhatsApp must be a valid number'),
-                        'WhatsApp.digits_between' => __('admin.WhatsApp must be between 8 and 15 digits'),
-
+                        
                         'email.required' => __('admin.E-mail is required'),
                         'email.email' => __('admin.Invalid E-mail format'),
                         'email.max' => __('admin.E-mail must not exceed 255 characters'),
@@ -1542,7 +1534,10 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 10) {
                     $validator = Validator::make($request->all(), [
-                        'pitch_deck_video' => 'nullable|mimes:mp4,ogg,webm|max:10240', // يجب أن يكون ملف MP4, OGG, WEBM وحجمه لا يتجاوز 10MB
+                        'pitch_deck_video' => 'nullable|mimes:mp4,ogg,webm|max:25600', // يجب أن يكون ملف MP4, OGG, WEBM وحجمه لا يتجاوز 10MB
+                    ], [
+                        'pitch_deck_video.mimes' => __('admin.Pitch_Deck_Video_must_be_a_valid_URL'),
+                        'pitch_deck_video.max' => __('admin.Pitch_Deck_Video_max_size_is_25MB'),
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
 
