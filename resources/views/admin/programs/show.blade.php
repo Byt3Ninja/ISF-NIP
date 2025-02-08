@@ -459,31 +459,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 ->count();
 
 
-        // Filter Screening
-        $finalScreenings = app(App\Finalscreening::class)->where('step_id', '=', $step->id)->get();
-        // حساب عدد السجلات لكل step_id
-          // حساب عدد السجلات لكل step_id
-          $totalFinalscreenCount = app(App\Finalscreening::class)
-              ->where('step_id', '=', $step->id)
-              ->count();
-
-          // حساب عدد company_id الفريدة لكل step_id
-          $totalDistinctCompanies = app(App\Finalscreening::class)
-              ->where('step_id', '=', $step->id)
-              ->distinct()
-              ->count('company_id');
-
-          // حساب عدد المحكمين
-          foreach ($finalScreenings as $screening) {
-            $finaljudges = is_string($screening->judges) ? json_decode($screening->judges, true) : $screening->judges;
-              $judgeData = app(App\User::class)->whereIn('id', $finaljudges)->get();
-              // إضافة بيانات المحكمين إلى المصفوفة
-              $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
-
-
-
-
-        }
+        
         @endphp
 
 
@@ -1064,6 +1040,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
       @endif
       @if($step->stype == 4)
+     
       <!-- Training Step -->
       <div class="col-12 mb-4">
         <div class="card" style="border-radius: 1rem;">
@@ -1229,8 +1206,29 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
         @php
 
-          
+         // Filter Screening
+        $finalScreenings = App\Finalscreening::where('step_id', '=', $step->id)->first();
+       
+        // حساب عدد السجلات لكل step_id
+          // حساب عدد السجلات لكل step_id
+          $totalFinalscreenCount = app(App\Finalscreening::class)
+              ->where('step_id', '=', $step->id)
+              ->count();
 
+          // حساب عدد company_id الفريدة لكل step_id
+          $totalDistinctCompanies = app(App\Finalscreening::class)
+              ->where('step_id', '=', $step->id)
+              ->distinct()
+              ->count('company_id');
+              
+          // حساب عدد المحكمين
+            $finaljudges = is_string($finalScreenings->judges) ? json_decode($finalScreenings->judges, true) : $finalScreenings->judges;
+              $judgeData = app(App\User::class)->whereIn('id', $finaljudges)->get();
+              // إضافة بيانات المحكمين إلى المصفوفة
+              $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
+        
+
+       
           $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
           $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNull('screening')->orWhere('screening', '{}')->count();
           $answersdone = app(App\Formdata::class)

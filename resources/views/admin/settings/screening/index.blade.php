@@ -107,9 +107,10 @@
                       <dt class="col-sm-3 text-right">{{ __('cycles.Total registered') }}</dt>
                       <dd class="col-sm-9">{{ \App\Company::whereIn('step', [$form->id ?? '', $cstep->id])->count() }}</dd>
                     </dl>
+                    
                     <dl class="row">
                       <dt class="col-sm-3 text-right">{{ __('cycles.Registered Judges') }}</dt>
-                      <dd class="col-sm-9">{{ $judges->count() }}</dd>
+                      <dd class="col-sm-9">{{ $cstep->judgers }}</dd>
                     </dl>
                   </div>
                 </div>
@@ -187,7 +188,7 @@
                                 : '' !!}
                             @foreach ($judges as $judge)
                               <option value="{{ $judge->id }}"
-                                {{ in_array($judge->id, json_decode($cstep->list) ?? []) ? 'selected' : '' }}>
+                                {{ is_array($cstep->list) && in_array($judge->id, json_decode($cstep->list) ?? []) ? 'selected' : '' }} >
                                 {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})
                               </option>
                             @endforeach
