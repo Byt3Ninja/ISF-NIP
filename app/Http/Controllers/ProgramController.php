@@ -86,6 +86,7 @@ class ProgramController extends Controller
 
         $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
 
+        
         $stepsData = [];
         foreach ($steps as $step) {
             $stepsData[] = [
