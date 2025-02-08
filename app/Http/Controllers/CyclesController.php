@@ -453,10 +453,10 @@ class CyclesController extends Controller
 
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {
-            return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);
+            return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first', 'class' => 'danger']);
         }
         if (!Auth::user()->company) {
-            return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);
+            return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
         }
         // Check enrolled in Cycle
         if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {
