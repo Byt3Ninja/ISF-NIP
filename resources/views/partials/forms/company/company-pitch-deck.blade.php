@@ -377,6 +377,14 @@
         alert('{{ __('admin.pitch_deck_video_should_be_video') }}')
         return;
       }
+      // Check file size (25MB = 25 * 1024 * 1024 bytes)
+      var maxSize = 25 * 1024 * 1024; 
+
+      if (file.size > maxSize) {
+        alert('{{ __('admin.pitch_deck_video_size_limit_exceeded') }}'); 
+        input.value = ''; // Clear the input field
+        return;
+      }
     } else if (inputId === 'document') {
       var allowedExtensions = /(\.pdf)$/i;
       for (var i = 0; i < input.files.length; i++) {
