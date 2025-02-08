@@ -253,13 +253,41 @@ if($company->team_num == '1'){
                       </a>
                     </div>
                   @endif
+                  @if ($company->google_map)
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-world ti-24px text-primary me-2"></i>
+                    <a href="{{ strpos($company->google_map, 'http') === 0 ? $company->google_map : 'http://' . $company->google_map }}"
+                      target="_blank">
+                      {{ $company->google_map }}
+                    </a>
+                  </div>
+                @endif
                 </div>
                 @if ($company->phone)
                   <div class="d-flex align-items-center">
                     <i class="ti ti-phone ti-28px text-primary me-2"></i>
-                    {{ $company->phone }}
+                    {{ $company->country_code . $company->phone }}
                   </div>
                 @endif
+                @if ($company->instagram)
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-world ti-24px text-primary me-2"></i>
+                    <a href="{{ strpos($company->instagram, 'http') === 0 ? $company->instagram : 'http://' . $company->instagram }}"
+                      target="_blank">
+                      {{ $company->instagram }}
+                    </a>
+                  </div>
+                @endif
+                @if ($company->tiktok)
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-world ti-24px text-primary me-2"></i>
+                    <a href="{{ strpos($company->tiktok, 'http') === 0 ? $company->tiktok : 'http://' . $company->tiktok }}"
+                      target="_blank">
+                      {{ $company->tiktok }}
+                    </a>
+                  </div>
+                @endif
+                
               </div>
             </div>
           </div>

@@ -39,7 +39,7 @@ class CyclesController extends Controller
 
         // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
         ExportCycleCompData::dispatch($data2);
-
+        
         return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
 
@@ -453,10 +453,10 @@ class CyclesController extends Controller
 
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {
-            return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);
+            return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first', 'class' => 'danger']);
         }
         if (!Auth::user()->company) {
-            return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);
+            return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
         }
         // Check enrolled in Cycle
         if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {

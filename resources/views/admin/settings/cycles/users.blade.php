@@ -248,6 +248,7 @@
 
 @stop
 @section('pagescripts')
+<script src="/app-assets/js/1.js"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       $('.table').DataTable({
