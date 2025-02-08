@@ -2093,7 +2093,7 @@ class ClientCompanyController extends Controller
         $teamMember->delete();
 
         // استجابة بعد الحفظ
-        return redirect()->route('my_company', $companyId)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+        return redirect()->route('my_company', $companyId)->with(['msg' => 'DeletedSuccessfully', 'class' => 'success']);
     }
 
 
