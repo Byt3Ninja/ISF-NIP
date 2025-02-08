@@ -249,7 +249,7 @@
                   <div class="col-12 d-flex justify-content-end">
                     <button
                       type="submit"
-                      class="btn btn-sm btn-primary d-none"
+                      class="btn btn-sm btn-primary "
                       id="submit-button-documents"
                     >
                       <span id="button-text">{{ __('admin.Save') }}</span>
@@ -290,47 +290,47 @@
     }
   }
 
-  function addDocument() {
-    var input = document.getElementById('document-upload');
-    var documentsList = document.getElementById('documents-list');
+  // function addDocument() {
+  //   var input = document.getElementById('document-upload');
+  //   var documentsList = document.getElementById('documents-list');
 
-    if (input.files && input.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        var documentCard = document.createElement('div');
-        documentCard.className = 'card';
-        documentCard.innerHTML = `
-          <div class="p-2">
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center gap-3">
-                <i class="ti ti-file fs-5 text-warning"></i>
-                <span class="fs-6">${input.files[0].name}</span>
-              </div>
-              <div class="d-flex align-items-center gap-1">
-                <a
-                  class="btn btn-sm btn-icon rounded-circle btn-transparent"
-                  href="${e.target.result}"
-                  target="_blank"
-                  download="{{ $fileNames[$index] }}"
-                >
-                  <i class="ti ti-download fs-6 text-primary"></i>
-                </a>
-                <span
-                  class="btn btn-sm btn-icon rounded-circle btn-transparent text-danger delete-file"
-                  data-index="${index}"
-                  data-file="${document}"
-                >
-                  <i class="ti ti-trash fs-6"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        `;
-        documentsList.appendChild(documentCard);
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
+  //   if (input.files && input.files[0]) {
+  //     var reader = new FileReader();
+  //     reader.onload = function (e) {
+  //       var documentCard = document.createElement('div');
+  //       documentCard.className = 'card';
+  //       documentCard.innerHTML = `
+  //         <div class="p-2">
+  //           <div class="d-flex justify-content-between align-items-center">
+  //             <div class="d-flex align-items-center gap-3">
+  //               <i class="ti ti-file fs-5 text-warning"></i>
+  //               <span class="fs-6">${input.files[0].name}</span>
+  //             </div>
+  //             <div class="d-flex align-items-center gap-1">
+  //               <a
+  //                 class="btn btn-sm btn-icon rounded-circle btn-transparent"
+  //                 href="${e.target.result}"
+  //                 target="_blank"
+  //                 download=""
+  //               >
+  //                 <i class="ti ti-download fs-6 text-primary"></i>
+  //               </a>
+  //               <span
+  //                 class="btn btn-sm btn-icon rounded-circle btn-transparent text-danger delete-file"
+  //                 data-index="${index}"
+  //                 data-file="${document}"
+  //               >
+  //                 <i class="ti ti-trash fs-6"></i>
+  //               </span>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       `;
+  //       documentsList.appendChild(documentCard);
+  //     };
+  //     reader.readAsDataURL(input.files[0]);
+  //   }
+  // }
 
   $(document).on('click', '.delete-file', function () {
     var fileIndex = $(this).data('index');

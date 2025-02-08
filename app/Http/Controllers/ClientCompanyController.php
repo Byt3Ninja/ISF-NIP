@@ -1535,6 +1535,9 @@ class ClientCompanyController extends Controller
                 if ($data['CompanyN'] == 10) {
                     $validator = Validator::make($request->all(), [
                         'pitch_deck_video' => 'nullable|mimes:mp4,ogg,webm|max:10240', // يجب أن يكون ملف MP4, OGG, WEBM وحجمه لا يتجاوز 10MB
+                    ], [
+                        'pitch_deck_video.mimes' => __('admin.Pitch_Deck_Video_must_be_a_valid_URL'),
+                        'pitch_deck_video.max' => __('admin.Pitch_Deck_Video_max_size_is_10MB'),
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
 

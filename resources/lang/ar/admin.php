@@ -1216,4 +1216,6 @@ return [
 	'pitch_deck_should_be_pdf' => 'يجب أن يكون ملف Pitch deck بصيغة PDF',
 	'pitch_deck_video_should_be_video' => 'يجب أن يكون فيديو Pitch deck بصيغة MP4، MKV، AVI، MOV',
 	'documents_should_be_pdf' => 'يجب أن تكون المستندات بصيغة PDF',
+	'Pitch_Deck_Video_must_be_a_valid_URL' => 'يجب ان يكون رابط الفيديو صالح',
+	'Pitch_Deck_Video_max_size_is_10MB' => 'يجب ان يكون حجم الفيديو لا يزيد عن 10MB',
 ];
