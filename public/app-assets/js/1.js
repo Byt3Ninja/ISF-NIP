@@ -184,16 +184,14 @@ $(document).ready(function () {
             alert(messages.exportNotSuccess);
             return;
         }
-
-alert(messages.exportSuccess);
-
+        alert(messages.exportSuccess);
         $.ajax({
             url: `/dashboard/export-cyclesComp`,
             type: 'GET',
             data:{step:step
             },
             success: function(response) {
-                // alert(response.message);
+                //  alert(response.message);
             },
             error: function(error) {
                 console.error('Error:', error);

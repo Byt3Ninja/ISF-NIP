@@ -39,7 +39,7 @@ class CyclesController extends Controller
 
         // إرسال وظيفة (Job) لتحميل البيانات وإرسال البريد
         ExportCycleCompData::dispatch($data2);
-
+        
         return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
     }
 
