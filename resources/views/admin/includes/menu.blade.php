@@ -309,6 +309,13 @@
       </li>
     @endif
 
+    <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
+      <a href="{{ route('currencies.index') }}" class="menu-link">
+        <i class="menu-icon tf-icons ti ti-money"></i>
+          <div>{{ __('admin.manage_currencies') }}</div>
+      </a>
+  </li>
+
     @can('edit_forms')
       <li class="{{ Request::is('dashboard/show-builder*', 'dashboard/show-form*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/show-builder" class="menu-link">

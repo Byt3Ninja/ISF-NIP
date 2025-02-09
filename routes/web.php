@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
@@ -409,6 +410,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('programlist/Email', 'ProgramController@SentEmail');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
+    /* Start of Currencies Routes */
+     Route::resource('currencies', 'CurrencyController');
+    /* End of Currencies Routes */
+
     // ===============> Mentor Dashboard Routes <===============
     Route::group(['prefix' => 'mentor', 'namespace' => 'Mentor'], function () {
         Route::get('mentorshipSessions', 'MentorshipController@index')->name('mentorshipSessions.index');
@@ -462,6 +467,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('/swot-analysis/save', [GeminiController::class, 'saveSwotAnalysis'])->name('swot.save');
     Route::get('/swot-analysis/export', [GeminiController::class, 'exportToPdf'])->name('swot.export');
     /* End of Gemini SWOT Analysis Routes */
+
+   
 
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'], function () {
