@@ -744,7 +744,9 @@
     @endif
       <!-- Survey -->
 
-
+      
+        
+      
       <!-- My Progress -->
       @if( Auth::user()->company && $circle_id != 0 )
         <div class="card mt-10">
@@ -842,6 +844,8 @@
                       </span>
                     </td>
                   </tr>
+
+                  
                 @endforeach
               </tbody>
             </table>
@@ -859,7 +863,9 @@
                   </h4>
 								</div>
 								<div class="card-body">
-									@php( $workingcycles = App\Cycle::whereNull('private')->whereRaw('? between start and end', [now()->format('Y-m-d')])->get() )
+									@php
+                  $workingcycles = App\Cycle::whereNull('private')->whereRaw('? between start and end', [now()->format('Y-m-d')])->get();
+                  @endphp
 									@if (count($workingcycles)>0)
 										@foreach($workingcycles as $cycle)
                     
@@ -869,7 +875,9 @@
 													<div class="d-flex align-items-center mt-2">
 														<div class="media-left">
                               @if (!is_null($cycle->organization->image_url))
-                    @php( $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME) )
+                    @php
+                    $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME);
+                    @endphp
     
     
 															<img src="{{ $cycle->organization->image_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
@@ -994,6 +1002,8 @@
             </h5>
           </div> --}}
 
+          
+
           <section>
 			<div class="row">
 				<div class="col-md-12">
@@ -1105,7 +1115,7 @@
 								</div>
 							</div>
 							
-
+             
 
 						
 					</div>
