@@ -307,12 +307,7 @@
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
-      <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
-        <a href="{{ route('currencies.index') }}" class="menu-link">
-          <i class="menu-icon fas fa-money-bill-wave"></i>
-            <div>{{ __('admin.manage_currencies') }}</div>
-        </a>
-    </li>
+      
     @endif
 
     
@@ -759,6 +754,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <div>{{ __('admin.settings') }}</div>
             </a>
           </li>
+          <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
+            <a href="{{ route('currencies.index') }}" class="menu-link">
+              <i class="menu-icon fas fa-money-bill-wave"></i>
+                <div>{{ __('admin.manage_currencies') }}</div>
+            </a>
+        </li>
           @if (!app()->environment('production', 'beta'))
             <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
               <a href="{{ route('Tags.index') }}" class="menu-link">
