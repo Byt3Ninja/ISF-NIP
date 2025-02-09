@@ -71,7 +71,7 @@ class ScreeningController extends Controller
         if ($request->step) {
             $type = Step::where('id', $request->step)->pluck('data')->first();
             $list = $request->judges;
-            
+            dd($request->judges);
             $notifylist = User::whereIn('id', array_values($list))->get();
             
             Step::where('id', $request->step)->update(['list' => json_encode($list)]);
