@@ -9,17 +9,19 @@ use App\Sector;
 use App\Company;
 use App\Service;
 use App\Calendar;
+use App\Currency;
 use App\Messages;
 use App\Schedule;
+use App\Settings;
 use App\Messenger;
 use App\Screening;
 use App\TimeSheet;
 use App\BuilderForm;
 use App\Organization;
 use App\Documentation;
+
 use App\Finalscreening;
 use App\MentorshipTask;
-
 use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
@@ -770,8 +772,9 @@ class HomeController extends Controller
             });
         }
         $services = $services->get();
-        $Setting = \App\Settings::where('id', 1)->first();
-        return view('admin.clients.directory')->with('services', $services)->with('Setting', $Setting);
+        $setting = Settings::where('id', 1)->first();
+        $currency = Currency::where('id', $setting->Currency)->first();
+        return view('admin.clients.directory')->with('services', $services)->with('setting', $setting)->with('currency', $currency);
     }
     public function rateservice($id, Request $request)
     {
