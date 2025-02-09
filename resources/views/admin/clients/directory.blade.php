@@ -90,7 +90,7 @@
                                   <a href="#" onclick="openservice({{ $row->id }})">{{ $row->{'name_' . $l} }}</a>
                                 </td>
                                 <td>{{ substr(strip_tags($row->{'description_' . $l}), 0, 40) }}...</td>
-                                <td>{{ $row->price }} SAR</td>
+                                <td>{{ $row->price . ' ' . $currency->currency_code }}</td>
                                 <td>
                                   <span class="d-flex align-items-center">
                                     {!! $row->totalRate()
