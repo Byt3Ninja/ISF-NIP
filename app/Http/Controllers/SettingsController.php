@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Calendar;
-use App\Country;
-use App\Cycle;
-use App\MentorshipRequest;
-use App\Notifications\TemplateEmail;
-use App\Settings;
-use App\Messages;
-use App\User;
-use Illuminate\Http\Request;
-use DB, File, URL;
-use Carbon\Carbon;
 use Auth;
+use App\User;
+use App\Cycle;
 use App\Event;
 use App\State;
+use App\Country;
+use App\Calendar;
+use App\Currency;
+use App\Messages;
+use App\Settings;
+use Carbon\Carbon;
+use DB, File, URL;
+use App\MentorshipRequest;
+use Illuminate\Http\Request;
+use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -36,6 +37,7 @@ class SettingsController extends Controller
         $Img3 =  Settings::findOrfail('9');
         $Counters = Settings::where('type', '6')->get();
         $countries = Country::all();
+        $currencies = Currency::all();
         $states = State::all();
         $json = File::get(base_path('database/dbFiles/countries.json'));
         $_countries = json_decode($json, true);
@@ -58,7 +60,7 @@ class SettingsController extends Controller
         return view('admin.settings.editegeneral')
             ->with('Title', $Title)->with('Icons', $Icons)->with('Img1', $Img1)
             ->with('Img2', $Img2)->with('Img3', $Img3)->with('Counters', $Counters)
-            ->with('countries', $countries)->with('states', $states);
+            ->with('countries', $countries)->with('states', $states)->with('currencies',$currencies);
     }
 
     public function update_settings(Request $request)
