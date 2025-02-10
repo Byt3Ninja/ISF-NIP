@@ -33,6 +33,7 @@ class ProgramController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
         $search = $request->input('search'); // التحقق من وجود البحث في الطلب
 
         if (Auth()->user()->hasRole('Admin')) {
@@ -40,7 +41,13 @@ class ProgramController extends Controller
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             })->get();
-        } else {
+        }
+        else if (Auth()->user()->hasRole('organizationManager')) {
+            $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+            })->get();
+        }
+        else {
             // إذا كان المستخدم ليس Admin
             $Organization = Organization::where('user_id', auth()->user()->id)->first();
 
