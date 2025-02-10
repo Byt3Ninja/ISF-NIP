@@ -224,7 +224,7 @@ return [
 	'registeredusers' => 'المستخدمين المسجلين',
 	'totalusersmf' => 'نسبة الذكور / الإناث',
 	'JobTitleAr' => 'المسمى الوظيقي باللغة العربية',
-	'JobTitleEn' => 'الامسمى الوظيفي',
+	'JobTitleEn' => 'المسمى الوظيفي',
 	'Chamber' => 'الغرفة الصناعية',
 	'RoomMembershipNumber' => 'رقم عضوية الغرفة',
 	'CommercialRecord' => 'رقم السجل التجاري',
