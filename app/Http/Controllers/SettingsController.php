@@ -14,6 +14,7 @@ use App\Messages;
 use App\Settings;
 use Carbon\Carbon;
 use DB, File, URL;
+use App\Organization;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use App\Notifications\TemplateEmail;
@@ -794,5 +795,108 @@ class SettingsController extends Controller
     }
 
 
+    public function showSettings()
+    {
+        $organization = auth()->user()->organization; 
+        $currencies = Currency::all();  
+        $timezones = collect(\DateTimeZone::listIdentifiers())
+        ->mapWithKeys(function ($timezone) {
+        $zone = new \DateTimeZone($timezone);
+        $offset = $zone->getOffset(new \DateTime("now", $zone)) / 3600; 
+        $formattedOffset = ($offset >= 0 ? 'GMT+' : 'GMT') . $offset;
+        return [$timezone => $timezone . ' (' . $formattedOffset . ')'];
+    })->sort();
 
+        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones'));
+    }
+
+
+    public function generalSetting(Request $request)
+    {
+      $request->validate([
+        'name_en' => 'nullable|string|max:255',
+        'img_url' => 'nullable|image',
+        'contact_email' => 'nullable|email',
+        'contact_phone' => 'nullable|string|max:11',
+        'address' => 'nullable|string',
+        'time_zone' => 'nullable|string|max:100',
+        'currency_id' => 'nullable|exists:currencies,id',
+    ]);
+
+    $organization = Organization::find($request->input('id'));
+
+    if (!$organization) {
+        return redirect()->route('organization-settings')->with('error', 'Organization not found.');
+    }
+
+    $organization->name_en = $request->input('organization_name', $organization->name_en);
+    $organization->contact_email = $request->input('contact_email', $organization->contact_email);
+    $organization->contact_phone = $request->input('contact_phone', $organization->contact_phone);
+    $organization->address = $request->input('address', $organization->address);
+    $organization->time_zone = $request->input('time_zone', $organization->time_zone);
+    $organization->currency_id = $request->input('currency_id', $organization->currency_id);
+    $organization->save();
+
+    if ($request->hasFile('img_url')) {
+        $image = $request->file('img_url');
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+        $image->move(public_path('organizations/'), $imageName);
+
+        $organization->img_url = 'organizations/' . $imageName;
+        $organization->save();
+    }
+
+        return redirect()->back()->with('message', 'StoredSuccessfully');
+
+    }
+
+    public function meetingSetting(Request $request)
+    {
+        $request->validate([
+        'meeting_platform' => 'required|string',
+        'ZOOM_CLIENT_ID' => 'nullable|string',
+        'ZOOM_CLIENT_SECRET' => 'nullable|string',
+        'ZOOM_ACCOUNT_ID' => 'nullable|string',
+        ]);
+
+        $organization = Organization::find($request->input('id'));
+        $organization->meeting_platform = $request->input('meeting_platform');
+        $organization->zoom_client_id = $request->input('ZOOM_CLIENT_ID');
+        $organization->zoom_client_secret = $request->input('ZOOM_CLIENT_SECRET');
+        $organization->zoom_account_id = $request->input('ZOOM_ACCOUNT_ID');    
+        $organization->save();
+
+        return redirect()->back()->with('message', 'StoredSuccessfully');
+  
+    }
+
+
+    public function socialSetting(Request $request)
+    {
+        $request->validate([
+            'website_url' => 'nullable|url',
+            'facebook_url' => 'nullable|url',
+            'twitter_handle' => 'nullable|string',
+            'youtube_url' => 'nullable|url',
+            'instagram_url' => 'nullable|url',
+            'linkedin_url' => 'nullable|url',
+            'tiktok_url' => 'nullable|url',
+        ]);
+    
+        $organization = Organization::find($request->input('id'));
+        $organization->website_url = $request->input('website_url');
+        $organization->facebook_page_url = $request->input('facebook_url');
+        $organization->twitter_handle = $request->input('twitter_handle');
+        $organization->youtube_channel_url = $request->input('youtube_url');
+        $organization->instagram_profile_url = $request->input('instagram_url');
+        $organization->linkedin_company_url = $request->input('linkedin_url');
+        $organization->tiktok_url = $request->input('tiktok_url');
+        $organization->save();
+    
+        return redirect()->back()->with('message', 'StoredSuccessfully');
+
+    }
 }
+
+
