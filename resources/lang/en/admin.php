@@ -1219,4 +1219,6 @@ return [
 	'Pitch_Deck_Video_max_size_is_25MB' => 'Pitch deck video max size is 10MB',
 	'pitch_deck_video_size_limit_exceeded' => 'Pitch deck video size limit exceeded',
 	'Please select at least one value' => 'Please select at least one value',
+	'Select Gender' => 'Select Gender',
+	'Confirm Password' => 'Confirm Password',
 ];

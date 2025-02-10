@@ -1226,4 +1226,6 @@ return [
 	'Pitch_Deck_Video_max_size_is_25MB' => 'يجب ان يكون حجم الفيديو لا يزيد عن 25MB',
 	'pitch_deck_video_size_limit_exceeded' => 'يجب ان يكون حجز الفيديو لا يزيد عن 25 MB',
 	'Please select at least one value' => 'الرجاء اختيار قيمة واحدة على الأقل',
+	'Select Gender' => 'اختر النوع',
+	'Confirm Password' => 'تأكيد كلمة المرور',
 ];
