@@ -1228,4 +1228,6 @@ return [
 	'Please select at least one value' => 'الرجاء اختيار قيمة واحدة على الأقل',
 	'Select Gender' => 'اختر النوع',
 	'Confirm Password' => 'تأكيد كلمة المرور',
+	'Financial plan attachment' => 'مرفق خطة العمل المالية',
 ];
+

@@ -1221,4 +1221,5 @@ return [
 	'Please select at least one value' => 'Please select at least one value',
 	'Select Gender' => 'Select Gender',
 	'Confirm Password' => 'Confirm Password',
+	'Financial plan attachment' => 'Financial plan attachment',
 ];
