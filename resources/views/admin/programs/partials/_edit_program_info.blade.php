@@ -7,13 +7,19 @@
       style="width: 100px; height: 90px; object-fit: contain; border-radius: 15px;"
     >
   </div>
+  @php
+    $user = auth()->user();
+    $isOrgMan = $user->hasRole('organizationManager');
+    $org_id = $user->organization_id ?? 0;
+  @endphp
   <div class="col-12">
-    <div class="mb-3">
+    <div class="mb-3 {{ $isOrgMan ? 'd-none' : '' }}">
       <label for="organization" class="form-label fs-6 fw-semibold">
         {{ __('cycles.Select_Organization') }}
       </label>
       <select class="form-select" id="organization" name="organization_id2" data-placeholder="{{ __('cycles.Select_Organization') }}">
         @foreach (\App\Organization::all() as $org)
+            @php if( $isOrgMan && $org->id != $org_id ) { continue; } @endphp
             <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
         @endforeach
     </select>
