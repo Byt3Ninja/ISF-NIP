@@ -364,8 +364,8 @@ class ClientProfileController extends Controller
     $l = app()->getLocale();
     
     // إعداد الأعمدة الصحيحة بناءً على اللغة
-    $firstNameColumn = $l == 'ar' ? 'first_name_ar' : 'first_name_en';
-    $lastNameColumn = $l == 'ar' ? 'last_name_ar' : 'last_name_en';
+    $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
+    $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
 
     // البحث في الموجهين
     $mentors = User::role('mentor')
@@ -406,8 +406,8 @@ class ClientProfileController extends Controller
                 $l = app()->getLocale();
                 
                 // إعداد الأعمدة الصحيحة بناءً على اللغة
-                $firstNameColumn = $l == 'ar' ? 'first_name_ar' : 'first_name_en';
-                $lastNameColumn = $l == 'ar' ? 'last_name_ar' : 'last_name_en';
+                $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
+                $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
             
                 // البحث في الموجهين
                 $mentors = User::role('mentor')

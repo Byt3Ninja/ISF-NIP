@@ -166,7 +166,7 @@
                             <p style="margin: 5px">{{ __('cycles.panel list') . ' ' . $key }}</p>
                             <div class="row col-md-12">
                               <div class="col-md-11">
-                                <select name="judges[{{ $key }}][]"
+                                <select name="  [{{ $key }}][]"
                                   class="select2 form-control panel{{ $key }}" multiple="multiple">
                                   @foreach ($judges as $judge)
                                     <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }}

@@ -2,14 +2,15 @@
 
 namespace App;
 
+use App\Traits\Auditable;
+use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\VerifyEmailQueued;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\Auditable;
-
-use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {

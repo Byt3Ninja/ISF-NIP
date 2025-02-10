@@ -220,7 +220,10 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">You have been invited to Judge a training session.</p>
                                                     <p style="margin: 0;"> </p>
-                                                    {{-- <p style="margin: 0;">Session will start at: {{ $date }}</p> --}}
+                                                    
+                                                    <p style="margin: 0;">Email is: {{ $data['email'] }}</p>
+                                                    <p style="margin: 0;">password is: {{ $data['password'] }}</p>
+                                                    
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Best regards,</p>
                                                     {{-- <p style="margin: 0;">{{ $organization_name_en }}</p> --}}
@@ -241,8 +244,9 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;">مرحباً بك كمحكم فى منصتنا</p>
                                                     <p style="margin: 0;"> </p>
                                                     
+                                                    <p style="margin: 0;">البريد الالكترونى : {{ $data['email'] }}</p>
+                                                    <p style="margin: 0;">كلمة المرور : {{ $data['password'] }}</p>
                                                     
-                                                    </p>
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">أطيب التحيات،</p>
                                                     {{-- <p style="margin: 0;">{{ $organization_name_ar }}</p> --}}

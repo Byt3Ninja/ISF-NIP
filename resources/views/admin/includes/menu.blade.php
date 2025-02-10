@@ -12,17 +12,12 @@
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
       
-      @if (!is_null(auth()->user()->organization))
+  @if (!is_null(auth()->user()->organization))
     @php
     $imageUrl = auth()->user()->organization->image_url;
-
-     // استخراج المسار من الرابط
-     $imagePath = parse_url($imageUrl, PHP_URL_PATH);
-
-     // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
-     $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
-@endphp
-          <img src="{{ $imageUrl }}" alt="avatar" class="logo-img">
+    @endphp
+     
+    <img src="{{ asset($imageUrl) }}" alt="avatar" class="logo-img">
          
       @else
       @if(!empty($setting->Logo))
@@ -307,12 +302,7 @@
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
-      <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
-        <a href="{{ route('currencies.index') }}" class="menu-link">
-          <i class="menu-icon fas fa-money-bill-wave"></i>
-            <div>{{ __('admin.manage_currencies') }}</div>
-        </a>
-    </li>
+      
     @endif
 
     
@@ -745,6 +735,15 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </a>
       </li>
     @endcan
+
+    @if (auth()->user()->hasanyRole('organizationManager'))
+    <li class="{{ Request::is('dashboard/organizations/settings*') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="{{ route('organization-settings') }}">
+        <i class="menu-icon tf-icons ti ti-settings"></i>
+        <div>{{ __('admin.settings') }}</div>
+      </a>
+    </li>
+    @endif
   
     @can('edit_settings')
       <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
@@ -759,6 +758,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <div>{{ __('admin.settings') }}</div>
             </a>
           </li>
+          <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
+            <a href="{{ route('currencies.index') }}" class="menu-link">
+              <i class="menu-icon fas fa-money-bill-wave"></i>
+                <div>{{ __('admin.manage_currencies') }}</div>
+            </a>
+        </li>
           @if (!app()->environment('production', 'beta'))
             <li class="{{ Request::is('*Tags') ? 'active' : '' }} menu-item">
               <a href="{{ route('Tags.index') }}" class="menu-link">

@@ -302,19 +302,19 @@
         </div>
         <!-- / Total companies by sdg chart -->
         <!-- Pie Chart -->
-        <div class="col-md-6 col-12 mt-6">
-          <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <h5 class="card-title mb-0">{{ __('admin.totalusersmf') }}</h5>
-              </div>
-            </div>
-            <div class="card-body">
-              <div id="pieChart"></div>
+      <div class="col-md-6 col-12 mt-6">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+             <div class="d-flex align-items-center">
+              <h5 class="card-title mb-0">{{ __('admin.totalusersmf') }}</h5>
             </div>
           </div>
-        </div>
-        <!-- /Pie Chart -->
+          <div class="card-body">
+             <div id="pieChart" style="width: 100%; height: 350px;"></div>
+          </div>
+      </div>
+    </div>
+<!-- /Pie Chart -->
         <!-- Vertical Bar Charts -->
         <div class="col-md-6 col-12 mt-6">
           <div class="card">
@@ -479,7 +479,140 @@
     const internshipSeriesName = '({{ __('admin.hours') }})';
     const internshipBarChartCategories = {!! json_encode($sessions_labels) !!};
     const internshipSeriesData = {!! json_encode($sessions_durations) !!};
+
   </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      const pieLabels = ['{{ __("admin.Female") }}', '{{ __("admin.Male") }}'];
+      const usersGender = @json($usersgender);
+
+      let maleCount = 0;
+      let femaleCount = 0;
+
+      usersGender.forEach(user => {
+          if (user.gender.toLowerCase() === 'male') {
+              maleCount = user.total;
+          } else if (user.gender.toLowerCase() === 'female') {
+              femaleCount = user.total;
+          }
+      });
+
+      const series = [];
+      
+      if (femaleCount > 0) {
+          series.push(femaleCount);
+      } else {
+          series.push(0);
+      }
+      
+      if (maleCount > 0) {
+          series.push(maleCount);
+      }
+
+      if (document.querySelector("#pieChart")) {
+          const options = {
+              chart: {
+                  type: "pie",
+                  height: 350
+              },
+              labels: pieLabels,
+              series: series,
+              colors: ["#FF4560", "#008FFB"],
+              legend: {
+                  position: "bottom"
+              },
+              dataLabels: {
+                  enabled: true,
+                  formatter: function(val, opts) {
+                      return val.toFixed(2) + '%'; 
+                  }
+              },
+              responsive: [{
+                  breakpoint: 480,
+                  options: {
+                      chart: {
+                          width: 200
+                      },
+                      legend: {
+                          position: 'bottom'
+                      }
+                  }
+              }]
+          };
+
+          const chart = new ApexCharts(document.querySelector("#pieChart"), options);
+          chart.render();
+      }
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      const usersGov = @json($usersgov); 
+      const locale = "{{ app()->getLocale() }}";
+
+      const stateLabels = usersGov.map(state => locale === 'ar' ? state.state_ar : state.state_en);
+      const userCounts = usersGov.map(state => state.total);
+
+      const generateRandomColor = () => `hsl(${Math.random() * 360}, 70%, 50%)`;
+      const backgroundColors = stateLabels.map(() => generateRandomColor());
+
+      const chartElement = document.getElementById("verticalBarChart");
+      if (!chartElement) {
+          console.error("Error: #verticalBarChart element not found!");
+          return;
+      }
+
+      // Chart Configuration
+      const ctx = chartElement.getContext("2d");
+
+      new Chart(ctx, {
+          type: "bar",
+          data: {
+              labels: stateLabels, 
+              datasets: [{
+                  data: userCounts, 
+                  backgroundColor: backgroundColors,
+                  borderColor: backgroundColors.map(color => color.replace("70%", "50%")),
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                  x: {
+                      ticks: {
+                          font: {
+                              size: 10 
+                          }
+                      }
+                  },
+                  y: {
+                      beginAtZero: false,
+                      suggestedMin: Math.min(...userCounts) - 1,
+                      suggestedMax: Math.max(...userCounts) + 2,
+                      ticks: {
+                          font: {
+                              size: 10 
+                          },
+                          stepSize: 2,
+                      }
+                  }
+              },
+              plugins: {
+                  legend: {
+                      display: false
+                  }
+              }
+          }
+      });
+  });
+</script>
+
+
+
   
   <script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>

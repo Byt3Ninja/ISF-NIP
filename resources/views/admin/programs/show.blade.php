@@ -1216,8 +1216,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
        
         // حساب عدد السجلات لكل step_id
           // حساب عدد السجلات لكل step_id
-          $totalFinalscreenCount = app(App\Finalscreening::class)
-              ->where('step_id', '=', $step->id)
+          $totalFinalscreenCount = App\Finalscreening::where('step_id', '=', $step->id)
               ->count();
           // حساب عدد company_id الفريدة لكل step_id
           $totalDistinctCompanies = app(App\Finalscreening::class)
