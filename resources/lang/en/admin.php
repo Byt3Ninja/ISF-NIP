@@ -1222,4 +1222,5 @@ return [
 	'Select Gender' => 'Select Gender',
 	'Confirm Password' => 'Confirm Password',
 	'Financial plan attachment' => 'Financial plan attachment',
+	'Final_Session' => 'Final Session',
 ];

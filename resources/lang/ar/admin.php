@@ -1229,5 +1229,6 @@ return [
 	'Select Gender' => 'اختر النوع',
 	'Confirm Password' => 'تأكيد كلمة المرور',
 	'Financial plan attachment' => 'مرفق خطة العمل المالية',
+	'Final_Session' => 'جلسة نهاية',
 ];
 
