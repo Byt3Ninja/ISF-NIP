@@ -830,7 +830,7 @@
                   @endphp
                   <tr>
                     <td>
-                      @if($step->stype == 1)
+                      @if($step->stype == 1 && ($status == ($l == 'ar' ? 'بدأت' : 'Started')))
                       @if (Auth::user()->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
