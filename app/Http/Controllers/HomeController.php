@@ -369,6 +369,7 @@ class HomeController extends Controller
                 ];
             }
         });
+        
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
@@ -416,11 +417,26 @@ class HomeController extends Controller
         $data['mentorshipRequests'] = $mentorshipRequests->whereNull('approved')->latest()->limit(5)->get();
         $data['latest_cycles'] = $cycles->latest()->limit(10)->get();
 
-        $usersgender = User::select('gender', DB::raw('count(*) as total'))->where('organization_id', $organization_id)->groupBy('gender')->get();
-        $data['usersgender'] = $usersgender;
+        // Demographic
+        $data['usersgov'] = User::join('states', 'users.state_id', '=', 'states.id')
+        ->where('users.organization_id', $organization_id)
+        ->select(
+            'states.name_en as state_en',
+            'states.name_ar as state_ar',
+            DB::raw('count(*) as total')
+        )
+        ->groupBy('states.name_en', 'states.name_ar')
+        ->get();
 
-        
 
+        // Male and Female Ratio
+        $data['usersgender'] = User::where('organization_id', $organization_id)
+        ->select('gender', DB::raw('count(*) as total'))
+        ->groupBy('gender')
+        ->get();
+
+
+    
         // Development Stage  
 
         $data['development_stages'] = [];
