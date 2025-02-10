@@ -49,10 +49,10 @@
                     {!! csrf_field() !!}
                     <div class="row">
                       <div class="col-md-12">
-                        <fieldset class="form-group mb-3">
+                        <fieldset>
                           <div class="row">
                             <div class="col-md-6">
-                              <div class="form-group">
+                              <div class="form-group mb-4">
                                 <label class="fs-6 fw-semibold form-label mb-1" for="first_name_en">{{ __('admin.First Name') }}</label>
                                 <input name="first_name_en" type="text" class="form-control" id="first_name_en"
                                   value="{{ old('first_name_en') }}" placeholder="{{ __('admin.First Name') }}" required
@@ -60,7 +60,7 @@
                               </div>
                             </div>
                             <div class="col-md-6">
-                              <div class="form-group">
+                              <div class="form-group mb-4">
                                 <label class="fs-6 fw-semibold form-label mb-1" for="last_name_en">{{ __('admin.Last Name') }}</label>
                                 <input value="{{ old('last_name_en') }}" name="last_name_en" type="text"
                                   class="form-control" id="last_name_en" placeholder="{{ __('admin.Last Name') }}"
@@ -69,9 +69,9 @@
                             </div>
                           </div>
                         </fieldset>
-                        <fieldset class="form-group mb-3">
+                        <fieldset>
                           <div class="row">
-                            <div class="col-md-6 col-12">
+                            <div class="col-md-6 col-12 mb-4">
                               <label class="fs-6 fw-semibold form-label mb-1" for="gender">{{ __('admin.Gender') }}</label>
                               <select class="form-select" id="gender" name="gender" required>
                                 <option value="">{{ __('admin.Select Gender') }}</option>
@@ -81,7 +81,7 @@
                                   }}</option>
                               </select>
                             </div>
-                            <div class="col-md-6 col-12">
+                            <div class="col-md-6 col-12 mb-4">
                               <label class="fs-6 fw-semibold form-label mb-1" for="role">{{ __('admin.Role') }}</label>
                               <select class="form-select" required id="role" name='role'>
                                 <option>{{ __('admin.Role') }}</option>
@@ -93,17 +93,17 @@
                             </div>
                           </div>
                         </fieldset>
-                        <fieldset class="form-group mb-3">
+                        <fieldset>
                           <div class="row">
                             <div class="col-md-6 col-12">
-                              <div class="form-group">
+                              <div class="form-group mb-4">
                                 <label class="fs-6 fw-semibold form-label mb-1" for="email">{{ __('admin.Email') }}</label>
                                 <input value="{{ old('email') }}" name="email" type="email" class="form-control"
                                   id="email" placeholder="{{ __('admin.Email') }}" required autocomplete="email">
                               </div>
                             </div>
                             <div class="col-md-6 col-12">
-                              <div class="form-group">
+                              <div class="form-group mb-4">
                                 <label class="fs-6 fw-semibold form-label mb-1" for="phone">{{ __('admin.Phone') }}</label>
                                 <input type="text" class="form-control" id="phone" placeholder="{{ __('admin.Phone') }}"
                                   value="{{ old('phone') }}" name="phone" required autocomplete="new-phone">
