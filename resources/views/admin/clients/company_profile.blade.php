@@ -182,36 +182,33 @@ if($company->team_num == '1'){
       <section class="mt-6">
         <div class="row">
           <div class="col-md-6">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 220px;">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 175px;">
               <div class="card-body">
                 <div class="d-flex justify-content-between">
                   <div class="d-flex flex-column justify-content-between">
-                    <div class="d-flex">
+                    <div class="d-flex align-items-center gap-4">
                       <div class="p-2 bg-label-warning radius-15 d-flex align-items-center"
-                        style="width: 150px; height: 74px; gap: 10px;">
+                        style="min-width: 180px; gap: 10px;">
                         <i class="ti ti-users ti-28px"></i>
                         <div class="mx-1 d-flex flex-column">
                           <span class="fw-bold text-black fs-6">{{ $team_num ?? 0 }}</span>
                           <span class="fw-bold mt-2" style="font-size: 12px;">{{ __('admin.Team number') }}</span>
                         </div>
                       </div>
-                      <div class="p-2 bg-label-info mx-4 radius-15" style="width: 150px; height: 74px;">
-                        <div class="d-flex flex-column align-items-center justif-content-center">
-                          <div class="d-flex align-items-center mb-2">
-                            <i class="ti ti-calendar-time ti-28px"></i>
-                            <span class="mx-1 fw-bold text-black fs-6">
-                              {{ $company->est_date ?? __('admin.N/A') }}
-                            </span>
-                          </div>
-                          <span class="text-nowrap" style="font-size: 12px;">
-                            {{ __('admin.Established date') }}
-                          </span>
+                      @if($company->est_date)
+                      <div class="p-2 bg-label-info radius-15 d-flex align-items-center"
+                        style="min-width: 180px; gap: 10px;">
+                        <i class="ti ti-calendar-time ti-28px"></i>
+                        <div class="mx-1 d-flex flex-column">
+                          <span class="fw-bold text-black fs-6">{{ $company->est_date ?? __('admin.N/A') }}</span>
+                          <span class="fw-bold mt-2" style="font-size: 12px;">{{ __('admin.Established date') }}</span>
                         </div>
                       </div>
+                      @endif
                     </div>
-                    <div class="mt-10" style="max-width: 220px;">
+                    <div class="mt-3" style="width: 100%;">
                       <span class="fw-bold">{{ __('admin.Working_Team_Details') }}</span>
-                      <p class="text-muted line-clamp-2 p-2">
+                      <p class="text-muted line-clamp-2 px-2">
                         {{ $company->working_team_summary ?? __('admin.N/A') }}
                       </p>
                     </div>
@@ -221,7 +218,7 @@ if($company->team_num == '1'){
             </div>
           </div>
           <div class="col-md-6 mt-6 mt-md-0">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 220px;">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 175px;">
               <div class="card-body d-flex flex-column h-100 justify-content-between">
                 <div class="d-flex justify-content-between py-4">
                   <div class="d-flex align-items-center">
