@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
       company_description: {
         validators: {
           regexp: {
-            regexp: /^[\p{L}\s]+$/u,
+            regexp: /^[\p{L}\s.]+$/u,
             message: descTranslations[lang].company_description.stringOnly
           }
         }
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function () {
       about_problem: {
         validators: {
           regexp: {
-            regexp: /^[\p{L}\s]+$/u,
+            regexp: /^[\p{L}\s.]+$/u,
             message: descTranslations[lang].about_problem.stringOnly
           }
         }
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
       about_market_opportunity: {
         validators: {
           regexp: {
-            regexp: /^[\p{L}\s]+$/u,
+            regexp: /^[\p{L}\s.]+$/u,
             message: descTranslations[lang].about_market_opportunity.stringOnly
           }
         }
@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function () {
       about_competitors: {
         validators: {
           regexp: {
-            regexp: /^[\p{L}\s]+$/u,
+            regexp: /^[\p{L}\s.]+$/u,
             message: descTranslations[lang].about_competitors.stringOnly
           }
         }
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
       about_monetize: {
         validators: {
           regexp: {
-            regexp: /^[\p{L}\s]+$/u,
+            regexp: /^[\p{L}\s.]+$/u,
             message: descTranslations[lang].about_monetize.stringOnly
           }
         }
@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
       about_challenges: {
         validators: {
           regexp: {
-            regexp: /^[\p{L}\s]+$/u,
+            regexp: /^[\p{L}\s.]+$/u,
             message: descTranslations[lang].about_challenges.stringOnly
           }
         }
