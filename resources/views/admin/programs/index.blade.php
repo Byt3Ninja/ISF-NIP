@@ -207,7 +207,9 @@
                   // $orgid = App/Organization::where('user_id','=', auth()->user()->id)->first();
                   $orgid = App\Organization::where('id','=', $cycle->organization_id)->get();
                   foreach ($orgid as  $org) {
-                    $mentortotal = App\User::where('id','=',$org->user_id)->get();
+                    $mentortotal = App\User::where('id','=',$org->user_id)->whereHas('roles', function($q){
+                      return $q->where('name', 'organizationManager');
+                    })->get();
                     $mentor_Count = $mentortotal->count();
                   }
                  
