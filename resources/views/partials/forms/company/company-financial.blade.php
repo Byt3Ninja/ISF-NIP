@@ -84,7 +84,7 @@
           <div class="position-relative">
             <select class="form-select px-10" required
               id="stage" name="stage">
-              <option value="">{{ __('admin.stage') }}</option>
+              <option value="" disabled>{{ __('admin.development_stage') }}</option>
 
               @foreach ($Stages as $Stage)
               <option value="{{ $Stage->id }}"
@@ -106,7 +106,7 @@
           <div class="position-relative">
             <select class="form-select px-10" required
               id="development_stage" name="development_stage">
-              <option value="" disabled>{{ __('admin.development_stage') }}</option>
+              <option value="" disabled>{{ __('admin.Funding_Stage') }}</option>
               <option value="Pre_seed_funding_stage"
                 {{ !empty($client->company) && $client->company->development_stage == 'Pre_seed_funding_stage' ? 'selected' : '' }}>
                 {{ __('admin.Pre_seed_funding_stage') }}

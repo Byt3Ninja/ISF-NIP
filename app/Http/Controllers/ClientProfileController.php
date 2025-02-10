@@ -83,32 +83,22 @@ class ClientProfileController extends Controller
       if($client->hasRole('Admin')){
       $mentorshipTasks = MentorshipTask::where('mentor_id',Auth::user()->id)->where('status','pending')->get();
       }else{
-
-      
         if ($client && $client->company) {
             $companyId = $client->company->id;
             $mentorshipTasks = MentorshipTask::where('company_id', $companyId)->get();
-            
         }else{
             $mentorshipTasks = MentorshipTask::where('mentor_id', Auth::user()->id)->get();
         }
     }
-      
       $mentrequests =  MentorshipRequest::where('mentor_id', Auth::user()->id);
-
         $mentrequests_count = $mentrequests->count();
         $mentrequests_period = $mentrequests->sum('period')/60;
-
-
         $average_rating = MentorshipRequest::where('mentor_id', Auth::user()->id)
     ->where('approved', 'Yes')
     ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
     ->avg('rating'); 
-   
-
       return view('admin/clients/profile', compact('client','mentors','mentorshipTasks','mentrequests_count','mentrequests_period','average_rating'));
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -118,8 +108,7 @@ class ClientProfileController extends Controller
      */
 
     public function Updatebio(Request $request)
-    {
-       
+    {  
             $user = Auth::user();
             // Mentor Bio section
             if ($request->mentor_section){
@@ -139,18 +128,14 @@ class ClientProfileController extends Controller
                 $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
                 $user->mentorExpertises()->sync($request->expertises);
             }
-
             return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
     }
     public function update(UpdateClientProfileRequest $request)
     {           
-        
         try{
             $first_name_ar = substr($request->first_name_en, 0, 250);
             $last_name_ar = substr($request->last_name_en, 0, 250);
-            
             $user = Auth::user();
-
             // // Mentor Bio section
             // if ($request->mentor_section){
             //     $data =[
