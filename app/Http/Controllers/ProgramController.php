@@ -84,7 +84,13 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        $cycle = Cycle::where('id', $id)->first();
+        $user = Auth()->user();
+        $cycle = Cycle::where('id', $id);
+        if( $user->hasRole('organizationManager') )
+        {
+            $cycle = $cycle->where('organization_id', $user->organization_id);
+        }
+        $cycle = $cycle->first();
         if(empty($cycle)) return redirect()->route('programlist.index')->with(['message2' => 'program_not_found', 'class' => 'danger']);
         $steps = Step::where('cycle_id', $cycle->id)->orderBy('arr', 'ASC')->get();
 
