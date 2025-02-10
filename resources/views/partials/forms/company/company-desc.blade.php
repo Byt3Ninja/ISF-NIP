@@ -1,13 +1,11 @@
+@php
+$action = Auth::user()->hasanyRole('Admin|organizationManager') ? route('update_my_company', $client->company->id) : route('update_my_company');
+@endphp
+
 <div class="card">
   <div class="card-body">
-    
-    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
-    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
+    <form id="desc-form" method="post" action="{{ $action }}"
       enctype="multipart/form-data">
-@else
-<form method="post" action="{{ route('update_my_company') }}"
-  enctype="multipart/form-data">
-@endif
       {!! csrf_field() !!}
       <input type="hidden" value="3" name="CompanyN">
 
@@ -41,6 +39,7 @@
             /> --}}
             <select name="Sustainable_development[]"
               class="form-select select2 border-light light-shadow px-10"
+              id="sustainable-mutiple-select"
               multiple="multiple">
               <option value="no_poverty"
               @if($client->company)
@@ -179,7 +178,9 @@
                             json_decode($client->company->Sustainable_development, true))) selected @endif @endif>
                 {{ __('admin.partnership_goals') }}</option>
             </select>
-  
+            <div class="invalid-feedback" id="sustainable-mutiple-select-error" style="display: none;">
+              {{ __('admin.Please select at least one value') }}
+            </div>
           </div>
         </div>
       <div class="border-bottom border-light my-8">
@@ -249,35 +250,39 @@
   </div>
 </div>
 
-{{-- @if( !empty( $client->company ) )
 <script>
-  const sustainabiltyWhiteList = '{{ $client->company->Sustainable_development }}';
-  const decodeHtmlEntities = (str) => {
-    const txt = document.createElement('textarea');
-    txt.innerHTML = str;
-    return txt.value;
-  };
-  const sustainabiltyWhiteListArray = JSON.parse(decodeHtmlEntities(sustainabiltyWhiteList));
-  // console.log('sustainabiltyWhiteListArray', sustainabiltyWhiteListArray);
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('loaded');
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const sustainabiltyInput = document.querySelector('#sustainable_development');
-    TagsCustomInlineSuggestion = new Tagify(sustainabiltyInput, {
-      whitelist: sustainabiltyWhiteListArray,
-      dropdown: {
-      maxItems: 20,
-      classname: 'tags-inline',
-      enabled: 0,
-      closeOnSelect: false
+    const descForm = document.getElementById('desc-form');
+
+    console.log('descForm', descForm)
+
+    descForm.addEventListener('submit', async (e) => {
+      const sustainabilityField = document.getElementById('sustainable-mutiple-select');
+      const sustainabilityFieldError = document.getElementById('sustainable-mutiple-select-error');
+
+      $(sustainabilityField).on('select2:select select2:unselect', () => {
+        if ($(sustainabilityField).val().length > 0) {
+          $(sustainabilityField).removeClass('is-invalid');
+          $(sustainabilityFieldError).hide();
+        }
+      });
+
+      // if not selected values disable form and attach is-invalid class
+      if (sustainabilityField.value.length === 0) {
+        e.preventDefault();
+        sustainabilityField.focus();
+        sustainabilityField.classList.add('is-invalid');
+        sustainabilityFieldError.style.display = 'block';
+        return;
+      } else {
+        sustainabilityField.classList.remove('is-invalid');
+        sustainabilityFieldError.style.display = 'none';
       }
-    });
 
-    // Set the initial value of the Tagify input with the selected whitelist
-    // TagsCustomInlineSuggestion.addTags(sustainabiltyWhiteListArray);
-    // }).on('change', handleTagifyChange);
-    // function handleTagifyChange(e) {
-    //   selected_Sustainable_development =  e.detail.value.trim() ? selected_Sustainable_development = JSON.parse( e.detail.value ) : [];
-    // }
-  });      
+      console.log('form is submitting');
+
+    });
+  })
 </script>
-@endif --}}
