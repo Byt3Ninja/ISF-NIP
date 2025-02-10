@@ -191,7 +191,7 @@
 												<div class="col-lg-6 col-md-6 col-sm-12">
 													<fieldset class="form-group mb-4 questions-type">
 														<label class="fs-6 form-label mb-2" for="category_id">{{ __('admin.questionCategory') }}</label>
-														<select class="form-control form-select select2" name="category_id" id="category_id" required>
+														<select class="form-control form-select select2" name="category_id" id="category_id" >
 															@foreach ($organizations->first()->questionsCategories as $category)
 																<option value="{{ $category['id'] }}" {{ !empty(old('category_id')) && old('category_id') == $category['id'] ? 'selected' : '' }}>
 																	{{ $category['title'] }}
@@ -204,7 +204,7 @@
 
 													<fieldset class="form-group mb-4 survey-type">
 														<label class="fs-6 form-label mb-2" for="survey_type">{{ __('admin.surveyType') }}</label>
-														<select class="form-control form-select select2" name="survey_type" id="survey_type" required>
+														<select class="form-control form-select select2" name="survey_type" id="survey_type" >
 															<option value="" selected disabled> {{ __('admin.Choose') }} </option>
 															<option value="stars"> {{ __('admin.surveyTypeStarRating') }} </option>
 															<option value="radio"> {{ __('admin.surveyTypeRadioButtons') }} </option>
@@ -219,7 +219,7 @@
 												<div class="col-lg-6 col-md-6 col-sm-12">
 													<fieldset class="form-group mb-4">
 														<label class="fs-6 form-label mb-2" for ="type">{{ __('admin.question_Type') }}</label>
-														<select class="form-control form-select select2" name="type" id="type" required>
+														<select class="form-control form-select select2" name="type" id="type" >
 															<option value="mcq" {{ !empty(old('type')) && old('type') == 'mcq' ? 'selected' : '' }}> {{ __('admin.type_mcq') }}</option>
 															<option value="tfq" {{ !empty(old('type')) && old('type') == 'tfq' ? 'selected' : '' }}> {{ __('admin.type_tfq') }}</option>
 														</select>
@@ -229,7 +229,7 @@
 												<div class="col-lg-6 col-md-6 col-sm-12">
 													<fieldset class="form-group mb-4">
 														<label class="fs-6 form-label mb-2" for ="difficulty">{{ __('admin.difficultyLevel') }}</label>
-														<select class="form-control form-select select2" name="difficulty" id="difficulty" required>
+														<select class="form-control form-select select2" name="difficulty" id="difficulty" >
 															<option value="easy" {{ !empty(old('difficulty')) && old('difficulty') == 'easy' ? 'selected' : '' }}>
 																{{ __('admin.difficulty_easy') }}
 															</option>
