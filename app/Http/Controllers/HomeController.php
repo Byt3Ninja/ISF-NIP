@@ -368,7 +368,7 @@ class HomeController extends Controller
                     'count' => $count,
                 ];
             }
-        });
+        })->values();
         
         return view('admin.dashboard', $data);
     }
