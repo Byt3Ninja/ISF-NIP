@@ -942,7 +942,7 @@
       @endphp
       @if( !is_null($myfinal)&&$myfinal->join_url )
 
-        <section>
+        <section class="mt-10">
           <div class="row">
             <div class="col-md-12">
               <div class="card">
