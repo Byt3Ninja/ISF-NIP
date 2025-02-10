@@ -212,6 +212,7 @@ $setting = \App\settings::where('id', 1)->first();
                                            role="presentation"
                                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
                                            width="100%">
+                                           @if($data['Type'] == 'Welcome')
                                         <tr>
                                             <td class="pad"
                                                 style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
@@ -230,11 +231,30 @@ $setting = \App\settings::where('id', 1)->first();
                                                 </div>
                                             </td>
                                         </tr>
+                                        @endif
+                                        @if($data['Type'] == 'Final_Screening')
+
+                                        <tr>
+                                            <td class="pad"
+                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
+                                                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
+                                                    <p style="margin: 0;">Dear {{ $data['name'] }},</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">Kindly note that we need your experience to judge New Incubation Cycle Registered users, the judging Peirod starting from {{ $data['start_date'] }} To {{ $data['end_date'] }}, Check your account for more details </p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">Best regards,</p>
+                                                    {{-- <p style="margin: 0;">{{ $organization_name_en }}</p> --}}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
                                     </table>
                                     <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-5"
                                            role="presentation"
                                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
                                            width="100%">
+                                    @if($data['Type'] == 'Welcome')
                                         <tr>
                                             <td class="pad"
                                                 style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
@@ -253,6 +273,33 @@ $setting = \App\settings::where('id', 1)->first();
                                                 </div>
                                             </td>
                                         </tr>
+                                    @endif
+                                    @if($data['Type'] == 'Final_Screening')
+
+                                        <tr>
+                                            <td class="pad"
+                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
+                                                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
+                                                    <p style="margin: 0;">عزيزي {{ $data['name'] }},</p>
+                                                    <p style="margin: 0;"> </p>
+                                                    @if($data['start_date'] != '')
+                                                    <p style="margin: 0;">نحن نحتاج الى خبراتك للتحكيم على مستخدمين جدد</p>
+                                                    <p style="margin: 0;">الخاص بالمستخدمين فى فترة من {{ $data['start_date'] }} الى {{ $data['end_date'] }}</p>
+                                                    <p style="margin: 0;">للتفاصيل اكثر ادخل الى منصتنا</p>
+                                                    
+                                                    @else
+                                                    <p style="margin: 0;">نحن نحتاج الى خبراتك للتحكيم على مستخدمين جدد</p>
+                                                    <p style="margin: 0;">سيتم ارسال بريد اليكترونى عند اضافة الوقت والتاريخ</p>
+                                                    <p style="margin: 0;">للتفاصيل اكثر ادخل الى منصتنا</p>
+                                                    @endif
+                                                    <p style="margin: 0;"> </p>
+                                                    <p style="margin: 0;">أطيب التحيات،</p>
+                                                    
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+
                                     </table>
                                 </td>
                             </tr>
