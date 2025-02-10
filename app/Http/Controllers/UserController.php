@@ -124,6 +124,7 @@ class UserController extends Controller
             if($request->role == 'Judger'){
                 // إرسال الإيميل الترحيبي
                 $data = [
+                    'Type' => 'Welcome',
                     'name' => $name,
                     'email' => $result->email,
                     'password' => $request->password,
