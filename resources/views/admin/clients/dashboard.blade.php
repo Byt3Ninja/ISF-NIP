@@ -562,24 +562,66 @@
     @endif
         <!-- / Latest Services -->
 
+        <!-- Latest Events -->
+        <div class="col-sm-6 col-12 mb-6">
+          <div class="card">
+            <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom">
+              <div class="d-flex align-items-center py-2">
+                <i class="ti ti-calendar-event ti-24px"></i>
+                <h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest Events') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              @if (count($e_latest) > 0)
+                @foreach ($e_latest as $event)
+                  <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
+                    <div class="widget-todo-title-area d-flex align-items-center">
+                      <a href="/dashboard/calendar">
+                        <span class="widget-todo-title ml-50 text-secondary">
+                          <i class="ti ti-link"></i>
+                          {{ $event->title }}
+                        </span>
+                      </a>
+                    </div>
+                    <div
+                      class="btn btn-label-success text-success py-1 rounded d-flex align-items-center justify-conetnt-center"
+                      style="width: 200px; height: 30px;">
+                      {{ date('d-m-Y', strtotime($event->start)) }}
+                    </div>
+                  </div>
+                @endforeach
+              @else
+                <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
+                  <div class="widget-todo-title-area d-flex align-items-center">
+                    <span class="widget-todo-title ml-50">
+                      <i class="bx bxs-bell-ring text-danger"></i>
+                      {{ __('dashboard.No Events added') }} '<a
+                        href="/dashboard/calendar">{{ __('dashboard.Add yours now') }}</a>'.</span>
+                  </div>
+                </div>
+              @endif
+            </div>
+          </div>
+        </div>
+        <!-- / Latest Events -->
+      </div>
 
       <!-- Survey -->
 
       @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
     @if( Auth::user()->hasRole('Registered') )
-    <div class="col-sm-6 col-12 mb-6" style="max-height: 300px; overflow-y: auto; border-radius: 1rem;">
+    <div class="col-12" style="height: 500px; overflow-y: auto;">
       <div class="card">
-        <div class="d-flex justify-content-between align-items-center my-2 border-bottom" style="width: 100%; padding: 0 1rem !important;">
-          <div class="d-flex align-items-center py-2">
-            <i class="ti ti-user-question mr-1"></i>
-            <h5 class="card-title mb-0 mx-2">{{ __('dashboard.availableSurveysList') }}</h5>
-          </div>
+        <div class="card-header border-bottom py-3">
+          <h5 class="card-title m-0">
+            <i class="ti ti-user-question mr-1"></i> {{ __('dashboard.availableSurveysList') }}
+          </h5>
         </div>
-        <div class="card-body py-6" style="padding: 0 1rem !important;">
+        <div class="card-body py-6">
           <div class="container-fluid px-0">
             @foreach( $available_surveys as $survey )
-            <div class="row border-bottom mb-2 pb-2 d-flex align-items-center">
-              <div class="col-9">
+            <div class="row my-3 border-bottom pb-3">
+              <div class="col-9 py-1">
                 @if( $survey->triggered_on == 'mentorship' )
                 <i class="ti ti-bulb mx-1"></i> 
                 @elseif( $survey->triggered_on == 'training' )
@@ -624,12 +666,7 @@
                 @endif
               </div>
               <div class="col-3 text-end">
-                <a 
-                  href="{{ route('surveys.taking', ['id' => $survey->id]) }}" 
-                  class="btn btn-sm btn-label-primary text-nowrap"
-                >
-                  {{ __('dashboard.startSurvey') }}
-                </a>
+                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
               </div>
             </div>
             @endforeach
@@ -705,55 +742,22 @@
     </div>
     @endif
     @endif
-      <!-- Survey -->        
-      </div>
-
-      <!-- Latest Events -->
-      <div class="col-12 mb-6">
-        <div class="card">
-          <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom">
-            <div class="d-flex align-items-center py-2">
-              <i class="ti ti-calendar-event ti-24px"></i>
-              <h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest Events') }}</h5>
-            </div>
-          </div>
-          <div class="card-body">
-            @if (count($e_latest) > 0)
-              @foreach ($e_latest as $event)
-                <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
-                  <div class="widget-todo-title-area d-flex align-items-center">
-                    <a href="/dashboard/calendar">
-                      <span class="widget-todo-title ml-50 text-secondary">
-                        <i class="ti ti-link"></i>
-                        {{ $event->title }}
-                      </span>
-                    </a>
-                  </div>
-                  <div
-                    class="btn btn-label-success text-success py-1 rounded d-flex align-items-center justify-conetnt-center"
-                    style="width: 200px; height: 30px;">
-                    {{ date('d-m-Y', strtotime($event->start)) }}
-                  </div>
-                </div>
-              @endforeach
-            @else
-              <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
-                <div class="widget-todo-title-area d-flex align-items-center">
-                  <span class="widget-todo-title ml-50">
-                    <i class="bx bxs-bell-ring text-danger"></i>
-                    {{ __('dashboard.No Events added') }} '<a
-                      href="/dashboard/calendar">{{ __('dashboard.Add yours now') }}</a>'.</span>
-                </div>
-              </div>
-            @endif
-          </div>
-        </div>
-      </div>
-      <!-- / Latest Events -->
-
+      <!-- Survey -->
 
       
+        @php
+          $svgs = ['notebook','search','idea','comments','trophy'];
+          $colors = ['#39da8a','#99a2ac','#fdac41'];
+          $cs = Auth::user()->company->step;
+          $s = 1;
+          $stat = "Completed";
+          $ctype = Auth::user()->company->stepdata->stype;
+                                $color= $colors[0];
+
+        @endphp
         
+    
+      
       
       <!-- My Progress -->
       @if( Auth::user()->company && $circle_id != 0 )
@@ -830,7 +834,7 @@
                   @endphp
                   <tr>
                     <td>
-                      @if($step->stype == 1 && ($status == ($l == 'ar' ? 'بدأت' : 'Started')))
+                      @if($step->stype == 1)
                       @if (Auth::user()->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
@@ -930,7 +934,96 @@
 				</section>
       @endif
       <!-- / My Progress -->
+     
+     
+    @if( $ctype == 5 )
+      @php
+      $myfinal = \App\Finalscreening::where('company_id', Auth::user()->company->id )->where('step_id', Auth::user()->company->step )->first();
+      @endphp
+      @if( !is_null($myfinal)&&$myfinal->join_url )
 
+        <section class="mt-10">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header border-bottom">
+                  <h4 class="card-title align-items-center">
+                    <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Final_Session") }}
+                  </h4>
+                </div>
+    
+                  <div class="">
+                    <div class="">
+                      <div class="table-responsive">
+                        <table class="table mb-0 sessonsTable" >
+                          <thead class="bg-label-light">
+                            <tr>
+                            <th>{{__('cycles.User/Title')}}</th>
+                            <th>{{__('admin.Judger')}}</th>
+                            <th>{{__('cycles.Date/Time')}}</th>
+                            <th>{{__('cycles.Done')}}</th>
+                            <th>{{__('cycles.Actions')}}</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <div class="d-flex align-items-center">
+                                  <a class="media-left" href="/dashboard/users/{{$myfinal->company->user->id}}/edit">
+                                    <img src="{{$myfinal->company->user->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
+                                  </a>
+                                  <a href="/dashboard/users/{{$myfinal->company->user->id}}/edit">
+                                    <div class="media-body">
+                                      <h6 class="media-heading mb-0 text-nowrap">{{$myfinal->company->user->{'first_name_'.$l} }} {{$myfinal->company->user->{'last_name_'.$l} }}</h6>
+                                      <span class="font-small-2 text-nowrap">{{$myfinal->company->user->{'title_'.$l} }}</span>
+                                    </div>
+                                  </a>
+                                </div>
+                              </td>
+                              <td>
+                                @foreach ($myfinal->judges as $judgeid )
+                                @php
+                                $judge = \App\User::find($judgeid);
+                                $name=optional($judge)->{'first_name_'.$l}.' '.optional($judge)->{'last_name_'.$l};
+                                @endphp
+                               @if(!empty($judge))
+                                <div style="cursor: pointer;" class="d-flex align-items-center">
+                                  <div class="chip-body">
+                                    <div class="avatar">
+                                      <img class="img-fluid rounded-circle me-3" src="{{asset(optional($judge)->image_url) }}" alt="photo" height="20" width="20">
+                                    </div>
+                                    <span class="chip-text text-nowrap">
+                                      {{$name}}
+                                    </span>
+                                  </div>
+                                </div>
+                                @endif
+                                @endforeach
+                              </td>
+                              <td>
+                                {{$myfinal->datetime}}
+                                <br>({{$myfinal->duration}}M)
+                              </td>
+                              <td>
+                                {{$myfinal->datetime < now() ?__('Yes'):__('No')}}
+                              </td>
+                              <td>
+                                <a href="{{$myfinal->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      @else
+        <hr><h6>{{__('dashboard.Your final session will start soon')}}.</h6>
+      @endif
+    @endif
       <!-- My last training -->
       @if (count($sessions) > 0)
         <div class="card mt-10">
