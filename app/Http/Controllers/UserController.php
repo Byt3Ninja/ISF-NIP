@@ -15,10 +15,11 @@ use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use \Spatie\Permission\Models\Role as Role;
-use DB, Log, Exception, Session, URL, File;
+use  Log, Exception, Session, URL, File;
 use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Notifications\WelcomeJudgerNotification;
 use Illuminate\Support\Facades\Log as FacadesLog;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -86,6 +87,53 @@ class UserController extends Controller
 
             $this->preProcessingCheck('add_user');
 
+            $setting = DB::table('settings')->where('id', 1)->first();
+            if ($setting->VFEmail == 1) {
+            if ($request->hasFile('img_url')) {
+                //store the image
+                $img_url = $request->file('img_url');
+                //get the path of the stores image
+                $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+            } else {
+                $img_url = '';
+            }
+            
+            $inputs = $request->except(['img_url']) + ['img_url' => $img_url];
+            $inputs['password'] = Hash::make($inputs['password']);
+            $inputs['password_confirmation'] = Hash::make($inputs['password_confirmation']);
+            $result = User::create($inputs);
+
+            Storage::disk('UsersLFM')->makeDirectory("$result->id");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/FinancialPlans");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/PitchDeck");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/Shared");
+            Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
+
+            $result->assignRole($request->role);
+            $data =[];
+            $name = $result->first_name_en . ' ' . $result->last_name_en;
+            $user = User::find($result->id);
+
+        // التحقق من أن المستخدم موجود
+        if ($user) {
+            $user->sendEmailVerificationNotification();
+        }
+
+
+            if($request->role == 'Judger'){
+                // إرسال الإيميل الترحيبي
+                $data = [
+                    'name' => $name,
+                    'email' => $result->email,
+                    'password' => $request->password,
+                ];
+            
+                // إرسال الإشعار
+                $result->notify(new WelcomeJudgerNotification($data));
+            }
+        }else{
+
             if ($request->hasFile('img_url')) {
                 //store the image
                 $img_url = $request->file('img_url');
@@ -98,6 +146,9 @@ class UserController extends Controller
             $inputs['password'] = Hash::make($inputs['password']);
             $inputs['password_confirmation'] = Hash::make($inputs['password_confirmation']);
             $result = User::create($inputs);
+
+            $result->email_verified_at = now();
+            $result->save();
 
             Storage::disk('UsersLFM')->makeDirectory("$result->id");
             Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
@@ -114,11 +165,14 @@ class UserController extends Controller
                 $data = [
                     'name' => $name,
                     'email' => $result->email,
+                    'password' => $request->password,
                 ];
             
                 // إرسال الإشعار
                 $result->notify(new WelcomeJudgerNotification($data));
             }
+
+        }
 
             if ($result)
                 return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']);

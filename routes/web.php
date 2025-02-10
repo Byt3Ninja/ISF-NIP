@@ -128,6 +128,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('updateSMWhatsApp');
 
 
+    Route::get('organizations/settings', 'SettingsController@showSettings')->name('organization-settings');
+    Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('meeting-settings');
+    Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('social-settings');
+    Route::put('organizations/settings/general', 'SettingsController@generalSetting')->name('general-settings');
+
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
     //Services Manager routes
@@ -468,7 +473,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/swot-analysis/export', [GeminiController::class, 'exportToPdf'])->name('swot.export');
     /* End of Gemini SWOT Analysis Routes */
 
-   
+    
 
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'], function () {

@@ -224,7 +224,7 @@ return [
 	'registeredusers' => 'المستخدمين المسجلين',
 	'totalusersmf' => 'نسبة الذكور / الإناث',
 	'JobTitleAr' => 'المسمى الوظيقي باللغة العربية',
-	'JobTitleEn' => 'الامسمى الوظيفي',
+	'JobTitleEn' => 'المسمى الوظيفي',
 	'Chamber' => 'الغرفة الصناعية',
 	'RoomMembershipNumber' => 'رقم عضوية الغرفة',
 	'CommercialRecord' => 'رقم السجل التجاري',
@@ -1225,4 +1225,9 @@ return [
 	'Pitch_Deck_Video_must_be_a_valid_URL' => 'يجب ان يكون رابط الفيديو صالح',
 	'Pitch_Deck_Video_max_size_is_25MB' => 'يجب ان يكون حجم الفيديو لا يزيد عن 25MB',
 	'pitch_deck_video_size_limit_exceeded' => 'يجب ان يكون حجز الفيديو لا يزيد عن 25 MB',
+	'Please select at least one value' => 'الرجاء اختيار قيمة واحدة على الأقل',
+	'Select Gender' => 'اختر النوع',
+	'Confirm Password' => 'تأكيد كلمة المرور',
+	'Financial plan attachment' => 'مرفق خطة العمل المالية',
 ];
+
