@@ -834,22 +834,25 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 10) {
                     $validator = Validator::make($request->all(), [
-                        'pitch_deck_video' => 'nullable|mimetypes:video/mp4,video/avi,video/mpeg|max:20480', // يجب أن يكون ملف PDF او PPT وحجمه لا يتجاوز 20MB
+                        'pitch_deck_video' => 'nullable', // يجب أن يكون ملف PDF او PPT وحجمه لا يتجاوز 20MB
                     ]);
 
                    
-                    if ($request->hasFile('pitch_deck_video')) {
-                        $file = $request->file('pitch_deck_video');
-                        $originalName = $file->getClientOriginalName();
-                        $path = $companyId . '/pitch_decks/';
+                    // if ($request->hasFile('pitch_deck_video')) {
+                    //     $file = $request->file('pitch_deck_video');
+                    //     $originalName = $file->getClientOriginalName();
+                    //     $path = $companyId . '/pitch_decks/';
                     
-                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
-                        $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_deck'
-                        ]);
+                    //     // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
+                    //     $file->storeAs($path, $originalName, [
+                    //         'disk' => 'pitch_deck'
+                    //     ]);
                     
-                        $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
-                    }else{
+                    //     $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
+                    // }else{
+                    //     return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
+                    // }
+                    if($request->pitch_deck_video == null){
                         return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
                     }
 
@@ -857,13 +860,13 @@ class ClientCompanyController extends Controller
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
-                            'pitch_deck_video' => $pitch_deck_video,
+                            'pitch_deck_video' => $request->pitch_deck_video,
                         ]);
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
-                            'pitch_deck_video' => $pitch_deck_video,
+                            'pitch_deck_video' => $request->pitch_deck_video,
                         ]);
                         $msgtype = 'NewComp';
                     }
@@ -1534,38 +1537,39 @@ class ClientCompanyController extends Controller
                 }
                 if ($data['CompanyN'] == 10) {
                     $validator = Validator::make($request->all(), [
-                        'pitch_deck_video' => 'nullable|mimes:mp4,ogg,webm|max:25600', // يجب أن يكون ملف MP4, OGG, WEBM وحجمه لا يتجاوز 10MB
-                    ], [
-                        'pitch_deck_video.mimes' => __('admin.Pitch_Deck_Video_must_be_a_valid_URL'),
-                        'pitch_deck_video.max' => __('admin.Pitch_Deck_Video_max_size_is_25MB'),
+                        'pitch_deck_video' => 'nullable', // يجب أن يكون ملف MP4, OGG, WEBM وحجمه لا يتجاوز 10MB
                     ]);
                     // $result = Company::updateOrCreate(['id' => $companyId], $data);
 
-                    if ($request->hasFile('pitch_deck_video')) {
-                        $file = $request->file('pitch_deck_video');
-                        $originalName = $file->getClientOriginalName();
-                        $path = $companyId . '/pitch_decks/';
+                    // if ($request->hasFile('pitch_deck_video')) {
+                    //     $file = $request->file('pitch_deck_video');
+                    //     $originalName = $file->getClientOriginalName();
+                    //     $path = $companyId . '/pitch_decks/';
                     
-                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
-                        $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_deck'
-                        ]);
+                    //     // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
+                    //     $file->storeAs($path, $originalName, [
+                    //         'disk' => 'pitch_deck'
+                    //     ]);
                     
-                        $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
-                    }else{
+                    //     $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
+                    // }else{
                         
+                    //     return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
+                    // }
+                    
+                    if($request->pitch_deck_video == null){
                         return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
                     }
                     if ($companyId) {
                         // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
                         $result = Company::where('id', $companyId)->update([
-                            'pitch_deck_video' => $pitch_deck_video,
+                            'pitch_deck_video' => $request->pitch_deck_video,
                         ]);
                         $msgtype = 'UpdateComp';
                     } else {
                         // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
                         $result = Company::create([
-                            'pitch_deck_video' => $pitch_deck_video,
+                            'pitch_deck_video' => $request->pitch_deck_video,
                         ]);
                         $msgtype = 'NewComp';
                     }

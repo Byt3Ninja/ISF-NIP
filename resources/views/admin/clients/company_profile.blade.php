@@ -651,11 +651,24 @@ if($company->team_num == '1'){
                 @if ($company->pitch_deck_video != null)
                   <div class="card-body text-center d-flex flex-column justify-content-between h-100">
                     <div class="d-flex flex-column justify-content-between align-items-center h-100">
-                      <video width="100%" controls>
-                        <source src="{{ $company->pitch_deck_video }}" type="video/mp4">
+                      @if($company)
+                @if ($company->pitch_deck_video != null)
+                <a href="{{ asset($company->pitch_deck_video) }}" target="_blank" class="mb-2 text-start w-100 cursor-pointer">
+                  {{ __('admin.View_Pitch_Deck_Video') }}
+                </a>
+                @endif
+                @else
+                <img
+                  id="deck-video-image"
+                  src="/images/deck-video.svg"
+                  style="width: 350px; height: 250px;"
+                />
+                @endif
+                      {{-- <video width="100%" controls>
+                        <source src="{{ $company->pitch_deck_video }}">
                         Your browser does not support the video tag.
-                      </video>
-                      <div class="mt-auto d-flex flex-column mb-6">
+                      </video> --}}
+                      {{-- <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">
                           To get analysis for your pitch deck please upload your
                           pitch deck video
@@ -666,7 +679,7 @@ if($company->team_num == '1'){
                           class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                           Click here
                         </a>
-                      </div>
+                      </div> --}}
                     </div>
                   </div>
                 @else
