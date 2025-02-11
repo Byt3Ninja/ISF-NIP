@@ -24,6 +24,7 @@ use Spatie\Permission\Models\Role;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 
 class SettingsController extends Controller
@@ -921,15 +922,21 @@ class SettingsController extends Controller
 
 
 
-public function inviteUser(Request $request)
+ public function inviteUser(Request $request)
 {
-        $request->validate([
+        
+    $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'role' => 'required|string|exists:roles,name',
         ]);
+    
+        if ($validator->fails()) {
+            return back()->with('message2', $validator->errors()->first())->withInput();
+        }
 
+    
          // Check for existing invitation and allow resending
             $invitation = Invitation::where('email', $request->email)
              ->where('organization_id', auth()->user()->organization_id)
@@ -954,8 +961,8 @@ public function inviteUser(Request $request)
             // Send invitation email
             Mail::to($request->email)->send(new UserInvitation($invitation));
 
-        return back()->with('message', 'InvitationSent');
-}
+            return back()->with('message', 'InvitationSent');
+        }
 
 public function showSetPasswordForm($invitationId)
 {
