@@ -21,15 +21,10 @@
     <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 @stop
 
-@section('content')
-  @if (!Auth::user()->first_name_ar)
-  <div class="d-none">
-    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
-  </div>
-  @endif
-  @php $setting = \App\Settings::where('id', 1)->first(); @endphp
   @php
-    $user_id = Auth::id();
+    $user = Auth::user();
+    $setting = \App\Settings::where('id', 1)->first();
+    $user_id = $user->id;
     $s_latest = \App\Service::orderBy('created_at', 'DESC')->take(5)->get();
     $e_latest = \App\Calendar::where('start', '>=', now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
             $q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
@@ -37,16 +32,16 @@
         ->orderBy('start')
         ->take(5)
         ->get();
-    $circle_id = Auth::user()->company->cycle ?? 0;
-    $organization_id = Auth::user()->organization_id ?? 0;
-    if( $organization_id == 0 ) { $organization_id = Auth::user()->company->cycledata->organization_id ?? 0; }
+    $circle_id = $user->company->cycle ?? 0;
+    $organization_id = $user->organization_id ?? 0;
+    if( $organization_id == 0 ) { $organization_id = $user->company->cycledata->organization_id ?? 0; }
     $s_count = \App\Service::count();
     $s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
     $nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
     $mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
     $m_count = count($mentors);
     $surveyEligible = [];
-    if( Auth::user()->company && $circle_id != 0 )
+    if( $user->company && $circle_id != 0 )
     {
       $steps = \App\Step::where('cycle_id', $circle_id)->orderBy('arr')->get();
       foreach( $steps as $step )
@@ -158,8 +153,8 @@
     }
     $surveyEligible = collect($surveyEligible)->groupBy('triggered_on')->toArray();
     /// My sessions
-    if (!empty(Auth::user()->company)) {
-        $sessions = \App\TrainingSession::where('step_id', Auth::user()->company->step)
+    if (!empty($user->company)) {
+        $sessions = \App\TrainingSession::where('step_id', $user->company->step)
             ->orderBy('datetime', 'ASC')
             ->take(3)
             ->get();
@@ -198,120 +193,125 @@
         ],
     ];
 
-	$s_latest = \App\Service::orderBy('created_at','DESC')->take(5)->get();
-	$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
-    $q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
-	})->orderBy('start')->take(5)->get();
-	$s_count = \App\Service::count();
-	$s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
-	$nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
-	$mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
-	$m_count = count($mentors);
-	/// Next session
-	// $nextsession = \App\MentorshipRequest::where('user_id', $user_id)->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
-	$days = request()->query('days', 14);
+		$s_latest = \App\Service::orderBy('created_at','DESC')->take(5)->get();
+		$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
+    	$q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
+		})->orderBy('start')->take(5)->get();
+		$s_count = \App\Service::count();
+		$s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
+		$nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
+		$mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
+		$m_count = count($mentors);
+		/// Next session
+		// $nextsession = \App\MentorshipRequest::where('user_id', $user_id)->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
+		$days = request()->query('days', 14);
 	
-	$nextSessions = \App\MentorshipRequest::where('user_id', $user_id)
-    ->where(function ($query) {
-        $query->where('approved', 'Yes')
-              ->orWhereNull('approved');
-    })
-    ->whereBetween('zoom_date', [
-        Carbon\Carbon::now()->startOfDay(), // بداية اليوم الحالي
-        Carbon\Carbon::now()->addDays($days)->endOfDay() // نهاية اليوم الـ 14 القادم
-    ])
-    ->orderBy('zoom_date', 'ASC')
-    ->get();
-	
-	
-	
-  if( Auth::user()->hasRole('Registered') )
-  {
-    /// Rating
-    $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
-    $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
-    $available_surveys = collect([]);
-    // load survey for startup
-    if( Auth::user()->company && $circle_id != 0 )
-    {
-      $surveysToAdd = [];
-      $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['startup', 'both'])->with(['myResponses'])->get();
-      
-      foreach( $surveys as $survey_scope )
-      {
-        
-        $my_responses = $survey_scope->myResponses;
-        if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
-        {
-          $due = $survey_scope->trigger_by_due;
-          $session = $survey_scope->trigger_by_session;
-          $mentorship = collect($surveyEligible['mentorship']);
-          $triggers = [];
-          if( $due == true ) { $triggers[] = 'due';  }
-          if( $session == true ) { $triggers[] = 'session'; }
-          $triggers = array_unique( $triggers );
-          if( count( $triggers ) == 0 ) { $mentorship = $mentorship->where('triggered_at', null); }
-          else { $mentorship = $mentorship->whereIn('triggered_by', $triggers); }
-          $mentorship = $mentorship->values();
-          foreach( $mentorship as $conditions )
-          {
-            $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-            if( empty( $checkResponse ) )
-            {
-              $surveysToAdd[] = [
-                'user_id' => $user_id,
-                'survey_id' => $survey_scope->survey_id, 
-                'cycle_id' => $circle_id,
-                'scope_id' => $survey_scope->id,
-                'triggered_on' => $conditions['triggered_on'],
-                'triggered_at' => $conditions['triggered_at'],
-                'triggered_by' => $conditions['triggered_by'],
-                'responses' => Null
-              ];
-            }
-          }
-        }
-        elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
-        {
-          $due = $survey_scope->trigger_by_due;
-          $quiz = $survey_scope->trigger_by_quiz;
-          $session = $survey_scope->trigger_by_session;
-          $training = collect($surveyEligible['training']);
-          if( $due == true ) { $triggers[] = 'due';  }
-          if( $quiz == true ) { $triggers[] = 'quiz'; }
-          if( $session == true ) { $triggers[] = 'session'; }
-          $triggers = array_unique( $triggers );
-          if( count( $triggers ) == 0 ) { $training = $training->where('triggered_at', null); }
-          else { $training = $training->whereIn('triggered_by', $triggers); }
-          $training = $training->values();
-          foreach( $training as $conditions )
-          {
-            $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-            if( empty( $checkResponse ) )
-            {
-              $surveysToAdd[] = [
-                'user_id' => $user_id,
-                'survey_id' => $survey_scope->survey_id, 
-                'cycle_id' => $circle_id,
-                'scope_id' => $survey_scope->id,
-                'triggered_on' => $conditions['triggered_on'],
-                'triggered_at' => $conditions['triggered_at'],
-                'triggered_by' => $conditions['triggered_by'],
-                'responses' => Null
-              ];
-            }
-          }
-        }
-      }
-      if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
-      $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
-    }
-  }
+		$nextSessions = \App\MentorshipRequest::where('user_id', $user_id)
+    	->where(function ($query) {
+        	$query->where('approved', 'Yes')
+              	->orWhereNull('approved');
+    	})
+    	->whereBetween('zoom_date', [
+        	Carbon\Carbon::now()->startOfDay(), // بداية اليوم الحالي
+        	Carbon\Carbon::now()->addDays($days)->endOfDay() // نهاية اليوم الـ 14 القادم
+    	])
+    	->orderBy('zoom_date', 'ASC')
+    	->get();
 
-	/// My sessions
-	if( !empty( Auth::user()->company ) ) { $sessions = \App\TrainingSession::where("step_id", Auth::user()->company->step)->orderBy('datetime','ASC')->take(1)->get(); }
-	else { $sessions = []; }
+    if( $user->hasRole('Registered') )
+    {
+      /// Rating
+      $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
+      $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
+      $available_surveys = collect([]);
+      // load survey for startup
+      if( $user->company && $circle_id != 0 )
+      {
+        $surveysToAdd = [];
+        $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['startup', 'both'])->with(['myResponses'])->get();
+        
+        foreach( $surveys as $survey_scope )
+        {
+          
+          $my_responses = $survey_scope->myResponses;
+          if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
+          {
+            $due = $survey_scope->trigger_by_due;
+            $session = $survey_scope->trigger_by_session;
+            $mentorship = collect($surveyEligible['mentorship']);
+            $triggers = [];
+            if( $due == true ) { $triggers[] = 'due';  }
+            if( $session == true ) { $triggers[] = 'session'; }
+            $triggers = array_unique( $triggers );
+            if( count( $triggers ) == 0 ) { $mentorship = $mentorship->where('triggered_at', null); }
+            else { $mentorship = $mentorship->whereIn('triggered_by', $triggers); }
+            $mentorship = $mentorship->values();
+            foreach( $mentorship as $conditions )
+            {
+              $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+              if( empty( $checkResponse ) )
+              {
+                $surveysToAdd[] = [
+                  'user_id' => $user_id,
+                  'survey_id' => $survey_scope->survey_id, 
+                  'cycle_id' => $circle_id,
+                  'scope_id' => $survey_scope->id,
+                  'triggered_on' => $conditions['triggered_on'],
+                  'triggered_at' => $conditions['triggered_at'],
+                  'triggered_by' => $conditions['triggered_by'],
+                  'responses' => Null
+                ];
+              }
+            }
+          }
+          elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
+          {
+            $due = $survey_scope->trigger_by_due;
+            $quiz = $survey_scope->trigger_by_quiz;
+            $session = $survey_scope->trigger_by_session;
+            $training = collect($surveyEligible['training']);
+            if( $due == true ) { $triggers[] = 'due';  }
+            if( $quiz == true ) { $triggers[] = 'quiz'; }
+            if( $session == true ) { $triggers[] = 'session'; }
+            $triggers = array_unique( $triggers );
+            if( count( $triggers ) == 0 ) { $training = $training->where('triggered_at', null); }
+            else { $training = $training->whereIn('triggered_by', $triggers); }
+            $training = $training->values();
+            foreach( $training as $conditions )
+            {
+              $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+              if( empty( $checkResponse ) )
+              {
+                $surveysToAdd[] = [
+                  'user_id' => $user_id,
+                  'survey_id' => $survey_scope->survey_id, 
+                  'cycle_id' => $circle_id,
+                  'scope_id' => $survey_scope->id,
+                  'triggered_on' => $conditions['triggered_on'],
+                  'triggered_at' => $conditions['triggered_at'],
+                  'triggered_by' => $conditions['triggered_by'],
+                  'responses' => Null
+                ];
+              }
+            }
+          }
+        }
+        if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
+        $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
+      }
+    }
+
+    /// My sessions
+    if( !empty( $user->company ) ) { $sessions = \App\TrainingSession::where("step_id", $user->company->step)->orderBy('datetime','ASC')->take(1)->get(); }
+    else { $sessions = []; }
   @endphp
+
+@section('content')
+  @if (!$user->first_name_ar)
+  <div class="d-none">
+    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+  </div>
+  @endif
 
   <!-- Content wrapper -->
   <div class="content-wrapper">
@@ -611,7 +611,7 @@
       <!-- Survey -->
 
       @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
-    @if( Auth::user()->hasRole('Registered') )
+    @if( $user->hasRole('Registered') )
     <div class="col-12" style="height: 500px; overflow-y: auto;">
       <div class="card">
         <div class="card-header border-bottom py-3">
@@ -677,7 +677,7 @@
       </div>
     </div>
     @endif
-    @if( Auth::user()->hasRole('Mentor') )
+    @if( $user->hasRole('Mentor') )
     <div class="col-12" style="max-height: 500px; overflow-y: auto;">
       <div class="card">
         <div class="card-header border-bottom py-3">
@@ -750,11 +750,14 @@
         @php
           $svgs = ['notebook','search','idea','comments','trophy'];
           $colors = ['#39da8a','#99a2ac','#fdac41'];
-          $cs = Auth::user()->company->step;
           $s = 1;
           $stat = "Completed";
-          $ctype = Auth::user()->company->stepdata->stype;
-                                $color= $colors[0];
+          $ctype = 0;
+          if( !empty( $user->company ) )
+          {
+            $ctype = $user->company->stepdata->stype;
+          }
+          $color= $colors[0];
 
         @endphp
         
@@ -762,20 +765,20 @@
       
       
       <!-- My Progress -->
-      @if( Auth::user()->company && $circle_id != 0 )
+      @if( $user->company && $circle_id != 0 )
         <div class="card mt-10">
           <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">
               <i class="ti ti-briefcase ti-24px"></i>
               <span class="mx-2">{{ __('dashboard.My progress') }} :
-                {{ Auth::user()->company->cycledata->title }}</span>
+                {{ $user->company->cycledata->title }}</span>
             </h5>
             <span
-              class="text-capitalize">{{ __('dashboard.start from') . ': ' . Auth::user()->company->cycledata->start_format . ' ' . __('dashboard.to') . ': ' . Auth::user()->company->cycledata->end_format }}</span>
+              class="text-capitalize">{{ __('dashboard.start from') . ': ' . $user->company->cycledata->start_format . ' ' . __('dashboard.to') . ': ' . $user->company->cycledata->end_format }}</span>
             <div class="d-flex align-items-center mt-3">
-              @if (!is_null(Auth::user()->company->cycledata->organization))
+              @if (!is_null($user->company->cycledata->organization))
               @php
-              $imageUrl = Auth::user()->company->cycledata->organization->image_url;
+              $imageUrl = $user->company->cycledata->organization->image_url;
           
                // استخراج المسار من الرابط
                $imagePath = parse_url($imageUrl, PHP_URL_PATH);
@@ -789,7 +792,7 @@
                 <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
             @endif
 
-              <span class="mx-3 text-secondary">{{ Auth::user()->company->cycledata->organization->name }}</span>
+              <span class="mx-3 text-secondary">{{ $user->company->cycledata->organization->name }}</span>
             </div>
           </div>
           <div class="table-responsive text-nowrap">
@@ -809,18 +812,18 @@
                     $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
                     $color = 'label-light';
                     $textColor = 'light';
-                    if (Auth::user()->company->stepdata->arr > $step->arr) {
+                    if ($user->company->stepdata->arr > $step->arr) {
                         $status = $l == 'ar' ? 'انتهت' : 'Completed';
                         $color = 'label-success';
                         $textColor = 'success';
-                    } elseif (Auth::user()->company->stepdata->arr == $step->arr) {
+                    } elseif ($user->company->stepdata->arr == $step->arr) {
                         $status = $l == 'ar' ? 'بدأت' : 'Started';
                         $color = 'label-primary';
                         $textColor = 'primary';
                     }
 
                     $trtype = $flink = null;
-                    if (Auth::user()->company->approved) {
+                    if ($user->company->approved) {
                         $flink = 'my/' . $step->id;
                     } else {
                         $flink = 'view/' . $circle_id;
@@ -837,7 +840,7 @@
                   <tr>
                     <td>
                       @if($step->stype == 1)
-                      @if (Auth::user()->company->approved)
+                      @if ($user->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
                           <a href="/dashboard/cycles/{{ $flink }}">
@@ -940,7 +943,7 @@
      
     @if( $ctype == 5 )
       @php
-      $myfinal = \App\Finalscreening::where('company_id', Auth::user()->company->id )->where('step_id', Auth::user()->company->step )->first();
+      $myfinal = \App\Finalscreening::where('company_id', $user->company->id )->where('step_id', $user->company->step )->first();
       @endphp
       @if( !is_null($myfinal)&&$myfinal->join_url )
 
@@ -1085,7 +1088,7 @@
       <!-- / My last training -->
 
       <!-- My Mentors -->
-      @if (Auth::user()->company->approved ?? null && count($mentors))
+      @if ($user->company->approved ?? null && count($mentors))
         <div class="card mt-10">
           {{-- <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">
@@ -1138,7 +1141,7 @@
 												{{-- <th>{{__('cycles.Company')}}</th> --}}
 												<th>{{__('cycles.User/Title')}}</th>
 												<th>{{__('cycles.Mentor')}}</th>
-                      @if (Auth::user()->hasRole('Admin'))
+                      @if ($user->hasRole('Admin'))
 												<th>{{__('cycles.Rate/Comment')}}</th>
                       @endif
 												<th>{{__('cycles.Date/Time')}}</th>
@@ -1187,7 +1190,7 @@
 															</div>
 														</div>
 													</td>
-                          @if (Auth::user()->hasRole('Admin'))
+                          @if ($user->hasRole('Admin'))
 													<td>
 														<small>{!!  $session->rate_comment?
 															 str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->rating).
