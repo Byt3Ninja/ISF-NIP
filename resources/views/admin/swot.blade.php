@@ -19,54 +19,58 @@
     <button id="generate-swot" class="btn btn-warning mt-4">{{__('admin.generate')}}</button>
 
      <!-- Export to PDF -->
-     <a href="{{ route('swot.export') }}" class="btn btn-success mt-3">{{__('admin.export')}}</a>
+     <a href="{{ route('swot.export') }}" class="btn btn-success mt-3 ms-4">{{__('admin.export')}}</a>
 
     <form action="{{ route('swot.save') }}" method="POST">
         @csrf
 
         <input type="hidden" name="company_id" value="{{ auth()->user()->company->id }}">
 
-        <div class="form-group mt-3">
-            <label>{{__('admin.strengths')}}</label>
-            <textarea name="strength" rows="8" class="form-control">{{ $swotAnalysis->strength ?? '' }}</textarea>
+         <div class="row mt-3">
+            <div class="col-md-6">
+                <label>{{__('admin.strengths')}}</label>
+                <textarea name="strength" rows="8" class="form-control mt-2">{{ $swotAnalysis->strength ?? '' }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label>{{__('admin.weaknesses')}}</label>
+                <textarea name="weakness" rows="8" class="form-control mt-2">{{ $swotAnalysis->weakness ?? '' }}</textarea>
+            </div>
         </div>
 
-        <div class="form-group mt-3">
-            <label>{{__('admin.strengths_recommendations')}}</label>
-            <textarea name="srecommendation" rows="8" class="form-control">{{ $swotAnalysis->srecommendation ?? '' }}</textarea>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label>{{__('admin.strengths_recommendations')}}</label>
+                <textarea name="srecommendation" rows="8" class="form-control mt-2">{{ $swotAnalysis->srecommendation ?? '' }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label>{{__('admin.weaknesses_recommendations')}}</label>
+                <textarea name="wrecommendation" rows="8" class="form-control mt-2">{{ $swotAnalysis->wrecommendation ?? '' }}</textarea>
+            </div>
         </div>
 
-        <div class="form-group mt-3">
-            <label>{{__('admin.weaknesses')}}</label>
-            <textarea name="weakness" rows="8" class="form-control">{{ $swotAnalysis->weakness ?? '' }}</textarea>
+         <div class="row mt-3">
+            <div class="col-md-6">
+                <label>{{__('admin.opportunities')}}</label>
+                <textarea name="opportunity" rows="8" class="form-control mt-2">{{ $swotAnalysis->opportunity ?? '' }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label>{{__('admin.threats')}}</label>
+                <textarea name="threat" rows="8" class="form-control mt-2">{{ $swotAnalysis->threat ?? '' }}</textarea>
+            </div>
         </div>
 
-        <div class="form-group mt-3">
-            <label>{{__('admin.weaknesses_recommendations')}}</label>
-            <textarea name="wrecommendation" rows="8" class="form-control">{{ $swotAnalysis->wrecommendation ?? '' }}</textarea>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label>{{__('admin.opportunities_recommendations')}}</label>
+                <textarea name="orecommendation" rows="8" class="form-control mt-2">{{ $swotAnalysis->orecommendation ?? '' }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label>{{__('admin.threats_recommendations')}}</label>
+                <textarea name="trecommendation" rows="8" class="form-control mt-2">{{ $swotAnalysis->trecommendation ?? '' }}</textarea>
+            </div>
         </div>
 
-        <div class="form-group mt-3">
-            <label>{{__('admin.opportunities')}}</label>
-            <textarea name="opportunity" rows="8" class="form-control">{{ $swotAnalysis->opportunity ?? '' }}</textarea>
-        </div>
-
-        <div class="form-group mt-3">
-            <label>{{__('admin.opportunities_recommendations')}}</label>
-            <textarea name="orecommendation" rows="8" class="form-control">{{ $swotAnalysis->orecommendation ?? '' }}</textarea>
-        </div>
-
-        <div class="form-group mt-3">
-            <label>{{__('admin.threats')}}</label>
-            <textarea name="threat" rows="8" class="form-control">{{ $swotAnalysis->threat ?? '' }}</textarea>
-        </div>
-
-        <div class="form-group mt-3">
-            <label>{{__('admin.threats_recommendations')}}</label>
-            <textarea name="trecommendation" rows="8" class="form-control">{{ $swotAnalysis->trecommendation ?? '' }}</textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-4">Save</button>
+        <button type="submit" class="btn btn-primary mt-4">{{__('admin.Save')}}</button>
     </form>
 </div>
 
