@@ -813,58 +813,72 @@ class SettingsController extends Controller
 
     public function generalSetting(Request $request)
     {
-      $request->validate([
-        'name_en' => 'nullable|string|max:255',
-        'img_url' => 'nullable|image',
-        'contact_email' => 'nullable|email',
-        'contact_phone' => 'nullable|string|max:11',
-        'address' => 'nullable|string',
-        'time_zone' => 'nullable|string|max:100',
-        'currency_id' => 'nullable|exists:currencies,id',
-    ]);
+         $request->validate([
+            'name_en' => 'nullable|string|max:255',
+            'img_url' => 'nullable|image',
+            'contact_email' => 'nullable|email',
+            'contact_phone' => 'nullable|string|max:11',
+            'address' => 'nullable|string',
+            'time_zone' => 'nullable|string|max:100',
+            'currency_id' => 'nullable|exists:currencies,id',
+        ]);
 
-    $organization = Organization::find($request->input('id'));
+     $organization = Organization::find($request->input('id'));
 
-    if (!$organization) {
-        return redirect()->route('organization-settings')->with('error', 'Organization not found.');
-    }
+        if (!$organization) {
+          return redirect()->back()->with('error', 'Organization not found.');
+        }
 
-    $organization->name_en = $request->input('organization_name', $organization->name_en);
-    $organization->contact_email = $request->input('contact_email', $organization->contact_email);
-    $organization->contact_phone = $request->input('contact_phone', $organization->contact_phone);
-    $organization->address = $request->input('address', $organization->address);
-    $organization->time_zone = $request->input('time_zone', $organization->time_zone);
-    $organization->currency_id = $request->input('currency_id', $organization->currency_id);
-    $organization->save();
-
-    if ($request->hasFile('img_url')) {
-        $image = $request->file('img_url');
-        $imageName = time() . '.' . $image->getClientOriginalExtension();
-
-        $image->move(public_path('organizations/'), $imageName);
-
-        $organization->img_url = 'organizations/' . $imageName;
+        $organization->name_en = $request->input('organization_name', $organization->name_en);
+        $organization->contact_email = $request->input('contact_email', $organization->contact_email);
+        $organization->contact_phone = $request->input('contact_phone', $organization->contact_phone);
+        $organization->address = $request->input('address', $organization->address);
+        $organization->time_zone = $request->input('time_zone', $organization->time_zone);
+        $organization->currency_id = $request->input('currency_id', $organization->currency_id);
         $organization->save();
-    }
 
-        return redirect()->back()->with('message', 'StoredSuccessfully');
+        if ($request->hasFile('img_url')) {
+            $image = $request->file('img_url');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+             $image->move(public_path('organizations/'), $imageName);
+             $organization->img_url = 'organizations/' . $imageName;
+            $organization->save();
+        }
+
+            return redirect()->back()->with('message', 'StoredSuccessfully');
 
     }
 
     public function meetingSetting(Request $request)
     {
         $request->validate([
-        'meeting_platform' => 'required|string',
-        'ZOOM_CLIENT_ID' => 'nullable|string',
-        'ZOOM_CLIENT_SECRET' => 'nullable|string',
-        'ZOOM_ACCOUNT_ID' => 'nullable|string',
+            'meeting_platform' => 'required|string',
+            'ZOOM_CLIENT_ID' => 'nullable|string',
+            'ZOOM_CLIENT_SECRET' => 'nullable|string',
+            'ZOOM_ACCOUNT_ID' => 'nullable|string',
+            'MICROSOFT_CLIENT_ID' => 'nullable|string',
+            'MICROSOFT_CLIENT_SECRET_VALUE' => 'nullable|string',
+            'MICROSOFT_TENANT_ID' => 'nullable|string',
+            'MICROSOFT_REDIRECT_URI' => 'nullable|string',
         ]);
 
         $organization = Organization::find($request->input('id'));
         $organization->meeting_platform = $request->input('meeting_platform');
-        $organization->zoom_client_id = $request->input('ZOOM_CLIENT_ID');
-        $organization->zoom_client_secret = $request->input('ZOOM_CLIENT_SECRET');
-        $organization->zoom_account_id = $request->input('ZOOM_ACCOUNT_ID');    
+
+        if ($request->input('meeting_platform') === 'zoom') {
+            $organization->zoom_client_id = $request->input('ZOOM_CLIENT_ID');
+            $organization->zoom_client_secret = $request->input('ZOOM_CLIENT_SECRET');
+            $organization->zoom_account_id = $request->input('ZOOM_ACCOUNT_ID');
+        } elseif ($request->input('meeting_platform') === 'teams') {
+            $organization->microsoft_client_id = $request->input('MICROSOFT_CLIENT_ID');
+            $organization->microsoft_client_secret_value = $request->input('MICROSOFT_CLIENT_SECRET_VALUE');
+            $organization->microsoft_tenant_id = $request->input('MICROSOFT_TENANT_ID');
+            $organization->microsoft_client_secret_id = $request->input('MICROSOFT_CLIENT_SECRET_ID');
+            $organization->microsoft_app_email = $request->input('MICROSOFT_APP_EMAIL');
+            $organization->microsoft_redirect_uri = $request->input('MICROSOFT_REDIRECT_URI');
+        }
+          
         $organization->save();
 
         return redirect()->back()->with('message', 'StoredSuccessfully');

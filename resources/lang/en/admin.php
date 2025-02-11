@@ -138,6 +138,8 @@ return [
 	'No' => 'No',
 	'Deleted' => 'Deleted',
 	'del' => 'Deleted Successfully',
+	'Zoom' => 'Zoom',
+	'Teams' => 'Teams',
 	'Currencies' => 'Currencies',
 	'Code' => 'Code',
 	'Name' => 'Name',
