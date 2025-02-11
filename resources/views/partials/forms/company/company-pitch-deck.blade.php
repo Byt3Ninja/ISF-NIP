@@ -128,13 +128,11 @@
                 <div class="mt-auto d-flex flex-column w-100 mt-2">
                   <input
                     id="video"
-                    class="form-control border-light light-shadow px-8 d-none"
-                    type="file"
+                    class="form-control border-light light-shadow px-8"
+                    type="text"
                     name="pitch_deck_video"
-                    accept="video/mp4,video/mkv,video/avi,video/mov"
-                    onchange="handleFileUpload('video', 'video-dropzone')"
                   />
-                  <div
+                  {{-- <div
                     id="video-dropzone"
                     class="d-flex flex-column justify-content-center align-items-center gap-1 border border-dashed border-2 p-3 text-center w-100 rounded"
                     style="cursor: pointer;"
@@ -142,7 +140,7 @@
                   >
                     <i class="ti ti-upload fs-4"></i>
                     <p>{{ __('admin.upload_video') }}</p>
-                  </div>
+                  </div> --}}
                 </div>
               </div>
               <div class="col-12 d-flex justify-content-end mt-3">
