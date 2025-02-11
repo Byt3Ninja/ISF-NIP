@@ -1223,4 +1223,5 @@ return [
 	'Confirm Password' => 'Confirm Password',
 	'Financial plan attachment' => 'Financial plan attachment',
 	'Final_Session' => 'Final Session',
+	'View_Pitch_Deck_Video' => 'View Pitch Deck Video',	
 ];

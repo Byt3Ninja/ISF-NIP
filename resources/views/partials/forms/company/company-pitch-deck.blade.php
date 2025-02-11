@@ -78,7 +78,7 @@
               <div class="col-12 d-flex justify-content-end mt-3">
                 <button
                   type="submit"
-                  class="btn btn-sm btn-primary mr-1 mb-1 d-none"
+                  class="btn btn-sm btn-primary mr-1 mb-1"
                   id="submit-button-pitch-deck"
                 >
                   <span id="button-text">{{ __('admin.Save') }}</span>
@@ -114,13 +114,9 @@
               >
                 @if($client->company)
                 @if ($client->company->pitch_deck_video != null)
-                <video width="100%" controls class="mb-2 border rounded">
-                  <source
-                    src="{{ asset($client->company->pitch_deck_video) }}"
-                    type="video/mp4"
-                  />
-                  Your browser does not support the video tag.
-                </video>
+                <a href="{{ asset($client->company->pitch_deck_video) }}" target="_blank" class="mb-2 text-start w-100 cursor-pointer">
+                  {{ __('admin.View_Pitch_Deck_Video') }}
+                </a>
                 @endif
                 @else
                 <img
@@ -152,7 +148,7 @@
               <div class="col-12 d-flex justify-content-end mt-3">
                 <button
                   type="submit"
-                  class="btn btn-sm btn-primary mr-1 mb-1 d-none"
+                  class="btn btn-sm btn-primary mr-1 mb-1"
                   id="submit-button-video"
                 >
                   <span id="button-text">{{ __('admin.Save') }}</span>
@@ -377,14 +373,14 @@
         alert('{{ __('admin.pitch_deck_video_should_be_video') }}')
         return;
       }
-      // Check file size (25MB = 25 * 1024 * 1024 bytes)
-      var maxSize = 25 * 1024 * 1024; 
+      // // Check file size (25MB = 25 * 1024 * 1024 bytes)
+      // var maxSize = 25 * 1024 * 1024; 
 
-      if (file.size > maxSize) {
-        alert('{{ __('admin.pitch_deck_video_size_limit_exceeded') }}'); 
-        input.value = ''; // Clear the input field
-        return;
-      }
+      // if (file.size > maxSize) {
+      //   alert('{{ __('admin.pitch_deck_video_size_limit_exceeded') }}'); 
+      //   input.value = ''; // Clear the input field
+      //   return;
+      // }
     } else if (inputId === 'document') {
       var allowedExtensions = /(\.pdf)$/i;
       for (var i = 0; i < input.files.length; i++) {
@@ -394,6 +390,8 @@
         }
       }
     }
+
+    console.log('input.files', input.files)
 
     if (input.files && input.files[0]) {
       var file = input.files[0];
@@ -407,7 +405,7 @@
             </span>
           </div>
         `;
-        checkAllUploads();
+        // checkAllUploads();
       };
       reader.readAsDataURL(file);
     }
@@ -426,34 +424,34 @@
       <i class="ti ti-upload fs-4"></i>
       <p>{{ __('admin.upload_file') }}</p>
     `;
-    checkAllUploads();
+    // checkAllUploads();
   }
 
-  function checkAllUploads() {
-    var pitchDeckInput = document.getElementById('pitch-deck-input');
-    var videoInput = document.getElementById('video');
-    var documentInput = document.getElementById('document');
+  // function checkAllUploads() {
+  //   var pitchDeckInput = document.getElementById('pitch-deck-input');
+  //   var videoInput = document.getElementById('video');
+  //   var documentInput = document.getElementById('document');
 
-    var pitchDeckButton = document.getElementById('submit-button-pitch-deck');
-    var videoButton = document.getElementById('submit-button-video');
-    var documentsButton = document.getElementById('submit-button-documents');
+  //   var pitchDeckButton = document.getElementById('submit-button-pitch-deck');
+  //   var videoButton = document.getElementById('submit-button-video');
+  //   var documentsButton = document.getElementById('submit-button-documents');
 
-    if (pitchDeckInput.files.length > 0) {
-      pitchDeckButton.classList.remove('d-none');
-    } else {
-      pitchDeckButton.classList.add('d-none');
-    }
+  //   if (pitchDeckInput.files.length > 0) {
+  //     pitchDeckButton.classList.remove('d-none');
+  //   } else {
+  //     pitchDeckButton.classList.add('d-none');
+  //   }
 
-    if (videoInput.files.length > 0) {
-      videoButton.classList.remove('d-none');
-    } else {
-      videoButton.classList.add('d-none');
-    }
+  //   if (videoInput.files.length > 0) {
+  //     videoButton.classList.remove('d-none');
+  //   } else {
+  //     videoButton.classList.add('d-none');
+  //   }
 
-    if (documentInput.files.length > 0) {
-      documentsButton.classList.remove('d-none');
-    } else {
-      documentsButton.classList.add('d-none');
-    }
-  }
+  //   if (documentInput.files.length > 0) {
+  //     documentsButton.classList.remove('d-none');
+  //   } else {
+  //     documentsButton.classList.add('d-none');
+  //   }
+  // }
 </script>
