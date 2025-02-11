@@ -89,22 +89,21 @@ class GeminiController extends Controller
         **Threats:**  
         - List external risks, such as competition, regulatory challenges, or economic changes.
 
-        ### Output Format:
-        ```json
-        {
-          \"Strengths\": [\"...\"],
-          \"Weaknesses\": [\"...\"],
-          \"Opportunities\": [\"...\"],
-          \"Threats\": [\"...\"],
-           \"Recommendations\": {
-            \"Strengths\": [\"...\"],
-            \"Weaknesses\": [\"...\"],
-            \"Opportunities\": [\"...\"],
-            \"Threats\": [\"...\"]
-          }
-        }
-        ```
-        Keep the analysis concise, practical, and aligned with the provided inputs.
+       ### Output Format:
+    {
+      \"Strengths\": \"<list the internal advantages the startup has>\",
+      \"Weaknesses\": \"<list internal limitations>\",
+      \"Opportunities\": \"<list external opportunities>\",
+      \"Threats\": \"<list external risks>\",
+      \"Recommendations\": {
+        \"Strengths\": \"<actionable recommendations for strengths>\",
+        \"Weaknesses\": \"<actionable recommendations for weaknesses>\",
+        \"Opportunities\": \"<actionable recommendations for opportunities>\",
+        \"Threats\": \"<actionable recommendations for threats>\"
+      }
+    }
+        When returning the content, please ensure that no quotes appear around the values or the lists. Instead of returning text in double quotes, return plain, formatted text that can be directly read. Do not include any extra symbols such as bullet points or markdown formatting. The goal is to return clean and practical output.
+
     ";
 
         $apiKey = env("GEMINI_API_KEY");

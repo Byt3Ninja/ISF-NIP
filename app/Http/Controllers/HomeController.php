@@ -155,18 +155,18 @@ class HomeController extends Controller
         });
 
         // Sector Breakdown
-        $sectorBreakdown = Sector::withCount('children')->get();
+        $sectorBreakdown = Sector::withCount('company')->get();
 
         $data['sector_data'] = $sectorBreakdown->map(function ($item) {
             return [
                 'label_en' => $item->name_en,
                 'label_ar' => $item->name_ar,
-                'count' => $item->children_count,
+                'count' => $item->company_count,
             ];
         });
 
 
-        // Project Type Distribution
+        // Company By Business Model
         $projectTypes = Company::select('business_type', DB::raw('count(*) as total'))
             ->groupBy('business_type')
             ->whereNotNull('business_type')
@@ -221,7 +221,7 @@ class HomeController extends Controller
         ];
 
 
-        // Companies By Sector
+        // Companies Per Sector
         $sectorData = Company::select('sector', DB::raw('count(*) as total'))
             ->whereNotNull('sector')
             ->groupBy('sector')
@@ -491,22 +491,25 @@ class HomeController extends Controller
 
         // Sector Breakdown
         $sectorBreakdown = Sector::join('companies', 'companies.sector', '=', 'sectors.id')
-            ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
-            ->select('sectors.name_en as sector_name_en', 'sectors.name_ar as sector_name_ar', DB::raw('count(companies.id) as total'))
-            ->groupBy('sectors.name_en', 'sectors.name_ar')
-            ->get();
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->where('cycles.organization_id', $organization_id) 
+        ->select(
+            'sectors.name_en as sector_name_en', 
+            'sectors.name_ar as sector_name_ar', 
+            DB::raw('count(companies.id) as total')
+        )
+        ->groupBy('sectors.name_en', 'sectors.name_ar')
+        ->get();
+    
+     $data['sector_data'] = $sectorBreakdown->map(function ($item) {
+        return [
+            'label_en' => $item->sector_name_en,
+            'label_ar' => $item->sector_name_ar,
+            'count' => $item->total,
+        ];
+    });
 
-        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
-            return [
-                'label_en' => $item->sector_name_en,
-                'label_ar' => $item->sector_name_ar,
-                'count' => $item->total,
-            ];
-        });
-
-        // Project Type Distribution
+        // Company By Business Model
         $projectTypes = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
