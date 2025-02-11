@@ -21,6 +21,7 @@
     ['general', 'ti-settings', __('settings.General Settings')],
     ['MeetingTab', 'ti-device-computer-camera', __('settings.Meeting Setting')],
     ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
+    ['teamMembers', 'ti-users', __('settings.teamMembers')],
   ])->map(function ($tab) {
     return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
   })->toArray();
@@ -102,8 +103,11 @@
                     @case('SocialMediaLinks')
                       @include('admin.organizations.partials.social-links')
                       @break
+
+                      @case('teamMembers')
+                      @include('admin.organizations.partials.team-members')
+                      @break
                  
-                    
                   @endswitch
                 </div>
               </div>
