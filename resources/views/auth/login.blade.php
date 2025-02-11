@@ -99,6 +99,7 @@
   <!-- Content -->
   @php
     $setting = App\Settings::first();
+    $logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
     $platformName = $setting ? $setting->Platform_Name : '';
     $formHeading = $l == 'ar' ? 'مرحبًا بعودتك إلى ' . $platformName : 'Welcome to ' . $platformName;
     $formSubHeading =
@@ -185,7 +186,7 @@
             <!-- Logo -->
             <div class="app-brand justify-content-center mb-4">
               <a href="/dashboard" class="app-brand-link">
-                <img src="/images/background/logo.png" alt="avatar"  width="150">
+                <img src="{{ $logo }}" alt="avatar"  width="150">
               </a>
             </div>
             <!-- /Logo -->

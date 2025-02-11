@@ -109,6 +109,8 @@
 
 <body>
   @php
+  $setting = App\Settings::first();
+  $logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
   $formHeading = $l == 'ar' ? 'تبدأ المغامرة من هنا' : 'Adventure starts here';
   $formSubHeading = $l == 'ar' ? '!اجعل إدارة تطبيقك سهلة وممتعة' : 'Make your app management easy and fun!';
   $firstName = $l == 'ar' ? 'الاسم الأول' : 'First Name';
@@ -195,7 +197,7 @@
             <!-- Logo -->
             <div class="app-brand justify-content-center mb-4">
               <a href="/dashboard" class="app-brand-link">
-                <img src="/images/background/logo.png" alt="avatar" width="150">
+                <img src="{{$logo}}" alt="avatar" width="150">
               </a>
             </div>
             <!-- /Logo -->

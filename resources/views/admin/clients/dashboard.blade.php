@@ -4,6 +4,8 @@
 @section('subTitle', __('admin.My Dashboard'))
 
 @section('style')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/widgets.css">
 	<link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/dashboard-ecommerce.css">
 	<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
@@ -1302,69 +1304,92 @@
     </div>
   </div>
 
-  <!--  Edit SP Modal -->
-  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                <div class="text-center mb-6">
-                    <h4 class="mb-2">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
-                </div>
-                <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
-  
-                  <div class="modal-body">
-                    @csrf
-                    <input type="hidden" name="mentorid" value="0" id="mentorid">
-                    <input type="hidden" name="organization_id" id="addOrganizationID">
-                    <input type="hidden" name="cycle_id" id="addCycleID">
-                    <div>
-                      <h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
-                      <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
-                    </div>
-                    <hr>
-                    
-                    <div class="form-group" id="showdates">
-                      <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
-                      <input class=" width-250 form-control" id="flatpickr-datetimeLimit" type="text"  name="date" required >
-                    </div>
-                    <div class="form-group">
-                      <label>{{__('dashboard.Meeting duration')}}:</label>
-                      <select name="period" class="select form-control width-150">
-                        <option value="30">30 {{__('dashboard.Minutes')}}</option>
-                        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
-                        <option value="120">2 {{__('dashboard.Hours')}}</option>
-                        <option value="180">3 {{__('dashboard.Hours')}}</option>
-                        <option value="240">4 {{__('dashboard.Hours')}}</option>
-                        <option value="300">5 {{__('dashboard.Hours')}}</option>
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label for="basicInputFile">{{__('dashboard.Send file with your request')}}</label>
-                      <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
-                        <label class="custom-file-label" for="inputGroupFile01">{{__('dashboard.Choose file')}}</label>
-                      </div>
-                    </div>
-                    <label>{{__('dashboard.Add note')}}:</label>
-                    <div class="form-group">
-                      <textarea class="form-control" id="notes" name='notes' rows="4" placeholder="{{__('dashboard.Write your note here')}}" ></textarea>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary ml-1" >
-                      
-                      <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
-                    </button>
-                  </div>
-                </form>
-
-
-
-            </div>
-        </div>
+<!--  Edit SP Modal -->
+<div class="modal fade" id="SendRequest" tabindex="-1" aria-labelledby="sendrequest" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+    <div class="modal-header mb-0">
+      <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="text-primary" id="rname"></span></h4>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
-</div>
+    <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+      @csrf
+      <div class="modal-body">
+      <input type="hidden" name="mentorid" value="0" id="mentorid">
+      <input type="hidden" name="organization_id" id="addOrganizationID">
+      <input type="hidden" name="cycle_id" id="addCycleID">
+      <div class="mb-6">
+        <h5 class="text-secondary">{{__('dashboard.Mentor schedule')}}</h5>
+        <div class="bg-label-secondary p-2 rounded">
+        <ul class="mb-0" id="schedule"></ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group mb-4">
+            <label for="date" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Start meeting Date/ Time')}}:</label>
+            <div class="input-group input-group-merge">
+              <input type="text" class="form-control" id="flatpickr-datetimeLimit" placeholder="{{__('dashboard.Start meeting Date/ Time')}}" name="date" required>
+              <div class="input-group-text">
+                <i class="ti ti-calendar text-secondary"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group mb-4">
+            <label for="from" class="form-label fw-semibold fs-6 mb-1">
+              {{__('dashboard.From')}}:
+            </label>
+            <select class="select2 form-select" id="timeFrom" name="timeFrom">
+              {{-- @for ($i = 0; $i < 12; $i++)
+              <option value="{{ $i == 0 ? 12 : $i }}:00 AM">{{ $i == 0 ? 12 : $i }}:00 AM</option>
+              <option value="{{ $i == 0 ? 12 : $i }}:30 AM">{{ $i == 0 ? 12 : $i }}:30 AM</option>
+              @endfor --}}
+            </select>
+          </div>   
+        </div>
+        <div class="col-6">
+          <div class="form-group mb-4">
+            <label for="to" class="form-label fw-semibold fs-6 mb-1">
+              {{__('dashboard.To')}}:
+            </label>
+            <select class="select2 form-select" id="timeTo" name="timeTo">
+              {{-- @for ($i = 0; $i < 12; $i++)
+              <option value="{{ $i == 0 ? 12 : $i }}:00 AM">{{ $i == 0 ? 12 : $i }}:00 AM</option>
+              <option value="{{ $i == 0 ? 12 : $i }}:30 AM">{{ $i == 0 ? 12 : $i }}:30 AM</option>
+              @endfor --}}
+            </select>
+          </div>
+        </div>
+      </div>
+      {{-- <div class="mb-3">
+        <label for="period" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Meeting duration')}}:</label>
+        <select name="period" class="form-select" id="period">
+        <option value="30">30 {{__('dashboard.Minutes')}}</option>
+        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
+        <option value="120">2 {{__('dashboard.Hours')}}</option>
+        <option value="180">3 {{__('dashboard.Hours')}}</option>
+        <option value="240">4 {{__('dashboard.Hours')}}</option>
+        <option value="300">5 {{__('dashboard.Hours')}}</option>
+        </select>
+      </div> --}}
+      <div class="mb-3">
+        <label for="inputGroupFile01" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Send file with your request')}}</label>
+        <input type="file" class="form-control" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+      </div>
+      <div class="mb-3">
+        <label for="notes" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Add note')}}:</label>
+        <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="{{__('dashboard.Write your note here')}}"></textarea>
+      </div>
+      </div>
+      <div class="modal-footer">
+      <button type="submit" class="btn btn-primary">{{__('dashboard.Submit')}}</button>
+      </div>
+    </form>
+    </div>
+  </div>
+  </div>
 <!--/ Edit SP Modal -->
   <!-- / Content wrapper -->
   {{-- <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
@@ -1426,9 +1451,11 @@
 @stop
 
 @section('scripts')
-<script src="{{ mix('js/app.js') }}"></script>
+{{-- <script src="{{ mix('js/app.js') }}"></script> --}}
   <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
@@ -1448,7 +1475,11 @@
 
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
-  <script src="/vuexy/assets/js/forms-pickers.js"></script>
+  {{-- <script src="/vuexy/assets/js/forms-pickers.js"></script> --}}
+
+  <script>
+
+  </script>
  
 @stop
 
@@ -1578,21 +1609,96 @@ window.location.href = url;
 			success: function (response) {
 				$('#SendRequest li').remove();
 				$('#name').html(name);
-				if (response.length>0) {
-					$.each(response, function(i, item) {
-						let note = '';
-						let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
-						if (item.notes) {note = item.notes;}
-						switch (item.type)
-						{
-							case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
-							case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
-							case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
-							case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
-							default:
-						}
-					});
-				} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
+        if (response && response.length>0) {
+      var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
+      var timeFromSelect = $('#timeFrom');
+      var timeToSelect = $('#timeTo');
+      
+      // Populate timeFromSelect and timeToSelect with 30-minute intervals
+      var startTime = moment(response[0].tfrom, 'HH:mm:ss');
+      var endTime = moment(response[0].tto, 'HH:mm:ss');
+
+      for (var i = 0; i < 48; i++) {
+        var time = moment().startOf('day').add(i * 30, 'minutes');
+        var timeFormatted = time.format('hh:mm A');
+        var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
+        timeFromSelect.append(option.clone());
+        timeToSelect.append(option.clone());
+        // var time = moment().startOf('day').add(i * 30, 'minutes');
+        // var timeFormatted = time.format('hh:mm A');
+        // var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
+
+        // if (time.isBetween(startTime, endTime, null, '[]')) {
+        //   timeFromSelect.append(option.clone());
+        //   timeToSelect.append(option.clone());
+        // } else {
+        //   option.prop('disabled', true);
+        //   timeFromSelect.append(option.clone());
+        //   timeToSelect.append(option.clone());
+        // }
+      }
+
+      // Date
+      console.log('response', response)
+      if (flatpickrDateTimeLimit) {
+        var enabledDays = response.reduce((acc, item) => {
+          return acc.concat(item.days);
+        }, []);
+      
+        console.log('enabledDays', enabledDays)
+      
+        flatpickrDateTimeLimit.flatpickr({
+          // enableTime: true,
+          dateFormat: 'Y-m-d',
+          minDate: 'today',
+          enable: [
+        function(date) {
+          return enabledDays.includes(date.toLocaleString('en-US', { weekday: 'short' }));
+        }
+          ]
+        });
+      }
+          $.each(response, function(i, item) {
+            let note = '';
+            let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
+            if (item.notes) {note = item.notes;}
+            switch (item.type)
+            {
+              case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
+              case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
+              case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
+              case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
+              default:
+            }
+          });
+        } else { 
+          
+          $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); 
+          var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
+      var timeFromSelect = $('#timeFrom');
+      var timeToSelect = $('#timeTo');
+      
+      // Populate timeFromSelect and timeToSelect with 30-minute intervals
+      for (var i = 0; i < 48; i++) {
+        var time = moment().startOf('day').add(i * 30, 'minutes');
+        var timeFormatted = time.format('hh:mm A');
+        var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
+        timeFromSelect.append(option.clone());
+        timeToSelect.append(option.clone());
+      }
+
+      // Date
+      if (flatpickrDateTimeLimit) {
+  
+      
+      
+        flatpickrDateTimeLimit.flatpickr({
+          // enableTime: true,
+          dateFormat: 'Y-m-d',
+          minDate: 'today',
+        });
+      }
+        }
 				$('#addOrganizationID').val(organization_id);
 				$('#addCycleID').val(cycle_id);
 				$('#SendRequest').modal('show');

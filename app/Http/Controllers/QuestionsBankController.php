@@ -31,7 +31,10 @@ class QuestionsBankController extends Controller
 			if (is_array($organization_id)) {
 				$questions = $questions->whereIn('organization_id', $organization_id);
 			} else {
-				$questions = $questions->where('organization_id', $organization_id);
+				$questions = $questions->whereHas('organizations', function ($query) use ($organization_id) {
+            		$query->where('organization_id', $organization_id);
+        		});
+				// $questions = $questions->where('organization_id', $organization_id);
 			}
 		}
 		$questions = $questions->get();

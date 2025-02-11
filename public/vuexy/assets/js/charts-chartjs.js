@@ -108,15 +108,15 @@
             }
           },
           y: {
-            min: 2,
-            max: 12,
+            min: 10,
+            max: 300,
             grid: {
               color: borderColor,
               drawBorder: false,
               borderColor: borderColor
             },
             ticks: {
-              stepSize: 2,
+              stepSize: 30,
               color: labelColor
             }
           }

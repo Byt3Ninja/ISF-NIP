@@ -39,17 +39,18 @@
             <input 
               id="pitch-deck-video-input"
               name="pitch_deck_video" 
-              type="file" 
-              accept="video/mp4"
+              type="text"
             />
           </div>
         @endif
       </form>
+      
       <div id="pitch-deck-video-error" class="invalid-feedback" style="display: none;">
         Please upload a pitch deck video
       </div>
     </div>
     <div class="card-footer">
+      
       <button
         type="button"
         onclick="onUploadPitchDeckVideo()"
