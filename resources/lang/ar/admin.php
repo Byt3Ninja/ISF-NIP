@@ -1230,5 +1230,6 @@ return [
 	'Confirm Password' => 'تأكيد كلمة المرور',
 	'Financial plan attachment' => 'مرفق خطة العمل المالية',
 	'Final_Session' => 'جلسة نهاية',
+	'View_Pitch_Deck_Video' => 'عرض فيديو Pitch Deck',
 ];
 
