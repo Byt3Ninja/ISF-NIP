@@ -66,7 +66,7 @@ const getPieChartConfig = (labels, data) => {
   };
 };
 
-const getBarChartConfig = (labels, data, precentage = false, max) => {
+const getBarChartConfig = ({labels, data, precentage = false, max, stepSize}) => {
   return {
     type: 'bar',
     data: {
@@ -116,14 +116,14 @@ const getBarChartConfig = (labels, data, precentage = false, max) => {
         },
         y: {
           min: 0,
-          max: precentage ? 100 : max ? max : 20,
+          max: max ? max : precentage ? 100 : max ? max : 20,
           grid: {
             color: borderColor,
             drawBorder: false,
             borderColor: borderColor
           },
           ticks: {
-            stepSize: precentage ? 10 : 1,
+            stepSize: stepSize ? stepSize:  precentage ? 10 : 1,
             color: labelColor
           }
         }
@@ -142,7 +142,7 @@ const renderTotalCompaniesBySectorChart = () => {
   const values = chartData.map(data => data.count);
   
   const chartDom = document.querySelector('#companyBySectorChart');
-  const chartConfig = getBarChartConfig(labels, values, false, 50);
+  const chartConfig = getBarChartConfig({labels, data: values, max: 300, stepSize: 30});
 
   if (chartDom) {
     new Chart(chartDom, chartConfig);
@@ -159,7 +159,8 @@ const renderUserDistributionChart = () => {
   const values = chartData.map(data => data.count);
 
   const chartDom = document.querySelector('#userDistributionChart');
-  const chartConfig = getBarChartConfig(labels, values, false, 50);
+  // const chartConfig = getBarChartConfig(labels, values, false, 50);
+  const chartConfig = getBarChartConfig({labels, data: values, max: 2000, stepSize: 200});
 
   if (chartDom) {
     new Chart(chartDom, chartConfig);
@@ -274,7 +275,8 @@ const renderTargetMarketChart = () => {
   const values = chartData ? chartData.map(data => data.count) : [];
 
   const chartDom = document.querySelector('#targetMarketChart');
-  const chartConfig = getBarChartConfig(labels, values, false, null);
+  // const chartConfig = getBarChartConfig(labels, values, false, null);
+  const chartConfig = getBarChartConfig({labels, data: values});
 
   if (chartDom) {
     new Chart(chartDom, chartConfig);
@@ -291,7 +293,8 @@ const renderDevStageChart = () => {
   const values = chartData.map(data => data.count);
 
   const charDom = document.querySelector('#devStageStackedBarChart');
-  const chartConfig = getBarChartConfig(labels, values, false, null);
+  // const chartConfig = getBarChartConfig(labels, values, false, null);
+  const chartConfig = getBarChartConfig({labels, data: values});
 
   if (charDom) {
     new Chart(charDom, chartConfig);
@@ -305,7 +308,8 @@ const renderCompanySdgChart = () => {
 
   const chartDom = document.querySelector('#sdgCompaniesChart');
 
-  const chartConfig = getBarChartConfig(labels, series);
+  // const chartConfig = getBarChartConfig(labels, series);
+  const chartConfig = getBarChartConfig({labels, data: series});
 
   if (chartDom) {
     new Chart(chartDom, chartConfig);
