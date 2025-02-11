@@ -76,15 +76,18 @@
               <div class="d-flex align-items-center" style="gap: 1rem;">
                 <div class="border d-flex radius-15 d-flex flex-shrink-0" style="width: 90px; height: 90px;">
                   
-                  <img src="{{ asset( $company->logo) }}" class="img-fluid m-auto" alt="logo"
-                    style="width: 90px; height: 90px; border-radius: 15px;" />
+                  <img 
+                    src="{{ $company->logo ? asset( $company->logo) : '/images/logo-placeholder.png' }}" 
+                    onerror="this.src='/images/logo-placeholder.png'"
+                    class="img-fluid m-auto" alt="logo"
+                    style="width: 90px; height: 90px; border-radius: 15px;" 
+                  />
                 </div>
                 <div class="d-flex flex-column pt-3">
                   <div class="d-flex align-items-center">
                     <div class="d-flex align-items-center">
                       <i class="ti ti-building-skyscraper ti-24px me-2 text-primary"></i>
-                      <span class="fw-bold fs-5 pt-1">{{ $company->{'name_' . $l} }}
-                        </h5>
+                      <h5 class="fw-bold mb-0">{{ $company->{'name_' . $l} }}</h5>
                     </div>
                     <div class="d-flex align-items-center mx-8" style="gap: 1rem;">
                       @if ($company->facebook)
@@ -98,7 +101,7 @@
                         <a class="d-flex align-items-center"
                           href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
                           target='_blank'>
-                          <img src="/icons/linkedin.svg" />
+                          <img src="/icons/linkedin.svg" width="23" height="23" />
                         </a>
                       @endif
                       <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}" target="_blank"
@@ -118,6 +121,29 @@
                           target='_blank'>
                           <i class="fa-brands fa-youtube fs-4 text-danger"></i>
                         </a>
+                      @endif
+                      @if ($company->phone)
+                        <a class="d-flex align-items-center" href="tel:{{ $company->country_code . $company->phone }}">
+                          <i class="ti ti-phone fs-4 text-primary"></i>
+                        </a>
+                      @endif
+                      @if ($company->instagram)
+                        <a class="d-flex align-items-center" href="{{ strpos($company->instagram, 'http') === 0 ? $company->instagram : 'http://' . $company->instagram }}" target="_blank">
+                          <i i class="fa-brands fa-instagram fs-4 text-danger"></i>
+                        </a>
+                      @endif
+                      @if ($company->tiktok)
+                        <a class="d-flex align-items-center" href="{{ strpos($company->tiktok, 'http') === 0 ? $company->tiktok : 'http://' . $company->tiktok }}" target="_blank">
+                          <i class="fa-brands fa-tiktok fs-5 text-dark"></i>
+                        </a>
+                      @endif
+                      @if ($company->google_map)
+                      <div class="d-flex align-items-center">
+                        <a href="{{ strpos($company->google_map, 'http') === 0 ? $company->google_map : 'http://' . $company->google_map }}"
+                          target="_blank">
+                          <i class="ti ti-map-pin fs-4 text-warning"></i>
+                        </a>
+                      </div>
                       @endif
                     </div>
                   </div>
@@ -220,7 +246,7 @@ if($company->team_num == '1'){
           <div class="col-md-6 mt-6 mt-md-0">
             <div class="card shadow-sm" style="border-radius: 15px; height: 175px;">
               <div class="card-body d-flex flex-column h-100 justify-content-between">
-                <div class="d-flex justify-content-between py-4">
+                <div class="d-flex justify-content-between mb-2">
                   <div class="d-flex align-items-center">
                     <i class="ti ti-map-2 ti-24px text-primary me-2"></i>
                     {{ optional($company->country)->{'name_' . $l} }}
@@ -234,22 +260,22 @@ if($company->team_num == '1'){
                     {{ optional($company->city)->{'name_' . $l} }}
                   </div>
                 </div>
-                <div class="d-flex justify-content-between">
-                  @if ($company->email)
-                    <div class="d-flex align-items-center">
-                      <i class="ti ti-mail ti-24px text-primary me-2"></i>
-                      {{ $company->email }}
-                    </div>
-                  @endif
-                  @if ($company->website)
-                    <div class="d-flex align-items-center">
-                      <i class="ti ti-world ti-24px text-primary me-2"></i>
-                      <a href="{{ strpos($company->website, 'http') === 0 ? $company->website : 'http://' . $company->website }}"
-                        target="_blank">
-                        {{ $company->website }}
-                      </a>
-                    </div>
-                  @endif
+                @if ($company->email)
+                  <a class="d-flex align-items-center text-primary" href="mailto:{{ $company->email }}">
+                    <i class="ti ti-mail ti-24px text-primary me-2"></i>
+                    {{ $company->email }}
+                  </a>
+                @endif
+                @if ($company->website)
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-world ti-24px text-primary me-2"></i>
+                    <a href="{{ strpos($company->website, 'http') === 0 ? $company->website : 'http://' . $company->website }}"
+                      target="_blank" class="line-clamp-1">
+                      {{ $company->website }}
+                    </a>
+                  </div>
+                @endif
+                {{-- <div class="d-flex align-items-center gap-4">
                   @if ($company->google_map)
                   <div class="d-flex align-items-center">
                     <i class="ti ti-world ti-24px text-primary me-2"></i>
@@ -258,33 +284,8 @@ if($company->team_num == '1'){
                       {{ $company->google_map }}
                     </a>
                   </div>
-                @endif
-                </div>
-                @if ($company->phone)
-                  <div class="d-flex align-items-center">
-                    <i class="ti ti-phone ti-28px text-primary me-2"></i>
-                    {{ $company->country_code . $company->phone }}
-                  </div>
-                @endif
-                @if ($company->instagram)
-                  <div class="d-flex align-items-center">
-                    <i class="ti ti-world ti-24px text-primary me-2"></i>
-                    <a href="{{ strpos($company->instagram, 'http') === 0 ? $company->instagram : 'http://' . $company->instagram }}"
-                      target="_blank">
-                      {{ $company->instagram }}
-                    </a>
-                  </div>
-                @endif
-                @if ($company->tiktok)
-                  <div class="d-flex align-items-center">
-                    <i class="ti ti-world ti-24px text-primary me-2"></i>
-                    <a href="{{ strpos($company->tiktok, 'http') === 0 ? $company->tiktok : 'http://' . $company->tiktok }}"
-                      target="_blank">
-                      {{ $company->tiktok }}
-                    </a>
-                  </div>
-                @endif
-                
+                  @endif
+                </div>                 --}}
               </div>
             </div>
           </div>
