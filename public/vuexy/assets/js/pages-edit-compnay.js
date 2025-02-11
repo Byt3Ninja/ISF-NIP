@@ -5,20 +5,20 @@
 const translations = {
   en: {
     name_en: {
-      notEmpty: 'Please enter company name in English',
-      stringOnly: 'Company name accepts english letters only'
+      notEmpty: 'Please enter company name',
+      stringOnly: 'Please enter a valid company name'
     },
     name_ar: {
-      notEmpty: 'Please enter company name in Arabic',
-      stringOnly: 'Company name accepts arabic letters only'
+      notEmpty: 'Please enter company name',
+      stringOnly: 'Please enter a valid company name'
     },
     address_en: {
-      notEmpty: 'Please enter address in English',
-      address: 'Please enter a valid English address using English letters'
+      notEmpty: 'Please enter address',
+      address: 'Please enter a valid address'
     },
     address_ar: {
-      notEmpty: 'Please enter address in Arabic',
-      address: 'Please enter a valid Arabic address using Arabic letters'
+      notEmpty: 'Please enter address',
+      address: 'Please enter a valid address using letters'
     },
     est_date: {
       establishmentDate: 'Establishment date cannot be a future date'
@@ -54,20 +54,20 @@ const translations = {
   },
   ar: {
     name_en: {
-      notEmpty: 'الرجاء إدخال اسم الشركة بالإنجليزية',
-      stringOnly: 'اسم الشركة يقبل الحروف الإنجليزية فقط'
+      notEmpty: 'الرجاء إدخال اسم الشركة',
+      stringOnly: 'الرجاء إدخال اسم شركة صالح'
     },
     name_ar: {
-      notEmpty: 'الرجاء إدخال اسم الشركة بالعربية',
-      stringOnly: 'اسم الشركة يقبل الحروف العربية فقط'
+      notEmpty: 'الرجاء إدخال اسم الشركة',
+      stringOnly: 'الرجاء إدخال اسم شركة صالح'
     },
     address_en: {
-      notEmpty: 'الرجاء إدخال العنوان بالإنجليزية',
-      address: 'الرجاء إدخال عنوان صالح باللغة الانجليزية باستخدام الحروف الانجليزية والأرقام والشرطات فقط.'
+      notEmpty: 'الرجاء إدخال العنوان ',
+      address: 'الرجاء إدخال عنوان صالح باستخدام الحروف والأرقام والشرطات فقط.'
     },
     address_ar: {
-      notEmpty: 'الرجاء إدخال العنوان بالعربية',
-      address: 'الرجاء إدخال عنوان صالح باللغة العربية باستخدام الحروف العربية والأرقام والشرطات فقط.'
+      notEmpty: 'الرجاء إدخال العنوان',
+      address: 'الرجاء إدخال عنوان صالح باستخدام الحروف والأرقام والشرطات فقط.'
     },
     est_date: {
       establishmentDate: 'لا يمكن أن يكون تاريخ التأسيس تاريخًا مستقبليًا'
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].name_en.notEmpty
           },
           regexp: {
-            regexp: /^[\p{L}\d\s]+$/u,
+            regexp: /^[\p{L}\d\s.,;&@:-]+$/u,
             message: translations[lang].name_en.stringOnly
           }
         }
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].name_ar.notEmpty
           },
           regexp: {
-            regexp: /^[\p{L}\d\s]+$/u,
+            regexp: /^[\p{L}\d\s.,;&@:-]+$/u,
             message: translations[lang].name_ar.stringOnly
           }
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
+
 use App\User;
 use App\Cycle;
 use App\Event;
@@ -14,18 +15,23 @@ use App\Messages;
 use App\Settings;
 use Carbon\Carbon;
 use DB, File, URL;
+use App\Invitation;
 use App\Organization;
 use App\MentorshipRequest;
+use App\Mail\UserInvitation;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use App\Notifications\TemplateEmail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 
 class SettingsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['showSetPasswordForm', 'acceptInvitation']);
     }
 
     public function get_settings(Request $request)
@@ -806,65 +812,81 @@ class SettingsController extends Controller
         $formattedOffset = ($offset >= 0 ? 'GMT+' : 'GMT') . $offset;
         return [$timezone => $timezone . ' (' . $formattedOffset . ')'];
     })->sort();
+     $invitations = Invitation::where('organization_id', $organization->id)->get();
+     $roles = Role::all();
 
-        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones'));
+        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','roles','invitations'));
     }
 
 
     public function generalSetting(Request $request)
     {
-      $request->validate([
-        'name_en' => 'nullable|string|max:255',
-        'img_url' => 'nullable|image',
-        'contact_email' => 'nullable|email',
-        'contact_phone' => 'nullable|string|max:11',
-        'address' => 'nullable|string',
-        'time_zone' => 'nullable|string|max:100',
-        'currency_id' => 'nullable|exists:currencies,id',
-    ]);
+         $request->validate([
+            'name_en' => 'nullable|string|max:255',
+            'img_url' => 'nullable|image',
+            'contact_email' => 'nullable|email',
+            'contact_phone' => 'nullable|string|max:11',
+            'address' => 'nullable|string',
+            'time_zone' => 'nullable|string|max:100',
+            'currency_id' => 'nullable|exists:currencies,id',
+        ]);
 
-    $organization = Organization::find($request->input('id'));
+     $organization = Organization::find($request->input('id'));
 
-    if (!$organization) {
-        return redirect()->route('organization-settings')->with('error', 'Organization not found.');
-    }
+        if (!$organization) {
+          return redirect()->back()->with('error', 'Organization not found.');
+        }
 
-    $organization->name_en = $request->input('organization_name', $organization->name_en);
-    $organization->contact_email = $request->input('contact_email', $organization->contact_email);
-    $organization->contact_phone = $request->input('contact_phone', $organization->contact_phone);
-    $organization->address = $request->input('address', $organization->address);
-    $organization->time_zone = $request->input('time_zone', $organization->time_zone);
-    $organization->currency_id = $request->input('currency_id', $organization->currency_id);
-    $organization->save();
-
-    if ($request->hasFile('img_url')) {
-        $image = $request->file('img_url');
-        $imageName = time() . '.' . $image->getClientOriginalExtension();
-
-        $image->move(public_path('organizations/'), $imageName);
-
-        $organization->img_url = 'organizations/' . $imageName;
+        $organization->name_en = $request->input('organization_name', $organization->name_en);
+        $organization->contact_email = $request->input('contact_email', $organization->contact_email);
+        $organization->contact_phone = $request->input('contact_phone', $organization->contact_phone);
+        $organization->address = $request->input('address', $organization->address);
+        $organization->time_zone = $request->input('time_zone', $organization->time_zone);
+        $organization->currency_id = $request->input('currency_id', $organization->currency_id);
         $organization->save();
-    }
 
-        return redirect()->back()->with('message', 'StoredSuccessfully');
+        if ($request->hasFile('img_url')) {
+            $image = $request->file('img_url');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+
+             $image->move(public_path('organizations/'), $imageName);
+             $organization->img_url = 'organizations/' . $imageName;
+            $organization->save();
+        }
+
+            return redirect()->back()->with('message', 'StoredSuccessfully');
 
     }
 
     public function meetingSetting(Request $request)
     {
         $request->validate([
-        'meeting_platform' => 'required|string',
-        'ZOOM_CLIENT_ID' => 'nullable|string',
-        'ZOOM_CLIENT_SECRET' => 'nullable|string',
-        'ZOOM_ACCOUNT_ID' => 'nullable|string',
+            'meeting_platform' => 'required|string',
+            'ZOOM_CLIENT_ID' => 'nullable|string',
+            'ZOOM_CLIENT_SECRET' => 'nullable|string',
+            'ZOOM_ACCOUNT_ID' => 'nullable|string',
+            'MICROSOFT_CLIENT_ID' => 'nullable|string',
+            'MICROSOFT_CLIENT_SECRET_VALUE' => 'nullable|string',
+            'MICROSOFT_TENANT_ID' => 'nullable|string',
+            'MICROSOFT_REDIRECT_URI' => 'nullable|string',
         ]);
 
         $organization = Organization::find($request->input('id'));
         $organization->meeting_platform = $request->input('meeting_platform');
-        $organization->zoom_client_id = $request->input('ZOOM_CLIENT_ID');
-        $organization->zoom_client_secret = $request->input('ZOOM_CLIENT_SECRET');
-        $organization->zoom_account_id = $request->input('ZOOM_ACCOUNT_ID');    
+
+        if ($request->input('meeting_platform') === 'zoom') {
+            $organization->zoom_client_id = $request->input('ZOOM_CLIENT_ID');
+            $organization->zoom_client_secret = $request->input('ZOOM_CLIENT_SECRET');
+            $organization->zoom_account_id = $request->input('ZOOM_ACCOUNT_ID');
+        } elseif ($request->input('meeting_platform') === 'teams') {
+            $organization->microsoft_client_id = $request->input('MICROSOFT_CLIENT_ID');
+            $organization->microsoft_client_secret_value = $request->input('MICROSOFT_CLIENT_SECRET_VALUE');
+            $organization->microsoft_tenant_id = $request->input('MICROSOFT_TENANT_ID');
+            $organization->microsoft_client_secret_id = $request->input('MICROSOFT_CLIENT_SECRET_ID');
+            $organization->microsoft_app_email = $request->input('MICROSOFT_APP_EMAIL');
+            $organization->microsoft_redirect_uri = $request->input('MICROSOFT_REDIRECT_URI');
+        }
+          
         $organization->save();
 
         return redirect()->back()->with('message', 'StoredSuccessfully');
@@ -897,6 +919,112 @@ class SettingsController extends Controller
         return redirect()->back()->with('message', 'StoredSuccessfully');
 
     }
+
+
+
+ public function inviteUser(Request $request)
+{
+        
+    $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'role' => 'required|string|exists:roles,name',
+        ]);
+    
+        if ($validator->fails()) {
+            return back()->with('message2', $validator->errors()->first())->withInput();
+        }
+
+    
+         // Check for existing invitation and allow resending
+            $invitation = Invitation::where('email', $request->email)
+             ->where('organization_id', auth()->user()->organization_id)
+            ->first();
+
+        if ($invitation) {
+            $invitation->expires_at = now()->addDays(2);
+            $invitation->save();
+            Mail::to($request->email)->send(new UserInvitation($invitation));
+            return back()->with('message', 'InvitationSent');
+        }
+
+            $invitation = new Invitation();
+            $invitation->first_name = $request->first_name;
+            $invitation->last_name = $request->last_name;
+            $invitation->email = $request->email;
+            $invitation->role = $request->role;
+            $invitation->organization_id = auth()->user()->organization_id;
+            $invitation->expires_at = now()->addDays(2);
+            $invitation->save();
+
+            // Send invitation email
+            Mail::to($request->email)->send(new UserInvitation($invitation));
+
+            return back()->with('message', 'InvitationSent');
+        }
+
+public function showSetPasswordForm($invitationId)
+{
+    $invitation = Invitation::findOrFail($invitationId);
+
+    if ($invitation->expires_at < now()) {
+        return redirect()->route('login')->with('message2', __('admin.invitationExpired'));
+    }
+
+    return view('auth.set-password', compact('invitation'));
+}
+
+
+public function acceptInvitation(Request $request, $invitationId)
+{
+    $request->validate([
+        'password' => 'required|min:8|confirmed',
+    ]);
+
+    $invitation = Invitation::findOrFail($invitationId);
+
+    if ($invitation->expires_at < now()) {
+        return redirect()->route('login')->with('error', 'Invitation has expired.');
+    }
+
+    // Check if user exists
+    if (User::where('email', $invitation->email)->exists()) {
+        return redirect()->route('login')->with('message2', __('admin.user_exists'));
+    }
+
+    $user = User::create([
+        'first_name_en' => $invitation->first_name,
+        'last_name_en' => $invitation->last_name,
+        'email' => $invitation->email,
+        'organization_id' => $invitation->organization_id,
+        'password' => bcrypt($request->password),
+    ]);
+
+    $user->assignRole($invitation->role);
+
+    return redirect()->route('dashboard')->with('message', __('admin.accountCreated'));
+}
+
+public function resendInvitation($invitationId)
+{
+    $invitation = Invitation::findOrFail($invitationId);
+    $invitation->expires_at = now()->addDays(2);
+    $invitation->save();
+
+    Mail::to($invitation->email)->send(new UserInvitation($invitation));
+
+    return back()->with('message', 'InvitationResent');
+}
+
+public function cancelInvitation($invitationId)
+{
+    $invitation = Invitation::findOrFail($invitationId);
+    $invitation->delete();
+
+    return back()->with('message', 'InvitationCanceled');
+}
+
 }
 
 

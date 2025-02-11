@@ -212,6 +212,34 @@ $countCards = [
           </div>
         </div>
       </div>
+      <!-- Vertical Bar Charts -->
+      <div class="col-12 mt-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="verticalBarChart" class="chartjs" data-height="345"></canvas>
+          </div>
+        </div>
+      </div>
+       <!-- Total companies by sectors -->
+       <div class="col-12 mt-6">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <h5 class="card-title mb-0">{{__('admin.Total_companies_by_sector')}}</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="companyBySectorChart" class="chartjs" data-height="345"></canvas>
+          </div>
+        </div>
+      </div>
+      <!-- / Total companies by sectors -->
+      <!-- /Vertical Bar Charts -->
       <!-- / Total companies by sdg chart -->
       <!-- Pie Chart -->
       <div class="col-md-6 col-12 mt-6">
@@ -227,20 +255,7 @@ $countCards = [
         </div>
       </div>
       <!-- /Pie Chart -->
-      <!-- Vertical Bar Charts -->
-      <div class="col-md-6 col-12 mt-6">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-              <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5>
-            </div>
-          </div>
-          <div class="card-body">
-            <canvas id="verticalBarChart" class="chartjs" data-height="345"></canvas>
-          </div>
-        </div>
-      </div>
-      <!-- /Vertical Bar Charts -->
+      
       <!-- Projects Pie Chart -->
       <div class="col-md-6 col-12 mt-6">
         <div class="card h-100">
@@ -326,20 +341,9 @@ $countCards = [
         </div>
       <!-- /Project Status Over Time Chart -->
 
-      <!-- Total companies by sectors -->
-      <div class="col-md-6 col-12 mt-6">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-              <h5 class="card-title mb-0">{{__('admin.Total_companies_by_sector')}}</h5>
-            </div>
-          </div>
-          <div class="card-body">
-            <canvas id="companyBySectorChart" class="chartjs" data-height="345"></canvas>
-          </div>
-        </div>
-      </div>
-      <!-- / Total companies by sectors -->
+      {{-- <div class="row">
+       
+      </div> --}}
     </div>
   </div>
   @stop

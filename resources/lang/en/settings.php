@@ -6,6 +6,7 @@ return [
     'ARABICWEBSITETITLE'   => 'Arabic Website Title',
     'ENGLISHWEBSITETITLE'   => 'English Website Title',
     'SocialMediaLinks'   => 'Social Media Links',
+	'teamMembers' => 'Team Members',
     'URLOF'   => 'URL of',
     'HomeWelcomeImages'   => 'Home Welcome Images',
     'Chooseimagefile'   => 'Choose Image file',
