@@ -48,7 +48,7 @@
     </div>
   
     <div class="form-group d-flex justify-content-end mt-auto">
-      <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Save') }}</button>
+      <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Submit') }}</button>
     </div>
   </form>
   
