@@ -55,6 +55,10 @@ Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
 Auth::routes(['verify' => true]);
+Route::get('organizations/settings/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
+    ->name('set-password-form');
+Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('accept-invitation');
+
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], function () {
     ####################### Overall System Admin Routes ###############
     // All Logged users
@@ -132,6 +136,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('meeting-settings');
     Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('social-settings');
     Route::put('organizations/settings/general', 'SettingsController@generalSetting')->name('general-settings');
+    Route::post('organizations/settings/invite', 'SettingsController@inviteUser')->name('invite-user');
+    Route::post('organizations/settings/resend-invitation/{invitationId}', 'SettingsController@resendInvitation')->name('resend-invitation');
+    Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('cancel-invitation');
 
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');

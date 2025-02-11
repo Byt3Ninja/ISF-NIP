@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
+
 use App\User;
 use App\Cycle;
 use App\Event;
@@ -14,10 +15,14 @@ use App\Messages;
 use App\Settings;
 use Carbon\Carbon;
 use DB, File, URL;
+use App\Invitation;
 use App\Organization;
 use App\MentorshipRequest;
+use App\Mail\UserInvitation;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use App\Notifications\TemplateEmail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -25,7 +30,7 @@ class SettingsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['showSetPasswordForm', 'acceptInvitation']);
     }
 
     public function get_settings(Request $request)
@@ -806,8 +811,10 @@ class SettingsController extends Controller
         $formattedOffset = ($offset >= 0 ? 'GMT+' : 'GMT') . $offset;
         return [$timezone => $timezone . ' (' . $formattedOffset . ')'];
     })->sort();
+     $invitations = Invitation::where('organization_id', $organization->id)->get();
+     $roles = Role::all();
 
-        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones'));
+        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','roles','invitations'));
     }
 
 
@@ -911,6 +918,106 @@ class SettingsController extends Controller
         return redirect()->back()->with('message', 'StoredSuccessfully');
 
     }
+
+
+
+public function inviteUser(Request $request)
+{
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'role' => 'required|string|exists:roles,name',
+        ]);
+
+         // Check for existing invitation and allow resending
+            $invitation = Invitation::where('email', $request->email)
+             ->where('organization_id', auth()->user()->organization_id)
+            ->first();
+
+        if ($invitation) {
+            $invitation->expires_at = now()->addDays(2);
+            $invitation->save();
+            Mail::to($request->email)->send(new UserInvitation($invitation));
+            return back()->with('message', 'InvitationSent');
+        }
+
+            $invitation = new Invitation();
+            $invitation->first_name = $request->first_name;
+            $invitation->last_name = $request->last_name;
+            $invitation->email = $request->email;
+            $invitation->role = $request->role;
+            $invitation->organization_id = auth()->user()->organization_id;
+            $invitation->expires_at = now()->addDays(2);
+            $invitation->save();
+
+            // Send invitation email
+            Mail::to($request->email)->send(new UserInvitation($invitation));
+
+        return back()->with('message', 'InvitationSent');
+}
+
+public function showSetPasswordForm($invitationId)
+{
+    $invitation = Invitation::findOrFail($invitationId);
+
+    if ($invitation->expires_at < now()) {
+        return redirect()->route('login')->with('message2', __('admin.invitationExpired'));
+    }
+
+    return view('auth.set-password', compact('invitation'));
+}
+
+
+public function acceptInvitation(Request $request, $invitationId)
+{
+    $request->validate([
+        'password' => 'required|min:8|confirmed',
+    ]);
+
+    $invitation = Invitation::findOrFail($invitationId);
+
+    if ($invitation->expires_at < now()) {
+        return redirect()->route('login')->with('error', 'Invitation has expired.');
+    }
+
+    // Check if user exists
+    if (User::where('email', $invitation->email)->exists()) {
+        return redirect()->route('login')->with('message2', __('admin.user_exists'));
+    }
+
+    $user = User::create([
+        'first_name_en' => $invitation->first_name,
+        'last_name_en' => $invitation->last_name,
+        'email' => $invitation->email,
+        'organization_id' => $invitation->organization_id,
+        'password' => bcrypt($request->password),
+    ]);
+
+    $user->assignRole($invitation->role);
+
+    return redirect()->route('dashboard')->with('message', __('admin.accountCreated'));
+}
+
+public function resendInvitation($invitationId)
+{
+    $invitation = Invitation::findOrFail($invitationId);
+    $invitation->expires_at = now()->addDays(2);
+    $invitation->save();
+
+    Mail::to($invitation->email)->send(new UserInvitation($invitation));
+
+    return back()->with('message', 'InvitationResent');
+}
+
+public function cancelInvitation($invitationId)
+{
+    $invitation = Invitation::findOrFail($invitationId);
+    $invitation->delete();
+
+    return back()->with('message', 'InvitationCanceled');
+}
+
 }
 
 
