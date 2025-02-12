@@ -721,7 +721,7 @@ class ClientCompanyController extends Controller
                         ]);
                         $uploadedFile = 'business_plan/' . $path . $originalName;
                     }
-                }
+                } else { return redirect()->back()->with(['msg' => 'Business Plan file not selected', 'class' => 'danger'])->withInput(); }
 
                 $result->business_model = $data['business_model'];
                 $result->other_business_model = $data['other_business_model'];
