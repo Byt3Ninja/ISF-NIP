@@ -55,7 +55,7 @@ Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
 Auth::routes(['verify' => true]);
-Route::get('organizations/settings/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
+Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
     ->name('set-password-form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('accept-invitation');
 
