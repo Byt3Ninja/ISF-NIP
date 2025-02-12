@@ -8,21 +8,21 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>{{__('admin.First Name')}}</th>
-                    <th>{{__('admin.Last Name')}}</th>
-                    <th>{{__('admin.Email')}}</th>
-                    <th>{{__('admin.Role')}}</th>
-                    <th>{{__('admin.Actions')}}</th>
+                    <th class="text-center">{{__('admin.First Name')}}</th>
+                    <th class="text-center">{{__('admin.Last Name')}}</th>
+                    <th class="text-center">{{__('admin.Email')}}</th>
+                    <th class="text-center">{{__('admin.Role')}}</th>
+                    <th class="text-center">{{__('admin.Actions')}}</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($invitations as $invitation)
                     <tr>
-                        <td>{{ $invitation->first_name }}</td>
-                        <td>{{ $invitation->last_name }}</td>
-                        <td>{{ $invitation->email }}</td>
-                        <td>{{ $invitation->role }}</td>
-                        <td>
+                        <td class="text-center">{{ $invitation->first_name }}</td>
+                        <td class="text-center">{{ $invitation->last_name }}</td>
+                        <td class="text-center">{{ $invitation->email }}</td>
+                        <td class="text-center">{{ $invitation->role }}</td>
+                        <td class="text-center">
                             <form action="{{ route('resend-invitation', $invitation->id) }}" method="POST" style="display: inline;">
                                 @csrf
                                 <button type="submit" class="btn btn-warning btn-sm" title="Resend Invitation">
@@ -70,9 +70,7 @@
                     <div class="mb-3">
                         <label for="role" class="form-label">{{__('admin.Role')}}</label>
                         <select class="form-control" id="role" name="role" required>
-                            @foreach($roles as $role)
                                 <option value="{{ $role->name }}">{{ $role->name }}</option>
-                            @endforeach
                         </select>
                     </div>
                 </div>

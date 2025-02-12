@@ -18,6 +18,7 @@ use DB, File, URL;
 use App\Invitation;
 use App\Organization;
 use App\MentorshipRequest;
+use Illuminate\Support\Str;
 use App\Mail\UserInvitation;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
@@ -813,9 +814,10 @@ class SettingsController extends Controller
         return [$timezone => $timezone . ' (' . $formattedOffset . ')'];
     })->sort();
      $invitations = Invitation::where('organization_id', $organization->id)->get();
-     $roles = Role::all();
+     $role = Role::where('name', 'organizationManager')->first();
 
-        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','roles','invitations'));
+
+        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','role','invitations'));
     }
 
 
@@ -831,7 +833,7 @@ class SettingsController extends Controller
             'currency_id' => 'nullable|exists:currencies,id',
         ]);
 
-     $organization = Organization::find($request->input('id'));
+        $organization = Organization::find($request->input('id'));
 
         if (!$organization) {
           return redirect()->back()->with('error', 'Organization not found.');
@@ -922,8 +924,8 @@ class SettingsController extends Controller
 
 
 
- public function inviteUser(Request $request)
-{
+  public function inviteUser(Request $request)
+ {
         
     $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
@@ -936,11 +938,16 @@ class SettingsController extends Controller
             return back()->with('message2', $validator->errors()->first())->withInput();
         }
 
+        // Check if user already exists in another organization
+         $existingUser = User::where('email', $request->email)->first();
+         if ($existingUser && $existingUser->organization_id !== auth()->user()->organization_id) {
+             return back()->with('message2', __('admin.user_belongs'));
+        }
     
          // Check for existing invitation and allow resending
-            $invitation = Invitation::where('email', $request->email)
-             ->where('organization_id', auth()->user()->organization_id)
-            ->first();
+        $invitation = Invitation::where('email', $request->email)
+         ->where('organization_id', auth()->user()->organization_id)
+         ->first();
 
         if ($invitation) {
             $invitation->expires_at = now()->addDays(2);
@@ -962,10 +969,11 @@ class SettingsController extends Controller
             Mail::to($request->email)->send(new UserInvitation($invitation));
 
             return back()->with('message', 'InvitationSent');
-        }
+    }
 
-public function showSetPasswordForm($invitationId)
-{
+    
+ public function showSetPasswordForm($invitationId)
+ {
     $invitation = Invitation::findOrFail($invitationId);
 
     if ($invitation->expires_at < now()) {
@@ -973,7 +981,7 @@ public function showSetPasswordForm($invitationId)
     }
 
     return view('auth.set-password', compact('invitation'));
-}
+ }
 
 
 public function acceptInvitation(Request $request, $invitationId)
@@ -1003,12 +1011,31 @@ public function acceptInvitation(Request $request, $invitationId)
 
     $user->assignRole($invitation->role);
 
+    $uniqueCode = rand(100000, 999999); 
+
+    $invitation->update([
+         'user_id' => $user->id,
+         'code' => $uniqueCode,
+     ]);
+
     return redirect()->route('dashboard')->with('message', __('admin.accountCreated'));
 }
+
 
 public function resendInvitation($invitationId)
 {
     $invitation = Invitation::findOrFail($invitationId);
+
+    // Prevent resending if invitation is expired
+    if ($invitation->expires_at < now()) {
+        return back()->with('message2', __('admin.invitationExpired'));
+    }
+
+    // Prevent resending if user has already registered
+    if (User::where('email', $invitation->email)->exists()) {
+        return back()->with('message2', __('admin.user_already_registered'));
+    }
+
     $invitation->expires_at = now()->addDays(2);
     $invitation->save();
 
@@ -1016,6 +1043,7 @@ public function resendInvitation($invitationId)
 
     return back()->with('message', 'InvitationResent');
 }
+
 
 public function cancelInvitation($invitationId)
 {
