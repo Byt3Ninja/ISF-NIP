@@ -1366,7 +1366,7 @@
           </div>
         </div>
       </div>
-      {{-- <div class="mb-3">
+      <div class="mb-3">
         <label for="period" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Meeting duration')}}:</label>
         <select name="period" class="form-select" id="period">
         <option value="30">30 {{__('dashboard.Minutes')}}</option>
@@ -1376,7 +1376,7 @@
         <option value="240">4 {{__('dashboard.Hours')}}</option>
         <option value="300">5 {{__('dashboard.Hours')}}</option>
         </select>
-      </div> --}}
+      </div>
       <div class="mb-3">
         <label for="inputGroupFile01" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Send file with your request')}}</label>
         <input type="file" class="form-control" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
