@@ -287,12 +287,19 @@
             <div class="card-body">
               @php
                 $today = date('Y-m-d');
-                $csteps = App\Step::whereRaw('"' . $today . '" BETWEEN `from` AND `to`')
-                    ->where('stype', 5)
-                    ->get();
+                    $finalScreenings = App\Finalscreening::whereJsonContains('judges', strval(Auth::id())) ->with('step')->get();
+                  $stepIds = $finalScreenings->pluck('step_id')->unique()->toArray();
+                    $csteps = App\Step::where('stype', 5)
+                      ->whereIn('id', $stepIds) 
+                      ->get();
+                      $finalScreeningsByStep = $finalScreenings->groupBy('step_id');
               @endphp
               @if (count($fcompanies) > 0)
                 @foreach ($csteps as $step)
+                @php
+                $fcompanies = $finalScreeningsByStep[$step->id] ?? collect();
+               
+                @endphp
                   <div class="mt-4">
                     <div class="card-header bg-label-light p-3 mb-2">
                       <h5 class="mb-0">
@@ -322,6 +329,7 @@
                           </tr>
                         </thead>
                         <tbody>
+                          
                           @foreach ($fcompanies as $fcompany)
                             <tr>
                               <td>
