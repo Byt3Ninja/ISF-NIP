@@ -156,7 +156,7 @@
     if (!empty($user->company)) {
         $sessions = \App\TrainingSession::where('step_id', $user->company->step)
             ->orderBy('datetime', 'ASC')
-            ->take(3)
+            ->take(5)
             ->get();
     } else {
         $sessions = [];
