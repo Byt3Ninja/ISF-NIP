@@ -107,7 +107,7 @@ if($answerspinding > 0){
 $orgCollection = collect([
 [__('admin.Startups'), 'building-skyscraper', $totalcompany, 'primary'],
 [__('cycles.steps'), 'stack-2', $totalSteps, 'info'],
-[__('admin.Mentors'), 'user', $mentor_Count, 'light'],
+[__('admin.Mentors'), 'user', $mentors->count(), 'light'],
 [__('cycles.All requests'), 'report', $totalMentorRequest, 'warning'],
 [__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5', $totalMentorperiod, 'success'],
 [__('admin.Company_Attendance_Rate'), 'heart-rate-monitor', '5 / '.number_format($totalMentorrating, 2), 'danger'],
@@ -1216,7 +1216,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
        
         // حساب عدد السجلات لكل step_id
           // حساب عدد السجلات لكل step_id
-          $totalFinalscreenCount = App\Finalscreening::where('step_id', '=', $step->id)
+          $totalFinalscreenCount = App\Finalscreening::where('step_id', '=', $step->id)->distinct()
               ->count();
           // حساب عدد company_id الفريدة لكل step_id
           $totalDistinctCompanies = app(App\Finalscreening::class)
@@ -1230,13 +1230,11 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               // إضافة بيانات المحكمين إلى المصفوفة
               $judgesDetails = $judgesDetails->merge($judgeData)->unique('id');
               }
-          $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
-          $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNull('screening')->orWhere('screening', '{}')->count();
-          $answersdone = app(App\Formdata::class)
-          ->where('step_id', $step->id)
-          ->whereNotNull('screening') // الحقل ليس NULL
-          ->where('screening', '!=', '{}') // الحقل ليس JSON فارغ
-          ->count();
+          $answers = app(App\FinalData::class)->whereNotNull('answer')->where('step_id', $step->id)->count();
+        
+          $answerspinding = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
+
+          $answersdone = $answers - $answerspinding;
 
   
         @endphp

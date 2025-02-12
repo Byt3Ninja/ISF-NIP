@@ -350,9 +350,19 @@
                                 </div>
                               </td>
                               <td>
+                                @php
+                                
+                                $formFieldsCount = App\Formfield::where('step_id', $step->id)->count();
+                                $finalDataCount =  App\FinalData::where('step_id', $step->id)->where('judge_id', Auth::id())->where('company_id', $fcompany->company_id)->whereNotNull('answer')->count();
+                              
+                                $judgepercentage = $formFieldsCount > 0 ? ($finalDataCount / $formFieldsCount) * 100 : 0;
+                                
+                                @endphp
                                 <div class="progress">
-                                  <div class="progress-bar bg-{{ $fcompany->progress < 50 ? 'danger' : ($fcompany->progress < 75 ? 'warning' : 'success') }}" role="progressbar" style="width: {{ $fcompany->progress }}%;" aria-valuenow="{{ $fcompany->progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                  <div class="progress-bar bg-{{ $judgepercentage < 50 ? 'danger' : ($judgepercentage < 75 ? 'warning' : 'success') }}" role="progressbar" style="width: {{ $judgepercentage }}%;" aria-valuenow="{{ $judgepercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                
                                 </div>
+                                {{ $judgepercentage . ' %'}}
                               </td>
                               <td>
                                 {{ $fcompany->datetime ?? __('dashboard.Not added yet') }}
