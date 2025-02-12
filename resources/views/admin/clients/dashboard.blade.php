@@ -840,16 +840,19 @@
                   <tr>
                     <td>
                       @if($step->stype == 1)
+                      @if($status != 'Completed' && $status != 'انتهت')
                       @if ($user->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
                           <a href="/dashboard/cycles/{{ $flink }}">
+                      @endif
                       @endif
                       {{ $step->title }}
                       </a>
                       @else
                       {{ $step->title }}
                       @endif
+                      
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span>
                     </td>
