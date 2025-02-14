@@ -436,16 +436,14 @@
     form.addEventListener('submit', (e) => {
       let isValid = true;
 
-      emailInput.addEventListener('input', () => {
-        const parent = emailInput.closest('.input-group');
-        if (emailInput.checkValidity()) {
-          isValid = true;
-          parent.classList.remove('is-invalid');
-        } else {
-          isValid = false;
-          parent.classList.add('is-invalid');
-        }
-      });
+      const parent = emailInput.closest('.input-group');
+      // Check if email match this regexp /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i
+      if (emailInput.value === '' || (emailInput.value.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i) && !emailInput.value.endsWith('.invalidTLD'))) {
+        parent.classList.remove('is-invalid');
+      } else {
+        parent.classList.add('is-invalid');
+        isValid = false;
+      }
 
       inputs.forEach(input => {
         const parent = input.closest('.input-group');
