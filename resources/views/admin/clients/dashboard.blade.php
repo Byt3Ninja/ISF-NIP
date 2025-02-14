@@ -414,7 +414,7 @@
                       <div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-conetnt-center"
                         style="width: 200px; height: 30px">
                         <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
-                          {{ $serv->serviceCategory->{'name_' . $l} }}
+                          <span class="line-clamp-1" style="font-size: 0.8rem;">{{ $serv->serviceCategory->{'name_' . $l} }}</span>
                         </a>
                       </div>
                     </div>
