@@ -287,12 +287,19 @@
             <div class="card-body">
               @php
                 $today = date('Y-m-d');
-                $csteps = App\Step::whereRaw('"' . $today . '" BETWEEN `from` AND `to`')
-                    ->where('stype', 5)
-                    ->get();
+                    $finalScreenings = App\Finalscreening::whereJsonContains('judges', strval(Auth::id())) ->with('step')->get();
+                  $stepIds = $finalScreenings->pluck('step_id')->unique()->toArray();
+                    $csteps = App\Step::where('stype', 5)
+                      ->whereIn('id', $stepIds) 
+                      ->get();
+                      $finalScreeningsByStep = $finalScreenings->groupBy('step_id');
               @endphp
               @if (count($fcompanies) > 0)
                 @foreach ($csteps as $step)
+                @php
+                $fcompanies = $finalScreeningsByStep[$step->id] ?? collect();
+               
+                @endphp
                   <div class="mt-4">
                     <div class="card-header bg-label-light p-3 mb-2">
                       <h5 class="mb-0">
@@ -322,6 +329,7 @@
                           </tr>
                         </thead>
                         <tbody>
+                          
                           @foreach ($fcompanies as $fcompany)
                             <tr>
                               <td>
@@ -342,9 +350,19 @@
                                 </div>
                               </td>
                               <td>
+                                @php
+                                
+                                $formFieldsCount = App\Formfield::where('step_id', $step->id)->count();
+                                $finalDataCount =  App\FinalData::where('step_id', $step->id)->where('judge_id', Auth::id())->where('company_id', $fcompany->company_id)->whereNotNull('answer')->count();
+                              
+                                $judgepercentage = $formFieldsCount > 0 ? ($finalDataCount / $formFieldsCount) * 100 : 0;
+                                
+                                @endphp
                                 <div class="progress">
-                                  <div class="progress-bar bg-{{ $fcompany->progress < 50 ? 'danger' : ($fcompany->progress < 75 ? 'warning' : 'success') }}" role="progressbar" style="width: {{ $fcompany->progress }}%;" aria-valuenow="{{ $fcompany->progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                  <div class="progress-bar bg-{{ $judgepercentage < 50 ? 'danger' : ($judgepercentage < 75 ? 'warning' : 'success') }}" role="progressbar" style="width: {{ $judgepercentage }}%;" aria-valuenow="{{ $judgepercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                
                                 </div>
+                                {{ $judgepercentage . ' %'}}
                               </td>
                               <td>
                                 {{ $fcompany->datetime ?? __('dashboard.Not added yet') }}

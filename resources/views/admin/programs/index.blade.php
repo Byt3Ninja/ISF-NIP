@@ -206,10 +206,8 @@
                             
                   // $orgid = App/Organization::where('user_id','=', auth()->user()->id)->first();
                   $orgid = App\Organization::where('id','=', $cycle->organization_id)->get();
-                  $mentortotal = App\User::whereIn('organization_id', $orgid->pluck('id')->toArray())->whereHas('roles', function($q){
-                    return $q->where('name', 'organizationManager');
-                  })->get();
-                  $mentor_Count = $mentortotal->count();
+                  $mentors = $cycle->mentors()->distinct()->get();
+                  $mentor_Count = $mentors->count();
                  
                   @endphp
                   <div class="card mb-6" style="border-radius: 20px;">
@@ -357,8 +355,9 @@
                             <i class="ti ti-user-circle text-primary ti-24px"></i>
                             <div class="d-flex flex-column">
                               <span class="fs-6 fw-bold mb-2">{{__('admin.Responsible')}}</span>
-                              @foreach($mentortotal as $mentor)
+                              
                                 <div class="d-flex flex-wrap gap-2 align-items-center" style="width: 100%">
+                                  @foreach($mentors as $mentor)
                                   <a 
                                     class="btn btn-sm btn-outline-primary rounded-pill"
                                     target="_blank"
@@ -371,8 +370,9 @@
                                     @endif
                                     <span class="mx-1">{{$mentor->name}}</span>
                                   </a>
+                                  @endforeach
                                 </div>
-                              @endforeach
+                              
                             </div>
                           </div>
                          

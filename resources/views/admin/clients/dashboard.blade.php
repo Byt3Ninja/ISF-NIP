@@ -156,7 +156,7 @@
     if (!empty($user->company)) {
         $sessions = \App\TrainingSession::where('step_id', $user->company->step)
             ->orderBy('datetime', 'ASC')
-            ->take(3)
+            ->take(5)
             ->get();
     } else {
         $sessions = [];
@@ -414,7 +414,7 @@
                       <div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-conetnt-center"
                         style="width: 200px; height: 30px">
                         <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
-                          {{ $serv->serviceCategory->{'name_' . $l} }}
+                          <span class="line-clamp-1" style="font-size: 0.8rem;">{{ $serv->serviceCategory->{'name_' . $l} }}</span>
                         </a>
                       </div>
                     </div>
@@ -840,16 +840,19 @@
                   <tr>
                     <td>
                       @if($step->stype == 1)
+                      @if($status != 'Completed' && $status != 'انتهت')
                       @if ($user->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
                           <a href="/dashboard/cycles/{{ $flink }}">
+                      @endif
                       @endif
                       {{ $step->title }}
                       </a>
                       @else
                       {{ $step->title }}
                       @endif
+                      
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span>
                     </td>
@@ -1366,7 +1369,7 @@
           </div>
         </div>
       </div>
-      {{-- <div class="mb-3">
+      <div class="mb-3">
         <label for="period" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Meeting duration')}}:</label>
         <select name="period" class="form-select" id="period">
         <option value="30">30 {{__('dashboard.Minutes')}}</option>
@@ -1376,7 +1379,7 @@
         <option value="240">4 {{__('dashboard.Hours')}}</option>
         <option value="300">5 {{__('dashboard.Hours')}}</option>
         </select>
-      </div> --}}
+      </div>
       <div class="mb-3">
         <label for="inputGroupFile01" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Send file with your request')}}</label>
         <input type="file" class="form-control" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
