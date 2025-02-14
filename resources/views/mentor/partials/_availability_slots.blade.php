@@ -36,31 +36,67 @@
                       <i class="ti ti-plus ms-2"></i>
                     </button>
                   </div>
-                  <div class="periods-container bg-white" data-day="{{ $day }}" style="display: none;">
-                    <div id="{{$day}}-period-row" class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
-                      <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
-                      <input class="form-control me-2 mb-2 mb-md-0" id="{{$day}}-from" type="time" name="periods[{{ $day }}][from][]">
-                      <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
-                      <input class="form-control me-2 mb-2 mb-md-0" id="tto" type="time" name="periods[{{ $day }}][to][]">
-                      <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{ __('admin.Min') }}</span>
-                      <div class="ps-4 d-flex flex-nowrap">
-                        <button 
-                          type="button" 
-                          class="btn btn-label-success btn-xs rounded-circle btn-icon me-2 add-period"
-                          bs-toggle="tooltip"
-                          title="{{ __('admin.Add_Period') }}"
-                        >
-                          <i class="ti ti-plus ti-13px"></i>
-                        </button>
-                        <div id="remove-period">
-                          <button 
-                            type="button" 
-                            class="btn btn-label-danger btn-xs rounded-circle btn-icon remove-period"
-                            bs-toggle="tooltip"
-                            title="{{ __('admin.Remove_Period') }}"
-                          >
-                          <i class="ti ti-trash ti-13px"></i>
-                          </button>
+                  <div class="periods-container bg-white w-100" data-day="{{ $day }}" style="display: none;">
+                    <div id="{{ $day }}-period-row" class="w-100 period-row d-flex align-items-center mb-2 my-2 rounded">
+                      <div class="d-flex align-items-center justify-content-between w-100">
+                        <div class="d-flex align-items-center gap-4 w-75">
+                          <div class="row w-100">
+                            <div class="col-md-6">
+                              <select class=" form-select w-100" id="{{$day}}-from" type="time" name="periods[{{ $day }}][from][]" data-placeholder="{{ __('admin.From') }}">
+                                <option value="">{{ __('admin.From') }}</option>
+                                @for ($i = 0; $i < 24; $i++)
+                                  @for ($j = 0; $j < 60; $j += 30)
+                                    @php
+                                      $hour = $i % 12 == 0 ? 12 : $i % 12;
+                                      $period = $i < 12 ? 'AM' : 'PM';
+                                    @endphp
+                                    <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($j, 2, '0', STR_PAD_LEFT) }}">
+                                      {{ str_pad($hour, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($j, 2, '0', STR_PAD_LEFT) }} {{ $period }}
+                                    </option>
+                                  @endfor
+                                @endfor
+                              </select>
+                            </div>
+                            <div class="col-md-6">
+                              <select class=" form-select w-100" id="{{$day}}-to" type="time" name="periods[{{ $day }}][to][]" data-placeholder="{{ __('admin.To') }}">
+                                <option value="">{{ __('admin.To') }}</option>
+                                @for ($i = 0; $i < 24; $i++)
+                                  @for ($j = 0; $j < 60; $j += 30)
+                                    @php
+                                      $hour = $i % 12 == 0 ? 12 : $i % 12;
+                                      $period = $i < 12 ? 'AM' : 'PM';
+                                    @endphp
+                                    <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($j, 2, '0', STR_PAD_LEFT) }}">
+                                      {{ str_pad($hour, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($j, 2, '0', STR_PAD_LEFT) }} {{ $period }}
+                                    </option>
+                                  @endfor
+                                @endfor
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-4 w-25">
+                          <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{ __('admin.Min') }}</span>
+                          <div class="d-flex flex-nowrap">
+                            <button 
+                              type="button" 
+                              class="btn btn-xs rounded-circle btn-icon me-2 add-period"
+                              bs-toggle="tooltip"
+                              title="{{ __('admin.Add_Period') }}"
+                            >
+                              <i class="ti ti-plus text-success"></i>
+                            </button>
+                            <div id="remove-period">
+                              <button 
+                                type="button" 
+                                class="btn btn-xs rounded-circle btn-icon remove-period"
+                                bs-toggle="tooltip"
+                                title="{{ __('admin.Remove_Period') }}"
+                              >
+                              <i class="ti ti-trash text-danger"></i>
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -94,8 +130,8 @@
   $(document).ready(function() {
     // Function to calculate the total time for a period row
     function calculateTotalTime($periodRow) {
-      var fromTime = $periodRow.find('input[name$="[from][]"]').val();
-      var toTime = $periodRow.find('input[name$="[to][]"]').val();
+      var fromTime = $periodRow.find('select[name$="[from][]"]').val();
+      var toTime = $periodRow.find('select[name$="[to][]"]').val();
       if (fromTime && toTime) {
         var from = new Date('1970-01-01T' + fromTime + 'Z');
         var to = new Date('1970-01-01T' + toTime + 'Z');
@@ -109,7 +145,7 @@
     // Function to check if any input has changed
     function checkFormChanges() {
       var formChanged = false;
-      $('form input, form textarea').each(function() {
+      $('form input, form textarea, form select').each(function() {
         if ($(this).data('initial-value') !== $(this).val()) {
           formChanged = true;
           return false; // break the loop
@@ -119,14 +155,14 @@
     }
 
     // Store initial values of inputs
-    $('form input, form textarea').each(function() {
+    $('form input, form textarea, form select').each(function() {
       $(this).data('initial-value', $(this).val());
     });
 
     // Toggle the periods container
     $(document).on('click', '#add-slot', function() {
-      console.log('add-slot');
       var $day = $(this).closest('.day-section').find('.periods-container');
+      var dayName = $day.data('day');
       if ($day.is(':visible')) {
         checkFormChanges();
         $day.hide();
@@ -138,37 +174,79 @@
         $day.show();
         $(this).html('{{ __('admin.Remove_Slot') }} <i class="ti ti-x ti-13px ms-2"></i>');
         if ($day.find('.period-row').length === 0) {
-          $day.find('.period-row').first().clone().appendTo($day);
-        }
-        if ($day.find('.period-row').length === 0) {
-        var newPeriodRow = `
-          <div class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
-            <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
-            <input class="form-control me-2 mb-2 mb-md-0" type="time" name="periods[${$day.data('day')}][from][]" required>
-            <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
-            <input class="form-control me-2 mb-2 mb-md-0" type="time" name="periods[${$day.data('day')}][to][]" required>
-            <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{__('admin.Min')}}</span>
-            <div class="ps-6 d-flex flex-nowrap">
-              <button type="button" class="btn btn-label-success btn-xs rounded-circle btn-icon me-2 add-period">
-                <i class="ti ti-plus text-16px"></i>
-              </button>
-              <div id="remove-period">
-                <button type="button" class="btn btn-label-danger btn-xs rounded-circle btn-icon remove-period">
-                  <i class="ti ti-trash text-16px"></i>
-                </button>
+          var newPeriodRow = `
+            <div id="${dayName}-period-row" class="w-100 period-row d-flex align-items-center mb-2 my-2 rounded">
+              <div class="d-flex align-items-center justify-content-between w-100">
+                <div class="d-flex align-items-center gap-4 w-75">
+                  <div class="row w-100">
+                    <div class="col-md-6">
+                      <select class=" form-select w-100" id="${dayName}-from" type="time" name="periods[${dayName}][from][]" required data-placeholder="{{ __('admin.From') }}">
+                        <option value="">{{ __('admin.From') }}</option>
+                        @for ($i = 0; $i < 24; $i++)
+                          @for ($j = 0; $j < 60; $j += 30)
+                            @php
+                              $hour = $i % 12 == 0 ? 12 : $i % 12;
+                              $period = $i < 12 ? 'AM' : 'PM';
+                            @endphp
+                            <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($j, 2, '0', STR_PAD_LEFT) }}">
+                              {{ str_pad($hour, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($j, 2, '0', STR_PAD_LEFT) }} {{ $period }}
+                            </option>
+                          @endfor
+                        @endfor
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <select class=" form-select w-100" id="${dayName}-to" type="time" name="periods[${dayName}][to][]" required data-placeholder="{{ __('admin.To') }}">
+                        <option value="">{{ __('admin.To') }}</option>
+                        @for ($i = 0; $i < 24; $i++)
+                          @for ($j = 0; $j < 60; $j += 30)
+                            @php
+                              $hour = $i % 12 == 0 ? 12 : $i % 12;
+                              $period = $i < 12 ? 'AM' : 'PM';
+                            @endphp
+                            <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($j, 2, '0', STR_PAD_LEFT) }}">
+                              {{ str_pad($hour, 2, '0', STR_PAD_LEFT) }}:{{ str_pad($j, 2, '0', STR_PAD_LEFT) }} {{ $period }}
+                            </option>
+                          @endfor
+                        @endfor
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-4 w-25">
+                  <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{ __('admin.Min') }}</span>
+                  <div class="d-flex flex-nowrap">
+                    <button 
+                      type="button" 
+                      class="btn btn-xs rounded-circle btn-icon me-2 add-period"
+                      bs-toggle="tooltip"
+                      title="{{ __('admin.Add_Period') }}"
+                    >
+                      <i class="ti ti-plus text-success"></i>
+                    </button>
+                    <div id="remove-period">
+                      <button 
+                        type="button" 
+                        class="btn btn-xs rounded-circle btn-icon remove-period"
+                        bs-toggle="tooltip"
+                        title="{{ __('admin.Remove_Period') }}"
+                      >
+                      <i class="ti ti-trash text-danger"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>`;
-        $day.append(newPeriodRow);
-      }
+            </div>`;
+          $day.append(newPeriodRow);
+        }
       }
     });
 
     // Add a new period row
     $(document).on('click', '.add-period', function() {
-      console.log('add-period');
       var $templateRow = $(this).closest('.periods-container').find('.period-row').first().clone();
-      $templateRow.find('input').val('');
+      $templateRow.find('select').val('');
       $templateRow.find('.total-time').text('0 {{__('admin.Min')}}');
       $(this).closest('.periods-container').append($templateRow);
       calculateTotalTime($templateRow); // Ensure total time is calculated for the new period
@@ -177,34 +255,30 @@
 
     // Remove the period row
     $(document).on('click', '.remove-period', function() {
-      console.log('remove-period');
       $(this).closest('.period-row').remove();
       checkFormChanges();
     });
-  
+
     // Calculate total time for each period row when the time is changed
-    $(document).on('change input blur', 'input[type="time"], textarea', function() {
+    $(document).on('change input blur', 'select, textarea', function() {
       var $periodRow = $(this).closest('.period-row');
       calculateTotalTime($periodRow);
       
       // Validate that both "from" and "to" times are required if one is changed
-      var fromTime = $periodRow.find('input[name$="[from][]"]').val();
-      var toTime = $periodRow.find('input[name$="[to][]"]').val();
+      var fromTime = $periodRow.find('select[name$="[from][]"]').val();
+      var toTime = $periodRow.find('select[name$="[to][]"]').val();
       if (fromTime) {
-        $periodRow.find('input[name$="[to][]"]').prop('required', true);
+        $periodRow.find('select[name$="[to][]"]').prop('required', true);
       } else {
-        $periodRow.find('input[name$="[to][]"]').prop('required', false);
+        $periodRow.find('select[name$="[to][]"]').prop('required', false);
       }
       if (toTime) {
-        $periodRow.find('input[name$="[from][]"]').prop('required', true);
+        $periodRow.find('select[name$="[from][]"]').prop('required', true);
       } else {
-        $periodRow.find('input[name$="[from][]"]').prop('required', false);
+        $periodRow.find('select[name$="[from][]"]').prop('required', false);
       }
       checkFormChanges();
     });
-
-    // Trigger the time picker when the input is focused
-    $('input[type="time"]').on('focus', function() { this.showPicker(); });
 
     // Initial check to disable the submit button if no changes
     checkFormChanges();

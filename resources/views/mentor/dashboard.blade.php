@@ -692,6 +692,9 @@
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  <!-- Moment -->
+  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+
 
   <!-- Page JS -->
   {{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
@@ -743,34 +746,76 @@
                   periodContainer.innerHTML = ''; // Clear existing rows
   
                   for (let i = 0; i < dayPeriods.length; i++) {
+                    console.log('dayPeriods', dayPeriods[i])
+                    const fromValue = moment(dayPeriods[i].tfrom, 'HH:mm:ss').format('HH:mm');
+                    const toValue = moment(dayPeriods[i].tto, 'HH:mm:ss').format('HH:mm');
+
+                    console.log('fromValue', fromValue)
+                    console.log('toValue', toValue)
+
+                    @php
+                      $timeOptions = '';
+                      for ($i = 0; $i < 24; $i++) {
+                        for ($j = 0; $j < 60; $j += 30) {
+                          $hour = $i % 12 == 0 ? 12 : $i % 12;
+                          $period = $i < 12 ? 'AM' : 'PM';
+                          $timeValue = str_pad($i, 2, '0', STR_PAD_LEFT) . ':' . str_pad($j, 2, '0', STR_PAD_LEFT);
+                          $timeOptions .= "<option value=\"$timeValue\">".str_pad($hour, 2, '0', STR_PAD_LEFT).":".str_pad($j, 2, '0', STR_PAD_LEFT)." $period</option>";
+                        }
+                      }
+                    @endphp
+                    const timeOptions = `{!! $timeOptions !!}`;
+
                     const newPeriodRow = `
-                      <div class="period-row d-flex align-items-center flex-wrap flex-md-nowrap mb-2 bg-label-light p-4 my-2 rounded">
-                        <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.From') }}</label>
-                        <input 
-                          required
-                          value="${dayPeriods[i].tfrom}"
-                          class="form-control me-2 mb-2 mb-md-0" type="time" name="periods['${day}'][from][]"
-                        />
-                        <label class="form-label me-2 mb-2 mb-md-0">{{ __('admin.To') }}</label>
-                        <input 
-                          required
-                          value="${dayPeriods[i].tto}"
-                          class="form-control me-2 mb-2 mb-md-0" type="time" name="periods['${day}'][to][]"
-                        />
-                        <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{__('admin.Min')}}</span>
-                        <div class="ps-6 d-flex flex-nowrap">
-                          <button type="button" class="btn btn-label-success btn-xs rounded-circle btn-icon me-2 add-period">
-                            <i class="ti ti-plus text-16px"></i>
-                          </button>
-                          <div id="remove-period">
-                            <button type="button" class="btn btn-label-danger btn-xs rounded-circle btn-icon remove-period">
-                              <i class="ti ti-trash text-16px"></i>
-                            </button>
+                      <div id="${day}-period-row" class="w-100 period-row d-flex align-items-center mb-2 my-2 rounded">
+                      <div class="d-flex align-items-center justify-content-between w-100">
+                        <div class="d-flex align-items-center gap-4 w-75">
+                          <div class="row w-100">
+                            <div class="col-md-6">
+                              <select class=" form-select w-100" id="${day}-from" type="time" name="periods[${day}][from][]" data-placeholder="{{ __('admin.From') }}">
+                                <option value="">{{ __('admin.From') }}</option>
+                                ${timeOptions}
+                              </select>
+                            </div>
+                            <div class="col-md-6">
+                              <select class=" form-select w-100" id="${day}-to" type="time" name="periods[${day}][to][]" data-placeholder="{{ __('admin.To') }}">
+                                <option value="">{{ __('admin.To') }}</option>
+                                ${timeOptions}
+                              </select>
+                            </div>
                           </div>
                         </div>
-                      </div>`
-                    ;
+                        <div class="d-flex align-items-center gap-4 w-25">
+                          <span class="total-time fw-bold text-dark text-nowrap me-2 mb-2 mb-md-0">0 {{ __('admin.Min') }}</span>
+                          <div class="d-flex flex-nowrap">
+                            <button 
+                              type="button" 
+                              class="btn btn-xs rounded-circle btn-icon me-2 add-period"
+                              bs-toggle="tooltip"
+                              title="{{ __('admin.Add_Period') }}"
+                            >
+                              <i class="ti ti-plus text-success"></i>
+                            </button>
+                            <div id="remove-period">
+                              <button 
+                                type="button" 
+                                class="btn btn-xs rounded-circle btn-icon remove-period"
+                                bs-toggle="tooltip"
+                                title="{{ __('admin.Remove_Period') }}"
+                              >
+                              <i class="ti ti-trash text-danger"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    `;
                     periodContainer.innerHTML += newPeriodRow; // Append the new rows
+
+                    // Set the selected values
+                    document.querySelector(`#${day}-from`).value = fromValue;
+                    document.querySelector(`#${day}-to`).value = toValue;
                   }
                 }
               }
