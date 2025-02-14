@@ -275,1473 +275,471 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
-
         try {
-            if ($id == null) {
+            $user = Auth::user();
+            if( !is_null( $id ) )
+            {
+                if( !$user->hasanyRole('Admin|organizationManager') ) { return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']); }
+                if( $user->hasRole('organizationManager') )
+                {
+                    $check = DB::select("SELECT
+                            *
+                        FROM
+                            companies c
+                        LEFT JOIN
+                            cycles cy ON cy.id = c.cycle
+                        LEFT JOIN
+                            organizations o ON o.id = cy.organization_id
+                        WHERE
+                            c.id = $id 
+                            AND o.user_id = " . $user->id);
 
-                $user = Auth::user();
-                $companyId = $user->company_id;
-                $data = $request->all();
-
-                if ($data['CompanyN'] == 1) {
-
-                    $validatedData = $request->validate([
-                        'name_en' => 'required|string|max:255',
-                        'country_id' => 'required|exists:countries,id',
-                        'state_id' => 'required|exists:states,id',
-                        'sector' => 'required|string|max:255',
-                        'address_en' => 'required|string|max:500',
-                        'est_date' => 'required|date',
-                        'years_of_operations' => 'required|string',
-                        'product_or_service' => 'required|string|in:Product,Service,Product + Service',
-                        'business_categories' => 'nullable|array',
-                        'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
-                        'other_category' => 'nullable|string|max:255',
-                    ], [
-                        'name_en.required' => __('admin.English Name is required'),
-                        'country_id.required' => __('admin.Country is required'),
-                        'country_id.exists' => __('admin.Invalid Country selected'),
-                        'state_id.required' => __('admin.State is required'),
-                        'state_id.exists' => __('admin.Invalid State selected'),
-                        'sector.required' => __('admin.Sector is required'),
-                        'address_en.required' => __('admin.English Address is required'),
-                        'est_date.required' => __('admin.Established Date must be a valid date'),
-                        'years_of_operations.required' => __('admin.Years of Operations is required'),
-                        'product_or_service.required' => __('admin.Product or Service is required'),
-                        'product_or_service.in' => __('admin.Invalid Product or Service selection'),
-                    ]);
-
-                    // Handle "Other" category logic
-                    if (in_array('Other', $validatedData['business_categories'] ?? [])) {
-                        $validatedData['business_categories'] = array_diff($validatedData['business_categories'], ['Other']);
-                        if (!empty($validatedData['other_category'])) {
-                            $validatedData['business_categories'][] = 'Other';
-                            $validatedData['business_categories'][] = $validatedData['other_category'];
-                        }
-                    }
-
-                    $validatedData['business_categories'] = json_encode($validatedData['business_categories']);
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], values: $data);
-
-                    // $msgtype = 'UpdateComp';
-
-                    if ($data['CreatedTax'] == 0) {
-                        $CreatedTax = 0;
-                        $cuntryReg = 0;
-                        $Commercial_Register = '';
-                        $Tax_Card = '';
-                    } else {
-                        $CreatedTax = $data['CreatedTax'];
-                        $cuntryReg = $data['Country_Register'];
-                        $Commercial_Register = $data['Commercial_Register'];
-                        $Tax_Card = $data['Tax_Card'];
-                    }
-
-
-
-                    if ($companyId) {
-
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'name_en' => $data['name_en'],
-                            'name_ar' => $data['name_en'],
-                            'country_id' => $data['country_id'],
-                            'state_id' => $data['state_id'],
-                            'sector' => $data['sector'],
-                            'address_en' => $data['address_en'],
-                            'address_ar' => $data['address_en'],
-                            'est_date' => $data['est_date'],
-                            'years_of_operations' => $data['years_of_operations'],
-                            'product_or_service' => $data['product_or_service'],
-                            'business_categories' => $validatedData['business_categories'],
-                            'CreatedTax' => $CreatedTax,
-                            'Commercial_Register' => $Commercial_Register,
-                            'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg ?? 0,
-                        ]);
-
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        $institutions = 'null';
-                        $email = 'null';
-                        $phone = '0';
-
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'name_en' => $data['name_en'],
-                            'name_ar' => $data['name_en'],
-                            'country_id' => $data['country_id'],
-                            'state_id' => $data['state_id'],
-                            'sector' => $data['sector'],
-                            'business_categories' => $validatedData['business_categories'],
-                            'address_en' => $data['address_en'],
-                            'address_ar' => $data['address_en'],
-                            'est_date' => $data['est_date'],
-                            'years_of_operations' => $data['years_of_operations'],
-                            'product_or_service' => $data['product_or_service'],
-                            'CreatedTax' => $CreatedTax,
-                            'Commercial_Register' => $Commercial_Register,
-                            'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg ?? 0,
-                            'institutions' => $institutions,
-                            'email' => $email,
-                            'phone' => $phone,
-
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
+                    $check = collect( $check )->first();
+                    if( empty( $check ) ) { return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']); }
+                    else
+                    {
+                        $id = $check->id;
                     }
                 }
-                if ($data['CompanyN'] == 2) {
-
-                    $validatedData = $request->validate([
-                        'phone' => 'required|numeric|digits_between:8,15',
-                        'WhatsApp' => 'nullable',
-                        'email' => 'required|email|max:255',
-                        'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
-                        'img_url' => 'nullable', // يجب أن يكون رابط صالح
-                        'facebook' => 'nullable|url', // يجب أن يكون إما نعم أو لا
-                        'twitter' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'linkedin' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'youtube' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'google_map' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
-                        'instagram' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
-                        'tiktok' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
-                    ], [
-                        'phone.required' => __('admin.Phone is required'),
-                        'phone.numeric' => __('admin.Phone must be a valid number'),
-                        'phone.digits_between' => __('admin.Phone must be between 8 and 15 digits'),
-
-                        'email.required' => __('admin.E-mail is required'),
-                        'email.email' => __('admin.Invalid E-mail format'),
-                        'email.max' => __('admin.E-mail must not exceed 255 characters'),
-                        'website.url' => __('admin.Website_Not_URL'),
-                        'img_url.url' => __('admin.img_url_Not_URL'),
-                        'facebook.url' => __('admin.facebook_Not_URL'),
-                        'twitter.url' => __('admin.twitter_Not_URL'),
-                        'linkedin.url' => __('admin.linkedin_Not_URL'),
-                        'youtube.url' => __('admin.youtube_Not_URL'),
-                        'google_map.url' => __('admin.google_map_Not_URL'),
-                        'instagram.url' => __('admin.instagram_url_Not_URL'),
-                        'tiktok.url' => __('admin.tiktok_url_Not_URL'),
-                    ]);
-
-
-                    // في الميثود التي تعالج الطلب
-                    if ($request->hasFile('img_url')) {
-                        // الحصول على الصورة
-                        $image = $request->file('img_url');
-                        // حفظ الصورة داخل القرص 'public_uploads'
-                        $img_path = $image->store('images/logo', 'public_uploads');
-
-                        // إنشاء رابط الصورة
-                        $img_url = Storage::disk('public_uploads')->url($img_path);
-                    } else {
-                        $img_url = $user->company->logo;
-                    }
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'country_code' => $data['country_code'],  // مثال لإضافة حقل الهاتف
-                            'phone' => $data['phone'],  // مثال لإضافة حقل الهاتف
-                            'country_code_w_a' => $data['country_code_w_a'],  // مثال لإضافة حقل الهاتف
-                            'whatsapp' => $data['WhatsApp'],  // مثال لإضافة حقل الواتساب
-                            'email' => $data['email'],  // مثال لإضافة حقل البريد الإلكتروني
-                            'website' => $data['website'],
-                            'logo' => $img_url,
-                            'facebook' => $data['facebook'],
-                            'twitter' => $data['twitter'],
-                            'linkedin' => $data['linkedin'],
-                            'youtube' => $data['youtube'],
-                            'google_map' => $data['google_map'],
-                            'instagram' => $data['instagram'],
-                            'tiktok' => $data['tiktok'],
-                        ]);
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'country_code' => $data['country_code'],  // مثال لإضافة حقل الهاتف
-                            'phone' => $data['phone'],  // مثال لإضافة حقل الهاتف
-                            'country_code_w_a' => $data['country_code_w_a'],  // مثال لإضافة حقل الهاتف
-                            'whatsapp' => $data['WhatsApp'],  // مثال لإضافة حقل الواتساب
-                            'email' => $data['email'],  // مثال لإضافة حقل البريد الإلكتروني
-                            'website' => $data['website'],
-                            'logo' => $img_url,
-                            'facebook' => $data['facebook'],
-                            'twitter' => $data['twitter'],
-                            'linkedin' => $data['linkedin'],
-                            'youtube' => $data['youtube'],
-                            'google_map' => $data['google_map'],
-                            'instagram' => $data['instagram'],
-                            'tiktok' => $data['tiktok'],
-                        ]);
-
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 3) {
-                    $validatedData = $request->validate([
-                        'company_description' => 'nullable|string|max:500',
-                        'Sustainable_development' => 'nullable|array',
-                        'about_problem' => 'nullable',
-                        'about_market_opportunity' => 'nullable',
-                        'about_competitors' => 'nullable',
-                        'about_monetize' => 'nullable',
-                        'about_challenges' => 'nullable',
-                    ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'info_company' => $data['company_description'],
-                            'Sustainable_development' => json_encode($data['Sustainable_development']),
-                            'about_problem' => $data['about_problem'],
-                            'about_market_opportunity' => $data['about_market_opportunity'],
-                            'about_competitors' => $data['about_competitors'],
-                            'about_monetize' => $data['about_monetize'],
-                            'about_challenges' => $data['about_challenges'],
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'info_company' => $data['company_description'],
-                            'Sustainable_development' => json_encode($data['Sustainable_development']),
-                            'about_problem' => $data['about_problem'],
-                            'about_market_opportunity' => $data['about_market_opportunity'],
-                            'about_competitors' => $data['about_competitors'],
-                            'about_monetize' => $data['about_monetize'],
-                            'about_challenges' => $data['about_challenges'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 4) {
-
-                    $request->validate([
-                        'Currency' => 'nullable',
-                        'pre_money_valuation' => 'nullable|numeric|min:0',
-                        'raised_fund' => 'nullable|numeric|min:0',
-                        'Funding_Target' => 'nullable|numeric|min:0',
-                        'stage' => 'nullable',
-                        'development_stage' => 'nullable',
-                        'targeted_market.*' => 'nullable',
-                        'business_type' => 'nullable',
-                    ], [
-
-                        'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
-                        'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
-                        'raised_fund.numeric' => __('admin.Raised fund must be a number'),
-                        'raised_fund.min' => __('admin.Raised fund must be a positive number'),
-                    ]);
-
-                    if($data['Funding_Target'] == null) {
-                        $data['Funding_Target'] = 0;
-                    }
-                    if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
-                        $data['targeted_market'] = ['null'];
-                    }
-
-                    if ($request->hasFile('financial_plan')) {
-                        $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
-                    
-                        if ($file->isValid()) {
-                            $originalName = $file->getClientOriginalName();
-                            $folder = match (true) {
-                                str_starts_with($file->getMimeType(), 'image/') => 'images',
-                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
-                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
-                                default => 'others',
-                            };
-                    
-                            $path = $companyId . '/financial_plan/' . $folder . '/';
-                    
-                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                            $file->storeAs($path, $originalName, [
-                                'disk' => 'pitch_deck'
-                            ]);
-                    
-                            $uploadedFile = 'financial_plan/' . $path . $originalName;
-                        }
-                    }else{
-                        $uploadedFile = $user->company->financial_plan;
-                    }
-                    
-                    if($data['financial_plan_description'] == null) {
-                        $data['financial_plan_description'] = '0';
-                    }
-
-
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'Currency' => $data['Currency'],
-                            'Pre_money_Valuation' => $data['pre_money_valuation'],
-                            'raised_fund' => $data['raised_fund'],
-                            'Funding_Target' => $data['Funding_Target'],
-                            'stage' => $data['stage'],
-                            'development_stage' => $data['development_stage'],
-                            'targeted_market' => json_encode($data['targeted_market']),
-                            'business_type' => $data['business_type'],
-                            'financial_plan' => $uploadedFile,
-                            'financial_plan_description' => $data['financial_plan_description'],
-                        ]);
-
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'Currency' => $data['Currency'],
-                            'Pre_money_Valuation' => $data['pre_money_valuation'],
-                            'raised_fund' => $data['raised_fund'],
-                            'Funding_Target' => $data['Funding_Target'],
-                            'stage' => $data['stage'],
-                            'development_stage' => $data['development_stage'],
-                            'targeted_market' => json_encode($data['targeted_market']),
-                            'business_type' => $data['business_type'],
-                            'financial_plan' => $uploadedFile,
-                            'financial_plan_description' => $data['financial_plan_description'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 5) {
-
-                    $request->validate([
-                        'team_num' => 'required|string',
-                    ], [
-                        'team_num.numeric' => __('admin.Raised fund must be a number'),
-                    ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'team_num' => $data['team_num'],
-                            'working_team_summary' => $data['working_team_summary'],
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'team_num' => $data['team_num'],
-                            'working_team_summary' => $data['working_team_summary'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 6) {
-
-                    $validator = Validator::make($request->all(), [
-                        'pitch_deck_info' => 'nullable', // يجب أن يكون إما نعم أو لا
-                        'pitch_deck_summary' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
-                        'problem_facing' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
-                        'solution_problem' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
-                    ], [
-                        'pitch_deck_info.required' => __('admin.Pitch_Deck_Information is required'),
-                        'pitch_deck_summary.required' => __('admin.Pitch_Deck_Summary is required'),
-                        'pitch_deck_summary.string' => __('admin.Pitch_Deck_Summary must be a string'),
-                        'pitch_deck_summary.max' => __('admin.Pitch_Deck_Summary max length is 500 characters'),
-                    ]);
-
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'pitch_deck_description' => $data['pitch_deck_info'],
-                            'pitch_deck_summary' => $data['pitch_deck_summary'],
-                            'problem' => $data['problem_facing'],
-                            'solution' => $data['solution_problem'],
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'pitch_deck_description' => $data['pitch_deck_info'],
-                            'pitch_deck_summary' => $data['pitch_deck_summary'],
-                            'problem' => $data['problem_facing'],
-                            'solution' => $data['solution_problem'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 8) {
-
-
-                    $validator = Validator::make($request->all(), [
-                        'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
-                        'img_url' => 'nullable', // يجب أن يكون رابط صالح
-                        'facebook' => 'nullable|url', // يجب أن يكون إما نعم أو لا
-                        'twitter' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'linkedin' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'youtube' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'google_map' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
-                        'instagram' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
-                        'tiktok' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
-                    ],  [
-                        'website.url' => __('admin.Website_Not_URL'),
-                        'img_url.url' => __('admin.img_url_Not_URL'),
-                        'facebook.url' => __('admin.facebook_Not_URL'),
-                        'twitter.url' => __('admin.twitter_Not_URL'),
-                        'linkedin.url' => __('admin.linkedin_Not_URL'),
-                        'youtube.url' => __('admin.youtube_Not_URL'),
-                        'google_map.url' => __('admin.google_map_Not_URL'),
-                        'instagram.url' => __('admin.instagram_url_Not_URL'),
-                        'tiktok.url' => __('admin.tiktok_url_Not_URL'),
-                    ]);
-
-                    // في الميثود التي تعالج الطلب
-                    if ($request->hasFile('img_url')) {
-                        // الحصول على الصورة
-                        $image = $request->file('img_url');
-                        // حفظ الصورة داخل القرص 'public_uploads'
-                        $img_path = $image->store('images/logo', 'public_uploads');
-
-                        // إنشاء رابط الصورة
-                        $img_url = Storage::disk('public_uploads')->url($img_path);
-                    } else {
-                        $img_url = $user->company->logo;
-                    }
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'website' => $data['website'],
-                            'logo' => $img_url,
-                            'facebook' => $data['facebook'],
-                            'twitter' => $data['twitter'],
-                            'linkedin' => $data['linkedin'],
-                            'youtube' => $data['youtube'],
-                            'google_map' => $data['google_map'],
-                            'instagram' => $data['instagram'],
-                            'tiktok' => $data['tiktok'],
-                        ]);
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'website' => $data['website'],
-                            'logo' => $img_url,
-                            'facebook' => $data['facebook'],
-                            'twitter' => $data['twitter'],
-                            'linkedin' => $data['linkedin'],
-                            'youtube' => $data['youtube'],
-                            'google_map' => $data['google_map'],
-                            'instagram' => $data['instagram'],
-                            'tiktok' => $data['tiktok'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 9) {
-                    $validator = Validator::make($request->all(), [
-                        'pitch_deck' => 'nullable|mimes:pdf,ppt,pptx|max:10240', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
-                    ], [
-                        'pitch_deck.mimes' => __('admin.Pitch_Deck must be a pdf or ppt file'),
-                        'pitch_deck.max' => __('admin.Pitch_Deck max size is 10MB'),
-
-                    ]);
-
-                   
-                    if ($request->hasFile('pitch_deck')) {
-                        $file = $request->file('pitch_deck');
-                        $originalName = $file->getClientOriginalName();
-                        $path = $companyId . '/pitch_decks/';
-                    
-                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
-                        $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_deck'
-                        ]);
-                    
-                        $pitch_deck = 'pitch_decks/'. $path . $originalName;
-                    }else{
-                        return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
-                    }
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'pitch_deck' => $pitch_deck,
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'pitch_deck' => $pitch_deck,
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 10) {
-                    $validator = Validator::make($request->all(), [
-                        'pitch_deck_video' => 'nullable', // يجب أن يكون ملف PDF او PPT وحجمه لا يتجاوز 20MB
-                    ]);
-
-                   
-                    // if ($request->hasFile('pitch_deck_video')) {
-                    //     $file = $request->file('pitch_deck_video');
-                    //     $originalName = $file->getClientOriginalName();
-                    //     $path = $companyId . '/pitch_decks/';
-                    
-                    //     // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
-                    //     $file->storeAs($path, $originalName, [
-                    //         'disk' => 'pitch_deck'
-                    //     ]);
-                    
-                    //     $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
-                    // }else{
-                    //     return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
-                    // }
-                    if($request->pitch_deck_video == null){
-                        return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
-                    }
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'pitch_deck_video' => $request->pitch_deck_video,
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'pitch_deck_video' => $request->pitch_deck_video,
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 11) {
-                    // $validator = Validator::make($request->all(), [
-                    //     'documents.*' => 'nullable|array|mimes:pdf,ppt,pptx|max:20480',
-                    // ],[
-                    //     'documents.*.mimes' => __('admin.Documents must be a pdf or ppt file'),
-                    //     'documents.*.max' => __('admin.Documents max size is 20MB'),
-                    // ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-
-                    if ($request->hasFile('documents')) {
-                        $files = $request->file('documents'); 
-                        $uploadedFiles = []; 
-                    
-                        foreach ($files as $file) {
-                            if ($file->isValid()) {
-                                $originalName = $file->getClientOriginalName();
-                                $folder = match (true) {
-                                    str_starts_with($file->getMimeType(), 'image/') => 'images',
-                                    str_starts_with($file->getMimeType(), 'video/') => 'videos',
-                                    in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
-                                    default => 'others',
-                                };
-                    
-                                $path = $companyId . '/pitch_decks/' . $folder . '/';
-                    
-                                // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                                $file->storeAs($path, $originalName, [
-                                    'disk' => 'pitch_deck'
-                                ]);
-                    
-                                $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
-                            }
-                        }
-                    }else{
-                        return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
-                    }
-
-                    if ($companyId) {
-
-                        // dd($data['documents']);
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'documents' =>  json_encode($uploadedFiles),
-                        ]);
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'documents' => json_encode($uploadedFiles),
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 12) {
-
-                    $request->validate([
-                        'about_problem' => 'required',
-                        'about_market_opportunity' => 'required',
-                        'about_competitors' => 'required',
-                        'about_monetize' => 'required',
-                        'about_challenges' => 'required',
-                    ], [
-                        'about_problem.required' => __('admin.about_problem is required'),
-                        'about_market_opportunity.required' => __('admin.about_market_opportunity is required'),
-                        'about_competitors.required' => __('admin.about_competitors is required'),
-                        'about_monetize.required' => __('admin.about_monetize is required'),
-                        'about_challenges.required' => __('admin.about_challenges is required'),
-                    ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'about_problem' => $data['about_problem'],
-                            'about_market_opportunity' => $data['about_market_opportunity'],
-                            'about_competitors' => $data['about_competitors'],
-                            'about_monetize' => $data['about_monetize'],
-                            'about_challenges' => $data['about_challenges'],
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'about_problem' => $data['about_problem'],
-                            'about_market_opportunity' => $data['about_market_opportunity'],
-                            'about_competitors' => $data['about_competitors'],
-                            'about_monetize' => $data['about_monetize'],
-                            'about_challenges' => $data['about_challenges'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 13) {
-
-                    $request->validate([
-                        'business_model' => 'required',
-                        'business_model_description' => 'required|string|max:255',
-                        'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:2048',
-                    ], [
-                        'business_model.required' => __('admin.business_model is required'),
-                        'business_model_description.required' => __('admin.business_model_description is required'),
-                    ]);
-
-                    if ($request->hasFile('business_plan')) {
-                        $file = $request->file('business_plan'); // التعامل مع ملف واحد فقط
-                    
-                        if ($file->isValid()) {
-                            $originalName = $file->getClientOriginalName();
-                            $folder = match (true) {
-                                str_starts_with($file->getMimeType(), 'image/') => 'images',
-                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
-                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
-                                default => 'others',
-                            };
-                    
-                            $path = $companyId . '/business_plan/' . $folder . '/';
-                    
-                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                            $file->storeAs($path, $originalName, [
-                                'disk' => 'pitch_deck'
-                            ]);
-                    
-                            $uploadedFile = 'business_plan/' . $path . $originalName;
-                        }
-                    }
-
-
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'business_model' => $data['business_model'],
-                            'other_business_model' => $data['other_business_model'],
-                            'business_model_description' => $data['business_model_description'],
-                            'business_plan' => $uploadedFile,
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'business_model' => $data['business_model'],
-                            'other_business_model' => $data['other_business_model'],
-                            'business_model_description' => $data['business_model_description'],
-                            'business_plan' => $uploadedFile,
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-            } else {
-                if (!Auth::user()->hasanyRole('Admin|organizationManager')) {
-                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
-                }
-                if (Auth::user()->hasRole('organizationManager')) {
-                    $userorg = Organization::where('user_id', Auth::id())->first();
-                    $cycles = Cycle::where('organization_id', $userorg->id)->with('companies')->get();
-                    foreach ($cycles as $cycle) {
-                        foreach ($cycle->companies as $company) {
-                            if ($company->id == $id) {
-                                $id = $company->id;
-                                break;
-                            } else {
-                                $id = null;
-                            }
-                        }
-                    }
-                }
-                if ($id == null) {
-                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
-                }
-
-                $user = User::where('company_id', $id)->first();
-                // $user = Auth::user();
-
-                $companyId = $user->company_id;
-                $data = $request->all();
-                // dd($companyId);
-
-                if ($data['CompanyN'] == 1) {
-
-                    $validatedData = $request->validate([
-                        'name_en' => 'required|string|max:255',
-                        'name_ar' => 'required|string|max:255',
-                        'country_id' => 'required|exists:countries,id',
-                        'state_id' => 'required|exists:states,id',
-                        'sector' => 'required|string|max:255',
-                        'address_en' => 'required|string|max:500',
-                        'address_ar' => 'required|string|max:500',
-                        'est_date' => 'required|date',
-                        'years_of_operations' => 'required|string',
-                        'product_or_service' => 'required|string|in:Product,Service,Product + Service',
-                        'business_categories' => 'nullable|array',
-                        'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
-                        'other_category' => 'nullable|string|max:255',
-                    ], [
-                        'name_en.required' => __('admin.English Name is required'),
-                        'name_ar.required' => __('admin.Arabic Name is required'),
-                        'country_id.required' => __('admin.Country is required'),
-                        'country_id.exists' => __('admin.Invalid Country selected'),
-                        'state_id.required' => __('admin.State is required'),
-                        'state_id.exists' => __('admin.Invalid State selected'),
-                        'sector.required' => __('admin.Sector is required'),
-                        'address_en.required' => __('admin.English Address is required'),
-                        'address_ar.required' => __('admin.Arabic Address is required'),
-                        'est_date.required' => __('admin.Established Date must be a valid date'),
-                        'years_of_operations.required' => __('admin.Years of Operations is required'),
-                        'product_or_service.required' => __('admin.Product or Service is required'),
-                        'product_or_service.in' => __('admin.Invalid Product or Service selection'),
-                    ]);
-
-                    // Handle "Other" category logic
-                    if (in_array('Other', $validatedData['business_categories'] ?? [])) {
-                        $validatedData['business_categories'] = array_diff($validatedData['business_categories'], ['Other']);
-                        if (!empty($validatedData['other_category'])) {
-                            $validatedData['business_categories'][] = $validatedData['other_category'];
-                        }
-                    }
-
-                    $validatedData['business_categories'] = json_encode($validatedData['business_categories']);
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], values: $data);
-
-                    // $msgtype = 'UpdateComp';
-
-                    if ($data['CreatedTax'] == 0) {
-                        $CreatedTax = 0;
-                        $cuntryReg = 0;
-                        $Commercial_Register = '';
-                        $Tax_Card = '';
-                    } else {
-                        $CreatedTax = $data['CreatedTax'];
-                        $cuntryReg = $data['Country_Register'];
-                        $Commercial_Register = $data['Commercial_Register'];
-                        $Tax_Card = $data['Tax_Card'];
-                    }
-
-
-
-                    if ($companyId) {
-
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'name_en' => $data['name_en'],
-                            'name_ar' => $data['name_ar'],
-                            'country_id' => $data['country_id'],
-                            'state_id' => $data['state_id'],
-                            'sector' => $data['sector'],
-                            'address_en' => $data['address_en'],
-                            'address_ar' => $data['address_ar'],
-                            'est_date' => $data['est_date'],
-                            'years_of_operations' => $data['years_of_operations'],
-                            'product_or_service' => $data['product_or_service'],
-                            'business_categories' => $validatedData['business_categories'],
-                            'CreatedTax' => $CreatedTax,
-                            'Commercial_Register' => $Commercial_Register,
-                            'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg ?? 0,
-                        ]);
-
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        $institutions = 'null';
-                        $email = 'null';
-                        $phone = '0';
-
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'name_en' => $data['name_en'],
-                            'name_ar' => $data['name_ar'],
-                            'country_id' => $data['country_id'],
-                            'state_id' => $data['state_id'],
-                            'sector' => $data['sector'],
-                            'business_categories' => $validatedData['business_categories'],
-                            'address_en' => $data['address_en'],
-                            'address_ar' => $data['address_ar'],
-                            'est_date' => $data['est_date'],
-                            'years_of_operations' => $data['years_of_operations'],
-                            'product_or_service' => $data['product_or_service'],
-                            'CreatedTax' => $CreatedTax,
-                            'Commercial_Register' => $Commercial_Register,
-                            'Tax_Card' => $Tax_Card,
-                            'Country_Register_id' => $cuntryReg ?? 0,
-                            'institutions' => $institutions,
-                            'email' => $email,
-                            'phone' => $phone,
-
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 2) {
-
-                    $validatedData = $request->validate([
-                        'phone' => 'required|numeric|digits_between:8,15',
-                        'WhatsApp' => 'nullable',
-                        'email' => 'required|email|max:255|unique:companies,email,' . $id,
-                    ], [
-                        'phone.required' => __('admin.Phone is required'),
-                        'phone.numeric' => __('admin.Phone must be a valid number'),
-                        'phone.digits_between' => __('admin.Phone must be between 8 and 15 digits'),
-                        
-                        'email.required' => __('admin.E-mail is required'),
-                        'email.email' => __('admin.Invalid E-mail format'),
-                        'email.max' => __('admin.E-mail must not exceed 255 characters'),
-                    ]);
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'country_code' => $data['country_code'],  // مثال لإضافة حقل الهاتف
-                            'phone' => $data['phone'],  // مثال لإضافة حقل الهاتف
-                            'whatsapp' => $data['WhatsApp'],  // مثال لإضافة حقل الواتساب
-                            'email' => $data['email'],  // مثال لإضافة حقل البريد الإلكتروني
-                        ]);
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'country_code' => $data['country_code'],  // مثال لإضافة حقل الهاتف
-                            'phone' => $data['phone'],  // مثال لإضافة حقل الهاتف
-                            'whatsapp' => $data['WhatsApp'],  // مثال لإضافة حقل الواتساب
-                            'email' => $data['email'],  // مثال لإضافة حقل البريد الإلكتروني
-                        ]);
-
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 3) {
-                    $validatedData = $request->validate([
-                        'company_description' => 'required|string|max:500',
-                        'Sustainable_development' => 'nullable|array',
-                        'Sustainable_development.*' => 'in:no_poverty,zero_hunger,good_health,quality_education,gender_equality,clean_water,clean_energy,decent_work,industry_innovation,reduced_inequalities,sustainable_cities,responsible_consumption,climate_action,life_below_water,life_on_land,peace_justice,partnership_goals',
-                    ], [
-                        'company_description.required' => __('admin.Company description must not exceed'),
-                        'company_description.max' => __('admin.Company description must not exceed 500 characters'),
-                        'Sustainable_development.required' => __('admin.sustainable development is Empty'),
-                        'Sustainable_development.*.in' => __('admin.sustainable development option'),
-                    ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'info_company' => $data['company_description'],
-                            'Sustainable_development' => json_encode($data['Sustainable_development']),
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'info_company' => $data['company_description'],
-                            'Sustainable_development' => json_encode($data['Sustainable_development']),
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 4) {
-
-                    $request->validate([
-                        'Currency' => 'nullable',
-                        'pre_money_valuation' => 'nullable|numeric|min:0',
-                        'raised_fund' => 'nullable|numeric|min:0',
-                        'Funding_Target' => 'nullable|numeric|min:0',
-                        'stage' => 'nullable',
-                        'development_stage' => 'nullable',
-                        'targeted_market.*' => 'nullable',
-                        'business_type' => 'nullable',
-                    ], [
-                        
-
-                        'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
-                        'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
-                        'raised_fund.numeric' => __('admin.Raised fund must be a number'),
-                        'raised_fund.min' => __('admin.Raised fund must be a positive number'),
-                    ]);
-
-                    if($data['Funding_Target'] == null) {
-                        $data['Funding_Target'] = 0;
-                    }
-                    if (!isset($data['targeted_market']) || $data['targeted_market'] == null) {
-                        $data['targeted_market'] = ['null'];
-                    }
-                    
-                    if ($request->hasFile('financial_plan')) {
-                        $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
-                    
-                        if ($file->isValid()) {
-                            $originalName = $file->getClientOriginalName();
-                            $folder = match (true) {
-                                str_starts_with($file->getMimeType(), 'image/') => 'images',
-                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
-                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
-                                default => 'others',
-                            };
-                    
-                            $path = $companyId . '/financial_plan/' . $folder . '/';
-                    
-                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                            $file->storeAs($path, $originalName, [
-                                'disk' => 'pitch_deck'
-                            ]);
-                    
-                            $uploadedFile = 'financial_plan/' . $path . $originalName;
-                        }
-                    }else{
-                        $uploadedFile = $user->company->financial_plan;
-                    }
-                    
-                    if($data['financial_plan_description'] == null) {
-                        $data['financial_plan_description'] = '0';
-                    }
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'Currency' => $data['Currency'],
-                            'Pre_money_Valuation' => $data['pre_money_valuation'],
-                            'raised_fund' => $data['raised_fund'],
-                            'Funding_Target' => $data['Funding_Target'],
-                            'stage' => $data['stage'],
-                            'development_stage' => $data['development_stage'],
-                            'targeted_market' => json_encode($data['targeted_market']),
-                            'business_type' => $data['business_type'],
-                            'financial_plan' => $uploadedFile,
-                            'financial_plan_description' => $data['financial_plan_description'],
-                        ]);
-
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'Currency' => $data['Currency'],
-                            'Pre_money_Valuation' => $data['pre_money_valuation'],
-                            'raised_fund' => $data['raised_fund'],
-                            'Funding_Target' => $data['Funding_Target'],
-                            'stage' => $data['stage'],
-                            'development_stage' => $data['development_stage'],
-                            'targeted_market' => json_encode($data['targeted_market']),
-                            'business_type' => $data['business_type'],
-                            'financial_plan' => $uploadedFile,
-                            'financial_plan_description' => $data['financial_plan_description'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 5) {
-
-                    $request->validate([
-                        'team_num' => 'required|string',
-                    ], [
-                        'team_num.numeric' => __('admin.Raised fund must be a number'),
-                    ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'team_num' => $data['team_num'],
-                            'working_team_summary' => $data['working_team_summary'],
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'team_num' => $data['team_num'],
-                            'working_team_summary' => $data['working_team_summary'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 6) {
-
-                    $validator = Validator::make($request->all(), [
-                        'pitch_deck_info' => 'nullable', // يجب أن يكون إما نعم أو لا
-                        'pitch_deck_summary' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
-                        'problem_facing' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
-                        'solution_problem' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
-                    ], [
-                        'pitch_deck_info.required' => __('admin.Pitch_Deck_Information is required'),
-                        'pitch_deck_summary.required' => __('admin.Pitch_Deck_Summary is required'),
-                        'pitch_deck_summary.string' => __('admin.Pitch_Deck_Summary must be a string'),
-                        'pitch_deck_summary.max' => __('admin.Pitch_Deck_Summary max length is 500 characters'),
-                    ]);
-
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'pitch_deck_description' => $data['pitch_deck_info'],
-                            'pitch_deck_summary' => $data['pitch_deck_summary'],
-                            'problem' => $data['problem_facing'],
-                            'solution' => $data['solution_problem'],
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'pitch_deck_description' => $data['pitch_deck_info'],
-                            'pitch_deck_summary' => $data['pitch_deck_summary'],
-                            'problem' => $data['problem_facing'],
-                            'solution' => $data['solution_problem'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 8) {
-
-                    $validator = Validator::make($request->all(), [
-                        'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
-                        'img_url' => 'nullable|url', // يجب أن يكون رابط صالح
-                        'facebook' => 'nullable|url', // يجب أن يكون إما نعم أو لا
-                        'twitter' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'linkedin' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'youtube' => 'nullable|url', // نص من 500 حرف كحد أقصى
-                        'google_map' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
-                    ],  [
-                        'website.url' => __('admin.Website_Not_URL'),
-                        'img_url.url' => __('admin.img_url_Not_URL'),
-                        'facebook.url' => __('admin.facebook_Not_URL'),
-                        'twitter.url' => __('admin.twitter_Not_URL'),
-                        'linkedin.url' => __('admin.linkedin_Not_URL'),
-                        'youtube.url' => __('admin.youtube_Not_URL'),
-                        'google_map.url' => __('admin.google_map_Not_URL'),
-                    ]);
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'website' => $data['website'],
-                            'logo' => $data['img_url'],
-                            'facebook' => $data['facebook'],
-                            'twitter' => $data['twitter'],
-                            'linkedin' => $data['linkedin'],
-                            'youtube' => $data['youtube'],
-                            'google_map' => $data['google_map'],
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'website' => $data['website'],
-                            'logo' => $data['img_url'],
-                            'facebook' => $data['facebook'],
-                            'twitter' => $data['twitter'],
-                            'linkedin' => $data['linkedin'],
-                            'youtube' => $data['youtube'],
-                            'google_map' => $data['google_map'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 9) {
-                    $validator = Validator::make($request->all(), [
-                        'pitch_deck' => 'nullable|mimes:pdf,ppt,pptx|max:10240', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
-                    ], [
-                        'pitch_deck.mimes' => __('admin.Pitch_Deck must be a pdf or ppt file'),
-                        'pitch_deck.max' => __('admin.Pitch_Deck max size is 10MB'),
-
-                    ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-
-                    if ($request->hasFile('pitch_deck')) {
-                        $file = $request->file('pitch_deck');
-                        $originalName = $file->getClientOriginalName();
-                        $path = $companyId . '/pitch_decks/';
-                    
-                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
-                        $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_deck'
-                        ]);
-                    
-                        $pitch_deck = 'pitch_decks/'. $path . $originalName;
-                    }else{
-                        return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
-                    }
-
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'pitch_deck' => $pitch_deck,
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'pitch_deck' => $pitch_deck,
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 10) {
-                    $validator = Validator::make($request->all(), [
-                        'pitch_deck_video' => 'nullable', // يجب أن يكون ملف MP4, OGG, WEBM وحجمه لا يتجاوز 10MB
-                    ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-
-                    // if ($request->hasFile('pitch_deck_video')) {
-                    //     $file = $request->file('pitch_deck_video');
-                    //     $originalName = $file->getClientOriginalName();
-                    //     $path = $companyId . '/pitch_decks/';
-                    
-                    //     // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
-                    //     $file->storeAs($path, $originalName, [
-                    //         'disk' => 'pitch_deck'
-                    //     ]);
-                    
-                    //     $pitch_deck_video = 'pitch_decks/'. $path . $originalName;
-                    // }else{
-                        
-                    //     return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
-                    // }
-                    
-                    if($request->pitch_deck_video == null){
-                        return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput();
-                    }
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'pitch_deck_video' => $request->pitch_deck_video,
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'pitch_deck_video' => $request->pitch_deck_video,
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 11) {
-                    // $validator = Validator::make($request->all(), [
-                    //     'documents.*' => 'nullable|array|mimes:pdf,ppt,pptx|max:20480',
-                    // ],[
-                    //     'documents.*.mimes' => __('admin.Documents must be a pdf or ppt file'),
-                    //     'documents.*.max' => __('admin.Documents max size is 20MB'),
-                    // ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-
-                    if ($request->hasFile('documents')) {
-                        $files = $request->file('documents'); 
-                        $uploadedFiles = []; 
-                    
-                        foreach ($files as $file) {
-                            if ($file->isValid()) {
-                                $originalName = $file->getClientOriginalName();
-                                $folder = match (true) {
-                                    str_starts_with($file->getMimeType(), 'image/') => 'images',
-                                    str_starts_with($file->getMimeType(), 'video/') => 'videos',
-                                    in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
-                                    default => 'others',
-                                };
-                    
-                                $path = $companyId . '/pitch_decks/' . $folder . '/';
-                    
-                                // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                                $file->storeAs($path, $originalName, [
-                                    'disk' => 'pitch_deck'
-                                ]);
-                    
-                                $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
-                            }
-                        }
-                    }else{
-                        return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
-                    }
-
-                    if ($companyId) {
-
-                        // dd($data['documents']);
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'documents' =>  json_encode($uploadedFiles),
-                        ]);
-
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'documents' => json_encode($uploadedFiles),
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 12) {
-
-                    $request->validate([
-                        'about_problem' => 'nullable',
-                        'about_market_opportunity' => 'nullable',
-                        'about_competitors' => 'nullable',
-                        'about_monetize' => 'nullable',
-                        'about_challenges' => 'nullable',
-                    ]);
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'about_problem' => $data['about_problem'],
-                            'about_market_opportunity' => $data['about_market_opportunity'],
-                            'about_competitors' => $data['about_competitors'],
-                            'about_monetize' => $data['about_monetize'],
-                            'about_challenges' => $data['about_challenges'],
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'about_problem' => $data['about_problem'],
-                            'about_market_opportunity' => $data['about_market_opportunity'],
-                            'about_competitors' => $data['about_competitors'],
-                            'about_monetize' => $data['about_monetize'],
-                            'about_challenges' => $data['about_challenges'],
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
-                if ($data['CompanyN'] == 13) {
-
-                    $request->validate([
-                        'business_model' => 'nullable',
-                        'business_model_description' => 'nullable',
-                        'business_plan' => 'nullable',
-                    ]);
-
-                    if ($request->hasFile('business_plan')) {
-                        $file = $request->file('business_plan'); // التعامل مع ملف واحد فقط
-                    
-                        if ($file->isValid()) {
-                            $originalName = $file->getClientOriginalName();
-                            $folder = match (true) {
-                                str_starts_with($file->getMimeType(), 'image/') => 'images',
-                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
-                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
-                                default => 'others',
-                            };
-                    
-                            $path = $companyId . '/business_plan/' . $folder . '/';
-                    
-                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                            $file->storeAs($path, $originalName, [
-                                'disk' => 'pitch_deck'
-                            ]);
-                    
-                            $uploadedFile = 'business_plan/' . $path . $originalName;
-                        }
-                    }
-
-                    // $result = Company::updateOrCreate(['id' => $companyId], $data);
-                    if ($companyId) {
-                        // إذا كان موجوداً، نقوم بتحديث البيانات بناءً على الـ companyId
-                        $result = Company::where('id', $companyId)->update([
-                            'business_model' => $data['business_model'],
-                            'other_business_model' => $data['other_business_model'],
-                            'business_model_description' => $data['business_model_description'],
-                            'business_plan' => $uploadedFile,
-                        ]);
-                        $msgtype = 'UpdateComp';
-                    } else {
-                        // إذا لم يكن هناك companyId، نستخدم `create` لإضافة مدخل جديد
-                        $result = Company::create([
-                            'business_model' => $data['business_model'],
-                            'other_business_model' => $data['other_business_model'],
-                            'business_model_description' => $data['business_model_description'],
-                            'business_plan' => $uploadedFile,
-                        ]);
-                        $msgtype = 'NewComp';
-                    }
-
-                    $msgtype = 'UpdateComp';
-                    if (!$companyId) {
-                        User::where('id', Auth::id())->update(['company_id' => $result->id]);
-                        $msgtype = 'NewComp';
-                    }
-                }
+                if( is_null( $id ) ) { return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']); }
+                $companyId = intval( $id );
+                $company = Company::find( $companyId );
+            }
+            else
+            {
+                $companyId = intval( $user->company_id );
+                $company = Company::find( $companyId );
+            }
+            $data = $request->all();
+            if( $companyId )
+            {
+                $result = Company::find( $companyId );
+                if( empty( $result ) )
+                {
+                    $result = new Company();
+                    $msgtype = 'AddComp';
+                } else { $msgtype = 'UpdateComp'; }
+            }
+            else
+            {
+                $result = new Company();
+                $msgtype = 'AddComp';
             }
 
+            if( $data['CompanyN'] == 1 )
+            {
+                $validatedData = $request->validate([
+                    'name_en' => 'required|string|max:255',
+                    'country_id' => 'required|exists:countries,id',
+                    'state_id' => 'required|exists:states,id',
+                    'sector' => 'required|string|max:255',
+                    'address_en' => 'required|string|max:500',
+                    'est_date' => 'required|date',
+                    'years_of_operations' => 'required|string',
+                    'product_or_service' => 'required|string|in:Product,Service,Product + Service',
+                    'business_categories' => 'nullable|array',
+                    'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
+                    'other_category' => 'nullable|string|max:255',
+                ], [
+                    'name_en.required' => __('admin.English Name is required'),
+                    'country_id.required' => __('admin.Country is required'),
+                    'country_id.exists' => __('admin.Invalid Country selected'),
+                    'state_id.required' => __('admin.State is required'),
+                    'state_id.exists' => __('admin.Invalid State selected'),
+                    'sector.required' => __('admin.Sector is required'),
+                    'address_en.required' => __('admin.English Address is required'),
+                    'est_date.required' => __('admin.Established Date must be a valid date'),
+                    'years_of_operations.required' => __('admin.Years of Operations is required'),
+                    'product_or_service.required' => __('admin.Product or Service is required'),
+                    'product_or_service.in' => __('admin.Invalid Product or Service selection'),
+                ]);
 
+                // Handle "Other" category logic
+                if( in_array('Other', $validatedData['business_categories'] ?? []) )
+                {
+                    $validatedData['business_categories'] = array_diff($validatedData['business_categories'], ['Other']);
+                    if( !empty( $validatedData['other_category'] ?? '') )
+                    {
+                        $validatedData['business_categories'][] = 'Other';
+                        $validatedData['business_categories'][] = $validatedData['other_category'];
+                    }
+                }
 
-            if ($result) {
-                event(new WebMessage($msgtype, $user->first_name_en));
+                $validatedData['business_categories'] = json_encode($validatedData['business_categories']);
+
+                if( $data['CreatedTax'] == 0 )
+                {
+                    $CreatedTax = 0;
+                    $cuntryReg = 0;
+                    $Commercial_Register = '';
+                    $Tax_Card = '';
+                }
+                else
+                {
+                    $CreatedTax = $data['CreatedTax'];
+                    $cuntryReg = $data['Country_Register'];
+                    $Commercial_Register = $data['Commercial_Register'];
+                    $Tax_Card = $data['Tax_Card'];
+                }
+
+                $result->name_en = $data['name_en'];
+                $result->name_ar = $data['name_en'];
+                $result->country_id = $data['country_id'];
+                $result->state_id = $data['state_id'];
+                $result->sector = $data['sector'];
+                $result->address_en = $data['address_en'];
+                $result->address_ar = $data['address_en'];
+                $result->est_date = $data['est_date'];
+                $result->years_of_operations = $data['years_of_operations'];
+                $result->product_or_service = $data['product_or_service'];
+                $result->business_categories = $validatedData['business_categories'];
+                $result->CreatedTax = $CreatedTax;
+                $result->Commercial_Register = $Commercial_Register;
+                $result->Tax_Card = $Tax_Card;
+                $result->Country_Register_id = $cuntryReg ?? 0;
+            }
+            if( $data['CompanyN'] == 2 )
+            {
+                $validatedData = $request->validate([
+                    'phone' => 'required|numeric|digits_between:8,15',
+                    'WhatsApp' => 'nullable',
+                    'email' => 'required|email|max:255',
+                    'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
+                    'img_url' => 'nullable', // يجب أن يكون رابط صالح
+                    'facebook' => 'nullable|url', // يجب أن يكون إما نعم أو لا
+                    'twitter' => 'nullable|url', // نص من 500 حرف كحد أقصى
+                    'linkedin' => 'nullable|url', // نص من 500 حرف كحد أقصى
+                    'youtube' => 'nullable|url', // نص من 500 حرف كحد أقصى
+                    'google_map' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                    'instagram' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                    'tiktok' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                ], [
+                    'phone.required' => __('admin.Phone is required'),
+                    'phone.numeric' => __('admin.Phone must be a valid number'),
+                    'phone.digits_between' => __('admin.Phone must be between 8 and 15 digits'),
+                    'email.required' => __('admin.E-mail is required'),
+                    'email.email' => __('admin.Invalid E-mail format'),
+                    'email.max' => __('admin.E-mail must not exceed 255 characters'),
+                    'website.url' => __('admin.Website_Not_URL'),
+                    'img_url.url' => __('admin.img_url_Not_URL'),
+                    'facebook.url' => __('admin.facebook_Not_URL'),
+                    'twitter.url' => __('admin.twitter_Not_URL'),
+                    'linkedin.url' => __('admin.linkedin_Not_URL'),
+                    'youtube.url' => __('admin.youtube_Not_URL'),
+                    'google_map.url' => __('admin.google_map_Not_URL'),
+                    'instagram.url' => __('admin.instagram_url_Not_URL'),
+                    'tiktok.url' => __('admin.tiktok_url_Not_URL'),
+                ]);
+
+                // في الميثود التي تعالج الطلب
+                if( $request->hasFile('img_url') )
+                {
+                    // الحصول على الصورة
+                    $image = $request->file('img_url');
+                    // حفظ الصورة داخل القرص 'public_uploads'
+                    $img_path = $image->store('images/logo', 'public_uploads');
+
+                    // إنشاء رابط الصورة
+                    $img_url = Storage::disk('public_uploads')->url($img_path);
+                } else { $img_url = $company->logo; }
+
+                $result->country_code = $data['country_code'];  // مثال لإضافة حقل الهاتف
+                $result->phone = $data['phone'];  // مثال لإضافة حقل الهاتف
+                $result->country_code_w_a = $data['country_code_w_a'];  // مثال لإضافة حقل الهاتف
+                $result->whatsapp = $data['WhatsApp'];  // مثال لإضافة حقل الواتساب
+                $result->email = $data['email'];  // مثال لإضافة حقل البريد الإلكتروني
+                $result->website = $data['website'];
+                $result->logo = $img_url;
+                $result->facebook = $data['facebook'];
+                $result->twitter = $data['twitter'];
+                $result->linkedin = $data['linkedin'];
+                $result->youtube = $data['youtube'];
+                $result->google_map = $data['google_map'];
+                $result->instagram = $data['instagram'];
+                $result->tiktok = $data['tiktok'];
+            }
+            if( $data['CompanyN'] == 3 )
+            {
+                $validatedData = $request->validate([
+                    'company_description' => 'nullable|string|max:500',
+                    'Sustainable_development' => 'nullable|array',
+                    'about_problem' => 'nullable',
+                    'about_market_opportunity' => 'nullable',
+                    'about_competitors' => 'nullable',
+                    'about_monetize' => 'nullable',
+                    'about_challenges' => 'nullable',
+                ]);
+
+                $result->info_company = $data['company_description'];
+                $result->Sustainable_development = json_encode($data['Sustainable_development']);
+                $result->about_problem = $data['about_problem'];
+                $result->about_market_opportunity = $data['about_market_opportunity'];
+                $result->about_competitors = $data['about_competitors'];
+                $result->about_monetize = $data['about_monetize'];
+                $result->about_challenges = $data['about_challenges'];
+            }
+            if( $data['CompanyN'] == 4 )
+            {
+                $request->validate([
+                    'Currency' => 'nullable',
+                    'pre_money_valuation' => 'nullable|numeric|min:0',
+                    'raised_fund' => 'nullable|numeric|min:0',
+                    'Funding_Target' => 'nullable|numeric|min:0',
+                    'stage' => 'nullable',
+                    'development_stage' => 'nullable',
+                    'targeted_market.*' => 'nullable',
+                    'business_type' => 'nullable',
+                ], [
+                    'pre_money_valuation.numeric' => __('admin.Pre-money valuation must be a number'),
+                    'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
+                    'raised_fund.numeric' => __('admin.Raised fund must be a number'),
+                    'raised_fund.min' => __('admin.Raised fund must be a positive number'),
+                ]);
+
+                $data['Funding_Target'] = $data['Funding_Target'] == null ? 0 : $data['Funding_Target'];
+                if( !isset( $data['targeted_market'] ) || $data['targeted_market'] == null ) { $data['targeted_market'] = ['null']; }
+
+                if( $request->hasFile('financial_plan') )
+                {
+                    $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
+                    if( $file->isValid() )
+                    {
+                        $originalName = $file->getClientOriginalName();
+                        $folder = match (true) {
+                            str_starts_with($file->getMimeType(), 'image/') => 'images',
+                            str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                            in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                            default => 'others',
+                        };
+                        $path = $companyId . '/financial_plan/' . $folder . '/';
+                        // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'pitch_deck'
+                        ]);
+                        $uploadedFile = 'financial_plan/' . $path . $originalName;
+                    }
+                } else { $uploadedFile = $company->financial_plan; }
+
+                $data['financial_plan_description'] = $data['financial_plan_description'] == null ? '0' : $data['financial_plan_description'];
+
+                $result->Currency = $data['Currency'];
+                $result->Pre_money_Valuation = $data['pre_money_valuation'];
+                $result->raised_fund = $data['raised_fund'];
+                $result->Funding_Target = $data['Funding_Target'];
+                $result->stage = $data['stage'];
+                $result->development_stage = $data['development_stage'];
+                $result->targeted_market = json_encode($data['targeted_market']);
+                $result->business_type = $data['business_type'];
+                $result->financial_plan = $uploadedFile;
+                $result->financial_plan_description = $data['financial_plan_description'];
+            }
+            if( $data['CompanyN'] == 5 )
+            {
+                $request->validate([
+                    'team_num' => 'required|string',
+                ], [
+                    'team_num.numeric' => __('admin.Raised fund must be a number'),
+                ]);
+
+                $result->team_num = $data['team_num'];
+                $result->working_team_summary = $data['working_team_summary'];
+            }
+            if( $data['CompanyN'] == 6 )
+            {
+                $validator = Validator::make($request->all(), [
+                    'pitch_deck_info' => 'nullable', // يجب أن يكون إما نعم أو لا
+                    'pitch_deck_summary' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
+                    'problem_facing' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
+                    'solution_problem' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
+                ], [
+                    'pitch_deck_info.required' => __('admin.Pitch_Deck_Information is required'),
+                    'pitch_deck_summary.required' => __('admin.Pitch_Deck_Summary is required'),
+                    'pitch_deck_summary.string' => __('admin.Pitch_Deck_Summary must be a string'),
+                    'pitch_deck_summary.max' => __('admin.Pitch_Deck_Summary max length is 500 characters'),
+                ]);
+
+                $result->pitch_deck_description = $data['pitch_deck_info'];
+                $result->pitch_deck_summary = $data['pitch_deck_summary'];
+                $result->problem = $data['problem_facing'];
+                $result->solution = $data['solution_problem'];
+            }
+            if( $data['CompanyN'] == 8 )
+            {
+                $validator = Validator::make($request->all(), [
+                    'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
+                    'img_url' => 'nullable', // يجب أن يكون رابط صالح
+                    'facebook' => 'nullable|url', // يجب أن يكون إما نعم أو لا
+                    'twitter' => 'nullable|url', // نص من 500 حرف كحد أقصى
+                    'linkedin' => 'nullable|url', // نص من 500 حرف كحد أقصى
+                    'youtube' => 'nullable|url', // نص من 500 حرف كحد أقصى
+                    'google_map' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                    'instagram' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                    'tiktok' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
+                ], [
+                    'website.url' => __('admin.Website_Not_URL'),
+                    'img_url.url' => __('admin.img_url_Not_URL'),
+                    'facebook.url' => __('admin.facebook_Not_URL'),
+                    'twitter.url' => __('admin.twitter_Not_URL'),
+                    'linkedin.url' => __('admin.linkedin_Not_URL'),
+                    'youtube.url' => __('admin.youtube_Not_URL'),
+                    'google_map.url' => __('admin.google_map_Not_URL'),
+                    'instagram.url' => __('admin.instagram_url_Not_URL'),
+                    'tiktok.url' => __('admin.tiktok_url_Not_URL'),
+                ]);
+
+                // في الميثود التي تعالج الطلب
+                if( $request->hasFile('img_url') )
+                {
+                    // الحصول على الصورة
+                    $image = $request->file('img_url');
+                    // حفظ الصورة داخل القرص 'public_uploads'
+                    $img_path = $image->store('images/logo', 'public_uploads');
+                    // إنشاء رابط الصورة
+                    $img_url = Storage::disk('public_uploads')->url($img_path);
+                } else { $img_url = $company->logo; }
+
+                $result->website = $data['website'];
+                $result->logo = $img_url;
+                $result->facebook = $data['facebook'];
+                $result->twitter = $data['twitter'];
+                $result->linkedin = $data['linkedin'];
+                $result->youtube = $data['youtube'];
+                $result->google_map = $data['google_map'];
+                $result->instagram = $data['instagram'];
+                $result->tiktok = $data['tiktok'];
+            }
+            if( $data['CompanyN'] == 9 )
+            {
+                $validator = Validator::make($request->all(), [
+                    'pitch_deck' => 'nullable|mimes:pdf,ppt,pptx|max:10240', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
+                ], [
+                    'pitch_deck.mimes' => __('admin.Pitch_Deck must be a pdf or ppt file'),
+                    'pitch_deck.max' => __('admin.Pitch_Deck max size is 10MB'),
+                ]);
+
+                if( $request->hasFile('pitch_deck') )
+                {
+                    $file = $request->file('pitch_deck');
+                    $originalName = $file->getClientOriginalName();
+                    $path = $companyId . '/pitch_decks/';
+                    // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
+                    $file->storeAs($path, $originalName, [
+                        'disk' => 'pitch_deck'
+                    ]);
+                    $pitch_deck = 'pitch_decks/'. $path . $originalName;
+                } else { return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput(); }
+
+                $result->pitch_deck = $pitch_deck;
+            }
+            if( $data['CompanyN'] == 10 )
+            {
+                $validator = Validator::make($request->all(), [
+                    'pitch_deck_video' => 'nullable', // يجب أن يكون ملف PDF او PPT وحجمه لا يتجاوز 20MB
+                ]);
+
+                if( $request->pitch_deck_video == null ) { return redirect()->back()->with(['msg' => 'No_Video_Found', 'class' => 'danger'])->withInput(); }
+                $result->pitch_deck_video = $request->pitch_deck_video;
+            }
+            if( $data['CompanyN'] == 11 )
+            {
+                if( $request->hasFile('documents') )
+                {
+                    $files = $request->file('documents'); 
+                    $uploadedFiles = []; 
+                    foreach( $files as $file )
+                    {
+                        if( $file->isValid() )
+                        {
+                            $originalName = $file->getClientOriginalName();
+                            $folder = match (true) {
+                                str_starts_with($file->getMimeType(), 'image/') => 'images',
+                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                                default => 'others',
+                            };
+                            $path = $companyId . '/pitch_decks/' . $folder . '/';
+                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
+                            $file->storeAs($path, $originalName, [
+                                'disk' => 'pitch_deck'
+                            ]);
+                            $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
+                        }
+                    }
+                } else { return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput(); }
+
+                $result->documents = json_encode($uploadedFiles);
+            }
+            if( $data['CompanyN'] == 12 )
+            {
+                $request->validate([
+                    'about_problem' => 'required',
+                    'about_market_opportunity' => 'required',
+                    'about_competitors' => 'required',
+                    'about_monetize' => 'required',
+                    'about_challenges' => 'required',
+                ], [
+                    'about_problem.required' => __('admin.about_problem is required'),
+                    'about_market_opportunity.required' => __('admin.about_market_opportunity is required'),
+                    'about_competitors.required' => __('admin.about_competitors is required'),
+                    'about_monetize.required' => __('admin.about_monetize is required'),
+                    'about_challenges.required' => __('admin.about_challenges is required'),
+                ]);
+
+                $result->about_problem = $data['about_problem'];
+                $result->about_market_opportunity = $data['about_market_opportunity'];
+                $result->about_competitors = $data['about_competitors'];
+                $result->about_monetize = $data['about_monetize'];
+                $result->about_challenges = $data['about_challenges'];
+            }
+            if( $data['CompanyN'] == 13 )
+            {
+                $request->validate([
+                    'business_model' => 'required',
+                    'business_model_description' => 'required|string|max:255',
+                    'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:2048',
+                ], [
+                    'business_model.required' => __('admin.business_model is required'),
+                    'business_model_description.required' => __('admin.business_model_description is required'),
+                ]);
+
+                if( $request->hasFile('business_plan') )
+                {
+                    $file = $request->file('business_plan'); // التعامل مع ملف واحد فقط
+                    if( $file->isValid() )
+                    {
+                        $originalName = $file->getClientOriginalName();
+                        $folder = match (true) {
+                            str_starts_with($file->getMimeType(), 'image/') => 'images',
+                            str_starts_with($file->getMimeType(), 'video/') => 'videos',
+                            in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
+                            default => 'others',
+                        };
+                        $path = $companyId . '/business_plan/' . $folder . '/';
+                        // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
+                        $file->storeAs($path, $originalName, [
+                            'disk' => 'pitch_deck'
+                        ]);
+                        $uploadedFile = 'business_plan/' . $path . $originalName;
+                    }
+                } else { return redirect()->back()->with(['msg' => 'Business Plan file not selected', 'class' => 'danger'])->withInput(); }
+
+                $result->business_model = $data['business_model'];
+                $result->other_business_model = $data['other_business_model'];
+                $result->business_model_description = $data['business_model_description'];
+                $result->business_plan = $uploadedFile;
+            }
+            $result->save();
+
+            if( is_null( $id ) )
+            {
+                User::where('id', $user->id)->update(['company_id' => $result->id]);
+                $msgtype = 'NewComp';
+            }
+
+            if( $result ) {
+                if( !in_array(env('APP_ENV', 'local'), ['local']) ) { event(new WebMessage($msgtype, $user->first_name_en)); } 
                 return redirect()->route('my_company', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
-            } else {
-                return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
-            }
+            } else { return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']); }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();

@@ -334,7 +334,7 @@
           <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
               <div class="d-flex align-items-center">
-                <h5 class="card-title mb-0">{{__('admin.Project_Status_Over_Time')}}</h5>
+                <h5 class="card-title mb-0">{{__('admin.company_business_model')}}</h5>
               </div>
             </div>
             <div class="card-body">
