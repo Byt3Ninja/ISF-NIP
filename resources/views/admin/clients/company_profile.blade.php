@@ -149,14 +149,11 @@
                   </div>
                   @php
                   $sector = App\Sector::where('id', $company->sector)->first();
-
-
                   @endphp
                   <p class="text-light mt-2 fw-medium line-clamp-1">
                     {{ $sector ? $sector->{'name_' . $l} : $company->sector }}
                   </p>
                 </div>
-
               </div>
             </div>
             <!-- Action Button -->
