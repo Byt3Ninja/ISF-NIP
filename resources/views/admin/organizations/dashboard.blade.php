@@ -494,8 +494,8 @@
 
     // Mentorship chart data
     const seriesName = '({{ __('admin.hours') }})';
-    const mentoshipStatisticsLabels = {!! json_encode($mentorship_labels) !!};
-    const mentoshipStatisticsData = {!! json_encode($mentorship_durations) !!};
+    const mentorshipStatisticsLabels = {!! json_encode($mentorship_labels) !!};
+    const mentorshipStatisticsData = {!! json_encode($mentorship_durations) !!};
 
     // Internship chart data
     const internshipSeriesName = '({{ __('admin.hours') }})';
@@ -503,9 +503,9 @@
     const internshipSeriesData = {!! json_encode($sessions_durations) !!};
 
     // Cycle Startups Chart Data
-    // const cyclesStartupName = 'Cycles Startups';
-    // const cyclesStartupLabels = ['startup1', 'startup2', 'startup3', 'startup4', 'startup5'];
-    // const cyclesStartupData = [10, 20, 30, 40, 50];
+    const cyclesStartupName = '';
+    const cyclesStartupLabels = null;
+    const cyclesStartupData = null;
   </script>
 
 <script>

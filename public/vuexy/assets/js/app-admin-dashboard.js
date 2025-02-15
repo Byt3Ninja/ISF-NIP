@@ -289,9 +289,16 @@ const renderTrainingSessionsChart = () => {
 };
 
 const renderMentorshipStatisticsChart = () => {
-  const labels = mentoshipStatisticsLabels;
-  const data = mentoshipStatisticsData;
+  let labels = [];
+  let data = [];
   const name = seriesName;
+
+  if (mentorshipStatisticsLabels) {
+    labels = mentorshipStatisticsLabels;
+  }
+  if (mentorshipStatisticsData) {
+    data = mentorshipStatisticsData;
+  }
 
   const chartDom = document.querySelector('#mentorshipStatisticChart');
   const chartConfig = getHorizontalBarChartConfig({ labels, data, name, latest10: true });
