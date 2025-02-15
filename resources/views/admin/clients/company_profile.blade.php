@@ -158,12 +158,14 @@
             </div>
             <!-- Action Button -->
             <div class="col-md-2 d-flex align-items-center justify-content-end">
-              @if (Auth::user()->hasanyRole('Admin|organizationManager'))
+              {{-- organizationManager --}}
+              @if (Auth::user()->hasanyRole('Admin'))
               <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
                   style="border-radius: 15px;">
                   {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
                 </a>
               @endif
+
               @if (isset(Auth::user()->company()->first()->id) && $company->id == Auth::user()->company()->first()->id)
                 <a href="/dashboard/myCompany" class="btn btn-label-primary shadow-sm text-primary fw-bold"
                   style="border-radius: 15px;">
