@@ -126,8 +126,9 @@ const getPieChartConfig = (labels, data) => {
 
 const getBarChartConfig = ({ labels, data, precentage = false, max, stepSize }) => {
   // get max value in customData array
-  const maxValue = data && data.length > 0 ? Math.round(Math.max(...data)) : 0;
-  const stepValue = maxValue ? Math.round(maxValue / 5) : 1;
+  const maxValue = data && data.length > 0 ? Math.round(Math.max(...data)) + 10 : 0;
+  const minValue = data && data.length > 0 ? Math.round(Math.min(...data)) : 0;
+  const stepValue = minValue ? minValue : 1;
 
   return {
     type: 'bar',
