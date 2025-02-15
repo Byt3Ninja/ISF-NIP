@@ -341,13 +341,13 @@ class ClientCompanyController extends Controller
                     'business_categories.*' => 'string|in:Food & Beverage,Technology,App / Website,Housewares / Home Design,Health / Wellness / Nutrition,Fitness,Sports,Beauty,Clothing / Fashion,Toys / Games,Children,Entertainment / Experiential,Pets,Music,Holiday,Other',
                     'other_category' => 'nullable|string|max:255',
                 ], [
-                    'name_en.required' => __('admin.English Name is required'),
+                    'name_en.required' => __('admin.Name is required'),
                     'country_id.required' => __('admin.Country is required'),
                     'country_id.exists' => __('admin.Invalid Country selected'),
                     'state_id.required' => __('admin.State is required'),
                     'state_id.exists' => __('admin.Invalid State selected'),
                     'sector.required' => __('admin.Sector is required'),
-                    'address_en.required' => __('admin.English Address is required'),
+                    'address_en.required' => __('admin.Address is required'),
                     'est_date.required' => __('admin.Established Date must be a valid date'),
                     'years_of_operations.required' => __('admin.Years of Operations is required'),
                     'product_or_service.required' => __('admin.Product or Service is required'),
@@ -421,7 +421,6 @@ class ClientCompanyController extends Controller
                     'email.email' => __('admin.Invalid E-mail format'),
                     'email.max' => __('admin.E-mail must not exceed 255 characters'),
                     'website.url' => __('admin.Website_Not_URL'),
-                    'img_url.url' => __('admin.img_url_Not_URL'),
                     'facebook.url' => __('admin.facebook_Not_URL'),
                     'twitter.url' => __('admin.twitter_Not_URL'),
                     'linkedin.url' => __('admin.linkedin_Not_URL'),
@@ -577,7 +576,6 @@ class ClientCompanyController extends Controller
                     'tiktok' => 'nullable|url', // مستند PDF أو PPT وحجمه لا يتجاوز 20MB
                 ], [
                     'website.url' => __('admin.Website_Not_URL'),
-                    'img_url.url' => __('admin.img_url_Not_URL'),
                     'facebook.url' => __('admin.facebook_Not_URL'),
                     'twitter.url' => __('admin.twitter_Not_URL'),
                     'linkedin.url' => __('admin.linkedin_Not_URL'),

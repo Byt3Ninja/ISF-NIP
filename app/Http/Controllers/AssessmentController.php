@@ -324,6 +324,7 @@ public function MakeAssessment()
         $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
         ->where('user_id', $userid)
         ->where('assessment_id', $assessment_user->id)->get();
+        
         return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
         }else{
             $user_scores = [];
