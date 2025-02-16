@@ -23,12 +23,14 @@
                         <td class="text-center">{{ $invitation->email }}</td>
                         <td class="text-center">{{ $invitation->role }}</td>
                         <td class="text-center">
+                            @if($invitation->status === 'pending')
                             <form action="{{ route('resend-invitation', $invitation->id) }}" method="POST" style="display: inline;">
                                 @csrf
                                 <button type="submit" class="btn btn-warning btn-sm" title="Resend Invitation">
                                     <i class="fas fa-redo-alt"></i>
                                 </button>
                             </form>
+                            @endif
                         
                             <form action="{{ route('cancel-invitation', $invitation->id) }}" method="POST" style="display: inline;">
                                 @csrf @method('DELETE')

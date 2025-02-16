@@ -119,35 +119,39 @@
       </div>
 
       <!-- Mentorship Sessions Chart -->
-      <div class="col-12 mt-6">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-              <i class="ti ti-device-laptop ti-28px"></i>
-              <h5 class="card-title mb-0 mx-2">{{ __('admin.mentorship statistic') }}</h5>
+       @if (!empty($mentorship_durations))
+        <div class="col-12 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-device-laptop ti-28px"></i>
+                <h5 class="card-title mb-0 mx-2">{{ __('admin.mentorship statistic') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="mentorshipStatisticChart"></div>
             </div>
           </div>
-          <div class="card-body">
-            <div id="horizontalBarChart"></div>
-          </div>
         </div>
-      </div>
+      @endif
       <!-- / Mentorship Sessions Chart -->
 
       <!-- Internship Sessions Chart -->
-      <div class="col-12 mt-6">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center">
-              <i class="ti ti-device-laptop ti-28px"></i>
-              <h5 class="card-title mb-0 mx-2">{{ __('admin.Sessions statistic') }}</h5>
+      @if(!empty($sessions_durations))
+        <div class="col-12 mt-6">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-device-laptop ti-28px"></i>
+                <h5 class="card-title mb-0 mx-2">{{ __('admin.Sessions statistic') }}</h5>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="internshipChart"></div>
             </div>
           </div>
-          <div class="card-body">
-            <div id="internshipChart"></div>
-          </div>
         </div>
-      </div>
+      @endif
       <!-- / Internship Sessions Chart -->
 
       <!-- Latest Cycles Table -->
@@ -282,12 +286,14 @@
               </div>
             </div>
             <div class="card-body">
-              <div id="horizontalBarChart"></div>
+              <canvas id="horizontalBarChart" style="height: 400px;"></canvas>
+
             </div>
           </div>
         </div>
         <!-- /Horizontal Bar Chart -->
         <!-- / Total companies by sdg chart -->
+        @if (!empty($sdg_data))
         <div class="col-12 mt-6">
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -300,8 +306,10 @@
             </div>
           </div>
         </div>
+        @endif
         <!-- / Total companies by sdg chart -->
         <!-- Pie Chart -->
+        @if (!empty($usersgender))
       <div class="col-md-6 col-12 mt-6">
         <div class="card h-100">
           <div class="card-header d-flex justify-content-between align-items-center">
@@ -313,93 +321,107 @@
              <div id="pieChart" style="width: 100%; height: 350px;"></div>
           </div>
       </div>
+      @endif
     </div>
 <!-- /Pie Chart -->
         <!-- Vertical Bar Charts -->
-        <div class="col-md-6 col-12 mt-6">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5>
+        @if (!empty($usersgov))
+          <div class="col-md-6 col-12 mt-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <h5 class="card-title mb-0 mx-2">{{ __('admin.usersdetails') }}</h5>
+                </div>
+              </div>
+              <div class="card-body">
+                <canvas id="verticalBarChart" class="chartjs" data-height="345"></canvas>
               </div>
             </div>
-            <div class="card-body">
-              <canvas id="verticalBarChart" class="chartjs" data-height="345"></canvas>
-            </div>
           </div>
-        </div>
+        @endif
         <!-- /Vertical Bar Charts -->
         <!-- Projects Pie Chart -->
-        <div class="col-md-6 col-12 mt-6">
-          <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <h5 class="card-title mb-0">{{__('admin.company_business_model')}}</h5>
+        @if (!empty($project_types))
+          <div class="col-md-6 col-12 mt-6">
+            <div class="card h-100">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <h5 class="card-title mb-0">{{__('admin.company_business_model')}}</h5>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="projectsPieChart"></div>
               </div>
             </div>
-            <div class="card-body">
-              <div id="projectsPieChart"></div>
-            </div>
           </div>
-        </div>
+        @endif
         <!-- / Projects Pie Chart -->
         <!-- Vertical Bar Charts -->
-        <div class="col-md-6 col-12 mt-6">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <h5 class="card-title mb-0">{{__('admin.Development_Stage')}}</h5>
+        @if (!empty($development_stages))
+          <div class="col-md-6 col-12 mt-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <h5 class="card-title mb-0">{{__('admin.Development_Stage')}}</h5>
+                </div>
+              </div>
+              <div class="card-body">
+                <canvas id="devStageStackedBarChart" class="chartjs" data-height="345"></canvas>
               </div>
             </div>
-            <div class="card-body">
-              <canvas id="devStageStackedBarChart" class="chartjs" data-height="345"></canvas>
-            </div>
           </div>
-        </div>
+        @endif
         <!-- /Vertical Bar Charts -->
         <!-- Sector Breakdown Chart -->
-        <div class="col-md-6 mt-6">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <h5 class="card-title mb-0">{{__('admin.Sector_Breakdown')}} </h5>
+        @if (!empty($sector_data))
+          <div class="col-md-6 mt-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <h5 class="card-title mb-0">{{__('admin.Sector_Breakdown')}} </h5>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="sectorBreakdownChart"></div>
               </div>
             </div>
-            <div class="card-body">
-              <div id="sectorBreakdownChart"></div>
-            </div>
           </div>
-        </div>
+        @endif
         <!-- / Sector Breakdown Chart -->
         <!-- /User Distribution Chart -->
-        <div class="col-md-6 mt-6">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <h5 class="card-title mb-0">{{__('admin.User_distribution_by_country')}}</h5>
+        @if (!empty($countries))
+          <div class="col-md-6 mt-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <h5 class="card-title mb-0">{{__('admin.User_distribution_by_country')}}</h5>
+                </div>
+              </div>
+              <div class="card-body">
+                <canvas id="userDistributionChart" class="chartjs" data-height="345"></canvas>
               </div>
             </div>
-            <div class="card-body">
-              <canvas id="userDistributionChart" class="chartjs" data-height="345"></canvas>
-            </div>
           </div>
-        </div>
+        @endif
         <!-- /User Distribution Chart -->
         <!-- Target Market Analysis Chart -->
-        <div class="col-md-6 mt-6">
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <h5 class="card-title mb-0">{{__('admin.Target_Market_Analysis')}}</h5>
+        @if (!empty($target_market_data))
+          <div class="col-md-6 mt-6">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <h5 class="card-title mb-0">{{__('admin.Target_Market_Analysis')}}</h5>
+                </div>
+              </div>
+              <div class="card-body">
+                <canvas id="targetMarketChart" class="chartjs" data-height="345"></canvas>
               </div>
             </div>
-            <div class="card-body">
-              <canvas id="targetMarketChart" class="chartjs" data-height="345"></canvas>
-            </div>
           </div>
-        </div>
+        @endif
         <!-- /Target Market Analysis Chart -->
         <!-- Project Status Over Time Chart -->
+        @if (!empty($project_status))
           <div class="col-12 col-md-6 mt-6">
             <div class="card">
               <div class="card-header d-flex justify-content-between align-items-center">
@@ -412,6 +434,7 @@
               </div>
             </div>
           </div>
+        @endif
         <!-- /Project Status Over Time Chart -->
   
         <!-- Total companies by sectors -->
@@ -439,7 +462,7 @@
 @stop
 
 @section('pagescripts')
-  <script>
+<script>
     // User distribution by country
     const userDistributionData = @json($countries);  
 
@@ -472,20 +495,26 @@
 
     // Mentorship chart data
     const seriesName = '({{ __('admin.hours') }})';
-    const barChartCategories = {!! json_encode($mentorship_labels) !!};
-    const seriesData = {!! json_encode($mentorship_durations) !!};
+    const mentorshipStatisticsLabels = {!! json_encode($mentorship_labels) !!};
+    const mentorshipStatisticsData = {!! json_encode($mentorship_durations) !!};
 
     // Internship chart data
     const internshipSeriesName = '({{ __('admin.hours') }})';
     const internshipBarChartCategories = {!! json_encode($sessions_labels) !!};
     const internshipSeriesData = {!! json_encode($sessions_durations) !!};
 
+    // Cycle Startups Chart Data
+    const cyclesStartupName = '';
+    const cyclesStartupLabels = null;
+    const cyclesStartupData = null;
   </script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
       const pieLabels = ['{{ __("admin.Female") }}', '{{ __("admin.Male") }}'];
       const usersGender = @json($usersgender);
+
+      // console.log('usersGender', usersGender)
 
       let maleCount = 0;
       let femaleCount = 0;
@@ -555,6 +584,8 @@
       const stateLabels = usersGov.map(state => locale === 'ar' ? state.state_ar : state.state_en);
       const userCounts = usersGov.map(state => state.total);
 
+      console.log('userCounts', userCounts)
+
       const generateRandomColor = () => `hsl(${Math.random() * 360}, 70%, 50%)`;
       const backgroundColors = stateLabels.map(() => generateRandomColor());
 
@@ -570,45 +601,108 @@
       new Chart(ctx, {
           type: "bar",
           data: {
-              labels: stateLabels, 
-              datasets: [{
-                  data: userCounts, 
-                  backgroundColor: backgroundColors,
-                  borderColor: backgroundColors.map(color => color.replace("70%", "50%")),
-                  borderWidth: 1
-              }]
+          labels: stateLabels, 
+          datasets: [{
+          data: userCounts, 
+          backgroundColor: backgroundColors,
+          borderColor: backgroundColors.map(color => color.replace("70%", "50%")),
+          borderWidth: 1,
+          barThickness: 15 // Set bar width to 15px
+          }]
           },
           options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                  x: {
-                      ticks: {
-                          font: {
-                              size: 10 
-                          }
-                      }
-                  },
-                  y: {
-                      beginAtZero: false,
-                      suggestedMin: Math.min(...userCounts) - 1,
-                      suggestedMax: Math.max(...userCounts) + 2,
-                      ticks: {
-                          font: {
-                              size: 10 
-                          },
-                          stepSize: 2,
-                      }
-                  }
-              },
-              plugins: {
-                  legend: {
-                      display: false
-                  }
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+          x: {
+              ticks: {
+              font: {
+              size: 10 
               }
+              }
+          },
+          y: {
+              beginAtZero: false,
+              suggestedMin: Math.min(...userCounts) - 1,
+              suggestedMax: Math.max(...userCounts) + 2,
+              ticks: {
+              font: {
+              size: 10 
+              },
+              stepSize: 2,
+              }
+          }
+          },
+          plugins: {
+          legend: {
+              display: false
+          }
+          }
           }
       });
   });
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+    var ctx = document.getElementById("horizontalBarChart");
+
+    if (ctx) {
+        var cyclesLabels = @json($cycles_labels);
+        var cyclesStartupsCount = @json($cycles_startups_count);
+
+        new Chart(ctx.getContext("2d"), {
+            type: 'bar',
+            data: {
+                labels: cyclesLabels,
+                datasets: [{
+                    data: cyclesStartupsCount,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    barThickness: 25
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        console.error("Canvas with ID 'horizontalBarChart' not found.");
+    }
+});
+
+
 </script>
 
 
@@ -616,7 +710,7 @@
   
   <script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-  <script src="/vuexy/assets/js/orgDashboard.js"></script>
+  <!-- <script src="/vuexy/assets/js/orgDashboard.js"></script> -->
 
   <script>
     function approve(id, stat) {

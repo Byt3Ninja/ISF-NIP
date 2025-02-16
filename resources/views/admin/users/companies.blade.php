@@ -253,7 +253,10 @@
                   </div>
                   <div class="w-100 d-flex flex-column justify-content-between" style="height: 80px;">
                     <h6 class="mt-3 fw-bold text-capitalize">{{ $company->{'name_' . $l} }}</h6>
-                    <p class="text-muted text-xs" style="margin-top: -10px;">{{ $company->sector }}</p>
+                    @php
+                  $sector = App\Sector::where('id', $company->sector)->first();
+                  @endphp
+                    <p class="text-muted text-xs" style="margin-top: -10px;">{{ $sector ? $sector->{'name_' . $l} : $company->sector }}</p>
                     <div style="margin-top: -10px;" class="d-flex justify-content-between align-items-center">
                       @if ($company->est_date)
                         <div class="p-1 bg-label-info rounded">

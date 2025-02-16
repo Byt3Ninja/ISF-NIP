@@ -397,6 +397,15 @@ $countCards = [
     // Pie Chart
     const pieLabels = ['{{ __('admin.Female') }}', '{{ __('admin.Male') }}'];
     const pieData = {!! json_encode($usersgender->pluck('total')) !!};
+
+    const internshipSeriesName = '';
+    const mentorshipStatisticsLabels = null;
+    const mentorshipStatisticsData = null;
+    const internshipBarChartCategories = null;
+    const internshipSeriesData = null;
+    const cyclesStartupName = '';
+    const cyclesStartupLabels = null;
+    const cyclesStartupData = null;
   </script>
   <script src="/vuexy/assets/js/app-admin-dashboard.js"></script>
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>

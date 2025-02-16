@@ -103,6 +103,10 @@ class UserController extends Controller
             $inputs['password_confirmation'] = Hash::make($inputs['password_confirmation']);
             $result = User::create($inputs);
 
+            $result->first_name_ar = $request->first_name_en;
+            $result->last_name_ar = $request->last_name_en;
+            $result->save();
+
             Storage::disk('UsersLFM')->makeDirectory("$result->id");
             Storage::disk('UsersLFM')->makeDirectory("$result->id/BusinessPlans");
             Storage::disk('UsersLFM')->makeDirectory("$result->id/FinancialPlans");
