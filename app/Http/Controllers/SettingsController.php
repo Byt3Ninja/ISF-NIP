@@ -1016,6 +1016,7 @@ public function acceptInvitation(Request $request, $invitationId)
     $invitation->update([
          'user_id' => $user->id,
          'code' => $uniqueCode,
+         'status' => 'accepted',
      ]);
 
     return redirect()->route('dashboard')->with('message', __('admin.accountCreated'));
