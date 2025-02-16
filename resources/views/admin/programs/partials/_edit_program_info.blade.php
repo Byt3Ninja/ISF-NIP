@@ -40,7 +40,11 @@
         oninput="this.value = this.value.trimStart()"
       >
     </div>
-    <div class="row">
+    <div class="col-12 mb-4">
+      <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('cycles.Valid_from_to') }}:</label>
+      <input type="text" id="date-range-picker" class="form-control" />
+    </div>
+    {{-- <div class="row">
       <div class="col-12 col-md-6">
         <div class="mb-3">
           <label for="valid-from" class="form-label fs-6 fw-semibold">
@@ -79,7 +83,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> --}}
     <div class="mb-3">
       <label for="description" class="form-label fs-6 fw-semibold">
         {{ __('cycles.Description') }}
@@ -119,3 +123,17 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('loaded');
+    var bsRangePickerBasic = $('#date-range-picker');
+    console.log('bsRangePickerBasic', bsRangePickerBasic);
+    if (bsRangePickerBasic.length) {
+      bsRangePickerBasic.daterangepicker({
+        opens: isRtl ? 'left' : 'right',
+        drops: 'up'
+      });
+    }
+  });
+</script>

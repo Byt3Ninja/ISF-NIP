@@ -286,5 +286,6 @@ return [
     'create_program' => 'إنشاء برنامج جديد',
     'External_Participation_Label' => 'خيار المشاركة الخارجية',
     'Select_Organization' => 'اختر المنظمة',
+    'Valid_from_to' => 'متاحة من / إلى',
   ];
 

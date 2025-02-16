@@ -1,7 +1,15 @@
 @extends('layouts.admin')
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
   <style>
+    .drp-calendar {
+      background-color: #fff;
+      margin-top: -3rem !important;
+    }
     @media screen and (max-width: 768px) {
       #mob {
         margin-top: 10px;
@@ -51,35 +59,39 @@
                 </div>
                 <hr style="margin:-10px 0 5px 0;">
                 <div class="card-body">
-                  <label class="form-label">{{ __('cycles.Select cycle from list') }}</label>
-                  <fieldset class="input-group">
-                    <select id="ccycle" class="select form-control"
-                      onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
-                      @foreach ($cycles as $cycle)
-                        <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                          ({{ __('cycles.Start') }} {{ $cycle->start->format('d-m') }}) -
-                          {{ optional($cycle->organization)->name }} </option>
-                      @endforeach
-                    </select>
-
-                    <div class="input-group-append mx-2" id="mob">
-                      <button class="btn btn-label-secondary"
-                        onclick="window.location.href='/dashboard/cycles/{{ $id }}'">
-                        <i class="ti ti-circles"></i> <span
-                          class="align-middle mx-2">{{ __('cycles.steps') }}</span>
-                      </button>
-                      <button class="btn btn-label-primary" onclick="DoChange(1)">
-                        <i class="ti ti-edit text-info"></i> <span class="align-middle mx-2">{{ __('cycles.Edit') }}</span>
-                      </button>
-                      <button class="btn btn-label-success" onclick="DoChange(2)">
-                        <i class="ti ti-plus"></i> <span class="align-middle mx-2">{{ __('cycles.New') }}</span>
-                      </button>
-                      <button class="btn btn-label-danger" onclick="DoChange(3)">
-                        <i class="ti ti-trash text-danger"></i> <span class="align-middle mx-2">{{ __('cycles.Delete') }}</span>
-                      </button>
+                  <div class="row d-flex align-items-end">
+                    <div class="col-12 col-md-6">
+                      <div class="form-group">
+                        <label class="form-label fs-5 fw-semibold mb-1">{{ __('cycles.Select cycle from list') }}</label>
+                        <select id="ccycle" class="form-select select2"
+                          onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
+                          @foreach ($cycles as $cycle)
+                            <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
+                              ({{ __('cycles.Start') }} {{ $cycle->start->format('d-m') }}) -
+                              {{ optional($cycle->organization)->name }} </option>
+                          @endforeach
+                        </select>
+                      </div>
                     </div>
-                  </fieldset>
-                  <br>
+                    <div class="col-12 col-md-6 mt-4 mt-md-0">
+                      <div class="d-flex align-items-center gap-4">
+                        <button class="btn btn-sm btn-label-secondary"
+                          onclick="window.location.href='/dashboard/cycles/{{ $id }}'">
+                          <i class="ti ti-circles"></i> <span
+                            class="align-middle mx-2">{{ __('cycles.steps') }}</span>
+                        </button>
+                        <button class="btn btn-sm btn-label-info" onclick="DoChange(1)">
+                          <i class="ti ti-edit text-info"></i> <span class="align-middle mx-2">{{ __('cycles.Edit') }}</span>
+                        </button>
+                        <button class="btn btn-sm btn-label-success" onclick="DoChange(2)">
+                          <i class="ti ti-plus"></i> <span class="align-middle mx-2">{{ __('cycles.New') }}</span>
+                        </button>
+                        <button class="btn btn-sm btn-label-danger" onclick="DoChange(3)">
+                          <i class="ti ti-trash text-danger"></i> <span class="align-middle mx-2">{{ __('cycles.Delete') }}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>                  
                 </div>
               </div>
             </div>
@@ -100,14 +112,14 @@
                   <!-- we get value from Select box Ely fo2 class name stepsExcel -->
                   <div class="d-flex align-items-center gap-4">
                     <div class="media align-items-center col-md-3">
-                      <select class="form-control ChangeAllBox">
+                      <select class="form-select select2 ChangeAllBox">
                         <option value="0">{{ __('cycles.Disapprove') }}</option>
                         @foreach ($steps as $step)
                         <option value="{{ $step->id }}">{{ $step->title }}</option>
                         @endforeach
                       </select>
                     </div>
-                    <div class="btn btn-label-primary ExportCycleComp">{{ __('cycles.Export') }}</div>
+                    <button type="button" class="btn btn-sm btn-label-primary ExportCycleComp">{{ __('cycles.Export') }}</button>
                   </div>
                   <table class="table mt-3">
                     <thead class="bg-label-light">
@@ -191,9 +203,9 @@
     </div>
   </div>
   <!-- END: Content-->
-  <div class="modal fade text-left" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
+  <div class="modal fade" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
         <form class="form" action= "{{ URL::to('dashboard/cycles/modify') }}" method="POST"
           enctype="multipart/form-data" autocomplete="off">
@@ -203,28 +215,32 @@
             </h4>
           </div>
           <div class="modal-body">
-            <div class="form-group mt-3">
+            <div class="form-group mb-4">
               <label class="form-label">{{ __('cycles.Cycle title') }}: </label>
               <input type="hidden" name="type" id="type">
               <input type="hidden" name="cycleid" id="cycleid">
               <input id='title' name='title' type="text" placeholder="{{ __('cycles.Title') }}"
                 class="form-control" required>
             </div>
-            <div class="form-group mt-3">
+            <div class="col-12 mb-4">
+              <label for="bs-rangepicker-basic" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
+              <input type="text" id="bs-rangepicker-basic" class="form-control" />
+            </div>
+            {{-- <div class="form-group mb-4">
               <label class="form-label">{{ __('cycles.Valid from') }}: </label>
               <input id='start' name='start' type="text" placeholder="{{ now()->format('Y-m-d') }}"
                 class="form-control date" required>
             </div>
-            <div class="form-group mt-3">
+            <div class="form-group mb-4">
               <label class="form-label">{{ __('cycles.Valid to') }}: </label>
               <input id='end' name='end' type="text"
                 placeholder="{{ now()->addDays(15)->format('Y-m-d') }}" class="form-control date" required>
-            </div>
-            <div class="form-group mt-3 mb-0">
+            </div> --}}
+            <div class="form-group mb-4">
               <label class="form-label">{{ __('cycles.Description') }}: </label>
               <textarea id='description' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control"></textarea>
             </div>
-            <div class="form-group mt-3 mb-0 custom-switch">
+            <div class="form-group mb-4 custom-switch">
               <span>{{ __('settings.Private') }}</span>&nbsp;
               <label class="form-label" for="customSwitch3"></label>
               <input name="private" type="checkbox" class="custom-control-input" id="customSwitch3">
@@ -232,11 +248,11 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+            <button type="button" class="btn btn-sm btn-label-secondary" data-bs-dismiss="modal">
               <i class="ti ti-x d-block d-sm-none"></i>
               <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
             </button>
-            <button type="submit" value="submit" class="btn btn-primary ml-1">
+            <button type="submit" value="submit" class="btn btn-sm btn-primary ml-1">
               <i class="ti ti-check d-block d-sm-none"></i>
               <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
             </button>
@@ -245,11 +261,33 @@
       </div>
     </div>
   </div>
-
 @stop
+
+@section('scripts')
+<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+@stop
+
 @section('pagescripts')
 <script src="/app-assets/js/1.js"></script>
+<script src="/vuexy/assets/js/forms-selects.js"></script>
+<script>
+  var bsRangePickerBasic = $('#bs-rangepicker-basic');
+  if (bsRangePickerBasic.length) {
+    bsRangePickerBasic.daterangepicker({
+      opens: isRtl ? 'left' : 'right',
+    });
+  }
+</script>
+
   <script type="text/javascript">
+   document.addEventListener('DOMContentLoaded', () => {
+      console.log('loaded');
+    });
+
     $(document).ready(function() {
       $('.table').DataTable({
         "responsive": true,

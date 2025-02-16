@@ -14,7 +14,6 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-{{-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" /> --}}
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 @stop
 
@@ -1477,12 +1476,16 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-3">
                 <label class="form-label" for="step-name">{{ __('cycles.Form title') }}:</label>
                 <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}"
-                class="form-control border light-shadow" required>
+                class="form-control" required>
               </div>
-              <div class="col-md-6 form-group mb-3">
+              <div class="col-12 mb-4">
+                <label for="bs-rangepicker-basic" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
+                <input type="text" id="bs-rangepicker-basic" class="form-control" />
+              </div>
+              {{-- <div class="col-md-6 form-group mb-3">
                 <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid from') }}: </label>
                 <div class="position-relative">
-                  <input id='mfromDate' name='fromDate' type="text" class="form-control border light-shadow flatpickr-date" required>
+                  <input id='mfromDate' name='fromDate' type="text" class="form-control flatpickr-date" required>
                   <div class="position-absolute top-0 end-0 mt-2 me-3">
                     <i class="ti ti-calendar ti-24px text-primary"></i>
                   </div>
@@ -1491,21 +1494,18 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-md-6 form-group mb-3">
                 <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid to') }}:</label>
                 <div class="position-relative">
-                  <input id='mtoDate' name='toDate' type="text" class="form-control border light-shadow flatpickr-date" required>
+                  <input id='mtoDate' name='toDate' type="text" class="form-control flatpickr-date" required>
                   <div class="position-absolute top-0 end-0 mt-2 me-3">
                     <i class="ti ti-calendar ti-24px text-primary"></i>
                   </div>
                 </div>
-              </div>
+              </div> --}}
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">{{ __('cycles.Description') }}: </label>
-                <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control border light-shadow"></textarea>
+                <textarea id='mdescription' name='description' placeholder="{{ __('cycles.Description') }}" class="form-control"></textarea>
             
               </div>
             </fieldset>
-         
-            
-
         </div>
         <div class="modal-footer">
           <button type="submit" value="submit" class="btn btn-primary">
@@ -1560,7 +1560,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <label class="form-label" for="step-name">Step Name</label>
                 <input 
                   type="text" 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-name" 
                   placeholder="Step Name"
                 />
@@ -1570,7 +1570,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="Start Date"
                   />
@@ -1584,7 +1584,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="End Date"
                   />
@@ -1596,7 +1596,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">Description</label>
                 <textarea 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-desc" 
                   rows="3" 
                   placeholder="Description"
@@ -1679,7 +1679,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <label class="form-label" for="step-name">Mentorship Name</label>
                 <input 
                   type="text" 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-name" 
                   placeholder="Step Name"
                 />
@@ -1689,7 +1689,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="Start Date"
                   />
@@ -1703,7 +1703,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="End Date"
                   />
@@ -1715,7 +1715,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">Description</label>
                 <textarea 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-desc" 
                   rows="3" 
                   placeholder="Description"
@@ -1783,7 +1783,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <label class="form-label" for="step-name">Training Name</label>
                 <input 
                   type="text" 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-name" 
                   placeholder="Step Name"
                 />
@@ -1793,7 +1793,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="Start Date"
                   />
@@ -1807,7 +1807,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="End Date"
                   />
@@ -1819,7 +1819,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">Description</label>
                 <textarea 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-desc" 
                   rows="3" 
                   placeholder="Description"
@@ -1871,7 +1871,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <label class="form-label" for="step-name">Final screening name</label>
                 <input 
                   type="text" 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-name" 
                   placeholder="Step Name"
                 />
@@ -1881,7 +1881,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="Start Date"
                   />
@@ -1895,7 +1895,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 <div class="position-relative">
                   <input 
                     type="text" 
-                    class="form-control border light-shadow" 
+                    class="form-control" 
                     id="flatpickr-date"
                     placeholder="End Date"
                   />
@@ -1907,7 +1907,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <div class="col-12 form-group mb-5">
                 <label class="form-label" form="step-desc">Description</label>
                 <textarea 
-                  class="form-control border light-shadow" 
+                  class="form-control" 
                   id="step-desc" 
                   rows="3" 
                   placeholder="Description"
@@ -1955,9 +1955,6 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 @stop
 
 @section('scripts')
-{{-- <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script> --}}
-{{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
-{{-- <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script> --}}
 <!-- Vendors JS -->
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
@@ -1968,33 +1965,41 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 <script src="/app-assets/vendors/js/extensions/dragula.min.js"></script>
 <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-{{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
 <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 @stop
 
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find($cycle->id))
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
 
   <script>
     // Set Language
     const lang = '{{ $l }}';
 
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('loaded');
+      var bsRangePickerBasic = $('#bs-rangepicker-basic');
+      if (bsRangePickerBasic.length) {
+        bsRangePickerBasic.daterangepicker({
+          opens: isRtl ? 'left' : 'right'
+        });
+      }
+    });
+
     const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
     const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
   
-    const editFpTo = flatpickr(editValidalidTo, {
-      monthSelectorType: 'static',
-      dateFormat: 'Y-m-d',
-      minDate: 'today',
-    });
+    // const editFpTo = flatpickr(editValidalidTo, {
+    //   monthSelectorType: 'static',
+    //   dateFormat: 'Y-m-d',
+    //   minDate: 'today',
+    // });
 
-    const editFpFrom = flatpickr(editValidFrom, {
-      monthSelectorType: 'static',
-      dateFormat: 'Y-m-d',
-      minDate: 'today',
-    });
+    // const editFpFrom = flatpickr(editValidFrom, {
+    //   monthSelectorType: 'static',
+    //   dateFormat: 'Y-m-d',
+    //   minDate: 'today',
+    // });
 
     // Handle Append File
     const appendFile = (mode, file, conainerId) => {
@@ -2059,8 +2064,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
             $('#edit-program-modal #description').val(response.description ?? '');
             $('#edit-program-modal #cycleid').val(cycleId); 
             $('#edit-program-modal #type').val(1);
-            $('#edit-program-modal #start').val(response.start ?? '');
-            $('#edit-program-modal #end').val(response.end ?? '');
+            // $('#edit-program-modal #start').val(response.start ?? '');
+            // $('#edit-program-modal #end').val(response.end ?? '');
             $('#edit-program-modal #organization').val(response.organization_id ?? '');
             $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
             if (response.private) {
