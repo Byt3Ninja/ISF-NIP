@@ -127,13 +127,13 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     console.log('loaded');
-    var bsRangePickerBasic = $('#date-range-picker');
-    console.log('bsRangePickerBasic', bsRangePickerBasic);
-    if (bsRangePickerBasic.length) {
-      bsRangePickerBasic.daterangepicker({
+    var bsRangePickers = document.querySelectorAll('#date-range-picker');
+    bsRangePickers.forEach((picker) => {
+      console.log('bsRangePicker', picker);
+      $(picker).daterangepicker({
         opens: isRtl ? 'left' : 'right',
         drops: 'up'
       });
-    }
+    });
   });
 </script>

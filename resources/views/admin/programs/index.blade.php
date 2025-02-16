@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
@@ -405,7 +406,7 @@
                             <i class="ti ti-message text-primary ti-24px"></i>
                             <div class="d-flex flex-column">
                               <span class="fs-6 fw-bold mb-1">{{__('admin.Description')}}</span>
-                              <p class="text-secondary line-clamp-4">{{ $cycle->description }}</p>
+                              <p class="text-secondary line-clamp-3">{{ $cycle->description }}</p>
                             </div>
                           </div>
                         @endif
@@ -468,7 +469,7 @@
                               style="background-color: #d9edee;"
                             >
                               <i class="ti ti-calendar text-info ti-16px"></i>
-                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                              <span class="fw-semibold text-dark mx-2 text-nowrap" style="font-size: 12px;">
                                 {{ $cycle->start ?  $cycle->start->format('Y-m-d') : ''}}
                               </span>
                             </div>
@@ -477,7 +478,7 @@
                               style="background-color: #d9edee;"
                             >
                               <i class="ti ti-calendar text-danger ti-16px"></i>
-                              <span class="fw-semibold text-dark mx-2" style="font-size: 12px;">
+                              <span class="fw-semibold text-dark mx-2 text-nowrap" style="font-size: 12px;">
                                 {{ $cycle->end ?  $cycle->end->format('Y-m-d') : ''}}
                               </span>
                             </div>
@@ -668,8 +669,10 @@
   {{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
   <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-@stop
+  <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+  @stop
 
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find(0))
@@ -682,31 +685,31 @@
     const validFrom = document.querySelector('#create-program-modal .valid-from');
     const validTo = document.querySelector('#create-program-modal .valid-to');
     const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
-    const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
+    // const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
     
-    const fpTo = flatpickr(validTo, {
-      monthSelectorType: 'static',
-      dateFormat: 'Y-m-d',
-      minDate: 'today',
-    });
+    // const fpTo = flatpickr(validTo, {
+    //   monthSelectorType: 'static',
+    //   dateFormat: 'Y-m-d',
+    //   minDate: 'today',
+    // });
 
-    const fpFrom = flatpickr(validFrom, {
-      monthSelectorType: 'static',
-      dateFormat: 'Y-m-d',
-      minDate: 'today',
-    });
+    // const fpFrom = flatpickr(validFrom, {
+    //   monthSelectorType: 'static',
+    //   dateFormat: 'Y-m-d',
+    //   minDate: 'today',
+    // });
 
-    const editFpTo = flatpickr(editValidalidTo, {
-      monthSelectorType: 'static',
-      dateFormat: 'Y-m-d',
-      minDate: 'today',
-    });
+    // const editFpTo = flatpickr(editValidalidTo, {
+    //   monthSelectorType: 'static',
+    //   dateFormat: 'Y-m-d',
+    //   minDate: 'today',
+    // });
 
-    const editFpFrom = flatpickr(editValidFrom, {
-      monthSelectorType: 'static',
-      dateFormat: 'Y-m-d',
-      minDate: 'today',
-    });
+    // const editFpFrom = flatpickr(editValidFrom, {
+    //   monthSelectorType: 'static',
+    //   dateFormat: 'Y-m-d',
+    //   minDate: 'today',
+    // });
 
     // Initialize Quill Editor
     const editorConfig = { theme: 'snow' };
