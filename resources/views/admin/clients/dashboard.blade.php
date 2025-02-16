@@ -414,7 +414,7 @@
                       <div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-conetnt-center"
                         style="width: 200px; height: 30px">
                         <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
-                          <span class="line-clamp-1" style="font-size: 0.8rem;">{{ $serv->serviceCategory->{'name_' . $l} }}</span>
+                          {{ $serv->serviceCategory->{'name_' . $l} }}
                         </a>
                       </div>
                     </div>
@@ -755,7 +755,7 @@
           $ctype = 0;
           if( !empty( $user->company ) )
           {
-            $ctype = $user->company->stepdata->stype;
+            $ctype = $user->company->stepdata->stype ?? '0';
           }
           $color= $colors[0];
 
@@ -840,7 +840,7 @@
                   <tr>
                     <td>
                       @if($step->stype == 1)
-                      @if($status != 'Completed' && $status != 'انتهت')
+                      @if($status != 'Completed' OR $status != 'انتهت')
                       @if ($user->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
