@@ -183,9 +183,14 @@
             </div>
             <!-- /Logo -->
             <h4 class="mb-1 text-center">{{__('admin.set_password')}}🔒</h4>
-            {{-- <p class="mb-6">
-              <span class="fw-medium">Your new password must be different from previously used passwords</span>
-            </p> --}}
+            @if ($errors->any())
+               <div class="alert alert-danger text-center">
+                   @foreach ($errors->all() as $error)
+                     <p class="mb-0">{{ $error }}</p>
+                   @endforeach
+                </div>
+            @endif
+           
             <form action="{{ route('accept-invitation', $invitation->id) }}" method="POST">
                 @csrf
               <div class="mb-6 form-password-toggle">

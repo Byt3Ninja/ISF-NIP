@@ -18,10 +18,16 @@ class Invitation extends Model
         'user_id',
         'code',
         'expires_at',
+        'status'
     ];
 
     public function organization()
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
