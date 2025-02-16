@@ -286,7 +286,8 @@
               </div>
             </div>
             <div class="card-body">
-              <div id="cycleStartupsChart"></div>
+              <canvas id="horizontalBarChart" style="height: 400px;"></canvas>
+
             </div>
           </div>
         </div>
@@ -640,6 +641,68 @@
           }
       });
   });
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+    var ctx = document.getElementById("horizontalBarChart");
+
+    if (ctx) {
+        var cyclesLabels = @json($cycles_labels);
+        var cyclesStartupsCount = @json($cycles_startups_count);
+
+        new Chart(ctx.getContext("2d"), {
+            type: 'bar',
+            data: {
+                labels: cyclesLabels,
+                datasets: [{
+                    data: cyclesStartupsCount,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    barThickness: 25
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        console.error("Canvas with ID 'horizontalBarChart' not found.");
+    }
+});
+
+
 </script>
 
 
