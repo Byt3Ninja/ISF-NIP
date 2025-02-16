@@ -377,6 +377,8 @@ $userid = auth()->user()->id;
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
 <script>
+   var Analysis_user_scores = {!! json_encode($Analysis_user_scores) !!};
+   console.log(Analysis_user_scores);
   window.addEventListener('DOMContentLoaded', () => {
     // Initialize the chart
     var chart = echarts.init(document.getElementById('chart'));

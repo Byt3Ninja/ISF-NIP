@@ -315,29 +315,49 @@ public function MakeAssessment()
     public function analysisAssessment()
     {
         if (Auth::user()->hasRole('Registered')) {
-        $l = app()->getLocale();
-        $userid = auth()->user()->id;
-        $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
-        if($assessment_user != null){
-         $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
-
-        $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
-        ->where('user_id', $userid)
-        ->where('assessment_id', $assessment_user->id)->get();
-        
-        return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
+            $l = app()->getLocale();
+            $userid = auth()->user()->id;
+            $assessment_user = Assessment::where('user_id', $userid)
+                ->whereNull('end_date')
+                ->first();
+            if ($assessment_user) {
+                $categories = Category::where('category_type', 'Assesment')
+                    ->with([
+                        'subcategory',
+                        'question' => function($query) use ($assessment_user) {
+                            $query->where('assessment_id', $assessment_user->id);
+                        }
+                    ])
+                    ->get();
+                $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                    ->where('user_id', $userid)
+                    ->where('assessment_id', $assessment_user->id)
+                    ->get();
+                $Analysis_user_scores = $categories->map(function ($category) {
+                    $questions = $category->question;
+                    $subcategories = $category->subcategory->map(function ($subcategory) use ($questions) {                        $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
+                        $total_questions = $subcategory_questions->count();
+                        $answered_questions = $subcategory_questions->whereNotNull('answer')->count();
+                        return [
+                            'name_ar'           => $subcategory->name_ar,
+                            'name_en'           => $subcategory->name_en,
+                            'total'   => $total_questions,
+                            'totalAnswered'=> $answered_questions,
+                        ];
+                    });
+                    return $subcategories;
+                })->flatten();
+                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores'));
         }else{
+            $Analysis_user_scores = [];
             $user_scores = [];
             $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
-            return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
+            return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories', 'Analysis_user_scores'));
         }
-
         }else{
             return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
         }
     }
-
-
     public function historyAssessment()
     {
         if (Auth::user()->hasRole('Registered')) {
@@ -345,15 +365,10 @@ public function MakeAssessment()
             $userid = auth()->user()->id;
             $assessmentsopen = Assessment::where('user_id', $userid)->whereNull('end_date')->get();
             $assessments = Assessment::where('user_id', $userid)->whereNotNull('end_date')->get();
-            
             return view('admin/clients/assessment/assessment-history', compact('assessmentsopen', 'assessments'));
-            
-    
             }else{
                 return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]);
             }
-
-        
     }
 
     public function AnswerAssessment(Request $request)
