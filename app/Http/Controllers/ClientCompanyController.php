@@ -397,6 +397,9 @@ class ClientCompanyController extends Controller
                 $result->Commercial_Register = $Commercial_Register;
                 $result->Tax_Card = $Tax_Card;
                 $result->Country_Register_id = $cuntryReg ?? 0;
+                $result->institutions = 'null';
+                $result->phone = '0';
+                $result->email = 'null';
             }
             if( $data['CompanyN'] == 2 )
             {
@@ -742,7 +745,7 @@ class ClientCompanyController extends Controller
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
-            // dd($e);
+            dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);

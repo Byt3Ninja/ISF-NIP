@@ -417,6 +417,13 @@ class HomeController extends Controller
         $data['mentorshipRequests'] = $mentorshipRequests->whereNull('approved')->latest()->limit(5)->get();
         $data['latest_cycles'] = $cycles->latest()->limit(10)->get();
 
+        $data['cycles_labels'] = [];
+        $data['cycles_startups_count'] = [];
+        foreach ($cycles->get() as $key) {
+            $data['cycles_labels'][] = $key->title;
+            $data['cycles_startups_count'][] = (int)$key->companies()->count();
+        }
+
         // Demographic
         $data['usersgov'] = User::join('states', 'users.state_id', '=', 'states.id')
         ->where('users.organization_id', $organization_id)
@@ -716,7 +723,7 @@ class HomeController extends Controller
                 ];
             }
         });
-
+       
         return view('admin.organizations.dashboard', $data);
     }
 

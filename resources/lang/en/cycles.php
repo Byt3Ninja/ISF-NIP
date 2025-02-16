@@ -289,5 +289,6 @@ return [
     'create_program' => 'Create New Program',
     'External_Participation_Label' => 'Non-Company Participation Option',
     'Select_Organization' => 'Select Organization',
+    'Valid_from_to' => 'Valid from - to',
 ];
 
