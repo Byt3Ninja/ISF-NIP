@@ -1246,5 +1246,18 @@ return [
 	'Financial plan attachment' => 'مرفق خطة العمل المالية',
 	'Final_Session' => 'جلسة نهاية',
 	'View_Pitch_Deck_Video' => 'عرض فيديو Pitch Deck',
+	'An unexpected error occurred, please try again later' => 'حدث خطاء غير متوقع، يرجى المحاولة في وقت لاحق',
+	'Business Plan file not selected' => 'لم يتم تحديد ملف خطة العمل المالية',
+	'business_model_description is required' => 'وصف خطة العمل المالية مطلوب',
+	'about_challenges is required' => '  حول التحديات مطلوب',
+	'about_monetize is required' => 'حول التحديث مطلوب',
+	'about_competitors is required' => 'حول المنافسين مطلوب',
+	'about_market_opportunity is required' => 'حول فرص السوق مطلوب',
+	'about_problem is required' => 'حول المشكلة مطلوب',
+	'tiktok_url_Not_URL' => 'يجب ان يكون رابط التيكتوك صالح',
+	'instagram_url_Not_URL' => 'يجب ان يكون رابط الانستغرام صالح',
+	'Address is required' => 'العنوان مطلوب',
+	'Name is required' => 'الاسم مطلوب',
+
 ];
 

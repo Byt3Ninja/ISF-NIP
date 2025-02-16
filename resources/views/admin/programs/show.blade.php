@@ -1062,7 +1062,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <a id="sessions" href="/dashboard/training/sessions/{{ $step->id }}" class="btn btn-primary">
                         <i class="ti ti-cast me-2"></i> {{ __('admin.Sessions') }}
                       </a>
-                      <a id="results" href="/dashboard/training/sessions/{{ $step->id }}" class="btn btn-primary">
+                      <a id="results" href="/dashboard/training/results" class="btn btn-primary">
                         <i class="ti ti-file-analytics me-2"></i> {{ __('admin.Results') }}
                       </a>
                     </div>
