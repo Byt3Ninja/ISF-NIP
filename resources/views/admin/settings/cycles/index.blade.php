@@ -267,7 +267,7 @@
           @endif
           <div class="col-12 mb-4">
             <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
-            <input type="text" id="bs-rangepicker-basic" class="form-control" />
+            <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" />
           </div>
           <div class="mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Cycle title') }}: </label>
@@ -354,7 +354,7 @@
           </div>
           <div class="col-12 mb-4">
             <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
-            <input type="text" id="stepFormRamgePicker" class="form-control" />
+            <input type="text" id="stepFormRamgePicker" class="form-control" name="date_range" required />
           </div>
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Step Title') }}: </label>
@@ -436,7 +436,7 @@
           </div>
           <div class="col-12 mb-4">
             <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
-            <input type="text" id="bs-rangepicker-basic" class="form-control" />
+            <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" required />
           </div>
           {{-- <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid from') }}: </label>
           <div class="mb-4">
