@@ -12,7 +12,7 @@ return [
 	'myinterests' => 'إهتماماتي',
 	'InvitationSent' => 'تم ارسال الدعوة بنجاح',
 	'invitationExpired' => 'انتهت صلاحية الدعوة',
-	'user_exists' => 'المستخدم موجود',
+	'user_exists' => 'هذا الحساب موجود',
 	'manage_currencies' => 'إدارة العملات',
 	'Currencies' => 'العملات',
 	'Add_Currency' => 'أضف العملة',
