@@ -62,7 +62,7 @@
                     class="form-control border-light light-shadow px-8 d-none"
                     type="file"
                     accept="application/pdf"
-                    onchange="handleFileUpload('pitch-deck-input', 'pitch-deck-dropzone')"
+                    onchange="handlePitchDickUpload('pitch-deck-input', 'pitch-deck-dropzone')"
                   />
                   <div
                     id="pitch-deck-dropzone"
@@ -74,12 +74,16 @@
                     <p>{{ __('admin.upload_file') }}</p>
                   </div>
                 </div>
+                <div class="invalid-feedback" id="pitch-deck-error" style="display: none">
+                  {{ __('admin.pitch_deck_should_be_pdf') }}
+                </div>
               </div>
-              <div class="col-12 d-flex justify-content-end mt-3">
+              <div class="col-12 d-flex justify-content-end mt-6">
                 <button
                   type="submit"
-                  class="btn btn-sm btn-primary mr-1 mb-1"
+                  class="btn btn-sm btn-primary mr-1 mb-1 pitch-deck-upload-btn"
                   id="submit-button-pitch-deck"
+                  disabled="true"
                 >
                   <span id="button-text">{{ __('admin.Save') }}</span>
                   <span
@@ -278,46 +282,47 @@
     }
   }
 
+  // Handle pitch dick document upload
+  function handlePitchDickUpload(inputId, dropzoneId) {
+    const input = document.getElementById(inputId);
+    const dropzone = document.getElementById(dropzoneId);
+    const pitchDickUploadButton = document.querySelector('.pitch-deck-upload-btn');
+    const pitchDickError = document.getElementById('pitch-deck-error');
 
-  $(document).on('click', '.delete-file', function () {
-    var fileIndex = $(this).data('index');
-    var filePath = $(this).data('file');
-    var cardElement = $(this).closest('.file-card');
+    console.log({
+    input
+   , dropzone
+   , pitchDickUploadButton,
+    pitchDickError})
 
-    Swal.fire({
-      title: 'هل أنت متأكد؟',
-      text: 'لن تتمكن من استعادة هذا الملف!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'نعم، احذف الملف!',
-      cancelButtonText: 'إلغاء'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        $.ajax({
-          url: '{{ route("delete.document") }}',
-          type: 'POST',
-          data: {
-              _token: '{{ csrf_token() }}',
-              index: fileIndex,
-              file: filePath,
-          },
-          success: function (response) {
-              if (response.success) {
-                  cardElement.remove();
-                  Swal.fire('تم الحذف!', 'تم حذف الملف بنجاح.', 'success');
-              } else {
-                  Swal.fire('خطأ!', 'حدث خطأ أثناء الحذف.', 'error');
-              }
-          },
-          error: function () {
-              Swal.fire('خطأ!', 'تعذر الاتصال بالخادم.', 'error');
-          },
-        });
-      }
-    });
-  });
+    const allowedExtensions = /(\.pdf)$/i;
+    if (!allowedExtensions.exec(input.value)) {
+      pitchDickError.style.display = 'block';
+      pitchDickUploadButton.disabled = true;
+      input.value = ''; // Clear the input field
+      return;
+    }
 
-
+    if (input.files && input.files[0]) {
+      pitchDickError.style.display = 'none';
+      pitchDickUploadButton.disabled = false;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        dropzone.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center w-100">
+            <span>${file.name}</span>
+            <span class="btn btn-sm btn-icon rounded-circle btn-transparent text-danger" onclick="removeFile('${inputId}', '${dropzoneId}', event)">
+              <i class="ti ti-trash fs-6"></i>
+            </span>
+          </div>
+        `;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  
+  // Handle upload documents 
   function handleDocumentUpload(inputId) {
     console.log('handleDocumentUpload');
     const input = document.getElementById(inputId);
@@ -375,6 +380,44 @@
       }
     }
   }
+  
+  $(document).on('click', '.delete-file', function () {
+    var fileIndex = $(this).data('index');
+    var filePath = $(this).data('file');
+    var cardElement = $(this).closest('.file-card');
+
+    Swal.fire({
+      title: 'هل أنت متأكد؟',
+      text: 'لن تتمكن من استعادة هذا الملف!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'نعم، احذف الملف!',
+      cancelButtonText: 'إلغاء'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          url: '{{ route("delete.document") }}',
+          type: 'POST',
+          data: {
+              _token: '{{ csrf_token() }}',
+              index: fileIndex,
+              file: filePath,
+          },
+          success: function (response) {
+              if (response.success) {
+                  cardElement.remove();
+                  Swal.fire('تم الحذف!', 'تم حذف الملف بنجاح.', 'success');
+              } else {
+                  Swal.fire('خطأ!', 'حدث خطأ أثناء الحذف.', 'error');
+              }
+          },
+          error: function () {
+              Swal.fire('خطأ!', 'تعذر الاتصال بالخادم.', 'error');
+          },
+        });
+      }
+    });
+  });
 
   function handleFileUpload(inputId, dropzoneId) {
     var input = document.getElementById(inputId);
