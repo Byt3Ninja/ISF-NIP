@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+  <!-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" /> -->
 
   <style>
     #contentWrapper {
@@ -183,7 +183,7 @@
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-  <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+  <!-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> -->
 @stop
 
 @section('pagescripts')
@@ -193,13 +193,13 @@
   <script src="/app-assets/js/1.js"></script>
 
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/vuexy/assets/js/forms-tagify.js"></script>
+  <!-- <script src="/vuexy/assets/js/forms-tagify.js"></script> -->
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
   <script src="/vuexy/assets/js/founder-form.js"></script>
   <script src="/vuexy/assets/js/shareholder-form.js"></script>
   <script src="/vuexy/assets/js/investor-form.js"></script>
 
-  <script>
+  <!-- <script>
     document.getElementById('img_url').addEventListener('change', function(
     event) {
       const file = event.target.files[0];
@@ -211,7 +211,7 @@
         reader.readAsDataURL(file);
       }
     });
-  </script> 
+  </script>  -->
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {

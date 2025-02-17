@@ -166,40 +166,29 @@
 
     <!-- Documents Column -->
     <div class="pitch-content tab-pane fade" id="documents-content">
-      <div class="col-12 mt-3">
-        <form
-          method="post"
-          action="{{ $formAction }}"
-          enctype="multipart/form-data"
-        >
-          @csrf
-          <input type="hidden" value="11" name="CompanyN" />
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">{{ __('admin.Documents') }}</h5>
-              <div class="d-flex flex-column gap-2">
-                @if($client->company)
-                @php
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">{{ __('admin.Documents') }}</h5>
+        </div>
+        <div class="card-body">
+          <div id="documents-list" class="mb-4">
+            @if($client->company)
+              @php
                 if($client->company->documents && !is_null($client->company->documents)){
-                $documents = json_decode($client->company->documents, true);
-                if( json_last_error() != JSON_ERROR_NONE ) {
-                $documents = [];
-                }
-                $fileNames = array_map(function ($url) {
-                return basename($url);
-                }, $documents);
+                  $documents = json_decode($client->company->documents, true);
+                  if( json_last_error() != JSON_ERROR_NONE ) {
+                    $documents = [];
+                  }
+                  $fileNames = array_map(function ($url) {
+                    return basename($url);
+                  }, $documents);
                 } else{
-                $documents = [];
+                 $documents = [];
                 }
-                @endphp
-                @foreach ($documents as $index => $document)
+              @endphp
+              @foreach ($documents as $index => $document)
                 @if (is_string($document) && !empty($document))
-                <div
-                  class="card file-card"
-                  data-index="{{ $index }}"
-                  data-file="{{ $document }}"
-                >
-                  <div class="p-2">
+                  <div class="p-2 rounded border file-card mb-2" data-file="{{ $document }}">
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="d-flex align-items-center gap-3">
                         <i class="ti ti-file fs-5 text-warning"></i>
@@ -224,42 +213,47 @@
                       </div>
                     </div>
                   </div>
-                </div>
                 @endif
-                @endforeach
-                @endif
-                <div class="mt-3" style="display: grid; place-items: center;">
-                  <input
-                    id="document"
-                    class="form-control"
-                    type="file"
-                    accept="application/pdf"
-                    multiple
-                    name="documents[]"
-                    onchange="handleFileUpload('document', 'documents-dropzone')"
-                  />
-                </div>
-                <div class="mt-3">
-                  <div class="col-12 d-flex justify-content-end">
-                    <button
-                      type="submit"
-                      class="btn btn-sm btn-primary "
-                      id="submit-button-documents"
-                    >
-                      <span id="button-text">{{ __('admin.Save') }}</span>
-                      <span
-                        id="button-spinner"
-                        class="spinner-border spinner-border-sm d-none"
-                        role="status"
-                        aria-hidden="true"
-                      ></span>
-                    </button>
-                  </div>
+              @endforeach
+            @endif
+          </div>
+          <form method="post" action="{{ $formAction }}" enctype="multipart/form-data">
+            @csrf
+            <fieldset>
+              <input type="hidden" value="11" name="CompanyN" />
+              <div class="form-group mt-3">
+                <input
+                  id="document"
+                  class="form-control"
+                  type="file"
+                  accept="application/pdf"
+                  multiple
+                  name="documents[]"
+                  onchange="handleDocumentUpload('document')"
+                />
+                <div class="invalid-feedback" id="document-error" style="display: none">
+                  {{ __('admin.documents_should_be_pdf') }}
                 </div>
               </div>
+            </fieldset>
+            <div class="w-100 d-flex justify-content-end mt-6">
+              <button
+                type="submit"
+                class="btn btn-sm btn-primary document-upload-btn"
+                id="submit-button-documents"
+                disabled="true"
+              >
+                <span id="button-text">{{ __('admin.Save') }}</span>
+                <span
+                  id="button-spinner"
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+              </button>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -284,76 +278,103 @@
     }
   }
 
-  // function addDocument() {
-  //   var input = document.getElementById('document-upload');
-  //   var documentsList = document.getElementById('documents-list');
-
-  //   if (input.files && input.files[0]) {
-  //     var reader = new FileReader();
-  //     reader.onload = function (e) {
-  //       var documentCard = document.createElement('div');
-  //       documentCard.className = 'card';
-  //       documentCard.innerHTML = `
-  //         <div class="p-2">
-  //           <div class="d-flex justify-content-between align-items-center">
-  //             <div class="d-flex align-items-center gap-3">
-  //               <i class="ti ti-file fs-5 text-warning"></i>
-  //               <span class="fs-6">${input.files[0].name}</span>
-  //             </div>
-  //             <div class="d-flex align-items-center gap-1">
-  //               <a
-  //                 class="btn btn-sm btn-icon rounded-circle btn-transparent"
-  //                 href="${e.target.result}"
-  //                 target="_blank"
-  //                 download=""
-  //               >
-  //                 <i class="ti ti-download fs-6 text-primary"></i>
-  //               </a>
-  //               <span
-  //                 class="btn btn-sm btn-icon rounded-circle btn-transparent text-danger delete-file"
-  //                 data-index="${index}"
-  //                 data-file="${document}"
-  //               >
-  //                 <i class="ti ti-trash fs-6"></i>
-  //               </span>
-  //             </div>
-  //           </div>
-  //         </div>
-  //       `;
-  //       documentsList.appendChild(documentCard);
-  //     };
-  //     reader.readAsDataURL(input.files[0]);
-  //   }
-  // }
 
   $(document).on('click', '.delete-file', function () {
     var fileIndex = $(this).data('index');
     var filePath = $(this).data('file');
     var cardElement = $(this).closest('.file-card');
 
-    if (confirm('هل أنت متأكد من حذف هذا الملف؟')) {
-      $.ajax({
-        url: '{{ route("delete.document") }}',
-        type: 'POST',
-        data: {
-          _token: '{{ csrf_token() }}',
-          index: fileIndex,
-          file: filePath,
-        },
-        success: function (response) {
-          if (response.success) {
-            cardElement.remove();
-            alert('تم حذف الملف بنجاح.');
-          } else {
-            alert('حدث خطأ أثناء الحذف.');
-          }
-        },
-        error: function () {
-          alert('تعذر الاتصال بالخادم.');
-        },
-      });
-    }
+    Swal.fire({
+      title: 'هل أنت متأكد؟',
+      text: 'لن تتمكن من استعادة هذا الملف!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'نعم، احذف الملف!',
+      cancelButtonText: 'إلغاء'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          url: '{{ route("delete.document") }}',
+          type: 'POST',
+          data: {
+              _token: '{{ csrf_token() }}',
+              index: fileIndex,
+              file: filePath,
+          },
+          success: function (response) {
+              if (response.success) {
+                  cardElement.remove();
+                  Swal.fire('تم الحذف!', 'تم حذف الملف بنجاح.', 'success');
+              } else {
+                  Swal.fire('خطأ!', 'حدث خطأ أثناء الحذف.', 'error');
+              }
+          },
+          error: function () {
+              Swal.fire('خطأ!', 'تعذر الاتصال بالخادم.', 'error');
+          },
+        });
+      }
+    });
   });
+
+
+  function handleDocumentUpload(inputId) {
+    console.log('handleDocumentUpload');
+    const input = document.getElementById(inputId);
+    const documentUploadButton = document.querySelector('.document-upload-btn');
+    const documentError = document.getElementById('document-error');
+    const documentList = document.getElementById('documents-list');
+
+    console.log('documentList,', documentList)
+
+    if (input.files && input.files[0]) {
+      for (let i = 0; i < input.files.length; i++) {
+        const allowedExtensions = /(\.pdf)$/i;
+        if (!allowedExtensions.exec(input.files[i].name)) {
+          // alert('{{ __('admin.documents_should_be_pdf') }}');
+          documentError.style.display = 'block';
+          input.value = ''; // Clear the input field
+          documentUploadButton.disabled = true;
+          return;
+        }
+
+        documentError.style.display = 'none';
+        documentUploadButton.disabled = false;
+
+        // var reader = new FileReader();
+        // reader.onload = function (e) {        
+        //   documentCard = `
+        //     <div class="p-2 rounded border file-card" data-file="${input.files[i].name}">
+        //       <div class="d-flex justify-content-between align-items-center">
+        //         <div class="d-flex align-items-center gap-3">
+        //           <i class="ti ti-file fs-5 text-warning"></i>
+        //           <span class="fs-6">${input.files[i].name}</span>
+        //         </div>
+        //         <div class="d-flex align-items-center gap-1">
+        //           <a
+        //             class="btn btn-sm btn-icon rounded-circle btn-transparent"
+        //             href="${e.target.result}"
+        //             target="_blank"
+        //             download=""
+        //           >
+        //             <i class="ti ti-download fs-6 text-primary"></i>
+        //           </a>
+        //           <span
+        //             class="btn btn-sm btn-icon rounded-circle btn-transparent text-danger delete-file"
+        //             data-index="${i}"
+        //             data-file="${input.files[i].name}"
+        //           >
+        //             <i class="ti ti-trash fs-6"></i>
+        //           </span>
+        //         </div>
+        //       </div>
+        //     </div>
+        //   `;
+        //   documentsList.appendChild(documentCard);
+        // };
+      }
+    }
+  }
 
   function handleFileUpload(inputId, dropzoneId) {
     var input = document.getElementById(inputId);
@@ -362,34 +383,20 @@
     if (inputId === 'pitch-deck-input') {
       var allowedExtensions = /(\.pdf)$/i;
       if (!allowedExtensions.exec(input.value)) {
-        alert('{{ __('admin.pitch_deck_should_be_pdf') }}')
+        alert('{{ __('admin.pitch_deck_should_be_pdf') }}');
+        input.value = ''; // Clear the input field
         return;
       }
     } else if (inputId === 'video') {
       var allowedExtensions = /(\.mp4|\.mkv|\.avi|\.mov)$/i;
       if (!allowedExtensions.exec(input.value)) {
-        alert('{{ __('admin.pitch_deck_video_should_be_video') }}')
+        alert('{{ __('admin.pitch_deck_video_should_be_video') }}');
+        input.value = ''; // Clear the input field
         return;
-      }
-      // // Check file size (25MB = 25 * 1024 * 1024 bytes)
-      // var maxSize = 25 * 1024 * 1024; 
-
-      // if (file.size > maxSize) {
-      //   alert('{{ __('admin.pitch_deck_video_size_limit_exceeded') }}'); 
-      //   input.value = ''; // Clear the input field
-      //   return;
-      // }
-    } else if (inputId === 'document') {
-      var allowedExtensions = /(\.pdf)$/i;
-      for (var i = 0; i < input.files.length; i++) {
-        if (!allowedExtensions.exec(input.files[i].name)) {
-          alert('{{ __('admin.documents_should_be_pdf') }}')
-          return;
-        }
       }
     }
 
-    console.log('input.files', input.files)
+    console.log('input.files', input.files);
 
     if (input.files && input.files[0]) {
       var file = input.files[0];
@@ -403,7 +410,6 @@
             </span>
           </div>
         `;
-        // checkAllUploads();
       };
       reader.readAsDataURL(file);
     }
@@ -422,34 +428,5 @@
       <i class="ti ti-upload fs-4"></i>
       <p>{{ __('admin.upload_file') }}</p>
     `;
-    // checkAllUploads();
   }
-
-  // function checkAllUploads() {
-  //   var pitchDeckInput = document.getElementById('pitch-deck-input');
-  //   var videoInput = document.getElementById('video');
-  //   var documentInput = document.getElementById('document');
-
-  //   var pitchDeckButton = document.getElementById('submit-button-pitch-deck');
-  //   var videoButton = document.getElementById('submit-button-video');
-  //   var documentsButton = document.getElementById('submit-button-documents');
-
-  //   if (pitchDeckInput.files.length > 0) {
-  //     pitchDeckButton.classList.remove('d-none');
-  //   } else {
-  //     pitchDeckButton.classList.add('d-none');
-  //   }
-
-  //   if (videoInput.files.length > 0) {
-  //     videoButton.classList.remove('d-none');
-  //   } else {
-  //     videoButton.classList.add('d-none');
-  //   }
-
-  //   if (documentInput.files.length > 0) {
-  //     documentsButton.classList.remove('d-none');
-  //   } else {
-  //     documentsButton.classList.add('d-none');
-  //   }
-  // }
 </script>

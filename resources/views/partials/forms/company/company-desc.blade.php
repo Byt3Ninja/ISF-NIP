@@ -264,8 +264,6 @@ $action = Auth::user()->hasanyRole('Admin|organizationManager') ? route('update_
 
     const descForm = document.getElementById('desc-form');
 
-    console.log('descForm', descForm)
-
     descForm.addEventListener('submit', async (e) => {
       const sustainabilityField = document.getElementById('sustainable-mutiple-select');
       const sustainabilityFieldError = document.getElementById('sustainable-mutiple-select-error');
