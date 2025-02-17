@@ -382,7 +382,7 @@ $userid = auth()->user()->id;
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const analysisUserScores = @json($Analysis_user_scores) || [];
-    
+    console.log('analysisUserScores', analysisUserScores);
     // console.log('analysisUserScores', analysisUserScores)
     
     const chartIndicatorData = analysisUserScores?.map(item => ({
