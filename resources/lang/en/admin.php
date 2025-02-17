@@ -1257,4 +1257,6 @@ return [
 	'Phone is required' => 'Phone is required',
 	'Address is required' => 'Address is required',
 	'Name is required' => 'Name is required',
+	'upload_video_url' => 'Upload Video URL',
+	'pitch_deck_video_should_be_valid_video_url' => 'Pitch deck video should be a valid video URL',
 ];

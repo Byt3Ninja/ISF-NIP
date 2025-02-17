@@ -1258,6 +1258,7 @@ return [
 	'instagram_url_Not_URL' => 'يجب ان يكون رابط الانستغرام صالح',
 	'Address is required' => 'العنوان مطلوب',
 	'Name is required' => 'الاسم مطلوب',
-
+	'upload_video_url' => 'رابط الفيديو',
+	'pitch_deck_video_should_be_valid_video_url' => 'يجب أن يكون رابط الفيديو صالح',
 ];
 

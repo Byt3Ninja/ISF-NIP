@@ -107,12 +107,15 @@
           method="post"
           action="{{ $formAction }}"
           enctype="multipart/form-data"
+          id="pitch-deck-video-form"
         >
           @csrf
           <input type="hidden" value="10" name="CompanyN" />
           <div class="card">
-            <div class="card-body">
+            <div class="card-header">
               <h5 class="card-title">{{ __('admin.Pitch_Deck_Video') }}</h5>
+            </div>
+            <div class="card-body">
               <div
                 class="d-flex h-100 flex-column justify-content-between align-items-center"
               >
@@ -131,8 +134,9 @@
                 @endif
                 <div class="mt-auto d-flex flex-column w-100 mt-2">
                   <input
-                    id="video"
-                    class="form-control border-light light-shadow px-8"
+                    id="video-input"
+                    class="form-control"
+                    placeholder="{{ __('admin.upload_video_url') }}"
                     type="text"
                     name="pitch_deck_video"
                   />
@@ -145,13 +149,17 @@
                     <i class="ti ti-upload fs-4"></i>
                     <p>{{ __('admin.upload_video') }}</p>
                   </div> --}}
+                  <div class="invalid-feedback" id="video-error" style="display: none">
+                    {{ __('admin.pitch_deck_video_should_be_valid_video_url') }}
+                  </div>
                 </div>
               </div>
-              <div class="col-12 d-flex justify-content-end mt-3">
+              <div class="col-12 d-flex justify-content-end mt-6">
                 <button
                   type="submit"
-                  class="btn btn-sm btn-primary mr-1 mb-1"
+                  class="btn btn-sm btn-primary mr-1 mb-1 pitch-video-upload-btn"
                   id="submit-button-video"
+                  disabled="true"
                 >
                   <span id="button-text">{{ __('admin.Save') }}</span>
                   <span
@@ -289,12 +297,6 @@
     const pitchDickUploadButton = document.querySelector('.pitch-deck-upload-btn');
     const pitchDickError = document.getElementById('pitch-deck-error');
 
-    console.log({
-    input
-   , dropzone
-   , pitchDickUploadButton,
-    pitchDickError})
-
     const allowedExtensions = /(\.pdf)$/i;
     if (!allowedExtensions.exec(input.value)) {
       pitchDickError.style.display = 'block';
@@ -320,8 +322,41 @@
       };
       reader.readAsDataURL(file);
     }
-  }
-  
+  };
+
+  const videoInput = document.getElementById('video-input');
+  const videoUploadButton = document.querySelector('.pitch-video-upload-btn');
+  const videoError = document.getElementById('video-error');
+  const pickDickVideoForm = document.getElementById('pitch-deck-video-form');
+
+  videoInput.addEventListener('input', function () {
+    const videoInputValue = videoInput.value;
+    const validVideoLink = videoInputValue.match(/(http(s?):\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+|((http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mkv|avi|mov))/);
+
+    if (!validVideoLink) {
+      videoError.style.display = 'block';
+      videoUploadButton.disabled = true;
+    } else {
+      videoError.style.display = 'none';
+      videoUploadButton.disabled = false;
+    }
+  });
+
+  pickDickVideoForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const videoInputValue = videoInput.value;
+    const validVideoLink = videoInputValue.match(/(http(s?):\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+|((http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mkv|avi|mov))/);
+    if (!validVideoLink) {
+      videoError.style.display = 'block';
+      videoUploadButton.disabled = true;
+      return;
+    }
+
+    videoError.style.display = 'none';
+    videoUploadButton.disabled = false;
+    pickDickVideoForm.submit();
+  });
+
   // Handle upload documents 
   function handleDocumentUpload(inputId) {
     console.log('handleDocumentUpload');
@@ -329,8 +364,6 @@
     const documentUploadButton = document.querySelector('.document-upload-btn');
     const documentError = document.getElementById('document-error');
     const documentList = document.getElementById('documents-list');
-
-    console.log('documentList,', documentList)
 
     if (input.files && input.files[0]) {
       for (let i = 0; i < input.files.length; i++) {
@@ -418,45 +451,6 @@
       }
     });
   });
-
-  function handleFileUpload(inputId, dropzoneId) {
-    var input = document.getElementById(inputId);
-    var dropzone = document.getElementById(dropzoneId);
-
-    if (inputId === 'pitch-deck-input') {
-      var allowedExtensions = /(\.pdf)$/i;
-      if (!allowedExtensions.exec(input.value)) {
-        alert('{{ __('admin.pitch_deck_should_be_pdf') }}');
-        input.value = ''; // Clear the input field
-        return;
-      }
-    } else if (inputId === 'video') {
-      var allowedExtensions = /(\.mp4|\.mkv|\.avi|\.mov)$/i;
-      if (!allowedExtensions.exec(input.value)) {
-        alert('{{ __('admin.pitch_deck_video_should_be_video') }}');
-        input.value = ''; // Clear the input field
-        return;
-      }
-    }
-
-    console.log('input.files', input.files);
-
-    if (input.files && input.files[0]) {
-      var file = input.files[0];
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        dropzone.innerHTML = `
-          <div class="d-flex justify-content-between align-items-center w-100">
-            <span>${file.name}</span>
-            <span class="btn btn-sm btn-icon rounded-circle btn-transparent text-danger" onclick="removeFile('${inputId}', '${dropzoneId}', event)">
-              <i class="ti ti-trash fs-6"></i>
-            </span>
-          </div>
-        `;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
 
   function removeFile(inputId, dropzoneId, event) {
     if (event) {
