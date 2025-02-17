@@ -352,7 +352,7 @@ public function MakeAssessment()
                     return $category->subcategory->map(function ($subcategory) use ($questions) {
                         $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
                         $total_questions = $subcategory_questions->count();
-                        $answered_questions = $subcategory_questions->whereNotNull('answer')->count();
+                        $answered_questions = $subcategory_questions->where('score', '!=', 0)->count();
                         return (object) [
                             'name_ar' => $subcategory->name_ar,
                             'name_en' => $subcategory->name_en,
