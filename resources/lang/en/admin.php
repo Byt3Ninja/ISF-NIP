@@ -144,7 +144,7 @@ return [
 	'Code' => 'Code',
 	'InvitationSent' => 'Invitation Sent Successfully',
 	'invitationExpired' => 'Invitation Expired',
-	'user_exists' => 'User already exists',
+	'user_exists' => 'Your Account already Exists',
 	'user_already_registered' => 'User Already Registered',
 	'send_invitation' => 'Send Invitation',
 	'Name' => 'Name',
