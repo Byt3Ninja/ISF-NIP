@@ -16,10 +16,12 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-@can ('manage_log')
-@if (count($auditLogs)>0)           <a href="/reports/audit-log" class="btn btn-primary glow">{{__('audit.Download all records')}}</a>
-                                    <a href="#" id="deleteAll" data-url="/dashboard/audit-logs/0" class="btn btn-danger glow">{{__('audit.Empty Log table')}}</a> @endif
-@endcan
+                                @if( $_user->ableTo('manage_log', $permissions) )
+                                    @if (count($auditLogs)>0)
+                                        <a href="/reports/audit-log" class="btn btn-primary glow">{{__('audit.Download all records')}}</a>
+                                        <a href="#" id="deleteAll" data-url="/dashboard/audit-logs/0" class="btn btn-danger glow">{{__('audit.Empty Log table')}}</a>
+                                    @endif
+                                @endif
                             </div>
                             <div class="card-content">
                                 <div class="card-body card-dashboard">

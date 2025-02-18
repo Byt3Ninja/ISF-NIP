@@ -158,7 +158,7 @@ class ClientCompanyController extends Controller
                     return $country;
                 });
             } else {
-                if (!Auth::user()->hasanyRole('Admin|organizationManager')) {
+                if (!Auth::user()->hasAnyRole('Admin|organizationManager')) {
                     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 }
                 if (Auth::user()->hasRole('organizationManager')) {
@@ -398,8 +398,6 @@ class ClientCompanyController extends Controller
                 $result->Tax_Card = $Tax_Card;
                 $result->Country_Register_id = $cuntryReg ?? 0;
                 $result->institutions = 'null';
-                $result->phone = '0';
-                $result->email = 'null';
             }
             if( $data['CompanyN'] == 2 )
             {
@@ -443,7 +441,7 @@ class ClientCompanyController extends Controller
 
                     // إنشاء رابط الصورة
                     $img_url = Storage::disk('public_uploads')->url($img_path);
-                } else { $img_url = $company->logo; }
+                } else { $img_url = $company->logo ?? 'null'; }
 
                 $result->country_code = $data['country_code'];  // مثال لإضافة حقل الهاتف
                 $result->phone = $data['phone'];  // مثال لإضافة حقل الهاتف
@@ -471,9 +469,14 @@ class ClientCompanyController extends Controller
                     'about_monetize' => 'nullable',
                     'about_challenges' => 'nullable',
                 ]);
+                if (isset($data['Sustainable_development'])) {
+                    $result->Sustainable_development = json_encode($data['Sustainable_development']);
+                }else{
+                    $result->Sustainable_development = '';
+                }
 
                 $result->info_company = $data['company_description'];
-                $result->Sustainable_development = json_encode($data['Sustainable_development']);
+                // $result->Sustainable_development = json_encode($data['Sustainable_development']);
                 $result->about_problem = $data['about_problem'];
                 $result->about_market_opportunity = $data['about_market_opportunity'];
                 $result->about_competitors = $data['about_competitors'];
@@ -745,7 +748,7 @@ class ClientCompanyController extends Controller
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
-            dd($e);
+            // dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);

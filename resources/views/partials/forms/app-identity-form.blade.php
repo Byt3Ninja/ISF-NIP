@@ -8,7 +8,7 @@
       <label class="form-label mb-2" for="logo">{{ __('settings.Logo') }}</label>
       <input id="logo" type="file" class="form-control" name="logo"
         onchange="previewImage(event, 'logoPreview')">
-      <img id="logoPreview" src="{{ asset('images/logo/' . $Title->Logo) }}" alt="Logo" class="img-fluid mt-2 rounded"
+      <img id="logoPreview" src="{{ $Title->header ? asset('images/logo/' . $Title->Logo) : '/images/upload.jpeg' }}" alt="Logo" class="img-fluid mt-2 rounded"
         style="width: 200px; height: 100px;">
     </div>
 
@@ -18,7 +18,7 @@
         onchange="previewImage(event, 'headerPreview')">
         <img 
         id="headerPreview" 
-        src="{{ asset('images/logo/' . $Title->header) }}" 
+        src="{{ $Title->header ? asset('images/logo/' . $Title->header) : '/images/upload.jpeg' }}" 
         alt="Header" 
         class="img-fluid mt-2 rounded" 
         style="width: 200px; height: 100px;">
@@ -28,7 +28,7 @@
       <label class="form-label mb-2" for="footer">{{ __('settings.footer') }}</label>
       <input id="footer" type="file" class="form-control" name="footer"
         onchange="previewImage(event, 'footerPreview')">
-      <img id="footerPreview" src="{{ asset('images/logo/' . $Title->footer) }}" alt="Footer" class="img-fluid mt-2 rounded"
+      <img id="footerPreview" src="{{ $Title->header ? asset('images/logo/' . $Title->footer) : '/images/upload.jpeg' }}" alt="Footer" class="img-fluid mt-2 rounded"
         style="width: 200px; height: 100px;">
     </div>
   </div>

@@ -42,7 +42,6 @@ class MentorsController extends Controller
 	}
 	public function index($id = 0)
 	{
-		$this->preProcessingCheck('edit_cycles');
 		$organization_id = auth()->user()->organization_id;
 		if ($id == 0) {
 			$id = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -59,7 +58,6 @@ class MentorsController extends Controller
 
 	public function list($id = 0)
 	{
-		$this->preProcessingCheck('edit_cycles');
 		$organization_id = auth()->user()->organization_id;
 		if ($id == 0) {
 			$id = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -77,7 +75,6 @@ class MentorsController extends Controller
 
 	public function assign($id, Request $request)
 	{
-		$this->preProcessingCheck('edit_cycles');
 		if ($request->id) {
 			CyclesMentors::where('cycle_id', $request->id)->delete();
 			if ($request->users) {
@@ -248,7 +245,6 @@ class MentorsController extends Controller
 
 	public function add(Request $request)
 	{
-		// $this->preProcessingCheck('edit_cycles');
 		if ($request->userid) {
 			$dates = explode(',', $request->date);
 			foreach ($dates as $key) {
@@ -326,7 +322,6 @@ class MentorsController extends Controller
 
 	public function sessions(Request $request)
 	{
-		$this->preProcessingCheck('edit_cycles');
 		$organization_id = auth()->user()->organization_id;
 
 		if ($request->show == 'all') {
@@ -453,8 +448,6 @@ class MentorsController extends Controller
 
 	public function modify(Request $request)
 	{
-
-		// $this->preProcessingCheck('edit_mentorship'); /// modify permissions
 		try {
 			$type = $request->rtype;
 			if ($type == 6) {
@@ -579,13 +572,13 @@ class MentorsController extends Controller
 
 	public function delSession($id, Request $request)
 	{
-		$this->preProcessingCheck('edit_cycles');
 		// $zoomId = TrainingSession::findOrFail($id)->zoom_id;
-		if ($request) {
+		if ($request)
+		{
 			// if( $zoomId )
 			// {
-			//	 $zoom = $this->delete( $zoomId );
-			//	 if( !$zoom['success'] ) { return response()->json(['state' => 'failed'], 500); }
+			// 	 $zoom = $this->delete( $zoomId );
+			// 	 if( !$zoom['success'] ) { return response()->json(['state' => 'failed'], 500); }
 			// }
 			MentorshipRequest::findOrFail($id)->delete();
 			return response()->json(['state' => 'success'], 200);

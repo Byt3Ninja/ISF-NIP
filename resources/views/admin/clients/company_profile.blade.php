@@ -158,19 +158,21 @@
             </div>
             <!-- Action Button -->
             <div class="col-md-2 d-flex align-items-center justify-content-end">
-              {{-- organizationManager --}}
-              @if (Auth::user()->hasanyRole('Admin'))
-              <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
+              @if( $_user->hasAnyRole('Admin|organizationManager') )
+                @if( $_user->ableTo('my_company', $permissions) )
+                <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
                   style="border-radius: 15px;">
                   {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
                 </a>
+                @endif
               @endif
-
-              @if (isset(Auth::user()->company()->first()->id) && $company->id == Auth::user()->company()->first()->id)
+              @if( isset( $_user->company()->first()->id ) && $company->id == $_user->company()->first()->id )
+                @if( $_user->ableTo('my_company', $permissions) )
                 <a href="/dashboard/myCompany" class="btn btn-label-primary shadow-sm text-primary fw-bold"
                   style="border-radius: 15px;">
                   {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
                 </a>
+                @endif
               @else
                 <a href="" data-bs-toggle="modal" data-bs-target="#MessageModal"
                   class="btn btn-label-primary shadow-sm text-primary fw-bold text-nowrap" style="border-radius: 15px;">
@@ -679,7 +681,7 @@ if($company->team_num == '1'){
                           class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                           Click here
                         </a>
-                      </div> --}}
+                      </div>
                     </div>
                   </div>
                 @else
@@ -1071,7 +1073,7 @@ if($company->team_num == '1'){
         </div>
         <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
           {!! csrf_field() !!}
-          <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
+          <input type="hidden" name="sender" value="{{ $_user->id }}">
           <input type="hidden" name="receiver" value="{{ $company->user->id }}">
           <div class="modal-body">
             <div class="form-group mb-3">

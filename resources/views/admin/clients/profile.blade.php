@@ -75,12 +75,14 @@
                     </li>
                   </ul>
                 </div>
+                @if( $_user->ableTo('my_profile', $permissions) )
                 <a href="/dashboard/myProfile" class="btn btn-primary mb-1">
                   <i class="ti ti-settings me-3 ti-md"></i>
                   <span class="align-middle">
                     {{$l=='ar'?'تعديل':'Edit'}}
                   </span>
                 </a>
+                @endif
               </div>
             </div>
           </div>
@@ -327,30 +329,30 @@
                         <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
                           <td class="text-center">
                             <div class="d-flex align-items-center gap-1">
-                              <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">
+                              @if( $_user->ableTo('show_mentor_profile', $permissions) ) <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">@endif
                                 <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40"
                                   width="40">
-                              </a>
-                              <a href="{{ route('show_mentor_profile', $task->user_id) }}">
+                              @if( $_user->ableTo('show_mentor_profile', $permissions) )</a> @endif
+                              @if( $_user->ableTo('show_mentor_profile', $permissions) )<a href="{{ route('show_mentor_profile', $task->user_id) }}"> @endif
                                 <div class="media-body">
                                   <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
                                   <span class="font-small-2">{{$task->user->title}}</span>
                                 </div>
-                              </a>
+                              @if( $_user->ableTo('show_mentor_profile', $permissions) )</a>@endif
                             </div>
                           </td>
 
                           <td class="text-center">
                             <div class="d-flex align-items-center gap-1">
-                              <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
+                              @if( $_user->ableTo('company_profile', $permissions) ) <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">@endif
                                 <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40"
                                   width="40">
-                              </a>
-                              <a href="/dashboard/companyProfile/{{$task->company->id}}">
+                              @if( $_user->ableTo('company_profile', $permissions) )</a> @endif
+                              @if( $_user->ableTo('company_profile', $permissions) ) <a href="/dashboard/companyProfile/{{$task->company->id}}"> @endif
                                 <div class="d-flex align-items-center gap-1">
                                   {{$task->company->name }}
                                 </div>
-                              </a>
+                              @if( $_user->ableTo('company_profile', $permissions) ) </a> @endif
                             </div>
                           </td>
 

@@ -416,49 +416,47 @@
                           // تحقق من أن $totalSteps ليست صفرًا قبل عملية القسمة
                           $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
                         @endphp
-                        <div class="d-flex flex-column">
-                          <div class="d-flex align-items-center">
-                            <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
-                            <div style="width: 100%; height: 7px;" class="progress rounded-pill">
-                              <div 
-                                class="progress-bar bg-primary" 
-                                role="progressbar" 
-                                style="width: {{ number_format($presSteps, 2) }}%;" 
-                                aria-valuenow="{{ number_format($presSteps, 2) }}" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100"
-                              ></div>
-                            </div>
-                            <span class="fw-bold mx-1">{{$totalSteps}}/{{$totalStepsFinish}}</span>
-                            <div class="mx-2 position-relative">
-                              <div class="dropdown"></div>
-                               <button
-                                  class="bg-transparent border-none" 
-                                  type="button" id="dropdownMenuButton"   
-                                  data-bs-toggle="dropdown" aria-expanded="false">
-                                  <i class="ti ti-dots-vertical ti-24px"></i>
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                  <li>
-                                    <button 
-                                      class="dropdown-item ccycle" set="1" 
-                                      do="{{ $cycle->id }}"
-                                      onclick="onEditProgramClick({{ $cycle->id }})"
-                                    >
-                                      <i class="ti ti-edit me-2 text-info"></i>
-                                      {{ __('cycles.Edit') }}
+                        <div class="d-flex align-items-center">
+                          <span class="fw-bold mx-1">{{ number_format($presSteps, 2) }}%</span>
+                          <div style="width: 100%; height: 7px;" class="progress rounded-pill">
+                            <div 
+                              class="progress-bar bg-primary" 
+                              role="progressbar" 
+                              style="width: {{ number_format($presSteps, 2) }}%;" 
+                              aria-valuenow="{{ number_format($presSteps, 2) }}" 
+                              aria-valuemin="0" 
+                              aria-valuemax="100"
+                            ></div>
+                          </div>
+                          <span class="fw-bold mx-1">{{$totalSteps}}/{{$totalStepsFinish}}</span>
+                          <div class="mx-2 position-relative">
+                            <div class="dropdown"></div>
+                             <button
+                                class="bg-transparent border-none" 
+                                type="button" id="dropdownMenuButton"   
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ti ti-dots-vertical ti-24px"></i>
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li>
+                                  <button 
+                                    class="dropdown-item ccycle" set="1" 
+                                    do="{{ $cycle->id }}"
+                                    onclick="onEditProgramClick({{ $cycle->id }})"
+                                  >
+                                    <i class="ti ti-edit me-2 text-info"></i>
+                                    {{ __('cycles.Edit') }}
+                                  </button>
+                                </li>
+                                <li>
+                                  @if( $_user->ableTo('delete_user', $permissions) )
+                                    <button class="dropdown-item" onclick="DoChange(3, {{ $cycle->id }})">
+                                      <i class="ti ti-trash me-2 text-danger"></i>
+                                      {{ __('cycles.Delete') }}
                                     </button>
-                                  </li>
-                                  <li>
-                                    @can('delete_user')
-                                      <button class="dropdown-item" onclick="DoChange(3, {{ $cycle->id }})">
-                                        <i class="ti ti-trash me-2 text-danger"></i>
-                                        {{ __('cycles.Delete') }}
-                                      </button>
-                                    @endcan
-                                  </li>
-                                </ul>
-                              </div>
+                                  @endif
+                                </li>
+                              </ul>
                             </div>
                           </div>
                           <!-- / Progress Bar -->
@@ -505,14 +503,14 @@
                             <th>{{ __('cycles.Organization logo') }}</th>
     
                             <th>
-                              @can('edit_user')
+                              @if( $_user->ableTo('edit_user', $permissions) )
                                 {{ __('cycles.Edit') }}
-                              @endcan
+                              @endif
                             </th>
                             <th>
-                              @can('delete_user')
+                              @if( $_user->ableTo('delete_user', $permissions) )
                                 {{ __('cycles.Delete') }}
-                              @endcan
+                              @endif
                             </th>
                           </tr>
                         </thead>
@@ -562,12 +560,12 @@
     
     
                               <td style="font-size: small;">
-                                @can('delete_user')
+                                @if( $_user->ableTo('delete_user', $permissions) )
                                   <div class="btn btn-danger" onclick="DoChange(3, {{ $cycle->id }})">
                                     <span class="align-middle ml-25"><i
                                         class="bx bx-trash ti-24px"></i>{{ __('cycles.Delete') }}</span>
                                   </div>
-                                @endcan
+                                @endif
                               </td>
     
     

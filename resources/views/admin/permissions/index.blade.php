@@ -15,8 +15,6 @@
         </div>
         <div class="content-body">
           <section id="basic-datatable">
-            
-            
             <div class="row">
               <div class="col-12">
                 <div class="card">
@@ -32,10 +30,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                                    <button type="button" class="close" data-bs-dismiss="alert"
-                                                            aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                     <div class="d-flex align-items-center">
                                                         <i class="ti ti-check"></i>
                                                         <span>
@@ -57,7 +52,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                            @foreach($permissions as $key => $permission)
+                                            @foreach($_permissions as $key => $permission)
                                                     <tr>
                                                         <td>
                                                             {{ $permission->id ?? '' }}
@@ -67,7 +62,7 @@
                                                         </td>
                                                         <td>
                                                             <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
-{{--                                                            <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>--}}
+                                                            {{--  <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>  --}}
                                                         </td>
 
                                                     </tr>

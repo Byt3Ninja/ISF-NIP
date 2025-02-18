@@ -28,6 +28,7 @@
         <section class="row">
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
+              @if( $_user->ableToAny(['stages.create', 'stages.store'], $permissions) )
               <div class="card-header">
                 <button 
                   class="btn btn-primary" 
@@ -36,6 +37,7 @@
                   <i class="ti ti-plus mx-2"></i>
                 </button>
               </div>
+              @endif
               <div class="card-body">
                 <div class="card-text">
                   <div class="table-responsive">
@@ -46,7 +48,7 @@
                           <th>{{ __('admin.Stage') }}</th>
                           <th>{{ __('admin.Description') }}</th>
                           <th>{{ __('cycles.Created at') }}</th>
-                          <th>{{ __('cycles.Edit/Delete') }}</th>
+                          @if( $_user->ableToAny(['stages.show', 'stages.edit', 'stages.update', 'stages.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
                         </tr>
                       </thead>
                       <tbody>
@@ -59,264 +61,221 @@
                           <td>{{$stage->{'name_' . $l} }}</td>
                           <td>{{$stage->{'description_' . $l} }}</td>
                           <td>{{$stage->created_at}}</td>
+                          @if( $_user->ableToAny(['stages.show', 'stages.edit', 'stages.update', 'stages.destroy'], $permissions) )
                           <td>
-                            <div class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ShowStage{{ $stage->id }}" >{{__('admin.Show')}}</div>
-                            <div class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#EditStage{{ $stage->id }}">{{__('admin.Edit')}}</div>
+                            @if( $_user->ableTo('stages.show', $permissions) )<div class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ShowStage{{ $stage->id }}" >{{__('admin.Show')}}</div>@endif
+                            @if( $_user->ableToAny(['stages.edit', 'stages.update'], $permissions) )<div class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#EditStage{{ $stage->id }}">{{__('admin.Edit')}}</div>@endif
+                            @if( $_user->ableTo('stages.destroy', $permissions) )
                             <form action="{{ route('stages.destroy', $stage->id) }}" method="POST" style="display: inline-block;">
                               @csrf
                               @method('DELETE')
                               <button class="btn btn-danger" type="submit" onclick="return confirm('Are you sure you want to delete this post?')">{{__('admin.Delete')}}</button>
-                          </form>
-
+                            </form>
+                            @endif
                           </td>
+                          @endif
                         </tr>
-                        <!-- Edit Customer Modal -->
-                        <div class="modal fade" id="EditStage{{ $stage->id }}" tabindex="-1" aria-hidden="true">
-                          <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-                              <div class="modal-content">
-                                  <div class="modal-body">
-                                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                      <div class="text-center mb-6">
-                                          <h4 class="mb-2">{{__('admin.Edit')}} ({{$stage->{'name_'.$l }   }})</h4>
-                                      </div>
-
-                                      <form class="add-new-user pt-0" action="{{ route('stages.update', $stage->id) }}" method="POST">
+                          @if( $_user->ableToAny(['stages.edit', 'stages.update'], $permissions) )
+                          <!-- Edit Customer Modal -->
+                          <div class="modal fade" id="EditStage{{ $stage->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <div class="text-center mb-6"> <h4 class="mb-2">{{__('admin.Edit')}} ({{$stage->{'name_'.$l }   }})</h4> </div>
+                                        <form class="add-new-user pt-0" action="{{ route('stages.update', $stage->id) }}" method="POST">
                                           @csrf
                                           @method('PUT')
-                                        <input type="hidden" value="{{ $stage->id }}" name="stage_id" >
-
-                                        <div class="ecommerce-customer-add-basic mb-4" >
-
-                                            <div class="col-md-12">
-                      
-                                              <div class="mb-6 width49">
-                                                <div>
-                                                    <label for="stage_name_ar" class="form-label" >{{ __('admin.StageName') }} ( {{ __('admin.Arabic') }} )</label>
+                                          <input type="hidden" value="{{ $stage->id }}" name="stage_id" >
+                                          <div class="ecommerce-customer-add-basic mb-4" >
+                                              <div class="col-md-12">
+                                                <div class="mb-6 width49">
+                                                  <div> <label for="stage_name_ar" class="form-label" >{{ __('admin.StageName') }} ( {{ __('admin.Arabic') }} )</label> </div>
+                                                  <input
+                                                      id="stage_name_ar"
+                                                      class="form-control @error('stage_name_ar') is-invalid @enderror"
+                                                      type="text"
+                                                      name="stage_name_ar"
+                                                      autocomplete="off"
+                                                      value="{{$stage->name_ar}}"
+                                                  />
                                                 </div>
-                                                <input
-                                                    id="stage_name_ar"
-                                                    class="form-control @error('stage_name_ar') is-invalid @enderror"
+                                                <div class="mb-6 width49">
+                                                  <div> <label for="stage_name_en" class="form-label" >{{ __('admin.StageName') }} ( {{ __('admin.English') }} )</label> </div>
+                                                  <input
+                                                      id="stage_name_en"
+                                                      class="form-control @error('stage_name_en') is-invalid @enderror"
+                                                      type="text"
+                                                      name="stage_name_en"
+                                                      autocomplete="off"
+                                                      value="{{$stage->name_en}}"
+                                                  />
+                                                </div>
+                                                <div class="mb-6 width49">
+                                                    <div> <label for="stage_Description_ar" class="form-label" >{{__('admin.StageDescription')}} ( {{ __('admin.Arabic') }} )</label> </div>
+                                                    <textarea id="stage_Description_ar" class="form-control @error('stage_Description_ar') is-invalid @enderror"
+                                                      type="text"
+                                                      name="stage_Description_ar"
+                                                      autocomplete="off">{{$stage->description_ar}}
+                                                    </textarea>
+                                                </div>
+                                                <div class="mb-6 width49">
+                                                  <div> <label for="stage_Description_en" class="form-label" >{{__('admin.StageDescription')}} ( {{ __('admin.English') }} )</label> </div>
+                                                  <textarea id="stage_Description_en"
+                                                    class="form-control @error('stage_Description_en') is-invalid @enderror"
                                                     type="text"
-                                                    name="stage_name_ar"
-                                                    autocomplete="off"
-                                                    value="{{$stage->name_ar}}"
-                                                />
-                                            </div>
-                      
-                                            <div class="mb-6 width49">
-                                              <div>
-                                                  <label for="stage_name_en" class="form-label" >{{ __('admin.StageName') }} ( {{ __('admin.English') }} )</label>
+                                                    name="stage_Description_en"
+                                                    autocomplete="off">{{$stage->description_en}}
+                                                  </textarea>
+                                                </div>
                                               </div>
-                                              <input
-                                                  id="stage_name_en"
-                                                  class="form-control @error('stage_name_en') is-invalid @enderror"
-                                                  type="text"
-                                                  name="stage_name_en"
-                                                  autocomplete="off"
-                                                  value="{{$stage->name_en}}"
-                                              />
                                           </div>
-                      
-                      
-                                          <div class="mb-6 width49">
-                                              <div>
-                                                  <label for="stage_Description_ar" class="form-label" >{{__('admin.StageDescription')}} ( {{ __('admin.Arabic') }} )</label>
-                                              </div>
-                                              <textarea id="stage_Description_ar"
-                                              class="form-control @error('stage_Description_ar') is-invalid @enderror"
-                                              type="text"
-                                              name="stage_Description_ar"
-                                              autocomplete="off">{{$stage->description_ar}}</textarea>
-                                              
-                                          </div>
-                        
-                                          <div class="mb-6 width49">
-                                            <div>
-                                                <label for="stage_Description_en" class="form-label" >{{__('admin.StageDescription')}} ( {{ __('admin.English') }} )</label>
-                                            </div>
-                                            <textarea id="stage_Description_en"
-                                            class="form-control @error('stage_Description_en') is-invalid @enderror"
-                                            type="text"
-                                            name="stage_Description_en"
-                                            autocomplete="off">{{$stage->description_en}}</textarea>
-                                            
-                                          </div>
-                      
-                                            </div>
-                                        </div>
-                                        
-
                                           <div class="text-center">
+                                            @if( $_user->ableToAny(['stages.edit', 'stages.update'], $permissions) )
                                               <button type="submit" class="btn btn-primary me-3 data-submit">{{__('admin.submit')}}</button>
-                                              <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
+                                            @endif
+                                            <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
                                           </div>
-                                      </form>
-
-
-
-                                  </div>
-                              </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                           </div>
-                      </div>
-                      <!--/ Edit JO Modal -->
-                      <!-- Show Customer Modal -->
-                    <div class="modal fade" id="ShowStage{{ $stage->id }}" tabindex="-1" aria-hidden="true">
-                      <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-                      <div class="modal-content" dir="ltr">
-                          <div class="modal-body">
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                              <div class="text-center mb-6">
-                                  <h4 class="mb-2">{{__('admin.Show')}} ( {{ $stage->{'name_' . $l} }} )</h4>
-                              </div>
+                          <!--/ Edit JO Modal -->
+                          @endif
+                          @if( $_user->ableTo('stages.show', $permissions) )
+                          <!-- Show Customer Modal -->
+                          <div class="modal fade" id="ShowStage{{ $stage->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+                            <div class="modal-content" dir="ltr">
+                                <div class="modal-body">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <div class="text-center mb-6">
+                                        <h4 class="mb-2">{{__('admin.Show')}} ( {{ $stage->{'name_' . $l} }} )</h4>
+                                    </div>
 
 
-                              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                                  <div class="d-flex gap-4 align-items-center">
-                                      <h6 class="m-0">{{ $stage->{'name_ar'} }} <br> {{ $stage->{'name_en'} }}</h6>
-                                  </div>
-                                  <p class="m-0 d-none d-sm-block">{{ __('admin.Stage') }}</p>
-                              </div>
+                                    <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                                        <div class="d-flex gap-4 align-items-center">
+                                            <h6 class="m-0">{{ $stage->{'name_ar'} }} <br> {{ $stage->{'name_en'} }}</h6>
+                                        </div>
+                                        <p class="m-0 d-none d-sm-block">{{ __('admin.Stage') }}</p>
+                                    </div>
 
 
-                              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                                  <div class="d-flex gap-4 align-items-center">
-                                      <h6 class="m-0">{{$stage->{'description_ar'} }}<br>{{ $stage->{'description_en'} }}</h6>
-                                  </div>
-                                  <p class="m-0 d-none d-sm-block">{{__('admin.StageDescription')}}</p>
-                              </div>
+                                    <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                                        <div class="d-flex gap-4 align-items-center">
+                                            <h6 class="m-0">{{$stage->{'description_ar'} }}<br>{{ $stage->{'description_en'} }}</h6>
+                                        </div>
+                                        <p class="m-0 d-none d-sm-block">{{__('admin.StageDescription')}}</p>
+                                    </div>
 
 
-                              <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
-                                  <div class="d-flex gap-4 align-items-center">
-                                      <h6 class="m-0">{{ $stage->created_at}}</h6>
-                                  </div>
-                                  <p class="m-0 d-none d-sm-block">{{__('admin.Created At')}}</p>
-                              </div>
-                              
+                                    <div class="d-flex justify-content-between align-items-center border-bottom py-4 mb-4">
+                                        <div class="d-flex gap-4 align-items-center">
+                                            <h6 class="m-0">{{ $stage->created_at}}</h6>
+                                        </div>
+                                        <p class="m-0 d-none d-sm-block">{{__('admin.Created At')}}</p>
+                                    </div>
+                                    
 
+                                </div>
+                            </div>
+                            </div>
                           </div>
-                      </div>
-                      </div>
-                    </div>
-                      <!--/ Show Customer Modal -->
+                          <!--/ Show Customer Modal -->
+                          @endif
                         @endforeach
-
                       </tbody>
                     </table>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
         </section>
 
- <!-- Create JobOrder Modal -->
- <div class="modal fade" id="CreateStage" tabindex="-1" aria-hidden="true" dir="rtl">
-  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-      <div class="modal-content">
-          <div class="modal-body">
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              <div class="text-center mb-6">
-                  <h4 class="mb-2">{{__('admin.Stage')}}</h4>
-              </div>
-
-              <form method="POST" action="{{route('stages.store')}}" class="pt-0" >
-                  @csrf
-
-                  <div class="ecommerce-customer-add-basic mb-4" >
-
-                      <div class="col-md-12">
-
-                        <div class="mb-6 width49">
-                          <div>
-                              <label for="stage_name_ar" class="form-label" >{{ __('admin.StageName') }} ( {{ __('admin.Arabic') }} )</label>
+        @if( $_user->ableToAny(['stages.create', 'stages.store'], $permissions) )
+        <!-- Create JobOrder Modal -->
+        <div class="modal fade" id="CreateStage" tabindex="-1" aria-hidden="true" dir="rtl">
+          <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+              <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="text-center mb-6"> <h4 class="mb-2">{{__('admin.Stage')}}</h4> </div>
+                    <form method="POST" action="{{route('stages.store')}}" class="pt-0" >
+                        @csrf
+                        <div class="ecommerce-customer-add-basic mb-4" >
+                          <div class="col-md-12">
+                            <div class="mb-6 width49">
+                              <div> <label for="stage_name_ar" class="form-label" >{{ __('admin.StageName') }} ( {{ __('admin.Arabic') }} )</label> </div>
+                              <input
+                                  id="stage_name_ar"
+                                  class="form-control @error('stage_name_ar') is-invalid @enderror"
+                                  type="text"
+                                  name="stage_name_ar"
+                                  autocomplete="off"
+                              />
+                            </div>
+                            <div class="mb-6 width49">
+                              <div> <label for="stage_name_en" class="form-label" >{{ __('admin.StageName') }} ( {{ __('admin.English') }} )</label> </div>
+                              <input
+                                  id="stage_name_en"
+                                  class="form-control @error('stage_name_en') is-invalid @enderror"
+                                  type="text"
+                                  name="stage_name_en"
+                                  autocomplete="off"
+                              />
+                            </div>
+                            <div class="mb-6 width49">
+                              <div> <label for="stage_Description_ar" class="form-label" >{{__('admin.StageDescription')}} ( {{ __('admin.Arabic') }} )</label> </div>
+                              <textarea id="stage_Description_ar"
+                                class="form-control @error('stage_Description_ar') is-invalid @enderror"
+                                type="text"
+                                name="stage_Description_ar"
+                                autocomplete="off">
+                              </textarea>
+                            </div>
+                            <div class="mb-6 width49">
+                              <div> <label for="stage_Description_en" class="form-label" >{{__('admin.StageDescription')}} ( {{ __('admin.English') }} )</label> </div>
+                              <textarea id="stage_Description_en"
+                                class="form-control @error('stage_Description_en') is-invalid @enderror"
+                                type="text"
+                                name="stage_Description_en"
+                                autocomplete="off">
+                              </textarea>
+                            </div>
                           </div>
-                          <input
-                              id="stage_name_ar"
-                              class="form-control @error('stage_name_ar') is-invalid @enderror"
-                              type="text"
-                              name="stage_name_ar"
-                              autocomplete="off"
-                          />
-                      </div>
-
-                      <div class="mb-6 width49">
-                        <div>
-                            <label for="stage_name_en" class="form-label" >{{ __('admin.StageName') }} ( {{ __('admin.English') }} )</label>
                         </div>
-                        <input
-                            id="stage_name_en"
-                            class="form-control @error('stage_name_en') is-invalid @enderror"
-                            type="text"
-                            name="stage_name_en"
-                            autocomplete="off"
-                        />
-                    </div>
-
-
-                    <div class="mb-6 width49">
                         <div>
-                            <label for="stage_Description_ar" class="form-label" >{{__('admin.StageDescription')}} ( {{ __('admin.Arabic') }} )</label>
+                          @if( $_user->ableToAny(['stages.create', 'stages.store'], $permissions) )
+                            <button type="submit" class="btn btn-primary me-sm-4 data-submit">{{__('admin.submit')}}</button>
+                          @endif
+                            <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
                         </div>
-                        <textarea id="stage_Description_ar"
-                        class="form-control @error('stage_Description_ar') is-invalid @enderror"
-                        type="text"
-                        name="stage_Description_ar"
-                        autocomplete="off"></textarea>
-                        
-                    </div>
-  
-                    <div class="mb-6 width49">
-                      <div>
-                          <label for="stage_Description_en" class="form-label" >{{__('admin.StageDescription')}} ( {{ __('admin.English') }} )</label>
-                      </div>
-                      <textarea id="stage_Description_en"
-                      class="form-control @error('stage_Description_en') is-invalid @enderror"
-                      type="text"
-                      name="stage_Description_en"
-                      autocomplete="off"></textarea>
-                      
-                    </div>
-
-
-                      </div>
-                  </div>
-
-
-
-                  <div>
-                      <button type="submit" class="btn btn-primary me-sm-4 data-submit">{{__('admin.submit')}}</button>
-                      <button type="reset" class="btn btn-label-danger" data-bs-dismiss="offcanvas">{{__('admin.Cancel')}}</button>
-                  </div>
-              </form>
-
+                    </form>
+                </div>
+              </div>
           </div>
-      </div>
-  </div>
-</div>
-<!--/ Create JobOrder Modal -->
-
-
+        </div>
+        <!--/ Create JobOrder Modal -->
+        @endif
       </div>
     </div>
   </div>
   <!-- END: Content-->
-
-
 @stop
 @section('scripts')
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-
-<!-- Page JS -->
-<script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
+  <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  <!-- Page JS -->
+  <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 @stop
 @section('pagescripts')
     <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
@@ -371,10 +330,6 @@
                     }
                 });
             });
-
         });
-
-
-        </script>
-            
+    </script>
 @stop

@@ -31,10 +31,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                <button type="button" class="close" data-bs-dismiss="alert"
-                                        aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 <div class="d-flex align-items-center">
                                     <i class="ti ti-check"></i>
                                     <span>
@@ -95,15 +92,15 @@
                                                 <td style="font-size: small;">{{ __(''.$room->published?'Yes':'No')}}</td>
                                                 <td style="font-size: small;">{{$room->User->{'first_name_'.$l}.' '.$room->User->{'last_name_'.$l} }}</td>
                                                 <td style="font-size: small;">
-                                                    @can('delete_user')
+                                                    @if( $_user->ableTo('delete_user', $permissions) )
                                                         <a  href="{{route('roomImages', ['id' => $room->id])}}" type="submit" class="btn btn-outline-warning btn-sm"><i class="bx bx-image"> </i></a>
-                                                    @endcan
+                                                    @endif
                                                 </td>
                                                 <?php $cont++;?>
                                                 <td style="padding: 0px;font-size: small;">
-                                                    @can('delete_user')
-                                                         <button id='deleteAction' data-id='{{$room->id}}' data-url="{{route('rooms.destroy', ['room' => $room->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="ti ti-trash text-danger"> </i></button>
-                                                    @endcan
+                                                    @if( $_user->ableTo('delete_user', $permissions) )
+                                                        <button id='deleteAction' data-id='{{$room->id}}' data-url="{{route('rooms.destroy', ['room' => $room->id])}}" type="button" class="btn btn-outline-danger btn-sm"><i class="ti ti-trash text-danger"> </i></button>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             @endforeach

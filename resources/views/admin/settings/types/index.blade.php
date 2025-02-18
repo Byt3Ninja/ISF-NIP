@@ -9,10 +9,11 @@
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
-    
+        @if( $_user->ableToAny(['types.create', 'types.store'], $permissions) )
         <div class="invoice-create-btn mb-4">
             <a href="{{route('types.create')}}" class="btn btn-primary glow">{{ __('admin.Add New')}}</a>
         </div>
+        @endif
         <div class="content-body">
             <section id="basic-datatable">
 
@@ -29,10 +30,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                                    <button type="button" class="close" data-bs-dismiss="alert"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                     <div class="d-flex align-items-center">
                                                         <i class="ti ti-check"></i>
                                                         <span>
@@ -52,15 +50,7 @@
                                                     <th>{{ __('admin.English Name')}}</th>
                                                     <th>{{ __('admin.Arabic Name')}}</th>
                                                     <th>{{ __('admin.Created At')}}</th>
-                                                    <th>
-                                                        @can('edit_type')
-                                                            {{ __('admin.Edit')}}
-                                                        @endcan
-
-                                                        @can('delete_type')
-                                                            {{ __('admin.Delete')}}
-                                                        @endcan
-                                                    </th>
+                                                    @if( $_user->ableToAny(['types.show', 'types.edit', 'types.update', 'types.destroy'], $permissions) )<th>{{ __('admin.Actions')}}</th>@endif
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -70,19 +60,19 @@
                                                         <td>{{$type->name_en}}</td>
                                                         <td>{{$type->name_ar}}</td>
                                                         <td>{{$type->created_at}}</td>
+                                                        @if( $_user->ableToAny(['types.show', 'types.edit', 'types.update', 'types.destroy'], $permissions) )
                                                         <td>
-                                                            @can('edit_type')
+                                                            @if( $_user->ableToAny(['types.edit', 'types.update'], $permissions) )
                                                                 <a href="{{route('types.edit', ['type' => $type->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
-                                                            @endcan
-
-                                                            @can('delete_type')
+                                                            @endif
+                                                            @if( $_user->ableTo('types.destroy', $permissions) )
                                                                 <button id='deleteAction' data-id='{{$type->id}}' data-url="{{route('types.destroy', ['type' => $type->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>
-                                                            @endcan
+                                                            @endif
                                                         </td>
+                                                        @endif
                                                     </tr>
                                                 @endforeach
                                             </tbody>
-
                                         </table>
                                     </div>
                                 </div>
@@ -90,9 +80,8 @@
                         </div>
                     </div>
                 </div>
-
+            </section>
         </div>
-        </section>
     </div>
 </div>
 @stop

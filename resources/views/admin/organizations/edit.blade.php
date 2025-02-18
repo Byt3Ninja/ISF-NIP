@@ -1,6 +1,4 @@
-@php
-    $user = $organization->user;
-@endphp
+@php $user = $organization->user; @endphp
 @extends('layouts.admin')
 @section('title', __('admin.Organizations') )
 @section('index_url', route('organizations.index') )
@@ -8,44 +6,38 @@
 @section('content')
 <style>
 	.progress-bar-container {
-	  width: 100%;
-	  background-color: #f3f3f3;
-	  border: 1px solid #ccc;
-	  border-radius: 5px;
-	  overflow: hidden;
-	  margin-top: 10px;
+		width: 100%;
+		background-color: #f3f3f3;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+		overflow: hidden;
+		margin-top: 10px;
 	}
 	.progress-bar {
-	  height: 20px;
-	  background-color: #4caf50;
-	  width: 0%;
-	  transition: width 0.3s;
+		height: 20px;
+		background-color: #4caf50;
+		width: 0%;
+		transition: width 0.3s;
 	}
-  </style>
+</style>
 <!-- BEGIN: Content-->
 <div class="app-content content">
 	<div class="content-overlay"></div>
 	<div class="content-wrapper">
-		
 		<div class="content-body">
 			<!-- BuilderForm start -->
 			<section id="basic-input">
 				<div class="row">
 					<div class="col-md-12">
 						<div class="card">
-							<div class="card-header">
-								<h4 class="card-title">{{__('admin.Edit organization')}}</h4>
-							</div>
+							<div class="card-header"> <h4 class="card-title">{{__('admin.Edit organization')}}</h4> </div>
 							<div class="card-content">
 								<div class="card-body">
 									@if(session()->has('msg'))
 									<div class="row">
 										<div class="col-md-12">
 											<div class="alert alert-warning alert-danger mb-2" role="alert">
-												<button type="button" class="close" data-bs-dismiss="alert"
-													aria-label="Close">
-													<span aria-hidden="true">&times;</span>
-												</button>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 												<div class="d-flex align-items-center">
 													<i class="ti ti-error"></i>
 													<span>
@@ -73,7 +65,7 @@
 									@endif
 									<form method="post" action="{{ route('organizations.update', ['organization' => $organization->id]) }}" enctype="multipart/form-data">
 										{!! csrf_field() !!}
-                                        <input name="_method" type="hidden" value="PATCH" />
+										<input name="_method" type="hidden" value="PATCH" />
 										<div class="row">
 											<div class="col-lg-6 col-md-6 col-sm-12">
 												<fieldset class="form-group">
@@ -121,7 +113,7 @@
 															<!-- right bottom-icon -->
 															<div class="progress-bar-container">
 																<div id="progress-bar" class="progress-bar"></div>
-															  </div>
+															</div>
 															
 															</div>
 															{{-- <div 
@@ -139,7 +131,7 @@
 													<label for="basicInput">{{__('admin.Organization Manager English Name')}}</label>
 													<div class="row">
 														<div class="col-md-6">
-															<input  name="first_name_en" type="text"
+															<input name="first_name_en" type="text"
 																class="form-control" id="first_name_en" value="{{ $user->first_name_en }}"
 																placeholder="{{ __('admin.First Name') }}" required
 																autocomplete="first_name_en" autofocus />
@@ -224,11 +216,13 @@
 												</div>
 											</div>
 										</div> --}}
+										@if( $_user->ableToAny(['organizations.edit', 'organizations.update'], $permissions) )
 										<div class="row">
 											<div class="col-12 d-flex justify-content-end">
 												<button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
 											</div>
 										</div>
+										@endif
 									</form>
 								</div>
 							</div>
@@ -243,41 +237,31 @@
 <!-- END: Content-->
 @stop
 @section('pagescripts')
-<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
-<script>
-    $('.lfm').filemanager('file');
-
-	const fileInput = document.getElementById('file1');
-	const previewImage = document.getElementById('company-logo');
-	const progressBar = document.getElementById('progress-bar');
-
-  fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-
-      reader.onloadstart = () => {
-        progressBar.style.width = '0%';
-      };
-
-      reader.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percentLoaded = Math.round((event.loaded / event.total) * 100);
-          progressBar.style.width = `${percentLoaded}%`;
-        }
-      };
-
-      reader.onload = (event) => {
-        previewImage.src = event.target.result;
-        progressBar.style.width = '100%';
-      };
-
-      reader.onerror = () => {
-        alert('Error loading file');
-      };
-
-      reader.readAsDataURL(file);
-    }
-  });
-  </script>
+	<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+	<script>
+		$('.lfm').filemanager('file');
+		const fileInput = document.getElementById('file1');
+		const previewImage = document.getElementById('company-logo');
+		const progressBar = document.getElementById('progress-bar');
+		fileInput.addEventListener('change', (event) => {
+			const file = event.target.files[0];
+			if( file )
+			{
+				const reader = new FileReader();
+				reader.onloadstart = () => { progressBar.style.width = '0%'; };
+				reader.onprogress = (event) => {
+					if (event.lengthComputable) {
+						const percentLoaded = Math.round((event.loaded / event.total) * 100);
+						progressBar.style.width = `${percentLoaded}%`;
+					}
+				};
+				reader.onload = (event) => {
+					previewImage.src = event.target.result;
+					progressBar.style.width = '100%';
+				};
+				reader.onerror = () => { alert('Error loading file'); };
+				reader.readAsDataURL(file);
+			}
+		});
+	</script>
 @stop

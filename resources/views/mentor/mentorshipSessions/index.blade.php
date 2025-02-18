@@ -68,7 +68,7 @@
                           <th class="text-center">{{__('cycles.Date/Time')}}</th>
                           <th class="text-center">{{__('mentor.mentorshipTasks.completedTasks')}}</th>
                           <th class="text-center">{{__('mentor.mentorshipTasks.nonCompletedTasks')}}</th>
-                          <th class="text-center">{{__('mentor.mentorshipTasks.all')}}</th>
+                          @if( $_user->ableTo('mentorshipTasks.index', $permissions) )<th class="text-center">{{__('mentor.mentorshipTasks.all')}}</th>@endif
                         </tr>
                       </thead>
                       <tbody>
@@ -78,8 +78,7 @@
                           <td class="text-center">{{ $loop->iteration }}</td>
                           <td class="text-center">
                             <div class="d-flex align-items-center gap-1">
-                              <a class="media-left mr-50"
-                                href="/dashboard/companyProfile/{{$session->user->company->id}}">
+                              @if( $_user->ableTo('company_profile', $permissions) )<a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">@endif
                                 <img 
                                   src="{{
                                     $session->user->company->logo_url ?? '/images/logo-placeholder.png'
@@ -88,7 +87,7 @@
                                   class="rounded-circle w-px-40 h-px-40 border border-light"
                                   onerror="this.src='/images/logo-placeholder.png';"
                                 >
-                              </a>
+                                @if( $_user->ableTo('company_profile', $permissions) )</a>@endif
                               <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                 <div class="d-flex align-items-center gap-1 text-nowrap">
                                   {{$session->user->company->name }}
@@ -160,6 +159,7 @@
                           </td>
                           <td class="text-center"> {{
                             $session->mentorshipTasks()->where('status','pending')->whereNotNull('title')->count() }}</td>
+                          @if( $_user->ableTo('mentorshipTasks.index', $permissions) )
                           <td class="text-center">
 
                             <a href="{{ route('mentorshipTasks.index',['mentorship_id'=>$session->id]) }}"
@@ -169,6 +169,7 @@
                               {{ $l == 'en' ? 'View' : 'عرض' }}</a>
                               
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                       </tbody>

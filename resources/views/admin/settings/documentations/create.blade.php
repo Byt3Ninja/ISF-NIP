@@ -83,7 +83,7 @@
                                     {{ __('admin.Users') }}</option>
                                   <option value="mentor" {{ old('role') == 'mentor' ? 'selected' : '' }}>
                                     {{ __('admin.Mentors') }}</option>
-                                  <option value="judge" {{ old('role') == 'judge' ? 'selected' : '' }}>
+                                  <option value="judge" {{ old('role') == 'judger' ? 'selected' : '' }}>
                                     {{ __('admin.Judgers') }}</option>
                                   <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>
                                     {{ __('admin.Managers') }}</option>

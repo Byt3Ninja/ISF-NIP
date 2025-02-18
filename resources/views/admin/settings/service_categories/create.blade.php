@@ -23,10 +23,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                    <button type="button" class="close" data-bs-dismiss="alert"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                     <div class="d-flex align-items-center">
                                                         <i class="ti ti-error"></i>
                                                         <span>
@@ -72,14 +69,15 @@
 
                                             </div>
                                         </div>
+                                        @if( $_user->ableToAny(['serviceCategories.create', 'serviceCategories.store'], $permissions) )
                                         <div class="row">
                                             <div class="col-12 d-flex justify-content-end">
-                                                <button type="submit"
-                                                    class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
+                                                <button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
                                             </div>
                                         </div>
+                                        @endif
+                                    </form>
                                 </div>
-                                </form>
                             </div>
                         </div>
                     </div>

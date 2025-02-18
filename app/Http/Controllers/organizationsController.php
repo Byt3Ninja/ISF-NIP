@@ -68,7 +68,7 @@ class organizationsController extends Controller
 			$role->save();
 		}
 		$user = User::create($request->except(['_token', 'name_en', 'name_ar', 'password_confirmation']));
-		$user->assignRole($role->id);
+		$user->allotRole($role->id);
 
 		$organization = new Organization;
 		$organization->name_ar = $request->name_ar;

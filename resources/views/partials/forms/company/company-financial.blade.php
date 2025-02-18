@@ -3,7 +3,7 @@
     <div class="border-bottom border-light mb-6">
       <h5 class="card-title">{{ $tab['label'] }}</h5>
     </div>
-    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+    @if($_user->hasAnyRole('Admin|organizationManager'))
     <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
       enctype="multipart/form-data">
 @else

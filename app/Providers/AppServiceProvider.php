@@ -32,6 +32,12 @@ class AppServiceProvider extends ServiceProvider
                     App::setLocale($userLanguage);
                 }
             }
+            $permissions = [];
+            $_user = auth()->user();
+            if( auth()->check() )
+            {
+                $permissions = $_user->myPermissions();
+            }
             $l = App::getLocale();
             $organization_id = null;
             if (auth()->check()) {
@@ -41,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
                     $organization_id = auth()->user()->organization_id;
                 }
             }
-            $view->with('l', $l)->with('organization_id', $organization_id);
+            $view->with(['l' => $l, 'organization_id' => $organization_id, '_user' => $_user, 'permissions' => $permissions]);
         });
 
 

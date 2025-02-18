@@ -408,12 +408,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                             </button>
                           </li>
                           <li>
-                            @can('delete_user')
+                            @if( $_user->ableTo('delete_user', $permissions) )
                             <button class="dropdown-item text-dark" id="deleteButton">
                               <i class="ti ti-trash me-2 text-danger"></i>
                               {{ __('cycles.Delete') }}
                             </button>
-                            @endcan
+                            @endif
                           </li>
                         </ul>
                       </div>
@@ -494,12 +494,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -602,12 +602,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -853,12 +853,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -1080,12 +1080,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -1266,12 +1266,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
