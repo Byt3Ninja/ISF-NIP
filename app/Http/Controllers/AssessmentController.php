@@ -333,20 +333,34 @@ public function MakeAssessment()
                     ->where('user_id', $userid)
                     ->where('assessment_id', $assessment_user->id)
                     ->get();
+                // $Analysis_user_scores = $categories->map(function ($category) {
+                //     $questions = $category->question;
+                //     $subcategories = $category->subcategory->map(function ($subcategory) use ($questions) {                        $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
+                //         $total_questions = $subcategory_questions->count();
+                //         $answered_questions = $subcategory_questions->whereNotNull('answer')->count();
+                //         return [
+                //             'name_ar'           => $subcategory->name_ar,
+                //             'name_en'           => $subcategory->name_en,
+                //             'total'   => $total_questions,
+                //             'totalAnswered'=> $answered_questions,
+                //         ];
+                //     });
+                //     return $subcategories;
+                // })->flatten();
                 $Analysis_user_scores = $categories->map(function ($category) {
                     $questions = $category->question;
-                    $subcategories = $category->subcategory->map(function ($subcategory) use ($questions) {                        $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
+                    return $category->subcategory->map(function ($subcategory) use ($questions) {
+                        $subcategory_questions = $questions->where('subcategory_id', $subcategory->id);
                         $total_questions = $subcategory_questions->count();
-                        $answered_questions = $subcategory_questions->whereNotNull('answer')->count();
-                        return [
-                            'name_ar'           => $subcategory->name_ar,
-                            'name_en'           => $subcategory->name_en,
-                            'total'   => $total_questions,
-                            'totalAnswered'=> $answered_questions,
+                        $answered_questions = $subcategory_questions->where('score', '!=', 0)->count();
+                        return (object) [
+                            'name_ar' => $subcategory->name_ar,
+                            'name_en' => $subcategory->name_en,
+                            'total' => $total_questions,
+                            'totalAnswered' => $answered_questions,
                         ];
                     });
-                    return $subcategories;
-                })->flatten();
+                })->flatten()->toArray();
                 return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores'));
         }else{
             $Analysis_user_scores = [];

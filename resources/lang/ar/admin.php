@@ -12,7 +12,7 @@ return [
 	'myinterests' => 'إهتماماتي',
 	'InvitationSent' => 'تم ارسال الدعوة بنجاح',
 	'invitationExpired' => 'انتهت صلاحية الدعوة',
-	'user_exists' => 'المستخدم موجود',
+	'user_exists' => 'هذا الحساب موجود',
 	'manage_currencies' => 'إدارة العملات',
 	'Currencies' => 'العملات',
 	'Add_Currency' => 'أضف العملة',
@@ -1258,6 +1258,7 @@ return [
 	'instagram_url_Not_URL' => 'يجب ان يكون رابط الانستغرام صالح',
 	'Address is required' => 'العنوان مطلوب',
 	'Name is required' => 'الاسم مطلوب',
-
+	'upload_video_url' => 'رابط الفيديو',
+	'pitch_deck_video_should_be_valid_video_url' => 'يجب أن يكون رابط الفيديو صالح',
 ];
 

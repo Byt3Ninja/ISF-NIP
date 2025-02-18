@@ -144,7 +144,7 @@ return [
 	'Code' => 'Code',
 	'InvitationSent' => 'Invitation Sent Successfully',
 	'invitationExpired' => 'Invitation Expired',
-	'user_exists' => 'User already exists',
+	'user_exists' => 'Your Account already Exists',
 	'user_already_registered' => 'User Already Registered',
 	'send_invitation' => 'Send Invitation',
 	'Name' => 'Name',
@@ -1257,4 +1257,6 @@ return [
 	'Phone is required' => 'Phone is required',
 	'Address is required' => 'Address is required',
 	'Name is required' => 'Name is required',
+	'upload_video_url' => 'Upload Video URL',
+	'pitch_deck_video_should_be_valid_video_url' => 'Pitch deck video should be a valid video URL',
 ];

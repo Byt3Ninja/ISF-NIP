@@ -124,7 +124,7 @@
   const pusherConfig = @json(getPusherConfig());
   const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
   const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
-  Pusher.logToConsole = true;
+  // Pusher.logToConsole = true;
 
   const pusher = new Pusher(pusherAppKey, {
      cluster: pusherCluster,
@@ -133,7 +133,7 @@
 
     const channel = pusher.subscribe('step-changes');
     channel.bind('ChangeStep', function(event) {
-      console.log(event.message);
+      // console.log(event.message);
     });
 </script>
 @endif
