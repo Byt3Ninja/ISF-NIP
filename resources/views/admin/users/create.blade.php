@@ -84,7 +84,7 @@
                             <div class="col-md-6 col-12 mb-4">
                               <label class="fs-6 fw-semibold form-label mb-1" for="role">{{ __('admin.Role') }}</label>
                               <select class="form-select" required id="role" name='role'>
-                                <option>{{ __('admin.Role') }}</option>
+                                <option disabled value="" selected>{{ __('admin.Select_Role') }}</option>
                                 @foreach ($roles as $role)
                                 <option value="{{ $role->name }}" {{ old('role')==$role->name ? 'selected' : '' }}>
                                   {{ __('admin.' . $role->name) }}</option>
