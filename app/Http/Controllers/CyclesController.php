@@ -115,20 +115,33 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
-
         $this->preProcessingCheck('edit_cycles');
         $id = $request->cycleid;
         $type = $request->type;
+
+        if ($request->has('date_range')) {
+            $dates = explode(' - ', $request->date_range);
+            $request->merge([
+                'start' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
+                'end' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
+                'fromDate' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
+                'toDate' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
+
+            ]);
+        }
+       
         if ($type == 1) {
+            
 
             /// Edit Cycle
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:2000',
-                'start' => 'required|date|before:end',
-                'end' => 'required|date|after:start',
+                'date_range' => 'required|date',
             ]);
+
+
 
             $cycle = Cycle::find($id);
 
@@ -453,7 +466,7 @@ class CyclesController extends Controller
 
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {
-            return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first', 'class' => 'danger']);
+            return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first.', 'class' => 'danger']);
         }
         if (!Auth::user()->company) {
             return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);

@@ -990,15 +990,16 @@ public function acceptInvitation(Request $request, $invitationId)
         'password' => 'required|min:8|confirmed',
     ]);
 
-    $invitation = Invitation::findOrFail($invitationId);
+    $invitation = Invitation::find($invitationId);
 
+    // If the invitation has expired
     if ($invitation->expires_at < now()) {
-        return redirect()->route('login')->with('error', 'Invitation has expired.');
+         return redirect()->back()->withErrors(['error' => __('admin.invitationExpired')]);
     }
 
-    // Check if user exists
+    // If the user already exists
     if (User::where('email', $invitation->email)->exists()) {
-        return redirect()->route('login')->with('message2', __('admin.user_exists'));
+        return redirect()->back()->withErrors(['error' => __('admin.user_exists')]);
     }
 
     $user = User::create([
