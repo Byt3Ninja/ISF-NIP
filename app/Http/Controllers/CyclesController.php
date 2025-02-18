@@ -115,9 +115,6 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
-
-        
-      
         $this->preProcessingCheck('edit_cycles');
         $id = $request->cycleid;
         $type = $request->type;
