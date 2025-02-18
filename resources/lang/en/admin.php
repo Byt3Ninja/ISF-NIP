@@ -1259,4 +1259,6 @@ return [
 	'Name is required' => 'Name is required',
 	'upload_video_url' => 'Upload Video URL',
 	'pitch_deck_video_should_be_valid_video_url' => 'Pitch deck video should be a valid video URL',
+	'Select_Role' => 'Select Role',
+	'manager' => 'Manager',
 ];

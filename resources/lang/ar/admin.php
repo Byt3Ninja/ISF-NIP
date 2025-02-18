@@ -1275,5 +1275,7 @@ return [
 	'Name is required' => 'الاسم مطلوب',
 	'upload_video_url' => 'رابط الفيديو',
 	'pitch_deck_video_should_be_valid_video_url' => 'يجب أن يكون رابط الفيديو صالح',
+	'Select_Role' => 'اختر الدور',
+	'manager' => 'مدير',
 ];
 
