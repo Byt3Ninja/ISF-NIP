@@ -1277,5 +1277,16 @@ return [
 	'pitch_deck_video_should_be_valid_video_url' => 'يجب أن يكون رابط الفيديو صالح',
 	'Select_Role' => 'اختر الدور',
 	'manager' => 'مدير',
+	'No_data_available_in_table' => 'لا يوجد بيانات في الجدول',
+	'Loading' => 'جاري التحميل',
+	'No_matching_records_found' => 'لا يوجد سجلات مطابقة',
+	'First' => 'الاول',
+	'Previous' => 'السابق',
+	'Last' => 'الاخير',
+	'Showing_0_to_0_of_0_entries' => 'عرض 0 إلى 0 من 0 سجلات',
+	'Entries' => 'مدخلات',
+	'Entries2' => 'مُدخل',
+	'Filtered' => 'منتقاة من مجموع ',
+	'Of' => 'من أصل ',
 ];
 
