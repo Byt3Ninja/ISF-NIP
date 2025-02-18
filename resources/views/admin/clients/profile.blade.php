@@ -456,22 +456,22 @@
 
       $('.zero-configuration').DataTable({
                     "language": {
-                        "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
-                        "sLoadingRecords": "جارٍ التحميل...",
-                        "sProcessing":   "جارٍ التحميل...",
-                        "sLengthMenu":   "أظهر _MENU_ مدخلات",
-                        "sZeroRecords":  "لم يعثر على أية سجلات",
-                        "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                        "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل",
-                        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                        "sEmptyTable":     "{{ __('admin.No_data_available_in_table') }}",
+                        "sLoadingRecords": "{{ __('admin.Loading') }}...",
+                        "sProcessing":   "{{ __('admin.Loading') }}...",
+                        "sLengthMenu":   "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
+                        "sZeroRecords":  "{{ __('admin.No_matching_records_found') }}",
+                        "sInfo":         "{{ __('admin.Show') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
+                        "sInfoEmpty":    "{{ __('admin.Showing_0_to_0_of_0_entries') }}",
+                        "sInfoFiltered": "({{ __('admin.Filtered') }} _MAX_ {{ __('admin.Entries2') }})",
                         "sInfoPostFix":  "",
-                        "sSearch":       "ابحث:",
+                        "sSearch":       "{{ __('admin.Search') }}:",
                         "sUrl":          "",
                         "oPaginate": {
-                            "sFirst":    "الأول",
-                            "sPrevious": "السابق",
-                            "sNext":     "التالي",
-                            "sLast":     "الأخير"
+                            "sFirst":    "{{ __('admin.First') }}",
+                            "sPrevious": "{{ __('admin.Previous') }}",
+                            "sNext":     "{{ __('admin.Next') }}",
+                            "sLast":     "{{ __('admin.Last') }}"
                         },
                         "oAria": {
                             "sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً",
