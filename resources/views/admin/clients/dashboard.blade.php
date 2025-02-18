@@ -856,8 +856,8 @@
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span>
                     </td>
-                    <td>{{ Carbon\Carbon::parse($step->from)->format('m-d') }}</td>
-                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m') }}</td>
+                    <td>{{ Carbon\Carbon::parse($step->from)->format('Y-m-d') }}</td>
+                    <td>{{ Carbon\Carbon::parse($step->to)->format('Y-m-d') }}</td>
                     <td style="height: 50px;">
                       <span style="width: 350px; height: 100%; display: inline-block; white-space: normal;">
                         {{ $step->description ? $step->description : '...' }}
@@ -914,7 +914,7 @@
 													</p>
                           <div class="d-flex align-items-center justify-content-between" style="width:100%">
                             <small class="text-muted" style="text-transform: capitalize">
-                              {{__('dashboard.start from')}} {{$cycle->start->format('d-m-Y')}}
+                              {{__('dashboard.start from')}} {{$cycle->start->format('Y-m-d')}}
                             </small>
                             <a href="/dashboard/cycles/view/{{$cycle->id}}" class="btn btn-primary">
                               <span class="mx-2">{{__('dashboard.Join')}}</span>
