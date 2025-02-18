@@ -9,15 +9,7 @@ class TimeSheet extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title',
-                            'user_id',
-                            'date',
-                            'hours_worked',
-                            'description',
-                            'category_id',
-                            'program_id',
-                            'status'
-                        ];
+    protected $fillable = ['title', 'user_id', 'date', 'hours_worked', 'description', 'category_id', 'program_id', 'status'];
 
     public function user()
     {

@@ -87,7 +87,7 @@ class RegisterController extends Controller
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
             ]);
-            $user->assignRole($data['role']);
+            $user->allotRole($data['role']);
 
 
             if ($data['role'] == "Mentor") {
@@ -129,7 +129,7 @@ class RegisterController extends Controller
                 'password' => Hash::make($data['password']),
                 'email_verified_at' => now(),
             ]);
-            $user->assignRole($data['role']);
+            $user->allotRole($data['role']);
 
 
             if ($data['role'] == "Mentor") {

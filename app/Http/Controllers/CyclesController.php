@@ -70,8 +70,6 @@ class CyclesController extends Controller
     }
     public function index($id = 0)
     {
-        $this->preProcessingCheck('edit_cycles');
-
         $organization_id = auth()->user()->organization_id;
 
         $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -92,7 +90,6 @@ class CyclesController extends Controller
 
     public function users($id)
     {
-        $this->preProcessingCheck('edit_cycles');
         $organization_id = auth()->user()->organization_id;
 
         if ($id == 0) {
@@ -115,7 +112,7 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
-        $this->preProcessingCheck('edit_cycles');
+
         $id = $request->cycleid;
         $type = $request->type;
 

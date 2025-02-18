@@ -1,5 +1,5 @@
 @php
-  $formAction = Auth::user()->hasanyRole('Admin|organizationManager')
+  $formAction = $_user->hasAnyRole('Admin|organizationManager')
     ? route('update_my_company', $client->company->id)
     : route('update_my_company');
 @endphp

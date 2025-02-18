@@ -53,29 +53,28 @@ class HomeController extends Controller
     public function index()
     {
         $user = auth()->user();
-        if ($user->hasanyRole('Admin|Editor|Manager')) {
+        if ($user->hasAnyRole('Admin|Editor|Manager')) {
 
             return $this->AdminDashboard();
-        } elseif ($user->hasRole('Registered|Page Manager|Pages Editor')) {
+        } elseif ($user->hasAnyRole('Registered|Page Manager|Pages Editor')) {
 
             return view('admin.clients.dashboard');
-        } elseif ($user->hasRole('organizationManager')) {
+        } elseif ($user->hasAnyRole('organizationManager')) {
 
             return $this->organizationDashboard();
-        } elseif ($user->hasRole('Mentor')) {
+        } elseif ($user->hasAnyRole('Mentor')) {
 
             if (!Auth::user()->bio) {
                 return redirect('/dashboard/myProfile#bio');
             }
             return $this->mentorDashboard();
-        } elseif ($user->hasRole('Judger')) {
+        } elseif ($user->hasAnyRole('Judger')) {
 
             return $this->judgerDashboard();
-        } elseif ($user->hasRole('Disabled')) {
+        } elseif ($user->hasAnyRole('Disabled')) {
 
             return view('admin.clients.disabled');
-        } else
-            abort(401);
+        }
     }
 
     // ============> Functions of dashboards
@@ -437,13 +436,9 @@ class HomeController extends Controller
 
 
         // Male and Female Ratio
-        $data['usersgender'] = User::where('organization_id', $organization_id)
-        ->select('gender', DB::raw('count(*) as total'))
-        ->groupBy('gender')
-        ->get();
+        $usersgender = User::select('gender', DB::raw('count(*) as total'))->where('organization_id', $organization_id)->groupBy('gender')->get();
+        $data['usersgender'] = $usersgender;
 
-
-    
         // Development Stage  
 
         $data['development_stages'] = [];
@@ -838,7 +833,7 @@ class HomeController extends Controller
     }
     public function help($id = 1)
     {
-        if (Auth::user()->hasanyRole('Admin|Manager')) {
+        if (Auth::user()->hasAnyRole('Admin|Manager')) {
             $role = 'admin';
         } elseif (Auth::user()->hasRole('Mentor')) {
             $role = 'mentor';

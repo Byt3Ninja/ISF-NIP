@@ -8,6 +8,7 @@ use App\Http\Controllers\Mentor\MentorshipTaskController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
 Route::get('test', function () {});
+Route::get('default-permissions', function() { App\Permission::default_permissions(); });
 // routes/web.php
 //Route::get('create-meeting', 'MicrosoftController@createMeeting');
 //Route::get('test', function () {
@@ -73,49 +74,49 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::resource('documentation', 'DocumentationController');
 
 
-    Route::get('calendar/{id}/edit', 'SettingsController@editcal');
-    Route::post('calendar/{id}/update', 'SettingsController@updatecal');
-    Route::get('calendar/{id}/delete', 'SettingsController@delcal');
-    Route::post('calendar/view', 'SettingsController@viewcal');
+    Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.edit');
+    Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.update');
+    Route::get('calendar/{id}/delete', 'SettingsController@delcal')->name('calendar.destroy');
+    Route::post('calendar/view', 'SettingsController@viewcal')->name('calendar.show');
     // Sliders Routes
-    Route::get('add_slide', 'SlidersController@add_slide');
-    Route::post('store_slide', 'SlidersController@store_slide');
-    Route::any('slides', 'SlidersController@slides');
-    Route::get('edit_slide/{id}', 'SlidersController@editslide');
-    Route::post('update_slide/{id}', 'SlidersController@updateslide');
-    Route::get('delete_slide/{id}', 'SlidersController@deleteslide');
+    Route::get('add_slide', 'SlidersController@add_slide')->name('slides.create');
+    Route::post('store_slide', 'SlidersController@store_slide')->name('slides.store');
+    Route::any('slides', 'SlidersController@slides')->name('slides.index');
+    Route::get('edit_slide/{id}', 'SlidersController@editslide')->name('slides.edit');
+    Route::post('update_slide/{id}', 'SlidersController@updateslide')->name('slides.update');
+    Route::get('delete_slide/{id}', 'SlidersController@deleteslide')->name('slides.destroy');
     // Menus Routes
-    Route::get('add_menu', 'MenusController@add_menu');
-    Route::post('store_menu', 'MenusController@store_menu');
-    Route::any('menus', 'MenusController@myMenus');
-    Route::get('edit_menu/{id}', 'MenusController@editMenu');
-    Route::post('update_menu/{id}', 'MenusController@updatemenu');
-    Route::get('delete_menu/{id}', 'MenusController@deleteMenu');
+    Route::get('add_menu', 'MenusController@add_menu')->name('menus.create');
+    Route::post('store_menu', 'MenusController@store_menu')->name('menus.store');
+    Route::any('menus', 'MenusController@myMenus')->name('menus.index');
+    Route::get('edit_menu/{id}', 'MenusController@editMenu')->name('menus.edit');
+    Route::post('update_menu/{id}', 'MenusController@updatemenu')->name('menus.update');
+    Route::get('delete_menu/{id}', 'MenusController@deleteMenu')->name('menus.destroy');
     // Posts Routes
-    Route::get('addpost', 'PostsController@add_post');
-    Route::post('storepost', 'PostsController@store_post');
-    Route::any('posts', 'PostsController@myposts');
-    Route::get('editpost/{id}', 'PostsController@editpost');
-    Route::post('updatepost/{id}', 'PostsController@updatepost');
-    Route::get('deletepost/{id}', 'PostsController@deletepost');
+    Route::get('addpost', 'PostsController@add_post')->name('posts.create');
+    Route::post('storepost', 'PostsController@store_post')->name('posts.store');
+    Route::any('posts', 'PostsController@myposts')->name('posts.index');
+    Route::get('editpost/{id}', 'PostsController@editpost')->name('posts.edit');
+    Route::post('updatepost/{id}', 'PostsController@updatepost')->name('posts.update');
+    Route::get('deletepost/{id}', 'PostsController@deletepost')->name('posts.destroy');
     // Pages Routes
-    Route::get('addpage', 'PagesController@add_page');
-    Route::post('storepage', 'PagesController@store_page');
-    Route::any('pages', 'PagesController@mypages');
-    Route::get('editpage/{id}', 'PagesController@editpage');
-    Route::post('updatepage/{id}', 'PagesController@updatepage');
-    Route::get('deletepage/{id}', 'PagesController@deletepage');
-    Route::get('editmypage', 'PagesController@editmypage');
+    Route::get('addpage', 'PagesController@add_page')->name('pages.create');
+    Route::post('storepage', 'PagesController@store_page')->name('pages.store');
+    Route::any('pages', 'PagesController@mypages')->name('pages.index');
+    Route::get('editpage/{id}', 'PagesController@editpage')->name('pages.edit');
+    Route::post('updatepage/{id}', 'PagesController@updatepage')->name('pages.update');
+    Route::get('deletepage/{id}', 'PagesController@deletepage')->name('pages.destroy');
+    Route::get('editmypage', 'PagesController@editmypage')->name('pages.editMyPage');
     // Pages Events
-    Route::get('addevent', 'EventsController@add_event');
-    Route::post('storeevent', 'EventsController@store_event');
-    Route::any('allevents', 'EventsController@myevent');
-    Route::get('editevent/{id}', 'EventsController@editevent');
-    Route::post('updateevent/{id}', 'EventsController@updateevent');
-    Route::get('deleteevent/{id}', 'EventsController@deleteevent');
+    Route::get('addevent', 'EventsController@add_event')->name('events.create');
+    Route::post('storeevent', 'EventsController@store_event')->name('events.store');
+    Route::any('allevents', 'EventsController@myevent')->name('events.index');
+    Route::get('editevent/{id}', 'EventsController@editevent')->name('events.edit');
+    Route::post('updateevent/{id}', 'EventsController@updateevent')->name('events.update');
+    Route::get('deleteevent/{id}', 'EventsController@deleteevent')->name('events.destroy');
     // Settings Routes
-    Route::any('settings', 'SettingsController@get_settings');
-    Route::post('update_settings', 'SettingsController@update_settings');
+    Route::any('settings', 'SettingsController@get_settings')->name('settings.list');
+    Route::post('update_settings', 'SettingsController@update_settings')->name('settings.save');
     Route::any('setaboutus', 'SettingsController@get_aboutus');
     Route::post('updateaboutus', 'SettingsController@update_aboutus');
     Route::any('setcontactus', 'SettingsController@get_contactus');
@@ -168,7 +169,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('updatebio_my_profile');
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('update_my_profile_password');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
-    Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('Mentors_Filter');
+    Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('email.confirm');
 
 
@@ -235,9 +236,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('get_states', 'CityController@states')->name('get_states_by_country');
 
     //FileManager
-    Route::get('/myFiles', 'FilemanagerController@index');
-    Route::get('/uploads/files/{id}/{path}', 'FilemanagerController@showfile')->where('path', '.*');
-    Route::get('/uploads/photos/{id}/{path}', 'FilemanagerController@showimage')->where('path', '.*');
+    Route::get('/myFiles', 'FilemanagerController@index')->name('myFiles.index');
+    Route::get('/uploads/files/{id}/{path}', 'FilemanagerController@showfile')->where('path', '.*')->name('myFiles.showFile');
+    Route::get('/uploads/photos/{id}/{path}', 'FilemanagerController@showimage')->where('path', '.*')->name('myFiles.showImage');
     Route::get('/uploads/tasks/{id}/cards/{card_id}/{path}', [MentorshipTaskController::class, 'attachments'])->where('path', '.*');
     //Explore private files
     Route::get('/private/{id}/{path}', 'FilemanagerController@showprivate')->where('path', '.*');
@@ -256,12 +257,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('/mread', 'MessengerController@makeread');
     Route::post('/messages/delete', 'MessengerController@destroy');
     //Contact US Messages
-    Route::get('mymsg', 'SettingsController@mymsg');
-    Route::post('msgreply', 'SettingsController@msgreply');
-    Route::get('deletemsg/{id}', 'SettingsController@deletemsg');
-    Route::post('makeread/{id}', 'SettingsController@makeread');
-    Route::post('makeunread/{id}', 'SettingsController@makeunread');
-    Route::get('openonemsg/{id}', 'SettingsController@openonemsg');
+    Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
+    Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
+    Route::get('deletemsg/{id}', 'SettingsController@deletemsg')->name('messages.delete');
+    Route::post('makeread/{id}', 'SettingsController@makeread')->name('messages.mark-read');
+    Route::post('makeunread/{id}', 'SettingsController@makeunread')->name('messages.mark-unread');
+    Route::get('openonemsg/{id}', 'SettingsController@openonemsg')->name('messages.show');
     //products categories Manager routes
     Route::resource('productsCategories', 'ProductCategoryController');
 
@@ -292,7 +293,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
     Route::post('cycles/save', 'CyclesController@saveForm');
-    Route::get('cycles/my/{id}', 'CyclesController@my');
+    Route::get('cycles/my/{id}', 'CyclesController@my')->name('cycles.my');
     Route::post('change/cyc', 'CyclesController@changAll');
     Route::get('/export-cyclesComp', 'CyclesController@exportcyclesComp');
 
@@ -303,7 +304,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('screening/add', 'ScreeningController@add');
     Route::get('screening/results/{id?}', 'ScreeningController@results');
     Route::get('{id?}/screening', 'ScreeningController@index');
-    Route::get('screening/{fid}/{cid}', 'ScreeningController@view');
+    Route::get('screening/{fid}/{cid}', 'ScreeningController@view')->name('screening.view');
     Route::get('screening/get/{fid}/{sid}/{pid}', 'ScreeningController@getusers');
     Route::post('screening/changestep', 'ScreeningController@changestep');
     Route::get('/export-Result', 'ScreeningController@exportresultScreen');
@@ -331,7 +332,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('mentorship/session', 'MentorsController@getSession');
     Route::post('mentorship/modify', 'MentorsController@modifySession');
     Route::post('mentorship/addwait', 'MentorsController@addWait');
-    Route::get('mentorship/mine', 'MentorsController@mine');
+    Route::get('mentorship/mine', 'MentorsController@mine')->name('my.mentorships');
     Route::post('mentorship/rate', 'MentorsController@rate');
     Route::post('mentorship/delsession/{id}', 'MentorsController@delSession');
     Route::get('/export-mentorship', 'MentorsController@exportMentorship');
@@ -405,13 +406,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/upcomingBusyReview', 'BookingController@upcomingBusyReview')->name('upcomingBusyReview');
     Route::get('/oldReview', 'BookingController@oldReview')->name('oldReview');
     //Final Screening
-    Route::get('final', 'FinalscreeningController@index');
-    Route::get('{id?}/final', 'FinalscreeningController@index');
-    Route::post('final/update', 'FinalscreeningController@update');
-    Route::post('final/save', 'FinalscreeningController@save');
+    Route::get('final', 'FinalscreeningController@index')->name('screening.index');
+    Route::get('{id?}/final', 'FinalscreeningController@index')->name('screening.show');
+    Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');
+    Route::post('final/save', 'FinalscreeningController@save')->name('screening.store');
     Route::post('final/addzoom', 'FinalscreeningController@addzoom');
     Route::get('final/results/{id?}', 'FinalscreeningController@results');
-    Route::get('final/{step_id}/{company_id}', 'FinalscreeningController@view');
+    Route::get('final/{step_id}/{company_id}', 'FinalscreeningController@view')->name('screening.openForm');
     Route::get('final/get/{sid}/{pid}', 'FinalscreeningController@getusers');
     Route::post('final/delsession/{id}', 'FinalscreeningController@delsession');
 

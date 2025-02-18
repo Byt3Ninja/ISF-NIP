@@ -23,10 +23,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                    <button type="button" class="close" data-bs-dismiss="alert"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                     <div class="d-flex align-items-center">
                                                         <i class="ti ti-error"></i>
                                                         <span>
@@ -43,7 +40,6 @@
                                         @method('patch')
                                         <div class="row">
                                             <div class="col-md-12">
-
                                                 <fieldset class="form-group">
                                                     <label for="basicInput">{{ __('admin.English Name')}}</label>
                                                     <input style="direction: ltr;" type="text" class="form-control" id="name_en" name='name_en'
@@ -56,17 +52,17 @@
                                                         required placeholder="{{__('admin.Arabic Name')}}"
                                                         value="{{ $type->name_ar}}">
                                                 </fieldset>
-
                                             </div>
                                         </div>
+                                        @if( $_user->ableToAny(['types.edit', 'types.update'], $permissions) )
                                         <div class="row">
                                             <div class="col-12 d-flex justify-content-end">
-                                                <button type="submit"
-                                                    class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
+                                                <button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
                                             </div>
                                         </div>
+                                        @endif
+                                    </form>
                                 </div>
-                                </form>
                             </div>
                         </div>
                     </div>

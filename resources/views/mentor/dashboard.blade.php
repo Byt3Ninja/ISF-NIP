@@ -95,9 +95,9 @@
     
 
     $user_id = Auth::id();
-    $circle_ids = Auth::user()->mentorCycles()->get()->pluck('id');
+    $circle_ids = $_user->mentorCycles()->get()->pluck('id');
     
-    if( Auth::user()->hasRole('Mentor') )
+    if( $_user->hasRole('Mentor') )
   {
     /// Rating
     $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
@@ -345,7 +345,8 @@
 
         <!-- / Latest Survey -->
         @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
-          @if( Auth::user()->hasRole('Mentor') )
+          @if( $_user->hasRole('Mentor') )
+          @if( $_user->ableToAll(['surveys.taking', 'surveys.submit'], $permissions) )
           <div class="col-sm-6 col-12 mb-6" style="max-height: 355px; overflow-y: auto; border-radius: 1rem;">
             <div class="card">
               <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -416,6 +417,7 @@
               </div>
             </div>
           </div>
+          @endif
           @endif
         @endif
         <!-- Latest Survey -->

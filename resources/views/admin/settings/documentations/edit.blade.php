@@ -84,7 +84,7 @@
                                   {{ __('admin.Users') }}</option>
                                 <option value="mentor" {{ $documentation->role == 'mentor' ? 'selected' : '' }}>
                                   {{ __('admin.Mentors') }}</option>
-                                <option value="judge" {{ $documentation->role == 'judge' ? 'selected' : '' }}>
+                                <option value="judge" {{ $documentation->role == 'judger' ? 'selected' : '' }}>
                                   {{ __('admin.Judgers') }}</option>
                                 <option value="admin" {{ $documentation->role == 'admin' ? 'selected' : '' }}>
                                   {{ __('admin.Managers') }}</option>

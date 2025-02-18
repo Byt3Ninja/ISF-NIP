@@ -112,7 +112,7 @@
                 <!-- Search Container -->
                 <div class="d-flex align-items-center justify-content-end">
                   <!-- Filter -->
-                  <form method="GET" action="{{ route('Mentors_Filter') }}">
+                  <form method="GET" action="{{ route('mentors.list') }}">
                     <div class="d-flex align-items-center">
                       <div style="display: flex; align-items: center;" class="mx-2">
                         <button 

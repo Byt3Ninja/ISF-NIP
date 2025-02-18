@@ -25,11 +25,11 @@ class CalenderController extends Controller
             $data=[];
             $user = auth()->user();
             $organization_id = $user->organization_id;
-            if ($user->hasanyRole('Admin|Editor|Manager|organizationManager')) {
+            if ($user->hasAnyRole('Admin|Editor|Manager|organizationManager')) {
 
                $data = $this->AdminCalender($organization_id);
 
-            }elseif ($user->hasanyRole('Mentor')){
+            }elseif ($user->hasAnyRole('Mentor')){
 
               $data = $this->MentorCalender();
 
@@ -196,6 +196,7 @@ class CalenderController extends Controller
 
     protected function JudgerCalender()
     {
+        $data = [];
         $myid=auth()->id();
         $mysteps = auth()->user()->screeningRequests()->get();
         $csteps = Step::whereIn('id',$mysteps->pluck('step_id'))->get();

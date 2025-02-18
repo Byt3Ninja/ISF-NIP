@@ -3,5 +3,5 @@
 @section('title', __('Forbidden'))
 @section('code', '403')
 @section('message')
-{{__($exception->getMessage() ?: 'Forbidden')}}, <a href="/">{{__('BACK TO HOME')}}</a></div>
+<div>{!! __($exception->getMessage() ?: 'Forbidden') !!}</div>
 @stop

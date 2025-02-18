@@ -72,7 +72,13 @@
 											<tbody>
 												@foreach( $quizzes ?? collect([]) as $quiz )
 													<tr>
-														<td> <a href="{{ route('quiz.overview', ['id' => $quiz->training_id, 'quiz_id' => $quiz->id]) }}"> {{ $quiz->title }} </a> </td>
+														<td>
+															@if( $_user->ableTo('quiz.overview', $permissions) )
+															<a href="{{ route('quiz.overview', ['id' => $quiz->training_id, 'quiz_id' => $quiz->id]) }}"> {{ $quiz->title }} </a>
+															@else
+															{{ $quiz->title }}
+															@endif
+														</td>
 														<td> {{ $quiz->questions->count() }} </td>
 														<td> {{ $quiz->start->format('jS M. Y h:i A') }} </td>
 														<td> {{ $quiz->end->format('jS M. Y h:i A') }} </td>

@@ -33,21 +33,19 @@
 
 			<div class="content-body">
 				<section class="organizations-list-wrapper">
-          <div class="organizations-list-table">
-            <div class="card">
-              <div class="card-content">
-                <div class="card-body">
-                  <div class="row pb-1">
-                    <div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
-                      <a 
-                        href="{{ route('quizzes.create') }}"
-                       class="btn btn-block btn-primary"
-                      > 
-                        <i class="ti ti-plus me-1"></i>
-                       {{ __('admin.Add New')}}
-                      </a>
-                    </div>
-                  </div>
+					<div class="organizations-list-table">
+						<div class="card">
+							<div class="card-content">
+								<div class="card-body">
+									@if($_user->ableToAny(['quizzes.create', 'quizzes.store'], $permissions))
+									<div class="row pb-1">
+										<div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
+											<a href="{{ route('quizzes.create') }}" class="btn btn-block btn-primary"> 
+												<i class="ti ti-plus me-1"></i> {{ __('admin.Add New')}}
+											</a>
+										</div>
+									</div>
+									@endif
 									<!-- datatable start -->
 									<div class="table-responsive">
 										<table id="organizations-list-datatable" class="table">
@@ -61,7 +59,7 @@
 												<th class="text-center">{{__('admin.quizDuration')}}</th>
 												<th class="text-center">{{__('admin.quizParticipants')}}</th>
 												<th class="text-center">{{__('admin.quizPassPercentage')}}</th>
-												<th class="text-center">{{__('admin.Actions')}}</th>
+												@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))<th class="text-center">{{__('admin.Actions')}}</th>@endif
 											</tr>
 											</thead>
 											<tbody>
@@ -104,16 +102,24 @@
 																-
 															@endif
 														</td>
+														@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))
 														<td class="text-center">
 															<div class="btn-group w-100">
 																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																<div class="dropdown-menu">
+																	@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions'], $permissions))
 																	<a href="{{ route('quizzes.questions', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-list-ul"></i> {{ __('admin.manageQuestions') }} </a>
+																	@endif
+																	@if($_user->ableToAny(['quizzes.edit', 'quizzes.update'], $permissions))
 																	<a href="{{ route('quizzes.edit', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-edit"></i> {{ __('admin.Edit') }}</a>
+																	@endif
+																	@if($_user->ableTo('quizzes.destroy', $permissions))
 																	<a id='deleteAction' data-id='{{ $quiz->id }}' data-url="{{ route('quizzes.destroy', ['quiz' => $quiz->id]) }}" href="{{ route('quizzes.destroy', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="ti ti-trash text-danger"></i> {{ __('admin.Delete') }} </a>
+																	@endif
 																</div>
 															</div>
 														</td>
+														@endif
 													</tr>
 												@endforeach
 											</tbody>

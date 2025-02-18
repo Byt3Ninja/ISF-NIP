@@ -93,7 +93,7 @@ class RegistrationController extends Controller
 						'api_token' => $request_token
 					]);
 					$user->save();
-					$user->assignRole('Registered');
+					$user->allotRole('Registered');
 					$company = new Company();
 					$company->fill([
 						'name_en' => $request->input('company.business_or_product_name', null),
