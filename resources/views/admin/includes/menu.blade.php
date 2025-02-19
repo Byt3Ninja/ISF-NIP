@@ -326,7 +326,12 @@
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
-      
+      <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
+        <a href="{{ route('roles.index') }}" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-user-cog"></i>
+          <div>{{ __('admin.Roles_and_permissions') }}</div>
+        </a>
+      </li>
     @endif
 
     @if( $_user->ableToAny(['show.builder', 'show.form'], $permissions) )
