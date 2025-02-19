@@ -317,25 +317,25 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('zoom/{id}/delete', 'MeetingController@destroy');
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
     //Mentors
-    Route::post('mentors/modify', 'MentorsController@modify');
-    Route::post('mentorship/add', 'MentorsController@add');
-    Route::get('mentorship/assign/{id?}', 'MentorsController@list');
-    Route::post('mentorship/assign/{id}', 'MentorsController@assign');
-    Route::get('mentorship/view/{id?}', 'MentorsController@index');
+    Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.modify');
+    Route::post('mentorship/add', 'MentorsController@add')->name('mentors.add');
+    Route::get('mentorship/assign/{id?}', 'MentorsController@list')->name('mentorship.list');
+    Route::post('mentorship/assign/{id}', 'MentorsController@assign')->name('mentorship.assign');
+    Route::get('mentorship/view/{id?}', 'MentorsController@index')->name('mentorship.view');
     Route::get('mentorship/{id?}/surveys', 'MentorsController@list_surveys')->name('mentorship.surveys');
     Route::get('mentorship/{id?}/surveys/create', 'MentorsController@create_survey')->name('mentorship.create_survey');
     Route::post('mentorship/{id?}/surveys/store', 'MentorsController@store_survey')->name('mentorship.store_survey');
     Route::get('mentorship/{id?}/surveys/{survey?}/edit', 'MentorsController@edit_survey')->name('mentorship.edit_survey');
     Route::patch('mentorship/{id?}/surveys/{survey?}/update', 'MentorsController@update_survey')->name('mentorship.update_survey');
     Route::delete('mentorship/{id?}/surveys/{survey?}/destroy', 'MentorsController@destroy_survey')->name('mentorship.destroy_survey');
-    Route::get('mentorship/sessions', 'MentorsController@sessions');
-    Route::post('mentorship/session', 'MentorsController@getSession');
-    Route::post('mentorship/modify', 'MentorsController@modifySession');
-    Route::post('mentorship/addwait', 'MentorsController@addWait');
+    Route::get('mentorship/sessions', 'MentorsController@sessions')->name('mentorship.sessions');
+    Route::post('mentorship/session', 'MentorsController@getSession')->name('mentorship.getSession');
+    Route::post('mentorship/modify', 'MentorsController@modifySession')->name('mentorship.modifySession');
+    Route::post('mentorship/addwait', 'MentorsController@addWait')->name('mentorship.addWait');
     Route::get('mentorship/mine', 'MentorsController@mine')->name('my.mentorships');
-    Route::post('mentorship/rate', 'MentorsController@rate');
-    Route::post('mentorship/delsession/{id}', 'MentorsController@delSession');
-    Route::get('/export-mentorship', 'MentorsController@exportMentorship');
+    Route::post('mentorship/rate', 'MentorsController@rate')->name('mentorship.rate');
+    Route::post('mentorship/delsession/{id}', 'MentorsController@delSession')->name('mentorship.delSession');
+    Route::get('/export-mentorship', 'MentorsController@exportMentorship')->name('mentorship.exportMentorship');
 
 
 
