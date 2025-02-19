@@ -1,12 +1,11 @@
 @php
-
 $user = auth()->user();
-$lastNotification = null;
+$notifications = collect();
 $all = 0;
 
 if ($user && $user->hasRole('Registered')) {
-    $notifications = $user->unreadNotifications()->latest()->first();
-    $all = $user->unreadNotifications()->count(); 
+    $notifications = $user->unreadNotifications()->latest()->take(5)->get();
+    $all = $notifications->count();
 }
 @endphp
 
@@ -45,17 +44,19 @@ if ($user && $user->hasRole('Registered')) {
     <!-- Notification List -->
     <li class="dropdown-notifications-list scrollable-container">
       <ul class="list-group list-group-flush">
-        @if ($all == 0)
-          <li class="list-group-item list-group-item-action dropdown-notifications-item">
-            <div class="dropdown-header px-1 py-75 d-flex justify-content-between"><span
-                class="notification-title" style="text-transform:capitalize;">
-                <span class="notif-count">{{ $all }}</span>
-                {{ __('admin.NewNotify') }}
-              </span><span class="text-bold-400 cursor-pointer"><a
-                  onclick="location.reload();">{{ __('admin.MarkRead') }}</a></span>
-            </div>
+        @role('Registered')
+        @if ($notifications->isEmpty())
+          <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">
+            <span class="text-muted">No new notifications</span>
           </li>
+        @else
+          @foreach ($notifications as $notification)
+            <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                <h6 class="media-heading">{{ $notification->data['message'] ?? 'New Notification' }}</h6>
+            </li>
+          @endforeach
         @endif
+        @endrole
 
         @if ($messages)
           <li class="list-group-item list-group-item-action dropdown-notifications-item">
@@ -68,13 +69,13 @@ if ($user && $user->hasRole('Registered')) {
           </li>
         @endif
         
-        @role('Registered')
+        {{-- @role('Registered')
          @if ($notifications)
            <li class="list-group-item list-group-item-action dropdown-notifications-item">
             <h6 class="media-heading">{{ $notifications->data['message'] ?? 'New Notification' }}</h6>
            </li>
          @endif
-        @endrole
+        @endrole --}}
 
         @hasanyrole('Admin|Manager')
           @if ($msgs)
