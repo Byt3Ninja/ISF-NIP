@@ -397,7 +397,6 @@ class ClientCompanyController extends Controller
                 $result->Commercial_Register = $Commercial_Register;
                 $result->Tax_Card = $Tax_Card;
                 $result->Country_Register_id = $cuntryReg ?? 0;
-                $result->institutions = 'null';
             }
             if( $data['CompanyN'] == 2 )
             {
