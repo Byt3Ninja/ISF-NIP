@@ -410,11 +410,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('{id?}/final', 'FinalscreeningController@index')->name('screening.show');
     Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');
     Route::post('final/save', 'FinalscreeningController@save')->name('screening.store');
-    Route::post('final/addzoom', 'FinalscreeningController@addzoom');
-    Route::get('final/results/{id?}', 'FinalscreeningController@results');
+    Route::post('final/addzoom', 'FinalscreeningController@addzoom')->name('screening.addzoom');
+    Route::get('final/results/{id?}', 'FinalscreeningController@results')->name('screening.results');
     Route::get('final/{step_id}/{company_id}', 'FinalscreeningController@view')->name('screening.openForm');
-    Route::get('final/get/{sid}/{pid}', 'FinalscreeningController@getusers');
-    Route::post('final/delsession/{id}', 'FinalscreeningController@delsession');
+    Route::get('final/get/{sid}/{pid}', 'FinalscreeningController@getusers')->name('screening.getuser');
+    Route::post('final/delsession/{id}', 'FinalscreeningController@delsession')->name('screening.delsession');
 
 
     //Program List
