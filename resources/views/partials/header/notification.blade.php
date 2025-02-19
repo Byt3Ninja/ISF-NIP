@@ -1,10 +1,27 @@
+@php
+
+$user = auth()->user();
+$lastNotification = null;
+$all = 0;
+
+if ($user && $user->hasRole('Registered')) {
+    $notifications = $user->unreadNotifications()->latest()->first();
+    $all = $user->unreadNotifications()->count(); 
+}
+@endphp
+
+
 <!-- Notification -->
 <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
   <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);"
     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
     <span class="position-relative">
       <i class="ti ti-bell ti-md"></i>
-      <span class="badge rounded-pill bg-danger badge-dot badge-notifications border"></span>
+      @if ($all > 0)
+        <span class="badge rounded-pill bg-danger badge-notifications border">
+          <span class="notif-count">{{ $all }}</span>
+        </span>
+      @endif
     </span>
   </a>
 
@@ -15,7 +32,8 @@
         <div class="dropdown-header d-flex align-items-center py-3">
           <h6 class="mb-0 me-auto" style="text-transform:capitalize;">Notification</h6>
           <div class="d-flex align-items-center h6 mb-0">
-            <span class="badge bg-label-primary me-2">{{ $all . ' ' . 'New' }} </span>
+            <span class="badge bg-label-primary me-2">{{ $all }} New </span>
+
             <a href="javascript:void(0)" class="btn btn-text-secondary rounded-pill btn-icon dropdown-notifications-all"
               data-bs-toggle="tooltip" data-bs-placement="top" title="Mark all as read"><i
                 class="ti ti-mail-opened text-heading"></i></a>
@@ -49,6 +67,14 @@
             </a>
           </li>
         @endif
+        
+        @role('Registered')
+         @if ($notifications)
+           <li class="list-group-item list-group-item-action dropdown-notifications-item">
+            <h6 class="media-heading">{{ $notifications->data['message'] ?? 'New Notification' }}</h6>
+           </li>
+         @endif
+        @endrole
 
         @hasanyrole('Admin|Manager')
           @if ($msgs)
@@ -102,3 +128,6 @@
   </ul>
 </li>
 <!--/ Notification -->
+
+
+
