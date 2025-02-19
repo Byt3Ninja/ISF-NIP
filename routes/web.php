@@ -361,7 +361,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
 
 
     Route::get('training/results/{id?}', 'TrainingController@results');
-    Route::get('training/sessions/{id?}', 'TrainingController@sessions');
+    Route::get('training/sessions/{id?}', 'TrainingController@sessions')->name('training.sessions');
     Route::post('training/addsession', 'TrainingController@addsession');
     Route::post('training/delsession/{id}', 'TrainingController@delsession');
     Route::post('training/session', 'TrainingController@session');
