@@ -670,7 +670,7 @@ if($company->team_num == '1'){
                         <source src="{{ $company->pitch_deck_video }}">
                         Your browser does not support the video tag.
                       </video> --}}
-                      {{-- <div class="mt-auto d-flex flex-column mb-6">
+                      <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">
                           To get analysis for your pitch deck please upload your
                           pitch deck video
@@ -1035,15 +1035,15 @@ if($company->team_num == '1'){
                               {!! strpos($field->answer, 'http') === 0
                                   ? '<a target="_blank" href="' . $field->answer . '"> ' . __('admin.Download File') . ' </a>'
                                   : $field->answer !!}
-                              {{-- @php(
-                                $comments = \App\Formdata::where('field_id', $field->field_id)->where('company_id', $company->id)->first(['comments'])->comments,
+                               @php(
+                                $comments = \App\Formdata::where('field_id', $field->field_id)->where('company_id', $company->id)->first(['comments'])->comments
                                 )
                               @foreach ($comments as $key => $cc)
                                 @if ($cc)
                                   <div class="warning">{{ __('admin.comment') }}({{ $key }}):
                                     {{ $cc }}</div>
                                 @endif
-                              @endforeach --}}
+                              @endforeach
                             </td>
                           </tr>
                         @endforeach
