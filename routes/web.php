@@ -342,22 +342,22 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
 
     //Training
     Route::get('training/all/{id?}', 'TrainingController@all')->name('training.all');
-    Route::get('training/edit/{id}', 'TrainingController@edit');
-    Route::post('training/store', 'TrainingController@store');
-    Route::post('training/delete/{id}', 'TrainingController@delete');
-    Route::post('training/delcontent/{id}', 'TrainingController@delcontent');
-    Route::get('training/addcontent/{id}', 'TrainingController@addcontent');
-    Route::get('training/editcontent/{id}', 'TrainingController@editcontent');
-    Route::get('training/viewcontent/{id}', 'TrainingController@viewcontent');
+    Route::get('training/edit/{id}', 'TrainingController@edit')->name('training.edit');
+    Route::post('training/store', 'TrainingController@store')->name('training.store');
+    Route::post('training/delete/{id}', 'TrainingController@delete')->name('training.delete');
+    Route::post('training/delcontent/{id}', 'TrainingController@delcontent')->name('training.delcontent');
+    Route::get('training/addcontent/{id}', 'TrainingController@addcontent')->name('training.addcontent');
+    Route::get('training/editcontent/{id}', 'TrainingController@editcontent')->name('training.editcontent');
+    Route::get('training/viewcontent/{id}', 'TrainingController@viewcontent')->name('training.viewcontent');
     Route::post('training/upload', 'TrainingController@upload')->name('training.upload');
-    Route::post('training/storecontent', 'TrainingController@storecontent');
+    Route::post('training/storecontent', 'TrainingController@storecontent')->name('training.storecontent');
     Route::get('training/my', 'TrainingController@mysessions')->name('training.my');
-    Route::get('training/my/{id}', 'TrainingController@my');
+    Route::get('training/my/{id}', 'TrainingController@my')->name('training.my');
     Route::get('training/my/{id}/quiz/{quiz_id}', 'TrainingController@myQuiz')->name('quiz.overview');
     Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}', 'TrainingController@myQuizResponses')->name('quiz.response');
     Route::post('training/my/{id}/quiz/{quiz_id}', 'TrainingController@doQuiz')->name('quiz.start');
-    Route::get('training/EditTR/{id}', 'TrainingController@editTR');
-    Route::get('training/viewCourse/{id}', 'TrainingController@showCourse');
+    Route::get('training/EditTR/{id}', 'TrainingController@editTR')->name('training.editTR');
+    Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('training.viewCourse');
 
 
     Route::get('training/results/{id?}', 'TrainingController@results');
