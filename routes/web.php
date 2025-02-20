@@ -419,8 +419,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
 
     //Program List
     Route::resource('programlist', 'ProgramController');
-    Route::get('programlist/show/{id}', 'ProgramController@show');
-    Route::post('programlist/Email', 'ProgramController@SentEmail');
+    Route::get('programlist/show/{id}', 'ProgramController@show')->name('programlist.show');
+    Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programlist.SentEmail');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     /* Start of Currencies Routes */

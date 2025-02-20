@@ -51,7 +51,7 @@
       $steps = \App\Step::where('cycle_id', $circle_id)->orderBy('arr')->get();
       foreach( $steps as $step )
       {
-        if( $step->stype == 3 || $step->stype == 4 )
+        if( optional($step)->stype == 3 || optional($step)->stype == 4 )
         {
           if( now() > $step->to->format('Y-m-d H:i:s') )
           {
