@@ -1308,5 +1308,6 @@ return [
 	'totalUsers' => 'اجمالي المستخدمين',
 	'Submit' => 'إرسال',
 	'Cancel' => 'إلغاء',
+	'Please_Choose_Judges' => 'الرجاء اختيار المحكمين',
 ];
 

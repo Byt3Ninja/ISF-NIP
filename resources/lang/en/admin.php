@@ -1292,4 +1292,5 @@ return [
 	'totalUsers' => 'Total Users',
 	'Submit' => 'Submit',
 	'Cancel' => 'Cancel',
+	'Please_Choose_Judges' => 'Please Choose Judges',
 ];
