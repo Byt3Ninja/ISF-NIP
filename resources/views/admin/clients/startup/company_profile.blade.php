@@ -46,6 +46,8 @@
 
 
 .masonry {
+  display: flex;
+  /* flex-wrap: wrap; */
   column-count: 1;
   column-gap: 20px;
 }
@@ -412,7 +414,7 @@
         @endif
         @if ($company->business_model != null)
         <div class="card">
-          <div class="card-body d-flex flex-column h-100 justify-content-between">
+          <div class="card-body d-flex flex-column justify-content-between">
             <h4>{{ __('admin.business_model') }}</h4>
             <div class="d-flex justify-content-between py-4">
               <div class="d-flex align-items-center">
@@ -490,7 +492,7 @@
         @endif
         @if ($company->financial_plan != null)
         <div class="card">
-          <div class="card-body d-flex flex-column h-100 justify-content-between">
+          <div class="card-body d-flex flex-column justify-content-between">
             <h4>{{ __('admin.financial_plan') }}</h4>
             <div class="d-flex justify-content-between py-4">
               <div class="d-flex align-items-center">

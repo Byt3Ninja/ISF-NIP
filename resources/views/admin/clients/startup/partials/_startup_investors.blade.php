@@ -1,7 +1,7 @@
 <div class="col-md-4 mt-6">
   <div class="card shadow-sm" style="border-radius: 15px; height: 300px; overflow-y: hidden;">
     <div class="py-4 px-8">
-      <h5 class="card-title mb-4">{{ __('admin.investors') }} ( {{count($Shareholders)}} )</h5>
+      <h5 class="card-title mb-3">{{ __('admin.investors') }} ( {{count($Shareholders)}} )</h5>
       @if (count($Investors) > 0)
       <div class="row" style="position: relative; height: 90%;">
         @if (count($Investors) > 2)
@@ -16,7 +16,7 @@
         @endif
 
         @foreach ($Investors as $Investor)
-        <div class="investor-col col-12 mb-4">
+        <div class="investor-col col-12 mb-2">
           <div class="card shadow-sm border" style="border-radius: 15px;">
             <div class="p-3">
               <div class="d-flex align-items-center">
