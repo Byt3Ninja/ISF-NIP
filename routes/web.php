@@ -360,15 +360,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('training.viewCourse');
 
 
-    Route::get('training/results/{id?}', 'TrainingController@results');
+    Route::get('training/results/{id?}', 'TrainingController@results')->name('training.results');
     Route::get('training/sessions/{id?}', 'TrainingController@sessions')->name('training.sessions');
-    Route::post('training/addsession', 'TrainingController@addsession');
-    Route::post('training/delsession/{id}', 'TrainingController@delsession');
-    Route::post('training/session', 'TrainingController@session');
-    Route::post('training/editsession', 'TrainingController@editsession');
-    Route::post('trainings/getdsc/{id}', 'TrainingController@getdsc');
-    Route::get('/export-Tresult', 'TrainingController@exportTresult');
-    Route::post('trainings/change/Tresult', 'TrainingController@changAllTL');
+    Route::post('training/addsession', 'TrainingController@addsession')->name('training.addsession');
+    Route::post('training/delsession/{id}', 'TrainingController@delsession')->name('training.delsession');
+    Route::post('training/session', 'TrainingController@session')->name('training.session');
+    Route::post('training/editsession', 'TrainingController@editsession')->name('training.editsession');
+    Route::post('trainings/getdsc/{id}', 'TrainingController@getdsc')->name('trainings.getdsc');
+    Route::get('/export-Tresult', 'TrainingController@exportTresult')->name('training.exportTresult');
+    Route::post('trainings/change/Tresult', 'TrainingController@changAllTL')->name('training.changAllTL');
     Route::get('training/create', 'TrainingController@create')->name('training.create');
     Route::get('training/{id?}/surveys', 'TrainingController@list_surveys')->name('training.surveys');
     Route::get('training/{id?}/surveys/create', 'TrainingController@create_survey')->name('training.create_survey');
@@ -419,8 +419,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
 
     //Program List
     Route::resource('programlist', 'ProgramController');
-    Route::get('programlist/show/{id}', 'ProgramController@show');
-    Route::post('programlist/Email', 'ProgramController@SentEmail');
+    Route::get('programlist/show/{id}', 'ProgramController@show')->name('programlist.show');
+    Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programlist.SentEmail');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     /* Start of Currencies Routes */

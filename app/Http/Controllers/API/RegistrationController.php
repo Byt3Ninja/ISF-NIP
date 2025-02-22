@@ -17,6 +17,9 @@ class RegistrationController extends Controller
 {
 	public function register(Request $request)
 	{
+		if ($request->isMethod('get')) {
+			return response()->json(['status' => false, 'code' => 412, 'message' => 'Request method not allowed']); // توجيه المستخدم إلى صفحة أخرى
+		}
 		try {
 			$rules = [
 				'personal.first_name' => 'required',

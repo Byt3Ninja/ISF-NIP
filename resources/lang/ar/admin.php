@@ -1309,5 +1309,8 @@ return [
 	'Submit' => 'إرسال',
 	'Cancel' => 'إلغاء',
 	'Please_Choose_Judges' => 'الرجاء اختيار المحكمين',
+	'No Shareholders' => 'لا يوجد مساهمون',
+	'No Founders' => 'لا يوجد مؤسسون',
+	'No Investors' => 'لا يوجد مستثمرون',
 ];
 

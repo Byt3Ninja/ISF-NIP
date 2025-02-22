@@ -1293,4 +1293,7 @@ return [
 	'Submit' => 'Submit',
 	'Cancel' => 'Cancel',
 	'Please_Choose_Judges' => 'Please Choose Judges',
+	'No Shareholders' => 'No Shareholders',
+	'No Founders' => 'No Founders',
+	'No Investors' => 'No Investors',
 ];
