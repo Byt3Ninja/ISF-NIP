@@ -68,7 +68,7 @@
                         @foreach ($cycles as $cycle)
                         <option value="{{ $cycle->id }}" data-organization="{{ $cycle->organization_id }}" {{ $cycle->id
                           == $id ? 'selected' : '' }}>{{ $cycle->title }} ({{ __('cycles.Start') }}
-                          {{ $cycle->start->format('d-m') }} {{ __('cycles.to') }} {{ $cycle->end->format('d-m') }})
+                          {{ $cycle->start->format('d-m-Y') }} {{ __('cycles.to') }} {{ $cycle->end->format('d-m-Y') }})
                           - {{ optional($cycle->organization)->name }}
                         </option>
                         @endforeach
@@ -165,7 +165,7 @@
                                 @endif
                               </h5>
                               {{ __('cycles.Start From') }}
-                              {{ !empty($step->from) ? $step->from->format('d-m') : '-' }}, {{ __('cycles.to') }}
+                              {{ !empty($step->from) ? $step->from->format('d-m-Y') : '-' }}, {{ __('cycles.to') }}
                               {{ !empty($step->to) ? $step->to->format('d-m-Y') : '-' }}
                             </div>
                           </div>
