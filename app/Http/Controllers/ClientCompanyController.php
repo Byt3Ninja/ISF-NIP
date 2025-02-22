@@ -79,7 +79,7 @@ class ClientCompanyController extends Controller
 
 
 
-            return view('admin/clients/company_profile', compact('company', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
+            return view('admin/clients/startup/company_profile', compact('company', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
         } catch (Exception $e) {
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
