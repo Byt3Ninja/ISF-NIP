@@ -3,10 +3,11 @@
 namespace App\Providers;
 
 
+use App\Settings;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
-use Illuminate\Support\Facades\Config;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -67,6 +68,8 @@ class AppServiceProvider extends ServiceProvider
             'services.linkedin.client_id' => $pusherConfig['LINKEDIN_CLIENT_ID'],
             'services.linkedin.client_secret' => $pusherConfig['LINKEDIN_CLIENT_SECRET'],
             'services.linkedin.redirect' => $pusherConfig['LINKEDIN_REDIRECT_URI'],
+
+            'app.locale' => $pusherConfig['locale'],
 
             // 'broadcasting.connections.pusher.MICROSOFT_CLIENT_ID' => $pusherConfig['MICROSOFT_CLIENT_ID'],
             // 'broadcasting.connections.pusher.MICROSOFT_CLIENT_SECRET_VALUE' => $pusherConfig['MICROSOFT_CLIENT_SECRET_VALUE'],
