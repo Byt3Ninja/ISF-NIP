@@ -306,15 +306,15 @@
                         <i class="ti ti-bell ti-24px"></i>
                         <span class="mx-2">
                           {{ $step->title }} - ({{ $step->cycle->title }})
-                          - {{ __('dashboard.start from') }} {{ $step->from->format('d-M') }}
-                          {{ __('dashboard.to') }} {{ $step->to->format('d-M-Y') }}
+                          - {{ __('dashboard.start from') }} {{ $step->from->format('d-m-Y') }}
+                          {{ __('dashboard.to') }} {{ $step->to->format('d-m-Y') }}
                         </span>
                       </h5>
                     </div>
                     <div class="card-body">
                       <p class="card-text">{{ $step->description }}</p>
                       <small class="text-muted">{{ __('dashboard.This Cycle Start from') }}
-                        {{ $step->cycle->start->format('d-m') }} {{ __('dashboard.to') }}
+                        {{ $step->cycle->start->format('d-m-Y') }} {{ __('dashboard.to') }}
                         {{ $step->cycle->end->format('d-m-Y') }}</small>
                     </div>
                     <div class="table-responsive">

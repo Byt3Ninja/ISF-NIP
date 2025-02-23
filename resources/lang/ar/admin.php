@@ -432,7 +432,7 @@ return [
 	'Error, can\'t add request' => 'خطأ، لا يمكن إضافة الطلب',
 	'New mentorship request from' => 'طلب جلسة إرشاد جديد من',
 	'New Service request from' => 'طلب خدمة جديد من',
-	'You need to enable Have a company first.' => 'يجب أن تفعل خيار (هل لديك شركة) أولاً',
+	'You need to enable Have a company first' => 'يجب أن تفعل خيار (هل لديك شركة) أولاً',
 	'You already enrolled in a cycle.' => 'أنت بالفعل داخل برنامج حالياً',
 	'The selected cycle doesn\'t contain a data form.' => 'البرنامج المختارة لا تحتوي على نموذج للتسجيل',
 	'Documentations' => 'وثائق المساعدة',

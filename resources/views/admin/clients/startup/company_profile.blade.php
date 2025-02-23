@@ -46,7 +46,7 @@
 
 
 .masonry {
-  display: flex;
+  /* display: flex; */
   /* flex-wrap: wrap; */
   column-count: 1;
   column-gap: 20px;
@@ -455,38 +455,44 @@
         <div class="card">
           <div class="card-body">
             <h5>{{ __('admin.about_problem') }}</h5>
-            <div class="row">
-              <div class="col-12">
-                <div class="d-flex shadow-sm radius-15 p-4 mb-2">
-                  <i class="ti ti-alert-circle ti-24px text-primary me-2"></i>
-                  {{ $company ? $company->about_problem : '' }}
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="d-flex shadow-sm radius-15 p-4 mb-2">
-                  <i class="ti ti-chart-bar ti-24px text-primary me-2"></i>
-                  {{ $company ? $company->about_market_opportunity : '' }}
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="d-flex shadow-sm radius-15 p-4 mb-2">
-                  <i class="ti ti-flag ti-24px text-primary me-2"></i>
-                  {{ $company ? $company->about_competitors : '' }}
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="d-flex shadow-sm radius-15 p-4 mb-2">
-                  <i class="ti ti-cash ti-28px text-primary me-2"></i>
-                  {{ $company ? $company->about_monetize : '' }}
-                </div>
-              </div>
-              <div class="col-12">
-                <div class="d-flex shadow-sm radius-15 p-4 mb-2">
-                  <i class="ti ti-target ti-24px text-primary me-2"></i>
-                  {{ $company ? $company->about_challenges : '' }}
-                </div>
+              <div class="d-flex gap-2">
+              <i class="ti ti-alert-circle ti-24px text-primary me-2"></i>
+              <div class="line-clamp-2">
+                {{ $company ? $company->about_problem : '' }}
               </div>
             </div>
+            @if($company->about_market_opportunity)
+            <div class="d-flex gap-2">
+              <div class="line-clamp-2">
+                <i class="ti ti-chart-bar ti-24px text-primary me-2"></i>
+                {{ $company ? $company->about_market_opportunity : '' }}
+              </div>
+            </div>
+            @endif
+            @if($company->about_competitors)
+            <div class="d-flex gap-2">
+              <i class="ti ti-flag ti-24px text-primary me-2"></i>
+              <div class="line-clamp-2">
+                {{ $company ? $company->about_competitors : '' }}
+              </div>
+            </div>
+            @endif
+            @if($company->about_monetize)
+            <div class="d-flex gap-2">
+              <i class="ti ti-cash ti-28px text-primary me-2"></i>
+              <div class="line-clamp-2">
+                {{ $company ? $company->about_monetize : '' }}
+              </div>
+            </div>
+            @endif
+            @if($company->about_challenges)
+            <div class="d-flex gap-2">
+              <i class="ti ti-target ti-24px text-primary me-2"></i>
+              <div class="line-clamp-2">
+                {{ $company ? $company->about_challenges : '' }}
+              </div>
+            </div>
+            @endif
           </div>
         </div>
         @endif

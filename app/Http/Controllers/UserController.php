@@ -87,7 +87,7 @@ class UserController extends Controller
 		Storage::disk('UsersLFM')->makeDirectory("$result->id/Shared");
 		Storage::disk('UsersLFM')->makeDirectory("$result->id/Others");
 
-		$result->allotRole($request->role);
+		$result->allotRoleById($request->role);
 		$data =[];
 		$name = $result->first_name_en . ' ' . $result->last_name_en;
 		if($request->role == 'Judger'){
@@ -171,7 +171,7 @@ class UserController extends Controller
 		} else { $result = $user->update($request->all()); }
 
 		$user->roles()->detach();
-		$user->allotRole($role->default_for);
+		$user->allotRoleById($role->id);
 
 		if( $result ) { return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']); }
 		else { return back()->withInput()->with(['msg' => 'FailedStore']); }

@@ -362,10 +362,10 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);
+				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);
+				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;
@@ -450,10 +450,10 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);
+				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);
+				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;
@@ -589,10 +589,10 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable "Have a company" first.', 'class' => 'danger']);
+				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']);
+				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;

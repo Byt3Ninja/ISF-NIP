@@ -14,6 +14,7 @@ class Permissions
         'filemanager*',
         'dashboard',
         'login*',
+        'cities*',
 		'LFMGet',
 		'get_states_by_country',
         'get_subcategory_by_category',

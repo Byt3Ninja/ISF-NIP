@@ -157,7 +157,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
 	public function roles() { return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id'); }
-	public function allotRole( $role )
+	public function allotRoleById( $id )
+    {
+        $user_id = $this->id;
+        $_role = Role::find( $id );
+        if( !empty( $_role ) )
+        {
+            RoleUsers::updateOrCreate(
+                ['model_id' => $this->id, 'role_id' => $id, 'model_type' => 'App\User'],
+            );
+        }
+    }
+    public function allotRole( $role )
     {
         $user_id = $this->id;
         $_role = Role::where('default_for', 'LIKE', '%' . $role . '%')->first();

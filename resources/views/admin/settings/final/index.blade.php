@@ -50,7 +50,7 @@ to group of users'];
                       @foreach ($steps as $step)
                       <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
                         ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" - {{ __('cycles.Start') }}
-                        {{ $step->from->format('d-m') }}) - {{ optional(optional($step->cycle)->organization)->name }}
+                        {{ $step->from->format('d-m-Y') }}) - {{ optional(optional($step->cycle)->organization)->name }}
                       </option>
                       @endforeach
                     </select>
@@ -100,7 +100,7 @@ to group of users'];
                 <h4>{{ $cstep->title }} </h4>
                 <h4 class="card-title primary">{{ __('cycles.Select judges from the menu') }}.</h4>
                 <small class="text-muted"> {{ __('cycles.from') }}
-                  {{ $cstep->from->format('d-m') }} {{ __('cycles.to') }}
+                  {{ $cstep->from->format('d-m-Y') }} {{ __('cycles.to') }}
                   {{ $cstep->to->format('d-m-Y') }}
                 </small>
               </div>

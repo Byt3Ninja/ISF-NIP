@@ -280,7 +280,7 @@
 													<hr style="color: {{$color}}">
 													<div class="text-{{$stat!="Started"||$s==0?'muted':'primary'}} line-ellipsis">
 														<span class="badge badge-{{$stat!="Started"||$s==0?'secondary':'success'}} badge-pill">{{__('dashboard.STEP ready')}} {{$step->arr}}</span>
-														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('m-d') }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m')}}
+														<br> {{__('dashboard.start from')}} {{ Carbon\Carbon::parse($step->from)->format('d-m-Y') }} {{__('dashboard.to')}} {{Carbon\Carbon::parse($step->to)->format('d-m-Y')}}
 														<br>{{$step->title}}
 													</div>
 													<div class="text-{{$stat!="Started"||$s==0?'muted':'success'}} line-ellipsis"> {{ __('dashboard.'.$stat) }} </div>

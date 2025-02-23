@@ -13,15 +13,15 @@
     <a href="/dashboard" class="app-brand-link">
       
       @if (!is_null($_user->organization))
-    @php
-    $imageUrl = $_user->organization->image_url;
+      @php
+       $imageUrl = $_user->organization->img_url ? asset($_user->organization->img_url) : null;
 
      // استخراج المسار من الرابط
      $imagePath = parse_url($imageUrl, PHP_URL_PATH);
 
      // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
      $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
-@endphp
+    @endphp
           <img src="{{ $imageUrl }}" alt="avatar" class="logo-img">
          
       @else
@@ -693,7 +693,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </li>
       @endif
     @endif
-    @if (!$_user->hasAnyRole('organizationManager'))
+    @if ($_user->hasAnyRole('organizationManager'))
       @if( $_user->ableToAny(['users.index '], $permissions) )
         <li class="{{ Request::is('*users*') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
@@ -744,6 +744,16 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           </a>
         </li>
       @endif
+
+      @if ($_user->ableTo('organization-settings',$permissions))
+      <li class="{{ Request::is('dashboard/organizations/settings*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('organization-settings') }}">
+          <i class="menu-icon tf-icons ti ti-settings"></i>
+          <div>{{ __('admin.settings') }}</div>
+        </a>
+      </li>
+      @endif
+  
       {{-- @if( $_user->ableTo('audit-logs.index', $permissions) )
     <li class="{{ Request::is('*audit-logs*') ? 'active' : '' }} menu-item">
       <a href="/dashboard/audit-logs">
