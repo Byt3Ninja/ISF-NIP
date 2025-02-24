@@ -1296,4 +1296,6 @@ return [
 	'No Shareholders' => 'No Shareholders',
 	'No Founders' => 'No Founders',
 	'No Investors' => 'No Investors',
+	'Survey_Info' => 'Survey Info',
+	'SurveyQuestions' => 'Survey Questions',
 ];
