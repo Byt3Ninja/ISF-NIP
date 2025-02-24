@@ -85,6 +85,7 @@
             </div>
         
             <div class="d-flex flex-column">
+              @if ($company->info_company)
               <div class="d-flex gap-2 mt-4 w-100">
                 <i class="ti ti-message ti-23px text-primary"></i>
                 <div class="d-flex flex-column w-100">
@@ -96,6 +97,7 @@
                   </div>
                 </div>
               </div>
+              @endif
               <div class="w-100 mt-4 d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2"
                   onclick="window.open('{{ $company->google_map ? $company->google_map : '#'}}', '_blank')" style="cursor: pointer;"
