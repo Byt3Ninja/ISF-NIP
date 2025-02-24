@@ -7,7 +7,7 @@
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <div>
-      <div class="w-100 d-flex justify-content-between align-items-center px-0 px-md-6">
+      <div class="w-100 d-flex flex-wrap justify-content-between align-items-center px-0 px-md-6">
         <h3 class="fw-bold mb-0">{{ __('admin.EditSurvey') }}</h3>
         <nav>
           <ul class="nav nav-tabs nav-fill" role="tablist">
