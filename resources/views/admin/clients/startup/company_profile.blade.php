@@ -369,7 +369,7 @@
                 </video>
                 @else
                 {{-- Unknown format --}}
-                <p class="text-danger">Invalid video URL</p>
+                <a href="{{ $videoUrl }}" target="_blank" class="btn btn-primary">View Video</a>
                 @endif
 
                 @else
@@ -458,14 +458,14 @@
         <div class="card">
           <div class="card-body">
             <h5>{{ __('admin.about_problem') }}</h5>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 mb-3">
               <i class="ti ti-alert-circle ti-24px text-primary me-2"></i>
               <div class="line-clamp-2">
                 {{ $company ? $company->about_problem : '' }}
               </div>
             </div>
             @if($company->about_market_opportunity)
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 mb-3">
               <div class="line-clamp-2">
                 <i class="ti ti-chart-bar ti-24px text-primary me-2"></i>
                 {{ $company ? $company->about_market_opportunity : '' }}
@@ -473,7 +473,7 @@
             </div>
             @endif
             @if($company->about_competitors)
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 mb-3">
               <i class="ti ti-flag ti-24px text-primary me-2"></i>
               <div class="line-clamp-2">
                 {{ $company ? $company->about_competitors : '' }}
@@ -481,7 +481,7 @@
             </div>
             @endif
             @if($company->about_monetize)
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 mb-3">
               <i class="ti ti-cash ti-28px text-primary me-2"></i>
               <div class="line-clamp-2">
                 {{ $company ? $company->about_monetize : '' }}
