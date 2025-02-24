@@ -34,7 +34,7 @@
                   <div class="fs-6 mt-2">Sector: <span class="fw-bold">{{ $sector ? $sector->{'name_' . $l} : $company->sector }}</span></div> -->
                 </div>
               </div>
-              <div class="d-flex align-items-center" style="gap: 1rem;">
+              <div class="d-flex align-items-center mt-3 mt-md-0" style="gap: 1rem;">
                 @if ($company->facebook)
                 <a class="d-flex align-items-center"
                   href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"

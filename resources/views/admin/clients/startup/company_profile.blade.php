@@ -69,7 +69,6 @@
     width: 75%;
   }
 }
-
 </style>
 @stop
 
@@ -264,7 +263,7 @@
     @if (!empty($Sustainables) && count($Sustainables) > 0)
     <section class="mt-6 row">
       <div class="col-12">
-        <div class="card" style= min-height: 290px;">
+        <div class="card" style=min-height: 290px;">
           <div class="p-4">
             <h5 class="">
               {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}
@@ -335,55 +334,59 @@
           </div>
         </div>
         <div class="col-12 col-md-6 mt-6">
-          <div class="card" style="height: 520px;">
-            <div class="card-body h-100">
+          <div class="card flex-grow-1" style="height: 520px;">
+            <div class="card-body">
               <h5 class="card-title">{{ __('admin.Pitch_Deck_Video') }}:</h5>
-              @if ($company->pitch_deck_video != null)
-              <div class="card-body text-center d-flex flex-column justify-content-between h-100">
-                <div class="d-flex flex-column justify-content-between align-items-center h-100">
-                  @if($company)
-                  @if ($company->pitch_deck_video != null)
-                  <a href="{{ asset($company->pitch_deck_video) }}" target="_blank"
-                    class="mb-2 text-start w-100 cursor-pointer">
-                    {{ __('admin.View_Pitch_Deck_Video') }}
-                  </a>
-                  @endif
-                  @else
-                  <img id="deck-video-image" src="/images/deck-video.svg" style="width: 350px; height: 250px;" />
-                  @endif
-                  {{-- <video width="100%" controls>
-                        <source src="{{ $company->pitch_deck_video }}">
+              <div class="d-flex flex-column justify-content-between align-items-center" style="height: 90%">
+                @if ($company && $company->pitch_deck_video)
+                @php
+                $videoUrl = $company->pitch_deck_video;
+                $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/[^\/]+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
+                $isYouTube = preg_match($youtubePattern, $videoUrl, $matches);
+                $videoId = $isYouTube ? $matches[1] : null;
+                @endphp
+
+                @if ($videoId)
+                {{-- Embed YouTube Video --}}
+                <iframe class="h-100 w-100" src="https://www.youtube.com/embed/{{ $videoId }}"
+                  title="YouTube video player" frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen>
+                </iframe>
+                @elseif (Str::contains($videoUrl, 'vimeo.com'))
+                {{-- Embed Vimeo Video --}}
+                @php
+                $vimeoId = preg_replace('/[^0-9]/', '', parse_url($videoUrl, PHP_URL_PATH));
+                @endphp
+                <iframe class="h-100 w-100" src="https://player.vimeo.com/video/{{ $vimeoId }}" frameborder="0"
+                  allow="autoplay; fullscreen; picture-in-picture" allowfullscreen>
+                </iframe>
+                @elseif (Str::endsWith($videoUrl, ['.mp4', '.webm', '.ogg']))
+                {{-- Direct Video File --}}
+                <video class="h-100 w-100" controls>
+                  <source src="{{ $videoUrl }}" type="video/mp4">
                   Your browser does not support the video tag.
-                  </video> --}}
-                  <div class="mt-auto d-flex flex-column mb-6">
-                    <span class="text-muted">
-                      To get analysis for your pitch deck please upload your
-                      pitch deck video
-                    </span>
-                    <a role="button"
-                      onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
-                      class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                      Click here
-                    </a>
-                  </div>
+                </video>
+                @else
+                {{-- Unknown format --}}
+                <p class="text-danger">Invalid video URL</p>
+                @endif
+
+                @else
+                <img id="deck-video-image" src="/images/deck-video.svg" style="width: 350px; height: height: 350px;" />
+                @endif
+
+                <div class="mt-auto d-flex flex-column pt-4 text-center">
+                  <span class="text-muted">
+                    To get analysis for your pitch deck please upload your pitch deck video
+                  </span>
+                  <a role="button"
+                    onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
+                    class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                    Click here
+                  </a>
                 </div>
               </div>
-              @else
-              <div class="card-body text-center d-grid justify-content-between">
-                <div class="d-flex flex-column justify-content-between align-items-center">
-                  <img src="/images/deck-video.svg" style="width: 350px; height: 350px;" />
-                  <div class="mt-auto d-flex flex-column">
-                    <span class="text-muted">
-                      To get analysis for your pitch deck please upload your
-                      pitch deck video
-                    </span>
-                    <a href="{{ route('my_company') }}"
-                      class="text-primary fw-medium text-decoration-underline mt-1">Click
-                      here</a>
-                  </div>
-                </div>
-              </div>
-              @endif
             </div>
           </div>
         </div>
@@ -455,7 +458,7 @@
         <div class="card">
           <div class="card-body">
             <h5>{{ __('admin.about_problem') }}</h5>
-              <div class="d-flex gap-2">
+            <div class="d-flex gap-2">
               <i class="ti ti-alert-circle ti-24px text-primary me-2"></i>
               <div class="line-clamp-2">
                 {{ $company ? $company->about_problem : '' }}
