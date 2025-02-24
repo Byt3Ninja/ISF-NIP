@@ -1312,5 +1312,7 @@ return [
 	'No Shareholders' => 'لا يوجد مساهمون',
 	'No Founders' => 'لا يوجد مؤسسون',
 	'No Investors' => 'لا يوجد مستثمرون',
+	'Survey_Info' => 'معلومات الاستبيان',
+	'SurveyQuestions' => 'أسئلة الاستبيان',
 ];
 
