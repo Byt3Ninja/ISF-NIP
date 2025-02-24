@@ -291,9 +291,9 @@
     @endif
     <!-- / Sustainable Development Icons -->
 
-    <section class="mt-6">
+    <section>
       <div class="row">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-6 mt-6">
           <div class="card" style="height: 520px;">
             <div class="card-body h-100">
               <h5 class="card-title">{{ __('admin.Pitch_Deck') }}:</h5>
@@ -334,7 +334,7 @@
             </div>
           </div>
         </div>
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-6 mt-6">
           <div class="card" style="height: 520px;">
             <div class="card-body h-100">
               <h5 class="card-title">{{ __('admin.Pitch_Deck_Video') }}:</h5>
