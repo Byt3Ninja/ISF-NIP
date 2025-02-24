@@ -1,10 +1,9 @@
 <div class="card">
   <div class="card-body">
-    <div class="border-bottom border-light mb-6">
-      <h5 class="card-title fw-semibold">{{ $tab['label'] }}</h5>
-    </div>
-    @if ($_user->hasAnyRole('Admin|organizationManager'))
+    
+    @if (Auth::user()->hasanyRole('Admin|organizationManager'))
       <form method="post"
+        id="contact-form" 
         action="{{ route('update_my_company', $client->company->id) }}"
         enctype="multipart/form-data">
       @else
@@ -15,6 +14,226 @@
     {!! csrf_field() !!}
     <input name="CompanyN" type="hidden" value="2">
     <div class="row">
+      <div class="border-bottom mb-4">
+        <h5 class="card-title">{{ __('admin.Logo_Social') }} </h5>
+      </div>
+      <div class="row mb-8">
+        <!-- Upload Company Logo -->
+        <div class="col-12 col-md-2 justify-content-center d-flex">
+          <div class="d-flex flex-column" style="width: fit-content;">
+            <div class="w-px-100 text-center">
+              <label class="fs-6 form-label fw-semibold mb-1" class="form-label fw-medium">{{ __('admin.Logo') }}</label>
+            </div>
+            <div id="holder" class="company-picker-container">
+              <div class="position-relative w-px-100 h-px-100 mb-3 cursor-pointer">
+                
+                <img 
+                  id="company-logo" 
+                  src="{{ $client->company ? asset($client->company->logo) : '/images/logo-placeholder.png' }}" 
+                  onerror="this.src = '/images/logo-placeholder.png';"
+                  alt="Company logo" 
+                  class="img-fluid rounded border w-px-100 h-px-100" 
+                />
+                <i class="ti ti-camera-plus position-absolute bottom-0 end-0 p-2"></i>
+              </div>
+              <input 
+                type="file" 
+                class="form-control mt-2 d-none" 
+                id="file1" 
+                name="img_url" 
+                accept="image/*" 
+              />
+            </div>
+
+            @if ($client->company && $client->company->logo) 
+              <div class="w-px-100 text-center">
+                <button
+                  type="button" 
+                  id="reset-company-logo"
+                  onclick="document.querySelector('#company-logo').src = '/images/logo-placeholder.png'; document.querySelector('#file1').value = '';"
+                  class="btn btn-label-secondary btn-sm"
+                >
+                  {{ $l == 'en' ? 'Reset' : 'إعادة تعيين' }}
+                </button>
+              </div>
+            @endif
+          </div>
+        </div>
+        <!-- /Upload Company Logo -->
+
+        <!-- Social Media Links -->
+        <div class="col-md-10">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="linkedin">{{ __('admin.Linkedin') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="linkedin" 
+                    name="linkedin" 
+                    {{-- placeholder="{{ $l == 'en' ? 'LinkedIn URL' : 'رابط لينكد إن' }}"  --}}
+                    placeholder="e.g. https://www.linkedin.com/" 
+                    value="{{ $client->company->linkedin ?? old('linkedin') }}" 
+                    pattern="https://www.linkedin.com/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-linkedin"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid LinkedIn URL' : 'رابط لينكد إن غير صالح' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="twitter">{{ __('admin.Twitter') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="twitter" 
+                    name="twitter" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Twitter or x URL' : 'رابط تويتر' }}"  --}}
+                    placeholder="e.g. https://x.com/" 
+                    value="{{ $client->company->twitter ?? old('twitter') }}" 
+                    pattern="https://twitter.com/.*|https://x.com/.*|https://X.com/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Twitter URL.' : 'يرجى إدخال رابط تويتر صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-twitter"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Twitter URL' : 'رابط تويتر غير صالح' }}.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="facebook">{{ __('admin.Facebook') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="facebook" 
+                    name="facebook" 
+                    placeholder="e.g. https://www.facebook.com/" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Facebook URL' : 'رابط فيسبوك' }}"  --}}
+                    value="{{ $client->company->facebook ?? old('facebook') }}" 
+                    pattern="https://www.facebook.com/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Facebook URL.' : 'يرجى إدخال رابط فيسبوك صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-facebook"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Facebook URL' : 'رابط فيسبوك غير صالح' }}.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="youtube">{{ __('admin.Youtube') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="youtube" 
+                    name="youtube" 
+                    {{-- placeholder="{{ $l == 'en' ? 'YouTube URL' : 'رابط يوتيوب' }}"  --}}
+                    placeholder="e.g. https://www.youtube.com/" 
+                    value="{{ $client->company->youtube ?? old('youtube') }}" 
+                    pattern="https://www.youtube.com/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid YouTube URL.' : 'يرجى إدخال رابط يوتيوب صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-youtube"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid YouTube URL' : 'رابط يوتيوب غير صالح' }}.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="website">{{ __('admin.Website') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="website" 
+                    name="website" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}"  --}}
+                    placeholder="e.g. https?://" 
+                    value="{{ $client->company->website ?? old('website') }}" 
+                    pattern="https?://.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid website URL.' : 'يرجى إدخال رابط موقع صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-world"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Website URL' : 'رابط الموقع غير صالح' }}.</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="google_map">{{ __('admin.Google Map full URL') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="google_map" 
+                    name="google_map" 
+                    placeholder="e.g. https://maps.app.goo.gl/" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Google Map URL' : 'رابط خريطة جوجل' }}"  --}}
+                    value="{{ $client->company->google_map ?? old('google_map') }}" 
+                    pattern="https://maps.app.goo.gl/.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Google Map URL.' : 'يرجى إدخال رابط خريطة جوجل صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-map-pin"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Google Map URL' : 'رابط خريطة جوجل غير صالح' }}.</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="instagram">{{ __('admin.Instagram') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="instagram" 
+                    name="instagram" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Instagram URL' : 'رابط انستجرام' }}"  --}}
+                    placeholder="e.g. https://www.instagram.com/" 
+                    value="{{ $client->company->instagram ?? old('instagram') }}" 
+                    pattern="https://www.instagram.com.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-instagram"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Instagram URL.' : 'يرجى إدخال رابط انستجرام صالح.' }}.</div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="fs-6 form-label fw-semibold mb-1" for="tiktok">{{ __('admin.Tiktok') }}</label>
+                <div class="input-group input-group-merge">
+                  <input 
+                    type="url" 
+                    class="form-control" 
+                    id="tiktok" 
+                    name="tiktok" 
+                    {{-- placeholder="{{ $l == 'en' ? 'Tiktok URL' : 'رابط انستجرام' }}"  --}}
+                    placeholder="e.g. https://www.tiktok.com" 
+                    value="{{ $client->company->tiktok ?? old('tiktok') }}" 
+                    pattern="https://www.tiktok.com.*" 
+                    title="{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}"
+                  />
+                  <span class="input-group-text text-light"><i class="ti ti-brand-tiktok"></i></span>
+                </div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid Tiktok URL.' : 'يرجى إدخال رابط تيك توك صالح.' }}.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-bottom border-light mb-6">
+        <h5 class="card-title fw-semibold">{{ $tab['label'] }}</h5>
+      </div>
+
       <div class="col-md-6 col-12 mb-6">
         <div class="d-grid">
           <div class="d-grid gap-2">
@@ -69,6 +288,7 @@
         </div>
       </div>
     </div>
+
     <div class="row">
       <div class="col-12 d-flex justify-content-end">
         <button class="btn btn-primary" id="submit-button" type="submit">
