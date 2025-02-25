@@ -6,7 +6,7 @@
       <form 
         id="founder-form" 
         method="post" 
-        action="{{ route('AddTeams_Comp') }}" 
+        {{-- action="{{ route('AddTeams_Comp') }}"  --}}
         enctype="multipart/form-data"
       >
         @csrf
@@ -92,7 +92,7 @@
         <div class="col-12 text-end mt-3" style="height: 40px;">
           <input type="hidden" name="TeamsNo" value="Founders" />
           <button 
-            {{--  type="submit"   --}}
+            type="submit"
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams" 
             do="Founders" 
             company="{{ optional($client->company)->id }}"
