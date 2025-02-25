@@ -85,13 +85,15 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   const shareholderForm = document.querySelector('#shareholder-form');
-  const editFounderForm = document.querySelector('#edit-shareholder-form');
+  const editShareHolderForm = document.querySelector('#edit-shareholder-form');
+
+  console.log('editShareHolderForm', editShareHolderForm)
 
   if (shareholderForm) {
     const shareholderValidator = FormValidation.formValidation(shareholderForm, createValidationConfig());
   }
 
-  if (editFounderForm) {
-    const editFounderValidator = FormValidation.formValidation(editFounderForm, createValidationConfig());
+  if (editShareHolderForm) {
+    const editFounderValidator = FormValidation.formValidation(editShareHolderForm, createValidationConfig());
   }
 });
