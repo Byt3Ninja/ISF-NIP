@@ -87,8 +87,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const shareholderForm = document.querySelector('#shareholder-form');
   const editShareHolderForm = document.querySelector('#edit-shareholder-form');
 
-  console.log('editShareHolderForm', editShareHolderForm)
-
   if (shareholderForm) {
     const shareholderValidator = FormValidation.formValidation(shareholderForm, createValidationConfig());
   }
