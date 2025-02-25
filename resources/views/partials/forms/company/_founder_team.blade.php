@@ -78,8 +78,6 @@
                   name="founder_linkedin" 
                   autocomplete="founder_linkedin" 
                   placeholder="e.g. https://www.linkedin.com/in/username" 
-                  pattern="https://www.linkedin.com/.*" 
-                  title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
                   oninput="this.value = this.value.trimStart()"
                 />
                 <div class="input-group-text">
@@ -267,8 +265,6 @@
                             name="founder_linkedin" 
                             autocomplete="founder_linkedin" 
                             placeholder="e.g. https://www.linkedin.com/in/username"
-                            pattern="https://www.linkedin.com/.*"
-                            title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
                             oninput="this.value = this.value.trimStart()"
                           />
                           <div class="input-group-text">
@@ -280,7 +276,7 @@
                   </div>
                   <div class="mt-6">
                     <button 
-                      {{--  type="submit"   --}}
+                      type="submit"
                       class="btn btn-primary me-3 data-submit EditTeams" 
                       do="{{ $fonder->id }}" 
                       company="{{ optional($client->company)->id }}"
