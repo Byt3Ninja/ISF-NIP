@@ -1298,4 +1298,7 @@ return [
 	'No Investors' => 'No Investors',
 	'Survey_Info' => 'Survey Info',
 	'SurveyQuestions' => 'Survey Questions',
+	'AddQuestions' => 'Add Questions',
+	'SelectQuestions' => 'Select Questions',
+	'CreateSurvey' => 'Create Survey',
 ];

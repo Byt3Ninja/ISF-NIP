@@ -25,7 +25,7 @@
 
       <div class="row px-0 px-md-6">
         @if( session()->has('success') )
-        <div class="col-md-12">
+        <div class="col-md-12 mt-4">
           <div role="alert" class="alert alert-success alert-dismissible fade show mb-2">
             {{ __('admin.'. session()->get('success')) }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -33,7 +33,7 @@
         </div>
         @endif
         @if( session()->has('error') )
-        <div class="col-md-12">
+        <div class="col-md-12 mt-4">
           <div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
             {{ __('admin.'.session()->get('error')) }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -41,9 +41,9 @@
         </div>
         @endif
         @if( session()->has('msg') )
-        <div class="row">
+        <div class="row mt-4">
           <div class="col-md-12">
-            <div class="alert alert-danger mb-2" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show mb-2" role="alert">
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               <div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span>
                   {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span> </div>
@@ -52,9 +52,10 @@
         </div>
         @endif
         @if( count( $errors ) > 0 )
-        <div class="row">
+        <div class="row mt-4">
           <div class="col-md-12">
-            <div class="alert alert-danger">
+            <div class="alert alert-danger alert-dismissible fade show mb-2">
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               <ul>
                 @foreach($errors->all() as $error)
                 <li>{{ $error }} </li>
@@ -65,6 +66,7 @@
         </div>
         @endif
       </div>
+
       <div class="tab-content px-0 px-md-6">
         <div class="tab-pane fade show active" id="survey-info">
           <form class="card mb-6" method="post" action="{{ route('surveys.update', ['survey' => $survey->id]) }}">
@@ -106,9 +108,26 @@
         </div>
 
         <div class="tab-pane fade" id="survey-questions">
+          <div class="row my-3">
+            <div class="col-6">
+              <button type="button" class="btn btn-label-primary btn-sm mb-3" id="add-questions-btn">
+                {{ __('admin.AddQuestions') }}
+                <i class="ti ti-plus ms-2"></i>
+              </button>
+            </div>
+            <div class="col-6">
+              <div class="d-flex justify-content-end">
+                <h6 id="select-title" class="fw-semibold text-muted mb-0 d-none">
+                  {{ __('admin.SelectQuestions') }}
+                  <i class="ti ti-circle-check ms-2"></i>
+                </h6>
+              </div>
+            </div>
+          </div>
           <form method="post" action="{{ route('surveys.update', ['survey' => $survey->id]) }}">
             {!! csrf_field() !!}
             <input name="_method" type="hidden" value="PATCH" />
+            <input type="hidden" name="selected_questions" id="selected-questions" value="[]" />
             @foreach( $questions as $key => $question )
             <div class="col-12">
               <div class="card border mb-4">
@@ -120,21 +139,23 @@
                       {{ $key + 1 }}
                     </span>
                     <h5 class="card-title ms-2 mb-0 fs-semibold">{{ $question->question }}</h5>
+                    <input type="checkbox" class="form-check-input ms-auto question-checkbox d-none"
+                      value="{{ $question->id }}" />
                   </div>
                 </div>
                 <div class="card-body">
                   @if ($question->survey_type == 'radio')
                   @foreach( $question->answers as $key => $answer )
-									<div class="ps-4">
-										<div class="form-check">
-											<input class="form-check-input" type="radio" name="answer_{{ $question['id'] }}"
-												id="answer-{{ $key }}" value="{{ $key }}" />
-											<label class="form-check-label" for="answer-{{ $key }}"
-												onclick="this.previousElementSibling.checked = true">
-												{{ $answer['text'] }}
-											</label>
-										</div>
-									</div>
+                  <div class="ps-4">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="answer_{{ $question['id'] }}"
+                        id="answer-{{ $key }}" value="{{ $key }}" />
+                      <label class="form-check-label" for="answer-{{ $key }}"
+                        onclick="this.previousElementSibling.checked = true">
+                        {{ $answer['text'] }}
+                      </label>
+                    </div>
+                  </div>
                   @endforeach
                   @elseif ($question->survey_type == 'stars')
                   <ul class="d-flex align-items-center gap-2 list-unstyled mb-0 ps-4">
@@ -154,10 +175,49 @@
               </div>
             </div>
             @endforeach
+
+            <div class="card-footer">
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                  {{__('admin.Save')}}
+                  <i class="ti ti-circle-check ms-2"></i>
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       </div>
     </div>
   </div>
 </div>
+@stop
+
+@section('pagescripts')
+<script>
+const questions = @json($questions);
+console.log('questions', questions);
+
+document.getElementById('add-questions-btn').addEventListener('click', function() {
+  document.querySelectorAll('.question-checkbox').forEach(function(checkbox) {
+    checkbox.classList.toggle('d-none');
+    document.querySelector('#select-title').classList.toggle('d-none');
+  });
+});
+
+document.querySelectorAll('.question-checkbox').forEach(function(checkbox) {
+  checkbox.addEventListener('change', function() {
+    const selectedQuestions = JSON.parse(document.getElementById('selected-questions').value);
+    if (this.checked) {
+      selectedQuestions.push(this.value);
+    } else {
+      const index = selectedQuestions.indexOf(this.value);
+      if (index > -1) {
+        selectedQuestions.splice(index, 1);
+      }
+    }
+    document.getElementById('selected-questions').value = JSON.stringify(selectedQuestions);
+    console.log('values', document.getElementById('selected-questions').value);
+  });
+});
+</script>
 @stop

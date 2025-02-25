@@ -1314,5 +1314,8 @@ return [
 	'No Investors' => 'لا يوجد مستثمرون',
 	'Survey_Info' => 'معلومات الاستبيان',
 	'SurveyQuestions' => 'أسئلة الاستبيان',
+	'AddQuestions' => 'إضافة أسئلة',
+	'SelectQuestions' => 'اختيار الأسئلة',
+	'CreateSurvey' => 'إنشاء استبيان',
 ];
 
