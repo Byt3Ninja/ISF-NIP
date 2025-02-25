@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
-use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
@@ -480,6 +480,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('/swot-analysis/save', [GeminiController::class, 'saveSwotAnalysis'])->name('swot.save');
     Route::get('/swot-analysis/export', [GeminiController::class, 'exportToPdf'])->name('swot.export');
     /* End of Gemini SWOT Analysis Routes */
+
+
+    /* Start of Projects Routes */
+    Route::post('projects/{project}/link-programs', 'ProjectController@linkPrograms')->name('projects.linkPrograms');
+    Route::delete('projects/{project}/unlink-program/{cycle}', 'ProjectController@unlinkProgram')->name('projects.unlinkProgram');
+    Route::post('/projects/{project}/add-team-members', 'ProjectController@addTeamMembers')->name('projects.addTeamMembers');
+    Route::delete('/projects/{project}/remove-team-member/{teamMember}', 'ProjectController@removeTeamMember')->name('projects.removeTeamMember');
+    Route::resource('projects', 'ProjectController');    
+    /* End of Projectss Routes */
 
     
 

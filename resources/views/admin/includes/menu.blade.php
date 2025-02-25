@@ -772,6 +772,15 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </a>
       </li>
     @endif
+
+     @if( $_user->ableTo('projects.index', $permissions) )
+      <li class="{{ Request::is('dashboard/projects*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('projects.index') }}">
+          <i class="menu-icon tf-icons ti ti-folder"></i>
+           <div>{{ __('admin.Projects') }}</div>
+        </a>
+     </li>
+    @endif
   
     @if( $_user->ableToAny(['settings.list', 'settings.save'], $permissions) )
       <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
