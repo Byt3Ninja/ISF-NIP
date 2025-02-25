@@ -139,7 +139,7 @@
                                     class="select2 form-control panel{{ $key }}" multiple="multiple">
                                     @foreach ($judges as $judge)
                                       <option value="{{ $judge->id }}"
-                                        {{ in_array($judge->id, $clist ?? []) ? 'selected' : '' }}>{{ $judge->name }}
+                                        {{ in_array($judge->id, is_array($clist) ? $clist : [], true) ? 'selected' : '' }}>{{ $judge->name }}
                                         ({{ $judge->email }})</option>
                                     @endforeach
                                   </select>

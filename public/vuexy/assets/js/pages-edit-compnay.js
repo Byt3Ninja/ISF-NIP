@@ -106,7 +106,7 @@ const translations = {
 const descTranslations = {
   en: {
     company_description: {
-      stringOnly: 'Company description accepts letters only'
+      stringOnly: 'Company description accepts letters and symbols only'
     },
     about_problem: {
       stringOnly: 'About the problem accepts letters only'
@@ -126,7 +126,7 @@ const descTranslations = {
   },
   ar: {
     company_description: {
-      stringOnly: 'وصف الشركة يقبل الحروف فقط'
+      stringOnly: 'وصف الشركة يقبل الحروف والرموز فقط'
     },
     about_problem: {
       stringOnly: 'حول المشكلة يقبل الحروف فقط'
@@ -295,9 +295,9 @@ document.addEventListener('DOMContentLoaded', function () {
       company_description: {
         validators: {
           regexp: {
-            regexp: /^[\p{L}\s.]+$/u,
+            regexp: /^[\p{L}\p{P}\p{S}\s.]+$/u,
             message: descTranslations[lang].company_description.stringOnly
-          }
+          }        
         }
       },
       about_problem: {

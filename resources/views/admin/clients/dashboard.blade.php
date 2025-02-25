@@ -841,11 +841,15 @@
                   <tr>
                     <td>
                       @if($step->stype == 1)
+                      @if($step->arr == 'Completed' || $step->arr == 'انتهت')
                         @if( $_user->company->approved && $_user->ableTo('cycles.my', $permissions) )
                           <a href="/dashboard/cycles/{{ $flink }}"> {{ $step->title }} </a>
                         @else 
                           {{ $step->title }}
                         @endif
+                        @else
+                        {{ $step->title }}
+                      @endif
                       @else
                         {{ $step->title }}
                       @endif

@@ -76,7 +76,7 @@
         <div class="col-12 text-end mt-3" style="height: 40px;">
           <input type="hidden" name="TeamsNo" value="Shareholders" />
           <button
-            {{--  type="submit"  --}}
+            type="submit"
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
             do="Shareholders"
             company="{{ optional($client->company)->id }}"
@@ -241,7 +241,7 @@
                       </div>
                       <div class="mt-6">
                         <button
-                          {{--  type="submit"  --}}
+                          type="submit" 
                           class="btn btn-primary me-3 data-submit EditTeams"
                           do="{{ $Shareholder->id }}"
                           company="{{ optional($client->company)->id }}"

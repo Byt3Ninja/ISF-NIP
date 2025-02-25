@@ -13,13 +13,14 @@ use App\Currency;
 use App\Messages;
 use App\Settings;
 use Carbon\Carbon;
-use DB, File, URL;
+use File, URL;
 use App\Invitation;
 use App\Organization;
 use App\MentorshipRequest;
 use Illuminate\Support\Str;
 use App\Mail\UserInvitation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Mail;
@@ -967,6 +968,15 @@ class SettingsController extends Controller
 			'organization_id' => $invitation->organization_id,
 			'password' => bcrypt($request->password),
 		]);
+
+		 $role = Role::where('name', $invitation->role)->first();
+		 if ($role) {
+			 DB::table('model_has_roles')->insert([
+				 'role_id' => $role->id,
+				 'model_id' => $user->id,
+				 'model_type' => User::class,
+			 ]);
+		 }
 
 		$user->assignRole($invitation->role);
 
