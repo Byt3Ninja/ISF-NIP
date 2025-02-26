@@ -398,7 +398,7 @@ return [
 	'Google Map full URL' => 'Google Map full URL',
 	'Select image file' => 'Select image file',
 	'problem' => 'Problem',
-	'idea' => 'Problem',
+	'idea' => 'idea',
 	'est_date' => 'Establishment date',
 	'raised_fund_egp' => 'Raised Fund in ',
 	'team_num' => 'Team number',

@@ -954,7 +954,7 @@
       @php
       $myfinal = \App\Finalscreening::where('company_id', $_user->company->id )->where('step_id', $_user->company->step )->first();
       @endphp
-      @if( !is_null($myfinal)&&$myfinal->join_url )
+      
 
         <section class="mt-10">
           <div class="row">
@@ -965,7 +965,7 @@
                     <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Final_Session") }}
                   </h4>
                 </div>
-    
+                @if( is_null($myfinal)&&$myfinal->join_url )
                   <div class="">
                     <div class="">
                       <div class="table-responsive">
@@ -1030,13 +1030,22 @@
                       </div>
                     </div>
                   </div>
+                  @else
+                  <div class="">
+                    <div class="">
+                      <div class="text-center">
+          <h3>{{__('dashboard.Your final session will start soon')}}.</h3>
+                      </div>
+                    </div>
+                  </div>
+        
+      @endif
+
               </div>
             </div>
           </div>
         </section>
-      @else
-        <hr><h6>{{__('dashboard.Your final session will start soon')}}.</h6>
-      @endif
+      
     @endif
       <!-- My last training -->
       @if (count($sessions) > 0)
