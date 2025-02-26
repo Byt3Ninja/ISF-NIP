@@ -849,13 +849,13 @@ class ClientCompanyController extends Controller
                 if( $request->ajax() ) { return response()->json(['state' => __('admin.founder_email_exist'),]); }
                 else { return redirect()->back()->with('error', __('admin.founder_email_exist')); }
             }
-            $linkedin = $request->input('founder_linkedin');
-            $linked = Team_member::where('LinkedIn', $linkedin)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
-            if ($linked != null) 
-            {
-                if( $request->ajax() ) { return response()->json(data: ['state' => __('admin.founder_linkedin_exist'),]); }
-                else { return redirect()->back()->with('error', __('admin.founder_linkedin_exist')); }
-            }
+            // $linkedin = $request->input('founder_linkedin');
+            // $linked = Team_member::where('LinkedIn', $linkedin)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
+            // if ($linked != null) 
+            // {
+            //     if( $request->ajax() ) { return response()->json(data: ['state' => __('admin.founder_linkedin_exist'),]); }
+            //     else { return redirect()->back()->with('error', __('admin.founder_linkedin_exist')); }
+            // }
 
             $founder = 'Founder';
             // إنشاء وحفظ بيانات العضو في قاعدة البيانات
