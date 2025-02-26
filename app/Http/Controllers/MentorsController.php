@@ -292,7 +292,14 @@ class MentorsController extends Controller
 					"Kindly note you have a new mentorship session with '" . $startup_owner_name . "', Session will start:" . $date . ", Check your account to join the session ",
 					"/dashboard"
 				];
-				$user->notify($MSG);
+				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				{
+					try {
+						$user->notify($MSG);
+					} catch (\Throwable $th) {
+						// throw $th;
+					}
+				}
 
 				/// Notify Startup Owner
 				$user = new User();
@@ -305,7 +312,14 @@ class MentorsController extends Controller
 					"Kindly note you have a new mentorship session with '" . $mentor_name . "', Session will start:" . $date . ", Check your account to join the session ",
 					"/dashboard"
 				];
-				$user->notify($MSG);
+				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				{
+					try {
+						$user->notify($MSG);
+					} catch (\Throwable $th) {
+						// throw $th;
+					}
+				}
 				/// End of mail send
 			}
 			return back()->with([
@@ -426,7 +440,14 @@ class MentorsController extends Controller
 				"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start:" . $request->date . ", Check your account to join the session ",
 				"/dashboard"
 			];
-			$user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 			/// Notify User
 			$user = new User();
 			$user->email = $rName_usr->email;
@@ -438,7 +459,14 @@ class MentorsController extends Controller
 				"Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $request->date . ", Check your account to join the session ",
 				"/dashboard"
 			];
-			$user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 			/// End of mail send
 			return back()->with(['message' => 'ٍsaved successfully']);
 		} else {
@@ -481,7 +509,14 @@ class MentorsController extends Controller
 					"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start:" . $request->date . ", Check your account to join the session ",
 					"/dashboard"
 				];
-				$user->notify($MSG);
+				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				{
+					try {
+						$user->notify($MSG);
+					} catch (\Throwable $th) {
+						// throw $th;
+					}
+				}
 				/// Notify User
 				$user = new User();
 				$user->email = $rName_usr->email;
@@ -493,7 +528,14 @@ class MentorsController extends Controller
 					"Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $request->date . ", Check your account to join the session ",
 					"/dashboard"
 				];
-				$user->notify($MSG);
+				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				{
+					try {
+						$user->notify($MSG);
+					} catch (\Throwable $th) {
+						// throw $th;
+					}
+				}
 				/// End of mail send
 				return response()->json('success');
 			} elseif ($type == 5) {

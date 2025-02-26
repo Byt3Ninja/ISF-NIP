@@ -181,7 +181,14 @@ class ServiceController extends Controller
 			$rfullname = $crequest->user->first_name_en ." ". $crequest->user->last_name_en;
 			$MSG = new TemplateEmail;
 			$MSG->Message=["Service request - VI portal","Dear ".$rfullname.",", "Kindly note that your service request (".$crequest->service->name_en . ") has been ".$stat.", Check your account for more details.","/dashboard/requests/mine"];
-			$user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 			/// End of mail send
 			return response()->json(['state'=>'success']);
 		}

@@ -102,7 +102,14 @@ class ScreeningController extends Controller
 						$MSG = new TemplateEmail;
 						$MSG->Message = ["New judging - VI portal", "Dear " . $rfullname . ",", "Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') .
 							" to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.", "/dashboard"];
-						$user->notify($MSG);
+						if( !in_array(env('APP_ENV', 'local'), ['local']) )
+						{
+							try {
+								$user->notify($MSG);
+							} catch (\Throwable $th) {
+								// throw $th;
+							}
+						}
 					}
 				}
 				/// End of mail send
@@ -240,9 +247,16 @@ class ScreeningController extends Controller
 			$recipients = User::role("Registered")->where('email', $company_owner->email)->get();
 
 			// Notify all recipients
-			foreach ($recipients as $recipient) {
-				$recipient->notify(new ChangeCycle($data));
-			}
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+					foreach( $recipients as $recipient ) {
+						$recipient->notify(new ChangeCycle($data));
+					}
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 		}
 		/// End of mail send
 		if ($update) {

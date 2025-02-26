@@ -115,7 +115,14 @@ class IndexController extends Controller
             $MSG = new App\Notifications\TemplateEmail;
             $MSG->Message = ["New subscribe to Newsletter ",
                 "Add my Email to your newsletter list: ", $Email, "subscribe from VI website"];
-            $user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
             return redirect()->back()->with('message', 'Done');
         } else {
             return redirect()->back()->with('message', 'Fail');

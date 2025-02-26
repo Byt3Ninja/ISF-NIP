@@ -152,7 +152,14 @@ class SettingsController extends Controller
 			$rfullname = $request->rname;
 			$MSG = new TemplateEmail;
 			$MSG->Message = [$request->subject.'- VI portal', "Dear " . $rfullname . ",", $request->message, "/dashboard"];
-			$user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 			Messages::find($request->mid)->update([
 				'reSubject' => $request->subject,
 				'reMessage' => $request->message,
