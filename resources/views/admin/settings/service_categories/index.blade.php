@@ -51,6 +51,7 @@
                         <thead>
                           <tr>
                             <th>#</th>
+                            <th class="text-center">{{__('admin.Organization')}}</th>
                             <th>{{ __('admin.English Name') }}</th>
                             <th>{{ __('admin.Arabic Name') }}</th>
                             <th>{{ __('admin.Created At') }}</th>
@@ -61,6 +62,11 @@
                           @foreach ($serviceCategories as $category)
                             <tr>
                               <td>{{ $index++ }}</td>
+                              <td class="text-center">
+                                <a href="{{ URL::to('dashboard/organizations/' . $category->organization_id . '/edit') }}">
+                                  {{ $category->organization ? $category->organization->{'name_'.$l} : '-' }}
+                                </a>
+                              </td>
                               <td>{{ $category->name_en }}</td>
                               <td>{{ $category->name_ar }}</td>
                               <td>{{ $category->created_at }}</td>

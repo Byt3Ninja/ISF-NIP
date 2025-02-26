@@ -23,22 +23,14 @@ class UpdateServiceRequest extends FormRequest
      */
     public function rules()
     {
-        if(UpdateServiceRequest::hasFile('img_url')){
-            return [
-                'name_en' => 'required',
-                'name_ar' => 'required',
-                'description_en' => 'required',
-                'description_ar' => 'required',
-                'img_url' => 'required',
-            ];
-        }else{
-            return [
-                'name_en' => 'required',
-                'name_ar' => 'required',
-                'description_en' => 'required',
-                'description_ar' => 'required',
-            ];
-
-        }
+        $rules = [
+            'name_en' => 'required',
+            'name_ar' => 'required',
+            'description_en' => 'required',
+            'description_ar' => 'required',
+            'service_category_id' => 'required|exists:service_categories,id',
+        ];
+        if( UpdateServiceRequest::hasFile('img_url') ) { $rules['img_url'] = 'required'; }
+        return $rules;
     }
 }
