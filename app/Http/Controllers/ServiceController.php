@@ -61,17 +61,28 @@ class ServiceController extends Controller
 	 */
 	public function store(StoreServiceRequest $request)
 	{
-		if( $request->hasFile('img_url') )
+		$category = ServiceCategory::find( $request->service_category_id );
+		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+		else
 		{
-			//store the image
-			$img_url = $request->file('img_url');
-			//get the path of the stores image
-			$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
-		} else { $img_url = ''; }
-		$result = Service::create($request->except(['img_url']) + ['img_url' => $img_url]);
+			if( empty( $category->organization_id ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+			else
+			{
+				if( $request->hasFile('img_url') )
+				{
+					//store the image
+					$img_url = $request->file('img_url');
+					//get the path of the stores image
+					$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
+				} else { $img_url = ''; }
+				$inputs = $request->except(['img_url']) + ['img_url' => $img_url];
+				$inputs['organization_id'] = $category->organization_id;
+				$result = Service::create( $inputs );
 
-		if( $result ) { return redirect()->route('services.index')->with( ['msg' => 'StoredSuccessfully'] ); }
-		else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+				if( $result ) { return redirect()->route('services.index')->with( ['msg' => 'StoredSuccessfully'] ); }
+				else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+			}
+		}
 	}
 
 	/**
@@ -106,19 +117,29 @@ class ServiceController extends Controller
 	 */
 	public function update(UpdateServiceRequest $request, Service $service)
 	{
-
-		if( $request->hasFile('img_url') )
+		$category = ServiceCategory::find( $request->service_category_id );
+		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+		else
 		{
-			// store the image
-			$img_url = $request->file('img_url');
-			// get the path of the stores image
-			$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
-			// update
-			$result = $service->update($request->except(['img_url']) + ['img_url' => $img_url]);
-		} else { $result = $service->update($request->all()); }
+			if( empty( $category->organization_id ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+			else
+			{
+				if( $request->hasFile('img_url') )
+				{
+					// store the image
+					$img_url = $request->file('img_url');
+					// get the path of the stores image
+					$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
+					$inputs = $request->except(['img_url']) + ['img_url' => $img_url];
+				} else { $inputs = $request->all(); }
+				$inputs['organization_id'] = $category->organization_id;
+				// update
+				$result = $service->update($inputs);
 
-		if( $result ) { return redirect()->route('services.index')->with( ['msg' => 'StoredSuccessfully'] ); }
-		else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+				if( $result ) { return redirect()->route('services.index')->with( ['msg' => 'StoredSuccessfully'] ); }
+				else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
+			}
+		}
 	}
 
 	/**

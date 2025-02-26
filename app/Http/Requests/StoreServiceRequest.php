@@ -29,6 +29,7 @@ class StoreServiceRequest extends FormRequest
             'description_en' => 'required',
             'description_ar' => 'required',
             'img_url' => 'required',
+            'service_category_id' => 'required|exists:service_categories,id',
         ];
     }
 }

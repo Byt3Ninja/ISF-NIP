@@ -42,6 +42,7 @@
                         <thead>
                           <tr>
                             <th>#</th>
+                            <th class="text-center">{{__('admin.Organization')}}</th>
                             <th>{{ __('cycles.English Name') }}</th>
                             <th>{{ __('cycles.Arabic Name') }}</th>
                             <th>{{ __('cycles.Price') }}</th>
@@ -53,6 +54,11 @@
                           @foreach ($services as $service)
                             <tr>
                               <td>{{ $index++ }}</td>
+                              <td class="text-center">
+                                <a href="{{ URL::to('dashboard/organizations/' . $service->organization_id . '/edit') }}">
+                                  {{ $service->organization ? $service->organization->{'name_'.$l} : '-' }}
+                                </a>
+                              </td>
                               <td>{{ $service->name_en }}</td>
                               <td>{{ $service->name_ar }}</td>
                               <td>{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
