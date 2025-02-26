@@ -90,11 +90,7 @@
         <div class="col-12 text-end mt-3" style="height: 40px;">
           <input type="hidden" name="TeamsNo" value="Founders" />
           <button 
-<<<<<<< Updated upstream
-            type="submit"
-=======
              type="button"  
->>>>>>> Stashed changes
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams" 
             do="Founders" 
             company="{{ optional($client->company)->id }}"
