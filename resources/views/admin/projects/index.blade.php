@@ -31,7 +31,7 @@
         <form method="GET" action="{{ route('projects.index') }}" class="d-flex gap-2">
     
             <select name="program_count" class="form-control">
-                <option value=""></option>
+                <option value="">{{ __('admin.filter_by_programs') }}</option>
                 <option value="1" {{ request('program_count') === '1' ? 'selected' : '' }}>1</option>
                 <option value="5" {{ request('program_count') === '5' ? 'selected' : '' }}>5</option>
                 <option value="10" {{ request('program_count') === '10' ? 'selected' : '' }}>10</option>
@@ -63,24 +63,21 @@
                 <td class="text-center">{{ $project->teamMembers()->count() }}</td>
                 <td class="text-center">{{ $project->created_at->format('Y-m-d') }}</td>
                 <td class="text-center">
-                     <!-- View Button -->
-                <a href="{{ route('projects.show', $project) }}" class="btn btn-sm btn-primary" title="View">
+                <a href="{{ route('projects.show', $project) }}" class="btn btn-sm btn-primary" title="{{ __('admin.View') }}">
                     <i class="ti ti-eye"></i>
                 </a>
                 
-                <!-- Edit Button -->
-                <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-sm btn-warning" title="Edit">
+                <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-sm btn-warning" title="{{ __('admin.Edit') }}">
                     <i class="ti ti-edit"></i>
                 </a>
                 
-                <!-- Delete Button (With Confirmation) -->
                 <form action="{{ route('projects.destroy', $project->id) }}" method="POST" style="display:inline-block;" 
-                      onsubmit="return confirm('Are you sure you want to delete this project?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                        <i class="ti ti-trash"></i>
-                    </button>
+                    onsubmit="return confirm('{{ __('admin.delete_project') }}')">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="btn btn-sm btn-danger" title="{{ __('admin.Delete') }}">
+                      <i class="ti ti-trash"></i>
+                  </button>
                 </form>
                 </td>
             </tr>

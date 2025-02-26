@@ -1337,5 +1337,6 @@ return [
 	'Projects' => 'المشاريع',
 	'Filter' => 'تصفية',
 	'no_programs' => 'لا توجد برامج',
+	'filter_by_programs' => 'تصفية حسب البرامج',
 ];
 

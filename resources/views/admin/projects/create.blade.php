@@ -21,6 +21,9 @@
                         <div class="col-md-12">
                             <label>{{ __('admin.Name') }}</label>
                             <input type="text" name="name" class="form-control" required>
+                             @error('name')
+                               <div class="text-danger">{{ $message }}</div>
+                             @enderror
                           </div>
                           <div class="col-md-12 mt-3">
                             <label>{{__('admin.Description')}}</label>
