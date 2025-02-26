@@ -67,7 +67,22 @@
           </button>
         </div>
       </form>
+<<<<<<< Updated upstream
       
+=======
+      <div class="col-12 text-end mt-3" style="height: 40px;">
+        <input type="hidden" name="TeamsNo" value="Investors" />
+        <button
+           type="button" 
+          class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
+          do="Investors"
+          company="{{ optional($client->company)->id }}"
+        >
+          <i class="ti ti-plus me-3"></i>
+          {{ $l == 'en' ? 'Add new investor' : 'إضافة مستثمر جديد' }}
+        </button>
+      </div>
+>>>>>>> Stashed changes
       @if($client->company)
       <div class="ShowTableInvestors">
         <div class="row px-4 mt-4">
