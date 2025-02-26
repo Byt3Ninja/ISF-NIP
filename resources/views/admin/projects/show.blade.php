@@ -8,16 +8,15 @@
 
 @section('content')
 
-@if(session()->has('message'))
-        <div class="alert alert-success alert-dismissible" role="alert">
-              {{ __('admin.'.session()->get('message')) }} {{ Session::forget('message') }}
-               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-@endif
-
 <div class="container mt-4 p-4 bg-white shadow rounded">
-    <h5 class="fw-bold">{{ $project->name }}</h5>
-    <p class="text-muted">{{ $project->description }}</p>
+    @if(session()->has('message'))
+    <div class="alert alert-success alert-dismissible" role="alert">
+        {{ __('admin.'.session()->get('message')) }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+    <h5 class="fw-bold">{{ $project?->name }}</h5>
 
     <!-- Add Program Button -->
     <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addProgramModal">
@@ -55,9 +54,10 @@
                                                 <td class="text-center">{{ $program->pivot->created_at->format('Y-m-d') }}</td>
                                                 <td class="text-center">
                                                     <button class="btn btn-danger btn-sm unlink-btn" data-url="{{ route('projects.unlinkProgram', [$project, $program]) }}">
-                                                        <i class="bi bi-trash"></i> {{ __('admin.Remove') }}
+                                                        <i class="ti ti-trash"></i>
                                                     </button>
                                                 </td>
+
                                             </tr>
                                             @empty
                                             <tr>
@@ -99,7 +99,7 @@
                         <td>{{ $member->pivot->created_at->format('Y-m-d') }}</td>
                         <td>
                             <button class="btn btn-danger btn-sm remove-member-btn" data-url="{{ route('projects.removeTeamMember', [$project, $member]) }}">
-                                <i class="bi bi-trash"></i> {{ __('admin.Remove') }}
+                                <i class="ti ti-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -184,13 +184,9 @@
 </div>
 
 
-
-
 @stop
 
 @section('pagescripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
 <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
 
@@ -207,8 +203,8 @@ $(document).ready(function() {
 });
 </script>
 
+
 <script>
-document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll('.unlink-btn').forEach(button => {
         button.addEventListener('click', function() {
             if (confirm('Are you sure you want to unlink this program?')) {
@@ -220,14 +216,18 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    document.getElementById('searchProgram').addEventListener('keyup', function() {
-        let query = this.value.toLowerCase();
-        document.querySelectorAll('#linkProgramsForm .form-check').forEach(item => {
-            item.style.display = item.innerText.toLowerCase().includes(query) ? '' : 'none';
-        });
-    });
-});
 </script>
+
+<script>
+    
+ document.getElementById('searchProgram').addEventListener('keyup', function() {
+     let query = this.value.toLowerCase();
+     document.querySelectorAll('#linkProgramsForm .form-check').forEach(item => {
+     item.style.display = item.innerText.toLowerCase().includes(query) ? '' : 'none';
+    });
+  });
+</script>
+    
 
 
 <script>
@@ -244,12 +244,12 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
 
-document.getElementById('searchTeamMember').addEventListener('keyup', function() {
+    document.getElementById('searchTeamMember').addEventListener('keyup', function() {
         let query = this.value.toLowerCase();
         document.querySelectorAll('#addTeamMemberForm .form-check').forEach(item => {
             item.style.display = item.innerText.toLowerCase().includes(query) ? '' : 'none';
         });
-    });
-});
+     });
+   });
 </script>
 @stop

@@ -46,7 +46,7 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:projects,name',
+            'name' => 'required|unique:projects,name|max:255',
             'description' => 'nullable'
         ]);
 
@@ -60,7 +60,7 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        $linkedPrograms = $project->programs()->paginate(5);
+        $linkedPrograms = $project->programs()->get();
         $availablePrograms = Cycle::whereNotIn('id', $project->programs()->pluck('cycles.id'))->get();
         $availableTeamMembers = Team_member::whereNotIn('id', $project->teamMembers()->pluck('team_member_id'))->get();
 
@@ -97,23 +97,23 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         $project->delete();
-        return redirect()->route('projects.index')->with('message', 'ProjectDeleted');
+        return redirect()->back()->with('message', 'ProjectDeleted');
     }
 
     public function linkPrograms(Request $request, Project $project)
     {
-        $request->validate(['programs' => 'required|array']);
+       $request->validate(['programs' => 'required|array']);
 
-     $programsData = [];
-      foreach ($request->programs as $programId) {
-         $programsData[$programId] = [
+       $programsData = [];
+        foreach ($request->programs as $programId) {
+           $programsData[$programId] = [
             'status' => 'Active',
             'created_at' => now(),
             'updated_at' => now(),
-         ];
+           ];
       }
 
-    $project->programs()->attach($programsData);
+        $project->programs()->attach($programsData);
 
         return back()->with('message', 'ProgramsLinked');
     }
@@ -121,8 +121,8 @@ class ProjectController extends Controller
 
     public function unlinkProgram(Project $project, Cycle $cycle)
     {
-        $project->programs()->wherePivot('cycle_id', $cycle->id)->detach();
-        return back()->with('message', 'ProgramUnlinked');
+        $project->programs()->detach($cycle->id);
+        return redirect()->back()->with('message', 'ProgramUnlinked');
     }
 
     public function addTeamMembers(Request $request, Project $project) 

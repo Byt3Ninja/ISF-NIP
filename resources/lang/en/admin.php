@@ -1321,4 +1321,5 @@ return [
 	'Projects' => 'Projects',
 	'Filter' => 'Filter',
 	'no_programs' => 'No Programs Found',
+	'filter_by_programs' => 'Filter By Programs',
 ];
