@@ -287,5 +287,9 @@ return [
     'External_Participation_Label' => 'خيار المشاركة الخارجية',
     'Select_Organization' => 'اختر المنظمة',
     'Valid_from_to' => 'متاحة من / إلى',
+    'date_time_required' => 'برجاء اختيار تاريخ ووقت للإجتماع',
+    'Select Judges' => 'اختر المحكمين',
+    'Judges required' => 'برجاء اختيار محكم واحد على الأقل',
+    'Edit_Step' => 'تعديل المرحلة',
   ];
 

@@ -3,7 +3,12 @@
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 @stop
 
 @php
@@ -19,20 +24,10 @@ to group of users'];
     <div class="content-body">
       <section id="multiple-column-form">
         @if (session()->has('message'))
-        <div class="alert alert-success alert-dismissible mb-2" role="alert">
-          {{ __('admin.' . session()->get('message')) }}
-          <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
+        <x-alert type="success" message="{{ __('admin.' . session()->get('message')) }}" />
         @endif
         @if (session()->has('message2'))
-        <div class="alert alert-danger alert-dismissible mb-2" role="alert">
-          {{ __('admin.' . session()->get('message2')) }}
-          <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
+        <x-alert type="danger" message="{{ __('admin.' . session()->get('message2')) }}" />
         @endif
          <!-- Validation messages -->
          @if (count($errors) > 0)
@@ -49,9 +44,9 @@ to group of users'];
               </div>
               <hr>
               <div class="card-body">
-                <label class="fs-6">{{ __('cycles.Select step from list to manage') }}</span>
+                <label class="fs-5 fw-semibold">{{ __('cycles.Select step from list to manage') }}</span>
                   <fieldset class="d-flex flex-column flex-md-row gap-3 mt-2">
-                    <select id="cstep" class="select form-control"
+                    <select id="cstep" class="select form-select"
                       style="margin-left: {{ $l == 'ar' ? '10px' : '0' }}; margin-right: {{ $l == 'ar' ? '0' : '10px' }}; width: 50%;"
                       onchange="window.open('/dashboard/'+this.options[this.selectedIndex].value+'/final','_self');">
                       @foreach ($steps as $step)
@@ -101,11 +96,11 @@ to group of users'];
         @if (isset($cstep))
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card">
-            <form action="/dashboard/final/update" method="POST" enctype="multipart/form-data">
+            <form id="judges-form" action="/dashboard/final/update" method="POST" enctype="multipart/form-data">
               {!! csrf_field() !!}
               <div class="card-header border-bottom">
-                <h4>{{ $cstep->title }} </h4>
-                <h4 class="card-title primary">{{ __('cycles.Select judges from the menu') }}.</h4>
+                <h4>{{ $l == 'en' ? 'Startups final screening' : $cstep->title }} </h4>
+                <h5 class="card-title primary">{{ __('cycles.Select judges from the menu') }}.</h5>
                 <small class="text-muted"> {{ __('cycles.from') }}
                   {{ $cstep->from->format('d-m-Y') }} {{ __('cycles.to') }}
                   {{ $cstep->to->format('d-m-Y') }}
@@ -120,12 +115,17 @@ to group of users'];
                       <br />
                       <div class="row col-md-12 mt-2">
                         <div class="col-md-12">
-                          <select name="judges[]" class="select2 form-control" multiple="multiple">
+                          <select id="select-judges" name="judges[]" class="select2 form-select" multiple="multiple"
+                            data-placeholder="{{ __('cycles.Select Judges') }}"
+                          >
                             @foreach ($judges as $judge)
                             <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }}
                               {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
                             @endforeach
                           </select>
+                          <div id="judges-error" class="invalid-feedback" style="display: none;">
+                            {{ __('cycles.Judges required') }}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -161,7 +161,13 @@ to group of users'];
                                 <div class="d-flex align-items-center">
                                   <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
                                     <img 
-                                      src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                      src="{{ $company->logo_url ? $company->logo_url : '/images/logo-placeholder.png' }}" 
+                                      oneerror="this.src='/images/logo-placeholder.png'"
+                                      alt="avatar"
+                                      class="rounded-circle"
+                                      height="40"
+                                      width="40"
+                                    />
                                   </a>
                                   <a href="/dashboard/companyProfile/{{ $company->id }}">
                                     <div class="d-flex align-items-center">
@@ -264,18 +270,25 @@ to group of users'];
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
         {!! csrf_field() !!}
         <div class="modal-header">
+          <h4 class="modal-title">{{ __('cycles.Edit_Step') }}</h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" name="sid" value="{{ $cstep->id }}">
           <input type="hidden" name="type" value="8">
           <br>
+          <div class="col-12 mb-4">
+            <label for="step-range-picker" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
+            <input type="hidden" name="fromDate" id="mfromDate">
+            <input type="hidden" name="toDate" id="mtoDate">
+            <input type="text" id="step-range-picker" class="form-control" name="date_range" />
+          </div>
           <div class="form-group mb-3">
             <label class="fs-6 mb-1">{{ __('cycles.Title') }}: </label>
             <input value="{{ $cstep->title }}" name='title' type="text" placeholder="Title" class="form-control"
               required>
           </div>
-          <div class="form-group mb-3">
+          {{-- <div class="form-group mb-3">
             <label class="fs-6 mb-1">{{ __('cycles.from') }}: </label>
             <input value="{{ $cstep->from->format('Y-m-d') }}" name='fromDate' type="text" class="form-control dateTime"
               required>
@@ -283,8 +296,8 @@ to group of users'];
           <div class="form-group mb-3">
             <label class="fs-6 mb-1">{{ __('cycles.to') }}: </label>
             <input value="{{ $cstep->to->format('Y-m-d') }}" name='toDate' type="text" class="form-control dateTime"
-              required>
-          </div>
+              required> 
+          </div>--}}
           <div class="form-group mb-0">
             <label class="fs-6 mb-1">{{ __('cycles.Description') }}: </label>
             <textarea name='description' placeholder="Description"
@@ -304,7 +317,7 @@ to group of users'];
 <div class="modal fade" id="addzoom" tabindex="-1" role="dialog" aria-labelledby="addzoom" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="post" action="/dashboard/final/addzoom" enctype="multipart/form-data" autocomplete="off">
+      <form id="create-zoom-form" method="post" action="/dashboard/final/addzoom" enctype="multipart/form-data" autocomplete="off">
         @csrf
         <div class="modal-header">
           <h4 class="modal-title white">{{ __('cycles.Add new zoom session') }}</h4>
@@ -316,7 +329,11 @@ to group of users'];
           <input type="hidden" name="company" value="0" id="cid">
           <div class="form-group mb-3" id="showdates mb-3">
             <label class="fs-6 mb-1">{{ __('cycles.Date/Time') }}:</label>
-            <input class='width-200 form-control dateTime' type="text" id="date" name="date" value="" required>
+            <input type="hidden" name="date" id="neededZoomDateTime" />
+            <input class='width-200 form-control zoomDateTime' type="text" id="date" placeholder="{{ __('cycles.Date/Time') }}" required>
+            <div id="create-zoom-error" class="invalid-feedback" style="display: none;">
+              {{ __('cycles.date_time_required')}}
+            </div>
           </div>
           <div class="form-group mb-3">
             <label class="fs-6 mb-1">{{ __('cycles.Meeting period') }}:</label>
@@ -342,7 +359,7 @@ to group of users'];
 <div class="modal fade" id="ModifyRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="post" action="/dashboard/final/editZoom" enctype="multipart/form-data">
+      <form id="edit-zoom-form" method="post" action="/dashboard/final/editZoom" enctype="multipart/form-data">
         @csrf
         <div class="modal-header">
           <h4 class="modal-title">{{ __('cycles.Modify Final Screen') }} </h4>
@@ -354,7 +371,11 @@ to group of users'];
           <input type="hidden" name="company" value="0" id="cid">
           <div class="form-group mb-3" id="showdates mb-3">
             <label class="fs-6 mb-1">{{ __('cycles.Date/Time') }}:</label>
-            <input class='date width-200 form-control dateTime' type="text" id="sdate" name="date" value="" required>
+            <input type="hidden" name="date" id="editNeededZoomDateTime" />
+            <input class='width-200 form-control editZoomDateTime' type="text" id="sdate" placeholder="{{ __('cycles.Date/Time') }}" required />
+            <div id="edit-zoom-error" class="invalid-feedback" style="display: none;">
+              {{ __('cycles.date_time_required')}}
+            </div>
           </div>
           <div class="form-group mb-3">
             <label class="fs-6 mb-1">{{ __('cycles.Meeting period') }}:</label>
@@ -384,16 +405,93 @@ to group of users'];
 <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 @stop
 
 @section('pagescripts')
+<script src="/vuexy/assets/js/forms-selects.js"></script>
 <script>
   // Date & TIme
   const dateTimePickr = $('.dateTime');
   if (dateTimePickr.length) {
     dateTimePickr.flatpickr({
-      enableTime: true
+      enableTime: true,
+      minDate: "today"
+    });
+  };
+
+  $('#select-judges').select2();
+
+  $('#select-judges').on('change', function() {
+    $('#select-judges').removeClass('is-invalid');
+    $('#judges-error').hide();
+  });
+
+  $('#judges-form').submit(function(e) {
+    const judgesValues = $('#select-judges').select2('val');
+    const startupsSelected = $('input[name="users[]"]:checked').length;
+
+    if (judgesValues.length === 0) {
+      e.preventDefault();
+      $('#select-judges').addClass('is-invalid');
+      $('#judges-error').show();
+    } else if (startupsSelected === 0) {
+      e.preventDefault();
+      alert('Please select at least one startup form the table.');
+    } else {
+      $('#judges-form').submit();
+    }
+  });
+
+  $('#create-zoom-form').submit(function(e) {
+    neededZoomDateTimeValue = $('#neededZoomDateTime').val();
+
+    if (!neededZoomDateTimeValue) {
+      e.preventDefault();
+      zoomDateTime.addClass('is-invalid');
+      zoomDateTime.focus();
+      $('#create-zoom-error').show();
+    }
+  })
+  
+  const zoomDateTime = $('.zoomDateTime');
+  console.log('zoomDateTime' ,zoomDateTime)
+  if (zoomDateTime.length) {
+    zoomDateTime.flatpickr({
+      enableTime: true,
+      minDate: "today",
+      onChange: function(selectedDates, dateStr, instance) {
+        $('#neededZoomDateTime').val(dateStr);
+      }
+    });
+  }
+
+  $('#edit-zoom-form').submit(function(e) {
+    editNeededZoomDateTimeValue = $('#editNeededZoomDateTime').val();
+
+    if (!editNeededZoomDateTimeValue) {
+      e.preventDefault();
+      editZoomDateTime.addClass('is-invalid');
+      editZoomDateTime.focus();
+      $('#edit-zoom-error').show();
+    }
+  })
+
+  const editZoomDateTime = $('.editZoomDateTime');
+  console.log('editZoomDateTime' ,editZoomDateTime)
+  if (editZoomDateTime.length) {
+    editZoomDateTime.flatpickr({
+      enableTime: true,
+      minDate: "today",
+      onChange: function(selectedDates, dateStr, instance) {
+        $('#editNeededZoomDateTime').val(dateStr);
+        console.log('editNeededZoomDateTime value', $('#editNeededZoomDateTime').val());
+      }
     });
   }
 
@@ -420,10 +518,30 @@ to group of users'];
       });
     }
 
+    const startDate = '{{ $cstep->from->format('Y-m-d') }}'
+    const endDate = '{{ $cstep->to->format('Y-m-d') }}'
+    
+    const stepStartDate = startDate ? moment(startDate) : moment();
+    const stepEndDate = endDate ? moment(endDate) : moment();
+
+    console.log('stepStartDate', stepStartDate);
+    console.log('stepEndDate', stepEndDate);
+
     function DoChange(set) {
       switch (set) {
       case 1:
         $('#stepForm').modal('show');
+
+        $('#step-range-picker').daterangepicker({
+          opens: isRtl ? 'left' : 'right',
+          // drops: 'up',
+          startDate: stepStartDate,
+          endDate: stepEndDate,
+        }).on('apply.daterangepicker', function(ev, picker) {
+          $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+          $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+        });
+
         break;
       case 2:
         $.ajaxSetup({headers});

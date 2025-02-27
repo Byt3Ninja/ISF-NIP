@@ -289,6 +289,10 @@ return [
     'create_program' => 'Create New Program',
     'External_Participation_Label' => 'Non-Company Participation Option',
     'Select_Organization' => 'Select Organization',
-    'Valid_from_to' => 'Valid from - to',
+    'Valid_from_to' => 'Valid from - Valid to',
+    'date_time_required' => 'Please select a date and time for meeting',
+    'Select Judges' => 'Select Judges',
+    'Judges required' => 'Please select at least one judge',
+    'Edit_Step' => 'Edit Step',
 ];
 
