@@ -503,13 +503,13 @@ class HomeController extends Controller
         ->groupBy('sectors.name_en', 'sectors.name_ar')
         ->get();
     
-     $data['sector_data'] = $sectorBreakdown->map(function ($item) {
-        return [
-            'label_en' => $item->sector_name_en,
-            'label_ar' => $item->sector_name_ar,
-            'count' => $item->total,
-        ];
-    });
+        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
+            return [
+                'label_en' => $item->sector_name_en,
+                'label_ar' => $item->sector_name_ar,
+                'count' => $item->total,
+            ];
+        });
 
         // Company By Business Model
         $projectTypes = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
