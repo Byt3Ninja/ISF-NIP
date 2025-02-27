@@ -267,6 +267,8 @@
           @endif
           <div class="col-12 mb-4">
             <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <input id='start' name='start' type="hidden" />
+            <input id='end' name='end' type="hidden" />
             <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" />
           </div>
           <div class="mb-4">
@@ -354,6 +356,8 @@
           </div>
           <div class="col-12 mb-4">
             <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <input type="hidden" id="fromDate" name="fromDate" />
+            <input type="hidden" id="toDate" name="toDate" />
             <input type="text" id="stepFormRamgePicker" class="form-control" name="date_range" required />
           </div>
           <div class="form-group mb-4">
@@ -435,8 +439,10 @@
               required>
           </div>
           <div class="col-12 mb-4">
-            <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
-            <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" required />
+            <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid_from_to') }}:</label>
+            <input type="hidden" id="mfromDate" name="fromDate" />
+            <input type="hidden" id="mtoDate" name="toDate" />
+            <input type="text" id="step-range-picker" class="form-control" name="date_range" required />
           </div>
           {{-- <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid from') }}: </label>
           <div class="mb-4">
@@ -488,20 +494,16 @@
 <script>
     console.log('loaded');
     const stepFormRamgePicker = $('#stepFormRamgePicker'); // Change to jQuery selector
-    console.log('stepFormRamgePicker', stepFormRamgePicker);
+    // console.log('stepFormRamgePicker', stepFormRamgePicker);
 
     if (stepFormRamgePicker.length) {
       stepFormRamgePicker.daterangepicker({
         opens: isRtl ? 'left' : 'right',
+      }).on('apply.daterangepicker', function(ev, picker) {
+        $('#fromDate').val(picker.startDate.format('YYYY-MM-DD'));
+        $('#toDate').val(picker.endDate.format('YYYY-MM-DD'));
       });
-    }
-
-    var bsRangePickerBasic = $('#bs-rangepicker-basic');
-    if (bsRangePickerBasic.length) {
-      bsRangePickerBasic.daterangepicker({
-        opens: isRtl ? 'left' : 'right',
-      });
-    }
+    };
 
     // $('.date').datetimepicker({
     //   timepicker: false,
@@ -536,7 +538,7 @@
             "type": 4,
           },
           success: function(response) {
-            console.log(response);
+            // console.log(response);
           },
           error: function(error) {
             console.log(error);
@@ -566,8 +568,22 @@
               $('#description').val(response.description);
               $('#cycleid').val(cycle);
               $('#type').val(1);
-              $('#start').val(response.start);
-              $('#end').val(response.end);
+
+              var bsRangePickerBasic = $('#bs-rangepicker-basic');
+              // $('#start').val(response.start);
+              // $('#end').val(response.end);
+
+              if (bsRangePickerBasic.length) {
+                bsRangePickerBasic.daterangepicker({
+                  opens: isRtl ? 'left' : 'right',
+                  startDate: response.start ? moment(response.start) : null,
+                  endDate: response.end ? moment(response.end) : null,
+                }).on('apply.daterangepicker', function(ev, picker) {
+                  $('#start').val(picker.startDate.format('YYYY-MM-DD'));
+                  $('#end').val(picker.endDate.format('YYYY-MM-DD'));
+                });
+              }
+
               $('#organization_id').val(response.organization_id)
               if (response.private) {
                 $('#customSwitch3').attr('checked', 'checked');
@@ -587,8 +603,20 @@
           $('#description').val('');
           $('#cycleid').val('');
           $('#type').val(2);
-          $('#start').val('');
-          $('#end').val('');
+
+          var bsRangePickerBasic = $('#bs-rangepicker-basic');
+          // $('#start').val(response.start);
+          // $('#end').val(response.end);
+
+          if (bsRangePickerBasic.length) {
+            bsRangePickerBasic.daterangepicker({
+              opens: isRtl ? 'left' : 'right',
+            }).on('apply.daterangepicker', function(ev, picker) {
+              $('#start').val(picker.startDate.format('YYYY-MM-DD'));
+              $('#end').val(picker.endDate.format('YYYY-MM-DD'));
+            });
+          }
+
           $('#customSwitch3').removeAttr('checked');
           $('#cycleForm').modal('show');
           break;
@@ -603,7 +631,7 @@
                   "type": 3,
                 },
                 success: function(response) {
-                  console.log(response);
+                  // console.log(response);
                   location.href = '/dashboard/cycles';
                 },
                 error: function(error) {
@@ -728,8 +756,19 @@
               $('#sid').val(response.id);
               $('#mtitle').val(response.title);
               $('#mdescription').val(response.description);
-              $('#mfromDate').val(response.from);
-              $('#mtoDate').val(response.to);
+              
+              $('#step-range-picker').daterangepicker({
+                opens: isRtl ? 'left' : 'right',
+                drops: 'up',
+                startDate: response?.from ? moment(response?.from) : null,
+                endDate: response?.to ? moment(response?.to) : null,
+              }).on('apply.daterangepicker', function(ev, picker) {
+                $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+                $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+              });
+
+              // $('#mfromDate').val(response.from);
+              // $('#mtoDate').val(response.to);
               $('#ModifyStepForm').modal('show');
             },
             error: function(error) {
@@ -764,7 +803,7 @@
             "type": 6,
           },
           success: function(response) {
-            console.log(response);
+            // console.log(response);
             location.href = '/dashboard/cycles/' + $('#ccycle').find(":selected").val();
           },
           error: function(error) {

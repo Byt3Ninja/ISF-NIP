@@ -30,7 +30,9 @@
       </label>
       <input type="hidden" name="type" id="type">
       <input type="hidden" name="cycleid" id="cycleid">
-    
+      <input type="hidden" name="start" id="start" />
+      <input type="hidden" name="end" id="end" />
+
       <input 
         type="text" 
         class="form-control" 
@@ -123,17 +125,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('loaded');
-    var bsRangePickers = document.querySelectorAll('#date-range-picker');
-    bsRangePickers.forEach((picker) => {
-      console.log('bsRangePicker', picker);
-      $(picker).daterangepicker({
-        opens: isRtl ? 'left' : 'right',
-        drops: 'up'
-      });
-    });
-  });
-</script>

@@ -33,7 +33,7 @@
 
     @media screen and (min-width: 768px) {
       .program-card {
-        height: 368px;
+        height: auto;
       }
     }
   </style>
@@ -357,7 +357,7 @@
                             <div class="d-flex flex-column">
                               <span class="fs-6 fw-bold mb-2">{{__('admin.Responsible')}}</span>
                               
-                                <div class="d-flex flex-wrap gap-2 align-items-center" style="width: 100%">
+                                <div class="d-flex flex-wrap gap-2 align-items-center" style="width: 90%">
                                   @foreach($mentors as $mentor)
                                   <a 
                                     class="btn btn-sm btn-outline-primary rounded-pill"
@@ -377,10 +377,10 @@
                             </div>
                           </div>
                          
-                          <div class="d-none d-md-flex flex-column">
+                          <div class="d-none d-md-flex flex-column" style="width: 180px;">
                             <span class="fs-6 fw-bold mx-2 mb-2">{{__('admin.Duration')}}</span>
                             <div 
-                              class="px-2 py-1 d-flex mb-1 rounded"
+                              class="px-2 py-1 d-flex mb-1 rounded justify-content-center align-items-center"
                               style="background-color: #d9edee;"
                             >
                               <i class="ti ti-calendar text-info ti-16px"></i>
@@ -389,7 +389,7 @@
                               </span>
                             </div>
                             <div 
-                              class="px-2 py-1 d-flex rounded"
+                              class="px-2 py-1 d-flex rounded justify-content-center align-items-center"
                               style="background-color: #d9edee;"
                             >
                               <i class="ti ti-calendar text-danger ti-16px"></i>
@@ -402,7 +402,7 @@
                         <!-- / Mentors Row -->
                         <!-- Program Description -->
                        @if (!empty($cycle->description))
-                          <div class="d-flex gap-2">
+                          <div class="d-flex gap-2 mt-4">
                             <i class="ti ti-message text-primary ti-24px"></i>
                             <div class="d-flex flex-column">
                               <span class="fs-6 fw-bold mb-1">{{__('admin.Description')}}</span>
@@ -757,6 +757,14 @@
       $('#create-program-modal #delegation_pdf').val();
       $('#create-program-modal #delegation_option').prop('checked', false);
       $('#create-program-modal #private').prop('checked', false);
+
+      $('#create-program-modal #date-range-picker').daterangepicker({
+        opens: isRtl ? 'left' : 'right',
+        drops: 'up',
+      }).on('apply.daterangepicker', function(ev, picker) {
+        $('#create-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
+        $('#create-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
+      });
     };
 
     // Handle Append File
@@ -802,6 +810,17 @@
           data: {"cycleid": cycleId },
           success: function(response) {
             console.log(response); 
+                        
+            $('#edit-program-modal #date-range-picker').daterangepicker({
+              opens: isRtl ? 'left' : 'right',
+              drops: 'up',
+              startDate: response?.start ? moment(response?.start) : null,
+              endDate: response?.end ? moment(response?.end) : null,
+            }).on('apply.daterangepicker', function(ev, picker) {
+              $('#edit-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
+              $('#edit-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
+            });
+
             $('#edit-program-modal #start').val(response.start ?? '');
             $('#edit-program-modal #end').val(response.end ?? '');
             $('#edit-program-modal #title').val(response.title ?? '');
