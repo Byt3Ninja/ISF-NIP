@@ -96,6 +96,9 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        if ($project->programs()->exists() || $project->teamMembers()->exists()) {
+            return redirect()->back()->with('error', 'ProjectCannotBeDeleted');
+        }
         $project->delete();
         return redirect()->back()->with('message', 'ProjectDeleted');
     }
@@ -122,7 +125,9 @@ class ProjectController extends Controller
     public function unlinkProgram(Project $project, Cycle $cycle)
     {
         $project->programs()->detach($cycle->id);
-        return redirect()->back()->with('message', 'ProgramUnlinked');
+        if (request()->ajax()) {
+          return response()->json(['message' => __('admin.ProgramUnlinked')]);
+        }
     }
 
     public function addTeamMembers(Request $request, Project $project) 
@@ -147,6 +152,9 @@ class ProjectController extends Controller
     public function removeTeamMember(Project $project, Team_member $teamMember) 
     {
         $project->teamMembers()->detach($teamMember->id);
-        return redirect()->back()->with('message', 'Team_member_removed');
+        if (request()->ajax()) {
+            return response()->json(['message' => __('admin.Team_member_removed')], 200);
+        }
+    
     }
 }

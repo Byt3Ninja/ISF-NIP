@@ -10,11 +10,18 @@
 @section('content')
 <div class="container">
     @if(session()->has('message'))
-        <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="alert alert-success alert-dismissible mt-2" role="alert">
               {{ __('admin.'.session()->get('message')) }} {{ Session::forget('message') }}
                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-@endif
+   @endif
+
+   @if(session()->has('error'))
+     <div class="alert alert-danger alert-dismissible mt-2" role="alert">
+       {{ __('admin.'.session()->get('error')) }}
+       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+     </div>
+    @endif
 
     <h4>{{ __('admin.Projects') }}</h4>
 

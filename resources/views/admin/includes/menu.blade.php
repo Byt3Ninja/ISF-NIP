@@ -804,7 +804,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
             <a href="{{ route('currencies.index') }}" class="menu-link">
               <i class="menu-icon fas fa-money-bill-wave"></i>
-                <div>{{ __('admin.manage_currencies') }}</div>
+                <div>{{ __('admin.Currencies') }}</div>
             </a>
         </li>
           @if (!app()->environment('production', 'beta'))

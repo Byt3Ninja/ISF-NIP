@@ -1343,5 +1343,12 @@ return [
 	'Period_is_required' => 'الفترة مطلوبة',
 	'Period_must_be_an_integer' => 'الفترة يجب ان تكون عدد صحيح',
 	'Period_must_be_at_least_30_minutes' => 'الفترة يجب ان تكون على الاقل 30 دقيقة',
-];
+	'delete_project' => 'هل أنت متأكد أنك تريد حذف هذا المشروع؟',
+	'delete_program' => 'هل أنت متأكد أنك تريد إلغاء ربط هذا البرنامج؟',
+	'delete_team_member' => 'هل أنت متأكد أنك تريد إزالة هذا العضو من الفريق؟',
+	'ProjectCannotBeDeleted' => 'لا يمكن حذف المشروع. فهو يحتوي على برامج مرتبطة أو أعضاء فريق!',
+	'currencyDeleted' => 'تم حذف العملة بنجاح',
+	'currencyUpdated' => 'تم تحديث العملة بنجاح',
+	'currencyCreated' => 'تم حفظ العملة بنجاح',
+]; 
 
