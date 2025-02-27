@@ -34,6 +34,13 @@ to group of users'];
           </button>
         </div>
         @endif
+         <!-- Validation messages -->
+         @if (count($errors) > 0)
+         @foreach ($errors->all() as $error)
+           <x-alert type="danger" message="{{ $error }}" />
+         @endforeach
+       @endif
+       <!-- / Alert -->
         <div class="row match-height">
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card mb-4">

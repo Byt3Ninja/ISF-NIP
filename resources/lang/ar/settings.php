@@ -125,4 +125,5 @@ return [
 	'Choose'=>'اختر',
 	'SocialMediaLogin'=>' اعدادات الدخول ',
 	'MentorList'=>'قائمة المدربين',
+	'Assessment'=>'التقييم',
 ];

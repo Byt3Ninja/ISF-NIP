@@ -1337,6 +1337,14 @@ return [
 	'Projects' => 'المشاريع',
 	'Filter' => 'تصفية',
 	'no_programs' => 'لا توجد برامج',
+<<<<<<< Updated upstream
 	'filter_by_programs' => 'تصفية حسب البرامج',
+=======
+	'Date_is_required' => 'التاريخ مطلوب',
+	'Date_must_be_a_valid_date' => 'التاريخ يجب ان يكون تاريخ صحيح',
+	'Period_is_required' => 'الفترة مطلوبة',
+	'Period_must_be_an_integer' => 'الفترة يجب ان تكون عدد صحيح',
+	'Period_must_be_at_least_30_minutes' => 'الفترة يجب ان تكون على الاقل 30 دقيقة',
+>>>>>>> Stashed changes
 ];
 

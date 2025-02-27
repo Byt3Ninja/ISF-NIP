@@ -124,4 +124,5 @@ return [
 	'Choose'=>'Choose',
 	'SocialMediaLogin'=>'Social Media Login',
 	'MentorList'=>'Mentor List',
+	'Assessment'=>'Assessment',
 ];

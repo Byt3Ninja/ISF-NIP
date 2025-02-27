@@ -160,6 +160,16 @@ class FinalscreeningController extends Controller
 
     public function addzoom(Request $request)
     {
+        $request->validate([
+            'date' => 'required|date',
+            'period' => 'required|integer|min:30'
+        ],[
+            'date.required' => __('admin.Date_is_required'),
+            'date.date' => __('admin.Date_must_be_a_valid_date'),
+            'period.required' => __('admin.Period_is_required'),
+            'period.integer' => __('admin.Period_must_be_an_integer'),
+            'period.min' => __('admin.Period_must_be_at_least_30_minutes'),
+        ]);
         if ($request->period) {
             $topic = "Final Screening (C" . $request->company . ')';
             $data = ['topic' => $topic,
