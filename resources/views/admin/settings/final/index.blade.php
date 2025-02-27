@@ -442,7 +442,7 @@ to group of users'];
       $('#judges-error').show();
     } else if (startupsSelected === 0) {
       e.preventDefault();
-      alert('Please select at least one startup form the table.');
+      alert('{{ __('cycles.startup_is_required') }}');
     } else {
       $('#judges-form').submit();
     }
