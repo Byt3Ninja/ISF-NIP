@@ -460,7 +460,6 @@ to group of users'];
   })
   
   const zoomDateTime = $('.zoomDateTime');
-  console.log('zoomDateTime' ,zoomDateTime)
   if (zoomDateTime.length) {
     zoomDateTime.flatpickr({
       enableTime: true,
@@ -483,14 +482,12 @@ to group of users'];
   })
 
   const editZoomDateTime = $('.editZoomDateTime');
-  console.log('editZoomDateTime' ,editZoomDateTime)
   if (editZoomDateTime.length) {
     editZoomDateTime.flatpickr({
       enableTime: true,
       minDate: "today",
       onChange: function(selectedDates, dateStr, instance) {
         $('#editNeededZoomDateTime').val(dateStr);
-        console.log('editNeededZoomDateTime value', $('#editNeededZoomDateTime').val());
       }
     });
   }
@@ -523,9 +520,6 @@ to group of users'];
     
     const stepStartDate = startDate ? moment(startDate) : moment();
     const stepEndDate = endDate ? moment(endDate) : moment();
-
-    console.log('stepStartDate', stepStartDate);
-    console.log('stepEndDate', stepEndDate);
 
     function DoChange(set) {
       switch (set) {
@@ -562,7 +556,7 @@ to group of users'];
             "type": 6,
           },
           success: function(response) {
-            console.log(response);
+            // console.log(response);
             location.href = '/dashboard/final';
           },
           error: function(error) {
