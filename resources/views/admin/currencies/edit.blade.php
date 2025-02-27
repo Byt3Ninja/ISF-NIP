@@ -45,27 +45,29 @@
                                             </div>
                                             <div class="col-md-6 mt-3">
                                                 <label>{{ __('admin.Exchange_Rate') }}</label>
-                                                <input type="number" name="exchange_rate_to_usd" class="form-control" value="{{ old('exchange_rate_to_usd', $currency->exchange_rate_to_usd) }}" required>
+                                                <input type="number" name="exchange_rate_to_usd" class="form-control" step="0.000001" value="{{ old('exchange_rate_to_usd', $currency->exchange_rate_to_usd) }}" required>
                                                 @error('exchange_rate_to_usd')
                                                  <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6 mt-3">
                                                 <label>{{ __('admin.Flag') }}</label>
-                                                <input type="file" name="flag" class="form-control">
-                                                @error('flag')
+                                                <input type="file" name="flag" class="form-control" id="flagInput" accept="image/*">                                                @error('flag')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                                 @if($currency->flag)
-                                                    <img src="{{ asset($currency->flag) }}" width="50" alt="Current Flag" class="mt-2">
+                                                    <img src="{{ asset($currency->flag) }}" width="100" alt="Current Flag" class="mt-2">
                                                 @endif
+                                                <div class="mt-2">
+                                                    <img id="flagPreview" src="" alt="Flag Preview" style="max-width: 100px; display: none;">
+                                                </div>
                                             </div>
                                             <div class="col-md-6 mt-6">
                                                 <label>{{ __('admin.Enabled') }}</label>
                                                 <input type="checkbox" name="enabled" value="1" {{ $currency->enabled ? 'checked' : '' }}>
                                             </div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary mt-3">{{ __('admin.Update') }}</button>
+                                        <button type="submit" class="btn btn-primary mt-3">{{ __('admin.Save') }}</button>
                                     </form>
                                 </div>
                             </div>
@@ -82,5 +84,20 @@
 
 @section('pagescripts')
 <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+
+<script>
+    document.getElementById('flagInput').addEventListener('change', function(event) {
+        let file = event.target.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let preview = document.getElementById('flagPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
 
 @stop

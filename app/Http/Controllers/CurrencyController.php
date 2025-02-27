@@ -49,7 +49,7 @@ class CurrencyController extends Controller
 
         $currency->save();
 
-        return redirect()->route('currencies.index')->with('msg', 'Saved');
+        return redirect()->route('currencies.index')->with('msg', 'currencyCreated');
     }
 
     
@@ -84,7 +84,7 @@ class CurrencyController extends Controller
         }
 
         $currency->save();
-        return redirect()->route('currencies.index')->with('msg', 'Saved');
+        return redirect()->route('currencies.index')->with('msg', 'currencyUpdated');
 
     }
 
@@ -94,6 +94,6 @@ class CurrencyController extends Controller
     public function destroy(Currency $currency)
     {
         $currency->delete();
-        return redirect()->route('currencies.index')->with('msg', 'del');
+        return redirect()->route('currencies.index')->with('msg', 'currencyDeleted');
     }
 }

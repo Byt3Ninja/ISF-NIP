@@ -152,7 +152,14 @@ class SettingsController extends Controller
 			$rfullname = $request->rname;
 			$MSG = new TemplateEmail;
 			$MSG->Message = [$request->subject.'- VI portal', "Dear " . $rfullname . ",", $request->message, "/dashboard"];
-			$user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 			Messages::find($request->mid)->update([
 				'reSubject' => $request->subject,
 				'reMessage' => $request->message,
@@ -340,6 +347,7 @@ class SettingsController extends Controller
 		$timezone = $request->input('timezone');
 		$Currency = $request->input('Currency');
 		$homePage = $request->HomePage == 'on' ? '1' : '0';
+		$Assessment = $request->Assessment == 'on' ? '1' : '0';
 		$updateSittings = Settings::where('id', $id)->first();
 		$updateSittings->ar_title = $site_ar_title;
 		$updateSittings->title = $site_title;
@@ -352,6 +360,7 @@ class SettingsController extends Controller
 		$updateSittings->timezone = $timezone;
 		$updateSittings->Currency = $Currency;
 		$updateSittings->HomePage = $homePage;
+		$updateSittings->assessment = $Assessment;
 		$updateSittings->save();
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}

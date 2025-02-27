@@ -124,4 +124,8 @@ return [
 	'Choose'=>'Choose',
 	'SocialMediaLogin'=>'Social Media Login',
 	'MentorList'=>'Mentor List',
+	'Assessment'=>'Assessment',
+	'whatsApp_URL_callback' => 'WhatsApp URL Callback',
+	'whatsApp_INSTANCE_ID' => 'WhatsApp INSTANCE ID',
+	'whatsApp_ACCESS_TOKEN' => 'WhatsApp ACCESS TOKEN',
 ];

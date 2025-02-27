@@ -8,7 +8,7 @@
 
 @section('content')
 
-<div class="container mt-4 p-4 bg-white shadow rounded">
+<div class="container mt-4 p-4 bg-white shadow rounded" id="success-message-container">
     @if(session()->has('message'))
     <div class="alert alert-success alert-dismissible" role="alert">
         {{ __('admin.'.session()->get('message')) }}
@@ -166,9 +166,11 @@
                             <input type="checkbox" class="form-check-input" name="team_members[]" value="{{ $member->id }}">
                             <label class="form-check-label">{{ $member->Name }}</label>
                             <select name="roles[]" class="form-select">
-                                <option value="Project Lead">Project Lead</option>
-                                <option value="Contributor">Contributor</option>
-                                <option value="Reviewer">Reviewer</option>
+                                @foreach($distinctRoles as $role)
+                                <option value="{{ $role }}" {{ $member->TeamMember == $role ? 'selected' : '' }}>
+                                    {{ $role }}
+                                </option>
+                                @endforeach
                             </select>
                         </div>
                         @endforeach
@@ -205,18 +207,43 @@ $(document).ready(function() {
 
 
 <script>
-    document.querySelectorAll('.unlink-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            if (confirm('Are you sure you want to unlink this program?')) {
-                fetch(this.dataset.url, {
-                    method: 'DELETE',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                }).then(() => location.reload());
-            }
-        });
+ $(document).ready(function() {
+    $('.unlink-btn').click(function() {
+        let button = $(this);
+        let deleteUrl = button.data('url');
+
+        let confirmationMessage = "{{ __('admin.delete_program') }}"; 
+        if (confirm(confirmationMessage)) {
+            $.ajax({
+                url: deleteUrl,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    let alertHtml = `
+                        <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                            ${response.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+
+                    $('#success-message-container').prepend(alertHtml);
+
+                    button.closest('tr').fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                },
+                error: function() {
+                    alert('Error! Could not unlink the program.');
+                }
+            });
+        }
     });
+});
 
 </script>
+
 
 <script>
     
@@ -229,27 +256,50 @@ $(document).ready(function() {
 </script>
     
 
+<script>
+    $(document).ready(function() {
+    $('.remove-member-btn').click(function() {
+        let button = $(this);
+        let deleteUrl = button.data('url');
+        let confirmationMessage = "{{ __('admin.delete_team_member') }}"; 
+        if (confirm(confirmationMessage)) {
+            $.ajax({
+                url: deleteUrl,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    let alertHtml = `
+                        <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                            ${response.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+
+                    $('#success-message-container').prepend(alertHtml);
+
+                    button.closest('tr').fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                },
+                error: function() {
+                    alert('Error! Could not remove the team member.');
+                }
+            });
+        }
+    });
+});
+
+</script>
+
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll('.remove-member-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            if (confirm('Are you sure you want to remove this team member?')) {
-                fetch(this.dataset.url, {
-                    method: 'DELETE',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                }).then(() => location.reload());
-            }
-        });
-    });
-
-
     document.getElementById('searchTeamMember').addEventListener('keyup', function() {
         let query = this.value.toLowerCase();
         document.querySelectorAll('#addTeamMemberForm .form-check').forEach(item => {
             item.style.display = item.innerText.toLowerCase().includes(query) ? '' : 'none';
         });
      });
-   });
 </script>
 @stop

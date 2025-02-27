@@ -96,14 +96,15 @@ class UserController extends Controller
 				'name' => $name,
 				'email' => $result->email,
 			];
-		
 			// إرسال الإشعار
-			try {
-				$result->notify(new WelcomeJudgerNotification($data));
-			} catch (\Throwable $th) {
-				//throw $th;
+			if( !in_array(env('APP_ENV', 'local'), ['local']) )
+			{
+				try {
+					$result->notify(new WelcomeJudgerNotification($data));
+				} catch (\Throwable $th) {
+					// throw $th;
+				}
 			}
-			
 		}
 
 		if( $result ) { return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']); }

@@ -8,6 +8,9 @@
 }
 </style>
 <!-- Menu -->
+@php
+      $updateSittings = App\Settings::where('id', 1)->first();
+    @endphp
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
@@ -80,6 +83,7 @@
             </a>
           </li>
           @endif
+          @if($updateSittings->assessment == 1)
           {{-- @if (!app()->environment('production', 'beta')) --}}
           @if( $_user->ableTo('analysis-assessment', $permissions) )
           <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
@@ -90,7 +94,7 @@
             </a>
           </li>
           @endif
-
+          @endif
           @if( in_array(env('APP_ENV', 'local'), ['dev', 'local']) && $_user->ableTo('swot.view', $permissions) )
           <li class="{{ Request::is('dashboard/swot-analysis*') ? 'active' : '' }} menu-item">
             <a href="{{ route('swot.view') }}" class="menu-link">
@@ -120,6 +124,7 @@
           </a>
         </li>
         @endif
+        @if($updateSittings->assessment == 1)
         {{-- @if (!app()->environment('production', 'beta')) --}}
         @if( $_user->ableTo('analysis-assessment', $permissions) )
         <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
@@ -129,6 +134,7 @@
             </span>
           </a>
         </li>
+        @endif
         @endif
 
         @if( in_array(env('APP_ENV', 'local'), ['dev', 'local']) && $_user->ableTo('swot.view', $permissions) )
@@ -798,7 +804,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
             <a href="{{ route('currencies.index') }}" class="menu-link">
               <i class="menu-icon fas fa-money-bill-wave"></i>
-                <div>{{ __('admin.manage_currencies') }}</div>
+                <div>{{ __('admin.Currencies') }}</div>
             </a>
         </li>
           @if (!app()->environment('production', 'beta'))
@@ -837,9 +843,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
       </li>
     @endif
 
-    @php
-      $updateSittings = App\Settings::where('id', 1)->first();
-    @endphp
+    
     @if ($updateSittings->HomePage == true)
       @if ($_user->hasRole('Admin'))
         @if( $_user->ableToAny(['settings.list', 'settings.save'], $permissions) )

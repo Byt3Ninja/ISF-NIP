@@ -65,7 +65,14 @@ class MessengerController extends Controller
             $sfullname = $sname->first_name_en ." ". $sname->last_name_en;
             $MSG = new TemplateEmail;
             $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/dashboard/inbox"];
-            $user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
             /// End of send
 
 		return redirect()->back()->with('message','Done');
@@ -138,7 +145,14 @@ class MessengerController extends Controller
                 $sfullname = $cuser->first_name_en ." ". $cuser->last_name_en;
                 $MSG = new TemplateEmail;
                 $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/dashboard/inbox"];
-                $user->notify($MSG);
+                if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                {
+                    try {
+                        $user->notify($MSG);
+                    } catch (\Throwable $th) {
+                        // throw $th;
+                    }
+                }
                 /// End of send
             }
         } elseif ($request->type==2) {
@@ -159,7 +173,14 @@ class MessengerController extends Controller
                 $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
                 $MSG = new TemplateEmail;
                 $MSG->Message = ["New message received - VI portal", "Dear " . $rfullname . ",", "You have a new message from " . $sfullname . ', Needs your review.', "/dashboard/inbox"];
-                $user->notify($MSG);
+                if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                {
+                    try {
+                        $user->notify($MSG);
+                    } catch (\Throwable $th) {
+                        // throw $th;
+                    }
+                }
                 /// End of send
             }
         } else {

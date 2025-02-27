@@ -98,7 +98,14 @@ class TrainingController extends Controller
 				$mail = new ChangeCycle($data);
 				// $MSG = new TemplateEmail;
 				// $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
-				$company_owner->notify($mail);
+				if( !in_array(env('APP_ENV', 'local'), ['local']) )
+				{
+					try {
+						$company_owner->notify($mail);
+					} catch (\Throwable $th) {
+						// throw $th;
+					}
+				}
 			}
 		}
 		/// End of mail send
@@ -715,8 +722,14 @@ class TrainingController extends Controller
 			$mail['organization_name_en'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_en ?? 'Unknown Organization';
 			$mail['organization_name_ar'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';;
 			$MSG = new TrainerEmail($mail);
-			\Notification::route('mail', $request->trainer_email)
-				->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+				try {
+					\Notification::route('mail', $request->trainer_email)->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
 		} elseif ($type == 'online') {
@@ -746,8 +759,14 @@ class TrainingController extends Controller
 			$mail['organization_name_en'] = Step::find($step)->cycle->organization->name_en;
 			$mail['organization_name_ar'] = Step::find($step)->cycle->organization->name_ar;
 			$MSG = new TrainerEmail($mail);
-			\Notification::route('mail', $request->trainer_email)
-				->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+				try {
+					\Notification::route('mail', $request->trainer_email)->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} else {
@@ -794,8 +813,14 @@ class TrainingController extends Controller
 			$mail['organization_name_en'] = $session->step->cycle->organization->name_en;
 			$mail['organization_name_ar'] = $session->step->cycle->organization->name_ar;
 			$MSG = new TrainerEmail($mail);
-			\Notification::route('mail', $request->trainer_email)
-				->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+				try {
+					\Notification::route('mail', $request->trainer_email)->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
@@ -824,8 +849,14 @@ class TrainingController extends Controller
 			$mail['organization_name_en'] = $session->step->cycle->organization->name_en;
 			$mail['organization_name_ar'] = $session->step->cycle->organization->name_ar;
 			$MSG = new TrainerEmail($mail);
-			\Notification::route('mail', $request->trainer_email)
-				->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+				try {
+					\Notification::route('mail', $request->trainer_email)->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} else {
