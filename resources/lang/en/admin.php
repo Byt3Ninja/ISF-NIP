@@ -1321,13 +1321,10 @@ return [
 	'Projects' => 'Projects',
 	'Filter' => 'Filter',
 	'no_programs' => 'No Programs Found',
-<<<<<<< Updated upstream
 	'filter_by_programs' => 'Filter By Programs',
-=======
 	'Date_is_required' => 'Date is required',
 	'Date_must_be_a_valid_date' => 'Date must be a valid date',
 	'Period_is_required' => 'Period is required',
 	'Period_must_be_an_integer' => 'Period must be an integer',
 	'Period_must_be_at_least_30_minutes' => 'Period must be at least 30 minutes',
->>>>>>> Stashed changes
 ];
