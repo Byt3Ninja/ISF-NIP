@@ -166,9 +166,11 @@
                             <input type="checkbox" class="form-check-input" name="team_members[]" value="{{ $member->id }}">
                             <label class="form-check-label">{{ $member->Name }}</label>
                             <select name="roles[]" class="form-select">
-                                <option value="Project Lead">Project Lead</option>
-                                <option value="Contributor">Contributor</option>
-                                <option value="Reviewer">Reviewer</option>
+                                @foreach($distinctRoles as $role)
+                                <option value="{{ $role }}" {{ $member->TeamMember == $role ? 'selected' : '' }}>
+                                    {{ $role }}
+                                </option>
+                                @endforeach
                             </select>
                         </div>
                         @endforeach

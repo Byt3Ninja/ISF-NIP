@@ -64,7 +64,8 @@ class ProjectController extends Controller
         $availablePrograms = Cycle::whereNotIn('id', $project->programs()->pluck('cycles.id'))->get();
         $availableTeamMembers = Team_member::whereNotIn('id', $project->teamMembers()->pluck('team_member_id'))->get();
 
-        return view('admin.projects.show', compact('project', 'linkedPrograms', 'availablePrograms','availableTeamMembers'));
+        $distinctRoles = Team_member::distinct()->pluck('TeamMember');
+        return view('admin.projects.show', compact('project', 'linkedPrograms', 'availablePrograms','availableTeamMembers','distinctRoles'));
     }
 
 
