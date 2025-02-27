@@ -10,10 +10,10 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <style>
 
-.drp-calendar {
-  background-color: #fff;
-  margin-top: -3rem !important;
-}
+  .daterangepicker {
+    margin-top: 8rem !important;
+  }
+
   #mob {
     display: flex;
     justify-content: flex-end;
