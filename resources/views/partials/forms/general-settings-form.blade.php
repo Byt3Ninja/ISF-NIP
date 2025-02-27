@@ -129,6 +129,13 @@
     </div>
   </div>
 
+  <div class="col-md-12 col-12">
+    <div class="form-check form-switch mb-2">
+      <input class="form-check-input" name="Assessment" type="checkbox" {{ $Title->assessment == '1' ? 'checked' : '' }} />
+      <label class="form-check-label">{{ __('settings.Assessment') }}</label>
+    </div>
+  </div>
+
   <div class="col-12 d-flex justify-content-end mt-6">
     <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
   </div>
