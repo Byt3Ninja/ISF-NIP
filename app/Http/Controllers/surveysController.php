@@ -52,7 +52,7 @@ class surveysController extends Controller
 			'organization_id' => 'required|exists:organizations,id',
 			'description' => 'nullable|sometimes',
 		]);
-
+		
 		$survey = new Surveys;
 		$survey->title = $request->title;
 		$survey->organization_id = $request->organization_id;
@@ -60,7 +60,8 @@ class surveysController extends Controller
 		$survey->save();
 
 		$id = $survey->id;
-		$questions_ids = $request->has('questions_ids') ? $request->questions_ids : [];
+		$questions_ids = $request->has('selected_questions') ? json_decode($request->selected_questions) : [];
+		
 		SurveyQuestions::where('survey_id', $id)->delete();
 		$survey->questions()->sync(array_map(function ($id, $key) {
 			return ['row_no' => $key + 1, 'question_id' => $id];
@@ -92,6 +93,7 @@ class surveysController extends Controller
 			}
 			$questions = $questions->get();
 			$survey_questions = !empty($survey->questions) ? $survey->questions->pluck('id')->toArray() : [];
+			
 			return view('admin.surveys.edit', compact('survey', 'organizations', 'questions', 'survey_questions'));
 		}
 	}
@@ -120,7 +122,7 @@ class surveysController extends Controller
 			$survey->organization_id = $request->organization_id;
 			$survey->description = $request->description;
 			$survey->save();
-			$questions_ids = $request->has('questions_ids') ? $request->questions_ids : [];
+			$questions_ids = $request->has('selected_questions') ? json_decode($request->selected_questions) : [];
 			SurveyQuestions::where('survey_id', $id)->delete();
 			$survey->questions()->sync(array_map(function ($id, $key) {
 				return ['row_no' => $key + 1, 'question_id' => $id];
