@@ -95,6 +95,7 @@ class UserController extends Controller
 			$data = [
 				'name' => $name,
 				'email' => $result->email,
+				'role' => 'Judger',
 			];
 			// إرسال الإشعار
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
@@ -106,6 +107,23 @@ class UserController extends Controller
 				}
 			}
 		}
+			// إرسال الإيميل الترحيبي
+			$data = [
+				'name' => $name,
+				'email' => $result->email,
+				'password' => $result->password,
+				'role' => '',
+			];
+			// إرسال الإشعار
+			// if( !in_array(env('APP_ENV', 'local'), ['local']) )
+			// {
+				try {
+					$result->notify(new WelcomeJudgerNotification($data));
+				} catch (\Throwable $th) {
+					throw $th;
+				}
+			// }
+		
 
 		if( $result ) { return redirect()->route('users.index')->with(['msg' => 'StoredSuccessfully']); }
 		else { return back()->withInput()->with(['msg' => 'FailedStore']); }
