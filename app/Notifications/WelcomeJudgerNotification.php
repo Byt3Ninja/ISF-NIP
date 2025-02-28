@@ -30,14 +30,20 @@ class WelcomeJudgerNotification extends Notification
         return ['mail'];
     }
 
-    /**
+    /** 
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject('مرحبًا بك كـ Judger!')
-            ->markdown('emails.welcome_judger', ['data' => $this->data]);
+        if ($this->data['role'] === 'Judger') {
+            return (new MailMessage)
+                ->subject('مرحبًا بك كـ Judger!')
+                ->markdown('emails.welcome_judger', ['data' => $this->data]);
+        } else {
+            return (new MailMessage)
+                ->subject('مرحبًا بك!')
+                ->markdown('emails.welcome', ['data' => $this->data]);
+        }
     }
 
     /**
