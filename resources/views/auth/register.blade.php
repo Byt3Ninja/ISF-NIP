@@ -246,19 +246,19 @@
                 <div class="col-12 mb-3">
                   <label for="username" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $firstName }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="first_name_en" type="text" class="form-control" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name_en" autofocus />
+                    <input name="first_name_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="first_name_en" placeholder="{{ __('auth.First English Name') }}" required autocomplete="first_name_en" autofocus />
                   </div>
                 </div>
                 <div class="col-12 mb-3">
                   <label for="last_name_en" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $secondName }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="last_name_en" type="text" class="form-control" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name_en" />
+                    <input name="last_name_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="last_name_en" placeholder="{{ __('auth.Last English Name') }}" required autocomplete="last_name_en" />
                   </div>
                 </div>
                 <div class="col-12 mb-3">
                   <label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
                   <div class="input-group input-group-merge">
-                    <input name="email" type="email" class="form-control" placeholder="{{ __('auth.E-Mail') }}" required />
+                    <input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required />
                   </div>
                 </div>
                 <div class="col-12 mb-4 form-password-toggle">
@@ -277,27 +277,27 @@
                 </div>
                 <div class="col-12 mb-4">
                   <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="gender">{{ $gender }}</label>
-                  <select class="form-select select2" name="gender" id="gender" required>
+                  <select class="form-select select2 text-{{ $l == 'ar' ? 'end' : 'start' }}" name="gender" id="gender" required>
                     <option value="Male">{{ __('Male') }}</option>
                     <option value="Female">{{ __('Female') }}</option>
                   </select>
                 </div>
                 <div class="col-12 mb-4 d-grid">
                   <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
-                  <input id="phone" type="tel" class="form-control" placeholder="{{ __('auth.Phone') }}" name="phone" required />
+                  <input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
                   <small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
                 </div>
                 <div id="mentorInputsWrapper" style="display: none;">
                   <div class="col-12 mb-3">
                     <label for="Title" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.JobTitleEn') }}</label>
                     <div class="input-group input-group-merge">
-                      <input name="title_en" type="text" class="form-control" id="Title" placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
+                      <input name="title_en" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Title" placeholder="{{ __('admin.JobTitleEn') }}" autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
                     </div>
                   </div>
                   <div class="col-12 mb-3">
                     <label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="expertise">{{ __('admin.Industry Expertise') }}</label>
                     <div class="form-group">
-                      <select name="expertise[]" class="select2 form-select" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Select Expertise')}}" required>
+                      <select name="expertise[]" class="select2 form-select text-{{ $l == 'ar' ? 'end' : 'start' }}" multiple="multiple" id="expertise" data-placeholder="{{__('admin.Select Expertise')}}" required>
                         @php
                         $expertises = App\Expertise::where('parent_id', null)->get();
                         @endphp
@@ -314,14 +314,13 @@
                   <div class="col-12 mb-3">
                     <label for="userbio" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.userbio') }}</label>
                     <div class="input-group">
-                      <textarea name="userbio" type="text" class="form-control" id="userbio" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()">
-                      </textarea>
+                      <textarea name="userbio" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="userbio" placeholder="{{ __('admin.userbio') }}" autocomplete="userbio" oninput="this.value = this.value.trimStart()"></textarea>
                     </div>
                   </div>
                   <div class="col-12 mb-3">
                     <label for="Linkedin" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('admin.Linkedin') }}</label>
                     <div class="input-group">
-                      <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control" id="Linkedin" placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
+                      <input value="{{ old('Linkedin') }}" name="Linkedin" type="url" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="Linkedin" placeholder="{{ __('admin.Linkedin') }}" autocomplete="Linkedin" />
                     </div>
                   </div>
                 </div>
