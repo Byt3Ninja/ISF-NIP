@@ -101,8 +101,10 @@
               </div>
             </div>
           </div>
-          <input type="hidden" name="selected_questions" id="selected-questions" value="[]" />
+          ggg
+          <input type="hidden" name="selected_questions" id="selected-questions" value="[{{ implode(',', array_map(fn($id) => "\"$id\"", $survey_questions)) }}]" />
           @foreach( $questions as $key => $question )
+         
           <div class="col-12">
             <div class="card border mb-4">
               <div class="card-header">
@@ -114,7 +116,7 @@
                   </span>
                   <h5 class="card-title ms-2 mb-0 fs-semibold">{{ $question->question }}</h5>
                   <input type="checkbox" class="form-check-input ms-auto question-checkbox d-none"
-                    value="{{ $question->id }}" />
+                    value="{{ $question->id }}" {{ in_array($question->id, $survey_questions) ? 'checked' : '' }} />
                 </div>
               </div>
               <div class="card-body">
