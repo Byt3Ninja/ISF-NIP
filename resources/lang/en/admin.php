@@ -1334,4 +1334,5 @@ return [
 	'currencyDeleted' => 'Currency Deleted Successfully',
 	'currencyUpdated' => 'Currency Updated Successfully',
 	'currencyCreated' => 'Currency Created Successfully',
+	'Startup_Joined_New_Program_subject' => 'Startup Joined New Program',
 ];
