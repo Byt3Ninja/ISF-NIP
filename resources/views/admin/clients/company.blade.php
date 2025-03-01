@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
+  <!-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" /> -->
 
   <style>
     #contentWrapper {
@@ -60,19 +60,6 @@
   <div class="content-wrapper" id="contentWrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y overflow-x-hidden" style="max-width: 100%;">
-      <!-- Alert -->
-      @if (session()->has('msg'))
-        <x-alert type="{{ session()->get('class') ?? 'danger' }}"
-          message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
-      @endif
-      <!-- Validation messages -->
-      @if (count($errors) > 0)
-        @foreach ($errors->all() as $error)
-          <x-alert type="danger" message="{{ $error }}" />
-        @endforeach
-      @endif
-      <!-- / Alert -->
-
       <!-- Tabs (mobile) -->
       <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">
         <ul class="nav nav-pills flex-nowrap" role="tablist">
@@ -101,9 +88,9 @@
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
-              <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
-                <a 
-                  id="company-tab"
+            <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
+              <a 
+              id="company-tab"
                   href="#navs-left-{{ $tab['target'] }}"
                   class="nav-link py-3"
                   data-bs-toggle="tab"
@@ -123,10 +110,24 @@
           class="tab-content p-0 overflow-y-auto custom-container mb-6" 
           style="{{ $l == 'en' ? 'margin-left: auto' : 'margin-right: auto' }}"
         >
+          <!-- Alert -->
+          @if (session()->has('msg'))
+            <x-alert 
+              type="{{ session()->get('class') ?? 'danger' }}"
+              message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" 
+            />
+          @endif
+          <!-- Validation messages -->
+          @if (count($errors) > 0)
+            @foreach ($errors->all() as $error)
+              <x-alert type="danger" message="{{ $error }}" />
+            @endforeach
+          @endif
+          <!-- / Alert -->
+
           @foreach ($tabs as $index => $tab)
-            <div class="tab-pane fade"
-              id="navs-left-{{ $tab['target'] }}">
-              @switch($tab['target'])
+          <div class="tab-pane fade" id="navs-left-{{ $tab['target'] }}">
+            @switch($tab['target'])
                 @case('company-info')
                   @include('partials.forms.company.company-info-form',['heading' => $tab['label']])
                 @break
@@ -182,7 +183,7 @@
   <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-  <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script>
+  <!-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> -->
 @stop
 
 @section('pagescripts')
@@ -192,13 +193,13 @@
   <script src="/app-assets/js/1.js"></script>
 
   <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script src="/vuexy/assets/js/forms-tagify.js"></script>
+  <!-- <script src="/vuexy/assets/js/forms-tagify.js"></script> -->
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
   <script src="/vuexy/assets/js/founder-form.js"></script>
   <script src="/vuexy/assets/js/shareholder-form.js"></script>
   <script src="/vuexy/assets/js/investor-form.js"></script>
 
-  <script>
+  <!-- <script>
     document.getElementById('img_url').addEventListener('change', function(
     event) {
       const file = event.target.files[0];
@@ -210,14 +211,43 @@
         reader.readAsDataURL(file);
       }
     });
-  </script> 
+  </script>  -->
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const pitchTabs = document.querySelectorAll('#pitch-tab');
       const tabs = document.querySelectorAll('#company-tab');
       const mobileTabs = document.querySelectorAll('#mobile-company-tab');
       const tabsContent = document.querySelectorAll('#company-tab-content .tab-pane');
+      const pitchContent = document.querySelectorAll('#pitch-tab-content .tab-pane');
       const activeCompanyTab = localStorage.getItem('activeCompanyTab');
+      const activePitchTab = localStorage.getItem('activePitchTab');
+
+      pitchTabs.forEach((tab, index) => {
+        tab.addEventListener('click', function() {
+          localStorage.setItem('activePitchTab', JSON.stringify(index));
+        });
+
+        if (!activePitchTab) {
+          pitchTabs[0].classList.add('active');
+          return;
+        }
+
+        if (index === JSON.parse(activePitchTab)) {
+          tab.classList.add('active');
+        }
+      });
+
+      pitchContent.forEach((tab, index) => {
+        if (!activePitchTab) {
+          pitchContent[0].classList.add('show', 'active');
+          return;
+        }
+
+        if (index === JSON.parse(activePitchTab)) {
+          tab.classList.add('fade', 'show', 'active');
+        }
+      });
 
       mobileTabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {

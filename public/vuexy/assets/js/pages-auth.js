@@ -35,13 +35,13 @@ const translations = {
     password: {
       notEmpty: 'Please enter your password',
       stringLength: 'Password must be 8-20 characters long',
-      strong: 'Password must be strong including uppercase, lowercase, numbers, and special characters.'
+      strong: "Password must be strong including uppercase, lowercase, numbers, and special characters such as @$!%*?&"
     },
     password_confirmation: {
       notEmpty: 'Please confirm password',
       identical: 'The password and its confirm are not the same',
       stringLength: 'Password must be 8-20 characters long',
-      strong: 'Password must be strong including uppercase, lowercase, numbers, and special characters.'
+      strong: "Password must be strong including uppercase, lowercase, numbers, and special characters such as @$!%*?&"
     },
     terms: {
       notEmpty: 'Please agree terms & conditions'
@@ -92,13 +92,13 @@ const translations = {
     password: {
       notEmpty: 'يرجى إدخال كلمة المرور الخاصة بك',
       stringLength: 'يجب ان تتكون كلمة المرور من 8-20 حرفًا',
-      strong: 'كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
+      strong: "@$!%*?& كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا مثل",
     },
     password_confirmation: {
       notEmpty: 'يرجى تأكيد كلمة المرور',
       identical: 'كلمة المرور وتأكيدها غير متطابقين',
       stringLength: 'يجب ان تتكون كلمة المرور من 8-20 حرفًا',
-      strong: 'كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا'
+      strong: "@$!%*?& كلمة السر يجب أن تكون قوية حيث تتضمن حروفًا كبيرة وصغيرة وأرقامًا ورموزًا مثل",
     },
     terms: {
       notEmpty: 'يرجى الموافقة على الشروط والأحكام'

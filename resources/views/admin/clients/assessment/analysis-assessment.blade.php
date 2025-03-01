@@ -376,79 +376,22 @@ $userid = auth()->user()->id;
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    // Initialize the chart
-    var chart = echarts.init(document.getElementById('chart'));
+@stop
 
-    // Chart configuration
-    var option = {
-      // title: {
-      //   text: 'Business Analysis Radar Chart',
-      //   left: 'center',
-      // },
-      tooltip: {},
-      radar: {
-        shape: 'circle',
-        name: {
-          textStyle: {
-            color: config.colors.dark,
-            fontSize: 16,
-          },
-        },
-        indicator: [
-          { name: 'Business Idea', max: 100 },
-          { name: 'Product Portfolio', max: 100 },
-          { name: 'Revenue Model', max: 100 },
-          { name: 'Customer Portfolio', max: 100 },
-          { name: 'Market Position', max: 100 },
-          { name: 'Networking', max: 100 },
-          { name: 'Marketing', max: 100 },
-          { name: 'Sales & Service', max: 100 },
-          { name: 'Communication & PR', max: 100 },
-          { name: 'Branding', max: 100 },
-          { name: 'Financials', max: 100 },
-          { name: 'Funding', max: 100 },
-          { name: 'Production & Deliveries', max: 100 },
-          { name: 'IT Systems', max: 100 },
-          { name: 'Facilities', max: 100 },
-          { name: 'Ownership & Board', max: 100 },
-          { name: 'Employees', max: 100 },
-          { name: 'Partnerships', max: 100 },
-          { name: 'Business Processes', max: 100 },
-          { name: 'Legal Issues', max: 100 },
-        ],
-      },
-      series: [
-        {
-          name: 'Analysis',
-          type: 'radar',
-          data: [
-            {
-              value: [
-                80, 90, 75, 60, 85, 95, 70, 80, 90, 75,
-                70, 65, 85, 75, 70, 85, 60, 70, 80, 90,
-              ],
-              name: 'Current Status',
-            },
-            {
-              value: [
-                70, 85, 60, 75, 80, 90, 85, 90, 70, 80,
-                80, 70, 75, 80, 75, 80, 70, 65, 75, 85,
-              ],
-              name: 'Goal',
-            },
-          ],
-        },
-      ],
-    };
-
-    // Set the option to the chart
-    chart.setOption(option);
-  });
-</script>
+@section('pagescripts')
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
+    const analysisUserScores = @json($Analysis_user_scores) || [];
+    console.log('analysisUserScores', analysisUserScores);
+    // console.log('analysisUserScores', analysisUserScores)
+    
+    const chartIndicatorData = analysisUserScores?.map(item => ({
+      name: document.documentElement.lang == 'ar' ? item?.name_ar : item?.name_en,
+      max: 100,
+    }));
+    
+    const chartData = analysisUserScores?.map(item => (item?.totalAnswered / item?.total) * 100 || 0);
+    
     // Show loading spinner
     var chart = echarts.init(document.getElementById('chart'));
     chart.showLoading();
@@ -466,28 +409,7 @@ $userid = auth()->user()->id;
                 fontSize: window.innerWidth < 768 ? 12 : 16,
             },
           },
-          indicator: [
-            { name: 'Business Idea', max: 100 },
-            { name: 'Product Portfolio', max: 100 },
-            { name: 'Revenue Model', max: 100 },
-            { name: 'Customer Portfolio', max: 100 },
-            { name: 'Market Position', max: 100 },
-            { name: 'Networking', max: 100 },
-            { name: 'Marketing', max: 100 },
-            { name: 'Sales & Service', max: 100 },
-            { name: 'Communication & PR', max: 100 },
-            { name: 'Branding', max: 100 },
-            { name: 'Financials', max: 100 },
-            { name: 'Funding', max: 100 },
-            { name: 'Production & Deliveries', max: 100 },
-            { name: 'IT Systems', max: 100 },
-            { name: 'Facilities', max: 100 },
-            { name: 'Ownership & Board', max: 100 },
-            { name: 'Employees', max: 100 },
-            { name: 'Partnerships', max: 100 },
-            { name: 'Business Processes', max: 100 },
-            { name: 'Legal Issues', max: 100 },
-          ],
+          indicator:chartIndicatorData,
         },
         series: [
           {
@@ -495,17 +417,11 @@ $userid = auth()->user()->id;
             type: 'radar',
             data: [
               {
-                value: [
-                  80, 90, 75, 60, 85, 95, 70, 80, 90, 75,
-                  70, 65, 85, 75, 70, 85, 60, 70, 80, 90,
-                ],
+                value: chartData,
                 name: 'Current Status',
               },
               {
-                value: [
-                  70, 85, 60, 75, 80, 90, 85, 90, 70, 80,
-                  80, 70, 75, 80, 75, 80, 70, 65, 75, 85,
-                ],
+                value: Array(chartData?.length).fill(100),
                 name: 'Goal',
               },
             ],

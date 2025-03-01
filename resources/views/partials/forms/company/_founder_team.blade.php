@@ -290,7 +290,7 @@
                     <button 
                       type="reset" 
                       class="btn btn-label-secondary" 
-                      data-bs-dismiss="offcanvas"
+                      data-bs-dismiss="modal"
                     >
                       {{ __('admin.Cancel') }}
                     </button>

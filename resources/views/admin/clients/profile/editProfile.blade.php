@@ -241,6 +241,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
 <!-- Page JS -->
 <script src="/vuexy/assets/js/edit-profile.js"></script>
 <script src="/vuexy/assets/js/forms-selects.js"></script>
+<script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 
 <script>
   $(document).ready(function() {

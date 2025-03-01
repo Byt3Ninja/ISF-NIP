@@ -9,17 +9,19 @@ use App\Sector;
 use App\Company;
 use App\Service;
 use App\Calendar;
+use App\Currency;
 use App\Messages;
 use App\Schedule;
+use App\Settings;
 use App\Messenger;
 use App\Screening;
 use App\TimeSheet;
 use App\BuilderForm;
 use App\Organization;
 use App\Documentation;
+
 use App\Finalscreening;
 use App\MentorshipTask;
-
 use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
@@ -153,18 +155,18 @@ class HomeController extends Controller
         });
 
         // Sector Breakdown
-        $sectorBreakdown = Sector::withCount('children')->get();
+        $sectorBreakdown = Sector::withCount('company')->get();
 
         $data['sector_data'] = $sectorBreakdown->map(function ($item) {
             return [
                 'label_en' => $item->name_en,
                 'label_ar' => $item->name_ar,
-                'count' => $item->children_count,
+                'count' => $item->company_count,
             ];
         });
 
 
-        // Project Type Distribution
+        // Company By Business Model
         $projectTypes = Company::select('business_type', DB::raw('count(*) as total'))
             ->groupBy('business_type')
             ->whereNotNull('business_type')
@@ -219,7 +221,7 @@ class HomeController extends Controller
         ];
 
 
-        // Companies By Sector
+        // Companies Per Sector
         $sectorData = Company::select('sector', DB::raw('count(*) as total'))
             ->whereNotNull('sector')
             ->groupBy('sector')
@@ -366,7 +368,8 @@ class HomeController extends Controller
                     'count' => $count,
                 ];
             }
-        });
+        })->values();
+        
         return view('admin.dashboard', $data);
     }
     protected function organizationDashboard()
@@ -414,11 +417,33 @@ class HomeController extends Controller
         $data['mentorshipRequests'] = $mentorshipRequests->whereNull('approved')->latest()->limit(5)->get();
         $data['latest_cycles'] = $cycles->latest()->limit(10)->get();
 
-        $usersgender = User::select('gender', DB::raw('count(*) as total'))->where('organization_id', $organization_id)->groupBy('gender')->get();
-        $data['usersgender'] = $usersgender;
+        $data['cycles_labels'] = [];
+        $data['cycles_startups_count'] = [];
+        foreach ($cycles->get() as $key) {
+            $data['cycles_labels'][] = $key->title;
+            $data['cycles_startups_count'][] = (int)$key->companies()->count();
+        }
 
-        
+        // Demographic
+        $data['usersgov'] = User::join('states', 'users.state_id', '=', 'states.id')
+        ->where('users.organization_id', $organization_id)
+        ->select(
+            'states.name_en as state_en',
+            'states.name_ar as state_ar',
+            DB::raw('count(*) as total')
+        )
+        ->groupBy('states.name_en', 'states.name_ar')
+        ->get();
 
+
+        // Male and Female Ratio
+        $data['usersgender'] = User::where('organization_id', $organization_id)
+        ->select('gender', DB::raw('count(*) as total'))
+        ->groupBy('gender')
+        ->get();
+
+
+    
         // Development Stage  
 
         $data['development_stages'] = [];
@@ -473,22 +498,25 @@ class HomeController extends Controller
 
         // Sector Breakdown
         $sectorBreakdown = Sector::join('companies', 'companies.sector', '=', 'sectors.id')
-            ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
-            ->select('sectors.name_en as sector_name_en', 'sectors.name_ar as sector_name_ar', DB::raw('count(companies.id) as total'))
-            ->groupBy('sectors.name_en', 'sectors.name_ar')
-            ->get();
+        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->where('cycles.organization_id', $organization_id) 
+        ->select(
+            'sectors.name_en as sector_name_en', 
+            'sectors.name_ar as sector_name_ar', 
+            DB::raw('count(companies.id) as total')
+        )
+        ->groupBy('sectors.name_en', 'sectors.name_ar')
+        ->get();
+    
+     $data['sector_data'] = $sectorBreakdown->map(function ($item) {
+        return [
+            'label_en' => $item->sector_name_en,
+            'label_ar' => $item->sector_name_ar,
+            'count' => $item->total,
+        ];
+    });
 
-        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
-            return [
-                'label_en' => $item->sector_name_en,
-                'label_ar' => $item->sector_name_ar,
-                'count' => $item->total,
-            ];
-        });
-
-        // Project Type Distribution
+        // Company By Business Model
         $projectTypes = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
             ->where('users.organization_id', $organization_id)
@@ -695,7 +723,7 @@ class HomeController extends Controller
                 ];
             }
         });
-
+       
         return view('admin.organizations.dashboard', $data);
     }
 
@@ -770,8 +798,9 @@ class HomeController extends Controller
             });
         }
         $services = $services->get();
-        $Setting = \App\Settings::where('id', 1)->first();
-        return view('admin.clients.directory')->with('services', $services)->with('Setting', $Setting);
+        $setting = Settings::where('id', 1)->first();
+        $currency = Currency::where('id', $setting->Currency)->first();
+        return view('admin.clients.directory')->with('services', $services)->with('setting', $setting)->with('currency', $currency);
     }
     public function rateservice($id, Request $request)
     {

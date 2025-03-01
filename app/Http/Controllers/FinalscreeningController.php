@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Company;
-use App\Factories\OnlineMeetingFactory;
-use App\FinalData;
-use App\Finalscreening;
-use App\Formfield;
-use App\Notifications\TemplateEmail;
 use App\Step;
 use App\User;
+use App\Company;
+use App\FinalData;
+use App\Formfield;
+use Carbon\Carbon;
+use App\Finalscreening;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
+use App\Notifications\TemplateEmail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
+use App\Factories\OnlineMeetingFactory;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-
+use App\Notifications\WelcomeJudgerNotification;
 
 class FinalscreeningController extends Controller
 {
@@ -53,12 +54,33 @@ class FinalscreeningController extends Controller
             $list = $request->judges;
            // dd();
             $companies = $request->users;
+            
             if (!$companies or !$list) {return Redirect::back()->with('message2', 'You need to select judges and companies to update');}
             foreach ($companies as $company) {
                 Finalscreening::where('company_id',$company)->where('step_id', $request->step)->delete();
                 Finalscreening::insert(['company_id'=>$company,'step_id'=>$request->step, 'judges'=>json_encode($list)]);
+
             }
-            return Redirect::back()->with('message', 'saved');
+            foreach ($list as $judge) {
+                
+                $result = User::findOrFail($judge);
+                $name = $result->first_name_en . ' ' . $result->last_name_en;
+                $email = $result->email;
+                
+                $data = [
+                    'Type' => 'Final_Screening',
+                    'name' => $name,
+                    'email' => $email,
+                    'start_date' => '',
+                    'end_date' => '',
+                ];
+                // إرسال الإشعار
+                $result->notify(new WelcomeJudgerNotification($data));
+            }
+            
+
+
+            return Redirect::back()->with('message', 'Saved');
         } else {
             return Redirect::back()->with('message2', 'error');
         }
@@ -150,7 +172,7 @@ class FinalscreeningController extends Controller
             
             $finalScreening->update([
                 'datetime' => $request->date,
-                'duration' => $request->duration,
+                'duration' => $request->period,
                 'zoom_id' => $onlineMeeting['data']['id'],
                 'start_url' =>  $onlineMeeting['data']['start_url'],
                 'join_url' =>  $onlineMeeting['data']['join_url']
@@ -158,21 +180,41 @@ class FinalscreeningController extends Controller
                 
             $startup_owner = Company::findOrFail($request->company)->user;
             $startup_owner_name = $startup_owner->name;
+                $start_date = $finalScreening->datetime;
+                $duration = $request->period;
+                $end_dateCarbon = Carbon::parse($start_date)->addMinutes($duration);
+                $end_date = $end_dateCarbon->toDateTimeString(); // Format: 2025-02-10 13:00:00
 
             $judges_names = '';
-            foreach ($finalScreening->evaluationJudgers as $judge) {
+            foreach ($finalScreening->judges as $judge) {
 
-                $judge_name = $judge->name;
-                $user = new User();
-                $user->email = $judge->email;
-                $user->id = $judge->id;
+                // $judge_name = $judge->name;
+                // $user = new User();
+                // $user->email = $judge->email;
+                // $user->id = $judge->id;
 
-                $MSG = new TemplateEmail;
-                $MSG->Message=["New Final Screen session - VI portal","Dear ".$judge_name.",","Kindly note you have a New Final Screen session with '".$startup_owner_name."', Session will start:".$request->date.
-                    ", Check your account to join the session ","/dashboard"];
+                // $MSG = new TemplateEmail;
+                // $MSG->Message=["New Final Screen session - VI portal","Dear ".$judge_name.",","Kindly note you have a New Final Screen session with '".$startup_owner_name."', Session will start:".$request->date.
+                //     ", Check your account to join the session ","/dashboard"];
 
-                $user->notify($MSG);
-                $judges_names .= $judge->name .', ';
+                // $user->notify($MSG);
+                // $judges_names .= $judge->name .', ';
+
+                $result = User::findOrFail($judge);
+                $name = $result->first_name_en . ' ' . $result->last_name_en;
+                $email = $result->email;
+                
+                $data = [
+                    'Type' => 'Final_Screening',
+                    'name' => $name,
+                    'email' => $email,
+                    'start_date' => $start_date,
+                    'end_date' => $end_date,
+                ];
+                // إرسال الإشعار
+                $result->notify(new WelcomeJudgerNotification($data));
+
+
 
             }
             

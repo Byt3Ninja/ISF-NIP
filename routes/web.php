@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
@@ -54,6 +55,10 @@ Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
 Auth::routes(['verify' => true]);
+Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
+    ->name('set-password-form');
+Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('accept-invitation');
+
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], function () {
     ####################### Overall System Admin Routes ###############
     // All Logged users
@@ -126,6 +131,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('updateSMAchiev');
     Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('updateSMWhatsApp');
 
+
+    Route::get('organizations/settings', 'SettingsController@showSettings')->name('organization-settings');
+    Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('meeting-settings');
+    Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('social-settings');
+    Route::put('organizations/settings/general', 'SettingsController@generalSetting')->name('general-settings');
+    Route::post('organizations/settings/invite', 'SettingsController@inviteUser')->name('invite-user');
+    Route::post('organizations/settings/resend-invitation/{invitationId}', 'SettingsController@resendInvitation')->name('resend-invitation');
+    Route::delete('organizations/settings/cancel-invitation/{invitationId}', 'SettingsController@cancelInvitation')->name('cancel-invitation');
 
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
@@ -409,6 +422,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('programlist/Email', 'ProgramController@SentEmail');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
+    /* Start of Currencies Routes */
+     Route::resource('currencies', 'CurrencyController');
+    /* End of Currencies Routes */
+
     // ===============> Mentor Dashboard Routes <===============
     Route::group(['prefix' => 'mentor', 'namespace' => 'Mentor'], function () {
         Route::get('mentorshipSessions', 'MentorshipController@index')->name('mentorshipSessions.index');
@@ -462,6 +479,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('/swot-analysis/save', [GeminiController::class, 'saveSwotAnalysis'])->name('swot.save');
     Route::get('/swot-analysis/export', [GeminiController::class, 'exportToPdf'])->name('swot.export');
     /* End of Gemini SWOT Analysis Routes */
+
+    
 
     // ===============> Reports <============
     Route::group(['prefix' => 'reports'], function () {

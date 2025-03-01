@@ -12,21 +12,21 @@
             
             <div class="content-body">
                     <section id="basic-input">
-                        <div class="row">
+                        <div class="row mb-6">
                             <div class="col-md-12">
                                 <div class="card">
                                     <div class="card-content">
                                         <div class="card-body">
-                                    <dl class="row">
+                                    <dl class="row border-bottom">
                                         <dt class="col-sm-3">
                                             {{__('admin.Company')}}
                                         </dt>
                                         <dd class="col-sm-9">
-                                            <a class="media-left mr-50" href="/dashboard/companyProfile/{{$company->id}}">
+                                            <a class="d-flex align-items-center gap-2" href="/dashboard/companyProfile/{{$company->id}}">
                                                 <img src="{{$company->logo_url}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                 <div class="media-body">
                                                     <h6 class="media-heading mb-0">{{$company->name }} </h6>
-                                                    <span class="font-small-2">{{$company->title }}</span>
+                                                    <span class="text-secondary">{{$company->title }}</span>
                                                 </div>
                                             </a>
                                         </dd>
@@ -56,12 +56,12 @@
                                         <div class="card-body">
                                             <br>
                                             @if(session()->has('msg'))
-                                                <div class="row">
+                                                <div class="row mb-6">
                                                     <div class="col-md-12">
                                                         <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
                                                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                             <div class="d-flex align-items-center">
-                                                                <i class="bx bx-{{Session::get('class')=='success'?'check-circle':'error'}}"></i>
+                                                                <i class="ti ti-{{Session::get('class')=='success'?'circle-check':'error'}}"></i>
                                                                 <span> {{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }} </span>
                                                             </div>
                                                         </div>
@@ -73,7 +73,7 @@
                                             {!! csrf_field() !!}
                                             <input type="hidden" name="company_id" value="{{$answers->pluck(['company_id'])->first()}}" />
                                             <input type="hidden" name="form_id" value="{{$answers->pluck(['form_id'])->first()}}" />
-                                            <div class="row">
+                                            <div class="row mb-6">
                                                 <div class="col-md-12">
                                                     @foreach($answers as $answer)
                                                         @php
@@ -85,7 +85,7 @@
                                                     <dl class="row">
                                                         <dt class="col-sm-3 text-bold-600">{{$answer->question}}
                                                             <small onclick="showcom({{$answer->field_id}})" class="float-right">{{__('admin.Add comment')}}</small><br>
-                                                            <button onclick="showcom({{$answer->field_id}})" type="button" title="{{__('admin.Add comment')}}" class="btn btn-sm btn-success float-right"><i class="bx bx-comment"></i> </button>
+                                                            <button onclick="showcom({{$answer->field_id}})" type="button" title="{{__('admin.Add comment')}}" class="btn btn-sm btn-label-success float-right"><i class="ti ti-message"></i> </button>
                                                         </dt>
                                                         <dd class="col-sm-7">
                                                         @if(substr($answer->answer,0,4)=='http')
@@ -104,7 +104,7 @@
                                                     @endforeach
                                                 </div>
                                             </div>
-                                            <div class="row">
+                                            <div class="row mb-6">
                                                 <div class="col-12 d-flex justify-content-end">
                                                     <button type="submit"
                                                             class="btn btn-primary mr-1 mb-1">{{__('admin.submit')}}</button>

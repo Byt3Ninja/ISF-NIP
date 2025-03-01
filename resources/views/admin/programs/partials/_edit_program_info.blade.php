@@ -7,13 +7,19 @@
       style="width: 100px; height: 90px; object-fit: contain; border-radius: 15px;"
     >
   </div>
+  @php
+    $user = auth()->user();
+    $isOrgMan = $user->hasRole('organizationManager');
+    $org_id = $user->organization_id ?? 0;
+  @endphp
   <div class="col-12">
-    <div class="mb-3">
+    <div class="mb-3 {{ $isOrgMan ? 'd-none' : '' }}">
       <label for="organization" class="form-label fs-6 fw-semibold">
         {{ __('cycles.Select_Organization') }}
       </label>
       <select class="form-select" id="organization" name="organization_id2" data-placeholder="{{ __('cycles.Select_Organization') }}">
         @foreach (\App\Organization::all() as $org)
+            @php if( $isOrgMan && $org->id != $org_id ) { continue; } @endphp
             <option value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
         @endforeach
     </select>
@@ -34,7 +40,11 @@
         oninput="this.value = this.value.trimStart()"
       >
     </div>
-    <div class="row">
+    <div class="col-12 mb-4">
+      <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('cycles.Valid_from_to') }}:</label>
+      <input type="text" id="date-range-picker" class="form-control" />
+    </div>
+    {{-- <div class="row">
       <div class="col-12 col-md-6">
         <div class="mb-3">
           <label for="valid-from" class="form-label fs-6 fw-semibold">
@@ -73,7 +83,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> --}}
     <div class="mb-3">
       <label for="description" class="form-label fs-6 fw-semibold">
         {{ __('cycles.Description') }}
@@ -113,3 +123,17 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('loaded');
+    var bsRangePickers = document.querySelectorAll('#date-range-picker');
+    bsRangePickers.forEach((picker) => {
+      console.log('bsRangePicker', picker);
+      $(picker).daterangepicker({
+        opens: isRtl ? 'left' : 'right',
+        drops: 'up'
+      });
+    });
+  });
+</script>

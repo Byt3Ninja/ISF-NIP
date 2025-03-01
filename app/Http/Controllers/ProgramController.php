@@ -33,6 +33,7 @@ class ProgramController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
         $search = $request->input('search'); // التحقق من وجود البحث في الطلب
 
         if (Auth()->user()->hasRole('Admin')) {
@@ -40,7 +41,13 @@ class ProgramController extends Controller
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             })->get();
-        } else {
+        }
+        else if (Auth()->user()->hasRole('organizationManager')) {
+            $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+            })->get();
+        }
+        else {
             // إذا كان المستخدم ليس Admin
             $Organization = Organization::where('user_id', auth()->user()->id)->first();
 
@@ -77,7 +84,13 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        $cycle = Cycle::where('id', $id)->first();
+        $user = Auth()->user();
+        $cycle = Cycle::where('id', $id);
+        if( $user->hasRole('organizationManager') )
+        {
+            $cycle = $cycle->where('organization_id', $user->organization_id);
+        }
+        $cycle = $cycle->first();
         if(empty($cycle)) return redirect()->route('programlist.index')->with(['message2' => 'program_not_found', 'class' => 'danger']);
         $steps = Step::where('cycle_id', $cycle->id)->orderBy('arr', 'ASC')->get();
 
@@ -86,6 +99,7 @@ class ProgramController extends Controller
 
         $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
 
+        
         $stepsData = [];
         foreach ($steps as $step) {
             $stepsData[] = [

@@ -271,15 +271,17 @@
       <div class="col-md-6 col-12 mb-6">
         <div class="form-group">
           <label class="form-label fs-6 fw-bold"
-          for="email">{{ __('admin.E-mail') }}</label>          <div class="input-group input-group-merge">
+          for="email">{{ __('admin.E-mail') }}</label>         
+           <div class="input-group input-group-merge">
             <input class="form-control" id="email" name="email"
               type="email"
               value="{{ $client->company ? $client->company->email : old('email') }}"
               style="direction: ltr;" placeholder="{{ __('admin.E-mail') }} *"
               autocomplete="email"
               oninput="this.value = this.value.trimStart()"
-              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
-            />
+              {{-- pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i" --}}
+              title="{{ $l == 'en' ? 'Please enter a valid email.' : 'يرجى إدخال بريد إلكتروني صالح.' }}"
+              />
             <span class="input-group-text text-light"><i class="ti ti-mail"></i></span>
           </div>
           <div class="invalid-feedback">{{ $l == 'en' ? 'Please enter a valid email.' : 'يرجى إدخال بريد إلكتروني صالح.' }}.</div>
@@ -407,11 +409,17 @@
 
     emailInput.addEventListener('input', () => {
      const parent = emailInput.closest('.input-group');
-      if (emailInput.checkValidity()) {
-        parent.classList.remove('is-invalid');
-      } else {
-        parent.classList.add('is-invalid');
-      }
+     // Check if email match this regexp /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i
+    if (emailInput.value === '' || (emailInput.value.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i) && !emailInput.value.endsWith('.invalidTLD'))) {
+      parent.classList.remove('is-invalid');
+     } else {
+      parent.classList.add('is-invalid');
+    }
+      // if (emailInput.checkValidity()) {
+      //   parent.classList.remove('is-invalid');
+      // } else {
+      //   parent.classList.add('is-invalid');
+      // }
     });
 
     inputs.forEach(input => {
@@ -428,16 +436,14 @@
     form.addEventListener('submit', (e) => {
       let isValid = true;
 
-      emailInput.addEventListener('input', () => {
-        const parent = emailInput.closest('.input-group');
-        if (emailInput.checkValidity()) {
-          isValid = true;
-          parent.classList.remove('is-invalid');
-        } else {
-          isValid = false;
-          parent.classList.add('is-invalid');
-        }
-      });
+      const parent = emailInput.closest('.input-group');
+      // Check if email match this regexp /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i
+      if (emailInput.value === '' || (emailInput.value.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i) && !emailInput.value.endsWith('.invalidTLD'))) {
+        parent.classList.remove('is-invalid');
+      } else {
+        parent.classList.add('is-invalid');
+        isValid = false;
+      }
 
       inputs.forEach(input => {
         const parent = input.closest('.input-group');
@@ -447,6 +453,12 @@
           isValid = false;
         }
       });
+
+      // Disable form submission if phoneError or whatsappError is displayed
+      if (phoneError.style.display === 'block' || whatsappError.style.display === 'block') {
+        isValid = false;
+      }
+
       if (!isValid) {
         e.preventDefault();
       }

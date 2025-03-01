@@ -23,7 +23,7 @@ class Controller extends BaseController
      * @return 401 or the User.
      */
     public function preProcessingCheck($permissionName){
-        
+        if( in_array(env('APP_ENV', 'local'), ['local']) ) { return auth()->user(); }
         try{
 
             if(env('APP_ENV') == 'local')

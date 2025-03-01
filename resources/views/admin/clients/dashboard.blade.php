@@ -4,6 +4,8 @@
 @section('subTitle', __('admin.My Dashboard'))
 
 @section('style')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/widgets.css">
 	<link rel="stylesheet" type="text/css" href="/app-assets/css{{$l=='ar'?'-rtl':''}}/pages/dashboard-ecommerce.css">
 	<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
@@ -19,15 +21,10 @@
     <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 @stop
 
-@section('content')
-  @if (!Auth::user()->first_name_ar)
-  <div class="d-none">
-    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
-  </div>
-  @endif
-  @php $setting = \App\Settings::where('id', 1)->first(); @endphp
   @php
-    $user_id = Auth::id();
+    $user = Auth::user();
+    $setting = \App\Settings::where('id', 1)->first();
+    $user_id = $user->id;
     $s_latest = \App\Service::orderBy('created_at', 'DESC')->take(5)->get();
     $e_latest = \App\Calendar::where('start', '>=', now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
             $q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
@@ -35,16 +32,16 @@
         ->orderBy('start')
         ->take(5)
         ->get();
-    $circle_id = Auth::user()->company->cycle ?? 0;
-    $organization_id = Auth::user()->organization_id ?? 0;
-    if( $organization_id == 0 ) { $organization_id = Auth::user()->company->cycledata->organization_id ?? 0; }
+    $circle_id = $user->company->cycle ?? 0;
+    $organization_id = $user->organization_id ?? 0;
+    if( $organization_id == 0 ) { $organization_id = $user->company->cycledata->organization_id ?? 0; }
     $s_count = \App\Service::count();
     $s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
     $nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
     $mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
     $m_count = count($mentors);
     $surveyEligible = [];
-    if( Auth::user()->company && $circle_id != 0 )
+    if( $user->company && $circle_id != 0 )
     {
       $steps = \App\Step::where('cycle_id', $circle_id)->orderBy('arr')->get();
       foreach( $steps as $step )
@@ -156,10 +153,10 @@
     }
     $surveyEligible = collect($surveyEligible)->groupBy('triggered_on')->toArray();
     /// My sessions
-    if (!empty(Auth::user()->company)) {
-        $sessions = \App\TrainingSession::where('step_id', Auth::user()->company->step)
+    if (!empty($user->company)) {
+        $sessions = \App\TrainingSession::where('step_id', $user->company->step)
             ->orderBy('datetime', 'ASC')
-            ->take(3)
+            ->take(5)
             ->get();
     } else {
         $sessions = [];
@@ -196,120 +193,125 @@
         ],
     ];
 
-	$s_latest = \App\Service::orderBy('created_at','DESC')->take(5)->get();
-	$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
-    $q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
-	})->orderBy('start')->take(5)->get();
-	$s_count = \App\Service::count();
-	$s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
-	$nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
-	$mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
-	$m_count = count($mentors);
-	/// Next session
-	// $nextsession = \App\MentorshipRequest::where('user_id', $user_id)->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
-	$days = request()->query('days', 14);
+		$s_latest = \App\Service::orderBy('created_at','DESC')->take(5)->get();
+		$e_latest = \App\Calendar::where('start','>=',now()->format('Y-m-d'))->where(function ($q) use ($user_id) {
+    	$q->orWhere('user_id', $user_id)->orWhereNull('isPrivate');
+		})->orderBy('start')->take(5)->get();
+		$s_count = \App\Service::count();
+		$s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
+		$nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
+		$mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
+		$m_count = count($mentors);
+		/// Next session
+		// $nextsession = \App\MentorshipRequest::where('user_id', $user_id)->where('approved','Yes')->where('zoom_date','>=',date("Y-m-d 00:00:00"))->orderBy('zoom_date','ASC')->first();
+		$days = request()->query('days', 14);
 	
-	$nextSessions = \App\MentorshipRequest::where('user_id', $user_id)
-    ->where(function ($query) {
-        $query->where('approved', 'Yes')
-              ->orWhereNull('approved');
-    })
-    ->whereBetween('zoom_date', [
-        Carbon\Carbon::now()->startOfDay(), // بداية اليوم الحالي
-        Carbon\Carbon::now()->addDays($days)->endOfDay() // نهاية اليوم الـ 14 القادم
-    ])
-    ->orderBy('zoom_date', 'ASC')
-    ->get();
-	
-	
-	
-  if( Auth::user()->hasRole('Registered') )
-  {
-    /// Rating
-    $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
-    $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
-    $available_surveys = collect([]);
-    // load survey for startup
-    if( Auth::user()->company && $circle_id != 0 )
-    {
-      $surveysToAdd = [];
-      $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['startup', 'both'])->with(['myResponses'])->get();
-      
-      foreach( $surveys as $survey_scope )
-      {
-        
-        $my_responses = $survey_scope->myResponses;
-        if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
-        {
-          $due = $survey_scope->trigger_by_due;
-          $session = $survey_scope->trigger_by_session;
-          $mentorship = collect($surveyEligible['mentorship']);
-          $triggers = [];
-          if( $due == true ) { $triggers[] = 'due';  }
-          if( $session == true ) { $triggers[] = 'session'; }
-          $triggers = array_unique( $triggers );
-          if( count( $triggers ) == 0 ) { $mentorship = $mentorship->where('triggered_at', null); }
-          else { $mentorship = $mentorship->whereIn('triggered_by', $triggers); }
-          $mentorship = $mentorship->values();
-          foreach( $mentorship as $conditions )
-          {
-            $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-            if( empty( $checkResponse ) )
-            {
-              $surveysToAdd[] = [
-                'user_id' => $user_id,
-                'survey_id' => $survey_scope->survey_id, 
-                'cycle_id' => $circle_id,
-                'scope_id' => $survey_scope->id,
-                'triggered_on' => $conditions['triggered_on'],
-                'triggered_at' => $conditions['triggered_at'],
-                'triggered_by' => $conditions['triggered_by'],
-                'responses' => Null
-              ];
-            }
-          }
-        }
-        elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
-        {
-          $due = $survey_scope->trigger_by_due;
-          $quiz = $survey_scope->trigger_by_quiz;
-          $session = $survey_scope->trigger_by_session;
-          $training = collect($surveyEligible['training']);
-          if( $due == true ) { $triggers[] = 'due';  }
-          if( $quiz == true ) { $triggers[] = 'quiz'; }
-          if( $session == true ) { $triggers[] = 'session'; }
-          $triggers = array_unique( $triggers );
-          if( count( $triggers ) == 0 ) { $training = $training->where('triggered_at', null); }
-          else { $training = $training->whereIn('triggered_by', $triggers); }
-          $training = $training->values();
-          foreach( $training as $conditions )
-          {
-            $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-            if( empty( $checkResponse ) )
-            {
-              $surveysToAdd[] = [
-                'user_id' => $user_id,
-                'survey_id' => $survey_scope->survey_id, 
-                'cycle_id' => $circle_id,
-                'scope_id' => $survey_scope->id,
-                'triggered_on' => $conditions['triggered_on'],
-                'triggered_at' => $conditions['triggered_at'],
-                'triggered_by' => $conditions['triggered_by'],
-                'responses' => Null
-              ];
-            }
-          }
-        }
-      }
-      if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
-      $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
-    }
-  }
+		$nextSessions = \App\MentorshipRequest::where('user_id', $user_id)
+    	->where(function ($query) {
+        	$query->where('approved', 'Yes')
+              	->orWhereNull('approved');
+    	})
+    	->whereBetween('zoom_date', [
+        	Carbon\Carbon::now()->startOfDay(), // بداية اليوم الحالي
+        	Carbon\Carbon::now()->addDays($days)->endOfDay() // نهاية اليوم الـ 14 القادم
+    	])
+    	->orderBy('zoom_date', 'ASC')
+    	->get();
 
-	/// My sessions
-	if( !empty( Auth::user()->company ) ) { $sessions = \App\TrainingSession::where("step_id", Auth::user()->company->step)->orderBy('datetime','ASC')->take(1)->get(); }
-	else { $sessions = []; }
+    if( $user->hasRole('Registered') )
+    {
+      /// Rating
+      $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
+      $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
+      $available_surveys = collect([]);
+      // load survey for startup
+      if( $user->company && $circle_id != 0 )
+      {
+        $surveysToAdd = [];
+        $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['startup', 'both'])->with(['myResponses'])->get();
+        
+        foreach( $surveys as $survey_scope )
+        {
+          
+          $my_responses = $survey_scope->myResponses;
+          if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
+          {
+            $due = $survey_scope->trigger_by_due;
+            $session = $survey_scope->trigger_by_session;
+            $mentorship = collect($surveyEligible['mentorship']);
+            $triggers = [];
+            if( $due == true ) { $triggers[] = 'due';  }
+            if( $session == true ) { $triggers[] = 'session'; }
+            $triggers = array_unique( $triggers );
+            if( count( $triggers ) == 0 ) { $mentorship = $mentorship->where('triggered_at', null); }
+            else { $mentorship = $mentorship->whereIn('triggered_by', $triggers); }
+            $mentorship = $mentorship->values();
+            foreach( $mentorship as $conditions )
+            {
+              $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+              if( empty( $checkResponse ) )
+              {
+                $surveysToAdd[] = [
+                  'user_id' => $user_id,
+                  'survey_id' => $survey_scope->survey_id, 
+                  'cycle_id' => $circle_id,
+                  'scope_id' => $survey_scope->id,
+                  'triggered_on' => $conditions['triggered_on'],
+                  'triggered_at' => $conditions['triggered_at'],
+                  'triggered_by' => $conditions['triggered_by'],
+                  'responses' => Null
+                ];
+              }
+            }
+          }
+          elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
+          {
+            $due = $survey_scope->trigger_by_due;
+            $quiz = $survey_scope->trigger_by_quiz;
+            $session = $survey_scope->trigger_by_session;
+            $training = collect($surveyEligible['training']);
+            if( $due == true ) { $triggers[] = 'due';  }
+            if( $quiz == true ) { $triggers[] = 'quiz'; }
+            if( $session == true ) { $triggers[] = 'session'; }
+            $triggers = array_unique( $triggers );
+            if( count( $triggers ) == 0 ) { $training = $training->where('triggered_at', null); }
+            else { $training = $training->whereIn('triggered_by', $triggers); }
+            $training = $training->values();
+            foreach( $training as $conditions )
+            {
+              $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+              if( empty( $checkResponse ) )
+              {
+                $surveysToAdd[] = [
+                  'user_id' => $user_id,
+                  'survey_id' => $survey_scope->survey_id, 
+                  'cycle_id' => $circle_id,
+                  'scope_id' => $survey_scope->id,
+                  'triggered_on' => $conditions['triggered_on'],
+                  'triggered_at' => $conditions['triggered_at'],
+                  'triggered_by' => $conditions['triggered_by'],
+                  'responses' => Null
+                ];
+              }
+            }
+          }
+        }
+        if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
+        $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
+      }
+    }
+
+    /// My sessions
+    if( !empty( $user->company ) ) { $sessions = \App\TrainingSession::where("step_id", $user->company->step)->orderBy('datetime','ASC')->take(1)->get(); }
+    else { $sessions = []; }
   @endphp
+
+@section('content')
+  @if (!$user->first_name_ar)
+  <div class="d-none">
+    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+  </div>
+  @endif
 
   <!-- Content wrapper -->
   <div class="content-wrapper">
@@ -609,7 +611,7 @@
       <!-- Survey -->
 
       @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
-    @if( Auth::user()->hasRole('Registered') )
+    @if( $user->hasRole('Registered') )
     <div class="col-12" style="height: 500px; overflow-y: auto;">
       <div class="card">
         <div class="card-header border-bottom py-3">
@@ -641,6 +643,8 @@
                     if( $survey->triggered_by == 'due' ) { $middleware = $survey->training_step; }
                     if( $survey->triggered_by == 'quiz' ) { $middleware = $survey->training_quiz; }
                   }
+                  if( is_null( $middleware ) || empty( $middleware ) ) { continue; }
+                  elseif( !$middleware->count() ) { continue; }
                 @endphp
                 @if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on) ) }} @endif
                 @if( $survey->triggered_on == 'mentorship' )
@@ -675,7 +679,7 @@
       </div>
     </div>
     @endif
-    @if( Auth::user()->hasRole('Mentor') )
+    @if( $user->hasRole('Mentor') )
     <div class="col-12" style="max-height: 500px; overflow-y: auto;">
       <div class="card">
         <div class="card-header border-bottom py-3">
@@ -744,22 +748,39 @@
     @endif
       <!-- Survey -->
 
+      
+        @php
+          $svgs = ['notebook','search','idea','comments','trophy'];
+          $colors = ['#39da8a','#99a2ac','#fdac41'];
+          $s = 1;
+          $stat = "Completed";
+          $ctype = 0;
+          if( !empty( $user->company ) )
+          {
+            $ctype = $user->company->stepdata->stype ?? '0';
+          }
+          $color= $colors[0];
 
+        @endphp
+        
+    
+      
+      
       <!-- My Progress -->
-      @if( Auth::user()->company && $circle_id != 0 )
+      @if( $user->company && $circle_id != 0 )
         <div class="card mt-10">
           <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">
               <i class="ti ti-briefcase ti-24px"></i>
               <span class="mx-2">{{ __('dashboard.My progress') }} :
-                {{ Auth::user()->company->cycledata->title }}</span>
+                {{ $user->company->cycledata->title }}</span>
             </h5>
             <span
-              class="text-capitalize">{{ __('dashboard.start from') . ': ' . Auth::user()->company->cycledata->start_format . ' ' . __('dashboard.to') . ': ' . Auth::user()->company->cycledata->end_format }}</span>
+              class="text-capitalize">{{ __('dashboard.start from') . ': ' . $user->company->cycledata->start_format . ' ' . __('dashboard.to') . ': ' . $user->company->cycledata->end_format }}</span>
             <div class="d-flex align-items-center mt-3">
-              @if (!is_null(Auth::user()->company->cycledata->organization))
+              @if (!is_null($user->company->cycledata->organization))
               @php
-              $imageUrl = Auth::user()->company->cycledata->organization->image_url;
+              $imageUrl = $user->company->cycledata->organization->image_url;
           
                // استخراج المسار من الرابط
                $imagePath = parse_url($imageUrl, PHP_URL_PATH);
@@ -773,7 +794,7 @@
                 <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
             @endif
 
-              <span class="mx-3 text-secondary">{{ Auth::user()->company->cycledata->organization->name }}</span>
+              <span class="mx-3 text-secondary">{{ $user->company->cycledata->organization->name }}</span>
             </div>
           </div>
           <div class="table-responsive text-nowrap">
@@ -793,18 +814,18 @@
                     $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
                     $color = 'label-light';
                     $textColor = 'light';
-                    if (Auth::user()->company->stepdata->arr > $step->arr) {
+                    if ($user->company->stepdata->arr > $step->arr) {
                         $status = $l == 'ar' ? 'انتهت' : 'Completed';
                         $color = 'label-success';
                         $textColor = 'success';
-                    } elseif (Auth::user()->company->stepdata->arr == $step->arr) {
+                    } elseif ($user->company->stepdata->arr == $step->arr) {
                         $status = $l == 'ar' ? 'بدأت' : 'Started';
                         $color = 'label-primary';
                         $textColor = 'primary';
                     }
 
                     $trtype = $flink = null;
-                    if (Auth::user()->company->approved) {
+                    if ($user->company->approved) {
                         $flink = 'my/' . $step->id;
                     } else {
                         $flink = 'view/' . $circle_id;
@@ -821,27 +842,32 @@
                   <tr>
                     <td>
                       @if($step->stype == 1)
-                      @if (Auth::user()->company->approved)
+                      @if($status != 'Completed' OR $status != 'انتهت')
+                      @if ($user->company->approved)
                         <a href="/dashboard/cycles/{{ $flink }}">
                         @else
                           <a href="/dashboard/cycles/{{ $flink }}">
+                      @endif
                       @endif
                       {{ $step->title }}
                       </a>
                       @else
                       {{ $step->title }}
                       @endif
+                      
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span>
                     </td>
-                    <td>{{ Carbon\Carbon::parse($step->from)->format('m-d') }}</td>
-                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m') }}</td>
+                    <td>{{ Carbon\Carbon::parse($step->from)->format('Y-m-d') }}</td>
+                    <td>{{ Carbon\Carbon::parse($step->to)->format('Y-m-d') }}</td>
                     <td style="height: 50px;">
                       <span style="width: 350px; height: 100%; display: inline-block; white-space: normal;">
                         {{ $step->description ? $step->description : '...' }}
                       </span>
                     </td>
                   </tr>
+
+                  
                 @endforeach
               </tbody>
             </table>
@@ -859,7 +885,9 @@
                   </h4>
 								</div>
 								<div class="card-body">
-									@php( $workingcycles = App\Cycle::whereNull('private')->whereRaw('? between start and end', [now()->format('Y-m-d')])->get() )
+									@php
+                  $workingcycles = App\Cycle::whereNull('private')->whereRaw('? between start and end', [now()->format('Y-m-d')])->get();
+                  @endphp
 									@if (count($workingcycles)>0)
 										@foreach($workingcycles as $cycle)
                     
@@ -869,7 +897,9 @@
 													<div class="d-flex align-items-center mt-2">
 														<div class="media-left">
                               @if (!is_null($cycle->organization->image_url))
-                    @php( $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME) )
+                    @php
+                    $fileN = pathinfo($cycle->organization->image_url, PATHINFO_BASENAME);
+                    @endphp
     
     
 															<img src="{{ $cycle->organization->image_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
@@ -886,7 +916,7 @@
 													</p>
                           <div class="d-flex align-items-center justify-content-between" style="width:100%">
                             <small class="text-muted" style="text-transform: capitalize">
-                              {{__('dashboard.start from')}} {{$cycle->start->format('d-m-Y')}}
+                              {{__('dashboard.start from')}} {{$cycle->start->format('Y-m-d')}}
                             </small>
                             <a href="/dashboard/cycles/view/{{$cycle->id}}" class="btn btn-primary">
                               <span class="mx-2">{{__('dashboard.Join')}}</span>
@@ -914,7 +944,96 @@
 				</section>
       @endif
       <!-- / My Progress -->
+     
+     
+    @if( $ctype == 5 )
+      @php
+      $myfinal = \App\Finalscreening::where('company_id', $user->company->id )->where('step_id', $user->company->step )->first();
+      @endphp
+      @if( !is_null($myfinal)&&$myfinal->join_url )
 
+        <section class="mt-10">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header border-bottom">
+                  <h4 class="card-title align-items-center">
+                    <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Final_Session") }}
+                  </h4>
+                </div>
+    
+                  <div class="">
+                    <div class="">
+                      <div class="table-responsive">
+                        <table class="table mb-0 sessonsTable" >
+                          <thead class="bg-label-light">
+                            <tr>
+                            <th>{{__('cycles.User/Title')}}</th>
+                            <th>{{__('admin.Judger')}}</th>
+                            <th>{{__('cycles.Date/Time')}}</th>
+                            <th>{{__('cycles.Done')}}</th>
+                            <th>{{__('cycles.Actions')}}</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <div class="d-flex align-items-center">
+                                  <a class="media-left" href="/dashboard/users/{{$myfinal->company->user->id}}/edit">
+                                    <img src="{{$myfinal->company->user->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
+                                  </a>
+                                  <a href="/dashboard/users/{{$myfinal->company->user->id}}/edit">
+                                    <div class="media-body">
+                                      <h6 class="media-heading mb-0 text-nowrap">{{$myfinal->company->user->{'first_name_'.$l} }} {{$myfinal->company->user->{'last_name_'.$l} }}</h6>
+                                      <span class="font-small-2 text-nowrap">{{$myfinal->company->user->{'title_'.$l} }}</span>
+                                    </div>
+                                  </a>
+                                </div>
+                              </td>
+                              <td>
+                                @foreach ($myfinal->judges as $judgeid )
+                                @php
+                                $judge = \App\User::find($judgeid);
+                                $name=optional($judge)->{'first_name_'.$l}.' '.optional($judge)->{'last_name_'.$l};
+                                @endphp
+                               @if(!empty($judge))
+                                <div style="cursor: pointer;" class="d-flex align-items-center">
+                                  <div class="chip-body">
+                                    <div class="avatar">
+                                      <img class="img-fluid rounded-circle me-3" src="{{asset(optional($judge)->image_url) }}" alt="photo" height="20" width="20">
+                                    </div>
+                                    <span class="chip-text text-nowrap">
+                                      {{$name}}
+                                    </span>
+                                  </div>
+                                </div>
+                                @endif
+                                @endforeach
+                              </td>
+                              <td>
+                                {{$myfinal->datetime}}
+                                <br>({{$myfinal->duration}}M)
+                              </td>
+                              <td>
+                                {{$myfinal->datetime < now() ?__('Yes'):__('No')}}
+                              </td>
+                              <td>
+                                <a href="{{$myfinal->join_url}}" target="_blank">({{__('dashboard.Join now')}})</a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      @else
+        <hr><h6>{{__('dashboard.Your final session will start soon')}}.</h6>
+      @endif
+    @endif
       <!-- My last training -->
       @if (count($sessions) > 0)
         <div class="card mt-10">
@@ -974,7 +1093,7 @@
       <!-- / My last training -->
 
       <!-- My Mentors -->
-      @if (Auth::user()->company->approved ?? null && count($mentors))
+      @if ($user->company->approved ?? null && count($mentors))
         <div class="card mt-10">
           {{-- <div class="card-header border-bottom">
             <h5 style="text-transform: capitalize">
@@ -993,6 +1112,8 @@
               </span>
             </h5>
           </div> --}}
+
+          
 
           <section>
 			<div class="row">
@@ -1025,7 +1146,7 @@
 												{{-- <th>{{__('cycles.Company')}}</th> --}}
 												<th>{{__('cycles.User/Title')}}</th>
 												<th>{{__('cycles.Mentor')}}</th>
-                      @if (Auth::user()->hasRole('Admin'))
+                      @if ($user->hasRole('Admin'))
 												<th>{{__('cycles.Rate/Comment')}}</th>
                       @endif
 												<th>{{__('cycles.Date/Time')}}</th>
@@ -1074,7 +1195,7 @@
 															</div>
 														</div>
 													</td>
-                          @if (Auth::user()->hasRole('Admin'))
+                          @if ($user->hasRole('Admin'))
 													<td>
 														<small>{!!  $session->rate_comment?
 															 str_repeat('<i class="bx bxs-star" style="color: #fc960f;"></i>',$session->rating).
@@ -1105,7 +1226,7 @@
 								</div>
 							</div>
 							
-
+             
 
 						
 					</div>
@@ -1191,69 +1312,92 @@
     </div>
   </div>
 
-  <!--  Edit SP Modal -->
-  <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                <div class="text-center mb-6">
-                    <h4 class="mb-2">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
-                </div>
-                <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
-  
-                  <div class="modal-body">
-                    @csrf
-                    <input type="hidden" name="mentorid" value="0" id="mentorid">
-                    <input type="hidden" name="organization_id" id="addOrganizationID">
-                    <input type="hidden" name="cycle_id" id="addCycleID">
-                    <div>
-                      <h5 class="text-primary"><i class="bx bx-time text-secondary"></i> {{__('dashboard.Mentor schedule')}}</h5>
-                      <span class="d-block bg-info p-1 white"> <ul class="mb-0" id="schedule"></ul> </span>
-                    </div>
-                    <hr>
-                    
-                    <div class="form-group" id="showdates">
-                      <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
-                      <input class=" width-250 form-control" id="flatpickr-datetimeLimit" type="text"  name="date" required >
-                    </div>
-                    <div class="form-group">
-                      <label>{{__('dashboard.Meeting duration')}}:</label>
-                      <select name="period" class="select form-control width-150">
-                        <option value="30">30 {{__('dashboard.Minutes')}}</option>
-                        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
-                        <option value="120">2 {{__('dashboard.Hours')}}</option>
-                        <option value="180">3 {{__('dashboard.Hours')}}</option>
-                        <option value="240">4 {{__('dashboard.Hours')}}</option>
-                        <option value="300">5 {{__('dashboard.Hours')}}</option>
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label for="basicInputFile">{{__('dashboard.Send file with your request')}}</label>
-                      <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
-                        <label class="custom-file-label" for="inputGroupFile01">{{__('dashboard.Choose file')}}</label>
-                      </div>
-                    </div>
-                    <label>{{__('dashboard.Add note')}}:</label>
-                    <div class="form-group">
-                      <textarea class="form-control" id="notes" name='notes' rows="4" placeholder="{{__('dashboard.Write your note here')}}" ></textarea>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary ml-1" >
-                      
-                      <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
-                    </button>
-                  </div>
-                </form>
-
-
-
-            </div>
-        </div>
+<!--  Edit SP Modal -->
+<div class="modal fade" id="SendRequest" tabindex="-1" aria-labelledby="sendrequest" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+    <div class="modal-header mb-0">
+      <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="text-primary" id="rname"></span></h4>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
-</div>
+    <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
+      @csrf
+      <div class="modal-body">
+      <input type="hidden" name="mentorid" value="0" id="mentorid">
+      <input type="hidden" name="organization_id" id="addOrganizationID">
+      <input type="hidden" name="cycle_id" id="addCycleID">
+      <div class="mb-6">
+        <h5 class="text-secondary">{{__('dashboard.Mentor schedule')}}</h5>
+        <div class="bg-label-secondary p-2 rounded">
+        <ul class="mb-0" id="schedule"></ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group mb-4">
+            <label for="date" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Start meeting Date/ Time')}}:</label>
+            <div class="input-group input-group-merge">
+              <input type="text" class="form-control" id="flatpickr-datetimeLimit" placeholder="{{__('dashboard.Start meeting Date/ Time')}}" name="date" required>
+              <div class="input-group-text">
+                <i class="ti ti-calendar text-secondary"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group mb-4">
+            <label for="from" class="form-label fw-semibold fs-6 mb-1">
+              {{__('dashboard.From')}}:
+            </label>
+            <select class="select2 form-select" id="timeFrom" name="timeFrom">
+              {{-- @for ($i = 0; $i < 12; $i++)
+              <option value="{{ $i == 0 ? 12 : $i }}:00 AM">{{ $i == 0 ? 12 : $i }}:00 AM</option>
+              <option value="{{ $i == 0 ? 12 : $i }}:30 AM">{{ $i == 0 ? 12 : $i }}:30 AM</option>
+              @endfor --}}
+            </select>
+          </div>   
+        </div>
+        <div class="col-6">
+          <div class="form-group mb-4">
+            <label for="to" class="form-label fw-semibold fs-6 mb-1">
+              {{__('dashboard.To')}}:
+            </label>
+            <select class="select2 form-select" id="timeTo" name="timeTo">
+              {{-- @for ($i = 0; $i < 12; $i++)
+              <option value="{{ $i == 0 ? 12 : $i }}:00 AM">{{ $i == 0 ? 12 : $i }}:00 AM</option>
+              <option value="{{ $i == 0 ? 12 : $i }}:30 AM">{{ $i == 0 ? 12 : $i }}:30 AM</option>
+              @endfor --}}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="period" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Meeting duration')}}:</label>
+        <select name="period" class="form-select" id="period">
+        <option value="30">30 {{__('dashboard.Minutes')}}</option>
+        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
+        <option value="120">2 {{__('dashboard.Hours')}}</option>
+        <option value="180">3 {{__('dashboard.Hours')}}</option>
+        <option value="240">4 {{__('dashboard.Hours')}}</option>
+        <option value="300">5 {{__('dashboard.Hours')}}</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="inputGroupFile01" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Send file with your request')}}</label>
+        <input type="file" class="form-control" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
+      </div>
+      <div class="mb-3">
+        <label for="notes" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Add note')}}:</label>
+        <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="{{__('dashboard.Write your note here')}}"></textarea>
+      </div>
+      </div>
+      <div class="modal-footer">
+      <button type="submit" class="btn btn-primary">{{__('dashboard.Submit')}}</button>
+      </div>
+    </form>
+    </div>
+  </div>
+  </div>
 <!--/ Edit SP Modal -->
   <!-- / Content wrapper -->
   {{-- <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
@@ -1315,9 +1459,11 @@
 @stop
 
 @section('scripts')
-<script src="{{ mix('js/app.js') }}"></script>
+{{-- <script src="{{ mix('js/app.js') }}"></script> --}}
   <!-- Vendors JS -->
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
@@ -1337,7 +1483,11 @@
 
   <!-- Page JS -->
   <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
-  <script src="/vuexy/assets/js/forms-pickers.js"></script>
+  {{-- <script src="/vuexy/assets/js/forms-pickers.js"></script> --}}
+
+  <script>
+
+  </script>
  
 @stop
 
@@ -1467,21 +1617,96 @@ window.location.href = url;
 			success: function (response) {
 				$('#SendRequest li').remove();
 				$('#name').html(name);
-				if (response.length>0) {
-					$.each(response, function(i, item) {
-						let note = '';
-						let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
-						if (item.notes) {note = item.notes;}
-						switch (item.type)
-						{
-							case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
-							case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
-							case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
-							case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
-							default:
-						}
-					});
-				} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
+        if (response && response.length>0) {
+      var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
+      var timeFromSelect = $('#timeFrom');
+      var timeToSelect = $('#timeTo');
+      
+      // Populate timeFromSelect and timeToSelect with 30-minute intervals
+      var startTime = moment(response[0].tfrom, 'HH:mm:ss');
+      var endTime = moment(response[0].tto, 'HH:mm:ss');
+
+      for (var i = 0; i < 48; i++) {
+        var time = moment().startOf('day').add(i * 30, 'minutes');
+        var timeFormatted = time.format('hh:mm A');
+        var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
+        timeFromSelect.append(option.clone());
+        timeToSelect.append(option.clone());
+        // var time = moment().startOf('day').add(i * 30, 'minutes');
+        // var timeFormatted = time.format('hh:mm A');
+        // var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
+
+        // if (time.isBetween(startTime, endTime, null, '[]')) {
+        //   timeFromSelect.append(option.clone());
+        //   timeToSelect.append(option.clone());
+        // } else {
+        //   option.prop('disabled', true);
+        //   timeFromSelect.append(option.clone());
+        //   timeToSelect.append(option.clone());
+        // }
+      }
+
+      // Date
+      console.log('response', response)
+      if (flatpickrDateTimeLimit) {
+        var enabledDays = response.reduce((acc, item) => {
+          return acc.concat(item.days);
+        }, []);
+      
+        console.log('enabledDays', enabledDays)
+      
+        flatpickrDateTimeLimit.flatpickr({
+          // enableTime: true,
+          dateFormat: 'Y-m-d',
+          minDate: 'today',
+          enable: [
+        function(date) {
+          return enabledDays.includes(date.toLocaleString('en-US', { weekday: 'short' }));
+        }
+          ]
+        });
+      }
+          $.each(response, function(i, item) {
+            let note = '';
+            let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
+            if (item.notes) {note = item.notes;}
+            switch (item.type)
+            {
+              case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
+              case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
+              case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
+              case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
+              default:
+            }
+          });
+        } else { 
+          
+          $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); 
+          var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
+      var timeFromSelect = $('#timeFrom');
+      var timeToSelect = $('#timeTo');
+      
+      // Populate timeFromSelect and timeToSelect with 30-minute intervals
+      for (var i = 0; i < 48; i++) {
+        var time = moment().startOf('day').add(i * 30, 'minutes');
+        var timeFormatted = time.format('hh:mm A');
+        var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
+        timeFromSelect.append(option.clone());
+        timeToSelect.append(option.clone());
+      }
+
+      // Date
+      if (flatpickrDateTimeLimit) {
+  
+      
+      
+        flatpickrDateTimeLimit.flatpickr({
+          // enableTime: true,
+          dateFormat: 'Y-m-d',
+          minDate: 'today',
+        });
+      }
+        }
 				$('#addOrganizationID').val(organization_id);
 				$('#addCycleID').val(cycle_id);
 				$('#SendRequest').modal('show');

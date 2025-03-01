@@ -57,20 +57,25 @@ class ScreeningController extends Controller
         } else {
             $form = [];
         }
+        $cstep->judgers = count(json_decode($cstep->list, true)??[]) ?? 0 ;///
         $svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
         return view('admin.settings.screening.index', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs'));
     }
 
     public function update(Request $request)
     {
+       
         if (!$request->judges) {
             return Redirect::back()->with('message2', 'برجاء اختيار المحكممين');
         }
         if ($request->step) {
             $type = Step::where('id', $request->step)->pluck('data')->first();
             $list = $request->judges;
+            dd($request->judges);
             $notifylist = User::whereIn('id', array_values($list))->get();
+            
             Step::where('id', $request->step)->update(['list' => json_encode($list)]);
+            
             Screening::where('step_id', $request->step)->delete();
             Formdata::where('form_id', $request->fid)->update(['step_id' => $request->step, 'screening' => '{}', 'comments' => '{}']);
             if ($list) {

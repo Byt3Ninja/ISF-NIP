@@ -5,20 +5,20 @@
 const translations = {
   en: {
     name_en: {
-      notEmpty: 'Please enter company name in English',
-      stringOnly: 'Company name accepts english letters only'
+      notEmpty: 'Please enter company name',
+      stringOnly: 'Please enter a valid company name'
     },
     name_ar: {
-      notEmpty: 'Please enter company name in Arabic',
-      stringOnly: 'Company name accepts arabic letters only'
+      notEmpty: 'Please enter company name',
+      stringOnly: 'Please enter a valid company name'
     },
     address_en: {
-      notEmpty: 'Please enter address in English',
-      address: 'Please enter a valid English address using English letters'
+      notEmpty: 'Please enter address',
+      address: 'Please enter a valid address'
     },
     address_ar: {
-      notEmpty: 'Please enter address in Arabic',
-      address: 'Please enter a valid Arabic address using Arabic letters'
+      notEmpty: 'Please enter address',
+      address: 'Please enter a valid address using letters'
     },
     est_date: {
       establishmentDate: 'Establishment date cannot be a future date'
@@ -46,28 +46,28 @@ const translations = {
       stringOnly: lang === 'en' ? 'Business type accepts english letters only' : 'نوع العمل يقبل الحروف الانجليزية فقط'
     },
     Commercial_Register: {
-      numeric: 'Commercial Register should contain numbers only',
+      numeric: 'Commercial Register should contain numbers only'
     },
     Tax_Card: {
-      numeric: 'Tax Card should contain numbers only',
-    },
+      numeric: 'Tax Card should contain numbers only'
+    }
   },
   ar: {
     name_en: {
-      notEmpty: 'الرجاء إدخال اسم الشركة بالإنجليزية',
-      stringOnly: 'اسم الشركة يقبل الحروف الإنجليزية فقط'
+      notEmpty: 'الرجاء إدخال اسم الشركة',
+      stringOnly: 'الرجاء إدخال اسم شركة صالح'
     },
     name_ar: {
-      notEmpty: 'الرجاء إدخال اسم الشركة بالعربية',
-      stringOnly: 'اسم الشركة يقبل الحروف العربية فقط'
+      notEmpty: 'الرجاء إدخال اسم الشركة',
+      stringOnly: 'الرجاء إدخال اسم شركة صالح'
     },
     address_en: {
-      notEmpty: 'الرجاء إدخال العنوان بالإنجليزية',
-      address: 'الرجاء إدخال عنوان صالح باللغة الانجليزية باستخدام الحروف الانجليزية والأرقام والشرطات فقط.'
+      notEmpty: 'الرجاء إدخال العنوان ',
+      address: 'الرجاء إدخال عنوان صالح باستخدام الحروف والأرقام والشرطات فقط.'
     },
     address_ar: {
-      notEmpty: 'الرجاء إدخال العنوان بالعربية',
-      address: 'الرجاء إدخال عنوان صالح باللغة العربية باستخدام الحروف العربية والأرقام والشرطات فقط.'
+      notEmpty: 'الرجاء إدخال العنوان',
+      address: 'الرجاء إدخال عنوان صالح باستخدام الحروف والأرقام والشرطات فقط.'
     },
     est_date: {
       establishmentDate: 'لا يمكن أن يكون تاريخ التأسيس تاريخًا مستقبليًا'
@@ -95,11 +95,54 @@ const translations = {
       stringOnly: lang === 'en' ? 'Business type accepts arabic letters only' : 'نوع العمل يقبل الحروف العربية فقط'
     },
     Commercial_Register: {
-      numeric: 'يجب أن يحتوي السجل التجاري على أرقام فقط',
+      numeric: 'يجب أن يحتوي السجل التجاري على أرقام فقط'
     },
     Tax_Card: {
-      numeric: 'يجب أن يحتوي البطاقة الضريبية على أرقام فقط',
+      numeric: 'يجب أن يحتوي البطاقة الضريبية على أرقام فقط'
+    }
+  }
+};
+
+const descTranslations = {
+  en: {
+    company_description: {
+      stringOnly: 'Company description accepts letters only'
     },
+    about_problem: {
+      stringOnly: 'About the problem accepts letters only'
+    },
+    about_market_opportunity: {
+      stringOnly: 'About the market opportunity accepts letters only'
+    },
+    about_competitors: {
+      stringOnly: 'About the competitors accepts letters only'
+    },
+    about_monetize: {
+      stringOnly: 'About monetize accepts letters only'
+    },
+    about_challenges: {
+      stringOnly: 'About challenges accepts letters only'
+    }
+  },
+  ar: {
+    company_description: {
+      stringOnly: 'وصف الشركة يقبل الحروف فقط'
+    },
+    about_problem: {
+      stringOnly: 'حول المشكلة يقبل الحروف فقط'
+    },
+    about_market_opportunity: {
+      stringOnly: 'حول فرص السوق يقبل الحروف فقط'
+    },
+    about_competitors: {
+      stringOnly: 'حول المنافسين يقبل الحروف فقط'
+    },
+    about_monetize: {
+      stringOnly: 'حول التحويل يقبل الحروف فقط'
+    },
+    about_challenges: {
+      stringOnly: 'حول التحديات يقبل الحروف فقط'
+    }
   }
 };
 
@@ -107,6 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log('DOM loaded with JavaScript');
 
   const editInfoForm = document.getElementById('edit-info-form');
+  const editDescForm = document.getElementById('desc-form');
   const establishmentDate = document.querySelectorAll('#est-date');
   const businessCategories = document.querySelectorAll('input[name="business_categories[]"]');
   const otherCategoryField = document.getElementById('other-category-field');
@@ -120,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].name_en.notEmpty
           },
           regexp: {
-            regexp:/^[\p{L}\d\s]+$/u,
+            regexp: /^[\p{L}\d\s.,;&@:-]+$/u,
             message: translations[lang].name_en.stringOnly
           }
         }
@@ -131,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message: translations[lang].name_ar.notEmpty
           },
           regexp: {
-            regexp:/^[\p{L}\d\s]+$/u,
+            regexp: /^[\p{L}\d\s.,;&@:-]+$/u,
             message: translations[lang].name_ar.stringOnly
           }
         }
@@ -246,6 +290,76 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
+  const descValidationConfig = {
+    fields: {
+      company_description: {
+        validators: {
+          regexp: {
+            regexp: /^[\p{L}\s.]+$/u,
+            message: descTranslations[lang].company_description.stringOnly
+          }
+        }
+      },
+      about_problem: {
+        validators: {
+          regexp: {
+            regexp: /^[\p{L}\s.]+$/u,
+            message: descTranslations[lang].about_problem.stringOnly
+          }
+        }
+      },
+      about_market_opportunity: {
+        validators: {
+          regexp: {
+            regexp: /^[\p{L}\s.]+$/u,
+            message: descTranslations[lang].about_market_opportunity.stringOnly
+          }
+        }
+      },
+      about_competitors: {
+        validators: {
+          regexp: {
+            regexp: /^[\p{L}\s.]+$/u,
+            message: descTranslations[lang].about_competitors.stringOnly
+          }
+        }
+      },
+      about_monetize: {
+        validators: {
+          regexp: {
+            regexp: /^[\p{L}\s.]+$/u,
+            message: descTranslations[lang].about_monetize.stringOnly
+          }
+        }
+      },
+      about_challenges: {
+        validators: {
+          regexp: {
+            regexp: /^[\p{L}\s.]+$/u,
+            message: descTranslations[lang].about_challenges.stringOnly
+          }
+        }
+      }
+    },
+    plugins: {
+      trigger: new FormValidation.plugins.Trigger(),
+      bootstrap5: new FormValidation.plugins.Bootstrap5({
+        eleValidClass: '',
+        rowSelector: '.mb-6'
+      }),
+      submitButton: new FormValidation.plugins.SubmitButton(),
+      defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+      autoFocus: new FormValidation.plugins.AutoFocus()
+    },
+    init: instance => {
+      instance.on('plugins.message.placed', function (e) {
+        if (e.element.parentElement.classList.contains('input-group')) {
+          e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+        }
+      });
+    }
+  };
+
   if (editInfoForm) {
     const formValidation = FormValidation.formValidation(editInfoForm, validationConfig);
 
@@ -257,12 +371,12 @@ document.addEventListener('DOMContentLoaded', function () {
           formValidation.addField('other_category', {
             validators: {
               notEmpty: {
-                message: translations[lang].other_category.notEmpty,
+                message: translations[lang].other_category.notEmpty
               },
               regexp: {
                 regexp: language === 'en' ? /^[a-zA-Z\s]*$/i : /^[\u0621-\u064A\s]*$/i,
                 message: translations[lang].other_category.stringOnly
-              },
+              }
             }
           });
         } else {
@@ -270,6 +384,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
     });
+  }
+
+  if (editDescForm) {
+    FormValidation.formValidation(editDescForm, descValidationConfig);
   }
 
   // Establishment Date

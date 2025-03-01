@@ -148,4 +148,7 @@ return [
     'logTaskUpdateRow_no' => '<a target="_blank" href=":url">:user</a> changed task sorting order from ":old" to ":new"',
     'Survey' => 'Survey',
     'Schedule' => 'Schedule',
+    'Date' => 'Date',
+    'From' => 'From',
+    'To' => 'To',
 ];

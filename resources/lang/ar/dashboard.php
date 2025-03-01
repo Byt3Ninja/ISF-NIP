@@ -148,4 +148,7 @@ return [
     'logTaskUpdateRow_no' => 'قام <a target="_blank" href=":url">:user</a> بتغيير ترتيب فرز المهام من ":old" إلى ":new"',
     "Survey" => "الاستبيان",
     'Schedule' => 'اضافة مواعيد',
+    'Date' => 'التاريخ',
+    'From' => 'من',
+    'To' => 'إلى',
 ];

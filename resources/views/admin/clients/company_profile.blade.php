@@ -76,15 +76,18 @@
               <div class="d-flex align-items-center" style="gap: 1rem;">
                 <div class="border d-flex radius-15 d-flex flex-shrink-0" style="width: 90px; height: 90px;">
                   
-                  <img src="{{ asset( $company->logo) }}" class="img-fluid m-auto" alt="logo"
-                    style="width: 90px; height: 90px; border-radius: 15px;" />
+                  <img 
+                    src="{{ $company->logo ? asset( $company->logo) : '/images/logo-placeholder.png' }}" 
+                    onerror="this.src='/images/logo-placeholder.png'"
+                    class="img-fluid m-auto" alt="logo"
+                    style="width: 90px; height: 90px; border-radius: 15px;" 
+                  />
                 </div>
                 <div class="d-flex flex-column pt-3">
                   <div class="d-flex align-items-center">
                     <div class="d-flex align-items-center">
                       <i class="ti ti-building-skyscraper ti-24px me-2 text-primary"></i>
-                      <span class="fw-bold fs-5 pt-1">{{ $company->{'name_' . $l} }}
-                        </h5>
+                      <h5 class="fw-bold mb-0">{{ $company->{'name_' . $l} }}</h5>
                     </div>
                     <div class="d-flex align-items-center mx-8" style="gap: 1rem;">
                       @if ($company->facebook)
@@ -98,7 +101,7 @@
                         <a class="d-flex align-items-center"
                           href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
                           target='_blank'>
-                          <img src="/icons/linkedin.svg" />
+                          <img src="/icons/linkedin.svg" width="23" height="23" />
                         </a>
                       @endif
                       <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}" target="_blank"
@@ -119,28 +122,50 @@
                           <i class="fa-brands fa-youtube fs-4 text-danger"></i>
                         </a>
                       @endif
+                      @if ($company->phone)
+                        <a class="d-flex align-items-center" href="tel:{{ $company->country_code . $company->phone }}">
+                          <i class="ti ti-phone fs-4 text-primary"></i>
+                        </a>
+                      @endif
+                      @if ($company->instagram)
+                        <a class="d-flex align-items-center" href="{{ strpos($company->instagram, 'http') === 0 ? $company->instagram : 'http://' . $company->instagram }}" target="_blank">
+                          <i i class="fa-brands fa-instagram fs-4 text-danger"></i>
+                        </a>
+                      @endif
+                      @if ($company->tiktok)
+                        <a class="d-flex align-items-center" href="{{ strpos($company->tiktok, 'http') === 0 ? $company->tiktok : 'http://' . $company->tiktok }}" target="_blank">
+                          <i class="fa-brands fa-tiktok fs-5 text-dark"></i>
+                        </a>
+                      @endif
+                      @if ($company->google_map)
+                      <div class="d-flex align-items-center">
+                        <a href="{{ strpos($company->google_map, 'http') === 0 ? $company->google_map : 'http://' . $company->google_map }}"
+                          target="_blank">
+                          <i class="ti ti-map-pin fs-4 text-warning"></i>
+                        </a>
+                      </div>
+                      @endif
                     </div>
                   </div>
                   @php
                   $sector = App\Sector::where('id', $company->sector)->first();
-
-
                   @endphp
                   <p class="text-light mt-2 fw-medium line-clamp-1">
                     {{ $sector ? $sector->{'name_' . $l} : $company->sector }}
                   </p>
                 </div>
-
               </div>
             </div>
             <!-- Action Button -->
             <div class="col-md-2 d-flex align-items-center justify-content-end">
-              @if (Auth::user()->hasanyRole('Admin|organizationManager'))
+              {{-- organizationManager --}}
+              @if (Auth::user()->hasanyRole('Admin'))
               <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
                   style="border-radius: 15px;">
                   {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
                 </a>
               @endif
+
               @if (isset(Auth::user()->company()->first()->id) && $company->id == Auth::user()->company()->first()->id)
                 <a href="/dashboard/myCompany" class="btn btn-label-primary shadow-sm text-primary fw-bold"
                   style="border-radius: 15px;">
@@ -182,36 +207,33 @@ if($company->team_num == '1'){
       <section class="mt-6">
         <div class="row">
           <div class="col-md-6">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 220px;">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 175px;">
               <div class="card-body">
                 <div class="d-flex justify-content-between">
                   <div class="d-flex flex-column justify-content-between">
-                    <div class="d-flex">
+                    <div class="d-flex align-items-center gap-4">
                       <div class="p-2 bg-label-warning radius-15 d-flex align-items-center"
-                        style="width: 150px; height: 74px; gap: 10px;">
+                        style="min-width: 180px; gap: 10px;">
                         <i class="ti ti-users ti-28px"></i>
                         <div class="mx-1 d-flex flex-column">
                           <span class="fw-bold text-black fs-6">{{ $team_num ?? 0 }}</span>
                           <span class="fw-bold mt-2" style="font-size: 12px;">{{ __('admin.Team number') }}</span>
                         </div>
                       </div>
-                      <div class="p-2 bg-label-info mx-4 radius-15" style="width: 150px; height: 74px;">
-                        <div class="d-flex flex-column align-items-center justif-content-center">
-                          <div class="d-flex align-items-center mb-2">
-                            <i class="ti ti-calendar-time ti-28px"></i>
-                            <span class="mx-1 fw-bold text-black fs-6">
-                              {{ $company->est_date ?? __('admin.N/A') }}
-                            </span>
-                          </div>
-                          <span class="text-nowrap" style="font-size: 12px;">
-                            {{ __('admin.Established date') }}
-                          </span>
+                      @if($company->est_date)
+                      <div class="p-2 bg-label-info radius-15 d-flex align-items-center"
+                        style="min-width: 180px; gap: 10px;">
+                        <i class="ti ti-calendar-time ti-28px"></i>
+                        <div class="mx-1 d-flex flex-column">
+                          <span class="fw-bold text-black fs-6">{{ $company->est_date ?? __('admin.N/A') }}</span>
+                          <span class="fw-bold mt-2" style="font-size: 12px;">{{ __('admin.Established date') }}</span>
                         </div>
                       </div>
+                      @endif
                     </div>
-                    <div class="mt-10" style="max-width: 220px;">
+                    <div class="mt-3" style="width: 100%;">
                       <span class="fw-bold">{{ __('admin.Working_Team_Details') }}</span>
-                      <p class="text-muted line-clamp-2 p-2">
+                      <p class="text-muted line-clamp-2 px-2">
                         {{ $company->working_team_summary ?? __('admin.N/A') }}
                       </p>
                     </div>
@@ -221,9 +243,9 @@ if($company->team_num == '1'){
             </div>
           </div>
           <div class="col-md-6 mt-6 mt-md-0">
-            <div class="card shadow-sm" style="border-radius: 15px; height: 220px;">
+            <div class="card shadow-sm" style="border-radius: 15px; height: 175px;">
               <div class="card-body d-flex flex-column h-100 justify-content-between">
-                <div class="d-flex justify-content-between py-4">
+                <div class="d-flex justify-content-between mb-2">
                   <div class="d-flex align-items-center">
                     <i class="ti ti-map-2 ti-24px text-primary me-2"></i>
                     {{ optional($company->country)->{'name_' . $l} }}
@@ -237,29 +259,32 @@ if($company->team_num == '1'){
                     {{ optional($company->city)->{'name_' . $l} }}
                   </div>
                 </div>
-                <div class="d-flex justify-content-between">
-                  @if ($company->email)
-                    <div class="d-flex align-items-center">
-                      <i class="ti ti-mail ti-24px text-primary me-2"></i>
-                      {{ $company->email }}
-                    </div>
-                  @endif
-                  @if ($company->website)
-                    <div class="d-flex align-items-center">
-                      <i class="ti ti-world ti-24px text-primary me-2"></i>
-                      <a href="{{ strpos($company->website, 'http') === 0 ? $company->website : 'http://' . $company->website }}"
-                        target="_blank">
-                        {{ $company->website }}
-                      </a>
-                    </div>
-                  @endif
-                </div>
-                @if ($company->phone)
+                @if ($company->email)
+                  <a class="d-flex align-items-center text-primary" href="mailto:{{ $company->email }}">
+                    <i class="ti ti-mail ti-24px text-primary me-2"></i>
+                    {{ $company->email }}
+                  </a>
+                @endif
+                @if ($company->website)
                   <div class="d-flex align-items-center">
-                    <i class="ti ti-phone ti-28px text-primary me-2"></i>
-                    {{ $company->phone }}
+                    <i class="ti ti-world ti-24px text-primary me-2"></i>
+                    <a href="{{ strpos($company->website, 'http') === 0 ? $company->website : 'http://' . $company->website }}"
+                      target="_blank" class="line-clamp-1">
+                      {{ $company->website }}
+                    </a>
                   </div>
                 @endif
+                {{-- <div class="d-flex align-items-center gap-4">
+                  @if ($company->google_map)
+                  <div class="d-flex align-items-center">
+                    <i class="ti ti-world ti-24px text-primary me-2"></i>
+                    <a href="{{ strpos($company->google_map, 'http') === 0 ? $company->google_map : 'http://' . $company->google_map }}"
+                      target="_blank">
+                      {{ $company->google_map }}
+                    </a>
+                  </div>
+                  @endif
+                </div>                 --}}
               </div>
             </div>
           </div>
@@ -587,13 +612,16 @@ if($company->team_num == '1'){
                         style="width: 100%; height: 350px; object-fit:" class="img-fluid">
                         <p>Your browser does not support iframes.</p>
                       </iframe>
-                      {{-- <div class="mt-auto d-flex flex-column mb-6">
+                      <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">To get analysis for your pitch
                           deck please</span>
-                        <a href="{{ route('my_company') }}"
-                          class="text-primary fw-medium text-decoration-underline mt-1">Click
-                          here</a>
-                      </div> --}}
+                        <a 
+                          role="button"
+                          onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                          class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                          Click here
+                        </a>
+                      </div>
                     </div>
                   </div>
                 @else
@@ -603,9 +631,12 @@ if($company->team_num == '1'){
                       <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">To get analysis for your pitch
                           deck please</span>
-                        <a href="{{ route('my_company') }}"
-                          class="text-primary fw-medium text-decoration-underline mt-1">Click
-                          here</a>
+                        <a 
+                          role="button"
+                          onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                          class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                          Click here
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -620,19 +651,35 @@ if($company->team_num == '1'){
                 @if ($company->pitch_deck_video != null)
                   <div class="card-body text-center d-flex flex-column justify-content-between h-100">
                     <div class="d-flex flex-column justify-content-between align-items-center h-100">
-                      <video width="100%" controls>
-                        <source src="{{ $company->pitch_deck_video }}" type="video/mp4">
+                      @if($company)
+                @if ($company->pitch_deck_video != null)
+                <a href="{{ asset($company->pitch_deck_video) }}" target="_blank" class="mb-2 text-start w-100 cursor-pointer">
+                  {{ __('admin.View_Pitch_Deck_Video') }}
+                </a>
+                @endif
+                @else
+                <img
+                  id="deck-video-image"
+                  src="/images/deck-video.svg"
+                  style="width: 350px; height: 250px;"
+                />
+                @endif
+                      {{-- <video width="100%" controls>
+                        <source src="{{ $company->pitch_deck_video }}">
                         Your browser does not support the video tag.
-                      </video>
-                      <div class="mt-auto d-flex flex-column mb-6">
+                      </video> --}}
+                      {{-- <div class="mt-auto d-flex flex-column mb-6">
                         <span class="text-muted">
                           To get analysis for your pitch deck please upload your
                           pitch deck video
                         </span>
-                        <a href="{{ route('my_company') }}"
-                          class="text-primary fw-medium text-decoration-underline mt-1">Click
-                          here</a>
-                      </div>
+                        <a 
+                          role="button"
+                          onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
+                          class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
+                          Click here
+                        </a>
+                      </div> --}}
                     </div>
                   </div>
                 @else
