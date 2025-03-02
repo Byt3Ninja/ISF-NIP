@@ -1335,4 +1335,6 @@ return [
 	'currencyUpdated' => 'Currency Updated Successfully',
 	'currencyCreated' => 'Currency Created Successfully',
 	'Startup_Joined_New_Program_subject' => 'Startup Joined New Program',
+	'new_training_message' => 'New Training Created',
+	
 ];
