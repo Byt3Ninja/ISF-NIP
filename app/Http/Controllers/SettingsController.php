@@ -348,6 +348,8 @@ class SettingsController extends Controller
 		$Currency = $request->input('Currency');
 		$homePage = $request->HomePage == 'on' ? '1' : '0';
 		$Assessment = $request->Assessment == 'on' ? '1' : '0';
+		$MentorList = $request->MentorList == 'on' ? '1' : '0';
+
 		$updateSittings = Settings::where('id', $id)->first();
 		$updateSittings->ar_title = $site_ar_title;
 		$updateSittings->title = $site_title;
@@ -360,6 +362,7 @@ class SettingsController extends Controller
 		$updateSittings->timezone = $timezone;
 		$updateSittings->Currency = $Currency;
 		$updateSittings->HomePage = $homePage;
+		$updateSittings->mentor_list = $MentorList;
 		$updateSittings->assessment = $Assessment;
 		$updateSittings->save();
 		return redirect()->back()->with('message', 'StoredSuccessfully');

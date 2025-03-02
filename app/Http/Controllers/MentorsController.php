@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Company;
-use App\Cycle;
-use App\Surveys;
-use App\CyclesMentors;
-use App\SurveyScopes;
-use App\Events\WebMessage;
-use App\Factories\OnlineMeetingFactory;
-use App\Jobs\ExportMentorsData;
-use App\MentorshipRequest;
-use App\Schedule;
 use App\User;
+use App\Cycle;
 use Exception;
+use App\Company;
+use App\Surveys;
+use App\Schedule;
+use Carbon\Carbon;
+use App\SurveyScopes;
+use App\CyclesMentors;
+use App\Events\WebMessage;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Jobs\ExportMentorsData;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TemplateEmail;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use App\Factories\OnlineMeetingFactory;
+use Illuminate\Support\Facades\Log;
+use App\Notifications\MentorshipRequestNotification;
 
 class MentorsController extends Controller
 {
@@ -235,6 +237,28 @@ class MentorsController extends Controller
 				'organization_id' => $request->organization_id,
 				'cycle_id' => $request->cycle_id
 			]);
+			if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+			$data = [];
+			$mentor = User::find($request->mentorid);
+			// ======> notify Mentor <=================
+				$data['Mentorname'] = $mentor->first_name_en . " " . $mentor->last_name_en;
+				$data['email'] = $mentor->email;
+				$data['date'] = $request->date;
+				$data['period'] = $request->period;
+				$data['user_name'] = Auth::user()->first_name_en . " " . Auth::user()->last_name_en;
+				$data['company_name'] = Auth::user()->company->name_en;
+				try {
+					$mentor->notify(new MentorshipRequestNotification($data));
+					log::info('Sent New Mentorship Request notification to ' . $mentor->email);
+				} catch (\Throwable $th) {
+					throw $th;
+				}
+		}
+
+
+
+
 			// Notify Admin here
 			event(new WebMessage('NewMent', Auth::user()->first_name_en . ' ' . Auth::user()->last_name_en));
 			return back()->with(['msg' => 'Request_successfully_added_Startup', 'class' => 'success']);

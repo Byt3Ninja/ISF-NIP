@@ -221,7 +221,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;">New Training created</p>
                                                     <p style="margin: 0;"> </p>
                                                     
-                                                    <p style="margin: 0;">We are excited to inform you that a new training session has been created: {{ $data['title'] }}.  
+                                                    <p style="margin: 0;">We are excited to inforam you that a new training session has been created: {{ $data['title'] }}.  
                                                         This training will provide valuable insights and skills to help your company grow.</p>
                                                     
                                                     <p style="margin: 0;">
