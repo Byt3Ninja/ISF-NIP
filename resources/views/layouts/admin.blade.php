@@ -96,11 +96,12 @@
 
             window.addEventListener("chatwoot:ready", function () {
               @if(auth()->check())
+              console.log("{{ auth()->user()->country_code . auth()->user()->phone ?? '' }}")
                 window.$chatwoot.setUser("{{ auth()->user()->id }}", {
                   email: "{{ auth()->user()->email }}",
                   name: "{{ auth()->user()->name }}",
                   avatar_url: "{{ Storage::disk('public_uploads')->url(auth()->user()->img_url)  }}",
-                  phone_number: "{{ auth()->user()->phone ?? '' }}"
+                  phone_number: "{{ auth()->user()->country_code . auth()->user()->phone ?? '' }}"
                 });
               @endif
             });
