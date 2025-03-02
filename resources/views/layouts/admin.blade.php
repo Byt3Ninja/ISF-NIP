@@ -79,13 +79,9 @@
 
   @auth
   @if (env('ENABLE_CHAT', false))
-      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
       <script>
         (function(d, t) {
           var BASE_URL = "https://app.chatwoot.com";
-          var websiteToken = '{{ env("CHATWOOT_WEBSITE_TOKEN") }}';
-
-          // Load the Chatwoot SDK
           var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
           g.src = BASE_URL + "/packs/js/sdk.js";
           g.defer = true;
@@ -94,28 +90,25 @@
 
           g.onload = function() {
             window.chatwootSDK.run({
-              websiteToken: websiteToken,
-              baseUrl: BASE_URL,
+              websiteToken: '{{ env("CHATWOOT_WEBSITE_TOKEN") }}',
+              baseUrl: BASE_URL
             });
 
-            window.$chatwoot.on("widget:toggle", function() {
-              if (!websiteToken.trim()) {
-                window.$chatwoot.hide();
-                Swal.fire({
-                  icon: 'error',
-                  title: 'Configuration Error',
-                  text: 'You must configure the Chatbot AI Token in the .env file!',
-                  confirmButtonColor: '#d33',
-                  confirmButtonText: 'Got it!'
+            window.addEventListener("chatwoot:ready", function () {
+              @if(auth()->check())
+                window.$chatwoot.setUser("{{ auth()->user()->id }}", {
+                  email: "{{ auth()->user()->email }}",
+                  name: "{{ auth()->user()->name }}",
+                  avatar_url: "{{ Storage::disk('public_uploads')->url(auth()->user()->img_url)  }}",
+                  phone_number: "{{ auth()->user()->phone ?? '' }}"
                 });
-              }
+              @endif
             });
-          };
+          }
         })(document, "script");
       </script>
   @endif
 @endauth
-
 
 
 @if(auth()->user()->hasRole('Registered'))
