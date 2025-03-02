@@ -609,7 +609,8 @@
                     if( $survey->triggered_by == 'due' ) { $middleware = $survey->training_step; }
                     if( $survey->triggered_by == 'quiz' ) { $middleware = $survey->training_quiz; }
                   }
-                  if( !$middleware->count() ) { continue; }
+                  if( is_null( $middleware ) || empty( $middleware ) ) { continue; }
+                  elseif( !$middleware->count() ) { continue; }
                 @endphp
                 @if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on) ) }} @endif
                 @if( $survey->triggered_on == 'mentorship' )

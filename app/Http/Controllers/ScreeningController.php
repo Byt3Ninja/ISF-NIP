@@ -216,6 +216,7 @@ class ScreeningController extends Controller
 
 	public function changestep(Request $request)
 	{
+		
 		$approved = $by = null;
 		$company = Company::where('id', $request->company)->first();
 		$data['last_step'] = Step::findOrFail($company->step)->title;
@@ -229,6 +230,7 @@ class ScreeningController extends Controller
 			}
 			$data['new_step'] = $cstep->title;
 		}
+		
 		$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);
 		if ($request->step != 0) {
 			/// notify Company Owner via Mail
@@ -240,7 +242,7 @@ class ScreeningController extends Controller
 			$data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
 			$data['organization_name_en'] = $cstep->cycle->organization->name_en;
 			$data['emailCompany'] = $company_owner->email;
-
+			
 			// Broadcast Event //
 			broadcast(new ChangeStep($data));
 

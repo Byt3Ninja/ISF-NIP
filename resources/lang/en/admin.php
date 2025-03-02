@@ -1334,4 +1334,8 @@ return [
 	'currencyDeleted' => 'Currency Deleted Successfully',
 	'currencyUpdated' => 'Currency Updated Successfully',
 	'currencyCreated' => 'Currency Created Successfully',
+	'Startup_Joined_New_Program_subject' => 'Startup Joined New Program',
+	'new_training_message' => 'New Training Created',
+	'mentorship_request_subject' => 'Mentorship Request',
+	
 ];

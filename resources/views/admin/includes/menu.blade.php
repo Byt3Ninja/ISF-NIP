@@ -699,7 +699,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </li>
       @endif
     @endif
-    @if ($_user->hasAnyRole('organizationManager'))
+    @if ($_user->hasAnyRole('organizationManager|Admin'))
       @if( $_user->ableToAny(['users.index '], $permissions) )
         <li class="{{ Request::is('*users*') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">

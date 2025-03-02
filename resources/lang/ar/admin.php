@@ -1350,5 +1350,9 @@ return [
 	'currencyDeleted' => 'تم حذف العملة بنجاح',
 	'currencyUpdated' => 'تم تحديث العملة بنجاح',
 	'currencyCreated' => 'تم حفظ العملة بنجاح',
+	'Startup_Joined_New_Program_subject' => 'تم الانضمام لبرنامج جديد',
+	'new_training_message' => 'تم انشاء تدريب جديدة',
+	'mentorship_request_subject' => 'طلب استشارة جديد',
+	
 ]; 
 
