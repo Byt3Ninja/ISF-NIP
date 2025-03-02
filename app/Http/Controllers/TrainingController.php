@@ -34,6 +34,7 @@ use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Factories\OnlineMeetingFactory;
+use App\Notifications\NewTrainingNotification;
 use Intervention\Image\ImageManagerStatic as Image;
 
 
@@ -684,6 +685,7 @@ class TrainingController extends Controller
 
 	public function addsession(Request $request)
 	{
+		
 		$step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
@@ -715,6 +717,9 @@ class TrainingController extends Controller
 				'trainer_name' => $request->trainer_name,
 				'trainer_email' => $request->trainer_email
 			]);
+			$data = [];
+			$cycleId = Step::find($step)->cycle_id;
+			$companies = Company::where('cycle', $cycleId)->get();
 			// ======> notify Trainer <=================
 			$mail['trainer_name'] = $request->trainer_name;
 			$mail['title'] = $topic;
@@ -722,6 +727,7 @@ class TrainingController extends Controller
 			$mail['organization_name_en'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_en ?? 'Unknown Organization';
 			$mail['organization_name_ar'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';;
 			$MSG = new TrainerEmail($mail);
+			
             if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
 				try {
@@ -729,6 +735,22 @@ class TrainingController extends Controller
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
+
+				foreach ($companies as $company) {
+					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
+					$data['email'] = $company->user->email;
+					$data['cycle'] = $company->cycledata->title;
+					$data['step'] = $company->stepdata->title;
+					$data['join_url'] = $join;
+					$data['title'] = $topic;
+					$data['date'] = $datetime;
+					try {
+						$company->user->notify(new NewTrainingNotification($data));
+						log::info('Sent New Training notification to ' . $company->user->email);
+					} catch (\Throwable $th) {
+						throw $th;
+					}
+				}
             }
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
@@ -737,6 +759,30 @@ class TrainingController extends Controller
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
 			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'location' => $request->online]);
+
+			if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+			$data = [];
+			$cycleId = Step::find($step)->cycle_id;
+			$companies = Company::where('cycle', $cycleId)->get();
+			// ======> notify Trainer <=================
+
+			foreach ($companies as $company) {
+				$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
+				$data['email'] = $company->user->email;
+				$data['cycle'] = $company->cycledata->title;
+				$data['step'] = $company->stepdata->title;
+				$data['join_url'] = '';
+				$data['title'] = $title;
+				$data['date'] = $datetime;
+				try {
+					$company->user->notify(new NewTrainingNotification($data));
+					log::info('Sent New Training notification to ' . $company->user);
+				} catch (\Throwable $th) {
+					// throw $th;
+				}
+			}
+		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
 			TrainingSession::insert([
@@ -766,6 +812,24 @@ class TrainingController extends Controller
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
+				$data = [];
+				$cycleId = Step::find($step)->cycle_id;
+				$companies = Company::where('cycle', $cycleId)->get();
+				foreach ($companies as $company) {
+					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
+					$data['email'] = $company->user->email;
+					$data['cycle'] = $company->cycledata->title;
+					$data['step'] = $company->stepdata->title;
+					$data['join_url'] = 'offline';
+					$data['title'] = $title;
+					$data['date'] = $datetime;
+					try {
+						$company->user->notify(new NewTrainingNotification($data));
+						log::info('Sent New Training notification to ' . $company->user->email);
+					} catch (\Throwable $th) {
+						throw $th;
+					}
+				}
             }
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
@@ -820,6 +884,13 @@ class TrainingController extends Controller
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
+
+
+
+
+
+
+
             }
 
 			// ==========> End Notify <================
