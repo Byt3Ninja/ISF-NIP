@@ -524,15 +524,26 @@ class MentorsController extends Controller
 				$user = new User();
 				$user->email = $rName->email;
 				$user->id = $rName->id;
+				$date_Request = $session->zoom_date;
 				$rFullName = $rName->name;
 				$rFullName_usr = $rName_usr->name;
 				$MSG = new TemplateEmail;
+				if ($request->stat == 'Yes') {
 				$MSG->Message = [
 					"New Mentorship session - VI portal",
 					"Dear " . $rFullName . ",",
-					"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start:" . $request->date . ", Check your account to join the session ",
+					"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start: " . $date_Request . ", Check your account to join the session ",
 					"/dashboard"
 				];
+			}else{
+				$MSG->Message = [
+					"New Mentorship session - VI portal",
+					"Dear " . $rFullName . ",",
+					"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', is Rejected",
+					"/dashboard"
+				];
+			}
+
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
 					try {
@@ -546,12 +557,21 @@ class MentorsController extends Controller
 				$user->email = $rName_usr->email;
 				$user->id = $rName_usr->id;
 				$MSG = new TemplateEmail;
+				if ($request->stat == 'Yes') {
 				$MSG->Message = [
 					"New Mentorship session - VI portal",
 					"Dear " . $rFullName_usr . ",",
-					"Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $request->date . ", Check your account to join the session ",
+					"Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start: " . $date_Request . ", Check your account to join the session ",
 					"/dashboard"
 				];
+			}else{
+					$MSG->Message = [
+						"New Mentorship session - VI portal",
+						"Dear " . $rFullName . ",",
+						"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', is Rejected",
+						"/dashboard"
+					];
+				}
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
 					try {
