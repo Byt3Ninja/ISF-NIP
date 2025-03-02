@@ -332,12 +332,16 @@
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
-      <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
-        <a href="{{ route('roles.index') }}" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-user-cog"></i>
-          <div>{{ __('admin.Roles_and_permissions') }}</div>
+    
+    @endif
+
+    @if( $_user->ableTo('projects.index', $permissions) )
+      <li class="{{ Request::is('dashboard/projects*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('projects.index') }}">
+          <i class="menu-icon tf-icons ti ti-folder"></i>
+           <div>{{ __('admin.Projects') }}</div>
         </a>
-      </li>
+     </li>
     @endif
 
     @if( $_user->ableToAny(['show.builder', 'show.form'], $permissions) )
@@ -725,6 +729,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                 <span class="menu-item">{{ __('admin.Companies') }}</span>
               </a>
             </li>
+            <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
+              <a href="{{ route('roles.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-user-cog"></i>
+                <div>{{ __('admin.Roles_and_permissions') }}</div>
+              </a>
+            </li>
             @if( $_user->ableTo('permissions.index', $permissions) )
               {{-- <li class="{{ Request::is('dashboard/permissions*') ? 'active' : '' }} menu-item">
             <a href="{{ route('permissions.index') }}">
@@ -779,14 +789,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
       </li>
     @endif
 
-     @if( $_user->ableTo('projects.index', $permissions) )
-      <li class="{{ Request::is('dashboard/projects*') ? 'active' : '' }} menu-item">
-        <a class="menu-link" href="{{ route('projects.index') }}">
-          <i class="menu-icon tf-icons ti ti-folder"></i>
-           <div>{{ __('admin.Projects') }}</div>
-        </a>
-     </li>
-    @endif
+     
   
     @if( $_user->ableToAny(['settings.list', 'settings.save'], $permissions) )
       <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">

@@ -36,7 +36,7 @@ class CalenderController extends Controller
             }elseif ($user->hasRole('Judger')){
 
                 $data = $this->JudgerCalender();
-            }elseif($user->hasRole('Registered|Page Manager|Pages Editor')){
+            }elseif ($user->hasAnyRole(['Registered', 'Page Manager', 'Pages Editor'])) {
                 $data=$this->StartupCalender();
             }
 
@@ -164,70 +164,82 @@ class CalenderController extends Controller
         return $data;
     }
 
-    protected function MentorCalender(){
-        $mentorshipRequests = auth()->user()->mentorSessions()->get();
-        foreach ($mentorshipRequests as $key) {
-            $data[] = [
-                'id' => $key->id,
-                'title' => __('admin.mentorship session'),
-                'start' => $key->ZoomDateOrg,
-                'end' => $key->EndZoomDateOrg,
-                'calendarId' => 'M',
-                'color' => '#ff5b5c',
-                'allDay' => false,
-                'textColor' => '#ffffff'
-            ];
-        }
-        $cycles = auth()->user()->mentorCycles()->get();
-        foreach ($cycles as $key) {
-            $data[] = [
-                'id' => $key->id,
-                'title' => $key->title,
-                'start' => $key->start,
-                'end' => $key->end,
-                'calendarId' => 'C',
-                'color' => '#009faa',
-                'allDay' => true,
-                'textColor' => '#ffffff'
-            ];
-        }
-        return $data;
+    protected function MentorCalender()
+{
+    $data = []; 
+
+    $mentorshipRequests = auth()->user()?->mentorSessions()?->get() ?? collect();
+    foreach ($mentorshipRequests as $key) {
+        $data[] = [
+            'id' => $key->id,
+            'title' => __('admin.mentorship session'),
+            'start' => $key->ZoomDateOrg,
+            'end' => $key->EndZoomDateOrg,
+            'calendarId' => 'M',
+            'color' => '#ff5b5c',
+            'allDay' => false,
+            'textColor' => '#ffffff'
+        ];
     }
+
+    $cycles = auth()->user()?->mentorCycles()?->get() ?? collect();
+    foreach ($cycles as $key) {
+        $data[] = [
+            'id' => $key->id,
+            'title' => $key->title,
+            'start' => $key->start,
+            'end' => $key->end,
+            'calendarId' => 'C',
+            'color' => '#009faa',
+            'allDay' => true,
+            'textColor' => '#ffffff'
+        ];
+    }
+
+    return $data;
+}
 
     protected function JudgerCalender()
-    {
-        $data = [];
-        $myid=auth()->id();
-        $mysteps = auth()->user()->screeningRequests()->get();
-        $csteps = Step::whereIn('id',$mysteps->pluck('step_id'))->get();
-        $finalScreenings = Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
-
-        foreach ($csteps as $key) {
-            $data[] = [
-                'id' => $key->id,
-                'title' => __('admin.judge Sessions'),
-                'start' => $key->from->format('d-m-Y'),
-                'end' => $key->to->format('d-m-Y'),
-                'calendarId' => 'S',
-                'color' => '#1a233a',
-                'allDay' => true,
-                'textColor' => '#ffffff'
-            ];
-        }
-        foreach ($finalScreenings as $key) {
-            $data[] = [
-                'id' => $key->id,
-                'title' => __('admin.Final Screening'),
-                'start' => $key->StartDateOrg,
-                'end' => $key->EndDateOrg,
-                'calendarId' => 'F',
-                'color' => '#2c6de9',
-                'allDay' => false,
-                'textColor' => '#ffffff'
-            ];
-        }
-        return $data;
+{
+    if (!auth()->check()) {
+        return [];
     }
+
+    $data = [];
+    $myid = auth()->id();
+    $mysteps = auth()->user()?->screeningRequests()?->get() ?? collect();
+    $csteps = Step::whereIn('id', $mysteps->pluck('step_id'))->get();
+    $finalScreenings = Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
+
+    foreach ($csteps as $key) {
+        $data[] = [
+            'id' => $key->id,
+            'title' => __('admin.judge Sessions'),
+            'start' => $key->from ? $key->from->format('d-m-Y') : null,
+            'end' => $key->to ? $key->to->format('d-m-Y') : null,
+            'calendarId' => 'S',
+            'color' => '#1a233a',
+            'allDay' => true,
+            'textColor' => '#ffffff'
+        ];
+    }
+
+    foreach ($finalScreenings as $key) {
+        $data[] = [
+            'id' => $key->id,
+            'title' => __('admin.Final Screening'),
+            'start' => $key->StartDateOrg,
+            'end' => $key->EndDateOrg,
+            'calendarId' => 'F',
+            'color' => '#2c6de9',
+            'allDay' => false,
+            'textColor' => '#ffffff'
+        ];
+    }
+
+    return $data;
+}
+
 
     protected function StartupCalender()
     {
