@@ -2,13 +2,12 @@
 <div class="col-12 mb-3">
   <div class="card shadow-sm" style="border-radius: 15px;">
     <div class="p-4">
-      <h5 class="card-title border-bottom pb-2 mb-6">{{ __('admin.shareholders') }}</h5>
+      <h5 class="card-title fw-bold border-bottom pb-2 mb-6">{{ __('admin.shareholders') }}</h5>
       <form
         id="shareholder-form"
-        method="post"
-        action="{{ route('AddTeams_Comp') }}"
-        enctype="multipart/form-data"
-        onsubmit="resetForm(this); return validateForm();"
+        {{-- method="post" --}}
+        {{-- action="{{ route('AddTeams_Comp') }}" --}}
+        {{-- enctype="multipart/form-data" --}}
       >
         @csrf
         <div class="show_Shareholders row">
@@ -75,11 +74,12 @@
         </div>
         <div class="col-12 text-end mt-3" style="height: 40px;">
           <input type="hidden" name="TeamsNo" value="Shareholders" />
+          <input type="hidden" id="CompanyN" name="CompanyN" value="{{ optional($client->company)->id }}" />
           <button
-             type="button" 
-            class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
-            do="Shareholders"
-            company="{{ optional($client->company)->id }}"
+            type="submit" 
+            class="btn btn-outline-primary text-black fw-bold rounded-pill"
+            {{-- do="Shareholders" --}}
+            {{-- company="{{ optional($client->company)->id }}" --}}
           >
             <i class="ti ti-plus me-3"></i>
             {{ $l == 'en' ? 'Add new shareholder' : 'إضافة مساهم جديد' }}
@@ -176,7 +176,7 @@
                     <div class="text-center mb-6">
                       <h4 class="mb-2"> ({{ $Shareholder->Name }})</h4>
                     </div>
-                    <form id="edit-shareholder-form" class="ecommerce-customer-add-basic mb-4">
+                    <form id="edit-shareholder-form" >
                       <div class="col-12">
                         <div class=" form-group mb-4">
                           <label class="form-label mb-2 fs-6 fw-semibold">
@@ -186,7 +186,7 @@
                             <input
                               type="text"
                               class="form-control shareholder_name{{ $Shareholder->id }}"
-                              id="shareholder_name{{ $Shareholder->id }}"
+                              id="edit_shareholder_name"
                               placeholder="{{ __('admin.shareholder_name') }}"
                               value="{{ $Shareholder->Name ? $Shareholder->Name : old('shareholder_name') }}"
                               name="shareholder_name"
@@ -206,7 +206,7 @@
                             <input
                               type="text"
                               class="form-control shareholder_role{{ $Shareholder->id }}"
-                              id="shareholder_role{{ $Shareholder->id }}"
+                              id="edit_shareholder_role"
                               placeholder="{{ __('admin.shareholder_role') }}"
                               value="{{ $Shareholder->RoleShereholder ? $Shareholder->RoleShereholder : old('shareholder_role') }}"
                               name="shareholder_role"
@@ -226,7 +226,7 @@
                             <input
                               type="text"
                               class="form-control shareholder_ownership_percentage{{ $Shareholder->id }}"
-                              id="shareholder_ownership_percentage{{ $Shareholder->id }}"
+                              id="edit_shareholder_ownership_percentage"
                               placeholder="{{ __('admin.shareholder_ownership_percentage') }}"
                               value="{{ $Shareholder->PresentagShereholder ? $Shareholder->PresentagShereholder : old('shareholder_ownership_percentage') }}"
                               name="shareholder_ownership_percentage"
@@ -240,11 +240,13 @@
                         </div>
                       </div>
                       <div class="mt-6">
+                        <input type="hidden" id="shareholderId" value="{{ $Shareholder->id }}" />
+                        <input type="hidden" id="CompanyN" value="{{ optional($client->company)->id }}" />
                         <button
                           type="submit" 
-                          class="btn btn-primary me-3 data-submit EditTeams"
-                          do="{{ $Shareholder->id }}"
-                          company="{{ optional($client->company)->id }}"
+                          class="btn btn-primary me-3"
+                          {{-- do="{{ $Shareholder->id }}" --}}
+                          {{-- company="{{ optional($client->company)->id }}" --}}
                         >
                           {{ __('admin.submit') }}
                         </button>

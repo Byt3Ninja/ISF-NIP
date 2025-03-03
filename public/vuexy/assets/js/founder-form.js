@@ -1,6 +1,6 @@
 'use strict';
 
-const currentLang = document.documentElement.lang;
+const currentLang = $('html').attr('lang');
 
 const founderFormTranslations = {
   en: {
@@ -29,8 +29,8 @@ const founderFormTranslations = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-  const createValidationConfig = () => ({
+$(document).ready(function () {
+  const createValidationConfig = (mode = 'create') => ({
     fields: {
       founder_name: {
         validators: {
@@ -66,38 +66,101 @@ document.addEventListener('DOMContentLoaded', function () {
         rowSelector: '.mb-6'
       }),
       submitButton: new FormValidation.plugins.SubmitButton(),
-      defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
       autoFocus: new FormValidation.plugins.AutoFocus()
     },
     init: instance => {
       instance.on('plugins.message.placed', function (e) {
-        if (e.element.parentElement.classList.contains('input-group')) {
-          e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+        if ($(e.element).parent().hasClass('input-group')) {
+          $(e.element).parent().after(e.messageElement);
         }
+      });
+      instance.on('core.form.valid', function (e) {
+        // console.log('e', e.formValidation.ee);
+        // Prevent the form from submitting
+        event.preventDefault();
+        // e.formValidation.ee.preventDefault();
+
+        createFounder(mode);
+
+        console.log('Form is valid, but submission is prevented.');
       });
     }
   });
 
-  const founderForm = document.querySelector('#founder-form');
-  const editFounderForm = document.querySelector('#edit-founder-form');
+  const createFounder = mode => {
+    const companyId = $('#CompanyN').val();
+    const founderId = $('#founderId').val();
 
-  if (founderForm) {
-    const founderValidator = FormValidation.formValidation(founderForm, createValidationConfig());
-    founderForm.addEventListener('submit', function (e) {
-      const fields = founderForm.querySelectorAll('.form-control');
-      fields.forEach(field => {
-        field.value = '';
-      });
+    const name = mode === 'create' ? $('#founder_name').val() : $('#edit_founder_name').val();
+    const email = mode === 'create' ? $('#founder_email').val() : $('#edit_founder_email').val();
+    const linkedin = mode === 'create' ? $('#founder_linkedin').val() : $('#edit_founder_linkedin').val();
+
+    $.ajax({
+      url: '/dashboard/AddCompanyTeams/' + companyId,
+      method: 'post',
+      data: {
+        id: mode === 'edit' ? founderId : undefined,
+        TeamsNo: mode == 'create' ? 'Founders' : undefined,
+        founder_name: name,
+        founder_email: email,
+        founder_linkedin: linkedin,
+        _token: $('meta[name="csrf-token"]').attr('content')
+      },
+      success: function (response) {
+        console.log('response', response);
+        const fields = editFounderForm.find('.form-control');
+        fields.each(function () {
+          $(this).val('');
+        });
+
+        if (response.state) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: response.state
+          });
+          if (mode === 'edit') {
+            location.reload();
+            return;
+          }
+
+          if (TeamsNo == 'Founders' && mode == 'create') {
+            $('.ShowTableFounders').load(location.href + ' .ShowTableFounders');
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errors
+          });
+          console.log('errors', errors);
+        }
+      },
+      error: function (error) {
+        console.log('error', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while processing your request.'
+        });
+      }
     });
+  };
+
+  const founderForm = $('#founder-form');
+  const editFounderForm = $('#edit-founder-form');
+
+  if (founderForm.length) {
+    founderForm.on('submit', function (event) {
+      event.preventDefault();
+    });
+    const founderValidator = FormValidation.formValidation(founderForm[0], createValidationConfig());
   }
 
-  if (editFounderForm) {
-    const editFounderValidator = FormValidation.formValidation(editFounderForm, createValidationConfig());
-    editFounderForm.addEventListener('submit', function (e) {
-      const fields = editFounderForm.querySelectorAll('.form-control');
-      fields.forEach(field => {
-        field.value = '';
-      });
+  if (editFounderForm.length) {
+    editFounderForm.on('submit', function (event) {
+      event.preventDefault();
     });
+    const editFounderValidator = FormValidation.formValidation(editFounderForm[0], createValidationConfig('edit'));
   }
 });

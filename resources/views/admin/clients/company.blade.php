@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-  <!-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" /> -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 
   <style>
     #contentWrapper {
@@ -166,6 +166,7 @@
       </div>
     </div>
     <!-- / Content -->
+    <div class="content-backdrop fade"></div>
   </div>
   <!-- / Content wrapper -->
 @stop

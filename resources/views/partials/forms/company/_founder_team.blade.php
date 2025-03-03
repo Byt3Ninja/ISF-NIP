@@ -2,7 +2,7 @@
 <div class="col-md-12 mb-3">
   <div class="card shadow-sm" style="border-radius: 15px;">
     <div class="p-4">
-      <h5 class="card-title border-bottom pb-2 mb-6">{{ __('admin.Founders') }}</h5>
+      <h5 class="card-title fw-bold border-bottom pb-2 mb-6">{{ __('admin.Founders') }}</h5>
       <form 
         id="founder-form" 
         method="post" 
@@ -87,19 +87,20 @@
             </div>
           </div>
         </div>
-        <div class="col-12 text-end mt-3" style="height: 40px;">
+        <div class="col-12 text-end mt-3">
           <input type="hidden" name="TeamsNo" value="Founders" />
+          <input type="hidden" id="CompanyN" name="CompanyN" value="{{ optional($client->company)->id }}" />
           <button 
-             type="button"  
-            class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams" 
-            do="Founders" 
-            company="{{ optional($client->company)->id }}"
+            id="submit-button"
+            type="submit"  
+            class="btn btn-outline-primary text-dark fw-bold rounded-pill" 
           >
             <i class="ti ti-plus me-3"></i>
             {{ $l == 'en' ? 'Add new founder' : 'إضافة مؤسس جديد' }}
           </button>
         </div>
       </form>
+
       @if($client->company)
       <div class="ShowTableFounders mt-4">
         @foreach ($fonders as $fonder)
@@ -167,7 +168,6 @@
                       <input type="hidden" value="{{ $fonder->id }}" name="id">
                       <button 
                         class="d-flex align-items-center gap-2 p-2 cursor-pointer border-0 bg-transparent w-100 text-start" 
-                        {{--  type="submit"   --}}
                         onclick="return confirm('Are you sure you want to delete this ?')"
                       >
                         <i class="ti ti-trash text-danger fs-6"></i>
@@ -180,7 +180,7 @@
           </div>
         </div>
 
-        <!-- Edit Customer Modal -->
+        <!-- Edit Founder Modal -->
         <div 
           class="modal fade" 
           id="EditTeams{{ $fonder->id }}" 
@@ -215,7 +215,7 @@
                         <input 
                           type="text" 
                           class="form-control founder_name{{ $fonder->id }}" 
-                          id="founder_name{{ $fonder->id }}" 
+                          id="edit_founder_name" 
                           placeholder="{{ __('admin.founder_name') }}" 
                           value="{{ $fonder->Name ? $fonder->Name : old('founder_name') }}" 
                           name="founder_name" 
@@ -237,7 +237,7 @@
                         <input 
                           type="email" 
                           class="form-control founder_email{{ $fonder->id }}" 
-                          id="founder_email{{ $fonder->id }}" 
+                          id="edit_founder_email" 
                           placeholder="{{ __('admin.founder_email') }}" 
                           value="{{ $fonder->Email ? $fonder->Email : old('founder_email') }}" 
                           name="founder_email" 
@@ -260,7 +260,7 @@
                           <input 
                             type="url" 
                             class="form-control founder_linkedin{{ $fonder->id }}" 
-                            id="founder_linkedin{{ $fonder->id }}" 
+                            id="edit_founder_linkedin" 
                             value="{{ $fonder->LinkedIn ? $fonder->LinkedIn : old('founder_linkedin') }}" 
                             name="founder_linkedin" 
                             autocomplete="founder_linkedin" 
@@ -275,11 +275,13 @@
                     </div>
                   </div>
                   <div class="mt-6">
+                    <input type="hidden" id="founderId" value="{{ $fonder->id }}" />
+                    <input type="hidden" id="CompanyN" value="{{ optional($client->company)->id }}" />
                     <button 
                       type="submit"
-                      class="btn btn-primary me-3 data-submit EditTeams" 
-                      do="{{ $fonder->id }}" 
-                      company="{{ optional($client->company)->id }}"
+                      class="btn btn-primary me-3" 
+                      {{-- do="{{ $fonder->id }}" 
+                      company="{{ optional($client->company)->id }}" --}}
                     >
                       {{ __('admin.submit') }}
                     </button>
@@ -296,7 +298,7 @@
             </div>
           </div>
         </div>
-        <!--/ Edit JO Modal -->
+        <!--/ Edit Founder Modal -->
         @endforeach
       </div>
       @endif
