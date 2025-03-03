@@ -133,7 +133,9 @@
                         @foreach($availablePrograms as $program)
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" name="programs[]" value="{{ $program->id }}">
-                            <label class="form-check-label">{{ $program->title }}</label>
+                            <label class="form-check-label">
+                                {{ $program->title }} - {{ $program->organization->{'name_' . app()->getLocale()} }}
+                            </label>
                         </div>
                         @endforeach
                     </div>

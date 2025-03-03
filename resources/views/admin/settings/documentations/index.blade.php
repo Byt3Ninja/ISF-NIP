@@ -56,7 +56,7 @@
                               @if( $_user->ableToAny(['documentation.show', 'documentation.edit', 'documentation.update', 'documentation.destroy'], $permissions) )
                               <td>
                                 @if( $_user->ableTo('documentation.show', $permissions) )
-                                <a title="View" target="_blank" href="/dashboard/documentation/{{ $doc->id }}"
+                                <a title="View" href="/dashboard/documentation/{{ $doc->id }}"
                                   class="btn btn-icon rounded-circle btn-label-primary">
                                   <i class="ti ti-eye"></i>
                                 </a>
