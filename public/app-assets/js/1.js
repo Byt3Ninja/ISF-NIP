@@ -409,177 +409,177 @@ $('.lfm').filemanager('file');
 
 
 
-$('.AddTeams').click(function(event) {
-    event.preventDefault();
-      var TeamsNo = $(this).attr('do');
-      var company = $(this).attr('company');
+// $('.AddTeams').click(function(event) {
+//     event.preventDefault();
+//       var TeamsNo = $(this).attr('do');
+//       var company = $(this).attr('company');
       
-    var founder_name = $('#founder_name').val();
-    var founder_email = $('#founder_email').val();
-    var founder_linkedin = $('#founder_linkedin').val();
-    var shareholder_name = $('#shareholder_name').val();
-    var shareholder_role = $('#shareholder_role').val();
-    var shareholder_ownership_percentage = $('#shareholder_ownership_percentage').val();
-    var investor_name = $('#investor_name').val();
-    var investment_type = $('#investment_type').val();
+//     var founder_name = $('#founder_name').val();
+//     var founder_email = $('#founder_email').val();
+//     var founder_linkedin = $('#founder_linkedin').val();
+//     var shareholder_name = $('#shareholder_name').val();
+//     var shareholder_role = $('#shareholder_role').val();
+//     var shareholder_ownership_percentage = $('#shareholder_ownership_percentage').val();
+//     var investor_name = $('#investor_name').val();
+//     var investment_type = $('#investment_type').val();
 
-        $.ajax({
-            url: '/dashboard/AddCompanyTeams/'+company, 
-            method: 'post',
-            data: {
-                'TeamsNo': TeamsNo,
-                'founder_name': founder_name,
-                'founder_email': founder_email,
-                'founder_linkedin': founder_linkedin,
-                'shareholder_name': shareholder_name,
-                'shareholder_role': shareholder_role,
-                'shareholder_ownership_percentage': shareholder_ownership_percentage,
-                'investor_name': investor_name,
-                'investment_type': investment_type,
-                _token: $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
+//         $.ajax({
+//             url: '/dashboard/AddCompanyTeams/'+company, 
+//             method: 'post',
+//             data: {
+//                 'TeamsNo': TeamsNo,
+//                 'founder_name': founder_name,
+//                 'founder_email': founder_email,
+//                 'founder_linkedin': founder_linkedin,
+//                 'shareholder_name': shareholder_name,
+//                 'shareholder_role': shareholder_role,
+//                 'shareholder_ownership_percentage': shareholder_ownership_percentage,
+//                 'investor_name': investor_name,
+//                 'investment_type': investment_type,
+//                 _token: $('meta[name="csrf-token"]').attr('content')
+//             },
+//             success: function(response) {
                 
-                if (response.state) {
-                    alert(response.state);
-                    if(TeamsNo == "Founders"){
-                    // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
-                     $('.ShowTableFounders').load(location.href + ' .ShowTableFounders');
-                    }
-                    if(TeamsNo == "Shareholders"){
-                        // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
-                         $('.ShowTableShareholders').load(location.href + ' .ShowTableShareholders');
-                        }
+//                 if (response.state) {
+//                     alert(response.state);
+//                     if(TeamsNo == "Founders"){
+//                     // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+//                      $('.ShowTableFounders').load(location.href + ' .ShowTableFounders');
+//                     }
+//                     if(TeamsNo == "Shareholders"){
+//                         // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+//                          $('.ShowTableShareholders').load(location.href + ' .ShowTableShareholders');
+//                         }
 
-                    if(TeamsNo == "Investors"){
-                        // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
-                            $('.ShowTableInvestors').load(location.href + ' .ShowTableInvestors');
-                        }
+//                     if(TeamsNo == "Investors"){
+//                         // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+//                             $('.ShowTableInvestors').load(location.href + ' .ShowTableInvestors');
+//                         }
 
 
 
-                }else{
-                    alert(errors);
-                }
-            },
-            error: function(error) {
-                if (error.responseJSON && error.responseJSON.errors) {
-                    var errors = error.responseJSON.errors;
+//                 }else{
+//                     alert(errors);
+//                 }
+//             },
+//             error: function(error) {
+//                 if (error.responseJSON && error.responseJSON.errors) {
+//                     var errors = error.responseJSON.errors;
     
-                    // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
-                    if (errors.founder_name) {
-                        alert(errors.founder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                    }
-                    if (errors.founder_email) {
-                        alert(errors.founder_email[0]); // عرض رسالة الخطأ الخاصة بالبريد الإلكتروني
-                    }
-                    if (errors.founder_linkedin) {
-                        alert(errors.founder_linkedin[0]); // عرض رسالة الخطأ الخاصة بالرابط
-                    }
+//                     // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
+//                     if (errors.founder_name) {
+//                         alert(errors.founder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+//                     }
+//                     if (errors.founder_email) {
+//                         alert(errors.founder_email[0]); // عرض رسالة الخطأ الخاصة بالبريد الإلكتروني
+//                     }
+//                     if (errors.founder_linkedin) {
+//                         alert(errors.founder_linkedin[0]); // عرض رسالة الخطأ الخاصة بالرابط
+//                     }
 
 
 
-                    if (errors.shareholder_name) {
-                        alert(errors.shareholder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                    }
-                    if (errors.shareholder_role) {
-                        alert(errors.shareholder_role[0]); 
-                    }
-                    if (errors.shareholder_ownership_percentage) {
-                        alert(errors.shareholder_ownership_percentage[0]); 
-                    }
+//                     if (errors.shareholder_name) {
+//                         alert(errors.shareholder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+//                     }
+//                     if (errors.shareholder_role) {
+//                         alert(errors.shareholder_role[0]); 
+//                     }
+//                     if (errors.shareholder_ownership_percentage) {
+//                         alert(errors.shareholder_ownership_percentage[0]); 
+//                     }
 
-                    if (errors.investor_name) {
-                        alert(errors.investor_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                    }
-                    if (errors.investment_type) {
-                        alert(errors.investment_type[0]); 
-                    }
+//                     if (errors.investor_name) {
+//                         alert(errors.investor_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+//                     }
+//                     if (errors.investment_type) {
+//                         alert(errors.investment_type[0]); 
+//                     }
 
-                }
-            }
-        });
+//                 }
+//             }
+//         });
     
     
-});
+// });
 
 
-$('.EditTeams').click(function(event) {
-    event.preventDefault();
-    var id = $(this).attr('do');
-    var company = $(this).attr('company');
+// $('.EditTeams').click(function(event) {
+//     event.preventDefault();
+//     var id = $(this).attr('do');
+//     var company = $(this).attr('company');
     
-  var founder_name = $('#founder_name'+id).val();
-  var founder_email = $('#founder_email'+id).val();
-  var founder_linkedin = $('#founder_linkedin'+id).val();
-  var shareholder_name = $('#shareholder_name'+id).val();
-  var shareholder_role = $('#shareholder_role'+id).val();
-  var shareholder_ownership_percentage = $('#shareholder_ownership_percentage'+id).val();
-  var investor_name = $('#investor_name'+id).val();
-  var investment_type = $('#investment_type'+id).val();
+//   var founder_name = $('#founder_name'+id).val();
+//   var founder_email = $('#founder_email'+id).val();
+//   var founder_linkedin = $('#founder_linkedin'+id).val();
+//   var shareholder_name = $('#shareholder_name'+id).val();
+//   var shareholder_role = $('#shareholder_role'+id).val();
+//   var shareholder_ownership_percentage = $('#shareholder_ownership_percentage'+id).val();
+//   var investor_name = $('#investor_name'+id).val();
+//   var investment_type = $('#investment_type'+id).val();
 
-      $.ajax({
-          url: '/dashboard/AddCompanyEdit/'+company, 
-          method: 'post',
-          data: {
-              'id': id,
-              'founder_name': founder_name,
-              'founder_email': founder_email,
-              'founder_linkedin': founder_linkedin,
-              'shareholder_name': shareholder_name,
-              'shareholder_role': shareholder_role,
-              'shareholder_ownership_percentage': shareholder_ownership_percentage,
-              'investor_name': investor_name,
-              'investment_type': investment_type,
-              _token: $('meta[name="csrf-token"]').attr('content')
-          },
-          success: function(response) {
+//       $.ajax({
+//           url: '/dashboard/AddCompanyEdit/'+company, 
+//           method: 'post',
+//           data: {
+//               'id': id,
+//               'founder_name': founder_name,
+//               'founder_email': founder_email,
+//               'founder_linkedin': founder_linkedin,
+//               'shareholder_name': shareholder_name,
+//               'shareholder_role': shareholder_role,
+//               'shareholder_ownership_percentage': shareholder_ownership_percentage,
+//               'investor_name': investor_name,
+//               'investment_type': investment_type,
+//               _token: $('meta[name="csrf-token"]').attr('content')
+//           },
+//           success: function(response) {
               
-              if (response.state) {
-                  alert(response.state);
-                  location.reload();
-              }else{
-                  alert(errors);
-              }
-          },
-          error: function(error) {
-              if (error.responseJSON && error.responseJSON.errors) {
-                  var errors = error.responseJSON.errors;
+//               if (response.state) {
+//                   alert(response.state);
+//                   location.reload();
+//               }else{
+//                   alert(errors);
+//               }
+//           },
+//           error: function(error) {
+//               if (error.responseJSON && error.responseJSON.errors) {
+//                   var errors = error.responseJSON.errors;
   
-                  // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
-                  if (errors.founder_name) {
-                      alert(errors.founder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                  }
-                  if (errors.founder_email) {
-                      alert(errors.founder_email[0]); // عرض رسالة الخطأ الخاصة بالبريد الإلكتروني
-                  }
-                  if (errors.founder_linkedin) {
-                      alert(errors.founder_linkedin[0]); // عرض رسالة الخطأ الخاصة بالرابط
-                  }
+//                   // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
+//                   if (errors.founder_name) {
+//                       alert(errors.founder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+//                   }
+//                   if (errors.founder_email) {
+//                       alert(errors.founder_email[0]); // عرض رسالة الخطأ الخاصة بالبريد الإلكتروني
+//                   }
+//                   if (errors.founder_linkedin) {
+//                       alert(errors.founder_linkedin[0]); // عرض رسالة الخطأ الخاصة بالرابط
+//                   }
 
-                  if (errors.shareholder_name) {
-                    alert(errors.shareholder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                }
-                if (errors.shareholder_role) {
-                    alert(errors.shareholder_role[0]); 
-                }
-                if (errors.shareholder_ownership_percentage) {
-                    alert(errors.shareholder_ownership_percentage[0]); 
-                }
+//                   if (errors.shareholder_name) {
+//                     alert(errors.shareholder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+//                 }
+//                 if (errors.shareholder_role) {
+//                     alert(errors.shareholder_role[0]); 
+//                 }
+//                 if (errors.shareholder_ownership_percentage) {
+//                     alert(errors.shareholder_ownership_percentage[0]); 
+//                 }
 
-                if (errors.investor_name) {
-                    alert(errors.investor_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                }
-                if (errors.investment_type) {
-                    alert(errors.investment_type[0]); 
-                }
+//                 if (errors.investor_name) {
+//                     alert(errors.investor_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
+//                 }
+//                 if (errors.investment_type) {
+//                     alert(errors.investment_type[0]); 
+//                 }
 
-              }
-          }
-      });
+//               }
+//           }
+//       });
   
   
-});
+// });
 
 
 
