@@ -151,10 +151,16 @@ $(document).ready(function () {
   const editFounderForm = $('#edit-founder-form');
 
   if (founderForm.length) {
+    founderForm.on('submit', function (event) {
+      event.preventDefault();
+    });
     const founderValidator = FormValidation.formValidation(founderForm[0], createValidationConfig());
   }
 
   if (editFounderForm.length) {
+    editFounderForm.on('submit', function (event) {
+      event.preventDefault();
+    });
     const editFounderValidator = FormValidation.formValidation(editFounderForm[0], createValidationConfig('edit'));
   }
 });

@@ -4,9 +4,9 @@
     <div class="p-4">
       <form id="investor-form">
         @csrf
-        <h5 class="card-title border-bottom pb-2 mb-6">{{ __('admin.investors') }}</h5>
+        <h5 class="card-title fw-bold border-bottom pb-2 mb-6">{{ __('admin.investors') }}</h5>
         <div class="form-group mb-4">
-          <label class="form-label fw-semibole mb-2 fs-6" for="investor_name">{{ __('admin.investor_name') }}</label>
+          <label class="form-label fw-semibold mb-2 fs-6" for="investor_name">{{ __('admin.investor_name') }}</label>
           <div class="input-group input-group-merge">
             <input
               type="text"
@@ -25,10 +25,10 @@
           </div>
         </div>
         <div class="form-group mb-4">
-          <label class="form-label fw-semibole mb-2 fs-6" for="investment_type">{{ __('admin.investment_type') }}</label>
+          <label class="form-label fw-semibold mb-2 fs-6" for="investment_type">{{ __('admin.investment_type') }}</label>
           <div class="input-group input-group-merge">
             <select
-              class="form-select form-control investment_type"
+              class="form-select investment_type"
               id="investment_type"
               name="investment_type"
               aria-placeholder="{{ __('admin.investment_type') }}"
@@ -55,30 +55,20 @@
           </div>
         </div>
         <div class="col-12 text-end mt-3" style="height: 40px;">
-          <input type="hidden" name="TeamsNo" value="Investors" />
+          <input type="hidden" id="TeamsNo" name="TeamsNo" value="Investors" />
+          <input type="hidden" id="CompanyN" name="CompanyN" value="{{ optional($client->company)->id }}" />
           <button
             type="submit"
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
-            do="Investors"
-            company="{{ optional($client->company)->id }}"
+            {{-- do="Investors" --}}
+            {{-- company="{{ optional($client->company)->id }}" --}}
           >
             <i class="ti ti-plus me-3"></i>
             {{ $l == 'en' ? 'Add new investor' : 'إضافة مستثمر جديد' }}
           </button>
         </div>
       </form>
-      <div class="col-12 text-end mt-3" style="height: 40px;">
-        <input type="hidden" name="TeamsNo" value="Investors" />
-        <button
-           type="button" 
-          class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
-          do="Investors"
-          company="{{ optional($client->company)->id }}"
-        >
-          <i class="ti ti-plus me-3"></i>
-          {{ $l == 'en' ? 'Add new investor' : 'إضافة مستثمر جديد' }}
-        </button>
-      </div>
+
       @if($client->company)
       <div class="ShowTableInvestors">
         <div class="row px-4 mt-4">
@@ -158,7 +148,7 @@
                           <input
                             type="text"
                             class="form-control investor_name"
-                            id="investor_name{{ $Investor->id }}"
+                            id="edit_investor_name"
                             placeholder="{{ __('admin.investor_name') }}"
                             value="{{ $Investor->Name ? $Investor->Name : old('investor_name') }}"
                             name="investor_name"
@@ -177,8 +167,8 @@
                         </label>
                         <div class="input-group input-group-merge">
                           <select
-                            class="form-select form-control investment_type{{ $Investor->id }}"
-                            id="investment_type{{ $Investor->id }}"
+                            class="form-select investment_type{{ $Investor->id }}"
+                            id="edit_investment_type"
                             name="investment_type"
                             aria-placeholder="{{ __('admin.investment_type') }}"
                             autocomplete="investment_type"
@@ -224,11 +214,13 @@
                     </div>
                   </div>
                   <div class="mt-6">
+                    <input type="hidden" id="investorId" value="{{ $Investor->id }}" />
+                    <input type="hidden" id="CompanyN" value="{{ optional($client->company)->id }}" />
                     <button 
                       type="submit"
-                      class="btn btn-primary me-3 data-submit EditTeams" 
-                      do="{{ $Investor->id }}"
-                      company="{{ optional($client->company)->id }}"
+                      class="btn btn-primary me-3" 
+                      {{-- do="{{ $Investor->id }}" --}}
+                      {{-- company="{{ optional($client->company)->id }}" --}}
                     >
                       {{ __('admin.submit') }}
                     </button>
