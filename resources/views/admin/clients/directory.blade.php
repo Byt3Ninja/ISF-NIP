@@ -149,6 +149,15 @@
               <span id="price"></span>
             </div>
             <br>
+          <div id="vendor-info">
+            <span class="text-bold-700">{{ __('admin.Vendor_Name') }}: </span>
+            <span id="vendor-name"></span> <br>
+            <span class="text-bold-700">{{ __('admin.Vendor_Phone') }}: </span>
+            <span id="vendor-phone"></span> <br>
+            <span class="text-bold-700">{{ __('admin.Vendor_Email') }}: </span>
+            <span id="vendor-email"></span>
+          </div>
+
             <div class="form-group" id="showdates">
               <label>{{ __('admin.Request Date/ Time') }}:</label>
               <input class='date width-200 form-control' type="text" name="datetime" id="date" value=""
@@ -245,7 +254,24 @@
           $('#description').html(response.description_{{ $l }});
           $('#simg').html(img);
           $('#sid').val(response.id);
-          $('#price').html(response.price + ' {{ __('EGP') }}');
+           // Handle Price Visibility
+           if (response.hide_price && !response.is_admin) {
+                $('#price').closest('div').hide();
+            } else {
+                $('#price').closest('div').show();
+                $('#price').html(response.price + ' {{ __('EGP') }}');
+            }
+
+            // Handle Vendor Info Visibility
+            if (response.hide_vendor_info && !response.is_admin) {
+                $('#vendor-info').hide();
+            } else {
+                $('#vendor-info').show();
+                $('#vendor-name').html(response.vendor_name);
+                $('#vendor-phone').html(response.vendor_phone);
+                $('#vendor-email').html(response.vendor_email);
+            }
+
           $('#service-data').modal('show');
         },
         error: function(error) {
