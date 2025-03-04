@@ -16,6 +16,7 @@ use App\MentorshipRequest;
 use Illuminate\Http\Request;
 use App\Jobs\ExportMentorsData;
 use Illuminate\Support\Facades\DB;
+use App\Services\WhatsAppService;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use App\Factories\OnlineMeetingFactory;
@@ -25,9 +26,11 @@ use App\Notifications\MentorshipRequestNotification;
 class MentorsController extends Controller
 {
 	protected $meetingService;
-	public function __construct()
+	protected $whatsAppService;
+	public function __construct(WhatsAppService $whatsAppService)
 	{
 		$this->meetingService = OnlineMeetingFactory::create();
+		$this->whatsAppService = $whatsAppService;
 	}
 
 	public function exportMentorship(Request $request)
@@ -254,11 +257,14 @@ class MentorsController extends Controller
 				} catch (\Throwable $th) {
 					throw $th;
 				}
+				$phoneNumber = $mentor->country_code_w_a . $mentor->whatsapp;
+				$Massage = "Dear " . $mentor->name . ",
+ '" . $data['company_name'] . "' has sent you a mentorship request,
+request will start: " . $data['date'] . ",
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 		}
-
-
-
-
 			// Notify Admin here
 			event(new WebMessage('NewMent', Auth::user()->first_name_en . ' ' . Auth::user()->last_name_en));
 			return back()->with(['msg' => 'Request_successfully_added_Startup', 'class' => 'success']);
@@ -296,19 +302,16 @@ class MentorsController extends Controller
 					'organization_id' => $request->organization_id,
 					'cycle_id' => $request->cycle_id,
 				]);
-
 				/// notify user via Mail
 				$mentor = User::findOrFail($request->mentorid);
 				$mentor_name = $mentor->name;
 
 				$startup_owner = User::findOrFail($request->userid);
 				$startup_owner_name = $startup_owner->name;
-
 				/// Notify Mentor
 				$user = new User();
 				$user->email = $mentor->email;
 				$user->id = $mentor->id;
-
 				$MSG = new TemplateEmail;
 				$MSG->Message = [
 					"New Mentorship session - VI portal",
@@ -323,8 +326,14 @@ class MentorsController extends Controller
 					} catch (\Throwable $th) {
 						// throw $th;
 					}
+					$phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
+						$Massage = "Dear " . $startup_owner->name . ", 
+This Is notification new mentorship session with '" . $startup_owner_name . "',
+Session will start:" . $date . ",
+Check your account to join the session ";
+						$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+						Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
-
 				/// Notify Startup Owner
 				$user = new User();
 				$user->email = $startup_owner->email;
@@ -343,7 +352,16 @@ class MentorsController extends Controller
 					} catch (\Throwable $th) {
 						// throw $th;
 					}
+					$phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
+					$Massage = "Dear " . $startup_owner->name . ",
+This Is notification new mentorship session with '" . $startup_owner_name . "',
+Session will start: " . $date . ",
+Session Link: " . $onlineMeeting['data']['join_url']. ",
+Thanks from " . env('APP_NAME');
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
+				
 				/// End of mail send
 			}
 			return back()->with([
@@ -361,7 +379,6 @@ class MentorsController extends Controller
 	public function sessions(Request $request)
 	{
 		$organization_id = auth()->user()->organization_id;
-
 		if ($request->show == 'all') {
 			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
@@ -411,7 +428,6 @@ class MentorsController extends Controller
 				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
 				$startDate = date('Y-m-d', strtotime($request->start_date));
 				$endDate = date('Y-m-d', strtotime($request->end_date));
-
 				// البحث باستخدام التاريخ من وإلى
 				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
 			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
@@ -471,6 +487,14 @@ class MentorsController extends Controller
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
+				$phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
+				$Massage = "Dear " . $rName->name . ",
+you have a new mentorship session with '" . $rFullName . "',
+Session will start:" . $request->date . ",
+Check your account to join the session,
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
 			/// Notify User
 			$user = new User();
@@ -490,6 +514,14 @@ class MentorsController extends Controller
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
+				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
+				$Massage = "Dear " . $rName_usr->name . ",
+you have a new mentorship session with '" . $rFullName . "',
+Session will start:" . $request->date . ",
+Check your account to join the session,
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
 			/// End of mail send
 			return back()->with(['message' => 'ٍsaved successfully']);
@@ -535,6 +567,13 @@ class MentorsController extends Controller
 					"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start: " . $date_Request . ", Check your account to join the session ",
 					"/dashboard"
 				];
+				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
+					$Massage = "Dear " . $rFullName . ",
+you have a new mentorship session with '" . $rFullName_usr . "',
+Session will start:" . $date_Request . ",
+Check your account to join the session,
+Thanks from " . env('APP_NAME');
+
 			}else{
 				$MSG->Message = [
 					"New Mentorship session - VI portal",
@@ -542,8 +581,12 @@ class MentorsController extends Controller
 					"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', is Rejected",
 					"/dashboard"
 				];
+				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
+					$Massage = "Dear " . $rFullName . ",
+you have a new mentorship session with '" . $rFullName_usr . "',
+is Rejected
+Thanks from " . env('APP_NAME');
 			}
-
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
 					try {
@@ -551,6 +594,8 @@ class MentorsController extends Controller
 					} catch (\Throwable $th) {
 						// throw $th;
 					}
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
 				/// Notify User
 				$user = new User();
@@ -564,13 +609,24 @@ class MentorsController extends Controller
 					"Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start: " . $date_Request . ", Check your account to join the session ",
 					"/dashboard"
 				];
+				$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
+					$Massage = "Dear " . $rFullName_usr . ",
+you have a new mentorship session with '" . $rFullName . "',
+Session will start:" . $date_Request . ",
+Check your account to join the session,
+Thanks from " . env('APP_NAME');
 			}else{
 					$MSG->Message = [
 						"New Mentorship session - VI portal",
-						"Dear " . $rFullName . ",",
-						"Kindly note you have a new mentorship session with '" . $rFullName_usr . "', is Rejected",
+						"Dear " . $rFullName_usr . ",",
+						"Kindly note you have a new mentorship session with '" . $rFullName . "', is Rejected",
 						"/dashboard"
 					];
+					$phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
+					$Massage = "Dear " . $rFullName_usr . ",
+you have a new mentorship session with '" . $rFullName . "',
+is Rejected
+Thanks from " . env('APP_NAME');
 				}
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
@@ -579,6 +635,8 @@ class MentorsController extends Controller
 					} catch (\Throwable $th) {
 						// throw $th;
 					}
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
 				/// End of mail send
 				return response()->json('success');
