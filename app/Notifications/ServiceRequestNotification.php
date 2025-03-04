@@ -36,7 +36,6 @@ class ServiceRequestNotification extends Notification
             ->line("**Request Details:**")
             ->line("**Requested by:**  {$service->vendor_name}")
             ->line("**Email:** {$service->vendor_email}")
-            ->line("**Organization:** " . ($requester->organization->name_en ?? 'N/A'))
             ->line("**Requested Date:** {$this->request->date_time}")
             ->line("**Service Description:** {$service->description_en}")
             ->line("**Additional Notes:** {$this->request->comment}")
