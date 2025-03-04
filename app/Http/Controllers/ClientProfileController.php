@@ -120,8 +120,8 @@ class ClientProfileController extends Controller
                     'profile_privacy'=>$request->profile_privacy,
                     'mentorship_approach'=>json_encode($request->mentorship_approach),
                 ];
-                if ($request->entrepreneurial_experience == 1){
-                    $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief;
+                if ($request->entrepreneurial_experience == 1 ){
+                    $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief ?? 0;
                 }else{
                     $data['entrepreneurial_experience_brief']=0;
                 }
