@@ -31,6 +31,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ServiceRequestNotification;
 
 
 class HomeController extends Controller
@@ -792,6 +794,8 @@ class HomeController extends Controller
                     ->orWhere('services.name_ar', 'like', '%' . $find . '%');
             });
         }
+         $user = auth()->user();
+        $isAdmin = $user && $user->hasRole('Admin');
         $services = $services->get();
         $setting = Settings::where('id', 1)->first();
         $currency = Currency::where('id', $setting->Currency)->first();
@@ -820,10 +824,24 @@ class HomeController extends Controller
     public function servicereq(Request $request)
     {
         if ($request) {
-            ServicesRequests::create(['service_id' => $request->id, 'user_id' => Auth::id(), 'comment' => $request->comment, 'date_time' => $request->datetime]);
+            $serviceRequest = ServicesRequests::create([
+                'service_id' => $request->id,
+                'user_id' => Auth::id(),
+                'comment' => $request->comment,
+                'date_time' => $request->datetime
+            ]);
+    
             event(new WebMessage('NewServ', Auth::user()->first_name_en . ' ' . Auth::user()->last_name_en));
+    
+            $service = Service::find($request->id);
+    
+            if ($service && $service->vendor_email) {
+                Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+            }
+    
             return response()->json(['state' => 'success']);
         }
+    
         return response()->json(['state' => 'failed'], 500);
     }
     public function dark(Request $request)

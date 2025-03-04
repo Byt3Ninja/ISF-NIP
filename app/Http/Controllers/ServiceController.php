@@ -60,30 +60,47 @@ class ServiceController extends Controller
 	 * @return \Illuminate\Http\Response
 	 */
 	public function store(StoreServiceRequest $request)
-	{
-		$category = ServiceCategory::find( $request->service_category_id );
-		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
-		else
-		{
-			if( empty( $category->organization_id ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
-			else
-			{
-				if( $request->hasFile('img_url') )
-				{
-					//store the image
-					$img_url = $request->file('img_url');
-					//get the path of the stores image
-					$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
-				} else { $img_url = ''; }
-				$inputs = $request->except(['img_url']) + ['img_url' => $img_url];
-				$inputs['organization_id'] = $category->organization_id;
-				$result = Service::create( $inputs );
-
-				if( $result ) { return redirect()->route('services.index')->with( ['msg' => 'StoredSuccessfully'] ); }
-				else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
-			}
+   { 
+	
+    $category = ServiceCategory::find( $request->service_category_id );
+		if( empty( $category ) ) { 
+			return back()->withInput()->with( ['msg' => 'FailedStore'] ); 
 		}
+	if( $request->hasFile('img_url') ){
+		//store the image
+		$img_url = $request->file('img_url');
+		//get the path of the stores image
+		$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
 	}
+    else {  
+		$img_url = ''; 
+	}
+    $inputs = $request->except(['img_url']);
+    $inputs['img_url'] = $img_url;
+    $inputs['organization_id'] = $category->organization_id;
+
+    $inputs = $request->except(['img_url']) + [
+        'img_url' => $img_url,
+        'organization_id' => $category->organization_id,
+        'vendor_name' => $request->vendor_name,
+        'vendor_phone' => $request->vendor_phone,
+        'vendor_email' => $request->vendor_email,
+		'hide_price' => $request->has('hide_price') ? 1 : 0, 
+		'hide_vendor_info' => $request->has('hide_vendor_info') ? 1 : 0
+    ];
+
+    $inputs['name_ar'] = $inputs['name_en']; 
+    $inputs['description_ar'] = $inputs['description_en'];
+
+    $result = Service::create($inputs);
+	
+    if ($result) {
+        return redirect()->route('services.index')->with(['msg' => 'StoredSuccessfully']);
+    } else {
+        return back()->withInput()->with(['msg' => 'FailedStore']);
+    }
+}
+
 
 	/**
 	 * Display the specified resource.
@@ -115,32 +132,40 @@ class ServiceController extends Controller
 	 * @param  \App\Service  $Service
 	 * @return \Illuminate\Http\Response
 	 */
-	public function update(UpdateServiceRequest $request, Service $service)
-	{
-		$category = ServiceCategory::find( $request->service_category_id );
-		if( empty( $category ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
-		else
-		{
-			if( empty( $category->organization_id ) ) { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
-			else
-			{
-				if( $request->hasFile('img_url') )
-				{
-					// store the image
-					$img_url = $request->file('img_url');
-					// get the path of the stores image
-					$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
-					$inputs = $request->except(['img_url']) + ['img_url' => $img_url];
-				} else { $inputs = $request->all(); }
-				$inputs['organization_id'] = $category->organization_id;
-				// update
-				$result = $service->update($inputs);
-
-				if( $result ) { return redirect()->route('services.index')->with( ['msg' => 'StoredSuccessfully'] ); }
-				else { return back()->withInput()->with( ['msg' => 'FailedStore'] ); }
-			}
-		}
+	
+	 public function update(UpdateServiceRequest $request, Service $service)
+  {
+    $category = ServiceCategory::find($request->service_category_id);
+    
+	if( empty( $category ) ) { 
+		return back()->withInput()->with( ['msg' => 'FailedStore'] ); 
 	}
+
+    $inputs = $request->except(['img_url']);
+
+    // Handle Image Upload
+    if ($request->hasFile('img_url')) {
+        $img_url = $request->file('img_url')->store('services', ['disk' => 'public_uploads']);
+        $inputs['img_url'] = $img_url;
+    }
+
+    $inputs['organization_id'] = $category->organization_id;
+
+    $inputs['vendor_name'] = $request->vendor_name;
+    $inputs['vendor_phone'] = $request->vendor_phone;
+    $inputs['vendor_email'] = $request->vendor_email;
+
+    $inputs['hide_price'] = $request->has('hide_price') ? 1 : 0;
+    $inputs['hide_vendor_info'] = $request->has('hide_vendor_info') ? 1 : 0;
+
+    $result = $service->update($inputs);
+
+    if ($result) {
+        return redirect()->route('services.index')->with(['msg' => 'UpdatedSuccessfully']);
+    } else {
+        return back()->withInput()->with(['msg' => 'FailedUpdate']);
+    }
+}
 
 	/**
 	 * Remove the specified resource from storage.
