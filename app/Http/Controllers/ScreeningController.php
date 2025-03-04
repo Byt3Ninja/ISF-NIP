@@ -12,6 +12,7 @@ use App\Events\ChangeStep;
 use Illuminate\Http\Request;
 use App\Jobs\ExportScreeneData;
 use App\Jobs\ExportResScreenData;
+use App\Services\WhatsAppService;
 use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
@@ -24,6 +25,10 @@ use Illuminate\Support\Facades\Redirect;
 
 class ScreeningController extends Controller
 {
+	protected $whatsAppService;
+	public function __construct(WhatsAppService $whatsAppService)
+		$this->whatsAppService = $whatsAppService;
+	}
 	public function index($id = 0)
 	{
 		$organization_id = auth()->user()->organization_id;
@@ -109,6 +114,15 @@ class ScreeningController extends Controller
 							} catch (\Throwable $th) {
 								// throw $th;
 							}
+
+							$phoneNumber = $rname->country_code_w_a . $rname->whatsapp;
+							$Massage = "Dear " . $rfullname . ",
+we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') .
+" to " . $cstep->to->format('d-m-Y') . ", Check your account for more details,
+		Thanks from " . env('APP_NAME');
+							$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+
 						}
 					}
 				}

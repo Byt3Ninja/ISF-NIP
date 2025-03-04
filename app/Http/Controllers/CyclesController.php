@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use App\BuilderForm;
 use App\BuilderField;
 use http\Env\Response;
+use App\Services\WhatsAppService;
 
 use App\Finalscreening;
 use App\TrainingSession;
@@ -28,6 +29,12 @@ use App\Notifications\StartupJoiningNotification;
 
 class CyclesController extends Controller
 {
+
+    protected $whatsAppService;
+	public function __construct(WhatsAppService $whatsAppService)
+	{
+		$this->whatsAppService = $whatsAppService;
+	}
 
     public function exportcyclesComp(Request $request)
     {
@@ -610,6 +617,14 @@ class CyclesController extends Controller
             } catch (\Throwable $th) {
                 throw $th;
             }
+
+            $phoneNumber = $user->country_code_w_a . $user->whatsapp;
+					$Massage = "Dear " . $user->name . ",
+Congratulations! You have successfully joined the" . $data['cycle'] .", 
+We are excited to have you on board and look forward to supporting your journey.
+Thanks from " . env('APP_NAME');
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
         }
 
             

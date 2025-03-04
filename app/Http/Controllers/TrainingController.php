@@ -28,6 +28,7 @@ use App\Jobs\ExportTresultData;
 use App\Traits\ZoomMeetingTrait;
 use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
+use App\Services\WhatsAppService;
 use App\Notifications\TrainerEmail;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
@@ -41,9 +42,11 @@ use Intervention\Image\ImageManagerStatic as Image;
 class TrainingController extends Controller
 {
 	protected $meetingService;
-	public function __construct()
+	protected $whatsAppService;
+	public function __construct(WhatsAppService $whatsAppService)
 	{
 		$this->meetingService =  OnlineMeetingFactory::create();
+		$this->whatsAppService = $whatsAppService;
 	}
 
 	public function exportTresult(Request $request)
@@ -750,6 +753,12 @@ class TrainingController extends Controller
 					} catch (\Throwable $th) {
 						throw $th;
 					}
+					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
+				$Massage = "Dear " . $company->user->name . ",
+New Training Session has been created: ". $data['title'] ."
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
             }
 			// ==========> End Notify <================
@@ -777,10 +786,16 @@ class TrainingController extends Controller
 				$data['date'] = $datetime;
 				try {
 					$company->user->notify(new NewTrainingNotification($data));
-					log::info('Sent New Training notification to ' . $company->user);
+					log::info('Sent New Training notification to ' . $company->user->email);
 				} catch (\Throwable $th) {
 					// throw $th;
 				}
+				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
+				$Massage = "Dear " . $company->user->name . ",
+New Training Session has been created: ". $data['title'] ."
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 			}
 		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
@@ -829,8 +844,15 @@ class TrainingController extends Controller
 					} catch (\Throwable $th) {
 						throw $th;
 					}
-				}
+				
+				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
+				$Massage = "Dear " . $company->user->name . ",
+New Training Session has been created: ". $data['title'] ."
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
+		}
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} else {

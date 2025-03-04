@@ -209,7 +209,7 @@ to group of users'];
                             @if (!$company->fsession($cstep->id))
                             {{ __('cycles.Add Judges first') }}
                             @elseif($company->fsession($cstep->id)->join_url)
-                            <button type="button" onclick="edit({{ $company->fsession($cstep->id)->id }})"
+                            <button type="button" onclick="edit({{ $company->id }})"
                               class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="modal"
                               data-bs-target="#ModifyRequest">
                               <i class="ti ti-edit text-info"></i>
@@ -359,7 +359,7 @@ to group of users'];
 <div class="modal fade" id="ModifyRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="edit-zoom-form" method="post" action="/dashboard/final/editZoom" enctype="multipart/form-data">
+      <form id="edit-zoom-form" method="post" action="/dashboard/final/addzoom" enctype="multipart/form-data">
         @csrf
         <div class="modal-header">
           <h4 class="modal-title">{{ __('cycles.Modify Final Screen') }} </h4>
@@ -368,7 +368,7 @@ to group of users'];
         <div class="modal-body">
           {{-- <p class="text-danger">{{ __('cycles.Before submit review') }}.</p> --}}
           <input type="hidden" name="step" value="{{ $cstep->id }}" id="sid">
-          <input type="hidden" name="company" value="0" id="cid">
+          <input type="hidden" name="company" value="" id="cid" class="cid">
           <div class="form-group mb-3" id="showdates mb-3">
             <label class="fs-6 mb-1">{{ __('cycles.Date/Time') }}:</label>
             <input type="hidden" name="date" id="editNeededZoomDateTime" />
@@ -580,7 +580,8 @@ to group of users'];
     }
 
     function edit(company) {
-      $('#cid').val(company);
+      alert(company);
+      $('.cid').val(company);
       $('#ModifyRequest').modal('show');
     }
 
