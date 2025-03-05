@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\User;
 use App\ServicesRequests;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -29,19 +30,18 @@ class ServiceRequestNotification extends Notification
         $service = $this->request->service;
         $requester = $this->request->user;
 
+       $firstAdminEmail = User::role('Admin')->orderBy('id')->value('email'); 
+       $firstOrgManagerEmail = User::role('organizationManager')->orderBy('id')->value('email'); 
+       $ccEmails = array_filter([$requester->email, $firstAdminEmail, $firstOrgManagerEmail]);
+
         return (new MailMessage)
             ->subject("[Service Request] New Request for {$service->name_en} from {$requester->first_name_en}")
-            ->greeting("Dear {$service->vendor_name},")
-            ->line("A new service request has been submitted for your service: **{$service->name_en}**.")
-            ->line("**Request Details:**")
-            ->line("**Requested by:** {$requester->first_name_en} {$requester->last_name_en}")
-            ->line("**Email:** {$requester->email}")
-            ->line("**Requested Date:** {$this->request->date_time}")
-            ->line("**Service Description:** {$service->description_en}")
-            ->line("**Additional Notes:** {$this->request->comment}")
-            ->line("Please review the request and respond accordingly.")
-            ->cc([$requester->email])
-            ->salutation("Best Regards, GrowthLabs Team");
+            ->markdown('emails.service_request', [
+                'service' => $service,
+                'requester' => $requester,
+                'request' => $this->request,
+            ])
+            ->cc($ccEmails); 
     }
 
     /**
