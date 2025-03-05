@@ -761,6 +761,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </li>
       @endif
 
+      @if ($_user->hasAnyRole('organizationManager'))
       @if ($_user->ableTo('organization-settings',$permissions))
       <li class="{{ Request::is('dashboard/organizations/settings*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('organization-settings') }}">
@@ -768,6 +769,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           <div>{{ __('admin.settings') }}</div>
         </a>
       </li>
+      @endif
       @endif
   
       {{-- @if( $_user->ableTo('audit-logs.index', $permissions) )
@@ -791,7 +793,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
 
      
   
-    @if( $_user->ableToAny(['settings.list', 'settings.save'], $permissions) )
+    @if ($_user->hasAnyRole('Admin'))
       <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="menu-icon tf-icons ti ti-settings"></i>

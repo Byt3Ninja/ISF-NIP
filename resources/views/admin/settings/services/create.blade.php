@@ -50,17 +50,12 @@
                       <div class="row">
                         <div class="col-md-12">
                           <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.English Name') }}</label>
+                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Service_Name') }}</label>
                             <input style="direction: ltr;" type="text" class="form-control col-md-6 col-sm-12"
-                              id="name_en" name='name_en' required placeholder="{{ __('admin.English Name') }}"
+                              id="name_en" name='name_en' required 
                               value="{{ old('name_en') }}">
                           </fieldset>
-                          <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Arabic Name') }}</label>
-                            <input style="direction: rtl;" type="text" class="form-control col-md-6 col-sm-12"
-                              id="name_ar" name='name_ar' required placeholder="{{ __('admin.Arabic Name') }}"
-                              value="{{ old('name_ar') }}">
-                          </fieldset>
+
                           <fieldset class="form-group mb-4">
                             <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Price') }}
                               {{ $Setting->Currency }}</label>
@@ -71,14 +66,9 @@
                           </fieldset>
 
                           <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.English Description') }}</label>
+                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Description') }}</label>
                             <textarea class="form-control" id="basicTextarea" name='description_en' required
-                              placeholder="{{ __('admin.English Description') }}" value="{{ old('description_en') }}"></textarea>
-                          </fieldset>
-                          <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Arabic Description') }}</label>
-                            <textarea class="form-control" id="description_ar" name='description_ar' required
-                              placeholder="{{ __('admin.Arabic Description') }}" value="{{ old('description_ar') }}"></textarea>
+                               value="{{ old('description_en') }}"></textarea>
                           </fieldset>
 
                           <fieldset class="form-group mb-4">
@@ -94,6 +84,44 @@
                             </select>
                           </fieldset>
 
+                          <!-- Vendor Details -->
+                  <fieldset class="form-group mb-4">
+                    <label class="fs-5 mb-2">{{ __('admin.Vendor_Name') }}</label>
+                    <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_name"
+                       value="{{ old('vendor_name') }}">
+                  </fieldset>
+
+                  <fieldset class="form-group mb-4">
+                    <label class="fs-5 mb-2">{{ __('admin.Vendor_Email') }}</label>
+                    <input type="email" class="form-control col-md-6 col-sm-12" name="vendor_email"
+                       value="{{ old('vendor_email') }}">
+                  </fieldset>
+
+                  <fieldset class="form-group mb-4">
+                    <label class="fs-5 mb-2">{{ __('admin.Vendor_Phone') }}</label>
+                    <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_phone"
+                     value="{{ old('vendor_phone') }}">
+                  </fieldset>
+
+                  <!-- Visibility Controls -->
+                  <fieldset class="form-group mb-4">
+                    <div class="form-check">
+                        <input type="hidden" name="hide_price" value="0">
+                        <input type="checkbox" class="form-check-input" id="hide_price" name="hide_price" value="1"
+                               {{ old('hide_price') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="hide_price">{{ __('admin.Hide_Price') }}</label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-group mb-4">
+                  <div class="form-check">
+                      <input type="hidden" name="hide_vendor_info" value="0">
+                      <input type="checkbox" class="form-check-input" id="hide_vendor_info" name="hide_vendor_info" value="1"
+                             {{ old('hide_vendor_info') ? 'checked' : '' }}>
+                      <label class="form-check-label" for="hide_vendor_info">{{ __('admin.Hide_Vendor') }}</label>
+                  </div>
+              </fieldset>
+
                           <fieldset class="form-group mb-4">
                             <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Image') }}</label>
                             <br />
@@ -102,7 +130,7 @@
                                 <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
                               </div> --}}
                               <div class="d-flex align-items-center border rounded py-1 px-2">
-                                <input type="file" required class="custom-file-input" id="img_url" name="img_url"
+                                <input type="file" class="custom-file-input" id="img_url" name="img_url"
                                   accept="image/*" aria-describedby="inputGroupFileAddon01">
                                 <label class="fs-5 mb-2 custom-file-label"
                                   for="inputGroupFile01">{{ __('admin.SelectFile') }}</label>

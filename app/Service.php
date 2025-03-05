@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Service extends Model
 {
-	protected $fillable = ['organization_id', 'service_category_id', 'name_en', 'name_ar','price', 'description_en', 'description_ar', 'img_url'];
+	protected $fillable = ['organization_id', 'service_category_id', 'name_en', 'name_ar','price', 'description_en', 'description_ar', 'img_url','vendor_name','vendor_email','vendor_phone','hide_price','hide_vendor_info'];
 
 	public function getNameAttribute()
 	{
