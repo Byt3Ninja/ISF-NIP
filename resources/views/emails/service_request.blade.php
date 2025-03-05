@@ -228,7 +228,6 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;"> **Service Description:** {{ $service->description_en }}</p>
                                                     <p style="margin: 0;">**Additional Notes:** {{ $request->comment }}</p>
                                                     <p style="margin: 0;">Please review the request and respond accordingly.</p>
-                                                    <p style="margin: 0;">{{ $requester->email }}</p>
                                                 </div>
                                             </td>
                                         </tr>
