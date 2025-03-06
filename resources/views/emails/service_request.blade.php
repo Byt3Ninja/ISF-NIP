@@ -221,13 +221,14 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;">Dear {{ $service->vendor_name }},</p>
                                                     <p style="margin: 0;">A new service request has been submitted for your service: **{{ $service->name_en }}**.
                                                     </p>
-                                                    <p style="margin: 0;">## **Request Details:**</p>
-                                                    <p style="margin: 0;">**Requested by:** {{ $requester->first_name_en }} {{ $requester->last_name_en }}</p>
-                                                    <p style="margin: 0;">**Email:** {{ $requester->email }}                                                    </p>
-                                                    <p style="margin: 0;">**Requested Date:** {{ $request->date_time }}</p>
-                                                    <p style="margin: 0;"> **Service Description:** {{ $service->description_en }}</p>
-                                                    <p style="margin: 0;">**Additional Notes:** {{ $request->comment }}</p>
-                                                    <p style="margin: 0;">Please review the request and respond accordingly.</p>
+                                                    <p style="margin: 0;">Request Details: -</p>
+                                                    <p style="margin: 0;">Requested by: {{ $requester->first_name_en }} {{ $requester->last_name_en }}</p>
+                                                    <p style="margin: 0;">Email: {{ $requester->email }}</p>
+                                                    <p style="margin: 0;">Organization: {{ $service->serviceCategory->organization->name_en }}</p>
+                                                    <p style="margin: 0;">Requested Date: {{ $request->date_time }}</p>
+                                                    <p style="margin: 0;"> Service Description: {{ $service->description_en }}</p>
+                                                    <p style="margin: 0;">Additional Notes: {{ $request->comment }}</p>
+                                                    <p style="margin: 0;">Please Review the Request and Respond Accordingly.</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -359,14 +360,19 @@ $setting = \App\settings::where('id', 1)->first();
                                            width="100%">
                                         <tr>
                                             <td class="pad"
-                                                style="padding-bottom:30px;padding-left:40px;padding-right:40px;padding-top:20px;">
-                                                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:12px;line-height:120%;text-align:left;mso-line-height-alt:14.399999999999999px;">
-                                                    <p style="margin: 0; word-break: break-word;"><span
-                                                                style="word-break: break-word; color: #95979c;">Best Regards,  
-                                                                **GrowthLabs Team**</span>
-                                                    </p>
-                                                </div>
-                                            </td>
+                                            style="padding-bottom:30px;padding-left:40px;padding-right:40px;padding-top:20px;">
+                                            <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:12px;line-height:120%;text-align:left;mso-line-height-alt:14.4px;">
+                                                <p style="margin: 0; word-break: break-word;">
+                                                    <span style="word-break: break-word; color: #95979c;">
+                                                        Best Regards,  
+                                                        <br>
+                                                        {{ $service->serviceCategory->organization->name_en }}
+                                                        <br>
+                                                        {{ $setting->Platform_Name }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </td>
                                         </tr>
                                     </table>
                                 </td>

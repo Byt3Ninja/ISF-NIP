@@ -30,9 +30,9 @@ class ServiceRequestNotification extends Notification
         $service = $this->request->service;
         $requester = $this->request->user;
 
-       $firstAdminEmail = User::role('Admin')->orderBy('id')->value('email'); 
-       $firstOrgManagerEmail = User::role('organizationManager')->orderBy('id')->value('email'); 
-       $ccEmails = array_filter([$requester->email, $firstAdminEmail, $firstOrgManagerEmail]);
+        $adminEmail = User::role('Admin')->orderBy('id')->value('email'); 
+        $orgManagerEmail = User::role('organizationManager')->orderBy('id')->value('email'); 
+        $ccEmails = array_filter([$requester->email, $adminEmail, $orgManagerEmail]);
 
         return (new MailMessage)
             ->subject("[Service Request] New Request for {$service->name_en} from {$requester->first_name_en}")
