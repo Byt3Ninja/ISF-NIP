@@ -27,6 +27,7 @@ class ScreeningController extends Controller
 {
 	protected $whatsAppService;
 	public function __construct(WhatsAppService $whatsAppService)
+	{
 		$this->whatsAppService = $whatsAppService;
 	}
 	public function index($id = 0)

@@ -1338,11 +1338,16 @@ return [
 	'new_training_message' => 'New Training Created',
 	'mentorship_request_subject' => 'Mentorship Request',
 	'No Sessions Available' => 'No Sessions Available',
+<<<<<<< Updated upstream
 	'Vendor_Name' => 'Vendor Name',
 	'Vendor_Email' => 'Vendor Email',
 	'Vendor_Phone' => 'Vendor Phone',
 	'Hide_Price'=> 'Hide Price',
 	'Hide_Vendor' => 'Hide Vendor Info',
 	'Service_Name' => 'Service Name',
+=======
+	'youareNotRegisterAttendee' => 'You are not registered to attend this training',
+	'youareRegisterAttendee' => 'You are registered to attend this training',
+>>>>>>> Stashed changes
 	
 ];

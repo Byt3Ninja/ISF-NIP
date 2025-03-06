@@ -180,6 +180,8 @@ return [
 
         Laravel\Socialite\SocialiteServiceProvider::class,
 
+        \Torann\GeoIP\GeoIPServiceProvider::class,
+
 
     ],
 
@@ -233,5 +235,6 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         'Sentry' => Sentry\Laravel\Facade::class,
+        'GeoIP' => \Torann\GeoIP\Facades\GeoIP::class,
     ],
 ];
