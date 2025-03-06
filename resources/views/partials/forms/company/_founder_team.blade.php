@@ -275,7 +275,7 @@
                     </div>
                   </div>
                   <div class="mt-6">
-                    <input type="hidden" id="founderId" value="{{ $fonder->id }}" />
+                    <input type="hidden" id="founderId" value="{{ $fonder->id }}" name="id" />
                     <input type="hidden" id="CompanyN" value="{{ optional($client->company)->id }}" />
                     <button 
                       type="submit"

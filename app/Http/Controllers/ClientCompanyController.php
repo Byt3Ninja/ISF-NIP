@@ -963,7 +963,9 @@ class ClientCompanyController extends Controller
     }
 
     public function EditTeams(Request $request, $id = null)
-    {
+    {return response()->json([
+        'state' => $request->id,
+    ]);
         if( isset( $id ) && !is_null( $id ) ) { $user = User::where('company_id', $id)->first(); }
         else
         {
@@ -971,7 +973,7 @@ class ClientCompanyController extends Controller
         }
         // $user = Auth::user();
         $companyId = $user->company_id;
-
+        
         // إنشاء وحفظ بيانات العضو في قاعدة البيانات
         $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
         if ($teamMember->TeamMember == "Founder") {

@@ -214,7 +214,7 @@
                     </div>
                   </div>
                   <div class="mt-6">
-                    <input type="hidden" id="investorId" value="{{ $Investor->id }}" />
+                    <input type="hidden" id="investorId" value="{{ $Investor->id }}" name="id" />
                     <input type="hidden" id="CompanyN" value="{{ optional($client->company)->id }}" />
                     <button 
                       type="submit"

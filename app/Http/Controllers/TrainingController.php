@@ -26,15 +26,16 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Jobs\ExportTresultData;
 use App\Traits\ZoomMeetingTrait;
+use App\Services\WhatsAppService;
 use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
-use App\Services\WhatsAppService;
 use App\Notifications\TrainerEmail;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Factories\OnlineMeetingFactory;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Notifications\NewTrainingNotification;
 use Intervention\Image\ImageManagerStatic as Image;
 
@@ -720,9 +721,7 @@ class TrainingController extends Controller
 				'trainer_name' => $request->trainer_name,
 				'trainer_email' => $request->trainer_email
 			]);
-			$data = [];
-			$cycleId = Step::find($step)->cycle_id;
-			$companies = Company::where('cycle', $cycleId)->get();
+			
 			// ======> notify Trainer <=================
 			$mail['trainer_name'] = $request->trainer_name;
 			$mail['title'] = $topic;
@@ -738,7 +737,9 @@ class TrainingController extends Controller
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
-
+				$data = [];
+				$cycleId = Step::find($step)->cycle_id;
+				$companies = Company::where('cycle', $cycleId)->get();
 				foreach ($companies as $company) {
 					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
 					$data['email'] = $company->user->email;
@@ -767,6 +768,7 @@ Thanks from " . env('APP_NAME');
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
+			
 			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'location' => $request->online]);
 
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
@@ -800,7 +802,7 @@ Thanks from " . env('APP_NAME');
 		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
-			TrainingSession::insert([
+			$trainingSession = TrainingSession::create([
 				'type' => $type,
 				'step_id' => $step,
 				'title' => $title,
@@ -813,7 +815,6 @@ Thanks from " . env('APP_NAME');
 				'trainer_email' => $request->trainer_email
 			]);
 			// ======> notify Trainer <=================
-
 			$mail['trainer_name'] = $request->trainer_name;
 			$mail['title'] = $title;
 			$mail['date'] = $datetime;
@@ -843,18 +844,32 @@ Thanks from " . env('APP_NAME');
 						log::info('Sent New Training notification to ' . $company->user->email);
 					} catch (\Throwable $th) {
 						throw $th;
-					}
-				
+					
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] ."
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-            }
-		}
+					}
+				}
+			}
+			// رابط المسح الضوئي للحضور
+			$attendanceUrl = url("training/session-attendance-offline/{$trainingSession->id}");
+			// اسم ملف QR Code
+			$qrFileName = 'training_' . $trainingSession->id . '.png';
+			// توليد QR Code كـ string
+			$qrCode = QrCode::format('png')->size(300)->generate($attendanceUrl);
+			// المسار الكامل داخل `public/`
+			$qrFilePath = '/qrcodes/' . $qrFileName;
+			// حفظ QR Code في `public/qrcodes/`
+			$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
+
+			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
+			$trainingSession->update(['QrCode' => $qrFilePath]);
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
+			
 		} else {
 			return back()->with(['message' => 'Can\'t add session', 'class' => 'danger']);
 		}
@@ -907,13 +922,33 @@ Thanks from " . env('APP_NAME');
                     // throw $th;
                 }
 
+				$data = [];
+				$cycleId = Step::find($step)->cycle_id;
+				$companies = Company::where('cycle', $cycleId)->get();
+				foreach ($companies as $company) {
+					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
+					$data['email'] = $company->user->email;
+					$data['cycle'] = $company->cycledata->title;
+					$data['step'] = $company->stepdata->title;
+					$data['join_url'] = $join;
+					$data['title'] = $topic;
+					$data['date'] = $datetime;
+					try {
+						$company->user->notify(new NewTrainingNotification($data));
+						log::info('Sent New Training notification to ' . $company->user->email);
+					} catch (\Throwable $th) {
+						throw $th;
+					}
+					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
+				$Massage = "Dear " . $company->user->name . ",
+Training Session has been Updated: ". $data['title'] ."
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+				}
+			}
 
-
-
-
-
-
-            }
+            
 
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
@@ -922,6 +957,31 @@ Thanks from " . env('APP_NAME');
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
 			TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'location' => $request->online]);
+			$data = [];
+			$cycleId = Step::find($step)->cycle_id;
+			$companies = Company::where('cycle', $cycleId)->get();
+			// ======> notify Trainer <=================
+			foreach ($companies as $company) {
+				$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
+				$data['email'] = $company->user->email;
+				$data['cycle'] = $company->cycledata->title;
+				$data['step'] = $company->stepdata->title;
+				$data['join_url'] = '';
+				$data['title'] = $title;
+				$data['date'] = $datetime;
+				try {
+					$company->user->notify(new NewTrainingNotification($data));
+					log::info('Sent New Training notification to ' . $company->user->email);
+				} catch (\Throwable $th) {
+					// throw $th;
+				}
+				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
+				$Massage = "Dear " . $company->user->name . ",
+Training Session has been Updated: ". $data['title'] ."
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+			}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
 			$session = TrainingSession::where('id', $id)->update([
@@ -949,6 +1009,33 @@ Thanks from " . env('APP_NAME');
                 } catch (\Throwable $th) {
                     // throw $th;
                 }
+
+				$data = [];
+				$cycleId = Step::find($step)->cycle_id;
+				$companies = Company::where('cycle', $cycleId)->get();
+				foreach ($companies as $company) {
+					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
+					$data['email'] = $company->user->email;
+					$data['cycle'] = $company->cycledata->title;
+					$data['step'] = $company->stepdata->title;
+					$data['join_url'] = 'offline';
+					$data['title'] = $title;
+					$data['date'] = $datetime;
+					try {
+						$company->user->notify(new NewTrainingNotification($data));
+						log::info('Sent New Training notification to ' . $company->user->email);
+					} catch (\Throwable $th) {
+						throw $th;
+					}
+				
+				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
+				$Massage = "Dear " . $company->user->name . ",
+Training Session has been Updated: ". $data['title'] ."
+Thanks from " . env('APP_NAME');
+				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+            }
+
             }
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
@@ -1371,4 +1458,40 @@ Thanks from " . env('APP_NAME');
 
 		return view('admin/settings/training/viewCourse', compact('course', 'id', 'contents', 'expertises', 'Quizzes', 'instructors', 'tags'));
 	}
+	public function attendanceOffline(Request $request , $id)
+	{
+		$session = TrainingSession::find($id);
+		$step_Traning = $session->step_id;
+		$cycle_Traning = $session->step->cycle->id;
+		$user = auth()->user();
+		$userId = $user->id;
+		$companyId = $user->company_id;
+		$cycle_user = $user->company->cycle;
+		$step_user = $user->company->step;
+		if($step_user == $step_Traning){
+			$insert = DB::table('attendance_training_offline')->insert([
+				'user_id' => $userId,
+				'company_id' => $companyId,
+				'training_session_id' => $session->id,
+				'step_id' => $step_Traning,
+				'cycle_id' => $cycle_Traning,
+				'attendance' => 1,
+				'location' => 'location',
+				'created_at' => now(),
+				'updated_at' => now(),
+			]);
+		}
+		if($insert){
+			return response()->json(['message' => 'youareRegisterAttendee']);
+		}else{
+			return response()->json(['message' => 'youareNotRegisterAttendee']);
+		}
+	}
+
+
+
+
+
+
+
 }

@@ -134,7 +134,14 @@
                                 @endif
 
                               </td>
-                              <td> <button title="Edit" onclick="editme({{ $session->id }})" type="button"
+                              <td> 
+                                @if ($session->QrCode != null)
+                                <button title="QRCode"
+                                class="btn btn-icon btn-label-info rounded-circle waves-effect" data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" > 
+                                <i class="ti ti-qrcode text-info"></i></button>
+                                @endif
+
+                                <button title="Edit" onclick="editme({{ $session->id }})" type="button"
                                   class="btn btn-icon btn-label-info rounded-circle waves-effect">
                                   <i class="ti ti-edit text-info"></i></button>&nbsp;
                                 <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
@@ -143,6 +150,20 @@
 
                               </td>
                             </tr>
+                            <!-- المودال نفسه -->
+<div class="modal fade" id="qrCodeModal{{ $session->id }}" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="qrCodeModalLabel">QR Code</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+              <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
+          </div>
+      </div>
+  </div>
+</div>
                           @endforeach
 
                         </tbody>
