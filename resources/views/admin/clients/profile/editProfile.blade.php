@@ -137,7 +137,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
         <!-- /Tab Content -->
 
         <!-- Deactivate account -->
-        <div class="card mb-6">
+        {{-- <div class="card mb-6">
           <h5 class="card-header">{{ __('admin.Delete Account') }}</h5>
           <div class="card-body">
             <div class="mb-6 col-12 mb-0">
@@ -156,7 +156,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
               </button>
             </form>
           </div>
-        </div>
+        </div> --}}
         <!-- /Deactivate account -->
       </div>
     </div>
