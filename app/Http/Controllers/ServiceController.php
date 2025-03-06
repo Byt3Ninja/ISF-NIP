@@ -63,9 +63,10 @@ class ServiceController extends Controller
    { 
 	
     $category = ServiceCategory::find( $request->service_category_id );
-		if( empty( $category ) ) { 
+	if( empty( $category ) ) { 
 			return back()->withInput()->with( ['msg' => 'FailedStore'] ); 
-		}
+	}
+
 	if( $request->hasFile('img_url') ){
 		//store the image
 		$img_url = $request->file('img_url');
@@ -135,13 +136,13 @@ class ServiceController extends Controller
 	
 	 public function update(UpdateServiceRequest $request, Service $service)
   {
-    $category = ServiceCategory::find($request->service_category_id);
+     $category = ServiceCategory::find($request->service_category_id);
     
-	if( empty( $category ) ) { 
+	  if( empty( $category ) ) { 
 		return back()->withInput()->with( ['msg' => 'FailedStore'] ); 
-	}
+	 }
 
-    $inputs = $request->except(['img_url']);
+      $inputs = $request->except(['img_url']);
 
     // Handle Image Upload
     if ($request->hasFile('img_url')) {
@@ -155,8 +156,8 @@ class ServiceController extends Controller
     $inputs['vendor_phone'] = $request->vendor_phone;
     $inputs['vendor_email'] = $request->vendor_email;
 
-    $inputs['hide_price'] = $request->has('hide_price') ? 1 : 0;
-    $inputs['hide_vendor_info'] = $request->has('hide_vendor_info') ? 1 : 0;
+	$inputs['hide_price'] = $request->input('hide_price', 0);
+    $inputs['hide_vendor_info'] = $request->input('hide_vendor_info', 0);
 
     $result = $service->update($inputs);
 
@@ -181,7 +182,7 @@ class ServiceController extends Controller
 
 	public function requests()
 	{
-		$received = ServicesRequests::whereNull('approved')->get();
+		$received = ServicesRequests::whereNull('approved')->with('service')->get();
 		$countold = ServicesRequests::whereNotNull('approved')->count();
 		return view('admin.settings.services.requests', compact('received','countold') );
 	}

@@ -71,9 +71,17 @@
                                 <td>{{ $rec->date_time }}</td>
                                 <td>
                                   <button
-                                    onclick="reply({{ $rec->id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
-                                    type="button" class="btn btn-icon rounded-circle btn-light-success mr-1">
-                                    <i class="ti ti-edit text-info"></i></button>
+                                  onclick="reply(
+                                      {{ $rec->id }}, 
+                                      '{{ addslashes($user) }}', 
+                                      '{{ addslashes($rec->service->{'name_' . $l} ?? '-') }}',
+                                      '{{ addslashes($rec->service->vendor_name ?? '-') }}',
+                                      '{{ addslashes($rec->service->vendor_email ?? '-') }}',
+                                      '{{ addslashes($rec->service->vendor_phone ?? '-') }}'
+                                  );"
+                                  type="button" class="btn btn-icon rounded-circle btn-light-success mr-1">
+                                  <i class="ti ti-edit text-info"></i>
+                              </button>
                                   <button
                                     onclick="OpenModal({{ $rec->user_id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
                                     type="button" class="btn btn-icon rounded-circle btn-light-primary mr-1">
@@ -158,6 +166,14 @@
         <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
         <input type="hidden" name="receiver" id="resid" value="">
         <div class="modal-body">
+          <label>{{ __('admin.Vendor_Name') }}:</label>
+          <p id="vendor_name">-</p>
+          
+          <label>{{ __('admin.Vendor_Email') }}:</label>
+          <p id="vendor_email">-</p>
+          
+          <label>{{ __('admin.Vendor_Phone') }}:</label>
+          <p id="vendor_phone">-</p>
           <label>{{ __('cycles.Add a comment') }}:</label>
           <div class="form-group">
             <textarea class="form-control" id="admin_comment" name='admin_comment' rows="4"
@@ -218,9 +234,13 @@
       $('#MessageModal').modal('show');
     }
 
-    function reply(id, name, title) {
+    function reply(id, name, title, vendorName, vendorEmail, vendorPhone) {
       $('#rname').html('"' + title + '" {{ __('cycles.Request from') }} ' + name);
       $('#resid').val(id);
+       // Update vendor details dynamically
+    $('#vendor_name').text(vendorName || '-');
+    $('#vendor_email').text(vendorEmail || '-');
+    $('#vendor_phone').text(vendorPhone || '-');
       $('#ReplyModal').modal('show');
     }
 
