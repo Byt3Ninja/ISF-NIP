@@ -1354,17 +1354,14 @@ return [
 	'new_training_message' => 'تم انشاء تدريب جديدة',
 	'mentorship_request_subject' => 'طلب استشارة جديد',
 	'No Sessions Available' => 'لا توجد جلسات متاحة',
-<<<<<<< Updated upstream
 	'Vendor_Name' => 'اسم البائع',
 	'Vendor_Email' => 'البريد الإلكتروني للبائع',
 	'Vendor_Phone' => 'رقم هاتف البائع',
 	'Hide_Price'=> 'إخفاء السعر',
 	'Hide_Vendor' => 'إخفاء معلومات البائع',
 	'Service_Name' => 'إخفاء معلومات البائع',
-=======
 	'youareNotRegisterAttendee' => 'ليس لديك حق الحضور في هذا التدريب',
 	'youareRegisterAttendee' => 'تم تسجيل حضورك في هذا التدريب',
->>>>>>> Stashed changes
 	
 ]; 
 
