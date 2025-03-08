@@ -269,11 +269,6 @@
           </select>
         </div>
 
-<!-- حاوية عرض QR Code -->
-<div id="qrCodeContainer" style="display: {{ $client->two_factor_enabled ? 'block' : 'none' }};">
-  <h3>امسح هذا الكود في تطبيق Google Authenticator</h3>
-  <img id="qrCodeImage" src="" alt="QR Code">
-</div>
 
 
       </div>
