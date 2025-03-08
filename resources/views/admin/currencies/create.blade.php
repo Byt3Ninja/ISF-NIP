@@ -44,7 +44,7 @@
                       </div>
                       <div class="col-md-6 mt-3">
                         <label>{{ __('admin.Exchange_Rate') }}</label>
-                        <input type="number" name="exchange_rate_to_usd" class="form-control" step="0.000001" required>
+                        <input type="number" name="exchange_rate_to_usd" class="form-control" >
                         @error('exchange_rate_to_usd')
                           <div class="text-danger">{{ $message }}</div>
                        @enderror

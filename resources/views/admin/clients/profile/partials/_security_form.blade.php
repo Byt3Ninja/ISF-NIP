@@ -71,6 +71,8 @@ $passwordRules = [
         @endforeach
       </ul>
 
+      
+
       <!-- Form Buttons -->
       <div class="mt-6">
         <button type="submit" class="btn btn-primary me-3">{{ __('admin.Save_Changes') }}</button>
