@@ -676,6 +676,7 @@ class ClientProfileController extends Controller
         ]);
         $user = Auth::user();
         $user->two_factor_enabled = 0;
+        $user->google2fa_secret = null;
         $user->save();
         return redirect('/dashboard/myProfile')->with('success',"2FA is now disabled.");
     }
