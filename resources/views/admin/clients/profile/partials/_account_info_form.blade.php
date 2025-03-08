@@ -269,17 +269,6 @@
           </select>
         </div>
 
-
-
-        <div class="col-md-12 col-12">
-          <div class="form-check form-switch mb-2">
-              <input class="form-check-input" id="twoFactorToggle" name="two_factor_enabled" type="checkbox"
-                  {{ $client->two_factor_enabled == '1' ? 'checked' : '' }} />
-              <label class="form-check-label">{{ __('admin.2FA') }}</label>
-          </div>
-      </div>
-
-
 <!-- حاوية عرض QR Code -->
 <div id="qrCodeContainer" style="display: {{ $client->two_factor_enabled ? 'block' : 'none' }};">
   <h3>امسح هذا الكود في تطبيق Google Authenticator</h3>
