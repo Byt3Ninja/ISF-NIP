@@ -748,12 +748,12 @@ class TrainingController extends Controller
 					$data['join_url'] = $join;
 					$data['title'] = $topic;
 					$data['date'] = $datetime;
-					try {
-						$company->user->notify(new NewTrainingNotification($data));
-						log::info('Sent New Training notification to ' . $company->user->email);
-					} catch (\Throwable $th) {
-						throw $th;
-					}
+					// try {
+					// 	$company->user->notify(new NewTrainingNotification($data));
+					// 	log::info('Sent New Training notification to ' . $company->user->email);
+					// } catch (\Throwable $th) {
+					// 	throw $th;
+					// }
 					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] ."
@@ -844,14 +844,14 @@ Thanks from " . env('APP_NAME');
 						log::info('Sent New Training notification to ' . $company->user->email);
 					} catch (\Throwable $th) {
 						throw $th;
-					
+					}
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] ."
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-					}
+					
 				}
 			}
 			// رابط المسح الضوئي للحضور
@@ -933,12 +933,12 @@ Thanks from " . env('APP_NAME');
 					$data['join_url'] = $join;
 					$data['title'] = $topic;
 					$data['date'] = $datetime;
-					try {
-						$company->user->notify(new NewTrainingNotification($data));
-						log::info('Sent New Training notification to ' . $company->user->email);
-					} catch (\Throwable $th) {
-						throw $th;
-					}
+					// try {
+					// 	$company->user->notify(new NewTrainingNotification($data));
+					// 	log::info('Sent New Training notification to ' . $company->user->email);
+					// } catch (\Throwable $th) {
+					// 	throw $th;
+					// }
 					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 Training Session has been Updated: ". $data['title'] ."
@@ -1480,12 +1480,11 @@ Thanks from " . env('APP_NAME');
 				'created_at' => now(),
 				'updated_at' => now(),
 			]);
-		}
-		if($insert){
 			return response()->json(['message' => 'youareRegisterAttendee']);
-		}else{
-			return response()->json(['message' => 'youareNotRegisterAttendee']);
 		}
+		
+			return response()->json(['message' => 'youareNotRegisterAttendee']);
+		
 	}
 
 

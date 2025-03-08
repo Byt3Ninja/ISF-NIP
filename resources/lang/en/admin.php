@@ -1346,5 +1346,18 @@ return [
 	'Service_Name' => 'Service Name',
 	'youareNotRegisterAttendee' => 'You are not registered to attend this training',
 	'youareRegisterAttendee' => 'You are registered to attend this training',
+	'2FA' => '2FA',
+	'Two_Factor_Authentication' => 'Two Factor Authentication',
+	'Two_Factor_Authentication_Description' => 'Two factor authentication (2FA) strengthens access security by requiring two methods (also referred to as factors) to verify your identity. Two factor authentication protects against phishing, social engineering and password brute force attacks and secures your logins from attackers exploiting weak or stolen credentials.',
+	'Generate_Secret_Key_to_Enable_2FA' => 'Generate Secret Key to Enable 2FA',
+	'Scan_this_QR_code_with_your_Google_Authenticator_App' => 'Scan this QR code with your Google Authenticator App. Alternatively, you can use the code:',
+	'Enter_the_pin_from_Google_Authenticator_app' => 'Enter the pin from Google Authenticator app:',
+	'Authenticator_Code' => 'Authenticator Code',
+	'Enable_2FA' => 'Enable 2FA',
+	'enabled' => 'Enabled',
+	'on_your_account' => 'on your account',
+	'If_you_are_looking_to_disable_Two_Factor_Authentication' => 'If you are looking to disable Two Factor Authentication',
+	'Current_Password' => 'Current Password',
+	'Disable_2FA' => 'Disable 2FA',
 	
 ];

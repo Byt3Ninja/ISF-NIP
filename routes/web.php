@@ -55,12 +55,17 @@ Route::get('search', 'IndexController@search');
 Route::get('event/{id}', 'IndexController@event');
 Route::post('eventregister', 'IndexController@eventregister');
 
+ // test middleware
+ Route::get('/2otp', function () {
+    return redirect('/dashboard');
+})->middleware(['auth', '2fa']);
+
 Auth::routes(['verify' => true]);
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
     ->name('set-password-form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('accept-invitation');
 
-Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], function () {
+Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa']], function () {
     ####################### Overall System Admin Routes ###############
     // All Logged users
     Route::get('/', 'HomeController@index')->name('admin');
@@ -171,7 +176,20 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('show_mentor_profile');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('email.confirm');
-
+    
+    Route::group(['prefix'=>'2fa'], function(){
+        Route::get('/','ClientProfileController@show2faForm');
+        Route::post('/generateSecret','ClientProfileController@generate2faSecret')->name('generate2faSecret');
+        Route::post('/enable2fa','ClientProfileController@enable2fa')->name('enable2fa');
+        Route::post('/disable2fa','ClientProfileController@disable2fa')->name('disable2fa');
+    
+        // 2fa middleware
+        Route::post('/2faVerify', function () {
+            return redirect('/dashboard');
+        })->name('2faVerify')->middleware('2fa');
+    });
+    
+    
 
     Route::post('/save-phone-session', 'ClientProfileController@savePhoneSession')->name('save.phone.session');
     Route::post('/send-code', 'ClientProfileController@sendCode')->name('send.code');
@@ -224,6 +242,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified']], fu
     Route::post('/EditCompanyMileStone/{id?}', 'ClientCompanyController@EditMileStone')->name('EditMileStone_Comp');
     Route::post('/DeleteCompanyMileStone/{id?}', 'ClientCompanyController@DeleteMileStone')->name('DeleteMileStone_Comp');
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('delete.document');
+    
+
 
     //like a service
     Route::post('/likeService', 'ClientCompanyController@likeService')->name('like_service');
