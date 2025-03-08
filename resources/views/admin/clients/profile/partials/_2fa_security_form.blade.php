@@ -16,7 +16,7 @@
                                 </div>
                             @endif
     
-                            @if($data['user'] == null)
+                            @if($data['user']->google2fa_secret == null)
                                 <form class="form-horizontal" method="POST" action="{{ route('generate2faSecret') }}">
                                     {{ csrf_field() }}
                                     <div class="form-group">
