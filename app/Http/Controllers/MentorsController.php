@@ -327,7 +327,7 @@ Thanks from " . env('APP_NAME');
 						// throw $th;
 					}
 					$phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
-						$Massage = "Dear " . $startup_owner->name . ", 
+						$Massage = "Dear " . $mentor_name . ", 
 This Is notification new mentorship session with '" . $startup_owner_name . "',
 Session will start:" . $date . ",
 Check your account to join the session ";

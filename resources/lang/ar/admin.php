@@ -1362,6 +1362,20 @@ return [
 	'Service_Name' => 'إخفاء معلومات البائع',
 	'youareNotRegisterAttendee' => 'ليس لديك حق الحضور في هذا التدريب',
 	'youareRegisterAttendee' => 'تم تسجيل حضورك في هذا التدريب',
+	'2FA' => '2FA',
+	'Two_Factor_Authentication' => 'المصادقة الثنائية',
+	'Two_Factor_Authentication_Description' => 'تعمل المصادقة الثنائية على تعزيز أمان الوصول من خلال طلب طريقتين (يشار إليهما أيضًا باسم العوامل) للتحقق من هويتك. تحمي المصادقة الثنائية من التصيد الاحتيالي والهندسة الاجتماعية وهجمات القوة الغاشمة لكلمة المرور وتحمي عمليات تسجيل الدخول الخاصة بك من المهاجمين الذين يستغلون بيانات اعتماد ضعيفة أو مسروقة.',
+	'Generate_Secret_Key_to_Enable_2FA' => 'توليد مفتاح سري لتمكين المصادقة الثنائية',
+	'Scan_this_QR_code_with_your_Google_Authenticator_App' => 'امسح هذا الكود QR مع تطبيق Google Authenticator الخاص بك أو يمكنك استخدام الرمز:',
+	'Enter_the_pin_from_Google_Authenticator_app' => 'ادخل الرمز من تطبيق Google Authenticator:',
+	'Authenticator_Code' => 'كود المصادقة الثنائية',
+	'Enable_2FA' => 'تمكين المصادقة الثنائية',
+	'2FA_is_currently' => 'المصادقة الثنائية حاليا',
+	'enabled' => 'مفعلة',
+	'on_your_account' => 'على حسابك',
+	'If_you_are_looking_to_disable_Two_Factor_Authentication' => 'اذا كنت تبحث عن تعطيل المصادقة الثنائية',
+	'Current_Password' => 'كلمة المرور الحالية',
+	'Disable_2FA' => 'تعطيل المصادقة الثنائية',
 	
 ]; 
 
