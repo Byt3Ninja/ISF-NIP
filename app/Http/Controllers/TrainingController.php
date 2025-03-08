@@ -855,7 +855,7 @@ Thanks from " . env('APP_NAME');
 				}
 			}
 			// رابط المسح الضوئي للحضور
-			$attendanceUrl = url("training/session-attendance-offline/{$trainingSession->id}");
+			$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$trainingSession->id}");
 			// اسم ملف QR Code
 			$qrFileName = 'training_' . $trainingSession->id . '.png';
 			// توليد QR Code كـ string
