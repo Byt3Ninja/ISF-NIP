@@ -1480,12 +1480,11 @@ Thanks from " . env('APP_NAME');
 				'created_at' => now(),
 				'updated_at' => now(),
 			]);
-		}
-		if($insert){
 			return response()->json(['message' => 'youareRegisterAttendee']);
-		}else{
-			return response()->json(['message' => 'youareNotRegisterAttendee']);
 		}
+		
+			return response()->json(['message' => 'youareNotRegisterAttendee']);
+		
 	}
 
 
