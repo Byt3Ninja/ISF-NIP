@@ -8,17 +8,19 @@
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
       <div class="content-body">
+        <h3 class="content-title fw-bold mb-4">{{ __('cycles.Services requests') }}</h3>
+
         <!-- Zero configuration table -->
         <section id="basic-datatable">
           <div class="row">
             @if (count($received) > 0)
               <div class="col-12">
                 <div class="card">
-                  <div class="card-header border-bottom border-light mb-2">
-                    <h4 class="content-title">{{ __('cycles.Services requests') }}</h4>
+                  <div class="card-header d-flex justify-content-end border-bottom border-light mb-2">
                     @if ($countold)
-                      <a href="/dashboard/requests/old" class="btn btn-primary glow">
+                      <a href="/dashboard/requests/old" class="btn btn-primary">
                         {{ __('cycles.Show old records') }}
+                        <i class="ti ti-eye ms-2"></i>
                       </a>
                     @endif
                   </div>
@@ -71,13 +73,21 @@
                                 <td>{{ $rec->date_time }}</td>
                                 <td>
                                   <button
-                                    onclick="reply({{ $rec->id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
-                                    type="button" class="btn btn-icon rounded-circle btn-light-success mr-1">
-                                    <i class="ti ti-edit text-info"></i></button>
+                                  onclick="reply(
+                                      {{ $rec->id }}, 
+                                      '{{ addslashes($user) }}', 
+                                      '{{ addslashes($rec->service->{'name_' . $l} ?? '-') }}',
+                                      '{{ addslashes($rec->service->vendor_name ?? '-') }}',
+                                      '{{ addslashes($rec->service->vendor_email ?? '-') }}',
+                                      '{{ addslashes($rec->service->vendor_phone ?? '-') }}'
+                                  );"
+                                  type="button" class="btn btn-icon rounded-circle btn-label-info mr-1">
+                                  <i class="ti ti-edit text-info"></i>
+                              </button>
                                   <button
                                     onclick="OpenModal({{ $rec->user_id }},'{{ $user }}','{{ $rec->service->{'name_' . $l} }}');"
-                                    type="button" class="btn btn-icon rounded-circle btn-light-primary mr-1">
-                                    <i class="bx bxl-telegram"></i></button>
+                                    type="button" class="btn btn-icon rounded-circle btn-label-primary mr-1">
+                                    <i class="ti ti-brand-telegram"></i></button>
                                 </td>
                               </tr>
                             @endforeach
@@ -108,69 +118,89 @@
     </div>
   </div>
   <!-- END: Content-->
-  <div class="modal fade text-left" id="MessageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+
+  <div class="modal fade text-left" id="MessageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="myModalLabel33">{{ __('messages.SendMessageTo') }} <span id="uname"></span>
+          <h4 class="modal-title" id="myModalLabel33">
+            {{ __('messages.SendMessageTo') }} <span id="uname"></span>
           </h4>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"></button>
         </div>
-        <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
-          {!! csrf_field() !!}
-          <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
-          <input type="hidden" name="receiver" id="rid" value="">
-          <div class="modal-body">
-            <label>{{ __('messages.Subject') }}:</label>
-            <div class="form-group">
+        <div class="modal-body">
+          <form method="post" action="/dashboard/send_message" enctype="multipart/form-data">
+            {!! csrf_field() !!}
+            <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
+            <input type="hidden" name="receiver" id="rid" value="">
+            <div class="form-group mb-3">
+              <label for="subject" class="fs-6 fw-semibold form-label mb-2">{{ __('messages.Subject') }}:</label>
               <input id="subject" name="subject" type="text" placeholder="{{ __('messages.Subject') }}"
                 class="form-control" required>
             </div>
-            <label>{{ __('messages.Message') }}: </label>
-            <div class="form-group">
+            <div class="form-group mb-3">
+              <label for="message" class="fs-6 fw-semibold form-label mb-2">{{ __('messages.Message') }}: </label>
               <textarea class="form-control" id="message" name='message' rows="8"
                 placeholder="{{ __('messages.Write your message') }}" required></textarea>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-
-              <span class="d-none d-sm-block">{{ __('messages.Close') }}</span>
-            </button>
-            <button type="submit" class="btn btn-primary ml-1">
-
-              <span class="d-none d-sm-block">{{ __('messages.Send') }}</span>
-            </button>
-          </div>
-        </form>
+            <div class="w-100 d-flex justify-content-end alitn-items-center gap-4 mt-4">
+              <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                {{ __('messages.Close') }}
+              </button>
+              <button type="submit" class="btn btn-primary">
+                {{ __('messages.Send') }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Send response -->
-  <div class="modal fade text-left" id="ReplyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+  <div class="modal fade text-left" id="ReplyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Response to') }} <span id="rname"></span></h4>
+          <h4 class="modal-title" id="myModalLabel33">
+            {{ __('cycles.Response to') }} <span id="rname"></span>
+          </h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
-        <input type="hidden" name="receiver" id="resid" value="">
         <div class="modal-body">
-          <label>{{ __('cycles.Add a comment') }}:</label>
-          <div class="form-group">
+          <input type="hidden" name="sender" value="{{ Auth::user()->id }}">
+          <input type="hidden" name="receiver" id="resid" value="">
+          
+          <div class="mb-3">
+            <label class="form-label fs-6 fw-semibold mb-2">{{ __('admin.Vendor_Name') }}:</label>
+            <p id="vendor_name" class="form-control-plaintext">-</p>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fs-6 fw-semibold mb-2">{{ __('admin.Vendor_Email') }}:</label>
+            <p id="vendor_email" class="form-control-plaintext">-</p>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fs-6 fw-semibold mb-2">{{ __('admin.Vendor_Phone') }}:</label>
+            <p id="vendor_phone" class="form-control-plaintext">-</p>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fs-6 fw-semibold mb-2">{{ __('cycles.Add a comment') }}:</label>
             <textarea class="form-control" id="admin_comment" name='admin_comment' rows="4"
               placeholder="{{ __('cycles.Write a response comment') }}"></textarea>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="approve('Yes')">
-
+          <button type="button" class="btn btn-label-primary" data-bs-dismiss="modal" onclick="approve('Yes')">
             <span class="d-none d-sm-block">{{ __('cycles.Approve') }}</span>
           </button>
-          <button type="button" class="btn btn-danger ml-1" onclick="approve('No')">
-
+          <button type="button" class="btn btn-label-danger ml-1" onclick="approve('No')">
             <span class="d-none d-sm-block">{{ __('cycles.Disapprove') }}</span>
           </button>
         </div>
@@ -178,6 +208,7 @@
     </div>
   </div>
 @stop
+
 @section('scripts')
   @if ($l == 'ar')
     <script type="text/javascript">
@@ -218,9 +249,13 @@
       $('#MessageModal').modal('show');
     }
 
-    function reply(id, name, title) {
+    function reply(id, name, title, vendorName, vendorEmail, vendorPhone) {
       $('#rname').html('"' + title + '" {{ __('cycles.Request from') }} ' + name);
       $('#resid').val(id);
+       // Update vendor details dynamically
+    $('#vendor_name').text(vendorName || '-');
+    $('#vendor_email').text(vendorEmail || '-');
+    $('#vendor_phone').text(vendorPhone || '-');
       $('#ReplyModal').modal('show');
     }
 

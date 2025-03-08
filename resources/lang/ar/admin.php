@@ -1360,6 +1360,8 @@ return [
 	'Hide_Price'=> 'إخفاء السعر',
 	'Hide_Vendor' => 'إخفاء معلومات البائع',
 	'Service_Name' => 'إخفاء معلومات البائع',
+	'youareNotRegisterAttendee' => 'ليس لديك حق الحضور في هذا التدريب',
+	'youareRegisterAttendee' => 'تم تسجيل حضورك في هذا التدريب',
 	
 ]; 
 

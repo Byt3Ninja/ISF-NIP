@@ -646,7 +646,8 @@
     </div>
     @endif
     @endif
-    @if( $_user->hasRole('Mentor') )
+    
+    {{-- @if( $_user->hasRole('Mentor') )
     <div class="col-12" style="max-height: 500px; overflow-y: auto;">
       <div class="card">
         <div class="card-header border-bottom py-3">
@@ -711,7 +712,7 @@
         </div>
       </div>
     </div>
-    @endif
+    @endif --}}
     @endif
       <!-- Survey -->
 

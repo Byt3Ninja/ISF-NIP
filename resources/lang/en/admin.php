@@ -1344,5 +1344,7 @@ return [
 	'Hide_Price'=> 'Hide Price',
 	'Hide_Vendor' => 'Hide Vendor Info',
 	'Service_Name' => 'Service Name',
+	'youareNotRegisterAttendee' => 'You are not registered to attend this training',
+	'youareRegisterAttendee' => 'You are registered to attend this training',
 	
 ];
