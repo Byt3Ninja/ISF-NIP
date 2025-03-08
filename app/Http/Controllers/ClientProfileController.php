@@ -161,7 +161,7 @@ class ClientProfileController extends Controller
             $first_name_ar = substr($request->first_name_en, 0, 250);
             $last_name_ar = substr($request->last_name_en, 0, 250);
             $user = Auth::user();
-            $two_factor_enabled = $request->two_factor_enabled ? 1 : 0;
+           
             // // Mentor Bio section
             // if ($request->mentor_section){
             //     $data =[
@@ -196,7 +196,7 @@ class ClientProfileController extends Controller
                 $result = $user->update($request->except(['img_url','password','email','first_name_ar','last_name_ar']) + ['img_url' => $img_url]);
                 $user->first_name_ar = $first_name_ar;
                     $user->last_name_ar = $last_name_ar;
-                    $user->two_factor_enabled = $two_factor_enabled;
+                   
                     $user->save();
             }else{
                     // if email changed send email verification
@@ -212,7 +212,7 @@ class ClientProfileController extends Controller
                 $user->last_name_ar = $last_name_ar;
               
                     $user->new_email = $request->email;
-                    $user->two_factor_enabled = $two_factor_enabled;
+                  
                     $user->save();
                      // إرسال رابط التحقق
                     $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
@@ -232,13 +232,13 @@ class ClientProfileController extends Controller
                     $result = $user->update($request->except(['password','email','first_name_ar','last_name_ar']));
                     $user->first_name_ar = $first_name_ar;
                     $user->last_name_ar = $last_name_ar;
-                    $user->two_factor_enabled = $two_factor_enabled;
+                  
                     $user->save();
                 }else{
                     $result = $user->update($request->except(['password','email','first_name_ar','last_name_ar']));
                     $user->first_name_ar = $first_name_ar;
                     $user->last_name_ar = $last_name_ar;
-                    $user->two_factor_enabled = $two_factor_enabled;
+                   
                     $user->new_email = $request->email;
                     $user->save();
                      // إرسال رابط التحقق
@@ -600,29 +600,29 @@ class ClientProfileController extends Controller
     /**
      * Show 2FA Setting form
      */
-    // public function show2faForm(Request $request){
-    //     $user = Auth::user();
-    //     $google2fa_url = "";
-    //     $secret_key = "";
+    public function show2faForm(Request $request){
+        $user = Auth::user();
+        $google2fa_url = "";
+        $secret_key = "";
 
-    //     if($user->exists()){
-    //         $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
-    //         $google2fa_url = $google2fa->getQRCodeInline(
-    //             env('APP_NAME'),
-    //             $user->email,
-    //             $user->google2fa_secret
-    //         );
-    //         $secret_key = $user->google2fa_secret;
-    //     }
+        if($user->exists()){
+            $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+            $google2fa_url = $google2fa->getQRCodeInline(
+                env('APP_NAME'),
+                $user->email,
+                $user->google2fa_secret
+            );
+            $secret_key = $user->google2fa_secret;
+        }
 
-    //     $data = array(
-    //         'user' => $user,
-    //         'secret' => $secret_key,
-    //         'google2fa_url' => $google2fa_url
-    //     );
+        $data = array(
+            'user' => $user,
+            'secret' => $secret_key,
+            'google2fa_url' => $google2fa_url
+        );
 
-    //     return view('auth.2fa_settings')->with('data', $data);
-    // }
+        return view('auth.2fa_settings')->with('data', $data);
+    }
 
     /**
      * Generate 2FA secret key

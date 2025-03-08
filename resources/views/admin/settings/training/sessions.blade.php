@@ -140,7 +140,7 @@
                                 class="btn btn-icon btn-label-info rounded-circle waves-effect" data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" > 
                                 <i class="ti ti-qrcode text-info"></i></button>
                                 @endif
-
+                               
                                 <button title="Edit" onclick="editme({{ $session->id }})" type="button"
                                   class="btn btn-icon btn-label-info rounded-circle waves-effect">
                                   <i class="ti ti-edit text-info"></i></button>&nbsp;
