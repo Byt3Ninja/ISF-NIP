@@ -227,6 +227,7 @@ return [
     'trainer name'=>'Trainer name',
     'trainer email'=>'Trainer Email',
     'training location'=>'Training location',
+    'training Address'=>'Training Address',
     'select online'=>'Select online course',
     'Display course contents' => 'View course contents',
     'Edit training session' => 'Edit training session',

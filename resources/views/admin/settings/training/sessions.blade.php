@@ -127,9 +127,9 @@
                                 @elseif ($session->type == 'offline')
                                   <b>{{ __('cycles.trainer name') }}:</b>
                                   {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
-                                  {{ $session->location }} <br>
+                                  {{ $session->training_Address }} <br>
                                 @else
-                                  <a href="/dashboard/training/all/{{ $session->location }}">{{ __('cycles.Display course contents') }}
+                                  <a href="/dashboard/training/all/{{ $session->training_Address }}">{{ __('cycles.Display course contents') }}
                                   </a>
                                 @endif
 
@@ -496,8 +496,13 @@
                 class="form-control">
             </div>
             <div class="form-group mb-3" id="location" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
+              <input name="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
+                class="form-control">
+            </div>
+            <div class="form-group mb-3" id="address" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input name="location" type="text" placeholder="{{ __('cycles.training location') }}"
+              <input name="training_location" type="text" placeholder="google map link"
                 class="form-control">
             </div>
           </div>
@@ -581,11 +586,19 @@
               <input id="etrainer_email" name="trainer_email" type="text"
                 placeholder="{{ __('cycles.trainer email') }}" class="form-control">
             </div>
-            <div class="form-group mb-3" id="slocation" style="display: none;">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input id="elocation" name="location" type="text" placeholder="{{ __('cycles.training location') }}"
+
+            <div class="form-group mb-3" id="saddress" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
+              <input id="eaddress" name="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
                 class="form-control">
             </div>
+
+            <div class="form-group mb-3" id="slocation" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
+              <input id="elocation" name="training_location" type="text" placeholder="{{ __('cycles.training location') }}"
+                class="form-control">
+            </div>
+
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1">
@@ -690,6 +703,7 @@
         $('#trainer').show();
         $('#trainer_email').show();
         $('#location').show();
+        $('#address').show();
       } else if (training === 'sessions') {
         $('#online').hide();
         $('#enddatetime').hide();
@@ -697,6 +711,7 @@
         $('#trainer').show();
         $('#trainer_email').show();
         $('#location').hide();
+        $('#address').hide();
       } else {
         $('#online').show();
         $('#enddatetime').hide();
@@ -704,6 +719,7 @@
         $('#trainer').hide();
         $('#trainer_email').hide();
         $('#location').hide();
+        $('#address').hide();
       }
     }
 
@@ -734,8 +750,10 @@
             $('#strainer').show();
             $('#strainer_email').show();
             $('#slocation').show();
+            $('#saddress').show();
             $('#eenddate').val(response.enddatetime);
-            $('#elocation').val(response.location);
+            $('#elocation').val(response.training_location);
+            $('#eaddress').val(response.training_Address);
             $('#etrainer').val(response.trainer_name);
             $('#etrainer_email').val(response.trainer_email);
           } else if (type === 'sessions') {
@@ -745,10 +763,12 @@
             $('#strainer').show();
             $('#strainer_email').show();
             $('#slocation').hide();
+            $('#saddress').hide();
             $('#etrainer').val(response.trainer_name);
             $('#etrainer_email').val(response.trainer_email);
             $('#eduration').val(response.duration);
             $('#elocation').val('');
+            $('#eaddress').val('');
           } else {
             $('#sonline').show();
             $('#senddatetime').hide();
@@ -756,7 +776,8 @@
             $('#strainer').hide();
             $('#strainer_email').hide();
             $('#slocation').hide();
-            $('#eonline').val(response.location);
+            $('#saddress').hide();
+            $('#eonline').val(response.training_Address);
             $('#etrainer').val('');
           }
           $('#editsession').modal('show');
