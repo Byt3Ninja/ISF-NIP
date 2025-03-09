@@ -37,11 +37,13 @@
       <div class="row mb-4">
         <form method="GET" action="{{ route('projects.index') }}" class="d-flex gap-2">
     
-            <select name="program_count" class="form-control">
+            <select name="program_name" class="form-control">
                 <option value="">{{ __('admin.filter_by_programs') }}</option>
-                <option value="1" {{ request('program_count') === '1' ? 'selected' : '' }}>1</option>
-                <option value="5" {{ request('program_count') === '5' ? 'selected' : '' }}>5</option>
-                <option value="10" {{ request('program_count') === '10' ? 'selected' : '' }}>10</option>
+                @foreach($programs as $program)
+                    <option value="{{ $program->title }}" {{ request('program_name') === $program->title ? 'selected' : '' }}>
+                        {{ $program->title }}
+                    </option>
+                @endforeach
             </select>
     
             <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
@@ -66,7 +68,7 @@
             @foreach ($projects as $project)
             <tr>
                 <td class="text-center"><a href="{{ route('projects.show', $project) }}">{{ $project->name }}</a></td>
-                <td class="text-center">{{ $project->programs_count }}</td>
+                <td class="text-center">{{ $project->programs()->count() }}</td>
                 <td class="text-center">{{ $project->teamMembers()->count() }}</td>
                 <td class="text-center">{{ $project->created_at->format('Y-m-d') }}</td>
                 <td class="text-center">
