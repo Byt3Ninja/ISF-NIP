@@ -1359,5 +1359,6 @@ return [
 	'If_you_are_looking_to_disable_Two_Factor_Authentication' => 'If you are looking to disable Two Factor Authentication',
 	'Current_Password' => 'Current Password',
 	'Disable_2FA' => 'Disable 2FA',
+	'Re_generate' => 'Re-generate',
 	
 ];

@@ -135,10 +135,16 @@
 
                               </td>
                               <td> 
+                                @if($session->type == 'offline')
                                 @if ($session->QrCode != null)
                                 <button title="QRCode"
                                 class="btn btn-icon btn-label-info rounded-circle waves-effect" data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" > 
                                 <i class="ti ti-qrcode text-info"></i></button>
+                                @else
+                                <button title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
+                                class="btn btn-icon btn-label-info rounded-circle waves-effect" > 
+                                <i class="ti ti-qrcode text-info"></i></button>
+                                @endif
                                 @endif
                                
                                 <button title="Edit" onclick="editme({{ $session->id }})" type="button"
@@ -160,7 +166,12 @@
           </div>
           <div class="modal-body text-center">
               <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
-          </div>
+              
+            </div>
+            <div title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
+              class="btn btn-label-info" > 
+              {{ __('admin.Re_generate') }}</div>
+          
       </div>
   </div>
 </div>
@@ -781,6 +792,29 @@
             $('#etrainer').val('');
           }
           $('#editsession').modal('show');
+        },
+        error: function(error) {
+          console.log(error);
+          alert("Error Occurred, Try again!");
+        }
+      });
+    }
+
+    function createQrCode(training) {
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/training/QrCode-offline",
+        data: {
+          "id": training,
+        },
+        success: function(response) {
+          alert(response.massege);
+          location.reload();
         },
         error: function(error) {
           console.log(error);
