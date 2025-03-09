@@ -1074,6 +1074,36 @@ Thanks from " . env('APP_NAME');
 		}
 	}
 
+
+
+	public function QrCodeTraining(Request $request)
+	{ 
+		if ($request->id) {
+			$session = DB::table('training_sessions')->where('id', $request->id)->first();
+			
+			// رابط المسح الضوئي للحضور
+			$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$session->id}");
+			// اسم ملف QR Code
+			$qrFileName = 'training_' . $session->id . '.png';
+			// توليد QR Code كـ string
+			$qrCode = QrCode::format('png')->size(300)->generate($attendanceUrl);
+			// المسار الكامل داخل `public/`
+			$qrFilePath = '/qrcodes/' . $qrFileName;
+			
+			// حفظ QR Code في `public/qrcodes/`
+			$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
+			
+			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
+			$session = DB::table('training_sessions')
+						->where('id', $request->id)
+						->update(['QrCode' => $qrFilePath]);
+
+			return response()->json(['massege' => 'Created Success']);
+				}else{
+				return response()->json(['state' => 'failed'], 500);
+				}
+	}
+
 	public function delsession($id, Request $request)
 	{
 		// $zoomid = TrainingSession::findOrFail($id)->zoom_id;

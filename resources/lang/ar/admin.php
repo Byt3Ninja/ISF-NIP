@@ -1376,6 +1376,7 @@ return [
 	'If_you_are_looking_to_disable_Two_Factor_Authentication' => 'اذا كنت تبحث عن تعطيل المصادقة الثنائية',
 	'Current_Password' => 'كلمة المرور الحالية',
 	'Disable_2FA' => 'تعطيل المصادقة الثنائية',
+	'Re_generate' => 'اعادة توليد',
 	
 ]; 
 
