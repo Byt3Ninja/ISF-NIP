@@ -225,6 +225,7 @@ return [
     'trainer name'=>'اسم المدرب',
     'trainer email'=>'البريد الالكتروني للمدرب',
     'training location'=>'مكان التدريب',
+    'training Address'=>'عنوان التدريب',
     'select online'=>'اختر محتوى من القائمة',
     'Display course contents' => 'عرض محتويات الكورس التعليمي',
     'Edit training session' => 'تحرير بيانات برنامج تدريبي',
