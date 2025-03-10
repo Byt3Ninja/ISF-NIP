@@ -1050,6 +1050,7 @@
         </section>
       
     @endif
+    @if( $ctype != 5 )
       <!-- My last training -->
       @if (count($sessions) > 0)
         <div class="card mt-10">
@@ -1107,7 +1108,7 @@
         </div>
       @endif
       <!-- / My last training -->
-
+      
       <!-- My Mentors -->
       @if ($_user->company->approved ?? null && count($mentors))
         <div class="card mt-10">
@@ -1325,6 +1326,7 @@
 	
       @endif
       <!-- / My Mentors -->
+    @endif
     </div>
   </div>
 
