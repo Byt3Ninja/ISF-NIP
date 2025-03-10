@@ -146,16 +146,16 @@
                                 @if($session->type == 'offline')
                                 @if ($session->QrCode != null)
                                 <button title="QRCode"
-                                class="btn btn-icon btn-label-info rounded-circle waves-effect" data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" > 
-                                <i class="ti ti-qrcode text-info"></i></button>
+                                class="btn btn-icon btn-label-warning rounded-circle waves-effect" data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" > 
+                                <i class="ti ti-qrcode text-warning"></i></button>
                                 @else
                                 <button title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
-                                class="btn btn-icon btn-label-info rounded-circle waves-effect" > 
-                                <i class="ti ti-qrcode text-info"></i></button>
+                                class="btn btn-icon btn-label-success rounded-circle waves-effect" > 
+                                <i class="ti ti-qrcode text-success"></i></button>
                                 @endif
                                 <a title="Attendance" href="/dashboard/training/Attendance-offline/{{ $session->id }}"
-                                class="btn btn-icon btn-label-info rounded-circle waves-effect" > 
-                                <i class="ti ti-calendar-check text-info"></i></a>
+                                class="btn btn-icon btn-label-dark rounded-circle waves-effect" > 
+                                <i class="ti ti-calendar-check text-dark"></i></a>
 
 
                                 @endif
@@ -498,14 +498,14 @@
               <div class="col-12 col-md-6">
                 <div class="form-group mb-3" style="display: none;" id="startdatetime">
                   <label class="form-label fs-6 mb-1">{{ __('cycles.Start') }}</label>
-                  <input id="startTime" name="enddatetime" type="text" placeholder="{{ __('cycles.Start') }}"
+                  <input id="startTime" name="starttime" type="text" placeholder="{{ __('cycles.Start') }}"
                     class="form-control">
                 </div>
               </div>
               <div class="col-12 col-md-6">
                 <div class="form-group mb-3" style="display: none;" id="enddatetime">
                   <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
-                  <input id="endTime" name="enddatetime" type="text" placeholder="{{ __('cycles.End') }}"
+                  <input id="endTime" name="endtime" type="text" placeholder="{{ __('cycles.End') }}"
                     class="form-control">
                 </div>
               </div>
@@ -589,14 +589,34 @@
             </div>
             <div class="form-group mb-3">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Date/Time') }}</label>
-              <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
-                class="form-control" required>
+              {{-- <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
+                class="form-control" required> --}}
+                <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date') }}"
+                class="form-control flatpickr-date" required>
             </div>
-            <div class="form-group mb-3" style="display: none;" id="senddatetime">
+            {{-- <div class="form-group mb-3" style="display: none;" id="senddatetime">
               <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
               <input id="eenddate" name="enddatetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
                 class="form-control">
+            </div> --}}
+
+            <div class="row">
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3" style="display: none;" id="estarttime">
+                  <label class="form-label fs-6 mb-1">{{ __('cycles.Start') }}</label>
+                  <input id="estartTime" name="starttime" type="text" placeholder="{{ __('cycles.Start') }}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3" style="display: none;" id="eendtime">
+                  <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
+                  <input id="eendTime" name="endtime" type="text" placeholder="{{ __('cycles.End') }}"
+                    class="form-control">
+                </div>
+              </div>
             </div>
+
             <div class="form-group mb-3" style="display: none;" id="ssessions">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Session duration') }}:</label>
               <select id="eduration" name="duration" class="select form-control" required>
@@ -710,6 +730,16 @@
       enableTime: true,
       noCalendar: true
     });
+
+    $('#estartTime').flatpickr({
+      enableTime: true,
+      noCalendar: true
+    });
+    
+    $('#eendTime').flatpickr({
+      enableTime: true,
+      noCalendar: true
+    });
   </script>
 
   <script>
@@ -795,7 +825,9 @@
       if (training === 'offline') {
         $('#online').hide();
         $('#startdatetime').show();
-        $('#enddatetime').show();
+        // $('#enddatetime').show();
+        $('#starttime').show();
+        $('#endtime').show();
         $('#sessions').hide();
         $('#trainer').show();
         $('#trainer_email').show();
@@ -803,7 +835,9 @@
         $('#address').show();
       } else if (training === 'sessions') {
         $('#online').hide();
-        $('#enddatetime').hide();
+        // $('#enddatetime').hide();
+        $('#starttime').hide();
+        $('#endtime').hide();
         $('#sessions').show();
         $('#trainer').show();
         $('#trainer_email').show();
@@ -811,7 +845,9 @@
         $('#address').hide();
       } else {
         $('#online').show();
-        $('#enddatetime').hide();
+        // $('#enddatetime').hide();
+        $('#starttime').hide();
+        $('#endtime').hide();
         $('#sessions').hide();
         $('#trainer').hide();
         $('#trainer_email').hide();
@@ -834,28 +870,42 @@
         },
         success: function(response) {
           let type = response.type;
+          let startDate = response.datetime.split(' ')[0];  
+          
+          let startTime = response.datetime.split(' ')[1].substring(0, 5);  
+          
           $('#ctype').hide();
           $('#etitle').val(response.title);
           $('#edsc').val(response.dsc);
-          $('#edatetime').val(response.datetime);
+          $('#edatetime').val(startDate);
+          $('#estartTime').val(startTime);
           $('#sid').val(training);
           $('#stype').val(type);
           if (type === 'offline') {
+            let endDate = response.enddatetime.split(' ')[0];
+            let endTime = response.enddatetime.split(' ')[1].substring(0, 5); 
             $('#sonline').hide();
-            $('#senddatetime').show();
+            // $('#senddatetime').show();
+            $('#estarttime').show();
+            $('#eendtime').show();
             $('#ssessions').hide();
             $('#strainer').show();
             $('#strainer_email').show();
             $('#slocation').show();
             $('#saddress').show();
-            $('#eenddate').val(response.enddatetime);
+            // $('#eenddate').val(response.enddatetime);
+            $('#edatetime').val(startDate);
+            $('#estartTime').val(startTime);
+            $('#eendTime').val(endTime);
             $('#elocation').val(response.training_location);
             $('#eaddress').val(response.training_Address);
             $('#etrainer').val(response.trainer_name);
             $('#etrainer_email').val(response.trainer_email);
           } else if (type === 'sessions') {
             $('#sonline').hide();
-            $('#senddatetime').hide();
+            // $('#senddatetime').hide();
+            $('#estarttime').show();
+            $('#eendtime').hide();
             $('#ssessions').show();
             $('#strainer').show();
             $('#strainer_email').show();
@@ -868,7 +918,9 @@
             $('#eaddress').val('');
           } else {
             $('#sonline').show();
-            $('#senddatetime').hide();
+            // $('#senddatetime').hide();
+            $('#estarttime').show();
+            $('#eendtime').hide();
             $('#ssessions').hide();
             $('#strainer').hide();
             $('#strainer_email').hide();
