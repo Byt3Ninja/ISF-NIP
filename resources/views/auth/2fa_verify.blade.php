@@ -241,7 +241,7 @@
                             @endif
     
                             Enter the pin from Google Authenticator app:<br/><br/>
-                            <form class="form-horizontal" action="{{ route('2faVerify') }}" method="POST">
+                            <form class="form-horizontal" action="{{ route('2fa.2faVerify') }}" method="POST">
                                 {{ csrf_field() }}
                                 <div class="form-group{{ $errors->has('one_time_password-code') ? ' has-error' : '' }}">
                                     <label for="one_time_password" class="control-label">One Time Password</label>

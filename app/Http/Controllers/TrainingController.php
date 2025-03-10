@@ -1559,8 +1559,6 @@ Thanks from " . env('APP_NAME');
 			if($session->enddatetime < now()){
 				return response()->json(['message' => 'SessionEnded', 'Ended' => $session->enddatetime]);
 			}
-			
-			
 			$insert = DB::table('attendance_training_offline')
 			->where('training_session_id', $session->id)
 			->where('user_id', $userId)->first();
@@ -1595,13 +1593,5 @@ Thanks from " . env('APP_NAME');
 		}
 		
 			return response()->json(['message' => 'youareNotRegisterAttendece']);
-		
 	}
-
-
-
-
-
-
-
 }
