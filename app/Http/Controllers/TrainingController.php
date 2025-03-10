@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
 use App\Jobs\ExportTresultData;
 use App\Traits\ZoomMeetingTrait;
 use App\Services\WhatsAppService;
+use App\AttendanceTrainingOffline;
 use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TrainerEmail;
@@ -835,6 +836,21 @@ Thanks from " . env('APP_NAME');
 				$cycleId = Step::find($step)->cycle_id;
 				$companies = Company::where('cycle', $cycleId)->get();
 				foreach ($companies as $company) {
+					$userId = User::where('company_id', $company->id)->first()->id;
+					$insert = DB::table('attendance_training_offline')
+							->insert([
+								'user_id' => $userId,
+								'company_id' => $company->id,
+								'training_session_id' => $trainingSession->id,
+								'step_id' => $step,
+								'cycle_id' => $cycleId,
+								'attendance' => 0,
+								'location' => 'location',
+								'created_at' => now(),
+								'updated_at' => now(),
+							]);
+
+
 					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
 					$data['email'] = $company->user->email;
 					$data['cycle'] = $company->cycledata->title;
@@ -1069,6 +1085,23 @@ Thanks from " . env('APP_NAME');
 		if ($request->id) {
 			$session = TrainingSession::findOrFail($request->id);
 			return response()->json($session);
+		} else {
+			return response()->json(['state' => 'failed'], 500);
+		}
+	}
+
+	public function getattendanceOffline(Request $request)
+	{
+		if ($request->id) {
+
+			$attendanceData = AttendanceTrainingOffline::where('training_session_id',$request->id)->with('user', 'trainingSession', 'step', 'cycle','company')->get();
+			// return response()->json([
+			// 	'success' => true,
+			// 	'message' => 'تم تسجيل الحضور بنجاح',
+			// 	'attendances' => $attendanceData,
+			// ]);
+			return view('admin.settings.training.attendance', compact('attendanceData'));
+			
 		} else {
 			return response()->json(['state' => 'failed'], 500);
 		}
@@ -1526,6 +1559,26 @@ Thanks from " . env('APP_NAME');
 			if($session->enddatetime < now()){
 				return response()->json(['message' => 'SessionEnded', 'Ended' => $session->enddatetime]);
 			}
+			
+			
+			$insert = DB::table('attendance_training_offline')
+			->where('training_session_id', $session->id)
+			->where('user_id', $userId)->first();
+			if(!empty($insert)){
+				$insert = DB::table('attendance_training_offline')
+				->where('id', $insert->id)
+				->update([
+				'user_id' => $userId,
+				'company_id' => $companyId,
+				'training_session_id' => $session->id,
+				'step_id' => $step_Traning,
+				'cycle_id' => $cycle_Traning,
+				'attendance' => 1,
+				'location' => 'location',
+				'created_at' => now(),
+				'updated_at' => now(),
+			]);
+		}else{
 			$insert = DB::table('attendance_training_offline')->insert([
 				'user_id' => $userId,
 				'company_id' => $companyId,
@@ -1537,6 +1590,7 @@ Thanks from " . env('APP_NAME');
 				'created_at' => now(),
 				'updated_at' => now(),
 			]);
+		}
 			return response()->json(['message' => 'youareRegisterAttendece']);
 		}
 		

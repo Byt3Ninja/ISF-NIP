@@ -39,4 +39,9 @@ class AttendanceTrainingOffline extends Model
     {
         return $this->belongsTo(Cycle::class);
     }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }

@@ -145,6 +145,11 @@
                                 class="btn btn-icon btn-label-info rounded-circle waves-effect" > 
                                 <i class="ti ti-qrcode text-info"></i></button>
                                 @endif
+                                <a title="Attendance" href="/dashboard/training/Attendance-offline/{{ $session->id }}"
+                                class="btn btn-icon btn-label-info rounded-circle waves-effect" > 
+                                <i class="ti ti-calendar-check text-info"></i></a>
+
+
                                 @endif
                                
                                 <button title="Edit" onclick="editme({{ $session->id }})" type="button"
@@ -175,6 +180,7 @@
       </div>
   </div>
 </div>
+
                           @endforeach
 
                         </tbody>
@@ -530,10 +536,6 @@
     </div>
   </div>
 
-
-
-
-
   <div class="modal fade text-left" id="editsession" tabindex="-1" role="dialog" aria-labelledby="editsession"
     aria-hidden="true">
     <div class="modal-dialog">
@@ -621,6 +623,43 @@
       </div>
     </div>
   </div>
+
+
+<!-- المودال نفسه -->
+{{-- <div class="modal fade" id="Attendance" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="qrCodeModalLabel">{{ __('admin.Attendance') }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>{{ __('admin.Traning_title') }}</th>
+                    <th>{{ __('admin.Trainer_name') }}</th>
+                    <th>{{ __('admin.Program_Name') }}</th>
+                    <th>{{ __('admin.StartUp_name') }}</th>
+                    <th>{{ __('admin.Attendance') }}</th>
+                  </tr>
+                </thead>
+                <tbody class="Attendance_body">
+                  <tr>
+                    <td class="text-center Traning_title"></td>
+                    <td class="text-center Trainer_name"></td>
+                    <td class="text-center Program_Name"></td>
+                    <td class="text-center StartUp_name"></td>
+                    <td class="text-center Attendance"></td>
+                  </tr>
+                </tbody>
+              </table>
+              
+            </div>
+
+      </div>
+  </div>
+</div> --}}
 
 @stop
 @section('pagescripts')
@@ -822,5 +861,59 @@
         }
       });
     }
+
+
+    function formatDateTime(dateTime) {
+    if (!dateTime) return 'غير متوفر'; // التحقق من عدم وجود قيمة
+
+    let date = new Date(dateTime);
+    return date.toLocaleString( {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true // 24 ساعة
+    });
+}
+
+    function Attendance(training){
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/training/Attendance-offline",
+        data: {
+          "id": training,
+        },
+        success: function(response) {
+          let attendanceHtml = "";
+                response.attendances.forEach(function(att) {
+                  attendanceHtml += `<tr>
+        <td class="text-center">${att?.training_session?.title ?? 'غير متوفر'}</td> 
+        <td class="text-center">${att?.training_session?.trainer_name ?? 'غير متوفر'}</td> 
+        <td class="text-center">${att?.cycle?.title ?? 'غير متوفر'}</td> 
+        <td class="text-center">${att?.user?.first_name_en +" "+att?.user?.last_name_en +" <br> ( "+ att?.company?.name_en +" ) " ?? 'غير متوفر'}</td> 
+        <td class="text-center text-success">${formatDateTime(att?.created_at) ?? 'غير متوفر'}</td>
+    </tr>`;
+                });
+
+                $(".Attendance_body").html(attendanceHtml);
+
+          $('#Attendance').modal('show');
+        },
+        error: function(error) {
+          console.log(error);
+          alert("Error Occurred, Try again!");
+        }
+      });
+    }
+
+
+
   </script>
 @stop
