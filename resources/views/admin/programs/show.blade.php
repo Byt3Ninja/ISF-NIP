@@ -84,12 +84,11 @@ foreach ($steps as  $step) {
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
   $totalDurationSum += $TotalStepsDuration;
   $answerspinding = 0;
-  $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
-          $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNotNull('screening')->orWhere('screening', '{}')->count();
-          $answersdone = app(App\Formdata::class)
+  $answers = app(App\FinalData::class)->where('step_id', $step->id)->count();
+          $answerspinding = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
+          $answersdone = app(App\FinalData::class)
           ->where('step_id', $step->id)
-          ->whereNotNull('screening') // الحقل ليس NULL
-          ->where('screening', '!=', '{}') // الحقل ليس JSON فارغ
+          ->whereNotNull('answer') // الحقل ليس NULL
           ->count();
 
 }
@@ -649,13 +648,10 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   $totalfiltration = 0;
                   $totalfiltrationPinding = 0;
                   $totalfiltrationDone = 0;
-
                   foreach ($companys as $key => $company) {
-                    
-                    $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
-                    $totalfiltrationPinding = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '=', '{}')->count();
-                    $totalfiltrationDone = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '!=', '{}')->count();
-                    
+                    $totalfiltration = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
+                    $totalfiltrationPinding = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->whereNull('answer')->count();
+                    $totalfiltrationDone = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->whereNotNull('answer')->count();
                   }
                     // $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $step->id)->count();
                   @endphp
