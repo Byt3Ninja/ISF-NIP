@@ -1,5 +1,13 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+@stop
+
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
@@ -482,14 +490,25 @@
                 placeholder="{{ __('cycles.Write your description here') }}."></textarea>
             </div>
             <div class="form-group mb-3">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.Date/Time') }}</label>
-              <input id="datetime" name="datetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
-                class="form-control" required>
+              <label class="form-label fs-6 mb-1">{{ __('cycles.Date') }}</label>
+              <input id="datetime" name="datetime" type="text" placeholder="{{ __('cycles.Date') }}"
+                class="form-control flatpickr-date" required>
             </div>
-            <div class="form-group mb-3" style="display: none;" id="enddatetime">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
-              <input id="enddate" name="enddatetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
-                class="form-control">
+            <div class="row">
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3" style="display: none;" id="startdatetime">
+                  <label class="form-label fs-6 mb-1">{{ __('cycles.Start') }}</label>
+                  <input id="startTime" name="enddatetime" type="text" placeholder="{{ __('cycles.Start') }}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3" style="display: none;" id="enddatetime">
+                  <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
+                  <input id="endTime" name="enddatetime" type="text" placeholder="{{ __('cycles.End') }}"
+                    class="form-control">
+                </div>
+              </div>
             </div>
             <div class="form-group mb-3" style="display: none;" id="sessions">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Session duration') }}:</label>
@@ -660,12 +679,39 @@
       </div>
   </div>
 </div> --}}
-
 @stop
+
+@section('scripts')
+<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+@stop
+
 @section('pagescripts')
   <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
   <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
+
+  <script>
+    $('.flatpickr-date').flatpickr({
+      monthSelectorType: 'static',
+      minDate: "today",
+    });
+
+    $('#startTime').flatpickr({
+      enableTime: true,
+      noCalendar: true
+    });
+    
+    $('#endTime').flatpickr({
+      enableTime: true,
+      noCalendar: true
+    });
+  </script>
+
   <script>
     $(document).ready(function() {
       $('#trainingtable').DataTable({
@@ -707,10 +753,10 @@
     });
   </script>
   <script>
-    $('#datetime,#enddate,#edatetime,#eenddate').datetimepicker({
-      timepicker: true,
-      format: 'Y-m-d H:i'
-    });
+    // $('#datetime,#enddate,#edatetime,#eenddate').datetimepicker({
+    //   timepicker: true,
+    //   format: 'Y-m-d H:i'
+    // });
 
     function deleteme(id) {
       let url = '/dashboard/training/delsession/' + id;
@@ -748,6 +794,7 @@
     function tchange(training) {
       if (training === 'offline') {
         $('#online').hide();
+        $('#startdatetime').show();
         $('#enddatetime').show();
         $('#sessions').hide();
         $('#trainer').show();

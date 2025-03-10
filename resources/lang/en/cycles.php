@@ -296,5 +296,6 @@ return [
     'Judges required' => 'Please select at least one judge',
     'Edit_Step' => 'Edit Step',
     'startup_is_required' => 'Please select at least one startup form the table.',
+    'Date' => 'Date',
 ];
 
