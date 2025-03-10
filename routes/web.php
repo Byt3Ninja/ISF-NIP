@@ -179,14 +179,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     
     Route::group(['prefix'=>'2fa'], function(){
         Route::get('/','ClientProfileController@show2faForm');
-        Route::post('/generateSecret','ClientProfileController@generate2faSecret')->name('generate2faSecret');
-        Route::post('/enable2fa','ClientProfileController@enable2fa')->name('enable2fa');
-        Route::post('/disable2fa','ClientProfileController@disable2fa')->name('disable2fa');
+        Route::post('/generateSecret','ClientProfileController@generate2faSecret')->name('2fa.generate2faSecret');
+        Route::post('/enable2fa','ClientProfileController@enable2fa')->name('2fa.enable2fa');
+        Route::post('/disable2fa','ClientProfileController@disable2fa')->name('2fa.disable2fa');
     
         // 2fa middleware
         Route::post('/2faVerify', function () {
             return redirect('/dashboard');
-        })->name('2faVerify')->middleware('2fa');
+        })->name('2fa.2faVerify')->middleware('2fa');
     });
     
     

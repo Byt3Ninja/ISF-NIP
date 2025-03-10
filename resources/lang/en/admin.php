@@ -1360,7 +1360,6 @@ return [
 	'Current_Password' => 'Current Password',
 	'Disable_2FA' => 'Disable 2FA',
 	'Re_generate' => 'Re-generate',
-<<<<<<< Updated upstream
 	'founder_name_is_required' => 'Founder Name is required',
 	'please_enter_valid_name' => 'Please enter a valid name of letters only',
 	'please_enter_valid_email' => 'Please enter a valid email',
@@ -1370,7 +1369,6 @@ return [
 	'shareholder_name_required' => 'Shareholder Name is required',
 	'investor_name_required' => 'Investor Name is required',
 	'investment_type_required' => 'Investor Type is required',
-=======
 	'Traning_title' => 'Traning title',
 	'Trainer_name' => 'Trainer name',
 	'Program_Name' => 'Program Name',
@@ -1378,5 +1376,4 @@ return [
 	'Attendance' => 'Attendance',
 	'Absent' => 'Absent',
 	
->>>>>>> Stashed changes
 ];
