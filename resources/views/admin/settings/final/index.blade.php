@@ -224,11 +224,13 @@ to group of users'];
                               <button type="button" title="Join only" class="btn btn-icon rounded-circle btn-label-primary">
                                 <i class="ti ti-user"></i></button></a>
                             @else
+                            @if($company->fsession($cstep->id)->join_url)
                             <button type="button" onclick="edit({{ $company->fsession($cstep->id)->id }})"
                               class="btn btn-icon btn-label-info rounded-circle" data-bs-toggle="modal"
                               data-bs-target="#ModifyRequest">
                               <i class="ti ti-edit text-info"></i>
                             </button>
+                            @endif
                             <button type="button" onclick="deleteme({{ $company->fsession($cstep->id)->id }})"
                               class="btn btn-icon rounded-circle btn-label-danger">
                               <i class="ti ti-trash text-danger"></i></button>
@@ -580,7 +582,7 @@ to group of users'];
     }
 
     function edit(company) {
-      alert(company);
+      // alert(company);
       $('.cid').val(company);
       $('#ModifyRequest').modal('show');
     }
