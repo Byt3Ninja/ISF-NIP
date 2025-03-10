@@ -784,11 +784,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
         @php
          
-        $mentoreCountRequest = app(App\MentorshipRequest::class)
-        ->where('cycle_id', '=', $step->cycle_id)
-        ->distinct()
-        ->count('mentor_id');
-
+        // $mentoreCountRequest = app(App\MentorshipRequest::class)
+        // ->where('cycle_id', '=', $step->cycle_id)
+        // ->distinct()
+        // ->count('mentor_id');
+        $mentoreCountRequest = App\CyclesMentors::where('cycle_id', $step->cycle_id)
+        ->count();
 
         $totalsessionsMen = app(App\MentorshipRequest::class)
         ->where('cycle_id', '=', $step->cycle_id)
