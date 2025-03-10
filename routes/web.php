@@ -401,6 +401,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('training/session-attendance-report/{id}', 'TrainingController@attendanceReport')->name('training.attendance-report');
     Route::get('training/session-attendance-offline/{id}', 'TrainingController@attendanceOffline')->name('training.attendanceOffline');
     Route::post('training/QrCode-offline', 'TrainingController@QrCodeTraining')->name('training.createQrCode');
+    Route::get('training/Attendance-offline/{id}', 'TrainingController@getattendanceOffline')->name('training.getattendanceOffline');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');

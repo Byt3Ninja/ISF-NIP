@@ -1377,6 +1377,7 @@ return [
 	'Current_Password' => 'كلمة المرور الحالية',
 	'Disable_2FA' => 'تعطيل المصادقة الثنائية',
 	'Re_generate' => 'اعادة توليد',
+<<<<<<< Updated upstream
 	'founder_name_is_required' => 'اسم المؤسس مطلوب',
 	'please_enter_valid_name' => 'يرجى إدخال اسم صالح متكون من حروف فقط',
 	'please_enter_valid_email' => 'يرجى إدخال بريد إلكتروني صالح',
@@ -1386,5 +1387,14 @@ return [
 	'shareholder_name_required' => 'اسم المساهم مطلوب',
 	'investor_name_required' => 'اسم المستثمر مطلوب',
 	'investment_type_required' => 'نوع المستثمر مطلوب',
+=======
+	'Traning_title' => 'عنوان التدريب',
+	'Trainer_name' => 'اسم المدرب',
+	'Program_Name' => 'اسم البرنامج',
+	'StartUp_name' => 'اسم الشركة',
+	'Attendance' => 'الحضور',
+	'Absent' => 'غياب',
+	
+>>>>>>> Stashed changes
 ]; 
 
