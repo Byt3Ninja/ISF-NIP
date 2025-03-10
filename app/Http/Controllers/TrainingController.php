@@ -692,10 +692,17 @@ class TrainingController extends Controller
 	public function addsession(Request $request)
 	{
 		
+
+		$startDate = $request->datetime; // التاريخ
+		$startTime = $request->starttime;   // وقت البداية
+		$endTime = $request->endtime;     // وقت النهاية
+		$start_datetime = "$startDate $startTime";
+		$end_datetime = "$startDate $endTime";
+
 		$step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
-		$datetime = $request->datetime;
+		$datetime = $start_datetime;
 		$type = $request->type;
 		if ($type == 'sessions') {
 			// Add Zoom
@@ -805,16 +812,19 @@ Thanks from " . env('APP_NAME');
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
 			
+		
+			
+		
 			$trainingSession = TrainingSession::create([
 				'type' => $type,
 				'step_id' => $step,
 				'title' => $title,
 				'dsc' => $dsc,
-				'datetime' => $datetime,
+				'datetime' => $start_datetime,
 				'user_id' => Auth::id(),
 				'training_Address' => $request->training_Address,
 				'training_location' => $request->training_location,
-				'enddatetime' => $request->enddatetime,
+				'enddatetime' => $end_datetime,
 				'trainer_name' => $request->trainer_name,
 				'trainer_email' => $request->trainer_email
 			]);
@@ -896,9 +906,16 @@ Thanks from " . env('APP_NAME');
 
 	public function editsession(Request $request)
 	{
+		$startDate = $request->datetime; // التاريخ
+		$startTime = $request->starttime;   // وقت البداية
+		$endTime = $request->endtime;     // وقت النهاية
+		$start_datetime = "$startDate $startTime";
+		$end_datetime = "$startDate $endTime";
+
+		// $step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
-		$datetime = $request->datetime;
+		$datetime = $start_datetime;
 		$type = $request->stype;
 		$id = $request->sid;
 		if ($type == 'sessions') {
@@ -977,8 +994,11 @@ Thanks from " . env('APP_NAME');
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
 			TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
+			if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+			$traning = TrainingSession::where('id', $id)->first();
 			$data = [];
-			$cycleId = Step::find($step)->cycle_id;
+			$cycleId = Step::find($traning->step_id)->cycle_id;
 			$companies = Company::where('cycle', $cycleId)->get();
 			// ======> notify Trainer <=================
 			foreach ($companies as $company) {
@@ -1002,6 +1022,7 @@ Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 			}
+		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
 			$session = TrainingSession::where('id', $id)->update([
@@ -1012,7 +1033,7 @@ Thanks from " . env('APP_NAME');
 				'user_id' => Auth::id(),
 				'training_Address' => $request->training_Address,
 				'training_location' => $request->training_location,
-				'enddatetime' => $request->enddatetime,
+				'enddatetime' => $end_datetime,
 				'trainer_name' => $request->trainer_name,
 				'trainer_email' => $request->trainer_email
 			]);
