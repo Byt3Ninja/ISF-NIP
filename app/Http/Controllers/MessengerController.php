@@ -65,7 +65,14 @@ class MessengerController extends Controller
             $sfullname = $sname->first_name_en ." ". $sname->last_name_en;
             $MSG = new TemplateEmail;
             $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/dashboard/inbox"];
-            $user->notify($MSG);
+            if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+                try {
+                    $user->notify($MSG);
+                } catch (\Throwable $th) {
+                    // throw $th;
+                }
+            }
             /// End of send
 
 		return redirect()->back()->with('message','Done');
@@ -102,7 +109,7 @@ class MessengerController extends Controller
     }
     public function sendmessage() {
        	$users = $mentors = null;
-	    if (Auth::user()->hasanyRole('Admin|Manager')) {
+	    if (Auth::user()->hasAnyRole('Admin|Manager')) {
 	        $users = Company::get();
 	        $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
         } elseif (Auth::user()->hasRole('Mentor')) {
@@ -113,7 +120,9 @@ class MessengerController extends Controller
           if(Auth::user()->company->approved) {
             $users = Company::where('cycle',Auth::user()->company->cycle)->where('id','!=',Auth::user()->company->id)->get();
             $mentors = User::join('cycles_mentors', 'users.id', 'user_id')->where('cycle_id',Auth::user()->company->cycle)->get(['users.id','first_name_ar','first_name_en','last_name_ar','last_name_en']);}
-        } 
+        }
+        if( empty( $users ) || !isset( $users ) ) { $users = Company::where('id', '<', 0)->get(); }
+        if( empty( $mentors ) || !isset( $mentors ) ) { $mentors = User::where('id', '<', 0)->get(); }
         return view('admin/clients/sendmessage', compact('users','mentors'));
     }
     public function savemessage(Request $request) {
@@ -136,7 +145,14 @@ class MessengerController extends Controller
                 $sfullname = $cuser->first_name_en ." ". $cuser->last_name_en;
                 $MSG = new TemplateEmail;
                 $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/dashboard/inbox"];
-                $user->notify($MSG);
+                if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                {
+                    try {
+                        $user->notify($MSG);
+                    } catch (\Throwable $th) {
+                        // throw $th;
+                    }
+                }
                 /// End of send
             }
         } elseif ($request->type==2) {
@@ -157,7 +173,14 @@ class MessengerController extends Controller
                 $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
                 $MSG = new TemplateEmail;
                 $MSG->Message = ["New message received - VI portal", "Dear " . $rfullname . ",", "You have a new message from " . $sfullname . ', Needs your review.', "/dashboard/inbox"];
-                $user->notify($MSG);
+                if( !in_array(env('APP_ENV', 'local'), ['local']) )
+                {
+                    try {
+                        $user->notify($MSG);
+                    } catch (\Throwable $th) {
+                        // throw $th;
+                    }
+                }
                 /// End of send
             }
         } else {

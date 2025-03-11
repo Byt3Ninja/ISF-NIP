@@ -31,6 +31,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ServiceRequestNotification;
 
 
 class HomeController extends Controller
@@ -53,29 +55,28 @@ class HomeController extends Controller
     public function index()
     {
         $user = auth()->user();
-        if ($user->hasanyRole('Admin|Editor|Manager')) {
+        if ($user->hasAnyRole('Admin|Editor|Manager')) {
 
             return $this->AdminDashboard();
-        } elseif ($user->hasRole('Registered|Page Manager|Pages Editor')) {
+        } elseif ($user->hasAnyRole('Registered|Page Manager|Pages Editor')) {
 
             return view('admin.clients.dashboard');
-        } elseif ($user->hasRole('organizationManager')) {
+        } elseif ($user->hasAnyRole('organizationManager')) {
 
             return $this->organizationDashboard();
-        } elseif ($user->hasRole('Mentor')) {
+        } elseif ($user->hasAnyRole('Mentor')) {
 
             if (!Auth::user()->bio) {
                 return redirect('/dashboard/myProfile#bio');
             }
             return $this->mentorDashboard();
-        } elseif ($user->hasRole('Judger')) {
+        } elseif ($user->hasAnyRole('Judger')) {
 
             return $this->judgerDashboard();
-        } elseif ($user->hasRole('Disabled')) {
+        } elseif ($user->hasAnyRole('Disabled')) {
 
             return view('admin.clients.disabled');
-        } else
-            abort(401);
+        }
     }
 
     // ============> Functions of dashboards
@@ -437,13 +438,9 @@ class HomeController extends Controller
 
 
         // Male and Female Ratio
-        $data['usersgender'] = User::where('organization_id', $organization_id)
-        ->select('gender', DB::raw('count(*) as total'))
-        ->groupBy('gender')
-        ->get();
+        $usersgender = User::select('gender', DB::raw('count(*) as total'))->where('organization_id', $organization_id)->groupBy('gender')->get();
+        $data['usersgender'] = $usersgender;
 
-
-    
         // Development Stage  
 
         $data['development_stages'] = [];
@@ -508,13 +505,13 @@ class HomeController extends Controller
         ->groupBy('sectors.name_en', 'sectors.name_ar')
         ->get();
     
-     $data['sector_data'] = $sectorBreakdown->map(function ($item) {
-        return [
-            'label_en' => $item->sector_name_en,
-            'label_ar' => $item->sector_name_ar,
-            'count' => $item->total,
-        ];
-    });
+        $data['sector_data'] = $sectorBreakdown->map(function ($item) {
+            return [
+                'label_en' => $item->sector_name_en,
+                'label_ar' => $item->sector_name_ar,
+                'count' => $item->total,
+            ];
+        });
 
         // Company By Business Model
         $projectTypes = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
@@ -797,6 +794,8 @@ class HomeController extends Controller
                     ->orWhere('services.name_ar', 'like', '%' . $find . '%');
             });
         }
+         $user = auth()->user();
+        $isAdmin = $user && $user->hasRole('Admin');
         $services = $services->get();
         $setting = Settings::where('id', 1)->first();
         $currency = Currency::where('id', $setting->Currency)->first();
@@ -825,10 +824,24 @@ class HomeController extends Controller
     public function servicereq(Request $request)
     {
         if ($request) {
-            ServicesRequests::create(['service_id' => $request->id, 'user_id' => Auth::id(), 'comment' => $request->comment, 'date_time' => $request->datetime]);
+            $serviceRequest = ServicesRequests::create([
+                'service_id' => $request->id,
+                'user_id' => Auth::id(),
+                'comment' => $request->comment,
+                'date_time' => $request->datetime
+            ]);
+    
             event(new WebMessage('NewServ', Auth::user()->first_name_en . ' ' . Auth::user()->last_name_en));
+    
+            $service = Service::find($request->id);
+    
+            if ($service && $service->vendor_email) {
+                Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+            }
+    
             return response()->json(['state' => 'success']);
         }
+    
         return response()->json(['state' => 'failed'], 500);
     }
     public function dark(Request $request)
@@ -838,7 +851,7 @@ class HomeController extends Controller
     }
     public function help($id = 1)
     {
-        if (Auth::user()->hasanyRole('Admin|Manager')) {
+        if (Auth::user()->hasAnyRole('Admin|Manager')) {
             $role = 'admin';
         } elseif (Auth::user()->hasRole('Mentor')) {
             $role = 'mentor';

@@ -2,22 +2,22 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\ResetPassword as ResetPasswordNotification;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\Auditable;
 use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\VerifyEmailQueued;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Notifications\ResetPassword as ResetPasswordNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-//    use Auditable;
+    // use Auditable;
     use Notifiable;
     use HasRoles;
-//    use SoftDeletes;
+    // use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -26,7 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'organization_id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'api_token', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
-        'PageId','dob','academic_stat','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address'];
+        'PageId','dob','academic_stat','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'google2fa_secret'];
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -38,11 +38,25 @@ class User extends Authenticatable implements MustVerifyEmail
 
 	public function sendPasswordResetNotification($token)
 	{
-    	$this->notify(new ResetPasswordNotification($token));
+        if( !in_array(env('APP_ENV', 'local'), ['local']) )
+        {
+            try {
+                $this->notify(new ResetPasswordNotification($token));
+            } catch (\Throwable $th) {
+                // throw $th;
+            }
+        }
 	}
     public function sendEmailVerificationNotification()
     {
-    $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
+        if( !in_array(env('APP_ENV', 'local'), ['local']) )
+        {
+            try {
+                $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
+            } catch (\Throwable $th) {
+                // throw $th;
+            }
+        }
 	}
 
     /**
@@ -156,5 +170,83 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(MentorshipRequest::class, 'mentor_id');
     }
 
+	public function roles() { return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id'); }
+	public function allotRoleById( $id )
+    {
+        $user_id = $this->id;
+        $_role = Role::find( $id );
+        if( !empty( $_role ) )
+        {
+            RoleUsers::updateOrCreate(
+                ['model_id' => $this->id, 'role_id' => $id, 'model_type' => 'App\User'],
+            );
+        }
+    }
+    public function allotRole( $role )
+    {
+        $user_id = $this->id;
+        $_role = Role::where('default_for', 'LIKE', '%' . $role . '%')->first();
+        if( !empty( $_role ) )
+        {
+            $id = $_role->id;
+        }
+        RoleUsers::updateOrCreate(
+            ['model_id' => $user_id, 'role_id' => $id, 'model_type' => 'App\User'],
+        );
+    }
+    
+    public function hasRole( $name ) 
+    {
+        if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        $name = trim( strtolower($name) );
+        $roles = $this->roles->pluck('default_for')->toArray();
+        $roles = array_map(function($n){ return trim( strtolower($n) ); }, $roles);
+        return in_array($name, $roles);
+    }
+    public function hasAnyRole( $roles )
+    {
+        if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        $rules = array_map(function($n){ return trim( strtolower($n) ); }, $this->roles->pluck('default_for')->toArray());
+        if( !is_array( $roles ) ) { $roles = explode('|', $roles); }
+        $roles = array_map(function($n){ return trim( strtolower( $n ) ); }, $roles);
+        foreach( $roles as $role ) {  if( in_array($role, $rules) ) { return true; } }
+        return false;
+    }
 
+    public function myPermissions()
+    {
+        $permissions = $this->roles->flatMap(function($role) { return $role->_permissions->pluck('name'); })->unique()->values()->toArray();
+        return $permissions;
+    }
+	public function ableTo( $permission, $permissions = [] )
+	{
+        if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        if( empty( $permissions ) || count( $permissions ) == 0 ) { $permissions = $this->roles->flatMap(function($role) { return $role->_permissions->pluck('name'); })->unique()->values()->toArray(); }
+        return in_array( $permission, $permissions );
+	}
+
+    public function ableToAll( $permission, $permissions = [] )
+    {
+        $count = 0;
+        if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        if( empty( $permissions ) || count( $permissions ) == 0 ) { $permissions = $this->roles->flatMap(function($role) { return $role->_permissions->pluck('name'); })->unique()->values()->toArray(); }
+        $permissions = array_map(function($n){ return trim( strtolower($n) ); }, $permissions); 
+        foreach( $permission as $p )
+        {
+            if( !in_array( trim( strtolower($p) ), $permissions ) ) { return false; } else { $count++; }
+        }
+        return $count == count( $permission );
+    }
+
+    public function ableToAny( $permission, $permissions = [] )
+    {
+        if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        if( empty( $permissions ) || count( $permissions ) == 0 ) { $permissions = $this->roles->flatMap(function($role) { return $role->_permissions->pluck('name'); })->unique()->values()->toArray(); }
+        $permissions = array_map(function($n){ return trim( strtolower($n) ); }, $permissions); 
+        foreach( $permission as $p )
+        {
+            if( in_array( trim( strtolower($p) ), $permissions ) ) { return true; }
+        }
+        return false;
+    }
 }

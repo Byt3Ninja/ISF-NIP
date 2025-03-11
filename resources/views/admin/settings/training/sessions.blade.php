@@ -1,5 +1,13 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+@stop
+
 @section('style')
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
@@ -48,7 +56,7 @@
                             }
                           @endphp
                           <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
-                            ({{ $step->cycle->title }}-{{ __('cycles.Start') . ' ' . $step->cycle->start->format('d-m') }})
+                            ({{ $step->cycle->title }}-{{ __('cycles.Start') . ' ' . $step->cycle->start->format('d-m-Y') }})
                             - {{ optional(optional($step->cycle)->organization)->name }}</option>
                         @endforeach
                       </select>
@@ -127,14 +135,32 @@
                                 @elseif ($session->type == 'offline')
                                   <b>{{ __('cycles.trainer name') }}:</b>
                                   {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
-                                  {{ $session->location }} <br>
+                                  {{ $session->training_Address }} <br>
                                 @else
-                                  <a href="/dashboard/training/all/{{ $session->location }}">{{ __('cycles.Display course contents') }}
+                                  <a href="/dashboard/training/all/{{ $session->training_Address }}">{{ __('cycles.Display course contents') }}
                                   </a>
                                 @endif
 
                               </td>
-                              <td> <button title="Edit" onclick="editme({{ $session->id }})" type="button"
+                              <td> 
+                                @if($session->type == 'offline')
+                                @if ($session->QrCode != null)
+                                <button title="QRCode"
+                                class="btn btn-icon btn-label-warning rounded-circle waves-effect" data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" > 
+                                <i class="ti ti-qrcode text-warning"></i></button>
+                                @else
+                                <button title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
+                                class="btn btn-icon btn-label-success rounded-circle waves-effect" > 
+                                <i class="ti ti-qrcode text-success"></i></button>
+                                @endif
+                                <a title="Attendance" href="/dashboard/training/Attendance-offline/{{ $session->id }}"
+                                class="btn btn-icon btn-label-dark rounded-circle waves-effect" > 
+                                <i class="ti ti-calendar-check text-dark"></i></a>
+
+
+                                @endif
+                               
+                                <button title="Edit" onclick="editme({{ $session->id }})" type="button"
                                   class="btn btn-icon btn-label-info rounded-circle waves-effect">
                                   <i class="ti ti-edit text-info"></i></button>&nbsp;
                                 <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
@@ -143,6 +169,26 @@
 
                               </td>
                             </tr>
+                            <!-- المودال نفسه -->
+<div class="modal fade" id="qrCodeModal{{ $session->id }}" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="qrCodeModalLabel">QR Code</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+              <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
+              
+            </div>
+            <div title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
+              class="btn btn-label-info" > 
+              {{ __('admin.Re_generate') }}</div>
+          
+      </div>
+  </div>
+</div>
+
                           @endforeach
 
                         </tbody>
@@ -444,14 +490,25 @@
                 placeholder="{{ __('cycles.Write your description here') }}."></textarea>
             </div>
             <div class="form-group mb-3">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.Date/Time') }}</label>
-              <input id="datetime" name="datetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
-                class="form-control" required>
+              <label class="form-label fs-6 mb-1">{{ __('cycles.Date') }}</label>
+              <input id="datetime" name="datetime" type="text" placeholder="{{ __('cycles.Date') }}"
+                class="form-control flatpickr-date" required>
             </div>
-            <div class="form-group mb-3" style="display: none;" id="enddatetime">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
-              <input id="enddate" name="enddatetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
-                class="form-control">
+            <div class="row">
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3" style="display: none;" id="startdatetime">
+                  <label class="form-label fs-6 mb-1">{{ __('cycles.Start') }}</label>
+                  <input id="startTime" name="starttime" type="text" placeholder="{{ __('cycles.Start') }}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3" style="display: none;" id="enddatetime">
+                  <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
+                  <input id="endTime" name="endtime" type="text" placeholder="{{ __('cycles.End') }}"
+                    class="form-control">
+                </div>
+              </div>
             </div>
             <div class="form-group mb-3" style="display: none;" id="sessions">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Session duration') }}:</label>
@@ -475,8 +532,13 @@
                 class="form-control">
             </div>
             <div class="form-group mb-3" id="location" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
+              <input name="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
+                class="form-control">
+            </div>
+            <div class="form-group mb-3" id="address" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input name="location" type="text" placeholder="{{ __('cycles.training location') }}"
+              <input name="training_location" type="text" placeholder="google map link"
                 class="form-control">
             </div>
           </div>
@@ -492,10 +554,6 @@
       </div>
     </div>
   </div>
-
-
-
-
 
   <div class="modal fade text-left" id="editsession" tabindex="-1" role="dialog" aria-labelledby="editsession"
     aria-hidden="true">
@@ -531,14 +589,34 @@
             </div>
             <div class="form-group mb-3">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Date/Time') }}</label>
-              <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
-                class="form-control" required>
+              {{-- <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
+                class="form-control" required> --}}
+                <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date') }}"
+                class="form-control flatpickr-date" required>
             </div>
-            <div class="form-group mb-3" style="display: none;" id="senddatetime">
+            {{-- <div class="form-group mb-3" style="display: none;" id="senddatetime">
               <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
               <input id="eenddate" name="enddatetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
                 class="form-control">
+            </div> --}}
+
+            <div class="row">
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3" style="display: none;" id="estarttime">
+                  <label class="form-label fs-6 mb-1">{{ __('cycles.Start') }}</label>
+                  <input id="estartTime" name="starttime" type="text" placeholder="{{ __('cycles.Start') }}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="form-group mb-3" style="display: none;" id="eendtime">
+                  <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
+                  <input id="eendTime" name="endtime" type="text" placeholder="{{ __('cycles.End') }}"
+                    class="form-control">
+                </div>
+              </div>
             </div>
+
             <div class="form-group mb-3" style="display: none;" id="ssessions">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Session duration') }}:</label>
               <select id="eduration" name="duration" class="select form-control" required>
@@ -560,11 +638,19 @@
               <input id="etrainer_email" name="trainer_email" type="text"
                 placeholder="{{ __('cycles.trainer email') }}" class="form-control">
             </div>
-            <div class="form-group mb-3" id="slocation" style="display: none;">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input id="elocation" name="location" type="text" placeholder="{{ __('cycles.training location') }}"
+
+            <div class="form-group mb-3" id="saddress" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
+              <input id="eaddress" name="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
                 class="form-control">
             </div>
+
+            <div class="form-group mb-3" id="slocation" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
+              <input id="elocation" name="training_location" type="text" placeholder="{{ __('cycles.training location') }}"
+                class="form-control">
+            </div>
+
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1">
@@ -577,11 +663,85 @@
     </div>
   </div>
 
+
+<!-- المودال نفسه -->
+{{-- <div class="modal fade" id="Attendance" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="qrCodeModalLabel">{{ __('admin.Attendance') }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>{{ __('admin.Traning_title') }}</th>
+                    <th>{{ __('admin.Trainer_name') }}</th>
+                    <th>{{ __('admin.Program_Name') }}</th>
+                    <th>{{ __('admin.StartUp_name') }}</th>
+                    <th>{{ __('admin.Attendance') }}</th>
+                  </tr>
+                </thead>
+                <tbody class="Attendance_body">
+                  <tr>
+                    <td class="text-center Traning_title"></td>
+                    <td class="text-center Trainer_name"></td>
+                    <td class="text-center Program_Name"></td>
+                    <td class="text-center StartUp_name"></td>
+                    <td class="text-center Attendance"></td>
+                  </tr>
+                </tbody>
+              </table>
+              
+            </div>
+
+      </div>
+  </div>
+</div> --}}
 @stop
+
+@section('scripts')
+<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+@stop
+
 @section('pagescripts')
   <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
   <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
+
+  <script>
+    $('.flatpickr-date').flatpickr({
+      monthSelectorType: 'static',
+      minDate: "today",
+    });
+
+    $('#startTime').flatpickr({
+      enableTime: true,
+      noCalendar: true
+    });
+    
+    $('#endTime').flatpickr({
+      enableTime: true,
+      noCalendar: true
+    });
+
+    $('#estartTime').flatpickr({
+      enableTime: true,
+      noCalendar: true
+    });
+    
+    $('#eendTime').flatpickr({
+      enableTime: true,
+      noCalendar: true
+    });
+  </script>
+
   <script>
     $(document).ready(function() {
       $('#trainingtable').DataTable({
@@ -623,10 +783,10 @@
     });
   </script>
   <script>
-    $('#datetime,#enddate,#edatetime,#eenddate').datetimepicker({
-      timepicker: true,
-      format: 'Y-m-d H:i'
-    });
+    // $('#datetime,#enddate,#edatetime,#eenddate').datetimepicker({
+    //   timepicker: true,
+    //   format: 'Y-m-d H:i'
+    // });
 
     function deleteme(id) {
       let url = '/dashboard/training/delsession/' + id;
@@ -664,25 +824,35 @@
     function tchange(training) {
       if (training === 'offline') {
         $('#online').hide();
-        $('#enddatetime').show();
+        $('#startdatetime').show();
+        // $('#enddatetime').show();
+        $('#starttime').show();
+        $('#endtime').show();
         $('#sessions').hide();
         $('#trainer').show();
         $('#trainer_email').show();
         $('#location').show();
+        $('#address').show();
       } else if (training === 'sessions') {
         $('#online').hide();
-        $('#enddatetime').hide();
+        // $('#enddatetime').hide();
+        $('#starttime').hide();
+        $('#endtime').hide();
         $('#sessions').show();
         $('#trainer').show();
         $('#trainer_email').show();
         $('#location').hide();
+        $('#address').hide();
       } else {
         $('#online').show();
-        $('#enddatetime').hide();
+        // $('#enddatetime').hide();
+        $('#starttime').hide();
+        $('#endtime').hide();
         $('#sessions').hide();
         $('#trainer').hide();
         $('#trainer_email').hide();
         $('#location').hide();
+        $('#address').hide();
       }
     }
 
@@ -700,42 +870,63 @@
         },
         success: function(response) {
           let type = response.type;
+          let startDate = response.datetime.split(' ')[0];  
+          
+          let startTime = response.datetime.split(' ')[1].substring(0, 5);  
+          
           $('#ctype').hide();
           $('#etitle').val(response.title);
           $('#edsc').val(response.dsc);
-          $('#edatetime').val(response.datetime);
+          $('#edatetime').val(startDate);
+          $('#estartTime').val(startTime);
           $('#sid').val(training);
           $('#stype').val(type);
           if (type === 'offline') {
+            let endDate = response.enddatetime.split(' ')[0];
+            let endTime = response.enddatetime.split(' ')[1].substring(0, 5); 
             $('#sonline').hide();
-            $('#senddatetime').show();
+            // $('#senddatetime').show();
+            $('#estarttime').show();
+            $('#eendtime').show();
             $('#ssessions').hide();
             $('#strainer').show();
             $('#strainer_email').show();
             $('#slocation').show();
-            $('#eenddate').val(response.enddatetime);
-            $('#elocation').val(response.location);
+            $('#saddress').show();
+            // $('#eenddate').val(response.enddatetime);
+            $('#edatetime').val(startDate);
+            $('#estartTime').val(startTime);
+            $('#eendTime').val(endTime);
+            $('#elocation').val(response.training_location);
+            $('#eaddress').val(response.training_Address);
             $('#etrainer').val(response.trainer_name);
             $('#etrainer_email').val(response.trainer_email);
           } else if (type === 'sessions') {
             $('#sonline').hide();
-            $('#senddatetime').hide();
+            // $('#senddatetime').hide();
+            $('#estarttime').show();
+            $('#eendtime').hide();
             $('#ssessions').show();
             $('#strainer').show();
             $('#strainer_email').show();
             $('#slocation').hide();
+            $('#saddress').hide();
             $('#etrainer').val(response.trainer_name);
             $('#etrainer_email').val(response.trainer_email);
             $('#eduration').val(response.duration);
             $('#elocation').val('');
+            $('#eaddress').val('');
           } else {
             $('#sonline').show();
-            $('#senddatetime').hide();
+            // $('#senddatetime').hide();
+            $('#estarttime').show();
+            $('#eendtime').hide();
             $('#ssessions').hide();
             $('#strainer').hide();
             $('#strainer_email').hide();
             $('#slocation').hide();
-            $('#eonline').val(response.location);
+            $('#saddress').hide();
+            $('#eonline').val(response.training_Address);
             $('#etrainer').val('');
           }
           $('#editsession').modal('show');
@@ -746,5 +937,82 @@
         }
       });
     }
+
+    function createQrCode(training) {
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/training/QrCode-offline",
+        data: {
+          "id": training,
+        },
+        success: function(response) {
+          alert(response.massege);
+          location.reload();
+        },
+        error: function(error) {
+          console.log(error);
+          alert("Error Occurred, Try again!");
+        }
+      });
+    }
+
+
+    function formatDateTime(dateTime) {
+    if (!dateTime) return 'غير متوفر'; // التحقق من عدم وجود قيمة
+
+    let date = new Date(dateTime);
+    return date.toLocaleString( {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true // 24 ساعة
+    });
+}
+
+    function Attendance(training){
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/training/Attendance-offline",
+        data: {
+          "id": training,
+        },
+        success: function(response) {
+          let attendanceHtml = "";
+                response.attendances.forEach(function(att) {
+                  attendanceHtml += `<tr>
+        <td class="text-center">${att?.training_session?.title ?? 'غير متوفر'}</td> 
+        <td class="text-center">${att?.training_session?.trainer_name ?? 'غير متوفر'}</td> 
+        <td class="text-center">${att?.cycle?.title ?? 'غير متوفر'}</td> 
+        <td class="text-center">${att?.user?.first_name_en +" "+att?.user?.last_name_en +" <br> ( "+ att?.company?.name_en +" ) " ?? 'غير متوفر'}</td> 
+        <td class="text-center text-success">${formatDateTime(att?.created_at) ?? 'غير متوفر'}</td>
+    </tr>`;
+                });
+
+                $(".Attendance_body").html(attendanceHtml);
+
+          $('#Attendance').modal('show');
+        },
+        error: function(error) {
+          console.log(error);
+          alert("Error Occurred, Try again!");
+        }
+      });
+    }
+
+
+
   </script>
 @stop

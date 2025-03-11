@@ -1,6 +1,6 @@
 @php
   $msgs = 0;
-  if (Auth::user()->hasanyRole('Admin|Manager')) {
+  if (Auth::user()->hasAnyRole('Admin|Manager')) {
       $msgs = App\Messages::where('read', 0)->count();
   }
   $messages = App\Messenger::where('receiver', Auth::user()->id)

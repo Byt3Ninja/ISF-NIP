@@ -219,7 +219,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
                                                     <p style="margin: 0;">Dear {{ $data['name'] }},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">You have been invited to Judge a training session.</p>
+                                                    <p style="margin: 0;">Welcome as a Judge to our platform.</p>
                                                     <p style="margin: 0;"> </p>
                                                     
                                                     <p style="margin: 0;">Email is: {{ $data['email'] }}</p>
@@ -261,7 +261,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
                                                     <p style="margin: 0;">عزيزي {{ $data['name'] }},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">مرحباً بك كمحكم فى منصتنا</p>
+                                                    <p style="margin: 0;">مرحباً بك كمحكم فى منصتنا.</p>
                                                     <p style="margin: 0;"> </p>
                                                     
                                                     <p style="margin: 0;">البريد الالكترونى : {{ $data['email'] }}</p>

@@ -193,10 +193,10 @@ class quizzesController extends Controller
 	public function my()
 	{
 		$user = auth()->user();
-		if( $user->hasRole(['Registered']) )
+		if( $user->hasAnyRole(['Registered']) )
 		{
-			if( !$user->HaveCompany ) { return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first.', 'class' => 'danger']); }
-			if( !$user->company ) { return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']); }
+			if( !$user->HaveCompany ) { return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']); }
+			if( !$user->company ) { return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']); }
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;

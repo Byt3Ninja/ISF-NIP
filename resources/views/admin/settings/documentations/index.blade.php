@@ -16,12 +16,14 @@
           <div class="row">
             <div class="col-12">
               <div class="card">
+                @if($_user->ableToAny(['documentation.create', 'documentation.store'], $permissions))
                 <div class="card-header">
                   <a href="{{ route('documentation.create') }}" class="btn btn-primary glow">
                     <i class="ti ti-plus me-1"></i>
                     {{ __('admin.Add New') }}
                   </a>
                 </div>
+                @endif
                 <div class="card-content">
                   <div class="card-body card-dashboard">
                     @if (session()->has('msg'))
@@ -39,14 +41,9 @@
                             <th>{{ __('admin.Arabic Title') }}</th>
                             <th>{{ __('admin.English Title') }}</th>
                             <th>{{ __('admin.Rolefor') }}</th>
-                            <th>
-                              {{ __('admin.View') }} |
-                              @can('manage_documentation')
-                                {{ __('admin.Edit') }}
-                                |
-                                {{ __('admin.Delete') }}
-                              @endcan
-                            </th>
+                            @if( $_user->ableToAny(['documentation.show', 'documentation.edit', 'documentation.update', 'documentation.destroy'], $permissions) )
+                              <th> {{ __('admin.Actions') }} </th>
+                            @endif
                           </tr>
                         </thead>
                         <tbody>
@@ -55,24 +52,30 @@
                               <td>{{ $doc->arr }}</td>
                               <td>{{ $doc->menu_ar }}</td>
                               <td>{{ $doc->menu_en }}</td>
-                              <td>{{ __('admin.' . $doc->role) }}</td>
+                              <td>{{ __('admin.role'. ucFirst($doc->role)) }}</td>
+                              @if( $_user->ableToAny(['documentation.show', 'documentation.edit', 'documentation.update', 'documentation.destroy'], $permissions) )
                               <td>
-                                <a title="View" target="_blank" href="/dashboard/documentation/{{ $doc->id }}"
+                                @if( $_user->ableTo('documentation.show', $permissions) )
+                                <a title="View" href="/dashboard/documentation/{{ $doc->id }}"
                                   class="btn btn-icon rounded-circle btn-label-primary">
                                   <i class="ti ti-eye"></i>
                                 </a>
-                                @can('manage_documentation')
+                                @endif
+                                @if( $_user->ableToAny(['documentation.edit', 'documentation.update'], $permissions) )
                                   <a title="Edit" href="{{ route('documentation.edit', ['documentation' => $doc->id]) }}"
                                     class="btn btn-icon rounded-circle btn-label-info">
                                     <i class="ti ti-edit text-info"></i>
                                   </a>
+                                @endif
+                                @if( $_user->ableTo('documentation.destroy', $permissions) )
                                   <button id='deleteAction' data-id='{{ $doc->id }}'
                                     data-url="{{ route('documentation.destroy', ['documentation' => $doc->id]) }}"
                                     class="btn btn-icon rounded-circle btn-label-danger">
                                     <i class="ti ti-trash text-danger"></i>
                                   </button>
-                                @endcan
+                                @endif
                               </td>
+                              @endif
                             </tr>
                           @endforeach
                         </tbody>

@@ -125,4 +125,8 @@ return [
 	'Choose'=>'اختر',
 	'SocialMediaLogin'=>' اعدادات الدخول ',
 	'MentorList'=>'قائمة المدربين',
+	'Assessment'=>'التقييم',
+	'whatsApp_URL_callback' => 'إعادة الاتصال عبر عنوان URL الخاص بـ WhatsApp',
+	'whatsApp_INSTANCE_ID' => 'معرف حالة الواتساب',
+	'whatsApp_ACCESS_TOKEN' => 'رمز الوصول إلى واتساب',
 ];

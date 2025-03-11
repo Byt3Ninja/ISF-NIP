@@ -2,31 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\BuilderField;
-use App\Company;
-use App\FinalData;
-use App\Finalscreening;
-use App\Formdata;
-use App\Formfield;
-use App\Jobs\ExportCycleCompData;
-use App\Screening;
-use App\TrainingSession;
-use Carbon\Carbon;
-use http\Env\Response;
-use Illuminate\Http\Request;
-
-use App\Cycle;
-use App\Step;
 use App\Form;
+use App\Step;
+use App\Cycle;
+use App\Company;
+use App\Formdata;
+use App\FinalData;
+use App\Formfield;
+use App\Screening;
+use Carbon\Carbon;
 use App\BuilderForm;
+use App\BuilderField;
+use http\Env\Response;
+use App\Services\WhatsAppService;
+
+use App\Finalscreening;
+use App\TrainingSession;
+use Illuminate\Http\Request;
+use App\Jobs\ExportCycleCompData;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
+use App\Notifications\StartupJoiningNotification;
 
 class CyclesController extends Controller
 {
+
+    protected $whatsAppService;
+	public function __construct(WhatsAppService $whatsAppService)
+	{
+		$this->whatsAppService = $whatsAppService;
+	}
 
     public function exportcyclesComp(Request $request)
     {
@@ -70,8 +78,6 @@ class CyclesController extends Controller
     }
     public function index($id = 0)
     {
-        $this->preProcessingCheck('edit_cycles');
-
         $organization_id = auth()->user()->organization_id;
 
         $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -92,7 +98,6 @@ class CyclesController extends Controller
 
     public function users($id)
     {
-        $this->preProcessingCheck('edit_cycles');
         $organization_id = auth()->user()->organization_id;
 
         if ($id == 0) {
@@ -115,7 +120,7 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
-        $this->preProcessingCheck('edit_cycles');
+
         $id = $request->cycleid;
         $type = $request->type;
 
@@ -466,7 +471,7 @@ class CyclesController extends Controller
 
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {
-            return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first.', 'class' => 'danger']);
+            return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
         if (!Auth::user()->company) {
             return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
@@ -592,7 +597,37 @@ class CyclesController extends Controller
             ]);
         }
 
+        $data =[];
+        $user = Auth::user();
+		$name = $user->first_name_en . ' ' . $user->last_name_en;
+        
+        $data = [
+            'name' => $name,
+            'email' => $user->email,
+            'step' => $user->company->stepdata->title,
+            'cycle' => $user->company->cycledata->title,
+        ];
+        
+        // إرسال الإشعار
+        if( !in_array(env('APP_ENV', 'local'), ['local']) )
+        {
+            try {
+                $user->notify(new StartupJoiningNotification($data));
+                log::info('Sent notification to ' . $user->email);
+            } catch (\Throwable $th) {
+                throw $th;
+            }
 
+            $phoneNumber = $user->country_code_w_a . $user->whatsapp;
+					$Massage = "Dear " . $user->name . ",
+Congratulations! You have successfully joined the" . $data['cycle'] .", 
+We are excited to have you on board and look forward to supporting your journey.
+Thanks from " . env('APP_NAME');
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+        }
+
+            
         return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
     }
 }

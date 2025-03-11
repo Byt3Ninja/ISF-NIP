@@ -19,21 +19,20 @@
               <div class="card">
                 <div class="card-content">
                   <div class="card-body card-dashboard">
+                    @if( $_user->ableToAny(['serviceCategories.create', 'serviceCategories.store'], $permissions) )
                     <div class="invoice-create-btn mb-4">
                       <a href="{{ route('services.create') }}" class="btn btn-primary glow">
-                        {{ __('cycles.Add New') }}
-                        <i class="ti ti-plus mx-1"></i>
+                        {{ __('cycles.Add New') }} <i class="ti ti-plus mx-1"></i>
                       </a>
                     </div>
+                    @endif
                     @if (session()->has('msg'))
                       <div class="row">
                         <div class="col-md-12">
                           <div class="alert alert-success alert-dismissible mb-2" role="alert">
                             {{ __('admin.' . session()->get('msg')) }}
                             {{ Session::forget('msg') }}
-                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                           </div>
                         </div>
                       </div>
@@ -43,46 +42,51 @@
                         <thead>
                           <tr>
                             <th>#</th>
+                            <th class="text-center">{{__('admin.Organization')}}</th>
                             <th>{{ __('cycles.English Name') }}</th>
                             <th>{{ __('cycles.Arabic Name') }}</th>
                             <th>{{ __('cycles.Price') }}</th>
+                            <th>{{ __('admin.Vendor_Name') }}</th>
+                            <th>{{ __('admin.Vendor_Email') }}</th>
+                            <th>{{ __('admin.Vendor_Phone') }}</th>
                             <th>{{ __('cycles.Created At') }}</th>
-                            <th>
-                              @can('edit_service')
-                                {{ __('cycles.Edit') }}
-                              @endcan
-
-                              @can('delete_service')
-                                /
-                                {{ __('cycles.Delete') }}
-                              @endcan
-                            </th>
+                            @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
                           </tr>
                         </thead>
                         <tbody>
                           @foreach ($services as $service)
                             <tr>
                               <td>{{ $index++ }}</td>
+                              <td class="text-center">
+                                <a href="{{ URL::to('dashboard/organizations/' . $service->organization_id . '/edit') }}">
+                                  {{ $service->organization ? $service->organization->{'name_'.$l} : '-' }}
+                                </a>
+                              </td>
                               <td>{{ $service->name_en }}</td>
                               <td>{{ $service->name_ar }}</td>
                               <td>{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
+                              <td>{{ $service->vendor_name}}</td>
+                              <td>{{ $service->vendor_email }}</td>
+                              <td>{{ $service->vendor_phone}}</td>
                               <td>{{ $service->created_at }}</td>
+                              @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions) )
                               <td>
-                                @can('edit_service')
+                                @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions) )
                                   <a href="{{ route('services.edit', ['service' => $service->id]) }}"
                                     class="btn btn-label-primary">
                                     <i class="ti ti-pencil"></i>
                                   </a>
-                                @endcan
+                                @endif
 
-                                @can('delete_service')
+                                @if( $_user->ableTo('services.destroy', $permissions) )
                                   <button id='deleteAction' data-id='{{ $service->id }}'
                                     data-url="{{ route('services.destroy', ['service' => $service->id]) }}" type="button"
                                     class="btn btn-label-danger">
                                     <i class="ti ti-trash text-danger"></i>
                                   </button>
-                                @endcan
+                                @endif
                               </td>
+                              @endif
                             </tr>
                           @endforeach
                         </tbody>

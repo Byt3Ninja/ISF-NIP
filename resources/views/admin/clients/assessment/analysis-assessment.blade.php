@@ -208,6 +208,11 @@ $userid = auth()->user()->id;
                   {{ __('admin.Make_a_new_assessment') }}
               </a>
                 @endif
+                <a 
+                 href="{{ route('assessment.pdf') }}"
+                  class="btn btn-sm btn-primary light-shadow radius-10">
+                  {{ __('admin.Export_assessment_pdf') }}
+              </a>
               </div>
             </div>
             <div class="d-flex flex-grow-1 align-items-center gap-3">

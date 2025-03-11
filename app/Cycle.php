@@ -39,4 +39,9 @@ class Cycle extends Model
     {
         return $this->morphMany(CalenderSync::class, 'calenderable');
     }
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'cycle_project')->withPivot(['status','created_at'])->withTimestamps(); 
+    }
 }

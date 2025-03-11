@@ -19,6 +19,10 @@
 
 @section('style')
 <style>
+  .daterangepicker {
+    margin-top: 8rem !important;
+  }
+
    input[type="file"]::file-selector-button {
     background-color: #FFFF;
     padding: 5px 10px;
@@ -80,12 +84,11 @@ foreach ($steps as  $step) {
   $TotalStepsDuration = app(App\TrainingSession::class)->where('step_id', '=', $step->id)->sum('duration');
   $totalDurationSum += $TotalStepsDuration;
   $answerspinding = 0;
-  $answers = app(App\Formdata::class)->where('step_id', $step->id)->count();
-          $answerspinding = app(App\Formdata::class)->where('step_id', $step->id)->whereNotNull('screening')->orWhere('screening', '{}')->count();
-          $answersdone = app(App\Formdata::class)
+  $answers = app(App\FinalData::class)->where('step_id', $step->id)->count();
+          $answerspinding = app(App\FinalData::class)->where('step_id', $step->id)->whereNull('answer')->count();
+          $answersdone = app(App\FinalData::class)
           ->where('step_id', $step->id)
-          ->whereNotNull('screening') // الحقل ليس NULL
-          ->where('screening', '!=', '{}') // الحقل ليس JSON فارغ
+          ->whereNotNull('answer') // الحقل ليس NULL
           ->count();
 
 }
@@ -387,16 +390,16 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                           <li>
                             <button id="editButton" class="dropdown-item text-dark">
-                              <i class="ti ti-file-export me-2 text-info"></i>
+                              <i class="ti ti-file-export me-2 text-warning"></i>
                               {{ __('cycles.Export_Data') }}
                             </button>
                           </li>
-                          <li>
+                          <!-- <li>
                             <button id="editButton" class="dropdown-item text-dark">
                               <i class="ti ti-stack-2 me-2 text-danger"></i>
                               {{ __('cycles.Edit_Step') }}
                             </button>
-                          </li>
+                          </li> -->
                           <li>
                             <button 
                               id="editButton" 
@@ -408,12 +411,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                             </button>
                           </li>
                           <li>
-                            @can('delete_user')
+                            @if( $_user->ableTo('delete_user', $permissions) )
                             <button class="dropdown-item text-dark" id="deleteButton">
                               <i class="ti ti-trash me-2 text-danger"></i>
                               {{ __('cycles.Delete') }}
                             </button>
-                            @endcan
+                            @endif
                           </li>
                         </ul>
                       </div>
@@ -494,12 +497,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -602,12 +605,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -645,13 +648,10 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   $totalfiltration = 0;
                   $totalfiltrationPinding = 0;
                   $totalfiltrationDone = 0;
-
                   foreach ($companys as $key => $company) {
-                    
-                    $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
-                    $totalfiltrationPinding = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '=', '{}')->count();
-                    $totalfiltrationDone = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->where('screening', '!=', '{}')->count();
-                    
+                    $totalfiltration = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->count();
+                    $totalfiltrationPinding = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->whereNull('answer')->count();
+                    $totalfiltrationDone = app(\App\FinalData::class)->where('step_id', '=', $step->id)->where('company_id', '=', $company->id)->whereNotNull('answer')->count();
                   }
                     // $totalfiltration = app(\App\Formdata::class)->where('step_id', '=', $step->id)->where('company_id', '=', $step->id)->count();
                   @endphp
@@ -780,11 +780,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
         @php
          
-        $mentoreCountRequest = app(App\MentorshipRequest::class)
-        ->where('cycle_id', '=', $step->cycle_id)
-        ->distinct()
-        ->count('mentor_id');
-
+        // $mentoreCountRequest = app(App\MentorshipRequest::class)
+        // ->where('cycle_id', '=', $step->cycle_id)
+        // ->distinct()
+        // ->count('mentor_id');
+        $mentoreCountRequest = App\CyclesMentors::where('cycle_id', $step->cycle_id)
+        ->count();
 
         $totalsessionsMen = app(App\MentorshipRequest::class)
         ->where('cycle_id', '=', $step->cycle_id)
@@ -853,12 +854,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -1080,12 +1081,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -1266,12 +1267,12 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                           </button>
                         </li>
                         <li>
-                          @can('delete_user')
+                          @if( $_user->ableTo('delete_user', $permissions) )
                           <button class="dropdown-item text-danger" onclick="deleteStep(this.id)" id="{{ $step->id }}">
                             <i class="ti ti-trash me-2"></i>
                             {{ __('cycles.Delete') }}
                           </button>
-                          @endcan
+                          @endif
                         </li>
                       </ul>
                     </div>
@@ -1479,8 +1480,10 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                 class="form-control" required>
               </div>
               <div class="col-12 mb-4">
-                <label for="bs-rangepicker-basic" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
-                <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" />
+                <label for="step-range-picker" class="form-label">{{ __('cycles.Valid_from_to') }}:</label>
+                <input type="hidden" name="fromDate" id="mfromDate">
+                <input type="hidden" name="toDate" id="mtoDate">
+                <input type="text" id="step-range-picker" class="form-control" name="date_range" />
               </div>
               {{-- <div class="col-md-6 form-group mb-3">
                 <label class="form-label" for="flatpickr-date">{{ __('cycles.Valid from') }}: </label>
@@ -1976,15 +1979,15 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     // Set Language
     const lang = '{{ $l }}';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('loaded');
-      var bsRangePickerBasic = $('#bs-rangepicker-basic');
-      if (bsRangePickerBasic.length) {
-        bsRangePickerBasic.daterangepicker({
-          opens: isRtl ? 'left' : 'right'
-        });
-      }
-    });
+    // document.addEventListener('DOMContentLoaded', () => {
+    //   console.log('loaded');
+    //   var bsRangePickerBasic = $('#bs-rangepicker-basic');
+    //   if (bsRangePickerBasic.length) {
+    //     bsRangePickerBasic.daterangepicker({
+    //       opens: isRtl ? 'left' : 'right'
+    //     });
+    //   }
+    // });
 
     const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
     const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
@@ -2060,6 +2063,17 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
           data: {"cycleid": cycleId },
           success: function(response) {
             console.log(response); 
+
+            $('#edit-program-modal #date-range-picker').daterangepicker({
+              opens: isRtl ? 'left' : 'right',
+              drops: 'up',
+              startDate: response?.start ? moment(response?.start) : '',
+              endDate: response?.end ? moment(response?.end) : '',
+            }).on('apply.daterangepicker', function(ev, picker) {
+              $('#edit-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
+              $('#edit-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
+            });
+
             $('#edit-program-modal #title').val(response.title ?? '');
             $('#edit-program-modal #description').val(response.description ?? '');
             $('#edit-program-modal #cycleid').val(cycleId); 
@@ -2338,6 +2352,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               "cycleid": 0,
             },
             success: function(response) {
+              console.log('response', response)
               step = response.stype;
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
@@ -2383,8 +2398,19 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               $('#sid').val(response.id);
               $('#mtitle').val(response.title);
               $('#mdescription').val(response.description);
-              $('#mfromDate').val(response.from);
-              $('#mtoDate').val(response.to);
+
+              $('#step-range-picker').daterangepicker({
+                opens: isRtl ? 'left' : 'right',
+                drops: 'up',
+                startDate: response?.from ? moment(response?.from) : null,
+                endDate: response?.to ? moment(response?.to) : null,
+              }).on('apply.daterangepicker', function(ev, picker) {
+                $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+                $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+              });
+
+              // $('#mfromDate').val(response.from);
+              // $('#mtoDate').val(response.to);
               $('#customStepModal').modal('show');
             },
             error: function(error) {

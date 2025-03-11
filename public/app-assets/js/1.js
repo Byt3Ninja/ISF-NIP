@@ -406,14 +406,248 @@ return $state;
 $('.lfm').filemanager('file');
 
 
+$('#founder-form #founder_name').on('input', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#founder-form #founder-error1').show();
+        $('#founder-form #founder-error2').hide();
+    } else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#founder-form #founder-error2').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#founder-form #founder-error1').hide();
+        $('#founder-form #founder-error2').hide();
+    }
+});
 
+$('#founder-form #founder_email').on('input', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#founder-form #email-error').show();
+    } else if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#founder-form #email-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#founder-form #email-error').hide();
+    }
+});
+
+$('#founder-form #founder_linkedin').on('input', function() {
+    const val = $(this).val();
+    if (val && !/^https:\/\/www.linkedin.com\/.*/.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#founder-form #linkedin-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#founder-form #linkedin-error').hide();
+    }
+});
+
+$('#edit-founder-form .founder_name').on('input', function() {
+    const val = $(this).val();
+    console.log('edit' , val)
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-founder-form #founder-error1').show();
+        $('#edit-founder-form #founder-error2').hide();
+    } else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-founder-form #founder-error2').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#edit-founder-form #founder-error1').hide();
+        $('#edit-founder-form #founder-error2').hide();
+    }
+});
+
+$('#edit-founder-form .founder_email').on('input', function() {
+    const val = $(this).val();
+    if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-founder-form #email-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#edit-founder-form #email-error').hide();
+    }
+});
+
+$('#edit-founder-form .founder_linkedin').on('input', function() {
+    const val = $(this).val();
+    if (val && !/^https:\/\/www.linkedin.com\/.*/.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-founder-form #linkedin-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#edit-founder-form #linkedin-error').hide();
+    }
+});
+
+$('#shareholder-form #shareholder_name').on('input', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#shareholder-form #shareholder-error1').show();
+        $('#shareholder-form #shareholder-error2').hide();
+    } else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#shareholder-form #shareholder-error1').hide();
+        $('#shareholder-form #shareholder-error2').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#shareholder-form #shareholder-error1').hide();
+        $('#shareholder-form #shareholder-error2').hide();
+    }
+});
+
+$('#shareholder-form #shareholder_role').on('input', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#shareholder-form #role-error').show();
+    }
+    else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#shareholder-form #role-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#shareholder-form #role-error').hide();
+    }
+});
+
+$('#shareholder-form #shareholder_ownership_percentage').on('input', function() {
+    const val = $(this).val();
+    if (!val || !/^\d{1,2}(\.\d{1,2})?$/.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#shareholder-form #ownership-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#shareholder-form #ownership-error').hide();
+    }
+});
+
+$('#edit-shareholder-form .shareholder_name').on('input', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-shareholder-form #shareholder-error1').show();
+        $('#edit-shareholder-form #shareholder-error2').hide();
+    } else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-shareholder-form #shareholder-error1').hide();
+        $('#edit-shareholder-form #shareholder-error2').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#edit-shareholder-form #shareholder-error1').hide();
+        $('#edit-shareholder-form #shareholder-error2').hide();
+    }
+});
+
+$('#edit-shareholder-form .shareholder_role').on('input', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-shareholder-form #role-error').show();
+    }
+    else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-shareholder-form #role-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#edit-shareholder-form #role-error').hide();
+    }
+});
+
+$('#edit-shareholder-form .shareholder_ownership_percentage').on('input', function() {
+    const val = $(this).val();
+    if (!val || !/^\d{1,2}(\.\d{1,2})?$/.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-shareholder-form #ownership-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#edit-shareholder-form #ownership-error').hide();
+    }
+});
+
+
+
+$('#investor-form #investor_name').on('input', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#investor-form #investor-error1').show();
+        $('#investor-form #investor-error2').hide();
+    } else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#investor-form #investor-error2').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#investor-form #investor-error1').hide();
+        $('#investor-form #investor-error2').hide();
+    }
+});
+
+$('#investor-form #investment_type').on('change', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#investor-form #investment-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#investor-form #investment-error').hide();
+    }
+});
+$('#edit-investor-form .investor_name').on('input', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-investor-form #investor-error1').show();
+        $('#edit-investor-form #investor-error2').hide();
+    } else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-investor-form #investor-error2').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#edit-investor-form #investor-error1').hide();
+        $('#edit-investor-form #investor-error2').hide();
+    }
+});
+
+$('#edit-investor-form .investment_type').on('change', function() {
+    const val = $(this).val();
+    if (!val) {
+        $(this).addClass('is-invalid').trigger('focus');
+        $('#edit-investor-form #investment-error').show();
+    } else {
+        $(this).removeClass('is-invalid');
+        $('#edit-investor-form #investment-error').hide();
+    }
+});
+
+$('#edit-founder-link, #edit-shareholder-link, #edit-investor-link').on('click', function() {
+    console.log('edit');
+    $('#edit-founder-form #founder-error1').hide();
+    $('#edit-founder-form #founder-error2').hide();
+    $('#edit-founder-form #email-error').hide();
+    $('#edit-founder-form #linkedin-error').hide();
+    $('#edit-shareholder-form #shareholder-error1').hide();
+    $('#edit-shareholder-form #shareholder-error2').hide();
+    $('#edit-shareholder-form #role-error').hide();
+    $('#edit-shareholder-form #ownership-error').hide();
+    $('#edit-investor-form #investor-error1').hide();
+    $('#edit-investor-form #investor-error2').hide();
+    $('#edit-investor-form #investment-error').hide();
+});
 
 
 $('.AddTeams').click(function(event) {
     event.preventDefault();
-      var TeamsNo = $(this).attr('do');
-      var company = $(this).attr('company');
-      
+    var TeamsNo = $(this).attr('do');
+    var company = $(this).attr('company');
+
     var founder_name = $('#founder_name').val();
     var founder_email = $('#founder_email').val();
     var founder_linkedin = $('#founder_linkedin').val();
@@ -423,100 +657,283 @@ $('.AddTeams').click(function(event) {
     var investor_name = $('#investor_name').val();
     var investment_type = $('#investment_type').val();
 
-        $.ajax({
-            url: '/dashboard/AddCompanyTeams/'+company, 
-            method: 'post',
-            data: {
-                'TeamsNo': TeamsNo,
-                'founder_name': founder_name,
-                'founder_email': founder_email,
-                'founder_linkedin': founder_linkedin,
-                'shareholder_name': shareholder_name,
-                'shareholder_role': shareholder_role,
-                'shareholder_ownership_percentage': shareholder_ownership_percentage,
-                'investor_name': investor_name,
-                'investment_type': investment_type,
-                _token: $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                
-                if (response.state) {
-                    alert(response.state);
-                    if(TeamsNo == "Founders"){
-                    // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
-                     $('.ShowTableFounders').load(location.href + ' .ShowTableFounders');
-                    }
-                    if(TeamsNo == "Shareholders"){
-                        // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
-                         $('.ShowTableShareholders').load(location.href + ' .ShowTableShareholders');
-                        }
+    // Validate inputs based on the form type
+    if (TeamsNo === "Founders") {
+        if (!founder_name) {
+            $('#founder_name').addClass('is-invalid').trigger('focus');
+            $('#founder-form #founder-error1').show();
+            return;
+        } else if (founder_name && !/^[\p{L}\s]+$/u.test(founder_name)) {
+            $('#founder_name').addClass('is-invalid').trigger('focus');
+            $('#founder-form #founder-error2').show();
+            return;
+        } else {
+            $('#founder_name').removeClass('is-invalid');
+            $('#founder-form #founder-error1').hide();
+            $('#founder-form #founder-error2').hide();
+        }
 
-                    if(TeamsNo == "Investors"){
-                        // تحميل البيانات في div فقط بدون إعادة تحميل الصفحة
+        if (!founder_email) {
+            $('#founder_email').addClass('is-invalid').trigger('focus');
+            $('#founder-form #email-error').show();
+            return;
+        } else if (founder_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(founder_email)) {
+            $('#founder_email').addClass('is-invalid').trigger('focus');
+            $('#founder-form #email-error').show();
+            return;
+        } else {
+            $('#founder_email').removeClass('is-invalid');
+            $('#founder-form #email-error').hide();
+        }
+
+        if (founder_linkedin && !/^https:\/\/www.linkedin.com\/.*/.test(founder_linkedin)) {
+            $('#founder_linkedin').addClass('is-invalid').trigger('focus');
+            $('#founder-form #linkedin-error').show();
+            return;
+        } else {
+            $('#founder_linkedin').removeClass('is-invalid');
+            $('#founder-form #linkedin-error').hide();
+        }
+    }
+    if (TeamsNo === "Shareholders") {
+        if (!shareholder_name) {
+            $('#shareholder_name').addClass('is-invalid').trigger('focus');
+            $('#shareholder-form #shareholder-error1').show();
+            return;
+        } else if (shareholder_name && !/^[\p{L}\s]+$/u.test(shareholder_name)) {
+            $('#shareholder_name').addClass('is-invalid').trigger('focus');
+            $('#shareholder-form #shareholder-error2').show();
+            return;
+        } else if (!shareholder_role || !/^[\p{L}\s]+$/u.test(shareholder_role)) {
+            $('#shareholder_role').addClass('is-invalid').trigger('focus');
+            $('#shareholder-form #role-error').show();
+            return;
+        } else if (!shareholder_ownership_percentage || !/^\d{1,2}(\.\d{1,2})?$/.test(shareholder_ownership_percentage)) {
+            $('#shareholder_ownership_percentage').addClass('is-invalid').trigger('focus');
+            $('#shareholder-form #ownership-error').show();
+            return;
+        } else {
+            $('#shareholder_name').removeClass('is-invalid');
+            $('#shareholder-form #shareholder-error1').hide();
+            $('#shareholder-form #shareholder-error2').hide();
+        }
+    }
+    if (TeamsNo === "Investors") {
+        if (!investor_name) {
+            $('#investor_name').addClass('is-invalid').trigger('focus');
+            $('#investor-form #investor-error1').show();
+            return;
+        } else if (investor_name && !/^[\p{L}\s]+$/u.test(investor_name)) {
+            $('#investor_name').addClass('is-invalid').trigger('focus');
+            $('#investor-form #investor-error2').show();
+            return;
+        } else if (!investment_type) {
+            $('#investment_type').addClass('is-invalid').trigger('focus');
+            $('#investor-form #investment-error').show();
+            return;
+        } else {
+            $('#investor_name').removeClass('is-invalid');
+            $('#investor-form #investor-error1').hide();
+            $('#investor-form #investor-error2').hide();
+        }
+    }
+
+    $.ajax({
+        url: '/dashboard/AddCompanyTeams/' + company,
+        method: 'post',
+        data: {
+            'TeamsNo': TeamsNo,
+            'founder_name': founder_name,
+            'founder_email': founder_email,
+            'founder_linkedin': founder_linkedin,
+            'shareholder_name': shareholder_name,
+            'shareholder_role': shareholder_role,
+            'shareholder_ownership_percentage': shareholder_ownership_percentage,
+            'investor_name': investor_name,
+            'investment_type': investment_type,
+            _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            if (response.state) {
+                // alert(response.state);
+                if (TeamsNo == "Founders") {
+                    $('#founder_name').val('');
+                    $('#founder_email').val('');
+                    $('#founder_linkedin').val('');
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.state,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $('.ShowTableFounders').load(location.href + ' .ShowTableFounders');
+                        }
+                    });
+                    
+                }
+                if (TeamsNo == "Shareholders") {
+                    $('#shareholder_name').val('');
+                    $('#shareholder_role').val('');
+                    $('#shareholder_ownership_percentage').val('');
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.state,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $('.ShowTableShareholders').load(location.href + ' .ShowTableShareholders');
+                        }
+                    });
+                    
+                }
+                if (TeamsNo == "Investors") {
+                    $('#investor_name').val('');
+                    $('#investment_type').val('');
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.state,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
                             $('.ShowTableInvestors').load(location.href + ' .ShowTableInvestors');
                         }
-
-
-
-                }else{
-                    alert(errors);
+                    });
                 }
-            },
-            error: function(error) {
-                if (error.responseJSON && error.responseJSON.errors) {
-                    var errors = error.responseJSON.errors;
-    
-                    // عرض رسائل الأخطاء بناءً على الحقول المفقودة أو غير الصحيحة
-                    if (errors.founder_name) {
-                        alert(errors.founder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                    }
-                    if (errors.founder_email) {
-                        alert(errors.founder_email[0]); // عرض رسالة الخطأ الخاصة بالبريد الإلكتروني
-                    }
-                    if (errors.founder_linkedin) {
-                        alert(errors.founder_linkedin[0]); // عرض رسالة الخطأ الخاصة بالرابط
-                    }
+            } else {
+                alert(errors);
+            }
+        },
+        error: function(error) {
+            if (error.responseJSON && error.responseJSON.errors) {
+                var errors = error.responseJSON.errors;
 
-
-
-                    if (errors.shareholder_name) {
-                        alert(errors.shareholder_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                    }
-                    if (errors.shareholder_role) {
-                        alert(errors.shareholder_role[0]); 
-                    }
-                    if (errors.shareholder_ownership_percentage) {
-                        alert(errors.shareholder_ownership_percentage[0]); 
-                    }
-
-                    if (errors.investor_name) {
-                        alert(errors.investor_name[0]); // عرض رسالة الخطأ الخاصة بالاسم
-                    }
-                    if (errors.investment_type) {
-                        alert(errors.investment_type[0]); 
-                    }
-
+                if (errors.founder_name) {
+                    alert(errors.founder_name[0]);
+                }
+                if (errors.founder_email) {
+                    alert(errors.founder_email[0]);
+                }
+                if (errors.founder_linkedin) {
+                    alert(errors.founder_linkedin[0]);
+                }
+                if (errors.shareholder_name) {
+                    alert(errors.shareholder_name[0]);
+                }
+                if (errors.shareholder_role) {
+                    alert(errors.shareholder_role[0]);
+                }
+                if (errors.shareholder_ownership_percentage) {
+                    alert(errors.shareholder_ownership_percentage[0]);
+                }
+                if (errors.investor_name) {
+                    alert(errors.investor_name[0]);
+                }
+                if (errors.investment_type) {
+                    alert(errors.investment_type[0]);
                 }
             }
-        });
-    
-    
+        }
+    });
 });
 
 
 $('.EditTeams').click(function(event) {
     event.preventDefault();
     var id = $(this).attr('do');
+    var TeamsNo = $(this).attr('data-id');
     var company = $(this).attr('company');
     
-  var founder_name = $('#founder_name'+id).val();
-  var founder_email = $('#founder_email'+id).val();
-  var founder_linkedin = $('#founder_linkedin'+id).val();
-  var shareholder_name = $('#shareholder_name'+id).val();
-  var shareholder_role = $('#shareholder_role'+id).val();
-  var shareholder_ownership_percentage = $('#shareholder_ownership_percentage'+id).val();
-  var investor_name = $('#investor_name'+id).val();
-  var investment_type = $('#investment_type'+id).val();
+    var founder_name = $('#founder_name'+id).val();
+    var founder_email = $('#founder_email'+id).val();
+    var founder_linkedin = $('#founder_linkedin'+id).val();
+    var shareholder_name = $('#shareholder_name'+id).val();
+    var shareholder_role = $('#shareholder_role'+id).val();
+    var shareholder_ownership_percentage = $('#shareholder_ownership_percentage'+id).val();
+    var investor_name = $('#investor_name'+id).val();
+    var investment_type = $('#investment_type'+id).val();
+
+     // Validate inputs based on the form type
+     if (TeamsNo === "Founders") {
+        if (!founder_name) {
+            $('#edit-founder-form .founder_name').addClass('is-invalid').trigger('focus');
+            $('#edit-founder-form #founder-error1').show();
+            return;
+        } else if (founder_name && !/^[\p{L}\s]+$/u.test(founder_name)) {
+            $('#edit-founder-form .founder_name').addClass('is-invalid').trigger('focus');
+            $('#edit-founder-form #founder-error2').show();
+            return;
+        } else {
+            $('#edit-founder-form .founder_name').removeClass('is-invalid');
+            $('#edit-founder-form #founder-error1').hide();
+            $('#edit-founder-form #founder-error2').hide();
+        }
+        if (!founder_email) {
+            $('#edit-founder-form .founder_email').addClass('is-invalid').trigger('focus');
+            $('#edit-founder-form #email-error').show();
+            return
+        } else if (founder_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(founder_email)) {
+            $('#edit-founder-form .founder_email').addClass('is-invalid').trigger('focus');
+            $('#edit-founder-form #email-error').show();
+            return;
+        } else {
+            $('#edit-founder-form .founder_email').removeClass('is-invalid');
+            $('#edit-founder-form #email-error').hide();
+        }
+
+        if (founder_linkedin && !/^https:\/\/www.linkedin.com\/.*/.test(founder_linkedin)) {
+            $('#edit-founder-form .founder_linkedin').addClass('is-invalid').trigger('focus');
+            $('#edit-founder-form #linkedin-error').show();
+            return;
+        } else {
+            $('#edit-founder-form .founder_linkedin').removeClass('is-invalid');
+            $('#edit-founder-form #linkedin-error').hide();
+        }
+    }
+    if (TeamsNo === "Shareholders") {
+        if (!shareholder_name) {
+            $('#edit-shareholder-form .shareholder_name').addClass('is-invalid').trigger('focus');
+            $('#edit-shareholder-form #shareholder-error1').show();
+            return;
+        } else if (shareholder_name && !/^[\p{L}\s]+$/u.test(shareholder_name)) {
+            $('#edit-shareholder-form .shareholder_name').addClass('is-invalid').trigger('focus');
+            $('#edit-shareholder-form #shareholder-error2').show();
+            return;
+        } else if (!shareholder_role || !/^[\p{L}\s]+$/u.test(shareholder_role)) {
+            $('#edit-shareholder-form .shareholder_role').addClass('is-invalid').trigger('focus');
+            $('#edit-shareholder-form #role-error').show();
+            return;
+        } else if (!shareholder_ownership_percentage || !/^\d{1,2}(\.\d{1,2})?$/.test(shareholder_ownership_percentage)) {
+            $('#edit-shareholder-form .shareholder_ownership_percentage').addClass('is-invalid').trigger('focus');
+            $('#edit-shareholder-form #ownership-error').show();
+            return;
+        } else {
+            $('#edit-shareholder-form .shareholder_name').removeClass('is-invalid');
+            $('#edit-shareholder-form #shareholder-error1').hide();
+            $('#edit-shareholder-form #shareholder-error2').hide();
+        }
+    }
+    if (TeamsNo === "Investors") {
+        if (!investor_name) {
+            $('#edit-investor-form .investor_name').addClass('is-invalid').trigger('focus');
+            $('#edit-investor-form #investor-error1').show();
+            return;
+        } else if (investor_name && !/^[\p{L}\s]+$/u.test(investor_name)) {
+            $('#edit-investor-form .investor_name').addClass('is-invalid').trigger('focus');
+            $('#edit-investor-form #investor-error2').show();
+            return;
+        } else if (!investment_type) {
+            $('#edit-investor-form .investment_type').addClass('is-invalid').trigger('focus');
+            $('#edit-investor-form #investment-error').show();
+            return;
+        } else {
+            $('#edit-investor-form .investor_name').removeClass('is-invalid');
+            $('#edit-investor-form #investor-error1').hide();
+            $('#edit-investor-form #investor-error2').hide();
+        }
+    }
 
       $.ajax({
           url: '/dashboard/AddCompanyEdit/'+company, 
@@ -534,10 +951,17 @@ $('.EditTeams').click(function(event) {
               _token: $('meta[name="csrf-token"]').attr('content')
           },
           success: function(response) {
-              
               if (response.state) {
-                  alert(response.state);
-                  location.reload();
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.state,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        location.reload();
+                    }
+                });
               }else{
                   alert(errors);
               }

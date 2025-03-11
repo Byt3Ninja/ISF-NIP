@@ -36,6 +36,6 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
         $user=User::first();
-        $user->assignRole(Role::first()->name);
+        $user->allotRole(Role::first()->name);
     }
 }

@@ -110,9 +110,11 @@
                           <select class="select2 form-select" name="users[]"
                             data-placeholder="{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}" multiple>
                             @foreach ($users as $index => $user)
+                              @if( $user->user )
                               <option value="{{ $user->user->id }}" {{ $index === 0 ? 'selected' : '' }}>
                                 {{ $user->user->{'first_name_' . $l} . ' ' . $user->user->{'last_name_' . $l} . ' - (' . $user->{'name_' . $l} . ')' }}
                               </option>
+                              @endif
                             @endforeach
                           </select>
                         @endif

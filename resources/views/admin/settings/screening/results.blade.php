@@ -42,7 +42,7 @@
                         @foreach ($steps as $step)
                           <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
                             ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}"
-                            - {{ __('cycles.Start') }} {{ $step->from->format('d-m') }})
+                            - {{ __('cycles.Start') }} {{ $step->from->format('d-m-Y') }})
                             - {{ optional(optional($step->cycle)->organization)->name }}</option>
                         @endforeach
                       </select>
@@ -87,14 +87,14 @@
                   <p>{{ $cstep->description }}</p>
                   <small class="text-muted"> 
                     {{ __('cycles.from') }}
-                  {{ $cstep->from->format('d-m') }} {{ __('cycles.to') }} {{ $cstep->to->format('d-m-Y') }}</small>
+                  {{ $cstep->from->format('d-m-Y') }} {{ __('cycles.to') }} {{ $cstep->to->format('d-m-Y') }}</small>
                 </div>
                 <div class="card-body">
                   <div class="card-text">
                     <dl class="row">
                       <dt class="col-sm-3 text-right">{{ __('cycles.Cycle') }}</dt>
                       <dd class="col-sm-9">{{ $cstep->cycle->title }} {{ __('cycles.from') }}
-                        "{{ $cstep->cycle->start->format('d-m') }} {{ __('cycles.to') }}
+                        "{{ $cstep->cycle->start->format('d-m-Y') }} {{ __('cycles.to') }}
                         {{ $cstep->cycle->end->format('d-m-Y') }}
                         "
                       </dd>

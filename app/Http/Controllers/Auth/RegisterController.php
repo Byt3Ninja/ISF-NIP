@@ -60,7 +60,7 @@ class RegisterController extends Controller
             'first_name_en' => ['required', 'string', 'max:255'],
             'last_name_en' => ['required', 'string', 'max:255'],
             'gender' => ['required'],
-            'phone' => ['required'],
+            'phone' => 'required|unique:users,phone',
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
@@ -82,12 +82,14 @@ class RegisterController extends Controller
                 'last_name_en' => $data['last_name_en'],
                 'first_name_ar' => $data['first_name_en'],
                 'last_name_ar' => $data['last_name_en'],
+                'title_ar' => $data['title_en'],
+                'title_en' => $data['title_en'],
                 'gender' =>  $data['gender'],
                 'phone' => $data['phone'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
             ]);
-            $user->assignRole($data['role']);
+            $user->allotRole($data['role']);
 
 
             if ($data['role'] == "Mentor") {
@@ -123,13 +125,15 @@ class RegisterController extends Controller
                 'last_name_en' => $data['last_name_en'],
                 'first_name_ar' => $data['first_name_en'],
                 'last_name_ar' => $data['last_name_en'],
+                'title_ar' => $data['title_en'],
+                'title_en' => $data['title_en'],
                 'gender' =>  $data['gender'],
                 'phone' => $data['phone'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
                 'email_verified_at' => now(),
             ]);
-            $user->assignRole($data['role']);
+            $user->allotRole($data['role']);
 
 
             if ($data['role'] == "Mentor") {

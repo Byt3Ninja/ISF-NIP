@@ -50,6 +50,7 @@ $phone_codes = App\Country::all();
 $tabs = [
 ['account', 'accountSection', 'users'],
 ['security', 'securitySection', 'lock'],
+['2FA', '2faSection', 'lock'],
 ['billing', 'billingSection', 'bookmark'],
 ['notifications', 'notificationsSection', 'bell'],
 ['connections', 'connectionsSection', 'link'],
@@ -86,7 +87,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
                 @if (auth()->user()->hasRole('Mentor'))
                   disabled="{{ $key > 2 ? 'true' : 'false' }}"
                 @else
-                  disabled="{{ $key > 1 ? 'true' : 'false' }}"
+                  disabled="{{ $key > 2 ? 'true' : 'false' }}"
                 @endif
               >
                 <i class="ti-sm ti ti-{{ $tab['icon'] }} me-1_5"></i>
@@ -125,6 +126,12 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
           </div>
           <!-- /Security section -->
 
+          <!-- Security section -->
+          <div class="tab-pane fade" id="2faSection">
+            @include('admin.clients.profile.partials._2fa_security_form')
+          </div>
+          <!-- /Security section -->
+
           <!-- Mentor fields -->
           @role('Mentor')
           <!-- Security section -->
@@ -137,7 +144,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
         <!-- /Tab Content -->
 
         <!-- Deactivate account -->
-        <div class="card mb-6">
+        {{-- <div class="card mb-6">
           <h5 class="card-header">{{ __('admin.Delete Account') }}</h5>
           <div class="card-body">
             <div class="mb-6 col-12 mb-0">
@@ -156,7 +163,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
               </button>
             </form>
           </div>
-        </div>
+        </div> --}}
         <!-- /Deactivate account -->
       </div>
     </div>
@@ -603,5 +610,7 @@ $(document).on('input', '.otp-input', function() {
     $(this).next('.otp-input').focus();
   }
 });
+
+
 </script>
 @stop

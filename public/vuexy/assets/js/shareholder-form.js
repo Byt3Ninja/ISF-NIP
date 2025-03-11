@@ -1,5 +1,4 @@
-
-const lngg = document.documentElement.lang;
+const lngg = $('html').attr('lang');
 
 const shareholderFormTranslations = {
   en: {
@@ -30,8 +29,8 @@ const shareholderFormTranslations = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-  const createValidationConfig = () => ({
+$(document).ready(function () {
+  const createValidationConfig = (mode = 'create') => ({
     fields: {
       shareholder_name: {
         validators: {
@@ -72,7 +71,6 @@ document.addEventListener('DOMContentLoaded', function () {
         rowSelector: '.mb-6'
       }),
       submitButton: new FormValidation.plugins.SubmitButton(),
-      defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
       autoFocus: new FormValidation.plugins.AutoFocus()
     },
     init: instance => {
@@ -81,17 +79,87 @@ document.addEventListener('DOMContentLoaded', function () {
           e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
         }
       });
+      instance.on('core.form.valid', function () {
+        createShareholder(mode);
+      });
     }
   });
 
-  const shareholderForm = document.querySelector('#shareholder-form');
-  const editFounderForm = document.querySelector('#edit-shareholder-form');
+  const createShareholder = (mode) => {
+    console.log('mode', mode)
+    const companyId = $('#CompanyN').val();
+    const shareholderId = $('#shareholderId').val();
 
-  if (shareholderForm) {
-    const shareholderValidator = FormValidation.formValidation(shareholderForm, createValidationConfig());
+    const nameInput = mode === 'create' ? $('#shareholder_name') : $('#edit_shareholder_name');
+    const roleInput = mode === 'create' ? $('#shareholder_role') : $('#edit_shareholder_role');
+    const percentageInput = mode === 'create' ? $('#shareholder_ownership_percentage') : $('#edit_shareholder_ownership_percentage');
+
+    const name = mode === 'create' ? $('#shareholder_name').val() : $('#edit_shareholder_name').val();
+    const role = mode === 'create' ? $('#shareholder_role').val() : $('#edit_shareholder_role').val();
+    const percentage = mode === 'create' ? $('#shareholder_ownership_percentage').val() : $('#edit_shareholder_ownership_percentage').val();
+
+    $.ajax({
+      url: '/dashboard/AddCompanyTeams/' + companyId,
+      method: 'post',
+      data: {
+        id: mode === 'edit' ? shareholderId : undefined,
+        TeamsNo: mode == 'create' ? 'Shareholders' : undefined,
+        shareholder_name: name,
+        shareholder_role: role,
+        shareholder_ownership_percentage: percentage,
+        _token: $('meta[name="csrf-token"]').attr('content')
+      },
+      success: function (response) {
+        console.log('response', response);
+        nameInput.val('');
+        roleInput.val('');
+        percentageInput.val('');
+
+        if (response.state) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            confirmButtonText: 'OK'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              location.reload();
+            }
+          });
+
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: response.errors || 'An error occurred.'
+          });
+          console.log('errors', response.errors);
+        }
+      },
+      error: function (error) {
+        console.log('error', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while processing your request.'
+        });
+      }
+    });
+  };
+
+  const shareholderForm = $('#shareholder-form');
+  const editShareHolderForm = $('#edit-shareholder-form');
+
+  if (shareholderForm.length) {
+    shareholderForm.on('submit', function (e) {
+      e.preventDefault(); // Prevent default form submission
+    });
+    const shareholderValidator = FormValidation.formValidation(shareholderForm[0], createValidationConfig('create'));
   }
 
-  if (editFounderForm) {
-    const editFounderValidator = FormValidation.formValidation(editFounderForm, createValidationConfig());
+  if (editShareHolderForm.length) {
+    editShareHolderForm.on('submit', function (e) {
+      e.preventDefault(); // Prevent default form submission
+    });
+    const editFounderValidator = FormValidation.formValidation(editShareHolderForm[0], createValidationConfig('edit'));
   }
 });

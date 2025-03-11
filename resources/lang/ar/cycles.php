@@ -225,6 +225,7 @@ return [
     'trainer name'=>'اسم المدرب',
     'trainer email'=>'البريد الالكتروني للمدرب',
     'training location'=>'مكان التدريب',
+    'training Address'=>'عنوان التدريب',
     'select online'=>'اختر محتوى من القائمة',
     'Display course contents' => 'عرض محتويات الكورس التعليمي',
     'Edit training session' => 'تحرير بيانات برنامج تدريبي',
@@ -287,5 +288,11 @@ return [
     'External_Participation_Label' => 'خيار المشاركة الخارجية',
     'Select_Organization' => 'اختر المنظمة',
     'Valid_from_to' => 'متاحة من / إلى',
+    'date_time_required' => 'برجاء اختيار تاريخ ووقت للإجتماع',
+    'Select Judges' => 'اختر المحكمين',
+    'Judges required' => 'برجاء اختيار محكم واحد على الأقل',
+    'Edit_Step' => 'تعديل المرحلة',
+    'startup_is_required' => 'برجاء اختيار على الأقل شركة واحدة من الجدول',
+    'Date' => 'التاريخ',
   ];
 

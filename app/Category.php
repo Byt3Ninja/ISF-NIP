@@ -9,9 +9,12 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['category_name_ar','category_name_en','weight','type'
-                        ];
+    protected $fillable = ['category_name_ar','category_name_en','weight','type'];
 
+    public function getNameAttribute()
+    {
+        return $this->{'category_name_' . app()->getLocale()};
+    }
 
     public function subcategory()
     {

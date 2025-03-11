@@ -23,10 +23,10 @@
     <div class="col-md-12 col-12">
         <div class="form-group mb-3">
             <label class="form-label" for="img_url">{{__('admin.Image')}}</label>
-            <input type="file" class="form-control" name="img_url" id="img_url">
-            @if($organization->img_url)
-                <img src="{{ asset($organization->img_url) }}" alt="Current Image" class="mt-3" width="70">
-            @endif
+            <input type="file" class="form-control" name="img_url" id="img_url" accept="image/*" onchange="previewImage(event)">
+            <div class="mt-3">
+                <img id="preview-image" src="{{ asset($organization->img_url) }}" alt="Preview Image" width="100" style="display: {{ $organization->img_url ? 'block' : 'none' }};">
+            </div>            
         </div>
     </div>
 
@@ -78,5 +78,18 @@
     <div class="col-12 d-flex justify-content-end mt-6">
       <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('settings.Submit') }}</button>
     </div>
-  </form>
+    
+</form>
   
+<script>
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            var preview = document.getElementById('preview-image');
+            preview.src = reader.result;
+            preview.style.display = "block";
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+</script>

@@ -130,7 +130,13 @@ return [
             'root' => storage_path('app/uploads/companies'),
             'url' => env('APP_URL') . 'api/uploads/companies',
             'visibility' => 'private',
-        ]
+        ],
+        'QrCodePublic' => [
+            'driver' => 'local',
+            'root' => public_path('qrcodes'),
+            'url' => env('APP_URL') . '/qrcodes',
+            'visibility' => 'public',
+        ],
     ],
 
 ];

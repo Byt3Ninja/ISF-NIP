@@ -3,10 +3,11 @@
 namespace App\Providers;
 
 
+use App\Settings;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
-use Illuminate\Support\Facades\Config;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,12 @@ class AppServiceProvider extends ServiceProvider
                     App::setLocale($userLanguage);
                 }
             }
+            $permissions = [];
+            $_user = auth()->user();
+            if( auth()->check() )
+            {
+                $permissions = $_user->myPermissions();
+            }
             $l = App::getLocale();
             $organization_id = null;
             if (auth()->check()) {
@@ -41,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
                     $organization_id = auth()->user()->organization_id;
                 }
             }
-            $view->with('l', $l)->with('organization_id', $organization_id);
+            $view->with(['l' => $l, 'organization_id' => $organization_id, '_user' => $_user, 'permissions' => $permissions]);
         });
 
 
@@ -61,6 +68,8 @@ class AppServiceProvider extends ServiceProvider
             'services.linkedin.client_id' => $pusherConfig['LINKEDIN_CLIENT_ID'],
             'services.linkedin.client_secret' => $pusherConfig['LINKEDIN_CLIENT_SECRET'],
             'services.linkedin.redirect' => $pusherConfig['LINKEDIN_REDIRECT_URI'],
+
+            'app.locale' => $pusherConfig['locale'],
 
             // 'broadcasting.connections.pusher.MICROSOFT_CLIENT_ID' => $pusherConfig['MICROSOFT_CLIENT_ID'],
             // 'broadcasting.connections.pusher.MICROSOFT_CLIENT_SECRET_VALUE' => $pusherConfig['MICROSOFT_CLIENT_SECRET_VALUE'],

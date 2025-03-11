@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
+
+class Permissions
+{
+    private $exceptNames = [
+        'filemanager*',
+        'dashboard',
+        'login*',
+        'cities*',
+		'LFMGet',
+		'get_states_by_country',
+        'get_subcategory_by_category',
+		'email.confirm',
+        'verification*'
+    ];
+
+    private $exceptControllers = [
+        'LoginController',
+		'IndexController',
+        'ForgotPasswordController',
+        'ResetPasswordController',
+        'SocialController',
+		'MicrosoftController',
+        'GoogleCalendarController',
+        'MicrosoftCalendarController'
+    ];
+
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        if( env('PERMISSION_BYPASS', false) === true ) { return $next($request); }
+        $user = auth()->user();
+        if( auth()->check() )
+        {
+            $route = $request->route();
+            $permission = $route->getName();
+            if( !trim( $permission ) || in_array( $permission, ['', 'admin', 'dashboard']) ) { return $next($request); }
+            else
+            {
+                if( $this->match( $route ) && !$user->ableTo( $permission ) )
+                {
+                    abort('401', $permission);
+                }
+            }
+        }
+        return $next($request);
+    }
+
+    private function match(Route $route)
+    {
+        if( $route->getName() == '' || $route->getName() === null ) { return false; }
+        else
+        {
+            if( in_array(class_basename($route->getController()), $this->exceptControllers) ) { return false; }
+            foreach ($this->exceptNames as $except) { if( Str::is($except, $route->getName()) || Str::is($except, $route->uri) ) { return false; } }
+        }
+        return true;
+    }
+}

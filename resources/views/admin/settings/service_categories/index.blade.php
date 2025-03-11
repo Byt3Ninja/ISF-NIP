@@ -22,19 +22,19 @@
               <div class="card">
                 <div class="card-content">
                   <div class="card-body card-dashboard">
+                    @if( $_user->ableToAny(['serviceCategories.create', 'serviceCategories.store'], $permissions) )
                     <div class="invoice-create-btn mb-4">
                       <a href="{{ route('serviceCategories.create') }}" class="btn btn-primary glow">
                         {{ __('admin.Add New') }}
                         <i class="ti ti-plus mx-1"></i>
                       </a>
                     </div>
+                    @endif
                     @if (session()->has('msg'))
                       <div class="row">
                         <div class="col-md-12">
                           <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             <div class="d-flex align-items-center">
                               <i class="ti ti-check"></i>
                               <span>
@@ -51,39 +51,39 @@
                         <thead>
                           <tr>
                             <th>#</th>
+                            <th class="text-center">{{__('admin.Organization')}}</th>
                             <th>{{ __('admin.English Name') }}</th>
                             <th>{{ __('admin.Arabic Name') }}</th>
                             <th>{{ __('admin.Created At') }}</th>
-                            <th>
-                              @can('edit_service_category')
-                                {{ __('admin.Edit') }}
-                              @endcan
-
-                              @can('delete_service_category')
-                                {{ __('admin.Delete') }}
-                              @endcan
-                            </th>
+                            @if( $_user->ableToAny(['serviceCategories.show', 'serviceCategories.edit', 'serviceCategories.update', 'serviceCategories.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
                           </tr>
                         </thead>
                         <tbody>
                           @foreach ($serviceCategories as $category)
                             <tr>
                               <td>{{ $index++ }}</td>
+                              <td class="text-center">
+                                <a href="{{ URL::to('dashboard/organizations/' . $category->organization_id . '/edit') }}">
+                                  {{ $category->organization ? $category->organization->{'name_'.$l} : '-' }}
+                                </a>
+                              </td>
                               <td>{{ $category->name_en }}</td>
                               <td>{{ $category->name_ar }}</td>
                               <td>{{ $category->created_at }}</td>
+                              @if( $_user->ableToAny(['serviceCategories.show', 'serviceCategories.edit', 'serviceCategories.update', 'serviceCategories.destroy'], $permissions) )
                               <td>
-                                @can('edit_service_category')
+                                @if( $_user->ableToAny(['serviceCategories.edit', 'serviceCategories.update'], $permissions) )
                                   <a href="{{ route('serviceCategories.edit', ['serviceCategory' => $category->id]) }}"
                                     class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
-                                @endcan
+                                @endif
 
-                                @can('delete_service_category')
+                                @if( $_user->ableTo('serviceCategories.destroy', $permissions) )
                                   <button id='deleteAction' data-id='{{ $category->id }}'
                                     data-url="{{ route('serviceCategories.destroy', ['serviceCategory' => $category->id]) }}"
                                     type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>
-                                @endcan
+                                @endif
                               </td>
+                              @endif
                             </tr>
                           @endforeach
                         </tbody>

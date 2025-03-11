@@ -162,7 +162,11 @@ class MentorshipTaskController extends Controller
 				'action' => 'add'
 			];
 
-			Notification::send([$mentor, $startup], new TaskNotification($data));
+			try {
+				Notification::send([$mentor, $startup], new TaskNotification($data));
+			} catch (\Throwable $th) {
+				//throw $th;
+			}
 			
 			if ($task->user->country_code_w_a && $task->user->whatsapp) {
 				$phoneNumber = $task->user->country_code_w_a . $task->user->whatsapp;

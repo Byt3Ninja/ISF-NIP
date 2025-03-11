@@ -346,7 +346,7 @@ return [
 	'SelMultiState' => 'You can choose multiple states or leave it blank to download all',
 	'New only' => 'New company',
 	'Join Cycle' => 'Into Program',
-	'You need to add your company details first.'=> 'You need to add your company details first.',
+	'You need to add your company details first'=> 'You need to add your company details first.',
 	'Google Map full URL' => 'Google Map full URL',
 	'Select image file'=> 'Select image file',
 	'problem'=> 'Problem',

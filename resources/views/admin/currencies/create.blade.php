@@ -23,23 +23,41 @@
                         <div class="col-md-6">
                             <label>{{ __('admin.Name') }}</label>
                             <input type="text" name="currency_name" class="form-control" required>
+                            @error('currency_name')
+                               <div class="text-danger">{{ $message }}</div>
+                            @enderror
                           </div>
                       <div class="col-md-6">
                         <label>{{ __('admin.Code') }}</label>
                         <input type="text" name="currency_code" class="form-control" required>
+                        @error('currency_code')
+                         <div class="text-danger">{{ $message }}</div>
+                        @enderror
                       </div>
                      
                       <div class="col-md-6 mt-3">
                         <label>{{ __('admin.Symbol') }}</label>
                         <input type="text" name="currency_symbol" class="form-control" required>
+                        @error('currency_symbol')
+                          <div class="text-danger">{{ $message }}</div>
+                        @enderror
                       </div>
                       <div class="col-md-6 mt-3">
                         <label>{{ __('admin.Exchange_Rate') }}</label>
-                        <input type="number" name="exchange_rate_to_usd" class="form-control" required>
+                        <input type="number" name="exchange_rate_to_usd" class="form-control" >
+                        @error('exchange_rate_to_usd')
+                          <div class="text-danger">{{ $message }}</div>
+                       @enderror
                       </div>
                       <div class="col-md-6 mt-3">
                         <label>{{ __('admin.Flag') }}</label>
-                        <input type="file" name="flag" class="form-control">
+                        <input type="file" name="flag" class="form-control" id="flagInput" accept="image/*">
+                        @error('flag')
+                         <div class="text-danger">{{ $message }}</div>
+                       @enderror
+                       <div class="mt-2">
+                        <img id="flagPreview" src="" alt="Flag Preview" style="max-width: 100px; display: none;">
+                      </div>
                       </div>
                       <div class="col-md-6 mt-10">
                         <label>{{ __('admin.Enabled') }}</label>
@@ -63,5 +81,20 @@
 
 @section('pagescripts')
 <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+
+<script>
+  document.getElementById('flagInput').addEventListener('change', function(event) {
+      let file = event.target.files[0];
+      if (file) {
+          let reader = new FileReader();
+          reader.onload = function(e) {
+              let preview = document.getElementById('flagPreview');
+              preview.src = e.target.result;
+              preview.style.display = 'block';
+          }
+          reader.readAsDataURL(file);
+      }
+  });
+</script>
 
 @stop

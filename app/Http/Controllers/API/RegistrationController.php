@@ -17,6 +17,9 @@ class RegistrationController extends Controller
 {
 	public function register(Request $request)
 	{
+		if ($request->isMethod('get')) {
+			return response()->json(['status' => false, 'code' => 412, 'message' => 'Request method not allowed']); // توجيه المستخدم إلى صفحة أخرى
+		}
 		try {
 			$rules = [
 				'personal.first_name' => 'required',
@@ -93,7 +96,7 @@ class RegistrationController extends Controller
 						'api_token' => $request_token
 					]);
 					$user->save();
-					$user->assignRole('Registered');
+					$user->allotRole('Registered');
 					$company = new Company();
 					$company->fill([
 						'name_en' => $request->input('company.business_or_product_name', null),

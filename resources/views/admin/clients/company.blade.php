@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-  <!-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" /> -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 
   <style>
     #contentWrapper {
@@ -166,6 +166,7 @@
       </div>
     </div>
     <!-- / Content -->
+    <div class="content-backdrop fade"></div>
   </div>
   <!-- / Content wrapper -->
 @stop
@@ -195,9 +196,9 @@
   <script src="/vuexy/assets/js/forms-selects.js"></script>
   <!-- <script src="/vuexy/assets/js/forms-tagify.js"></script> -->
   <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
-  <script src="/vuexy/assets/js/founder-form.js"></script>
-  <script src="/vuexy/assets/js/shareholder-form.js"></script>
-  <script src="/vuexy/assets/js/investor-form.js"></script>
+  {{-- <script src="/vuexy/assets/js/founder-form.js"></script> --}}
+  {{-- <script src="/vuexy/assets/js/shareholder-form.js"></script> --}}
+  {{-- <script src="/vuexy/assets/js/investor-form.js"></script> --}}
 
   <!-- <script>
     document.getElementById('img_url').addEventListener('change', function(

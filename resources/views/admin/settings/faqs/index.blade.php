@@ -35,9 +35,7 @@
                       <div class="row">
                         <div class="col-md-12">
                           <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             <div class="d-flex align-items-center">
                               <i class="ti ti-check"></i>
                               <span>
@@ -58,12 +56,12 @@
                             <th>{{ __('admin.Arabic Title') }}</th>
                             <th>{{ __('admin.Created At') }}</th>
                             <th>{{ __('admin.Published') }}</th>
-                            @can('edit_faqs')
+                            @if( $_user->ableTo('edit_faqs', $permissions) )
                               <th>
                                 {{ __('admin.Edit') }} /
                                 {{ __('admin.Delete') }}
                               </th>
-                            @endcan
+                            @endif
                           </tr>
                         </thead>
                         <tbody>
@@ -74,7 +72,7 @@
                               <td>{{ $faq->title_ar }}</td>
                               <td>{{ $faq->created_at }}</td>
                               <td>{{ $faq->published ? 'Yes' : 'No' }}</td>
-                              @can('edit_faqs')
+                              @if( $_user->ableTo('edit_faqs', $permissions) )
                                 <td>
                                   <a href="{{ route('faqs.edit', ['faq' => $faq->id]) }}" class="btn btn-label-info"><i
                                       class="ti ti-edit text-info"> </i></a>
@@ -82,7 +80,7 @@
                                     data-url="{{ route('faqs.destroy', ['faq' => $faq->id]) }}" type="button"
                                     class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>
                                 </td>
-                              @endcan
+                              @endif
                             </tr>
                           @endforeach
                         </tbody>
