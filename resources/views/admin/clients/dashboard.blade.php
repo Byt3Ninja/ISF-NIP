@@ -1620,7 +1620,6 @@ window.location.href = url;
 	// });
 
   document.addEventListener('DOMContentLoaded', function() {
-    var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
     var timeFromSelect = $('#timeFrom');
     var timeToSelect = $('#timeTo');
     
@@ -1635,8 +1634,6 @@ window.location.href = url;
   });
 
 	function request(id,mentor,organization_id=null,cycle_id=null) {
-    $('#SendRequest').modal('show');
-
 		$('#mentorid').val(id);
 		$('#rname').html(mentor);
 		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
@@ -1649,8 +1646,9 @@ window.location.href = url;
 				$('#name').html(name);
 
         if (response && response.length>0) {
-          // Date
           console.log('response', response)
+          // Date
+          var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
           if (flatpickrDateTimeLimit) {
             var enabledDays = response.reduce((acc, item) => {
               return acc.concat(item.days);
@@ -1713,7 +1711,7 @@ window.location.href = url;
 			}, 
       error: function (error) {
         console.log(error); 
-        // alert("Error Occurred, Try again!");
+        alert("Error Occurred, Try again!");
       }
 		});
 	}
