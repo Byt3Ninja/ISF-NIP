@@ -1392,6 +1392,7 @@ return [
 	'StartUp_name' => 'اسم الشركة',
 	'Attendance' => 'الحضور',
 	'Absent' => 'غياب',
+	'Export_assessment_pdf' => 'تصدير التقييم PDF',
 	
 ]; 
 
