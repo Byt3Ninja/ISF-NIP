@@ -246,7 +246,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:right;mso-line-height-alt:22.5px;">
                                                     <p style="margin: 0;">عزيزي {{ $notifiable->name }},</p>
                                                     <p style="margin: 0;"> </p>
-                                                    <p style="margin: 0;">مرحباً بك كمحكم فى منصتنا</p>
+                                                    <p style="margin: 0;">مرحباً بك  فى منصتنا</p>
                                                     <p style="margin: 0;"> </p>
                                                     
                                                     

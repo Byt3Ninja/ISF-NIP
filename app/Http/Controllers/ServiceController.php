@@ -158,7 +158,9 @@ class ServiceController extends Controller
 
 	$inputs['hide_price'] = $request->input('hide_price', 0);
     $inputs['hide_vendor_info'] = $request->input('hide_vendor_info', 0);
-
+	$inputs['name_ar'] = $inputs['name_en']; 
+    $inputs['description_ar'] = $inputs['description_en'];
+	
     $result = $service->update($inputs);
 
     if ($result) {

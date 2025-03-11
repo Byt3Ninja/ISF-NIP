@@ -1050,6 +1050,7 @@
         </section>
       
     @endif
+    @if( $ctype != 5 )
       <!-- My last training -->
       @if (count($sessions) > 0)
         <div class="card mt-10">
@@ -1107,7 +1108,7 @@
         </div>
       @endif
       <!-- / My last training -->
-
+      
       <!-- My Mentors -->
       @if ($_user->company->approved ?? null && count($mentors))
         <div class="card mt-10">
@@ -1325,6 +1326,7 @@
 	
       @endif
       <!-- / My Mentors -->
+    @endif
     </div>
   </div>
 
@@ -1498,13 +1500,8 @@
 
 
   <!-- Page JS -->
-  <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+  {{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
   {{-- <script src="/vuexy/assets/js/forms-pickers.js"></script> --}}
-
-  <script>
-
-  </script>
- 
 @stop
 
 @section('pagescripts')
@@ -1616,14 +1613,27 @@ window.location.href = url;
 
 	
 	
-	$("#date").datetimepicker({
-		format: 'Y-m-d H:i', onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
-		maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
-		timepicker: true
-	});
+	// $("#date").datetimepicker({
+	// 	format: 'Y-m-d H:i', onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
+	// 	maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
+	// 	timepicker: true
+	// });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var timeFromSelect = $('#timeFrom');
+    var timeToSelect = $('#timeTo');
+    
+    // Populate timeFromSelect and timeToSelect with 30-minute intervals
+    for (var i = 0; i < 48; i++) {
+      var time = moment().startOf('day').add(i * 30, 'minutes');
+      var timeFormatted = time.format('hh:mm A');
+      var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
+      timeFromSelect.append(option.clone());
+      timeToSelect.append(option.clone());
+    }
+  });
 
 	function request(id,mentor,organization_id=null,cycle_id=null) {
-    
 		$('#mentorid').val(id);
 		$('#rname').html(mentor);
 		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
@@ -1631,57 +1641,33 @@ window.location.href = url;
 			type: "POST", url: "/dashboard/mentors/modify",
 			data: {"id": id, "rtype": 5,},
 			success: function (response) {
+        $('#SendRequest').modal('show');
 				$('#SendRequest li').remove();
 				$('#name').html(name);
+
         if (response && response.length>0) {
-      var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
-      var timeFromSelect = $('#timeFrom');
-      var timeToSelect = $('#timeTo');
-      
-      // Populate timeFromSelect and timeToSelect with 30-minute intervals
-      var startTime = moment(response[0].tfrom, 'HH:mm:ss');
-      var endTime = moment(response[0].tto, 'HH:mm:ss');
+          console.log('response', response)
+          // Date
+          var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
+          if (flatpickrDateTimeLimit) {
+            var enabledDays = response.reduce((acc, item) => {
+              return acc.concat(item.days);
+            }, []);
+          
+            console.log('enabledDays', enabledDays)
+          
+            flatpickrDateTimeLimit.flatpickr({
+              // enableTime: true,
+              dateFormat: 'Y-m-d',
+              minDate: 'today',
+              enable: [
+                function(date) {
+                  return enabledDays.includes(date.toLocaleString('en-US', { weekday: 'short' }));
+                }
+              ]
+            });
+          }
 
-      for (var i = 0; i < 48; i++) {
-        var time = moment().startOf('day').add(i * 30, 'minutes');
-        var timeFormatted = time.format('hh:mm A');
-        var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
-        timeFromSelect.append(option.clone());
-        timeToSelect.append(option.clone());
-        // var time = moment().startOf('day').add(i * 30, 'minutes');
-        // var timeFormatted = time.format('hh:mm A');
-        // var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
-
-        // if (time.isBetween(startTime, endTime, null, '[]')) {
-        //   timeFromSelect.append(option.clone());
-        //   timeToSelect.append(option.clone());
-        // } else {
-        //   option.prop('disabled', true);
-        //   timeFromSelect.append(option.clone());
-        //   timeToSelect.append(option.clone());
-        // }
-      }
-
-      // Date
-      console.log('response', response)
-      if (flatpickrDateTimeLimit) {
-        var enabledDays = response.reduce((acc, item) => {
-          return acc.concat(item.days);
-        }, []);
-      
-        console.log('enabledDays', enabledDays)
-      
-        flatpickrDateTimeLimit.flatpickr({
-          // enableTime: true,
-          dateFormat: 'Y-m-d',
-          minDate: 'today',
-          enable: [
-        function(date) {
-          return enabledDays.includes(date.toLocaleString('en-US', { weekday: 'short' }));
-        }
-          ]
-        });
-      }
           $.each(response, function(i, item) {
             let note = '';
             let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
@@ -1699,34 +1685,34 @@ window.location.href = url;
           
           $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); 
           var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
-      var timeFromSelect = $('#timeFrom');
-      var timeToSelect = $('#timeTo');
+          var timeFromSelect = $('#timeFrom');
+          var timeToSelect = $('#timeTo');
       
-      // Populate timeFromSelect and timeToSelect with 30-minute intervals
-      for (var i = 0; i < 48; i++) {
-        var time = moment().startOf('day').add(i * 30, 'minutes');
-        var timeFormatted = time.format('hh:mm A');
-        var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
-        timeFromSelect.append(option.clone());
-        timeToSelect.append(option.clone());
-      }
+          // // Populate timeFromSelect and timeToSelect with 30-minute intervals
+          // for (var i = 0; i < 48; i++) {
+          //   var time = moment().startOf('day').add(i * 30, 'minutes');
+          //   var timeFormatted = time.format('hh:mm A');
+          //   var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
+          //   timeFromSelect.append(option.clone());
+          //   timeToSelect.append(option.clone());
+          // }
 
-      // Date
-      if (flatpickrDateTimeLimit) {
-  
-      
-      
-        flatpickrDateTimeLimit.flatpickr({
-          // enableTime: true,
-          dateFormat: 'Y-m-d',
-          minDate: 'today',
-        });
-      }
+          // Date
+          if (flatpickrDateTimeLimit) {
+            flatpickrDateTimeLimit.flatpickr({
+              // enableTime: true,
+              dateFormat: 'Y-m-d',
+              minDate: 'today',
+            });
+          }
         }
 				$('#addOrganizationID').val(organization_id);
 				$('#addCycleID').val(cycle_id);
-				$('#SendRequest').modal('show');
-			}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
+			}, 
+      error: function (error) {
+        console.log(error); 
+        alert("Error Occurred, Try again!");
+      }
 		});
 	}
 </script>

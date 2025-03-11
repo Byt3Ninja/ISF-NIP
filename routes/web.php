@@ -179,14 +179,14 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     
     Route::group(['prefix'=>'2fa'], function(){
         Route::get('/','ClientProfileController@show2faForm');
-        Route::post('/generateSecret','ClientProfileController@generate2faSecret')->name('generate2faSecret');
-        Route::post('/enable2fa','ClientProfileController@enable2fa')->name('enable2fa');
-        Route::post('/disable2fa','ClientProfileController@disable2fa')->name('disable2fa');
+        Route::post('/generateSecret','ClientProfileController@generate2faSecret')->name('2fa.generate2faSecret');
+        Route::post('/enable2fa','ClientProfileController@enable2fa')->name('2fa.enable2fa');
+        Route::post('/disable2fa','ClientProfileController@disable2fa')->name('2fa.disable2fa');
     
         // 2fa middleware
         Route::post('/2faVerify', function () {
             return redirect('/dashboard');
-        })->name('2faVerify')->middleware('2fa');
+        })->name('2fa.2faVerify')->middleware('2fa');
     });
     
     
@@ -214,6 +214,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/history-assessment', 'AssessmentController@historyAssessment')->name('history-assessment');;
     Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
     Route::post('/answer-assessment', 'AssessmentController@AnswerAssessment')->name('answer-assessment');
+    Route::get('/exportAssessment-pdf', 'AssessmentController@generatePDF')->name('assessment.pdf');
+
 
     Route::get('/assessment-admin/{id}', 'AssessmentController@assessmentAdmin')->name('question-assessment_admin');
 
@@ -400,6 +402,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('training/session-record/{id}', 'TrainingController@sessionRecord')->name('training.session-record');
     Route::get('training/session-attendance-report/{id}', 'TrainingController@attendanceReport')->name('training.attendance-report');
     Route::get('training/session-attendance-offline/{id}', 'TrainingController@attendanceOffline')->name('training.attendanceOffline');
+    Route::post('training/QrCode-offline', 'TrainingController@QrCodeTraining')->name('training.createQrCode');
+    Route::get('training/Attendance-offline/{id}', 'TrainingController@getattendanceOffline')->name('training.getattendanceOffline');
 
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');

@@ -2,7 +2,7 @@
 <div class="col-md-12 mb-3">
   <div class="card shadow-sm" style="border-radius: 15px;">
     <div class="p-4">
-      <h5 class="card-title fw-bold border-bottom pb-2 mb-6">{{ __('admin.Founders') }}</h5>
+      <h5 class="card-title border-bottom pb-2 mb-6">{{ __('admin.Founders') }}</h5>
       <form 
         id="founder-form" 
         method="post" 
@@ -34,6 +34,8 @@
                   <i class="ti ti-user"></i>
                 </div>
               </div>
+              <div id="founder-error1" class="invalid-feedback">{{__('admin.founder_name_is_required')}}</div>
+              <div id="founder-error2" class="invalid-feedback">{{__('admin.please_enter_valid_name')}}</div>
             </div>
           </div>
           <div class="col-12">
@@ -59,6 +61,7 @@
                   <i class="ti ti-mail"></i>
                 </div>
               </div>
+              <div id="email-error" class="invalid-feedback">{{__('admin.please_enter_valid_email')}}</div>
             </div>
           </div>
           <div class="col-12">
@@ -84,23 +87,23 @@
                   <i class="ti ti-brand-linkedin"></i>
                 </div>
               </div>
+              <div id="linkedin-error" class="invalid-feedback">{{__('admin.please_enter_valid_linkedin')}}</div>
             </div>
           </div>
         </div>
-        <div class="col-12 text-end mt-3">
+        <div class="col-12 text-end mt-3" style="height: 40px;">
           <input type="hidden" name="TeamsNo" value="Founders" />
-          <input type="hidden" id="CompanyN" name="CompanyN" value="{{ optional($client->company)->id }}" />
           <button 
-            id="submit-button"
-            type="submit"  
-            class="btn btn-outline-primary text-dark fw-bold rounded-pill" 
+            type="button"  
+            class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams" 
+            do="Founders" 
+            company="{{ optional($client->company)->id }}"
           >
             <i class="ti ti-plus me-3"></i>
             {{ $l == 'en' ? 'Add new founder' : 'إضافة مؤسس جديد' }}
           </button>
         </div>
       </form>
-
       @if($client->company)
       <div class="ShowTableFounders mt-4">
         @foreach ($fonders as $fonder)
@@ -132,10 +135,12 @@
                   <i class="ti ti-mail"></i>
                   <span class="text-muted text-xs">{{ $fonder->Email }}</span>
                 </div>
+                @if ($fonder->LinkedIn)
                 <div class="d-flex align-items-center gap-2">
                   <img src="/icons/linkedin.svg" width="18" height="18" />
                   <span class="text-muted text-xs">{{ $fonder->LinkedIn }}</span>
                 </div>
+                @endif
               </div>
               <div class="ms-auto position-relative">
                 <div 
@@ -147,6 +152,7 @@
                     class="d-flex align-items-center gap-2 p-2 cursor-pointer" 
                     data-bs-toggle="modal" 
                     data-bs-target="#EditTeams{{ $fonder->id }}"
+                    id="edit-founder-link"
                   >
                     <i class="ti ti-pencil text-primary fs-6"></i>
                     <span style="font-size: 11px;" class="fw-bold">{{ __('admin.Edit') }}</span>
@@ -168,6 +174,7 @@
                       <input type="hidden" value="{{ $fonder->id }}" name="id">
                       <button 
                         class="d-flex align-items-center gap-2 p-2 cursor-pointer border-0 bg-transparent w-100 text-start" 
+                        {{--  type="submit"   --}}
                         onclick="return confirm('Are you sure you want to delete this ?')"
                       >
                         <i class="ti ti-trash text-danger fs-6"></i>
@@ -180,7 +187,7 @@
           </div>
         </div>
 
-        <!-- Edit Founder Modal -->
+        <!-- Edit Customer Modal -->
         <div 
           class="modal fade" 
           id="EditTeams{{ $fonder->id }}" 
@@ -214,8 +221,8 @@
                       <div class="input-group input-group-merge">
                         <input 
                           type="text" 
-                          class="form-control founder_name{{ $fonder->id }}" 
-                          id="edit_founder_name" 
+                          class="form-control founder_name" 
+                          id="founder_name{{ $fonder->id }}" 
                           placeholder="{{ __('admin.founder_name') }}" 
                           value="{{ $fonder->Name ? $fonder->Name : old('founder_name') }}" 
                           name="founder_name" 
@@ -226,6 +233,8 @@
                           <i class="ti ti-user"></i>
                         </div>
                       </div>
+                      <div id="founder-error1" class="invalid-feedback">{{__('admin.founder_name_is_required')}}</div>
+                      <div id="founder-error2" class="invalid-feedback">{{__('admin.please_enter_valid_name')}}</div>
                     </div>
                     <div class="form-group mb-4">
                       <label 
@@ -236,8 +245,8 @@
                       <div class="input-group input-group-merge">
                         <input 
                           type="email" 
-                          class="form-control founder_email{{ $fonder->id }}" 
-                          id="edit_founder_email" 
+                          class="form-control founder_email" 
+                          id="founder_email{{ $fonder->id }}" 
                           placeholder="{{ __('admin.founder_email') }}" 
                           value="{{ $fonder->Email ? $fonder->Email : old('founder_email') }}" 
                           name="founder_email" 
@@ -248,6 +257,7 @@
                           <i class="ti ti-mail"></i>
                         </div>
                       </div>
+                      <div id="email-error" class="invalid-feedback">{{__('admin.please_enter_valid_email')}}</div>
                     </div>
                     <div class="form-group mb-4">
                       <label 
@@ -259,8 +269,8 @@
                         <div class="input-group input-group-merge">
                           <input 
                             type="url" 
-                            class="form-control founder_linkedin{{ $fonder->id }}" 
-                            id="edit_founder_linkedin" 
+                            class="form-control founder_linkedin" 
+                            id="founder_linkedin{{ $fonder->id }}" 
                             value="{{ $fonder->LinkedIn ? $fonder->LinkedIn : old('founder_linkedin') }}" 
                             name="founder_linkedin" 
                             autocomplete="founder_linkedin" 
@@ -271,17 +281,17 @@
                             <i class="ti ti-brand-linkedin"></i>
                           </div>
                         </div>
+                        <div id="linkedin-error" class="invalid-feedback">{{__('admin.please_enter_valid_linkedin')}}</div>
                       </div>
                     </div>
                   </div>
                   <div class="mt-6">
-                    <input type="hidden" id="founderId" value="{{ $fonder->id }}" name="id" />
-                    <input type="hidden" id="CompanyN" value="{{ optional($client->company)->id }}" />
                     <button 
-                      type="submit"
-                      class="btn btn-primary me-3" 
-                      {{-- do="{{ $fonder->id }}" 
-                      company="{{ optional($client->company)->id }}" --}}
+                      {{-- type="submit" --}}
+                      class="btn btn-primary me-3 data-submit EditTeams" 
+                      do="{{ $fonder->id }}" 
+                      data-id="Founders"
+                      company="{{ optional($client->company)->id }}"
                     >
                       {{ __('admin.submit') }}
                     </button>
@@ -298,7 +308,7 @@
             </div>
           </div>
         </div>
-        <!--/ Edit Founder Modal -->
+        <!--/ Edit JO Modal -->
         @endforeach
       </div>
       @endif

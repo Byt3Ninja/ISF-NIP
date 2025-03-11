@@ -1376,6 +1376,23 @@ return [
 	'If_you_are_looking_to_disable_Two_Factor_Authentication' => 'اذا كنت تبحث عن تعطيل المصادقة الثنائية',
 	'Current_Password' => 'كلمة المرور الحالية',
 	'Disable_2FA' => 'تعطيل المصادقة الثنائية',
+	'Re_generate' => 'اعادة توليد',
+	'founder_name_is_required' => 'اسم المؤسس مطلوب',
+	'please_enter_valid_name' => 'يرجى إدخال اسم صالح متكون من حروف فقط',
+	'please_enter_valid_email' => 'يرجى إدخال بريد إلكتروني صالح',
+	'please_enter_valid_linkedin' => 'يرجى إدخال رابط لينكدإن صالح',
+	'percentage_must_be_between_1_and_100' => 'يجب أن تكون النسبة بين 1 و 100',
+	'please_enter_valid_role' => 'يرجى إدخال دور صالح',
+	'shareholder_name_required' => 'اسم المساهم مطلوب',
+	'investor_name_required' => 'اسم المستثمر مطلوب',
+	'investment_type_required' => 'نوع المستثمر مطلوب',
+	'Traning_title' => 'عنوان التدريب',
+	'Trainer_name' => 'اسم المدرب',
+	'Program_Name' => 'اسم البرنامج',
+	'StartUp_name' => 'اسم الشركة',
+	'Attendance' => 'الحضور',
+	'Absent' => 'غياب',
+	'Export_assessment_pdf' => 'تصدير التقييم PDF',
 	
 ]; 
 

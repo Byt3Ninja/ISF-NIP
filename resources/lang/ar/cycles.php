@@ -225,6 +225,7 @@ return [
     'trainer name'=>'اسم المدرب',
     'trainer email'=>'البريد الالكتروني للمدرب',
     'training location'=>'مكان التدريب',
+    'training Address'=>'عنوان التدريب',
     'select online'=>'اختر محتوى من القائمة',
     'Display course contents' => 'عرض محتويات الكورس التعليمي',
     'Edit training session' => 'تحرير بيانات برنامج تدريبي',
@@ -292,5 +293,6 @@ return [
     'Judges required' => 'برجاء اختيار محكم واحد على الأقل',
     'Edit_Step' => 'تعديل المرحلة',
     'startup_is_required' => 'برجاء اختيار على الأقل شركة واحدة من الجدول',
+    'Date' => 'التاريخ',
   ];
 

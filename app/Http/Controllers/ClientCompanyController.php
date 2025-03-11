@@ -963,9 +963,7 @@ class ClientCompanyController extends Controller
     }
 
     public function EditTeams(Request $request, $id = null)
-    {return response()->json([
-        'state' => $request->id,
-    ]);
+    {
         if( isset( $id ) && !is_null( $id ) ) { $user = User::where('company_id', $id)->first(); }
         else
         {

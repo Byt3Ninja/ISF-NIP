@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Storage;
+
 use App\Step;
 use App\Tags;
 use App\User;
@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
 use App\Jobs\ExportTresultData;
 use App\Traits\ZoomMeetingTrait;
 use App\Services\WhatsAppService;
+use App\AttendanceTrainingOffline;
 use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TrainerEmail;
@@ -35,6 +36,7 @@ use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Factories\OnlineMeetingFactory;
+use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Notifications\NewTrainingNotification;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -690,10 +692,17 @@ class TrainingController extends Controller
 	public function addsession(Request $request)
 	{
 		
+
+		$startDate = $request->datetime; // التاريخ
+		$startTime = $request->starttime;   // وقت البداية
+		$endTime = $request->endtime;     // وقت النهاية
+		$start_datetime = "$startDate $startTime";
+		$end_datetime = "$startDate $endTime";
+
 		$step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
-		$datetime = $request->datetime;
+		$datetime = $start_datetime;
 		$type = $request->type;
 		if ($type == 'sessions') {
 			// Add Zoom
@@ -769,7 +778,7 @@ Thanks from " . env('APP_NAME');
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
 			
-			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'location' => $request->online]);
+			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
 
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
@@ -802,15 +811,20 @@ Thanks from " . env('APP_NAME');
 		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
+			
+		
+			
+		
 			$trainingSession = TrainingSession::create([
 				'type' => $type,
 				'step_id' => $step,
 				'title' => $title,
 				'dsc' => $dsc,
-				'datetime' => $datetime,
+				'datetime' => $start_datetime,
 				'user_id' => Auth::id(),
-				'location' => $request->location,
-				'enddatetime' => $request->enddatetime,
+				'training_Address' => $request->training_Address,
+				'training_location' => $request->training_location,
+				'enddatetime' => $end_datetime,
 				'trainer_name' => $request->trainer_name,
 				'trainer_email' => $request->trainer_email
 			]);
@@ -832,6 +846,21 @@ Thanks from " . env('APP_NAME');
 				$cycleId = Step::find($step)->cycle_id;
 				$companies = Company::where('cycle', $cycleId)->get();
 				foreach ($companies as $company) {
+					$userId = User::where('company_id', $company->id)->first()->id;
+					$insert = DB::table('attendance_training_offline')
+							->insert([
+								'user_id' => $userId,
+								'company_id' => $company->id,
+								'training_session_id' => $trainingSession->id,
+								'step_id' => $step,
+								'cycle_id' => $cycleId,
+								'attendance' => 0,
+								'location' => 'location',
+								'created_at' => now(),
+								'updated_at' => now(),
+							]);
+
+
 					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
 					$data['email'] = $company->user->email;
 					$data['cycle'] = $company->cycledata->title;
@@ -877,9 +906,16 @@ Thanks from " . env('APP_NAME');
 
 	public function editsession(Request $request)
 	{
+		$startDate = $request->datetime; // التاريخ
+		$startTime = $request->starttime;   // وقت البداية
+		$endTime = $request->endtime;     // وقت النهاية
+		$start_datetime = "$startDate $startTime";
+		$end_datetime = "$startDate $endTime";
+
+		// $step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
-		$datetime = $request->datetime;
+		$datetime = $start_datetime;
 		$type = $request->stype;
 		$id = $request->sid;
 		if ($type == 'sessions') {
@@ -907,6 +943,7 @@ Thanks from " . env('APP_NAME');
 				'trainer_name' => $request->trainer_name,
 				'trainer_email' => $request->trainer_email
 			]);
+			$session = TrainingSession::find($id);
 			// ======> notify Trainer <=================
 			$mail['trainer_name'] = $request->trainer_name;
 			$mail['title'] = $topic;
@@ -956,9 +993,12 @@ Thanks from " . env('APP_NAME');
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
-			TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'location' => $request->online]);
+			TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
+			if( !in_array(env('APP_ENV', 'local'), ['local']) )
+            {
+			$traning = TrainingSession::where('id', $id)->first();
 			$data = [];
-			$cycleId = Step::find($step)->cycle_id;
+			$cycleId = Step::find($traning->step_id)->cycle_id;
 			$companies = Company::where('cycle', $cycleId)->get();
 			// ======> notify Trainer <=================
 			foreach ($companies as $company) {
@@ -982,6 +1022,7 @@ Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 			}
+		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
 			$session = TrainingSession::where('id', $id)->update([
@@ -990,11 +1031,13 @@ Thanks from " . env('APP_NAME');
 				'dsc' => $dsc,
 				'datetime' => $datetime,
 				'user_id' => Auth::id(),
-				'location' => $request->location,
-				'enddatetime' => $request->enddatetime,
+				'training_Address' => $request->training_Address,
+				'training_location' => $request->training_location,
+				'enddatetime' => $end_datetime,
 				'trainer_name' => $request->trainer_name,
 				'trainer_email' => $request->trainer_email
 			]);
+			$session = TrainingSession::find($id);
 			// ======> notify Trainer <=================
 			$mail['trainer_name'] = $request->trainer_name;
 			$mail['title'] = $title;
@@ -1037,6 +1080,20 @@ Thanks from " . env('APP_NAME');
             }
 
             }
+
+			// رابط المسح الضوئي للحضور
+			$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$session->id}");
+			// اسم ملف QR Code
+			$qrFileName = 'training_' . $session->id . '.png';
+			// توليد QR Code كـ string
+			$qrCode = QrCode::format('png')->size(300)->generate($attendanceUrl);
+			// المسار الكامل داخل `public/`
+			$qrFilePath = '/qrcodes/' . $qrFileName;
+			// حفظ QR Code في `public/qrcodes/`
+			$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
+
+			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
+			$session->update(['QrCode' => $qrFilePath]);
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} else {
@@ -1052,6 +1109,53 @@ Thanks from " . env('APP_NAME');
 		} else {
 			return response()->json(['state' => 'failed'], 500);
 		}
+	}
+
+	public function getattendanceOffline(Request $request)
+	{
+		if ($request->id) {
+
+			$attendanceData = AttendanceTrainingOffline::where('training_session_id',$request->id)->with('user', 'trainingSession', 'step', 'cycle','company')->get();
+			// return response()->json([
+			// 	'success' => true,
+			// 	'message' => 'تم تسجيل الحضور بنجاح',
+			// 	'attendances' => $attendanceData,
+			// ]);
+			return view('admin.settings.training.attendance', compact('attendanceData'));
+			
+		} else {
+			return response()->json(['state' => 'failed'], 500);
+		}
+	}
+
+
+
+	public function QrCodeTraining(Request $request)
+	{ 
+		if ($request->id) {
+			$session = DB::table('training_sessions')->where('id', $request->id)->first();
+			
+			// رابط المسح الضوئي للحضور
+			$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$session->id}");
+			// اسم ملف QR Code
+			$qrFileName = 'training_' . $session->id . '.png';
+			// توليد QR Code كـ string
+			$qrCode = QrCode::format('png')->size(300)->generate($attendanceUrl);
+			// المسار الكامل داخل `public/`
+			$qrFilePath = '/qrcodes/' . $qrFileName;
+			
+			// حفظ QR Code في `public/qrcodes/`
+			$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
+			
+			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
+			$session = DB::table('training_sessions')
+						->where('id', $request->id)
+						->update(['QrCode' => $qrFilePath]);
+
+			return response()->json(['massege' => 'Created Success']);
+				}else{
+				return response()->json(['state' => 'failed'], 500);
+				}
 	}
 
 	public function delsession($id, Request $request)
@@ -1468,7 +1572,32 @@ Thanks from " . env('APP_NAME');
 		$companyId = $user->company_id;
 		$cycle_user = $user->company->cycle;
 		$step_user = $user->company->step;
+		
 		if($step_user == $step_Traning){
+			if($session->datetime > now()){
+				return response()->json(['message' => 'WaitForStartAttendece', 'Start' => $session->datetime]);
+			}
+			if($session->enddatetime < now()){
+				return response()->json(['message' => 'SessionEnded', 'Ended' => $session->enddatetime]);
+			}
+			$insert = DB::table('attendance_training_offline')
+			->where('training_session_id', $session->id)
+			->where('user_id', $userId)->first();
+			if(!empty($insert)){
+				$insert = DB::table('attendance_training_offline')
+				->where('id', $insert->id)
+				->update([
+				'user_id' => $userId,
+				'company_id' => $companyId,
+				'training_session_id' => $session->id,
+				'step_id' => $step_Traning,
+				'cycle_id' => $cycle_Traning,
+				'attendance' => 1,
+				'location' => 'location',
+				'created_at' => now(),
+				'updated_at' => now(),
+			]);
+		}else{
 			$insert = DB::table('attendance_training_offline')->insert([
 				'user_id' => $userId,
 				'company_id' => $companyId,
@@ -1480,17 +1609,10 @@ Thanks from " . env('APP_NAME');
 				'created_at' => now(),
 				'updated_at' => now(),
 			]);
-			return response()->json(['message' => 'youareRegisterAttendee']);
+		}
+			return response()->json(['message' => 'youareRegisterAttendece']);
 		}
 		
-			return response()->json(['message' => 'youareNotRegisterAttendee']);
-		
+			return response()->json(['message' => 'youareNotRegisterAttendece']);
 	}
-
-
-
-
-
-
-
 }

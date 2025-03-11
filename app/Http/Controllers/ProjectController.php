@@ -15,22 +15,26 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Project::withCount(['programs', 'teamMembers']);
-
-        if ($request->filled('program_count')) {
-             $query->having('programs_count', $request->program_count);
+        $query = Project::with(['programs', 'teamMembers']);
+    
+        if ($request->filled('program_name')) {
+            $query->whereHas('programs', function ($q) use ($request) {
+                $q->where('title', $request->program_name);
+            });
         }
-
-         if ($request->filled('start_date') && $request->filled('end_date')) {
-             $startDate = Carbon::parse($request->start_date)->startOfDay();
-             $endDate = Carbon::parse($request->end_date)->endOfDay();
-             $query->whereBetween('created_at', [$startDate, $endDate]);
+    
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $query->whereBetween('created_at', [$startDate, $endDate]);
         }
     
         $projects = $query->paginate(10);
-
-        return view('admin.projects.index', compact('projects'));
+        $programs = Cycle::all();
+    
+        return view('admin.projects.index', compact('projects', 'programs'));
     }
+    
 
     /**
      * Show the form for creating a new resource.
