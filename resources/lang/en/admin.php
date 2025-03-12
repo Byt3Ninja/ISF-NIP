@@ -1376,5 +1376,6 @@ return [
 	'Attendance' => 'Attendance',
 	'Absent' => 'Absent',
 	'Export_assessment_pdf' => 'Export assessment pdf',
+	'Add new Assessment' => 'Add New Assessment',
 	
 ];
