@@ -123,8 +123,9 @@ class CyclesController extends Controller
 
         $id = $request->cycleid;
         $type = $request->type;
-
+        
         if ($request->has('date_range')) {
+            
             $dates = explode(' - ', $request->date_range);
             $request->merge([
                 'start' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
@@ -133,20 +134,22 @@ class CyclesController extends Controller
                 'toDate' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
 
             ]);
+            
         }
        
         if ($type == 1) {
             
-
+            
             /// Edit Cycle
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:2000',
-                'date_range' => 'required|date',
+                'start' => 'required|date',
+                'end' => 'required|date',
             ]);
 
-
+            
 
             $cycle = Cycle::find($id);
 
