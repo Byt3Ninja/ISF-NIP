@@ -90,7 +90,7 @@ document.getElementById('generate-swot').addEventListener('click', function () {
     .then(data => {
         if (data.error) {
             Swal.fire({
-                title: "Error!",
+                title: "{{ __('admin.Error!') }}",
                 text: data.error + (data.missing_fields ? "\n" + data.missing_fields.join(", ") : ""),
                 icon: "error",
                 confirmButtonText: "OK"
@@ -98,8 +98,8 @@ document.getElementById('generate-swot').addEventListener('click', function () {
         } else {
            
             Swal.fire({
-                title: "Success!",
-                text: "SWOT Analysis Generated Successfully.",
+                title: "{{ __('admin.Success!') }}",
+                text: "{{ __('admin.swot_generated') }}",
                 icon: "success",
                 confirmButtonText: "OK"
             }).then(() => {
@@ -114,7 +114,6 @@ document.getElementById('generate-swot').addEventListener('click', function () {
         errorMessageDiv.className = 'alert alert-danger mt-3';
         errorMessageDiv.innerHTML = "Something went wrong while generating the SWOT Analysis.";
 
-        // Append error message to the container
         document.querySelector('.container').prepend(errorMessageDiv);
     });
 });

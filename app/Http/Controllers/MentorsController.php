@@ -533,10 +533,12 @@ Thanks from " . env('APP_NAME');
 	public function modify(Request $request)
 	{
 		try {
+			
 			$type = $request->rtype;
 			if ($type == 6) {
 				$start = $join = null;
 				if ($request->stat == 'Yes') {
+					
 					$mRequest = MentorshipRequest::findOrFail($request->id);
 					$topic = "Online mentorship meeting (M" . $mRequest->mentor_id . '- U' . $mRequest->user_id . ')';
 					$data = ['topic' => $topic, "start_time" => $mRequest->zoom_date, 'duration' => $mRequest->period, 'host_video' => 1, 'participant_video' => 1];
@@ -548,6 +550,7 @@ Thanks from " . env('APP_NAME');
 					$start = $onlineMeeting['data']['start_url'];
 					$join = $onlineMeeting['data']['join_url'];
 				}
+				
 				MentorshipRequest::find($request->id)->update(['approved' => $request->stat, 'start_url' => $start, 'join_url' => $join]);
 				/// Notify Mentor
 				$session = MentorshipRequest::findOrFail($request->id);

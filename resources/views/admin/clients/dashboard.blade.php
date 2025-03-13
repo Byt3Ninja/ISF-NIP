@@ -102,6 +102,7 @@
         }
       }
     }
+    
     foreach( $myTrainings as $trainingSession )
     {
       if( $trainingSession->type == 'sessions' )
@@ -120,8 +121,10 @@
           }
         }
       }
+      
       elseif( in_array($trainingSession->type, ['online', 'offline','sessions']) )
       {
+        
         if( empty( $trainingSession->datetime ) ) { continue; }
         else
         {
@@ -137,6 +140,7 @@
         }
       }
     }
+    
     foreach( $quizzes as $myQuiz )
     {
       $attempts = $myQuiz->myAttempts;
@@ -235,12 +239,13 @@
     if( $_user->company && $circle_id != 0 )
     {
       $surveysToAdd = [];
-      $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['startup', 'both'])->with(['myResponses'])->get();
+      $surveys = \App\SurveyScopes::where('cycle_id', $circle_id)->whereIn('type', ['startup', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
       
       foreach( $surveys as $survey_scope )
       {
         
         $my_responses = $survey_scope->myResponses;
+       
         if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
         {
           $due = $survey_scope->trigger_by_due;
@@ -271,6 +276,7 @@
             }
           }
         }
+        
         elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
         {
           $due = $survey_scope->trigger_by_due;
@@ -307,7 +313,6 @@
       $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
     }
   }
-
 	/// My sessions
 	if( !empty( $_user->company ) ) { $sessions = \App\TrainingSession::where("step_id", $_user->company->step)->orderBy('datetime','ASC')->take(1)->get(); }
 	else { $sessions = []; }

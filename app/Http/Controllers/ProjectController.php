@@ -136,24 +136,23 @@ class ProjectController extends Controller
     }
 
     public function addTeamMembers(Request $request, Project $project) 
-    {
-        $request->validate([
-            'team_members' => 'required|array',
-            'team_members.*' => 'exists:team_members,id',
-            'roles.*' => 'string'
-        ]);
-    
-        foreach ($request->team_members as $index => $teamMemberId) {
-            $role = $request->roles[$index];
-            
-            if (!$project->teamMembers()->where('team_member_id', $teamMemberId)->exists()) {
-                $project->teamMembers()->attach($teamMemberId, ['role' => $role]);
-            }
+  {
+      $request->validate([
+        'team_members' => 'required|array',
+        'team_members.*' => 'exists:team_members,id',
+        'roles' => 'required|array',
+      ]);
+
+    foreach ($request->team_members as $teamMemberId) {
+        $role = $request->roles[$teamMemberId] ?? null; 
+
+        if ($role && !$project->teamMembers()->where('team_member_id', $teamMemberId)->exists()) {
+            $project->teamMembers()->attach($teamMemberId, ['role' => $role]);
         }
-    
-        return redirect()->back()->with('message', 'Team_member_added');
     }
-    
+
+     return redirect()->back()->with('message', 'Team_member_added');
+  }
     public function removeTeamMember(Project $project, Team_member $teamMember) 
     {
         $project->teamMembers()->detach($teamMember->id);

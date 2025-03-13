@@ -126,7 +126,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="searchProgram" class="form-control mb-3" placeholder="Search programs...">
+                <input type="text" id="searchProgram" class="form-control mb-3" placeholder="{{ __('admin.Search programs') }}">
                 <form id="linkProgramsForm" action="{{ route('projects.linkPrograms', $project) }}" method="POST">
                     @csrf
                     <div class="overflow-auto" style="max-height: 250px;">
@@ -159,23 +159,22 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="searchTeamMember" class="form-control mb-3" placeholder="Search team members...">
+                <input type="text" id="searchTeamMember" class="form-control mb-3" placeholder="{{ __('admin.Search team members') }}">
                 <form id="addTeamMemberForm" action="{{ route('projects.addTeamMembers', $project) }}" method="POST">
                     @csrf
                     <div class="overflow-auto" style="max-height: 250px;">
                         @foreach($availableTeamMembers as $member)
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="team_members[]" value="{{ $member->id }}">
-                            <label class="form-check-label">{{ $member->Name }}</label>
-                            <select name="roles[]" class="form-select">
+                            <input type="checkbox" class="form-check-input" name="team_members[]" value="{{ $member->id }}" id="member-{{ $member->id }}">
+                            <label class="form-check-label" for="member-{{ $member->id }}">{{ $member->Name }}</label>
+                    
+                            <select name="roles[{{ $member->id }}]" class="form-select">
                                 @foreach($distinctRoles as $role)
-                                <option value="{{ $role }}" {{ $member->TeamMember == $role ? 'selected' : '' }}>
-                                    {{ $role }}
-                                </option>
+                                <option value="{{ $role }}">{{ $role }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        @endforeach
+                    @endforeach
                     </div>
                     <div class="modal-footer mt-2">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>

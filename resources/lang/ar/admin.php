@@ -1392,7 +1392,13 @@ return [
 	'StartUp_name' => 'اسم الشركة',
 	'Attendance' => 'الحضور',
 	'Absent' => 'غياب',
-	'Export_assessment_pdf' => 'تصدير التقييم PDF',
-	
+	'Search team members' => 'البحث عن أعضاء الفريق',
+	'Search programs' => 'البحث عن البرامج',
+	'swot_error' => 'يرجى ملء الحقول التالية من ملفك الشخصي قبل إنشاء تحليل SWOT:',
+	'generate' => 'إنشاء تحليل SWOT',
+	'export' => 'طباعة إلى PDF',
+	'swot_generated' => 'تم إنشاء تحليل SWOT بنجاح',
+	'Success!' => '!نجاح',
+	'Error!' => '!خطأ',
 ]; 
 

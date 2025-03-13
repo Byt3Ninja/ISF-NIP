@@ -1376,5 +1376,11 @@ return [
 	'Attendance' => 'Attendance',
 	'Absent' => 'Absent',
 	'Export_assessment_pdf' => 'Export assessment pdf',
-	
+	'Add new Assessment' => 'Add New Assessment',
+	'Search team members' => 'Search Team Members',
+	'Search programs' => 'Search Programs',
+	'swot_error' => 'Please Complete the Following Fields From Your Profile Before Generating the SWOT Analysis:',
+	'swot_generated' => 'تم إنشاء تحليل SWOT بنجاح',
+	'Success!' => 'Success!',
+	'Error!' => 'Error!',
 ];

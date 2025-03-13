@@ -31,15 +31,16 @@
     </div>
     
     <div class="section">
-        <label>Strengths Recommendations</label>
-        <div>{{ $srecommendation }}</div>
-    </div>
-
-    <div class="section">
         <label>Weaknesses</label>
         <div>{{ $weakness }}</div>
     </div>
 
+    <div class="section">
+        <label>Strengths Recommendations</label>
+        <div>{{ $srecommendation }}</div>
+    </div>
+
+   
     <div class="section">
         <label>Weaknesses Recommendations</label>
         <div>{{ $wrecommendation }}</div>
@@ -51,15 +52,16 @@
     </div>
 
     <div class="section">
-        <label>Opportunities Recommendations</label>
-        <div>{{ $orecommendation }}</div>
-    </div>
-
-    <div class="section">
         <label>Threats</label>
         <div>{{ $threat }}</div>
     </div>
 
+    <div class="section">
+        <label>Opportunities Recommendations</label>
+        <div>{{ $orecommendation }}</div>
+    </div>
+
+   
     <div class="section">
         <label>Threats Recommendations</label>
         <div>{{ $trecommendation }}</div>
