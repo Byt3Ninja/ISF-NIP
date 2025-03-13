@@ -43,6 +43,9 @@
                     <h4 class="card-title">{{ __('cycles.Training Steps') }}</h4>
                   </div>
                   <hr>
+                  @php
+                  $cycleId = $steps->where('id', $id)->first()->cycle_id;
+                  @endphp
                   <div class="card-body">
                     <label class="form-label fs-5 mb-2">{{ __('cycles.Select Step') }}</label>
                     <fieldset class="d-flex flex-column flex-md-row gap-3">
@@ -69,9 +72,11 @@
                         <a class="btn btn-label-success" href="/dashboard/cycles/{{ $step->id == $id ? $ccycle : '' }}">
                           <i class="ti ti-pencil"></i> <span class="mx-1">{{ __('cycles.Cycle') }}</span>
                         </a>
-                        <a class="btn btn-label-dark" href="/dashboard/training/{{ $step->cycle_id }}/surveys">
+                       
+                        <a class="btn btn-label-dark" href="/dashboard/training/{{ $cycleId ?? 0 }}/surveys">
                           <i class="ti ti-question-mark"></i> <span class="mx-1">{{ __('cycles.Manage Surveys') }}</span>
                         </a>
+                        
                       </div>
                     </fieldset>
                   </div>
