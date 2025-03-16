@@ -1384,4 +1384,5 @@ return [
 	'Success!' => 'Success!',
 	'Error!' => 'Error!',
 	'No_LinkedIn' => 'No LinkedIn',
+	'To get analysis for your pitch deck please upload your pitch deck video' => 'To get analysis for your pitch deck please upload your pitch deck video',
 ];
