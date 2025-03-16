@@ -1383,4 +1383,5 @@ return [
 	'swot_generated' => 'تم إنشاء تحليل SWOT بنجاح',
 	'Success!' => 'Success!',
 	'Error!' => 'Error!',
+	'No_LinkedIn' => 'No LinkedIn',
 ];
