@@ -645,16 +645,19 @@
                     {!! strpos($field->answer, 'http') === 0
                     ? '<a target="_blank" href="' . $field->answer . '"> ' . __('admin.Download File') . ' </a>'
                     : $field->answer !!}
-                    @php(
+                    @php
                     $comments = \App\Formdata::where('field_id', $field->field_id)->where('company_id',
-                    $company->id)->first(['comments'])->comments
-                    )
+                    $company->id)->first(['comments'])->comments;
+                    // $comments = $comments ? json_decode($comments, true) : []; 
+                    @endphp
+                    @if($comments == null)
                     @foreach ($comments as $key => $cc)
                     @if ($cc)
                     <div class="warning">{{ __('admin.comment') }}({{ $key }}):
                       {{ $cc }}</div>
                     @endif
                     @endforeach
+                    @endif
                   </td>
                 </tr>
                 @endforeach
