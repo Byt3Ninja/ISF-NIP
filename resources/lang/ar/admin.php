@@ -1401,5 +1401,6 @@ return [
 	'Success!' => '!نجاح',
 	'Error!' => '!خطأ',
 	'No_LinkedIn' => 'لا يوجد لينكدان',
+	'To get analysis for your pitch deck please upload your pitch deck video' => 'للحصول على تحليل لوثائقك الرسمية يرجى رفع وثائقك الرسمية',
 ]; 
 
