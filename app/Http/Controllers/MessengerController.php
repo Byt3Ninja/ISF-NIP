@@ -1,6 +1,6 @@
 <?php
 namespace App\Http\Controllers;
-use Auth;
+
 use App\User;
 use App\Company;
 use App\Messages;
@@ -10,6 +10,7 @@ use App\Events\WebMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
+use Illuminate\Support\Facades\Auth;
 
 class MessengerController extends Controller
 {
@@ -20,17 +21,25 @@ class MessengerController extends Controller
                 'last_name_ar','subject','read','messenger.created_at','messenger.sender']);
 	return view('admin.clients.inbox')->with('received',$received);
 	}
-    public function outbox() {
-        $sent = Messenger::leftJoin('users','receiver','=','users.id')
-            ->where('sender',Auth::user()->id)->orderBy('created_at','DESC')->get(['messenger.id','first_name_en','last_name_en','first_name_ar',
-                'last_name_ar','subject','read','messenger.receiver','messenger.created_at']);
-                
-                if($sent == null){
-        return view('admin.clients.outbox')->with('sent',$sent);
-                }else{
-                    return redirect()->route('sendmessage');
-                }
-    }
+    public function outbox()
+  {
+    $sent = Messenger::where('messenger.sender', Auth::id()) 
+        ->join('users', 'messenger.receiver', '=', 'users.id')
+        ->orderBy('messenger.created_at', 'DESC')
+        ->get([
+            'messenger.id',
+            'users.first_name_en',
+            'users.last_name_en',
+            'users.first_name_ar',
+            'users.last_name_ar',
+            'messenger.subject',
+            'messenger.read',
+            'messenger.receiver',
+            'messenger.created_at'
+        ]);
+
+    return view('admin.clients.outbox', compact('sent'));
+}
     public function openmsg(Request $request) {
 	    if ($request->type==1) {
         $getmsg = Messenger::leftJoin('users','sender','=','users.id')->where('receiver',Auth::user()->id)->where('messenger.id',$request->id)->first(['messenger.id','first_name_en','last_name_en','first_name_ar',

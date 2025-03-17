@@ -117,7 +117,7 @@
           <p><b>{{ __('messages.Message') }}:</b></p> <span id="message"></span>
         </div>
         <div class="modal-footer">
-          <a onclick="delme({{ $sent->id }})" href="javascript:void(0);">
+          <a onclick="delme()" href="javascript:void(0);" id="deleteMessageBtn">
             <button type="button" class="btn btn-label-danger">
               <i class="ti ti-x d-block d-sm-none"></i>
               <span class="d-none d-sm-block">{{ __('messages.Delete') }}</span>
