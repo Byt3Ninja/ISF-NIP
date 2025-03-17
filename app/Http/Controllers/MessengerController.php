@@ -1,14 +1,15 @@
 <?php
 namespace App\Http\Controllers;
+use Auth;
+use App\User;
 use App\Company;
+use App\Messages;
+use App\Messenger;
 use App\CyclesMentors;
 use App\Events\WebMessage;
-use App\Messages;
-use App\User;
 use Illuminate\Http\Request;
-use App\Messenger;
+use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
-use Auth;
 
 class MessengerController extends Controller
 {
@@ -130,73 +131,108 @@ class MessengerController extends Controller
 	    if ($request->type==1) {
             if (!$request->users) { return redirect('/dashboard')->with(['msg' => 'MessageError', 'class' => 'danger']);}
             foreach ($request->users as $key=>$rec) {
-                $new = new Messenger();
-                $new->sender = $cuser->id;
-                $new->receiver = $rec;
-                $new->subject= $request->input('subject');
-                $new->message = $request->input('message');
-                $new->Save();
-                $rname = User::findOrFail($rec);
-                /// Send Mail
-                $user = new User();
-                $user->email = $rname->email;
-                $user->id = $rname->id;
-                $rfullname = $rname->first_name_en ." ". $rname->last_name_en;
-                $sfullname = $cuser->first_name_en ." ". $cuser->last_name_en;
-                $MSG = new TemplateEmail;
-                $MSG->Message=["New message received - VI portal","Dear ".$rfullname.",","You have a new message from ".$sfullname.', Needs your review.',"/dashboard/inbox"];
-                if( !in_array(env('APP_ENV', 'local'), ['local']) )
-                {
-                    try {
-                        $user->notify($MSG);
-                    } catch (\Throwable $th) {
-                        // throw $th;
-                    }
+                $rname = User::find($rec);
+                if (!$rname) {
+                    return redirect('/dashboard')->with(['msg' => 'Error: Selected User does not exist', 'class' => 'danger']);
                 }
-                /// End of send
+    
+                try {
+                    $new = new Messenger();
+                    $new->sender = $cuser->id;
+                    $new->receiver = $rec;
+                    $new->subject = $request->input('subject');
+                    $new->message = $request->input('message');
+                    $new->save(); // Save to DB
+    
+                    // Prepare Email
+                    $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
+                    $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+                    $MSG = new TemplateEmail;
+                    $MSG->Message = [
+                        "New message received - VI portal",
+                        "Dear " . $rfullname . ",",
+                        "You have a new message from " . $sfullname . ", Needs your review.",
+                        "/dashboard/inbox"
+                    ];
+    
+                    // Send Notification (only in production)
+                    if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                        try {
+                            $rname->notify($MSG);
+                        } catch (\Throwable $th) {
+                            Log::error('Notification Error: ' . $th->getMessage());
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Database Error: ' . $e->getMessage());
+                    return redirect('/dashboard')->with(['msg' => 'Database error: ' . $e->getMessage(), 'class' => 'danger']);
+                }
             }
-        } elseif ($request->type==2) {
-            if (!$request->mentors) { return redirect('/dashboard')->with(['msg' => 'MessageError', 'class' => 'danger']);}
-            foreach ($request->mentors as $key=>$rec) {
-                $new = new Messenger();
-                $new->sender = $cuser->id;
-                $new->receiver = $rec;
-                $new->subject = $request->input('subject');
-                $new->message = $request->input('message');
-                $new->Save();
-                $rname = User::findOrFail($rec);
-                /// Send Mail
-                $user = new User();
-                $user->email = $rname->email;
-                $user->id = $rname->id;
-                $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
-                $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
-                $MSG = new TemplateEmail;
-                $MSG->Message = ["New message received - VI portal", "Dear " . $rfullname . ",", "You have a new message from " . $sfullname . ', Needs your review.', "/dashboard/inbox"];
-                if( !in_array(env('APP_ENV', 'local'), ['local']) )
-                {
-                    try {
-                        $user->notify($MSG);
-                    } catch (\Throwable $th) {
-                        // throw $th;
-                    }
+        } elseif ($request->type == 2) {
+            if (!$request->mentors || !is_array($request->mentors)) {
+                return redirect('/dashboard')->with(['msg' => 'MessageError: No mentors selected', 'class' => 'danger']);
+            }
+    
+            foreach ($request->mentors as $rec) {
+                $rname = User::find($rec);
+    
+                if (!$rname) {
+                    return redirect('/dashboard')->with(['msg' => 'Error: Selected mentor does not exist', 'class' => 'danger']);
                 }
-                /// End of send
+    
+                try {
+                    $new = new Messenger();
+                    $new->sender = $cuser->id;
+                    $new->receiver = $rec;
+                    $new->subject = $request->input('subject');
+                    $new->message = $request->input('message');
+                    $new->save();
+    
+                    // Prepare Email
+                    $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
+                    $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+                    $MSG = new TemplateEmail;
+                    $MSG->Message = [
+                        "New message received - VI portal",
+                        "Dear " . $rfullname . ",",
+                        "You have a new message from " . $sfullname . ", Needs your review.",
+                        "/dashboard/inbox"
+                    ];
+    
+                    // Send Notification (only in production)
+                    if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                        try {
+                            $rname->notify($MSG);
+                        } catch (\Throwable $th) {
+                            Log::error('Notification Error: ' . $th->getMessage());
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Database Error: ' . $e->getMessage());
+                    return redirect('/dashboard')->with(['msg' => 'Database error: ' . $e->getMessage(), 'class' => 'danger']);
+                }
             }
         } else {
-            $new = new Messages();
-            $name = $cuser->first_name_en.' '.$cuser->last_name_en;
-            $new->name = $name;
-            $new->internal_id = $cuser->id;
-            $new->phone = $cuser->phone;
-            $new->email = $cuser->email;
-            $new->subject = $request->input('subject');
-            $new->message = $request->input('message');
-            $new->userip = $request->getClientIp();
-            $new->Save();
-            event(new WebMessage('mymsg', $name));
+            try {
+                $new = new Messages();
+                $name = $cuser->first_name_en . ' ' . $cuser->last_name_en;
+                $new->name = $name;
+                $new->internal_id = $cuser->id;
+                $new->phone = $cuser->phone;
+                $new->email = $cuser->email;
+                $new->subject = $request->input('subject');
+                $new->message = $request->input('message');
+                $new->userip = $request->getClientIp();
+                $new->save();
+    
+                event(new WebMessage('mymsg', $name));
+            } catch (\Exception $e) {
+                Log::error('Error: ' . $e->getMessage());
+                return redirect('/dashboard')->with(['msg' => 'Database error: ' . $e->getMessage(), 'class' => 'danger']);
+            }
         }
-        return redirect('/dashboard')->with(['msg' => 'MessageSent', 'class' => 'success']);
+    
+        return redirect('/dashboard')->with(['msg' => 'Message sent successfully!', 'class' => 'success']);
     }
 
 
