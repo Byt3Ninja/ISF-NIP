@@ -49,7 +49,11 @@
                                         <tbody>
                                             @forelse($linkedPrograms as $program)
                                             <tr>
-                                                <td class="text-center">{{ $program->title }}</td>
+                                                <td class="text-center">
+                                                    <a href="{{ route('programlist.show', $program->id) }}" class="text-primary">
+                                                        {{ $program->title }}
+                                                    </a>
+                                                </td>
                                                 <td class="text-center"><span class="badge bg-info">{{ $program->pivot->status }}</span></td>
                                                 <td class="text-center">{{ $program->pivot->created_at->format('Y-m-d') }}</td>
                                                 <td class="text-center">

@@ -5,6 +5,7 @@ use App\Http\Requests\StoreServiceRequest;
 use App\Http\Requests\UpdateServiceRequest;
 
 use App\Notifications\TemplateEmail;
+use App\Organization;
 use App\Service;
 use App\ServiceCategory;
 
@@ -50,7 +51,8 @@ class ServiceController extends Controller
 	{
 		$serviceCategories = ServiceCategory::all();
 		$Setting = \App\Settings::where('id', 1)->first();
-		return view('admin/settings/services/create', compact('serviceCategories','Setting'));
+		$organizations = Organization::all();
+		return view('admin/settings/services/create', compact('serviceCategories','Setting','organizations'));
 	}
 
 	/**
@@ -78,11 +80,9 @@ class ServiceController extends Controller
 	}
     $inputs = $request->except(['img_url']);
     $inputs['img_url'] = $img_url;
-    $inputs['organization_id'] = $category->organization_id;
 
     $inputs = $request->except(['img_url']) + [
         'img_url' => $img_url,
-        'organization_id' => $category->organization_id,
         'vendor_name' => $request->vendor_name,
         'vendor_phone' => $request->vendor_phone,
         'vendor_email' => $request->vendor_email,
@@ -93,9 +93,14 @@ class ServiceController extends Controller
     $inputs['name_ar'] = $inputs['name_en']; 
     $inputs['description_ar'] = $inputs['description_en'];
 
-    $result = Service::create($inputs);
+    $service = Service::create($inputs);
+
+	 // Assign organizations (if selected)
+	 if ($service && $request->has('organization_ids')) {
+        $service->organizations()->attach($request->organization_ids);
+    }
 	
-    if ($result) {
+    if ($service) {
         return redirect()->route('services.index')->with(['msg' => 'StoredSuccessfully']);
     } else {
         return back()->withInput()->with(['msg' => 'FailedStore']);
@@ -123,7 +128,8 @@ class ServiceController extends Controller
 	public function edit(Service $service)
 	{
 		$serviceCategories = ServiceCategory::all();
-		return view('admin/settings/services/edit', compact('service', 'serviceCategories'));
+		$organizations = Organization::all();
+		return view('admin/settings/services/edit', compact('service', 'serviceCategories','organizations'));
 	}
 
 	/**
@@ -150,7 +156,6 @@ class ServiceController extends Controller
         $inputs['img_url'] = $img_url;
     }
 
-    $inputs['organization_id'] = $category->organization_id;
 
     $inputs['vendor_name'] = $request->vendor_name;
     $inputs['vendor_phone'] = $request->vendor_phone;
@@ -161,9 +166,15 @@ class ServiceController extends Controller
 	$inputs['name_ar'] = $inputs['name_en']; 
     $inputs['description_ar'] = $inputs['description_en'];
 	
-    $result = $service->update($inputs);
+    $updated = $service->update($inputs);
 
-    if ($result) {
+    if ($request->has('organization_ids')) {
+        $service->organizations()->sync($request->organization_ids);
+    } else {
+        $service->organizations()->detach();
+    }
+
+    if ($updated) {
         return redirect()->route('services.index')->with(['msg' => 'UpdatedSuccessfully']);
     } else {
         return back()->withInput()->with(['msg' => 'FailedUpdate']);
