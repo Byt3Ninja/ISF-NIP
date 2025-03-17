@@ -1337,7 +1337,7 @@ return [
 	'Projects' => 'المشاريع',
 	'Filter' => 'تصفية',
 	'no_programs' => 'لا توجد برامج',
-	'filter_by_programs' => 'تصفية حسب البرامج',
+	'filter_by_programs' => 'اختر البرنامج',
 	'Date_is_required' => 'التاريخ مطلوب',
 	'Date_must_be_a_valid_date' => 'التاريخ يجب ان يكون تاريخ صحيح',
 	'Period_is_required' => 'الفترة مطلوبة',
