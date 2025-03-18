@@ -1216,7 +1216,7 @@ return [
 	'Url' => 'رابط',
 	'LinkedIn' => 'لينكدإن',
 	'Facebook' => 'فيسبوك',
-	'Twitter' => 'تويتر',
+	'Twitter' => 'رابط اكس',
 	'Linkedin' => 'لينكد إن',
 	'Youtube' => 'يوتيوب',
 	'Google Map' => 'خرائط جوجل',

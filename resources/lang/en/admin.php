@@ -1195,7 +1195,7 @@ return [
 	'Url' => 'URL',
 	'LinkedIn' => 'LinkedIn',
 	'Facebook' => 'Facebook',
-	'Twitter' => 'Twitter',
+	'Twitter' => 'X Url',
 	'Linkedin' => 'Linkedin',
 	'Youtube' => 'YouTube',
 	'Google Map' => 'Google Map',
