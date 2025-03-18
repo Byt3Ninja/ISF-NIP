@@ -729,7 +729,8 @@ document.addEventListener("DOMContentLoaded", function() {
           'rtype': 6,
         },
         success: function(response) {
-          location.reload();
+          alert(response);
+          // location.reload();
         },
         error: function(error) {
           console.log(error);

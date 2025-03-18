@@ -425,9 +425,9 @@
             "step": step,
           },
           success: function(response) {
-            alert(response.ddddd);
+            // alert(response.ddddd);
             // console.log(response);
-            // location.href = '/dashboard/cycles/{{ $id }}/registered';
+            location.href = '/dashboard/cycles/{{ $id }}/registered';
           },
           error: function(error) {
             console.log("Error Occurred, arrange failed");

@@ -378,7 +378,8 @@
 
                 <div class="mt-auto d-flex flex-column pt-4 text-center">
                   <span class="text-muted">
-                    To get analysis for your pitch deck please upload your pitch deck video
+                    {{-- To get analysis for your pitch deck please upload your pitch deck video --}}
+                    {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
                   </span>
                   <a role="button"
                     onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
@@ -649,12 +650,14 @@
                     $comments = \App\Formdata::where('field_id', $field->field_id)->where('company_id',
                     $company->id)->first(['comments'])->comments
                     )
+                    @if ($comments == null)
                     @foreach ($comments as $key => $cc)
                     @if ($cc)
                     <div class="warning">{{ __('admin.comment') }}({{ $key }}):
                       {{ $cc }}</div>
                     @endif
                     @endforeach
+                    @endif
                   </td>
                 </tr>
                 @endforeach

@@ -1321,7 +1321,7 @@ return [
 	'Projects' => 'Projects',
 	'Filter' => 'Filter',
 	'no_programs' => 'No Programs Found',
-	'filter_by_programs' => 'Filter By Programs',
+	'filter_by_programs' => 'Select Program',
 	'Date_is_required' => 'Date is required',
 	'Date_must_be_a_valid_date' => 'Date must be a valid date',
 	'Period_is_required' => 'Period is required',
@@ -1376,5 +1376,13 @@ return [
 	'Attendance' => 'Attendance',
 	'Absent' => 'Absent',
 	'Export_assessment_pdf' => 'Export assessment pdf',
-	
+	'Add new Assessment' => 'Add New Assessment',
+	'Search team members' => 'Search Team Members',
+	'Search programs' => 'Search Programs',
+	'swot_error' => 'Please Complete the Following Fields From Your Profile Before Generating the SWOT Analysis:',
+	'swot_generated' => 'تم إنشاء تحليل SWOT بنجاح',
+	'Success!' => 'Success!',
+	'Error!' => 'Error!',
+	'No_LinkedIn' => 'No LinkedIn',
+	'To get analysis for your pitch deck please upload your pitch deck video' => 'To get analysis for your pitch deck please upload your pitch deck video',
 ];

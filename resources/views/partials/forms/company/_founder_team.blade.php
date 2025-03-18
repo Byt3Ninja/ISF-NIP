@@ -138,7 +138,7 @@
                 @if ($fonder->LinkedIn)
                 <div class="d-flex align-items-center gap-2">
                   <img src="/icons/linkedin.svg" width="18" height="18" />
-                  <span class="text-muted text-xs">{{ $fonder->LinkedIn }}</span>
+                  <span class="text-muted text-xs">{{ $fonder->LinkedIn == null ? __('admin.No_LinkedIn') : $fonder->LinkedIn }}</span>
                 </div>
                 @endif
               </div>

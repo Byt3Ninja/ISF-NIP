@@ -36,6 +36,8 @@ class UpdateServiceRequest extends FormRequest
                 Rule::unique('services', 'vendor_email')->ignore($this->route('service')),
             ],
             'vendor_phone' => 'required|string|max:11',
+            'organization_ids' => 'nullable|array',
+            'organization_ids.*' => 'exists:organizations,id',
         ];
         if( UpdateServiceRequest::hasFile('img_url') ) { $rules['img_url'] = 'required'; }
         return $rules;

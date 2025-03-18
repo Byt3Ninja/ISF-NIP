@@ -1337,7 +1337,7 @@ return [
 	'Projects' => 'المشاريع',
 	'Filter' => 'تصفية',
 	'no_programs' => 'لا توجد برامج',
-	'filter_by_programs' => 'تصفية حسب البرامج',
+	'filter_by_programs' => 'اختر البرنامج',
 	'Date_is_required' => 'التاريخ مطلوب',
 	'Date_must_be_a_valid_date' => 'التاريخ يجب ان يكون تاريخ صحيح',
 	'Period_is_required' => 'الفترة مطلوبة',
@@ -1392,7 +1392,15 @@ return [
 	'StartUp_name' => 'اسم الشركة',
 	'Attendance' => 'الحضور',
 	'Absent' => 'غياب',
-	'Export_assessment_pdf' => 'تصدير التقييم PDF',
-	
+	'Search team members' => 'البحث عن أعضاء الفريق',
+	'Search programs' => 'البحث عن البرامج',
+	'swot_error' => 'يرجى ملء الحقول التالية من ملفك الشخصي قبل إنشاء تحليل SWOT:',
+	'generate' => 'إنشاء تحليل SWOT',
+	'export' => 'طباعة إلى PDF',
+	'swot_generated' => 'تم إنشاء تحليل SWOT بنجاح',
+	'Success!' => '!نجاح',
+	'Error!' => '!خطأ',
+	'No_LinkedIn' => 'لا يوجد لينكدان',
+	'To get analysis for your pitch deck please upload your pitch deck video' => 'للحصول على تحليل لوثائقك الرسمية يرجى رفع وثائقك الرسمية',
 ]; 
 

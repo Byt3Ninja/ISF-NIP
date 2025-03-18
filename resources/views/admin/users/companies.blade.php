@@ -145,19 +145,14 @@
                         <select class="form-select stage border rounded bg-transparent text-primary px-10"
                           style="max-width: 180px;" name="stage">
                           <option value="">{{ __('admin.stage') }}</option>
-                          <option value="idea" {{ 'idea' == request('stage') ? 'selected' : '' }}>
-                            {{ __('admin.stage_idea') }}
-                          </option>
-                          <option value="prototype" {{ 'prototype' == request('stage') ? 'selected' : '' }}>
-                            {{ __('admin.stage_prototype') }}
-                          </option>
-                          <option value="ready_product" {{ 'ready_product' == request('stage') ? 'selected' : '' }}>
-                            {{ __('admin.stage_ready_product') }}
-                          </option>
-                          <option value="company_in_market"
-                            {{ 'company_in_market' == request('stage') ? 'selected' : '' }}>
-                            {{ __('admin.stage_company_in_market') }}
-                          </option>
+                          @php
+                            $stages = App\Stage::all();
+                          @endphp
+                          @foreach ($stages as $stage)
+                            <option value="{{ $stage->id }}" {{ $stage->id == request('stage') ? 'selected' : '' }}>
+                              {{ $stage->{'name_'. $l} ?? '' }}
+                            </option>
+                          @endforeach
                         </select>
 
 
