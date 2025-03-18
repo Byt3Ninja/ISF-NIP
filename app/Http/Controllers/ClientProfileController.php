@@ -53,7 +53,7 @@ class ClientProfileController extends Controller
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id',null)->get();
-            $Currencies = Currency::all();
+            $Currencies = Currency::where('enabled',1)->get();
             $json = File::get(base_path('database/dbFiles/countries.json'));
             $_countries = json_decode($json, true);
             $_countries = collect( $_countries )->map(function ($country) {

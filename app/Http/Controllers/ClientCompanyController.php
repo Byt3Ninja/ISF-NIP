@@ -70,7 +70,7 @@ class ClientCompanyController extends Controller
                 ->where('Company_id', $id)->get();
             $Planned_Milestones = Milestone::where('plan', 'Planned_Milestones')
                 ->where('Company_id', $id)->get();
-            $Currencies = Currency::all(); // جلب جميع الأعضاء
+            $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
             // مسار الملف
             $pathToFile = storage_path($company->pitch_deck);
             // تحقق من وجود الملف
@@ -138,7 +138,7 @@ class ClientCompanyController extends Controller
                 }
                 $Stages = Stage::all();
 
-                $Currencies = Currency::all(); // جلب جميع الأعضاء
+                $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
                 $json = File::get(base_path('database/dbFiles/countries.json'));
                 $_countries = json_decode($json, true);
                 $_countries = collect($_countries)->map(function ($country) {
@@ -221,7 +221,7 @@ class ClientCompanyController extends Controller
                 }
                 $Stages = Stage::all();
 
-                $Currencies = Currency::all(); // جلب جميع الأعضاء
+                $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
                 $json = File::get(base_path('database/dbFiles/countries.json'));
                 $_countries = json_decode($json, true);
                 $_countries = collect($_countries)->map(function ($country) {
