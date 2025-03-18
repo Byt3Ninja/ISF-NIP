@@ -238,7 +238,7 @@
       @endif
     @endif
 
-    @if ($_user->hasAnyRole('Mentor'))
+    @if ($_user->hasAnyRole('Mentor|organizationManager'))
       @if( $_user->ableTo('mentorshipSessions.index', $permissions) )
       <li 
         class="{{ 
@@ -325,7 +325,7 @@
       </li>
     @endif
 
-    @if ($_user->hasRole('Admin'))
+    @if ($_user->hasRole('Admin|organizationManager'))
       <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
         <a href="{{ route('organizations.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-settings"></i>
@@ -633,6 +633,13 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
             <a class="menu-link" href="/dashboard/surveys">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item"> {{ __('admin.surveys') }}</span>
+            </a>
+          </li>
+
+          <li class="{{ Request::is('dashboard/Totalsurveys*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('total.surveys') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Survey_Results') }}</span>
             </a>
           </li>
         </ul>
