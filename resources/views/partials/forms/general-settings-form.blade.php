@@ -105,11 +105,11 @@
       <label class="form-label" for="Currency">{{ __('settings.Currency') }} *</label>
       <select class="form-control" id="Currency" name='Currency'>
         <option value="">{{ __('settings.Currency') }}</option>
-       @foreach ($currencies as $currency)
-       <option value="{{ $currency->id }}" {{ $currency->id == $Title->Currency
-       ? 'selected' : '' }}>
-       {{ $currency->currency_name }}</option>
-       @endforeach
+        @foreach ($currencies->where('enabled', 1) as $currency)
+        <option value="{{ $currency->id }}" {{ $currency->id == $Title->Currency ? 'selected' : '' }}>
+            {{ $currency->currency_name }}
+        </option>
+    @endforeach
       </select>
     </div>
   </div>
