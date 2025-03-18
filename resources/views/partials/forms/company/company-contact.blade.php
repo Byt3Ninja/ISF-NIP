@@ -101,7 +101,7 @@
                   />
                   <span class="input-group-text text-light"><i class="ti ti-brand-x"></i></span>
                 </div>
-                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Twitter URL' : 'رابط تويتر غير صالح' }}.</div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid X URL' : 'رابط اكس غير صالح' }}.</div>
               </div>
             </div>
             <div class="col-md-6">
