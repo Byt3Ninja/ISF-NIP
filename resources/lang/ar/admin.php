@@ -1402,5 +1402,10 @@ return [
 	'Error!' => '!خطأ',
 	'No_LinkedIn' => 'لا يوجد لينكدان',
 	'To get analysis for your pitch deck please upload your pitch deck video' => 'للحصول على تحليل لوثائقك الرسمية يرجى رفع وثائقك الرسمية',
+	'Code' => 'الكود',
+	'Symbol' => 'الرمز',
+	'Flag' => 'العلم',
+	'Exchange_Rate' => 'سعر الصرف',
+	'Add_new_currency' => 'اضافة عملة جديدة',
 ]; 
 
