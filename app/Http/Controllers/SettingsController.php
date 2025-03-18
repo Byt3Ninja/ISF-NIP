@@ -44,7 +44,7 @@ class SettingsController extends Controller
 		$Img3 =  Settings::findOrFail('9');
 		$Counters = Settings::where('type','6')->get();
 		$countries = Country::all();
-		$currencies = Currency::all();
+		$currencies = Currency::where('enabled',1)->get();
 		$states= State::all();
 		$json = File::get(base_path('database/dbFiles/countries.json'));
 		$_countries = json_decode($json, true);
@@ -783,7 +783,7 @@ class SettingsController extends Controller
     public function showSettings()
     {
         $organization = auth()->user()->organization; 
-        $currencies = Currency::all();  
+        $currencies = Currency::where('enabled',1)->get();  
         $timezones = collect(\DateTimeZone::listIdentifiers())
         ->mapWithKeys(function ($timezone) {
 			$zone = new \DateTimeZone($timezone);
