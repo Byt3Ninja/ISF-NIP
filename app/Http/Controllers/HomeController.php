@@ -794,9 +794,7 @@ class HomeController extends Controller
                     ->orWhere('services.name_ar', 'like', '%' . $find . '%');
             });
         }
-         $user = auth()->user();
-        $isAdmin = $user && $user->hasRole('Admin');
-        $services = $services->get();
+        $services = Service::whereHas('organizations')->get();
         $setting = Settings::where('id', 1)->first();
         $currency = Currency::where('id', $setting->Currency)->first();
         return view('admin.clients.directory')->with('services', $services)->with('setting', $setting)->with('currency', $currency);
