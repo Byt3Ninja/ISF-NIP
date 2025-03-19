@@ -95,45 +95,48 @@
       </div>
       <div class="form-group mb-6">
         <label for="entrepreneurial_experience" class="form-label fs-6 fw-bold">
-          {{ __('admin.Entrepreneurial Experience') }}
+            {{ __('admin.Entrepreneurial Experience') }}
         </label>
         <select 
-          name="entrepreneurial_experience" 
-          id="entrepreneurial_experience" 
-          class="form-select select2"
+            name="entrepreneurial_experience" 
+            id="entrepreneurial_experience" 
+            class="form-select select2"
+            onchange="toggleExperienceBrief()"
         >
-          <option 
-            value="1" 
-            {{ optional($client->bio)->entrepreneurial_experience ? 'selected' : '' }}
-          >
-            {{ __('Yes') }}
-          </option>
-          <option 
-            value="0" 
-            {{ optional($client->bio)->entrepreneurial_experience ? '' : 'selected' }}
-          >
-            {{ __('No') }}
-          </option>
+            <option 
+                value="1" 
+                {{ optional($client->bio)->entrepreneurial_experience ? 'selected' : '' }}
+            >
+                {{ __('Yes') }}
+            </option>
+            <option 
+                value="0" 
+                {{ optional($client->bio)->entrepreneurial_experience ? '' : 'selected' }}
+            >
+                {{ __('No') }}
+            </option>
         </select>
-      </div>
-      <div class="form-group mb-6">
+    </div>
+    
+    <div class="form-group mb-6" id="experience_brief_container" style="display: none;">
         <label class="form-label fs-6 fw-bold">
-          {{ __('admin.Entrepreneurial Experience desc') }}.
+            {{ __('admin.Entrepreneurial Experience desc') }}.
         </label>
         <textarea 
-          class="form-control" 
-          id="basicTextarea" 
-          rows="8" 
-          name="entrepreneurial_experience_brief"
-          oninput="this.value = this.value.trimStart()"
-          required
+            class="form-control" 
+            id="basicTextarea" 
+            rows="8" 
+            name="entrepreneurial_experience_brief"
+            oninput="this.value = this.value.trimStart()"
+            required
         >
-          {{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }}
+            {{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }}
         </textarea>
         <label for="tcontent" class="mt-2">
-          {{ __('admin.Entrepreneurial Experience Brief') }}
+            {{ __('admin.Entrepreneurial Experience Brief') }}
         </label>
-      </div>
+    </div>
+     
       <div class="form-group mb-6">
         <label for="profile_privacy" class="form-label fs-6 fw-bold">
           {{ __('admin.Profile Privacy') }}
@@ -322,5 +325,20 @@
       const fv = FormValidation.formValidation(document.getElementById('jobInfoForm'), jobInfoFormConfig);
     })();
   });
+
+  function toggleExperienceBrief() {
+        let select = document.getElementById('entrepreneurial_experience');
+        let briefContainer = document.getElementById('experience_brief_container');
+        
+        if (select.value == "1") {
+            briefContainer.style.display = "block";
+        } else {
+            briefContainer.style.display = "none";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleExperienceBrief();
+    });
 
 </script>
