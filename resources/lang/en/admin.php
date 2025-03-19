@@ -1388,4 +1388,7 @@ return [
 	'Surveys' => 'Surveys',
 	'Scope' => 'Scope',
 	'Survey_Results' => 'Survey Results',
+	'Please_select_date' => 'Please select date',
+	'Please_select_from_time' => 'Please select from time',
+	'Please_select_to_time' => 'Please select to time',
 ];
