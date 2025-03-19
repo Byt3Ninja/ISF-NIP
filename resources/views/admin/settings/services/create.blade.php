@@ -49,6 +49,7 @@
                       {!! csrf_field() !!}
                       <div class="row">
                         <div class="col-md-12">
+                          
                           <fieldset class="form-group mb-4">
                             <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Service_Name') }}</label>
                             <input style="direction: ltr;" type="text" class="form-control col-md-6 col-sm-12"
@@ -83,6 +84,25 @@
                               @endforeach
                             </select>
                           </fieldset>
+
+                          <fieldset class="form-group mb-4">
+                            <label class="fs-5 mb-2">{{ __('admin.Organizations') }}</label>
+                            <div class="row">
+                                @foreach ($organizations as $organization)
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                id="organization_{{ $organization->id }}" 
+                                                name="organization_ids[]" 
+                                                value="{{ $organization->id }}">
+                                            <label class="form-check-label" for="organization_{{ $organization->id }}">
+                                                {{ $organization->{'name_' . app()->getLocale()} }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </fieldset>
 
                           <!-- Vendor Details -->
                   <fieldset class="form-group mb-4">

@@ -44,14 +44,14 @@
                       </div>
                       <div class="col-md-6 mt-3">
                         <label>{{ __('admin.Exchange_Rate') }}</label>
-                        <input type="number" name="exchange_rate_to_usd" class="form-control" >
+                        <input type="number" name="exchange_rate_to_usd" step="0.000001" class="form-control" >
                         @error('exchange_rate_to_usd')
                           <div class="text-danger">{{ $message }}</div>
                        @enderror
                       </div>
                       <div class="col-md-6 mt-3">
                         <label>{{ __('admin.Flag') }}</label>
-                        <input type="file" name="flag" class="form-control" id="flagInput" accept="image/*">
+                        <input type="file" name="flag" class="form-control" id="flagInput" accept="image/jpeg, image/png, image/jpg">
                         @error('flag')
                          <div class="text-danger">{{ $message }}</div>
                        @enderror

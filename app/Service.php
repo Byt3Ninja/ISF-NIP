@@ -31,8 +31,8 @@ class Service extends Model
 		return ($rate??0) ;
 	}
 
-	public function organization()
-	{
-		return $this->belongsTo(Organization::class, 'organization_id');
-	}
+	public function organizations()
+  {
+      return $this->belongsToMany(Organization::class, 'organization_service');
+  }
 }

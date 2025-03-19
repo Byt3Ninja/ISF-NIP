@@ -118,6 +118,46 @@ class MentorsController extends Controller
 		}
 	}
 
+	public function total_surveys()
+	{
+		if (Auth::user()->hasAnyRole('organizationManager')) {
+		$organization_id = auth()->user()->organization_id;
+			$surveys = SurveyScopes::where('organization_id', $organization_id)->with(['survey', 'responses'])->get();
+			$surveys = $surveys->map(function ($survey) {
+				$responses = $survey->responses;
+				$eligibleUsers = $responses->count();
+				$engagedUsers = $responses->whereNotNull('responses')->count();
+				$notEngagedUsers = $responses->whereNull('responses')->count();
+				$survey->eligibleUsers = $eligibleUsers;
+				$survey->engagedUsers = $engagedUsers;
+				$survey->notEngagedUsers = $notEngagedUsers;
+				$survey->engagementRate = $eligibleUsers > 0 ? (number_format(round(($engagedUsers / $eligibleUsers * 100), 2), 2)) : 0.00;
+				return $survey;
+			});
+
+		}else{
+			$organization_id = auth()->user()->organization_id;
+			$surveys = SurveyScopes::with(['survey', 'responses'])->get();
+			$surveys = $surveys->map(function ($survey) {
+				$responses = $survey->responses;
+				$eligibleUsers = $responses->count();
+				$engagedUsers = $responses->whereNotNull('responses')->count();
+				$notEngagedUsers = $responses->whereNull('responses')->count();
+				
+				$survey->eligibleUsers = $eligibleUsers;
+				$survey->engagedUsers = $engagedUsers;
+				$survey->notEngagedUsers = $notEngagedUsers;
+				
+				$survey->engagementRate = $eligibleUsers > 0 ? (number_format(round(($engagedUsers / $eligibleUsers * 100), 2), 2)) : 0.00;
+				return $survey;
+			});
+		}
+
+
+			return view('admin.surveys.totalsurvey', compact('surveys'));
+		
+	}
+
 	public function create_survey($id, Request $request)
 	{
 		$organization_id = auth()->user()->organization_id;

@@ -52,7 +52,8 @@
                                             </div>
                                             <div class="col-md-6 mt-3">
                                                 <label>{{ __('admin.Flag') }}</label>
-                                                <input type="file" name="flag" class="form-control" id="flagInput" accept="image/*">                                                @error('flag')
+                                                <input type="file" name="flag" class="form-control" id="flagInput" accept="image/jpeg, image/png, image/jpg">                                                
+                                                @error('flag')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                                 @if($currency->flag)

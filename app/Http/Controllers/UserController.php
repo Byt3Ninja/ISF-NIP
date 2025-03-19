@@ -294,11 +294,7 @@ class UserController extends Controller
 		} else if (Auth::user()->hasRole('Mentor')) {
 
 			$organization_id = auth()->user()->organization_id;
-			$cycle_ids = Cycle::where('organization_id', $organization_id)
-				->whereHas('mentors', function ($query) {
-					$query->where('user_id', auth()->id());
-				})
-				->pluck('id');
+			$cycle_ids = Cycle::where('organization_id', $organization_id)->pluck('id');
 
 			// foreach ($cycle_ids as $cycle) {
 			//	 $cycle_companies = Company::where('cycle', $cycle->id)->get();

@@ -337,7 +337,7 @@
                               </div>
                             </div>
                           </div>
-                          <div  style="width: fit-content">
+                          {{-- <div  style="width: fit-content">
                             <div class="d-flex align-items-center g-1" style="height: 55px;">
                               <div class="bg-label-danger p-2 d-flex align-items-center justify-content-center rounded mx-1">
                                 <i class="ti ti-stack-2 ti-24px"></i>
@@ -347,7 +347,7 @@
                                 <span class="badge bg-light rounded-pill text-secondary mx-2 fw-bold">5</span>
                               </div>
                             </div>
-                          </div>
+                          </div> --}}
                         </div>
                         <!-- / Count Row -->
                         <!-- Mentors Row -->

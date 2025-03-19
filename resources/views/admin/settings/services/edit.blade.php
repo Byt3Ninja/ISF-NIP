@@ -86,6 +86,26 @@
                                                         @endforeach
                                                     </select>
                                                 </fieldset>
+
+                                                <fieldset class="form-group mt-4">
+                                                    <label class="fs-5 mb-2">{{ __('admin.Organizations') }}</label>
+                                                    <div class="row">
+                                                        @foreach ($organizations as $organization)
+                                                            <div class="col-md-4">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" 
+                                                                        id="organization_{{ $organization->id }}" 
+                                                                        name="organization_ids[]" 
+                                                                        value="{{ $organization->id }}"
+                                                                        {{ in_array($organization->id, old('organization_ids', $service->organizations->pluck('id')->toArray() ?? [])) ? 'checked' : '' }}>
+                                                                    <label class="form-check-label" for="organization_{{ $organization->id }}">
+                                                                        {{ $organization->{'name_' . app()->getLocale()} }}
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </fieldset>
                                                   <!-- Vendor Details -->
                                                   <fieldset class="form-group mt-3">
                                                     <label class="fs-5 mb-2">{{ __('admin.Vendor_Name') }}</label>

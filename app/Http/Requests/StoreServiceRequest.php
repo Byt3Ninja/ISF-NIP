@@ -31,6 +31,8 @@ class StoreServiceRequest extends FormRequest
             'vendor_name' => 'required|string|max:50',
             'vendor_email' => 'required|string|max:50|unique:services,vendor_email,except,id',
             'vendor_phone' => 'required|string|max:11',
+            'organization_ids' => 'nullable|array',
+            'organization_ids.*' => 'exists:organizations,id',
         ];
     }
 }

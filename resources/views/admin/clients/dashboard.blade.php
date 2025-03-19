@@ -1335,93 +1335,10 @@
     </div>
   </div>
 
-<!--  Edit SP Modal -->
-<div class="modal fade" id="SendRequest" tabindex="-1" aria-labelledby="sendrequest" aria-hidden="true">
-  <div class="modal-dialog modal-md modal-dialog-centered">
-    <div class="modal-content">
-    <div class="modal-header mb-0">
-      <h4 class="modal-title">{{__('dashboard.Add mentorship session with')}} <span class="text-primary" id="rname"></span></h4>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
-      @csrf
-      <div class="modal-body">
-      <input type="hidden" name="mentorid" value="0" id="mentorid">
-      <input type="hidden" name="organization_id" id="addOrganizationID">
-      <input type="hidden" name="cycle_id" id="addCycleID">
-      <div class="mb-6">
-        <h5 class="text-secondary">{{__('dashboard.Mentor schedule')}}</h5>
-        <div class="bg-label-secondary p-2 rounded">
-        <ul class="mb-0" id="schedule"></ul>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-12">
-          <div class="form-group mb-4">
-            <label for="date" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Start meeting Date/ Time')}}:</label>
-            <div class="input-group input-group-merge">
-              <input type="text" class="form-control" id="flatpickr-datetimeLimit" placeholder="{{__('dashboard.Start meeting Date/ Time')}}" name="date" required>
-              <div class="input-group-text">
-                <i class="ti ti-calendar text-secondary"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="form-group mb-4">
-            <label for="from" class="form-label fw-semibold fs-6 mb-1">
-              {{__('dashboard.From')}}:
-            </label>
-            <select class="select2 form-select" id="timeFrom" name="timeFrom">
-              {{-- @for ($i = 0; $i < 12; $i++)
-              <option value="{{ $i == 0 ? 12 : $i }}:00 AM">{{ $i == 0 ? 12 : $i }}:00 AM</option>
-              <option value="{{ $i == 0 ? 12 : $i }}:30 AM">{{ $i == 0 ? 12 : $i }}:30 AM</option>
-              @endfor --}}
-            </select>
-          </div>   
-        </div>
-        <div class="col-6">
-          <div class="form-group mb-4">
-            <label for="to" class="form-label fw-semibold fs-6 mb-1">
-              {{__('dashboard.To')}}:
-            </label>
-            <select class="select2 form-select" id="timeTo" name="timeTo">
-              {{-- @for ($i = 0; $i < 12; $i++)
-              <option value="{{ $i == 0 ? 12 : $i }}:00 AM">{{ $i == 0 ? 12 : $i }}:00 AM</option>
-              <option value="{{ $i == 0 ? 12 : $i }}:30 AM">{{ $i == 0 ? 12 : $i }}:30 AM</option>
-              @endfor --}}
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label for="period" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Meeting duration')}}:</label>
-        <select name="period" class="form-select" id="period">
-        <option value="30">30 {{__('dashboard.Minutes')}}</option>
-        <option value="60" selected>1 {{__('dashboard.Hour')}}</option>
-        <option value="120">2 {{__('dashboard.Hours')}}</option>
-        <option value="180">3 {{__('dashboard.Hours')}}</option>
-        <option value="240">4 {{__('dashboard.Hours')}}</option>
-        <option value="300">5 {{__('dashboard.Hours')}}</option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="inputGroupFile01" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Send file with your request')}}</label>
-        <input type="file" class="form-control" id="inputGroupFile01" name="file_url" accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
-      </div>
-      <div class="mb-3">
-        <label for="notes" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Add note')}}:</label>
-        <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="{{__('dashboard.Write your note here')}}"></textarea>
-      </div>
-      </div>
-      <div class="modal-footer">
-      <button type="submit" class="btn btn-primary">{{__('dashboard.Submit')}}</button>
-      </div>
-    </form>
-    </div>
-  </div>
-  </div>
-<!--/ Edit SP Modal -->
+  <!--  Edit SP Modal -->
+  @include('admin.clients.startup.partials._session_modal')
+  <!--/ Edit SP Modal -->
+
   <!-- / Content wrapper -->
   {{-- <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
@@ -1511,8 +1428,7 @@
 
 @section('pagescripts')
   <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
-
-  
+  <script src="/vuexy/assets/js/mentorship-session.js"></script>
 
   <script>
     $(document).ready(function() {
@@ -1614,112 +1530,7 @@ window.location.href = url;
 			@endif
 		});
 		
-	});
-
-	
-	
-	// $("#date").datetimepicker({
-	// 	format: 'Y-m-d H:i', onGenerate: function( ct ) { jQuery(this).find('.xdsoft_date').toggleClass('xdsoft_disabled'); },
-	// 	maxDate: '{{date('Y/m/d',strtotime("-1 days"))}}',
-	// 	timepicker: true
-	// });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    var timeFromSelect = $('#timeFrom');
-    var timeToSelect = $('#timeTo');
-    
-    // Populate timeFromSelect and timeToSelect with 30-minute intervals
-    for (var i = 0; i < 48; i++) {
-      var time = moment().startOf('day').add(i * 30, 'minutes');
-      var timeFormatted = time.format('hh:mm A');
-      var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
-      timeFromSelect.append(option.clone());
-      timeToSelect.append(option.clone());
-    }
-  });
-
-	function request(id,mentor,organization_id=null,cycle_id=null) {
-		$('#mentorid').val(id);
-		$('#rname').html(mentor);
-		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
-		$.ajax({
-			type: "POST", url: "/dashboard/mentors/modify",
-			data: {"id": id, "rtype": 5,},
-			success: function (response) {
-        $('#SendRequest').modal('show');
-				$('#SendRequest li').remove();
-				$('#name').html(name);
-
-        if (response && response.length>0) {
-          console.log('response', response)
-          // Date
-          var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
-          if (flatpickrDateTimeLimit) {
-            var enabledDays = response.reduce((acc, item) => {
-              return acc.concat(item.days);
-            }, []);
-          
-            console.log('enabledDays', enabledDays)
-          
-            flatpickrDateTimeLimit.flatpickr({
-              // enableTime: true,
-              dateFormat: 'Y-m-d',
-              minDate: 'today',
-              enable: [
-                function(date) {
-                  return enabledDays.includes(date.toLocaleString('en-US', { weekday: 'short' }));
-                }
-              ]
-            });
-          }
-
-          $.each(response, function(i, item) {
-            let note = '';
-            let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
-            if (item.notes) {note = item.notes;}
-            switch (item.type)
-            {
-              case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
-              case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
-              case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
-              case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
-              default:
-            }
-          });
-        } else { 
-          
-          $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); 
-          var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
-          var timeFromSelect = $('#timeFrom');
-          var timeToSelect = $('#timeTo');
-      
-          // // Populate timeFromSelect and timeToSelect with 30-minute intervals
-          // for (var i = 0; i < 48; i++) {
-          //   var time = moment().startOf('day').add(i * 30, 'minutes');
-          //   var timeFormatted = time.format('hh:mm A');
-          //   var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
-          //   timeFromSelect.append(option.clone());
-          //   timeToSelect.append(option.clone());
-          // }
-
-          // Date
-          if (flatpickrDateTimeLimit) {
-            flatpickrDateTimeLimit.flatpickr({
-              // enableTime: true,
-              dateFormat: 'Y-m-d',
-              minDate: 'today',
-            });
-          }
-        }
-				$('#addOrganizationID').val(organization_id);
-				$('#addCycleID').val(cycle_id);
-			}, 
-      error: function (error) {
-        console.log(error); 
-        alert("Error Occurred, Try again!");
-      }
-		});
-	}
+	});	
 </script>
 
   <script>
