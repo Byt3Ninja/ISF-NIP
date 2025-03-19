@@ -150,6 +150,10 @@
 style="width: 366px;">
 </div>
 
+
+
+
+
                       </div>
                     </div>
 
@@ -182,9 +186,29 @@ style="width: 366px;">
                         <!-- Sort Content Here -->
                       </div>
                       <!-- Sorting -->
+                      
                     </div>
 
-
+                    @php
+                    $expertises = App\Expertise::where('parent_id',null)->get();
+                    @endphp
+                    <div class="form-group mb-6 d-grid">
+                      <label for="selectExpertises" class="form-label fs-6 fw-bold">
+                        {{ __('admin.SelectExpertises') }}
+                      </label>
+                      <small class="mb-3">{{ __('admin.SelectMultiExpertises') }}.</small>
+                      <div class="input-group input-group-merge">
+                        <select name="expertises[]" class="form-select " multiple="multiple" id="selectExpertises">
+                          @foreach ($expertises as $expertise_group)
+                          <optgroup label="{{ $expertise_group->title }}">
+                            @foreach ($expertise_group->children as $expertise)
+                            <option value="{{ $expertise->id }}">{{ $expertise->title }}</option>
+                            @endforeach
+                          </optgroup>
+                          @endforeach
+                        </select>
+                      </div>
+                    </div>
                   </form>
                 </div>
                 <!-- / Search Container -->
