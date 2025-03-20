@@ -31,10 +31,14 @@ class organizationsController extends Controller
 		$this->middleware('auth');
 	}
 
-	public function index()
+	public function index(Request $request)
 	{
-		$organizations = Organization::with(['user', 'cycles'])->get();
-
+		$organizations = Organization::with(['user', 'cycles']);
+		if($request->status !== null && $request->status !== 'all') {
+		$organizations = $organizations->where('status', $request->status)->get();
+		}else{
+			$organizations = $organizations->get();
+		}
 		foreach ($organizations as $organization) {
 			$organization->total_startups = Company::whereHas('cycle', function ($query) use ($organization) {
 				$query->where('organization_id', $organization->id);

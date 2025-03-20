@@ -67,17 +67,17 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    public static function image_handler( $img )
+    {
+        if( !$img ) { return "/images/placeholder.jpg"; }
+        if( $img && !str_starts_with($img, 'https://') ) { return "/191014/" . $img; }
+        return $img;
+    }
     // ==========> Attributes <=====================
     public function getImageUrlAttribute()
     {
         $image = $this->img_url;
-        if (!$image) {
-            return "/images/placeholder.jpg";
-        }
-        if ($image && !str_starts_with($image, 'https://')) {
-            return "/191014/" . $image;
-        }
-        return $image;
+        return self::image_handler( $image );
     }
     public function getFirstNameAttribute()
     {

@@ -311,7 +311,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('builder/organization/{id?}', 'FormBuilderController@builderByOrganization');
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('index.cycle');
-    Route::get('cycles/{id}/registered', 'CyclesController@users');
+    Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users');
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
     Route::post('cycles/save', 'CyclesController@saveForm');

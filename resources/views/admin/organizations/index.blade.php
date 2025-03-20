@@ -41,6 +41,19 @@
 		<section class="organizations-list-wrapper">
 			<div class="organizations-list-table">
 				<div class="card">
+
+
+					<form method="GET" action="{{ route('organizations.index') }}">
+						<div class="mb-6 width20">
+							<label for="start_date">{{ __('admin.Status') }}</label>
+							<select class="form-select" name="status">
+								<option value="all" {{ request('status') == 'all' ? "selected" : "" }} >{{ __('admin.All') }}</option>
+								<option value="1" {{ request('status') == '1' ? "selected" : "" }}>{{ __('admin.Active') }}</option>
+								<option value="0" {{ request('status') == '0' ? "selected" : "" }} >{{ __('admin.Inactive') }}</option>
+							</select>
+						</div>
+						<button type="submit" class="btn btn-primary"> <i class="ti ti-search"></i> {{ __('admin.Search') }} </button>
+					</form>
 					<div class="card-header"> <h4 class="card-title mb-0">{{__('admin.Organizations')}}</h4> </div>
 					<div class="card-content">
 						<div class="card-body">
@@ -57,6 +70,7 @@
 											<th>{{__('admin.Startup')}}</th>
 											<th>{{__('admin.Startups')}}</th>
 											<th>{{__('admin.Cycles')}}</th>
+											<th>{{__('admin.Status')}}</th>
 											@if( $_user->ableToAny(['organizations.show', 'organizations.edit', 'organizations.update', 'organizations.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
 										</tr>
 									</thead>
@@ -82,6 +96,9 @@
 										<td style="font-size: small;">{{ $organization->user->name }}</td>
 										<td style="font-size: small;">{{ $organization->total_startups }}</td>
 										<td style="font-size: small;">{{ $organization->cycles->count()}}</td>
+										<td style="font-size: small;">{!! $organization->status == 1 
+											? "<div class='btn btn-label-success'>" . __('admin.Active') . "</div>" 
+											: "<div class='btn btn-label-danger'>" . __('admin.Inactive') . "</div>" !!}</td>
 										@if( $_user->ableToAny(['organizations.show', 'organizations.edit', 'organizations.update', 'organizations.destroy'], $permissions) )
 										<td>
 											@if( $_user->ableToAny(['organizations.edit', 'organizations.update'], $permissions) )<a class="btn btn-label-primary btn-sm" href="{{ route('organizations.edit', ['organization' => $organization->id]) }}"> <i class="ti ti-edit"></i></a>@endif

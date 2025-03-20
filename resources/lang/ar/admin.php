@@ -1413,5 +1413,8 @@ return [
 	'Please_select_date' => 'يرجى اختيار التاريخ',
 	'Please_select_from_time' => 'يرجى اختيار وقت البدء',
 	'Please_select_to_time' => 'يرجى اختيار وقت الانتهاء',
+	'Filter_Mentors' => 'تصفية المرشدين',
+	'Apply' => 'تطبيق',
+	'Inactive' => 'غير نشط',
 ]; 
 
