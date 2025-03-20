@@ -198,11 +198,11 @@ style="width: 366px;">
                       </label>
                       <small class="mb-3">{{ __('admin.SelectMultiExpertises') }}.</small>
                       <div class="input-group input-group-merge">
-                        <select name="expertises[]" class="form-select " multiple="multiple" id="selectExpertises">
+                        <select name="expertises" class="form-select " id="selectExpertises">
                           @foreach ($expertises as $expertise_group)
                           <optgroup label="{{ $expertise_group->title }}">
                             @foreach ($expertise_group->children as $expertise)
-                            <option value="{{ $expertise->id }}">{{ $expertise->title }}</option>
+                            <option value="{{ $expertise->id }}" {{ request('expertises') == $expertise->id ? 'selected': '' }} >{{ $expertise->title }}</option>
                             @endforeach
                           </optgroup>
                           @endforeach
