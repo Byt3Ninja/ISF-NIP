@@ -23,6 +23,11 @@ class Organization extends Model
 		'created_at',
 		'updated_at',
 	];
+	public static function image_handler( $img )
+    {
+        if( !$img ) { return '/app-assets/images/logo_placeholder.png'; }
+        return $img;
+    }
 	// ===========> Attributes <==============
 	public function getNameAttribute($key)
 	{
@@ -32,10 +37,7 @@ class Organization extends Model
 	public function getImageUrlAttribute()
 	{
 		$image = $this->img_url;
-		if (!$image) {
-			return '/app-assets/images/logo_placeholder.png';
-		}
-		return $image;
+		return self::image_handler( $image );
 	}
 	// =============> Relations <=================
 	/**

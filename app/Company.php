@@ -92,14 +92,16 @@ class Company extends Model
         'business_categories' => 'array',
         'product_photo' => 'array',
     ];
+    public static function logo_handler( $img )
+    {
+        if( !$img ) { return '/app-assets/images/logo_placeholder.png'; }
+        return $img;
+    }
     // ===========> Attributes <==============
     public function getLogoUrlAttribute()
     {
         $image = $this->logo;
-        if (!$image) {
-            return '/app-assets/images/logo_placeholder.png';
-        }
-        return $image;
+        return self::logo_handler( $image );
     }
     public function getBusinessModelUrlAttribute()
     {

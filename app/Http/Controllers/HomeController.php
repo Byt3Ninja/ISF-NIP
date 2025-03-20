@@ -19,6 +19,8 @@ use App\TimeSheet;
 use App\BuilderForm;
 use App\Organization;
 use App\Documentation;
+use App\SurveyScopes;
+use App\SurveyResponses;
 
 use App\Finalscreening;
 use App\MentorshipTask;
@@ -34,6 +36,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ServiceRequestNotification;
 use stdClass;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -93,30 +96,61 @@ class HomeController extends Controller
         $has_org = !empty( $user->organization_id ) && !is_null( $user->organization_id ) && trim( $user->organization_id ) ? true : false;
         if( auth()->check() ) { $permissions = $user->myPermissions(); }
 
-        if( array_intersect(['dashboard_cards.managers', 'dashboard_cards.mentors', 'dashboard_cards.judgers'], $permissions) )
+        if( array_intersect(['dashboard_cards.managers', 'dashboard_cards.mentors', 'dashboard_cards.judgers', 'dashboard_tables.mentors'], $permissions) )
         {
             $users_q = "SELECT 
                     u.id,
+                    u.img_url,
                     CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS name_en,
                     CONCAT(TRIM(COALESCE(u.first_name_ar, '')), ' ', TRIM(COALESCE(u.last_name_ar, ''))) AS name_ar,
+                    u.title_en AS `title_en`,
+                    u.title_ar AS `title_ar`,
                     u.gender,
                     u.email,
-                    r.default_for AS `role`
+                    r.default_for AS `role`,
+                    ub.bio_en AS bio_en,
+                    ub.bio_ar AS bio_ar,
+                    ub.specialization_en AS bio_specialization_en,
+                    ub.specialization_ar AS bio_specialization_ar,
+                    ub.linkedin AS linkedin,
+                    cm.cycle_id AS cycle_id,
+                    c.organization_id AS organization_id
                 FROM
                     users u
                 LEFT JOIN
                     model_has_roles mhr ON u.id = mhr.model_id AND model_type = 'App\\\User'
                 LEFT JOIN
                     roles r ON mhr.role_id = r.id
+                LEFT JOIN
+                    users_bio ub ON ub.user_id = u.id
+                LEFT JOIN
+                    cycles_mentors cm ON cm.user_id = u.id
+                LEFT JOIN
+                    cycles c ON c.id = cm.cycle_id
                 WHERE
                     u.deleted_at IS NULL
             ";
             $users = collect( DB::select( $users_q ) );
-            $users = $users->groupBy('id')->map(function ( $user ) {
+            $users = $users->groupBy('id')->map(function ( $user ) use ( $l ) {
                 $oneUser = $user->first();
                 $roles = $user->map(function( $item ) { return strtolower( $item->role ); })->unique()->toArray();
                 unset($oneUser->role);
                 $oneUser->roles = $roles;
+                $image = User::image_handler( $oneUser->img_url );
+
+                unset($oneUser->img_url);
+                $oneUser->name = $l == 'en' ? $oneUser->name_en : $oneUser->name_ar;
+                $oneUser->image_url = $image;
+                $oneUser->bio = $oneUser->{'bio_' . $l};
+                $oneUser->specialization = $oneUser->{'bio_specialization_' . $l};
+                unset($oneUser->bio_en);
+                unset($oneUser->bio_ar);
+                unset($oneUser->bio_specialization_en);
+                unset($oneUser->bio_specialization_ar);
+                $oneUser->title = $oneUser->{'title_' . $l};
+                unset($oneUser->title_ar);
+                unset($oneUser->title_en);
+                $oneUser->mentor_cycles = $user->map(function( $item ) { return $item->cycle_id; })->unique()->filter( function( $item ) { return $item != null; })->values()->toArray();
                 return $oneUser;
             })->values();
         } else { $users = collect([]); }
@@ -488,17 +522,14 @@ class HomeController extends Controller
                 $output->zoom_date = $session->zoom_date;
                 $output->start_url = $session->start_url;
 
-                $image = $session->user_image_url;
-                if( !$image ) { $image = "/images/placeholder.jpg"; }
-                if( $image && !str_starts_with($image, 'https://') ) { $image = "/191014/" . $image; }
+                $image = User::image_handler( $session->user_image_url );
                 $user = new stdClass;
                 $user->id = $session->user_id;
                 $user->image_url = $image;
                 $user->name = $session->{"first_name_{$l}"} . ' ' . $session->{"last_name_{$l}"};
                 $user->title = $session->{"user_title_{$l}"};
 
-                $companyLogo = $session->company_logo;
-                if( !$companyLogo ) { $companyLogo = '/app-assets/images/logo_placeholder.png'; }
+                $companyLogo = Company::logo_handler( $session->company_logo );
                 $company = new stdClass;
                 $company->id = $session->company_id;
                 $company->logo_url = $companyLogo;
@@ -599,6 +630,481 @@ class HomeController extends Controller
         $managers = $users->filter(function ( $user ) { return in_array('admin', $user->roles) || in_array('manager', $user->roles); })->values();
 
         $data = [];
+        $cycle_id = 0;
+        $stepData = null;
+        $cycleData = null;
+        $organization = null;
+
+        $latest_events_q = "SELECT
+                c.id,
+                c.title,
+                c.start
+            FROM
+                calendars c
+            WHERE
+                c.start >= ?
+                AND (
+                    c.user_id = $user->id
+                    OR c.isPrivate IS null
+                )
+            ORDER BY
+                c.start ASC
+            LIMIT
+                5
+        ";
+        $latest_events = collect( DB::select( $latest_events_q, [now()->format('Y-m-d')] ) );
+
+        $conditions = '';
+        if( $has_org ) { $conditions = " WHERE s.organization_id = " . $user->organization_id; }
+        $latest_services_q = "SELECT
+                s.id,
+                s.name_en,
+                s.name_ar,
+                sc.id AS category_id,
+                sc.name_en AS category_name_en,
+                sc.name_ar AS category_name_ar
+            FROM 
+                services s
+            LEFT JOIN
+                service_categories sc ON s.service_category_id = sc.id
+            $conditions
+            ORDER BY 
+                s.created_at DESC
+            LIMIT
+                5
+        ";
+        $latest_services = collect( DB::select( $latest_services_q ) )->map(function( $item ) use ( $l ) {
+            $service = new stdClass;
+            $service->id = $item->id;
+            $service->name = $item->{'name_' . $l};
+            $service->category = new stdClass;
+            $service->category->id = $item->category_id;
+            $service->category->name = $item->{'category_name_' . $l};
+            return $service;
+        });
+
+        $working_cycles_q = "SELECT
+                c.id,
+                c.title,
+                c.description,
+                c.start,
+                c.organization_id,
+                o.name_en AS `org_name_en`,
+                o.name_ar AS `org_name_ar`,
+                o.img_url AS `org_img_url`
+            FROM
+                cycles c
+            LEFT JOIN
+                organizations o ON o.id = c.organization_id
+            WHERE
+                c.private IS null
+                AND ? BETWEEN c.start AND c.end
+        ";
+        $workingCycles = collect( DB::select( $working_cycles_q, [now()->format('Y-m-d')] ) )->map(function( $item ) use ( $l ) {
+            $cycle = new stdClass;
+            $cycle->id = $item->id;
+            $cycle->title = $item->title;
+            $cycle->description = $item->description;
+            $cycle->start = Carbon::parse( $item->start )->format('Y-m-d');
+            $cycle->organization = new stdClass;
+            $cycle->organization->id = $item->organization_id;
+            $cycle->organization->name = $item->{'org_name_' . $l};
+            $cycle->organization->image_url = Organization::image_handler( $item->org_img_url );
+            return $cycle;
+        });
+        $days = request()->query('days', 14);
+        $company = $user->company;
+        $organization_id = null;
+        if( $company )
+        {
+            $stepData = $company->stepdata;
+            $cycle_id = $company->cycle;
+            $cycleData = $company->cycledata;
+            if( $cycleData )
+            {
+                $organization = $cycleData->organization;
+                if( !empty( $organization ) ) { $organization_id = $organization->id; }
+            }
+        }
+
+        $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
+        $end = Carbon::now()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
+
+        $steps_q = "SELECT
+                s.id,
+                s.title,
+                s.arr,
+                s.stype,
+                s.from,
+                s.to,
+                s.description
+            FROM
+                steps s
+            WHERE
+                s.cycle_id = $cycle_id
+                AND s.cycle_id != 0
+                AND s.cycle_id IS NOT null
+            ORDER BY
+                s.arr asc
+        ";
+        
+        $steps = collect( DB::select($steps_q) )->map(function( $step ) use ( $l, $company, $stepData, $cycle_id ) {
+            $step->from = Carbon::parse( $step->from )->format('d-m-Y');
+            $step->to = Carbon::parse( $step->to )->format('d-m-Y');
+
+            $status = $l == 'ar' ? 'لم تبدأ' : 'Not started';
+            $color = 'label-light';
+            $textColor = 'light';
+            if( $stepData->arr > $step->arr )
+            {
+                $status = $l == 'ar' ? 'انتهت' : 'Completed';
+                $color = 'label-success';
+                $textColor = 'success';
+            }
+            elseif( $stepData->arr == $step->arr )
+            {
+                $status = $l == 'ar' ? 'بدأت' : 'Started';
+                $color = 'label-primary';
+                $textColor = 'primary';
+            }
+
+            $trType = $fLink = null;
+            if( $company->approved ) { $trType = 'my/' . $step->id; }
+            else { $fLink = 'view/' . $cycle_id; }
+
+            $step->status = $status;
+            $step->color = $color;
+            $step->textColor = $textColor;
+            $step->trType = $trType;
+            $step->fLink = $fLink;
+            return $step;
+        });
+        $nextSessions_q = "SELECT
+                mr.id,
+                mr.mentor_id,
+                mr.user_id,
+                mr.comment,
+                mr.approved,
+                mr.rating,
+                mr.join_url,
+                mr.zoom_date,
+                mr.period,
+                mr.rate_comment,
+                mr.done,
+                u.img_url AS `user_img_url`,
+                u.first_name_en AS `user_first_name_en`,
+                u.first_name_ar AS `user_first_name_ar`,
+                u.last_name_en AS `user_last_name_en`,
+                u.last_name_ar AS `user_last_name_ar`,
+                u.title_en AS `user_title_en`,
+                u.title_ar AS `user_title_ar`,
+                c.id AS `company_id`,
+                c.logo AS `company_logo`,
+                c.name_en AS `company_name_en`,
+                c.name_ar AS `company_name_ar`,
+                m.first_name_en AS `mentor_first_name_en`,
+                m.first_name_ar AS `mentor_first_name_ar`,
+                m.last_name_en AS `mentor_last_name_en`,
+                m.last_name_ar AS `mentor_last_name_ar`,
+                m.img_url AS `mentor_img_url`,
+                msr.rating AS `mentor_rating`
+            FROM
+                mentorship_requests mr
+            LEFT JOIN
+                users m ON m.id = mr.mentor_id
+            LEFT JOIN
+                users u ON u.id = mr.user_id
+            LEFT JOIN
+                companies c ON c.id = u.company_id
+            LEFT JOIN
+               mentorship_requests msr ON msr.mentor_id = m.id
+            WHERE
+                mr.user_id = $user->id
+                AND (
+                    mr.approved = 'Yes'
+                    OR mr.approved IS null
+                )
+                AND mr.zoom_date between '$start' AND '$end'
+            ORDER BY
+                mr.zoom_date ASC
+        ";
+        $nextSessions = collect( DB::select($nextSessions_q) );
+        $nextSessions = $nextSessions->groupBy('id')->map(function ( $groupedSession ) use ( $l ) {
+            $_session = $groupedSession->first();
+            $session = new stdClass;
+            $session->id = $_session->id;
+            $session->mentor_id = $_session->mentor_id;
+            $session->user_id = $_session->user_id;
+            $session->comment = $_session->comment;
+            $session->approved = $_session->approved;
+            $session->rating = $_session->rating;
+            $session->join_url = $_session->join_url;
+            $session->zoom_date = $_session->zoom_date;
+            $session->period = $_session->period;
+            $session->rate_comment = $_session->rate_comment;
+            $session->done = $_session->done;
+
+            $user = new stdClass;
+            $user->id = $_session->user_id;
+            $user->image_url = User::image_handler( $_session->user_img_url );
+            $user->first_name = $_session->{'user_first_name_' . $l};
+            $user->last_name = $_session->{'user_last_name_' . $l};
+            $user->name = trim( $user->first_name . ' ' . $user->last_name );
+            $user->title = $_session->{'user_title_' . $l};
+
+            $company = new stdClass;
+            $company->id = $_session->company_id;
+            $company->logo_url = Company::logo_handler( $_session->company_logo );
+            $company->name = $_session->{'company_name_' . $l};
+            $user->company = $company;
+            $session->user = $user;
+            
+            $mentor = new stdClass;
+            $mentor->id = $_session->mentor_id;
+            $mentor->first_name = $_session->{'mentor_first_name_' . $l};
+            $mentor->last_name = $_session->{'mentor_last_name_' . $l};
+            $mentor->name = trim( $mentor->first_name . ' ' . $mentor->last_name );
+            $mentor->image_url = User::image_handler( $_session->mentor_img_url );
+            $mentor->ratings = $groupedSession->sum('mentor_rating');
+            $session->mentor = $mentor;
+            return $session;
+        })->values();
+
+        $setting = collect( DB::select("SELECT * FROM settings where `id` = 1 limit 1") )->first();
+
+        if( $company && $cycle_id != 0 )
+        {
+            $surveyEligible = [];
+            foreach( $steps as $step )
+            {
+                if( ( optional($step)->stype == 3 || optional($step)->stype == 4 ) && ( now() > Carbon::parse( $step->to )->format('Y-m-d H:i:s') ) )
+                {
+                    $surveyEligible[] = [
+                      'triggered_on' => $step->stype == 3 ? 'mentorship' : 'training',
+                      'triggered_at' => $step->id,
+                      'triggered_by' => 'due'
+                    ];
+                }
+            }
+            
+            $my_mentorship_requests_q = "SELECT
+                    mr.id,
+                    mr.period,
+                    mr.zoom_date
+                FROM
+                    mentorship_requests mr
+                WHERE
+                    mr.user_id = $user->id
+                    AND mr.approved = 'Yes'
+                    AND mr.cycle_id = $cycle_id
+            ";
+            $my_mentorship_requests = collect( DB::select( $my_mentorship_requests_q ) )->map(function ($item) {
+                $item->end_at = Carbon::parse($item->zoom_date)->addMinutes($item->period)->format('Y-m-d H:i:s');
+                return $item;
+            })->filter(function($item) {
+                return !empty( $item->zoom_date ) && !empty( $item->period ) && now() > $item->end_at;
+            })->values();
+
+            $my_trainings_q = "SELECT
+                    ts.id,
+                    ts.type,
+                    ts.duration,
+                    ts.datetime
+                FROM
+                    training_sessions ts
+                INNER JOIN
+                    steps s ON ts.step_id = s.id
+                WHERE
+                    s.cycle_id = $cycle_id;
+            ";
+            $my_trainings = collect( DB::select($my_trainings_q) )->filter(function( $item ) {
+                if( $item->type == 'sessions' && ( empty( $item->datetime ) || empty( $item->duration ) ) ) { return false; }
+                elseif( in_array($item->type, ['online', 'offline', 'sessions']) && empty( $item->datetime ) ) { return false; }
+                else { return true; }
+            })->values()->map(function($item) {
+                $item->end_at = null;
+                if( $item->type == 'sessions' ) { $item->end_at = Carbon::parse($item->datetime)->addMinutes($item->duration)->format('Y-m-d H:i:s'); }
+                elseif( in_array($item->type, ['online', 'offline', 'sessions']) ) { $item->end_at = Carbon::parse($item->datetime)->format('Y-m-d H:i:s'); }
+                return $item;
+            })->filter(function($item) {
+                return now() > $item->end_at;
+            })->values();
+
+            $my_quizzes_q = "SELECT
+                    q.id,
+                    q.end,
+                    q.attempts,
+                    q.passing_criteria AS criteria,
+                    qr.id AS attempt_id,
+                    qr.score AS attempt_score
+                FROM
+                    quizzes q
+                LEFT JOIN
+                    quiz_results qr ON qr.quiz_id = q.id AND qr.user_id = $user->id
+                WHERE
+                    q.status = 'published'
+                    AND q.organization_id = $organization_id
+            ";
+            $my_quizzes = collect( DB::select( $my_quizzes_q ) )->groupBy('id')->map(function($items) {
+                $item = $items->first();
+                $quiz = new stdClass;
+                $quiz->id = $item->id;
+                $quiz->criteria = $item->criteria;
+                $quiz->end = Carbon::parse( $item->end )->format('Y-m-d H:i:s');
+                $quiz->trials = $item->attempts;
+                $quiz->attempts = $items->map(function($result) {
+                    $attempt = new stdClass;
+                    $attempt->id = $result->attempt_id;
+                    $attempt->score = $result->attempt_score;
+                    return $attempt;
+                });
+                return $quiz;
+            })->values()->filter(function($quiz) {
+                $attempts = $quiz->attempts;
+                if( $attempts->count() > 0 )
+                {
+                    if(
+                        $attempts->where('score', '>=', $quiz->criteria)->count() >= 1
+                        || $attempts->where('score', '<', $quiz->criteria)->count() >= $quiz->trials
+                        || now()->format('Y-m-d H:i:s') > $quiz->end
+                    ) { return true; } else { return false; }
+                } else { return false; }
+            })->values();
+
+            foreach( $my_mentorship_requests as $mentorship )
+            {
+                $surveyEligible[] = [
+                    'triggered_on' => 'mentorship',
+                    'triggered_at' => $mentorship->id,
+                    'triggered_by' => 'session'
+                ];
+            }
+
+            foreach( $my_trainings as $session )
+            {
+                $surveyEligible[] = [
+                    'triggered_on' => 'training',
+                    'triggered_at' => $session->id,
+                    'triggered_by' => 'session'
+                ];
+            }
+
+            foreach( $my_quizzes as $quiz )
+            {
+                $surveyEligible[] = [
+                    'triggered_on' => 'training',
+                    'triggered_at' => $quiz->id,
+                    'triggered_by' => 'quiz'
+                ];
+            }
+            $surveysToAdd = [];
+            $surveys = SurveyScopes::where('cycle_id', $cycle_id)->whereIn('type', ['startup', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
+
+            foreach( $surveys as $survey_scope )
+            {
+                $my_responses = $survey_scope->myResponses;
+                if( $survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible) ) 
+                {
+                    $due = $survey_scope->trigger_by_due;
+                    $session = $survey_scope->trigger_by_session;
+                    $mentorship = collect($surveyEligible['mentorship']);
+                    $triggers = [];
+                    if( $due == true ) { $triggers[] = 'due';  }
+                    if( $session == true ) { $triggers[] = 'session'; }
+                    $triggers = array_unique( $triggers );
+                    if( count( $triggers ) == 0 ) { $mentorship = $mentorship->where('triggered_at', null); }
+                    else { $mentorship = $mentorship->whereIn('triggered_by', $triggers); }
+                    $mentorship = $mentorship->values();
+                    foreach( $mentorship as $conditions )
+                    {
+                        $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+                        if( empty( $checkResponse ) )
+                        {
+                            $surveysToAdd[] = [
+                                'user_id' => $user->id,
+                                'survey_id' => $survey_scope->survey_id, 
+                                'cycle_id' => $cycle_id,
+                                'scope_id' => $survey_scope->id,
+                                'triggered_on' => $conditions['triggered_on'],
+                                'triggered_at' => $conditions['triggered_at'],
+                                'triggered_by' => $conditions['triggered_by'],
+                                'responses' => Null
+                            ];
+                        }
+                    }
+                }
+                elseif( $survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible) ) 
+                {
+                    $due = $survey_scope->trigger_by_due;
+                    $quiz = $survey_scope->trigger_by_quiz;
+                    $session = $survey_scope->trigger_by_session;
+                    $training = collect($surveyEligible['training']);
+                    if( $due == true ) { $triggers[] = 'due';  }
+                    if( $quiz == true ) { $triggers[] = 'quiz'; }
+                    if( $session == true ) { $triggers[] = 'session'; }
+                    $triggers = array_unique( $triggers );
+                    if( count( $triggers ) == 0 ) { $training = $training->where('triggered_at', null); }
+                    else { $training = $training->whereIn('triggered_by', $triggers); }
+                    $training = $training->values();
+                    foreach( $training as $conditions )
+                    {
+                        $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
+                        if( empty( $checkResponse ) )
+                        {
+                            $surveysToAdd[] = [
+                                'user_id' => $user->id,
+                                'survey_id' => $survey_scope->survey_id, 
+                                'cycle_id' => $cycle_id,
+                                'scope_id' => $survey_scope->id,
+                                'triggered_on' => $conditions['triggered_on'],
+                                'triggered_at' => $conditions['triggered_at'],
+                                'triggered_by' => $conditions['triggered_by'],
+                                'responses' => Null
+                            ];
+                        }
+                    }
+                }
+            }
+
+            if( !empty($surveysToAdd) ) { SurveyResponses::insert( $surveysToAdd ); }
+        }
+
+        $available_surveys = SurveyResponses::where('user_id', $user->id)->where('cycle_id', $cycle_id)->whereNull('responses')->get();
+        $available_surveys = $available_surveys->map(function( $item ) {
+            $middleware = collect([]);
+            if( $item->triggered_on == 'mentorship' )
+            {
+                if( $item->triggered_by == 'session' ) { $middleware = $item->mentorship_session; }
+                if( $item->triggered_by == 'due' ) { $middleware = $item->mentorship_step; }
+            }
+            elseif( $item->triggered_on == 'training' )
+            {
+                if( $item->triggered_by == 'session' ) { $middleware = $item->training_session; }
+                if( $item->triggered_by == 'due' ) { $middleware = $item->training_step; }
+                if( $item->triggered_by == 'quiz' ) { $middleware = $item->training_quiz; }
+            }
+            $item->middleware = $middleware;
+            return $item;
+        })->filter(function( $item ) {
+            $middleware = $item->middleware;
+            if( is_null( $middleware ) || empty( $middleware ) ) { return false; }
+            elseif( !$middleware->count() ) { return false; }
+            return true;
+        })->values();
+
+        $data['cycle_id'] = $cycle_id;
+        $data['days'] = $days;
+        $data['mentors'] = $mentors;
+        $data['nextSessions'] = $nextSessions;
+        $data['steps'] = $steps;
+        $data['company'] = $company;
+        $data['cycleData'] = $cycleData;
+        $data['organization'] = $organization;
+        $data['available_surveys'] = $available_surveys;
+        $data['latest_services'] = $latest_services;
+        $data['latest_events'] = $latest_events;
+        $data['workingCycles'] = $workingCycles;
+        $data['setting'] = $setting;
         $data['countCards'] = [
             [
                 'color' => 'success',

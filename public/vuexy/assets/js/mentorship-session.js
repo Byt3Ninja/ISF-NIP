@@ -38,11 +38,12 @@ function normalizeResponseDays(response) {
 function request(id, mentor, organization_id = null, cycle_id = null) {
   $('#mentorid').val(id);
   $('#rname').html(mentor);
-  $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+  let _token = $('meta[name="csrf-token"]').attr('content');
+  $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': _token } });
   $.ajax({
     type: 'POST',
     url: '/dashboard/mentors/modify',
-    data: { id: id, rtype: 5 },
+    data: { id: id, rtype: 5, _token: _token },
     success: function (response) {
       responseData = normalizeResponseDays(response); // Normalize days
       console.log('response', responseData);
