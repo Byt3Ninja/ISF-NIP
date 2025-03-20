@@ -328,7 +328,7 @@
                   <div class="form-check mb-0 ms-2">
                     <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
                     <label class="form-check-label" for="terms-conditions">
-                      {{ __('auth.I agree to') }}
+                      <span class="text-dark">{{ __('auth.I agree to') }}</span>
                       <a href="https://growthlabs.app/terms-and-condition/">
                         {{ __('auth.Privacy policy & terms') }}
                       </a>
