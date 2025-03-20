@@ -510,6 +510,11 @@
 			</div>
 		</div>
 	</div>
+	@if( $_user->ableTo('mentors.modify', $permissions) && array_intersect(['dashboard_tables.mentors'], $permissions) && !is_null( $cycle_id ) )
+	<!--  Edit SP Modal -->
+  		@include('admin.clients.startup.partials._session_modal')
+  	<!--/ Edit SP Modal -->
+	@endif
 	<!-- / Content Wrapper -->
 @stop
 @section('scripts')
