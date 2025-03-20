@@ -416,6 +416,7 @@
   {"name": "dashboard_cards.training_sessions_durations", "guard_name": "web"},
   {"name": "dashboard_cards.services", "guard_name": "web"},
   {"name": "dashboard_cards.my_requests", "guard_name": "web"},
+  {"name": "dashboard_cards.my_mentors", "guard_name": "web"},
   {"name": "dashboard_cards.filtration", "guard_name": "web"},
   {"name": "dashboard_cards.evaluation", "guard_name": "web"},
   {"name": "dashboard_cards.coming_sessions", "guard_name": "web"},
