@@ -48,6 +48,8 @@
             <input type="hidden" class="cyclesExcel" value="{{ request()->route('id') }}">
           @endif
 
+          
+
           <div class="row match-height">
             <div class="col-xl-12 col-md-12 col-sm-12">
               <div class="card">
@@ -109,6 +111,129 @@
               <hr style="margin:-10px 0 5px 0;">
               <div class="card-body">
                 <div class="table-responsive">
+                  <br>
+                  <!-- Filter -->
+              <form method="GET" action="{{ route('cycles.users', $id) }}">
+                <div class="d-flex align-items-center mx-2">
+                  <div style="display: flex; align-items: center;">
+                  <button
+                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                    style="border-radius: 17px; width: 40px; height: 40px;"
+                     type="submit"
+                  >
+                    <i class="ti ti-filter text-white ti-24px"></i>
+                  </button>
+                </div>
+                <!-- Search Bar -->
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select name="step_id" class="form-control">
+                    <option value="0">All</option>
+                    @foreach ($steps as $step)
+                    <option value="{{ $step->id }}" {{ $step->id == request('step_id') ? 'selected' : '' }}>{{ $step->title }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select name="country_id" class="form-control">
+                    <option value="0">All</option>
+                    @php
+                    $countries = App\Country::all();
+                    @endphp
+                    @foreach ($countries as $country)
+                    <option value="{{ $country->id }}" {{ $country->id == request('country_id') ? 'selected' : '' }}>{{ $country->{'name_'.$l} }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select name="sector_id" class="form-control">
+                    <option value="0">All</option>
+                    @php
+                    $sectors = App\Sector::all();
+                    @endphp
+                    @foreach ($sectors as $sector)
+                    <option value="{{ $sector->id }}" {{ $sector->id == request('sector_id') ? 'selected' : '' }}>{{ $sector->{'name_'.$l} }}</option>
+                    @endforeach
+                  </select>
+                </div>
+  
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select name="Dstage_id" class="form-control">
+                    <option value="0">All</option>
+                    @php
+                    $stages = App\Stage::all();
+                    @endphp
+                    @foreach ($stages as $stage)
+                    <option value="{{ $stage->id }}" {{ $stage->id == request('Dstage_id') ? 'selected' : '' }}>{{ $stage->{'name_'.$l} }}</option>
+                    @endforeach
+                  </select>
+                </div>
+
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select class="form-select px-10" name="funding_stage">
+              <option value="" >{{ __('admin.All') }}</option>
+              <option value="Pre_seed_funding_stage"
+                {{ request('funding_stage') == 'Pre_seed_funding_stage' ? 'selected' : '' }}>
+                {{ __('admin.Pre_seed_funding_stage') }}
+              </option>
+              <option value="Seed_funding_stage "
+                {{ request('funding_stage') == 'Seed_funding_stage' ? 'selected' : '' }}>
+                {{ __('admin.Seed_funding_stage') }}
+              </option>
+              <option value="Series_A_funding"
+                {{ request('funding_stage') == 'Series_A_funding' ? 'selected' : '' }}>
+                {{ __('admin.Series_A_funding') }}
+              </option>
+              <option value="Series_B_funding"
+                {{ request('funding_stage') == 'Series_B_funding' ? 'selected' : '' }}>
+                {{ __('admin.Series_B_funding') }}
+              </option>
+              <option value="Series_C_funding"
+                {{ request('funding_stage') == 'Series_C_funding' ? 'selected' : '' }}>
+                {{ __('admin.Series_C_funding') }}
+              </option>
+            </select>
+                </div>
+
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <label>{{ __('admin.Targeted_Market') }}</label>
+                  <select class="form-control" name="targeted_market[]" multiple>
+                    <option value="0">All</option>
+                    @php
+                    $countries = App\Country::all();
+                    @endphp
+                    @foreach ($countries as $country)
+                    <option value="{{ $country->id }}" {{ $country->id == request('country_id') ? 'selected' : '' }}>{{ $country->{'name_'.$l} }}</option>
+                    @endforeach
+                  </select>
+                </div>
+
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select class="form-select px-10" name="BType">
+              <option value="0" >{{ __('admin.All') }}</option>
+              <option value="B2C"
+                {{ request('BType') == 'B2C' ? 'selected' : '' }}>
+                B2C</option>
+              <option value="B2B"
+                {{ request('BType') == 'B2B' ? 'selected' : '' }}>
+                B2B</option>
+              <option value="B2B2C"
+                {{ request('BType') == 'B2B2C' ? 'selected' : '' }}>
+                B2B2C</option>
+              <option value="C2C"
+                {{ request('BType') == 'C2C' ? 'selected' : '' }}>
+                C2C</option>
+              <option value="B2G"
+                {{ request('BType') == 'B2G' ? 'selected' : '' }}>
+                B2G</option>
+              <option value="Platform"
+                {{ request('BType') == 'Platform' ? 'selected' : '' }}>
+                Platform</option>
+            </select>
+                </div>
+  
+              </div>
+              </form>
+              <hr>
                   <!-- we get value from Select box Ely fo2 class name stepsExcel -->
                   <div class="d-flex align-items-center gap-4">
                     <div class="media align-items-center col-md-3">

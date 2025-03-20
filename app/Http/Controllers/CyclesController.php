@@ -96,7 +96,7 @@ class CyclesController extends Controller
         return view('admin.settings.cycles.index', compact('cycles', 'steps', 'id', 'svgs'));
     }
 
-    public function users($id)
+    public function users(Request $request, $id)
     {
         $organization_id = auth()->user()->organization_id;
 
@@ -112,9 +112,37 @@ class CyclesController extends Controller
                 return $q->where('organization_id', $organization_id);
             })->get();
         }
-        $companies = Company::where('cycle', $id)->get();
+        $companies = Company::where('cycle', $id);
         $uniqueCycleIds = $companies->pluck('cycle')->unique();
         $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
+        if($request->step_id != 0){
+            $companies = $companies->where('step', $request->step_id);
+        }
+        if($request->country_id != 0){
+            $companies = $companies->where('country_id', $request->country_id);
+        }
+        if($request->sector_id != 0){
+            $companies = $companies->where('sector', $request->sector_id);
+        }
+        if($request->Dstage_id != 0){
+            $companies = $companies->where('stage', $request->Dstage_id);
+        }
+        if($request->funding_stage != 0){
+            $companies = $companies->where('development_stage', $request->funding_stage);
+        }
+        if($request->targeted_market != 0){
+            $companies = $companies->where(function ($query) use ($request) {
+                foreach ($request->targeted_market as $market) {
+                    $query->orWhereJsonContains('targeted_market', $market);
+                }
+            });
+        }
+        if($request->BType != 0){
+            $companies = $companies->where('business_type', $request->BType);
+        }
+
+
+        $companies = $companies->get();
         return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps'));
     }
 
