@@ -440,6 +440,8 @@
   {"name": "dashboard_tables.available_surveys", "guard_name": "web"},
   {"name": "dashboard_tables.latest_events", "guard_name": "web"},
   {"name": "dashboard_tables.current_enrolled_program", "guard_name": "web"},
+  {"name": "dashboard_tables.my_last_training", "guard_name": "web"},
+  {"name": "dashboard_tables.my_final_session", "guard_name": "web"},
   {"name": "dashboard_tables.mentors_sessions", "guard_name": "web"},
   {"name": "dashboard_tables.mentors", "guard_name": "web"},
   {"name": "dashboard_tables.my_current_schedule", "guard_name": "web"},

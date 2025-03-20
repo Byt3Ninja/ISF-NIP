@@ -630,6 +630,7 @@ class HomeController extends Controller
         $managers = $users->filter(function ( $user ) { return in_array('admin', $user->roles) || in_array('manager', $user->roles); })->values();
 
         $data = [];
+        $cType = 0;
         $cycle_id = 0;
         $stepData = null;
         $cycleData = null;
@@ -712,12 +713,108 @@ class HomeController extends Controller
             $cycle->organization->image_url = Organization::image_handler( $item->org_img_url );
             return $cycle;
         });
+        $myFinal = null;
         $days = request()->query('days', 14);
         $company = $user->company;
+        $sessions = collect([]);
         $organization_id = null;
         if( $company )
         {
+            $sessions_q = "SELECT
+                    ts.id,
+                    ts.type,
+                    ts.title,
+                    ts.datetime,
+                    ts.enddatetime AS `end_datetime`,
+                    ts.duration,
+                    ts.join_url,
+                    ts.trainer_name,
+                    ts.training_location AS `location`
+                FROM
+                    training_sessions ts
+                WHERE
+                    ts.step_id = $company->step
+                ORDER BY
+                    ts.datetime ASC
+                LIMIT
+                    5
+            ";
+            $sessions = collect( DB::select( $sessions_q ) );
+
+            $myFinal_q = "SELECT
+                    fs.id,
+                    fs.judges,
+                    fs.join_url,
+                    fs.datetime,
+                    fs.duration,
+                    u.id AS `user_id`,
+                    u.img_url AS `user_image_url`,
+                    u.first_name_en AS `user_first_name_en`,
+                    u.first_name_ar AS `user_first_name_ar`,
+                    u.last_name_en AS `user_last_name_en`,
+                    u.last_name_ar AS `user_last_name_ar`,
+                    u.title_en AS `user_title_en`,
+                    u.title_ar AS `user_title_ar`
+                FROM
+                    finalscreenings fs
+                LEFT JOIN
+                    companies c ON c.id = fs.company_id
+                LEFT JOIN
+                    users u ON u.company_id = c.id AND u.id = $user->id
+                WHERE
+                    fs.company_id = $company->id
+                    AND fs.step_id = $company->step
+                LIMIT
+                    1
+            ";
+            $myFinal = collect( DB::select( $myFinal_q ) )->first();
+            if( !empty( $myFinal ) )
+            {
+                $myFinal->judges = json_decode( $myFinal->judges );
+
+                $judgers_q = "SELECT
+                        u.id,
+                        u.first_name_en,
+                        u.first_name_ar,
+                        u.last_name_en,
+                        u.last_name_ar,
+                        u.img_url
+                    FROM
+                        users u
+                    WHERE u.id IN (" . implode(',', $myFinal->judges) . ")
+                ";
+
+                $judgers = collect( DB::select( $judgers_q ) )->map(function( $item ) use ( $l ) {
+                    $judger = new stdClass;
+                    $judger->id = $item->id;
+                    $judger->name = trim( $item->{'first_name_' . $l} . ' ' . $item->{'last_name_' . $l} );
+                    $judger->img_url = User::image_handler( $item->img_url );
+                    return $judger;
+                });
+
+                $myFinal->judges = $judgers;
+                $myFinal->company = new stdClass;
+                $myFinal->company->id = $company->id;
+                $myFinal->company->user = new stdClass;
+                $myFinal->company->user->id = $myFinal->user_id;
+                $myFinal->company->user->image_url = User::image_handler( $myFinal->user_image_url );
+                $myFinal->company->user->first_name = $myFinal->{'user_first_name_' . $l};
+                $myFinal->company->user->last_name = $myFinal->{'user_last_name_' . $l};
+                $myFinal->company->user->name = trim( $myFinal->company->user->first_name . ' ' . $myFinal->company->user->last_name );
+                $myFinal->company->user->title = $myFinal->{'user_title_' . $l};
+
+                unset( $myFinal->user_id );
+                unset( $myFinal->user_image_url );
+                unset( $myFinal->user_first_name_en );
+                unset( $myFinal->user_first_name_ar );
+                unset( $myFinal->user_last_name_en );
+                unset( $myFinal->user_last_name_ar );
+                unset( $myFinal->user_title_en );
+                unset( $myFinal->user_title_ar );
+            }
+
             $stepData = $company->stepdata;
+            if( !empty( $stepData ) ) { $cType = $stepData->stype; }
             $cycle_id = $company->cycle;
             $cycleData = $company->cycledata;
             if( $cycleData )
@@ -1092,6 +1189,9 @@ class HomeController extends Controller
             return true;
         })->values();
 
+        $data['cType'] = $cType;
+        $data['myFinal'] = $myFinal;
+        $data['sessions'] = $sessions;
         $data['cycle_id'] = $cycle_id;
         $data['days'] = $days;
         $data['mentors'] = $mentors;
