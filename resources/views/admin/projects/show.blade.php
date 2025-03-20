@@ -51,6 +51,7 @@
                       <th>{{ __('admin.Program_name') }}</th>
                       <th class="text-center">{{ __('admin.Status') }}</th>
                       <th class="text-center">{{ __('admin.Date') }}</th>
+                      <th class="text-center">{{ __('admin.EndDate') }}</th>
                       <th class="text-center">{{ __('admin.Actions') }}</th>
                     </tr>
                   </thead>
@@ -69,7 +70,8 @@
                         @endphp
                         <span class="badge bg-label-{{$badgeColor}}">{{ $program->pivot->status }}</span>
                       </td>
-                      <td class="text-center">{{ $program->pivot->created_at->format('Y-m-d') }}</td>
+                      <td class="text-center">{{ $program->start ? $program->start->format('Y-m-d') : '' }}</td>
+                      <td class="text-center">{{ $program->end ? $program->end->format('Y-m-d') : '' }}</td>
                       <td class="text-center">
                         <button class="btn btn-label-danger btn-sm btn-icon rounded-circle unlink-btn"
                           data-url="{{ route('projects.unlinkProgram', [$project, $program]) }}">
@@ -148,6 +150,7 @@
         </button>
       </div>
       <form id="linkProgramsForm" action="{{ route('projects.linkPrograms', $project) }}" method="POST" class="bg-label-secondary">
+        @csrf
         <div class="card">
           <div class="card-body">
             <!-- Search Bar -->
