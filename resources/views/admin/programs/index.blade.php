@@ -112,6 +112,46 @@
                   value="{{ request('search') }}" 
                 />
               </div>
+
+              <div class="position-relative me-3 d-none d-md-flex">
+                <select name="organization_id" class="form-control">
+                  <option value="0">All</option>
+                  @php
+                  $organizations = App\Organization::all();
+                  
+                  @endphp
+                  @foreach ($organizations as $organization) 
+                  <option value="{{$organization->id}}" {{ $organization->id == request('organization_id') ? 'selected' : '' }}> {{ $organization->{'name_' . $l} }}</option>
+                @endforeach
+                </select>
+              </div>
+
+              <div class="position-relative me-3 d-none d-md-flex">
+                <input
+                  class="form-control search border rounded mx-1 bg-transparent text-primary px-10 datepicker"
+                  
+                  placeholder="{{ __('admin.StartDate') }}"
+                  name="start_date"
+                  value="{{ request('start_date') }}" 
+                />
+                <input
+                  class="form-control search border rounded mx-1 bg-transparent text-primary px-10 datepicker"
+                  
+                  placeholder="{{ __('admin.EndDate') }}"
+                  name="end_date"
+                  value="{{ request('end_date') }}" 
+                />
+              </div>
+
+              <div class="position-relative me-3 d-none d-md-flex">
+                <select name="private" class="form-control">
+                  <option value="0">All</option>
+                  <option value="Yes" {{ 'Yes' == request('private') ? 'selected' : '' }}> {{ __('admin.Yes') }}</option>
+                  <option value="No" {{ 'No' == request('private') ? 'selected' : '' }}> {{ __('admin.No') }}</option>
+               
+                </select>
+              </div>
+
             </div>
             </form>
 
@@ -698,7 +738,11 @@
     const validTo = document.querySelector('#create-program-modal .valid-to');
     const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
     // const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
-    
+    flatpickr(".datepicker", {
+        dateFormat: "Y-m-d", // تنسيق التاريخ المطلوب
+        allowInput: true,    // السماح للمستخدم بكتابة التاريخ يدويًا
+        locale: "ar",        // دعم اللغة العربية (يمكنك تغييره)
+    });
     // const fpTo = flatpickr(validTo, {
     //   monthSelectorType: 'static',
     //   dateFormat: 'Y-m-d',

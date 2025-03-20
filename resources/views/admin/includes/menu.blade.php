@@ -325,7 +325,7 @@
       </li>
     @endif
 
-    @if ($_user->hasRole('Admin|organizationManager'))
+    @if ($_user->hasAnyRole('Admin|organizationManager'))
       <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
         <a href="{{ route('organizations.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-settings"></i>

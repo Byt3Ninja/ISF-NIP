@@ -1393,4 +1393,5 @@ return [
 	'Please_select_to_time' => 'Please select to time',
 	'Filter_Mentors' => 'Filter Mentors',
 	'Apply' => 'Apply',
+	'Inactive' => 'Inactive',
 ];
