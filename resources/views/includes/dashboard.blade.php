@@ -358,6 +358,140 @@
 						</section>
 					</div>
 				@endif
+				
+				@if( $cType == 5 && array_intersect(['dashboard_tables.my_final_session'], $permissions) )
+					<div class="col-12">
+						<section>
+							<div class="row">
+								<div class="col-md-12">
+									<div class="card mt-10">
+										<div class="card-header border-bottom">
+											<h4 class="card-title align-items-center">
+												<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Final_Session") }}
+											</h4>
+										</div>
+										<div class="card-body">
+											@if( !is_null( $myFinal ) && $myFinal->join_url )
+												<div class="table-responsive">
+													<table class="table mb-0 sessonsTable" >
+														<thead class="bg-label-light">
+															<tr>
+																<th>{{__('cycles.User/Title')}}</th>
+																<th>{{__('admin.Judger')}}</th>
+																<th>{{__('cycles.Date/Time')}}</th>
+																<th>{{__('cycles.Done')}}</th>
+																<th>{{__('cycles.Actions')}}</th>
+															</tr>
+														</thead>
+														<tbody>
+															<tr>
+																<td>
+																	<div class="d-flex align-items-center">
+																		<a class="media-left" href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
+																			<img src="{{ $myFinal->company->user->image_url }}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
+																		</a>
+																		<a href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
+																			<div class="media-body">
+																				<h6 class="media-heading mb-0 text-nowrap">{{ $myFinal->company->user->name }}</h6>
+																				<span class="font-small-2 text-nowrap">{{ $myFinal->company->user->title }}</span>
+																			</div>
+																		</a>
+																	</div>
+																</td>
+																<td>
+																	@foreach( $myFinal->judges as $judger )
+																		@if(!empty($judge))
+																			<div style="cursor: pointer;" class="d-flex align-items-center">
+																				<div class="chip-body">
+																					<div class="avatar">
+																						<img class="img-fluid rounded-circle me-3" src="{{ $judger->img_url }}" alt="photo" height="20" width="20">
+																					</div>
+																					<span class="chip-text text-nowrap"> {{ $judger->name }} </span>
+																				</div>
+																			</div>
+																		@endif
+																	@endforeach
+																</td>
+																<td> {{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M) </td>
+																<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
+																<td> <a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a> </td>
+															</tr>
+														</tbody>
+													</table>
+												</div>
+											@else
+												<div class="text-center">
+													<h3>{{__('dashboard.Your final session will start soon')}}.</h3>
+												</div>
+											@endif
+										</div>
+									</div>
+								</div>
+							</div>
+						</section>
+					</div>
+				@endif
+				@if( $cType != 5 && array_intersect(['dashboard_tables.my_last_training'], $permissions) && $sessions->count() > 0 )
+					<div class="col-12">
+						<section>
+							<div class="row">
+								<div class="col-md-12">
+									<div class="card mt-10">
+										<div class="card-header border-bottom">
+											<h5 style="text-transform: capitalize">
+												<i class="ti ti-clipboard-list ti-28px"></i>
+												<span class="mx-2"> {{ __('dashboard.My Latest training') }} ::
+													<a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
+												</span>
+											</h5>
+										</div>
+										<div class="card-body">
+											<div class="table-responsive">
+												<table class="table mb-0" id="trainingtable">
+													<thead class="bg-label-light">
+														<tr>
+															<th>#</th>
+															<th>{{ __('cycles.Type') }}</th>
+															<th>{{ __('cycles.Title') }}</th>
+															<th>{{ __('cycles.Start') }}</th>
+															<th>{{ __('cycles.End') }}</th>
+															<th>{{ __('cycles.details') }}</th>
+														</tr>
+													</thead>
+													<tbody>
+														@foreach( $sessions as $key => $session )
+															<tr>
+																<td>{{ $key + 1 }}</td>
+																<td>{{ __('cycles.' . $session->type) }}</td>
+																<td>{{ $session->title }}</td>
+																<td>{{ $session->datetime }}</td>
+																<td>{{ $session->end_datetime ?? '-' }}</td>
+																<td>
+																	@if( $session->type == 'sessions' )
+																		{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+																		<a href="{{ $session->join_url }}" target="_blank">
+																			<button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx bx-desktop"></i> </button>
+																		</a>
+																	@elseif ($session->type == 'offline')
+																		<b>{{ __('cycles.trainer name') }}:</b> {{ $session->trainer_name }}<br>
+																		<b>{{ __('cycles.training location') }}:</b>
+																		{{ $session->location }} <br>
+																	@else
+																		<a href="/dashboard/training/my/{{ $session->location }}">{{ __('cycles.Display course contents') }} </a>
+																	@endif
+																</td>
+                  											</tr>
+														@endforeach
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</section>
+					</div>
+				@endif
 				@if( array_intersect(['dashboard_tables.mentors_sessions'], $permissions) )
 					<div class="col-12">
 						<section>
@@ -380,7 +514,7 @@
 												<a href="/dashboard/mentorship/mine"><div class="btn btn-label-info">{{__('cycles.showAll')}}</div></a>
 											</h4>
 										</div>
-										<div class="">
+										<div class="card-body">
 											<div class="table-responsive">
 												<table class="table mb-0 sessonsTable" >
 													<thead class="bg-label-light">
@@ -452,7 +586,7 @@
 													<span class="mx-2">{{ __("dashboard.Mentors") }}</span>
 												</h4>
 											</div>
-											<div class="">
+											<div class="card-body">
 												<div class="table-responsive">
 													<table class="table" id="mentorstable">
 														<thead class="bg-label-light">
