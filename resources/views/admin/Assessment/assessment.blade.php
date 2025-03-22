@@ -34,6 +34,55 @@
 							</div>
 							@endif
 							<div class="card-body">
+								<br>
+                  <!-- Filter -->
+              <form method="GET" action="{{ route('assessments.index') }}">
+                <div class="d-flex align-items-center mx-2">
+                  <div style="display: flex; align-items: center;">
+                  <button
+                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                    style="border-radius: 17px; width: 40px; height: 40px;"
+                     type="submit"
+                  >
+                    <i class="ti ti-filter text-white ti-24px"></i>
+                  </button>
+                </div>
+                <!-- Search Bar -->
+                
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select name="startup_id" class="form-control">
+                    <option value="0">All</option>
+                    @php
+                    $startups = App\Company::all();
+                    @endphp
+                    @foreach ($startups as $startup)
+                    <option value="{{ $startup->id }}" {{ $startup->id == request('startup_id') ? 'selected' : '' }}>{{ $startup->{'name_'.$l} }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select name="founder_id" class="form-control">
+                    <option value="0">All</option>
+                    @php
+                    $founders = App\User::role('Registered')->get();
+                    @endphp
+                    @foreach ($founders as $founder)
+                    <option value="{{ $founder->id }}" {{ $founder->id == request('founder_id') ? 'selected' : '' }}>{{ $founder->{'first_name_'.$l} }} {{ $founder->{'last_name_'.$l} }}</option>
+                    @endforeach
+                  </select>
+                </div>
+  
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <input type="text" name="datefrom" class="form-control date" placeholder="From" value="{{ request('datefrom') }}">
+                </div>
+
+				<div class="position-relative me-3 d-none d-md-flex">
+					<input type="text" name="dateto" class="form-control date" placeholder="To" value="{{ request('dateto') }}">
+				  </div>
+
+              </div>
+              </form>
+              <hr>
 								<div class="card-text">
 									<div class="table-responsive">
 										<table class="table mb-0" id="userstable">
