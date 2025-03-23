@@ -1394,4 +1394,8 @@ return [
 	'Filter_Mentors' => 'Filter Mentors',
 	'Apply' => 'Apply',
 	'Inactive' => 'Inactive',
+	'Add_New' => 'Add New',
+	'No_Data_Found' => 'No Data Found',
+	'Organization Manager English Last Name' => 'Organization Manager English Last Name',
+	'Organization Manager Arabic Last Name' => 'Organization Manager Arabic Last Name',
 ];

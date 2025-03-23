@@ -151,6 +151,7 @@
                   </div>
                   <h5 class="mb-1 fw-semibold">{{ __('admin.Targeted_Market') }}</h5>
                   <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
+                    @if($company->targeted_market != null)
                     @php
                     $countryIds = json_decode($company->targeted_market, true);
                     @endphp
@@ -170,6 +171,7 @@
                     <span
                       class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
                       style="width: fit-content;">{{ __('admin.N/A') }}</span>
+                    @endif
                     @endif
                   </div>
                 </div>
@@ -622,11 +624,13 @@
                     {{ __('admin.Screening by') }}:
                   </td>
                   <td>
+                    @if( $judges->count() > 0 )
                     @foreach ($judges as $ju)
                     ({{ $ju->id }})
                     {{ $ju->{'first_name_' . $l} }}
                     {{ $ju->{'last_name_' . $l} }},
                     @endforeach
+                    @endif
                   </td>
                 </tr>
               </tbody>
@@ -650,7 +654,7 @@
                     $comments = \App\Formdata::where('field_id', $field->field_id)->where('company_id',
                     $company->id)->first(['comments'])->comments
                     )
-                    @if ($comments == null)
+                    @if ($comments != null)
                     @foreach ($comments as $key => $cc)
                     @if ($cc)
                     <div class="warning">{{ __('admin.comment') }}({{ $key }}):
