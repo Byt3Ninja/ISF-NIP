@@ -328,7 +328,7 @@
     @if ($_user->hasAnyRole('Admin|organizationManager'))
       <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
         <a href="{{ route('organizations.index') }}" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-settings"></i>
+          <i class="menu-icon tf-icons ti ti-layout-board"></i>
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>

@@ -1416,5 +1416,9 @@ return [
 	'Filter_Mentors' => 'تصفية المرشدين',
 	'Apply' => 'تطبيق',
 	'Inactive' => 'غير نشط',
+	'Add_New' => 'اضافة جديد',
+	'No_Data_Found' => 'لا يوجد بيانات',
+	'Organization Manager English Last Name' => 'اسم العائلة لمدير المؤسسة باللغة الإنجليزية',
+	'Organization Manager Arabic Last Name' => 'اسم العائلة لمدير المؤسسة باللغة العربية',
 ]; 
 
