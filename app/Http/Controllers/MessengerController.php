@@ -62,7 +62,8 @@ class MessengerController extends Controller
             $new->messgeId = $request->input('messgeId');
             $new->subject= $request->input('subject');
 			$new->message = $request->input('message');
-            $new->Save();
+            $new->user_id = auth()->user()->id;
+            $new->save();
             $rname = User::findOrFail($request->input('receiver'));
             $sname =  User::findOrFail($request->input('sender'));
             /// notify user vi push
