@@ -1443,5 +1443,10 @@ return [
 	'Export_assessment_pdf' => 'تصدير التقييمات PDF',
 	'MessageSentSuccessfully' => 'تم ارسال الرسالة بنجاح',
 	'No sent Messages' => 'لا يوجد رسائل مرسلة',
+	'equal_to' => 'مساوي به',
+	'more_than_or_equal_to' => 'اكثر من او مساوي به',
+	'less_than_or_equal_to' => 'اقل من او مساوي به',
+	'more_than' => 'اكثر من',
+	'less_than' => 'اقل من',
 ]; 
 

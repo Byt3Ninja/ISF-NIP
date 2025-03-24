@@ -1420,4 +1420,9 @@ return [
     ],
 	'MessageSentSuccessfully' => 'Message Sent Successfully',
 	'No sent Messages' => 'No Sent Messages',
+	'equal_to' => 'Equal to',
+	'more_than_or_equal_to' => 'More than or equal to',
+	'less_than_or_equal_to' => 'Less than or equal to',
+	'more_than' => 'More than',
+	'less_than' => 'Less than',
 ];

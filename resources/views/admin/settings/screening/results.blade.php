@@ -70,7 +70,45 @@
             if ($form) {
                 $clist = [$form->id, $cstep->id];
             }
-            $companies = \App\Company::whereIn('step', $clist)->get();
+            $companies = \App\Company::whereIn('step', $clist);
+            if(request('startup_id') != 0){
+              $companies = $companies->where('id', request('startup_id'));
+            }
+            
+            if(request('judge_id') != 0){
+              $judgeId = request('judge_id');
+              $formId = $form->id ?? null;
+              $judges = collect();
+                  $judges = $companies->get()->map(function ($company) use ($formId) {
+                      return \App\User::whereIn('id', $company->judges($company->id, $formId))->get();
+                  })->flatten();
+            }
+            if(request('result_id') != 0){
+              $companyModel = new \App\Company();
+              $comparison = request('result2_id'); // نوع المقارنة (==, <, >, <=, >=)
+              $threshold = request('result_id'); // القيمة التي تتم المقارنة معها
+
+              $filteredCompanies = $companies->get()->filter(function ($company) use ($form, $companyModel, $comparison, $threshold) {
+                  $weight = $companyModel->companyWeight([$company->id], $form->id ?? '', 0);
+
+                  // تطبيق المقارنة بناءً على نوعها
+                  return match ($comparison) {
+                      '=='  => $weight == $threshold,
+                      '>'   => $weight > $threshold,
+                      '<'   => $weight < $threshold,
+                      '>='  => $weight >= $threshold,
+                      '<='  => $weight <= $threshold,
+                      default => false // في حالة لم تكن المقارنة صحيحة، لا تُرجع أي شركة
+                  };
+              });
+              
+              $companies = $filteredCompanies;
+            }else{ 
+              $companies = $companies->get();
+            }
+            
+
+            
           @endphp
 
           @if ($companies->count() == 0)
@@ -149,7 +187,81 @@
                       <div class="btn btn-label-primary ExportCycleComp">{{ __('cycles.Export') }}</div>
                     </div>
 
+                    <hr>
+                    
+                    <form method="GET" action="/dashboard/screening/results/{{ request('id') }}">
+                      <div class="d-flex align-items-center mx-2">
+                        <div style="display: flex; align-items: center;">
+                        <button
+                          class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                          style="border-radius: 17px; width: 40px; height: 40px;"
+                           type="submit"
+                        >
+                          <i class="ti ti-filter text-white ti-24px"></i>
+                        </button>
+                      </div>
+                      <!-- Search Bar -->
+                      
+                      <div class="position-relative me-3 d-none d-md-flex">
+                        <select name="startup_id" class="form-control">
+                          <option value="0">All</option>
+                          @php
+                         $companies2 = \App\Company::whereIn('step', $clist)->get();
+                          @endphp
+                          @foreach ($companies2 as $company2)
+                          <option value="{{ $company2->id }}" {{ $company2->id == request('startup_id') ? 'selected' : '' }}>{{ $company2->{'name_'.$l} }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                      
+                      
+                          
+                      <div class="position-relative me-3 d-none d-md-flex">
+                        <select name="judge_id" class="form-control">
+                          <option value="0">All</option>
+                          @php
+                          $uniqueJudges = collect();
+                          @endphp
+                          @foreach($companies as $company)       
+                            @php
+                          $judges = \App\User::whereIn('id', $company->judges($company->id, $form->id))->get();
+                          $uniqueJudges = $uniqueJudges->merge($judges)->unique('id');
+                          @endphp
+                          @foreach ($uniqueJudges as $judge)
+                          <option value="{{ $judge->id }}" {{ $judge->id == request('judge_id') ? 'selected' : '' }}>{{ $judge->{'first_name_'.$l} }} {{ $judge->{'last_name_'.$l} }}</option>
+                          @endforeach
+                          @endforeach
+                        </select>
+                      </div>
+      
+              <div class="position-relative me-3 d-none d-md-flex">
+                <select name="result_id" class="form-control">
+                  <option value="0" {{ request('result_id') == 0 ? 'selected' : '' }}>0</option>
+                  <option value="10" {{ request('result_id') == 10 ? 'selected' : '' }}>10</option>
+                  <option value="20" {{ request('result_id') == 20 ? 'selected' : '' }}>20</option>
+                  <option value="30" {{ request('result_id') == 30 ? 'selected' : '' }}>30</option>
+                  <option value="40" {{ request('result_id') == 40 ? 'selected' : '' }}>40</option>
+                  <option value="50" {{ request('result_id') == 50 ? 'selected' : '' }}>50</option>
+                  <option value="60" {{ request('result_id') == 60 ? 'selected' : '' }}>60</option>
+                  <option value="70" {{ request('result_id') == 70 ? 'selected' : '' }}>70</option>
+                  <option value="80" {{ request('result_id') == 80 ? 'selected' : '' }}>80</option>
+                  <option value="90" {{ request('result_id') == 90 ? 'selected' : '' }}>90</option>
+                </select>
+                <select name="result2_id" class="form-control">
+                  <option value="==" {{ request('result2_id') == '=' ? 'selected' : '' }}>{{ __('admin.equal_to') }}</option>
+                  <option value=">=" {{ request('result2_id') == '>=' ? 'selected' : '' }}>{{ __('admin.more_than_or_equal_to') }}</option>
+                  <option value="<=" {{ request('result2_id') == '<=' ? 'selected' : '' }}>{{ __('admin.less_than_or_equal_to') }}</option>
+                  <option value=">" {{ request('result2_id') == '>' ? 'selected' : '' }}>{{ __('admin.more_than') }}</option>
+                  <option value="<" {{ request('result2_id') == '<' ? 'selected' : '' }}>{{ __('admin.less_than') }}</option>
+                </select>
+              </div>
+      
+                    </div>
+                    </form>
+                    <hr>
+
                     <table id="result-list-datatable" class="table mb-0">
+                      
                       <thead class="bg-label-secondary">
                         <tr>
                           <th><input type="checkbox" class="checkAll"></th>
