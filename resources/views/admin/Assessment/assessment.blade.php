@@ -103,7 +103,11 @@
 														<td>{{$c++}}</td>
 														<td>{{$assessment->start_date }}</td>
 														<td>{{$assessment->end_date }}</td>
-														<td>{{$assessment->user->name }}</td>
+														<td>
+															<a href="{{ route('company_profile', $assessment->user->company->id) }}">
+																{{ $assessment->user->company->{'name_'.app()->getLocale()} }}
+															</a>
+														</td>
 														<td>{{$assessment->created_at}}</td>
 														@if( $_user->ableToAny(['assessments.show', 'question-assessment_admin', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )
 														<td>

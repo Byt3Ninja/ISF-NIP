@@ -136,7 +136,8 @@ class MessengerController extends Controller
         if( empty( $mentors ) || !isset( $mentors ) ) { $mentors = User::where('id', '<', 0)->get(); }
         return view('admin/clients/sendmessage', compact('users','mentors'));
     }
-    public function savemessage(Request $request) {
+    public function savemessage(Request $request) 
+    {
         $cuser = Auth::user();
 	    if ($request->type==1) {
             if (!$request->users) { return redirect('/dashboard')->with(['msg' => 'MessageError', 'class' => 'danger']);}
@@ -218,8 +219,8 @@ class MessengerController extends Controller
                         }
                     }
                 } catch (\Exception $e) {
-                    Log::error('Database Error: ' . $e->getMessage());
-                    return redirect('/dashboard')->with(['msg' => 'Database error: ' . $e->getMessage(), 'class' => 'danger']);
+                    Log::error('Error: ' . $e->getMessage());
+                    return redirect('/dashboard')->with(['msg' => 'error: ' . $e->getMessage(), 'class' => 'danger']);
                 }
             }
         } else {
@@ -242,7 +243,7 @@ class MessengerController extends Controller
             }
         }
     
-        return redirect('/dashboard')->with(['msg' => 'Message sent successfully!', 'class' => 'success']);
+        return redirect('/dashboard')->with(['msg' => 'MessageSentSuccessfully', 'class' => 'success']);
     }
 
 
