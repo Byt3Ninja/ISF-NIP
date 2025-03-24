@@ -208,11 +208,16 @@ $userid = auth()->user()->id;
                   {{ __('admin.Make_a_new_assessment') }}
               </a>
                 @endif
-                <a 
-                 href="{{ route('assessment.pdf') }}"
-                  class="btn btn-sm btn-primary light-shadow radius-10">
-                  {{ __('admin.Export_assessment_pdf') }}
-              </a>
+
+                @if($assessment && $assessment->end_date != null)
+                <a href="{{ route('assessment.pdf') }}" class="btn btn-sm btn-primary light-shadow radius-10 ms-2">
+                    {{ __('admin.Export_assessment_pdf') }}
+                </a>
+               @else
+                <a class="bg-light hover-none radius-10 disabled px-4 py-2 ms-2" style="cursor: not-allowed !important;">
+                    {{ __('admin.Export_assessment_pdf') }}
+                </a>
+              @endif
               </div>
             </div>
             <div class="d-flex flex-grow-1 align-items-center gap-3">

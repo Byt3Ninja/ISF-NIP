@@ -295,22 +295,22 @@ class Company extends Model
     public static function static_categories()
     {
         return [
-            'Food & Beverage' => false,
-            'Technology' => false,
-            'App / Website' => false,
-            'Housewares / Home Design' => false,
-            'Health / Wellness / Nutrition' => false,
-            'Fitness' => false,
-            'Sports' => false,
-            'Beauty' => false,
-            'Clothing / Fashion' => false,
-            'Toys / Games' => false,
-            'Children' => false,
-            'Entertainment / Experiential' => false,
-            'Pets' => false,
-            'Music' => false,
-            'Holiday' => false,
-            'Other' => true
+            __('admin.categories.food_beverage') => false,
+            __('admin.categories.technology') => false,
+            __('admin.categories.app_website') => false,
+            __('admin.categories.housewares_home_design') => false,
+            __('admin.categories.health_wellness_nutrition') => false,
+            __('admin.categories.fitness') => false,
+            __('admin.categories.sports') => false,
+            __('admin.categories.beauty') => false,
+            __('admin.categories.clothing_fashion') => false,
+            __('admin.categories.toys_games') => false,
+            __('admin.categories.children') => false,
+            __('admin.categories.entertainment_experiential') => false,
+            __('admin.categories.pets') => false,
+            __('admin.categories.music') => false,
+            __('admin.categories.holiday') => false,
+            __('admin.categories.other') => true,
         ];
     }
 
