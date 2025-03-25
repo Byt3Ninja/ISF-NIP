@@ -1,5 +1,6 @@
 stages:
   - beta
+  - dev
 
 beta:
   stage: beta
