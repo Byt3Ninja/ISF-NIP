@@ -35,7 +35,7 @@ dev:
       - ssh-keyscan -p22 54.144.48.46 >> ~/.ssh/known_hosts
       - chmod 644 ~/.ssh/known_hosts
     script:
-      - ssh -p22 -o StrictHostKeyChecking=no ubuntu@54.144.48.46 "cd /home/app/incubator && git pull && sudo docker exec incubator-app php artisan migrate --force"
+      - ssh -p22 -o StrictHostKeyChecking=no root@54.144.48.46 "cd /home/app/incubator && git pull && docker exec incubator-app php artisan migrate --force"
 
     only:
       - dev
