@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Organization extends Model
 {
 	use Auditable;
+	public static $module = 'Organizations';
 	protected $fillable = [
 		'name_ar',
 		'name_en',

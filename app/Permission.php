@@ -7,8 +7,9 @@ use App\Traits\Auditable;
 
 class Permission extends Model
 {
-	protected $table = 'permissions';
 	use Auditable;
+	protected $table = 'permissions';
+	public static $module = 'Permissions';
 
 	protected $fillable = [
 		'name',

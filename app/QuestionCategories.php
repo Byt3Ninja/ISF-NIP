@@ -12,6 +12,7 @@ class QuestionCategories extends Model
 	use Auditable;
 	public $timestamps = true;
 	protected $table = 'question_categories';
+	public static $module = 'Question Categories';
 	protected $primaryKey = 'id';
 
 	protected $fillable = [
