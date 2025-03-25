@@ -19,7 +19,7 @@ return [
 	'Yes' =>'نعم',
 	'No' => 'لا',
     'No Received Messages'=>'لا يوجد رسائل مستلمة لعرضها',
-    'No Sent Messages'=>'لا يوجد رسائل مرسلة لعرضها',
+    'No sent Messages'=>'لا يوجد رسائل مرسلة لعرضها',
     'Send' => 'إرسال',
     'Write your message' => 'أكتب محتوى رسالتك',
     'ReceivedName' => 'مرسل لـ',

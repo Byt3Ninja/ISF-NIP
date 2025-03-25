@@ -19,7 +19,7 @@ return [
 	'Yes' =>'Yes',
 	'No' => 'No',
   	'No Received Messages'=>'No Received Messages',
-  	'No Sent Messages'=>'No Sent Messages',
+  	'No sent Messages'=>'No Sent Messages',
 	'Send' => 'Send',
 	'Write your message' => 'Write your message',
 	'ReceivedName' => 'Received by',
