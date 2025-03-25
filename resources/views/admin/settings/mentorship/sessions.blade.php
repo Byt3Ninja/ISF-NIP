@@ -149,9 +149,7 @@
                           </select>
                         </div>
                         @php
-                        
                             $cycles = \App\Cycle::get();
-                        
                         @endphp
                         <div class="col-md-3 mx-2" style="display: inline-block">
                           <select class="form-control " id="cycle_id">
