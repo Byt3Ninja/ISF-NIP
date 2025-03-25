@@ -45,7 +45,7 @@ class MentorsController extends Controller
 		ExportMentorsData::dispatch($data4);
 		return response()->json(['message' => 'Export process started. You will receive an email with the download attached.']);
 	}
-	public function index($id = 0)
+	public function index(Request $request, $id = 0)
 	{
 		$organization_id = auth()->user()->organization_id;
 		if ($id == 0) {
@@ -58,6 +58,17 @@ class MentorsController extends Controller
 		$cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
 		})->get();
+
+		if($request->step_id != 0){
+			$companies = Company::where('cycle', $id)
+    ->where('step', '>', 0)
+    ->when($request->has('step_id'), function ($query) use ($request) {
+        return $query->where('step', $request->step_id);
+    })
+    ->get();
+		}
+
+		
 		return view('admin.settings.mentorship.index', compact('mentors', 'id', 'companies', 'cycles'));
 	}
 
