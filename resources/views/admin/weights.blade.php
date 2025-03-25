@@ -335,7 +335,7 @@
 				"paging": true,
 				"bInfo": false,
 				"columnDefs": [
-					{"orderable": false, "targets":	[3]},
+					{"orderable": true, "targets":	[3]},
 				],
 				@if ($l == 'ar')
 				"language": {
