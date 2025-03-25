@@ -141,6 +141,39 @@
           <div class="card-header border-bottom mb-4">
             <h4 class="card-title">{{ __('cycles.Cycle registered users') }}</h4>
           </div>
+          <br>
+                  <!-- Filter -->
+              <form method="GET" action="{{ route('mentorship.view', $id) }}">
+                <div class="d-flex align-items-center mx-2">
+                  <div style="display: flex; align-items: center;">
+                  <button
+                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                    style="border-radius: 17px; width: 40px; height: 40px;"
+                     type="submit"
+                  >
+                    <i class="ti ti-filter text-white ti-24px"></i>
+                  </button>
+                </div>
+                <!-- Search Bar -->
+                
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select name="step_id" class="form-control">
+                    <option value="0">All</option>
+                    @php
+                    $steps = App\Step::where('cycle_id', $id)->get();
+                    @endphp
+                    @foreach ($steps as $step)
+                    <option value="{{ $step->id }}" {{ $step->id == request('step_id') ? 'selected' : '' }}>{{ $step->title }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                
+  
+                
+
+              </div>
+              </form>
+              <hr>
           <div class="table-responsive card-body">
             <table class="table mb-0" id="userstable">
               <thead class="bg-label-light text-nowrap">

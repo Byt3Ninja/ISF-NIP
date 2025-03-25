@@ -18,6 +18,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use Notifiable;
     use HasRoles;
     // use SoftDeletes;
+    public static $module = 'Users';
 
     /**
      * The attributes that are mass assignable.
