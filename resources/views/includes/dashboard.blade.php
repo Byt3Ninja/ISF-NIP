@@ -366,9 +366,9 @@
 								<div class="col-md-12">
 									<div class="card mt-10">
 										<div class="card-header border-bottom">
-											<h4 class="card-title align-items-center">
+											<h5 class="card-title align-items-center">
 												<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Final_Session") }}
-											</h4>
+											</h5>
 										</div>
 										<div class="card-body">
 											@if( !is_null( $myFinal ) && $myFinal->join_url )
@@ -499,7 +499,7 @@
 								<div class="col-md-12">
 									<div class="card mt-10">
 										<div class="card-header border-bottom">
-											<h4 class="card-title align-items-center">
+											<h5 class="card-title align-items-center">
 												<i class='bx bx-card font-medium-4 mr-1'></i> {{ __("dashboard.MentorsSession") }} :
 												@if($days!=14)
 													<div onclick="redirectWithDays('14')" class="btn btn-label-success" id="forteenDays"> 14 {{__('cycles.days')}}</div>
@@ -512,7 +512,7 @@
 													<div onclick="redirectWithDays('7')" class="btn btn-label-warning" id="sevenDays"> 7 {{__('cycles.days')}}</div>
 												@endif
 												<a href="/dashboard/mentorship/mine"><div class="btn btn-label-info">{{__('cycles.showAll')}}</div></a>
-											</h4>
+											</h5>
 										</div>
 										<div class="card-body">
 											<div class="table-responsive">
@@ -581,10 +581,10 @@
 									<div class="col-md-12">
 										<div class="card">
 											<div class="card-header border-bottom mb-4">
-												<h4 class="card-title align-items-center">
+												<h5 class="card-title align-items-center">
 													<i class="ti ti-school ti-28px"></i>
 													<span class="mx-2">{{ __("dashboard.Mentors") }}</span>
-												</h4>
+												</h5>
 											</div>
 											<div class="card-body">
 												<div class="table-responsive">
@@ -641,6 +641,150 @@
 						</div> 
 					</div>
 				@endif
+
+				@if( array_intersect(['dashboard_tables.my_current_schedule'], $permissions) )
+					<div class="col-12">
+						<div class="card mt-10">
+							<section>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="card">
+											<div class="card-header border-bottom mb-4">
+												<h5 class="card-title align-items-center">
+													<i class="ti ti-calendar-plus ti-24px"></i>
+													<span class="mx-2">{{ __("dashboard.My current schedule") }}</span>
+													@if( $_user->ableTo('mentors.modify', $permissions) )
+													<button id="addSchedule"  onclick="this.querySelector('.spinner-border').classList.remove('d-none'); modify(1, undefined, 0)" type="button" class="btn btn-sm btn-label-primary">
+														{{ __('dashboard.Schedule') }}
+														<i class="ti ti-calendar ms-2"></i>
+														<span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+													</button>
+													@endif
+												</h5>
+											</div>
+											<div class="card-body">
+												<div class="table-responsive">
+													<table class="table">
+														<thead>
+															<th> {{ '#' }} </th>
+															<th> {{ __('dashboard.Days') }} </th>
+															<th> {{ __('dashboard.Time') }} </th>
+															<th> {{ __('dashboard.Notes') }} </th>
+															<th> {{ __('dashboard.Actions') }} </th>
+														</thead>
+														<tbody>
+															@foreach( $my_schedules as $key => $schedule )
+																<tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
+																	<td> {{ $loop->iteration }} </td>
+																	<td> {{ $schedule->_days }} </td>
+																	<td> {{ __('dashboard.from') }} {{ $schedule->t_from }} {{ __('dashboard.to') }} {{ $schedule->t_to }} </td>
+																	<td> {{ $schedule->notes }} </td>
+																	<td>
+																		<div class="dropdown">
+																			<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"> <i class="ti ti-dots-vertical"></i> </button>
+																			<div class="dropdown-menu">
+																				<button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button"> <i class="ti ti-pencil me-2"></i> Edit </button>
+																				<button class="dropdown-item" onclick="modify(2, {{ $schedule->id }}, {{ $schedule->active }})" type="button">
+																					<i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
+																					{{ $schedule->active ? 'Deactivate' : 'Activate' }}
+																				</button>
+																				<button onclick="modify(3,{{ $schedule->id }},0)" type="button" class="dropdown-item"><i class="ti ti-trash me-2"></i> Delete</button>
+																			</div>
+																		</div>
+																	</td>
+																</tr>
+															@endforeach
+															@if( $my_schedules->count() == 0 )
+															<tr>
+																<td class="text-center" colspan="5">no data</td>
+															</tr>
+															@endif
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</section>
+						</div>
+					</div>
+				@endif
+
+				@if( array_intersect(['dashboard_tables.my_next_mentorship_sessions'], $permissions) )
+					<div class="col-12">
+						<div class="card mt-10">
+							<section>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="card">
+											<div class="card-header border-bottom mb-4">
+												<h5 class="card-title align-items-center">
+													<i class="ti ti-calendar-stats ti-24px"></i>
+													<span class="mx-2">{{ __("dashboard.My next mentorship sessions") }}</span>
+												</h5>
+											</div>
+											<div class="card-body">
+												<div class="table-responsive">
+													<table class="table">
+														<thead>
+															<th> {{ '#' }} </th>
+															<th> {{ __('dashboard.Company') }} </th>
+															<th> {{ __('dashboard.User') }} </th>
+															<th> {{ __('dashboard.Date') }} </th>
+															<th> {{ __('dashboard.Admin Notes') }} </th>
+															<th> {{ __('dashboard.Meeting Link') }} </th>
+														</thead>
+														<tbody>
+															@foreach( $upcoming_sessions as $key => $session )
+															<tr>
+																<td> {{ $loop->iteration }} </td>
+																<td>
+																	@if( $_user->ableTo('company_profile', $permissions) )<a class="text-dark" href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
+																		<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
+																		<span class="fw-medium"> {{ $session->user->company->name }}</span>
+																	@if( $_user->ableTo('company_profile', $permissions) )</a>@endif
+																</td>
+																<td>
+																	@if( $_user->ableTo('users.edit', $permissions) )<a class="text-dark d-flex align-items-center gap-2" href="/dashboard/users/{{ $session->user->id }}/edit">@endif
+																		<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle" height="35" width="35" style="border: 2px solid #ddd;">
+																		<div class="media-body">
+																			<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $session->user->name }}</h6>
+																			<span class="font-small-2" style="font-size:11px;">{{ $session->user->title }}</span>
+																		</div>
+																	@if( $_user->ableTo('users.edit', $permissions) )</a>@endif
+																</td>
+																<td> {{ $session->zoom_date }} ({{ $session->period }}M) </td>
+																<td> {{ $session->admin_comment ?? '...' }} </td>
+																<td>
+																	@if (now()->format('Y-m-d') == date('Y-m-d', strtotime($session->zoom_date)))
+																	<a href="{{ $session->start_url }}" target="_blank">
+																		<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
+																			<i class="ti ti-user"></i>
+																		</button>
+																	</a>
+																	@else
+																		<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+																	@endif
+																</td>
+															</tr>
+															@endforeach
+															@if( $upcoming_sessions->count() == 0 )
+															<tr>
+																<td class="text-center" colspan="6">no data</td>
+															</tr>
+															@endif
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</section>
+						</div>
+					</div>
+				@endif
 			</div>
 		</div>
 	</div>
@@ -649,6 +793,7 @@
   		@include('admin.clients.startup.partials._session_modal')
   	<!--/ Edit SP Modal -->
 	@endif
+	@include('mentor.partials._availability_slots')
 	<!-- / Content Wrapper -->
 @stop
 @section('scripts')

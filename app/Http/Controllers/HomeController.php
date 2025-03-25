@@ -471,7 +471,7 @@ class HomeController extends Controller
             });
         } else { $evaluation = collect([]); }
 
-        if( array_intersect(['dashboard_cards.coming_sessions'], $permissions) )
+        if( array_intersect(['dashboard_cards.coming_sessions', 'my_next_mentorship_sessions'], $permissions) )
         {
             $upcoming_sessions_q = "SELECT
                     mr.id AS `id`,
@@ -967,6 +967,52 @@ class HomeController extends Controller
             return $session;
         })->values();
 
+        $my_schedules_q = "SELECT
+                s.id,
+                s.user_id,
+                s.type,
+                s.days,
+                s.dfrom,
+                s.dto,
+                s.tfrom,
+                s.tto,
+                s.notes,
+                s.active
+            FROM
+                schedules s
+            WHERE
+                s.user_id = $user->id
+        ";
+        $my_schedules = collect( DB::select($my_schedules_q) )->map(function( $schedule ) {
+            $schedule->active = $schedule->active == 1 || $schedule->active == true ? true : false;
+            $date_from = Carbon::parse( $schedule->dfrom )->format('d-m-Y');
+            $date_to = Carbon::parse( $schedule->dto )->format('d-m-Y');
+            $_days = '';
+            switch( $schedule->type )
+            {
+                case 'Weekly': {
+                    $_days = 'Weekly (' . str_replace(['[', ']', '"'], ' ', json_encode($schedule->days)) . ')';
+                    break;
+                }
+                case 'WorkingDays': {
+                    $_days = __('dashboard.All working days');
+                    break;
+                }
+                case 'Period': {
+                    $_days = __('dashboard.from') . $date_from . __('dashboard.to') . $date_to;
+                    break;
+                }
+                default: {
+                    $_days = $date_to;
+                }
+            }
+            $schedule->_days = $_days;
+            $schedule->t_from = substr($schedule->tfrom, 0, 5);
+            $schedule->t_to = substr($schedule->tto, 0, 5);
+            $schedule->notes ? $schedule->notes : '...';
+            return $schedule;
+        });
+
         $setting = collect( DB::select("SELECT * FROM settings where `id` = 1 limit 1") )->first();
 
         if( $company && $cycle_id != 0 )
@@ -1189,6 +1235,8 @@ class HomeController extends Controller
             return true;
         })->values();
 
+        $data['my_schedules'] = $my_schedules;
+        $data['upcoming_sessions'] = $upcoming_sessions;
         $data['cType'] = $cType;
         $data['myFinal'] = $myFinal;
         $data['sessions'] = $sessions;
