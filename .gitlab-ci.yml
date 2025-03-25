@@ -21,7 +21,7 @@ beta:
     - beta
 
 
-  dev:
+dev:
     stage: dev
     image: ubuntu:latest
     allow_failure: true
