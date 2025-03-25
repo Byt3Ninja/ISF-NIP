@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    //    use Auditable;
+    // use Auditable;
+    public static $module = 'Company';
     protected $fillable = [
         'organization_id',
         'country_id',

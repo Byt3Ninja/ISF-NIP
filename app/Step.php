@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 class Step extends Model
 {
 	// use Auditable;
+	public static $module = 'Program Step';
 	protected $casts = ['from'  => 'date:Y-m-d', 'to' => 'date:Y-m-d',];
 	public function cycle()
 	{
