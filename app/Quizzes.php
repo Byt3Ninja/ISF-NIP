@@ -14,6 +14,7 @@ class Quizzes extends Model
 	public $timestamps = true;
 	protected $table = 'quizzes';
 	protected $primaryKey = 'id';
+	public static $module = 'Quizzes';
 
 	protected $fillable = [
 		'title',

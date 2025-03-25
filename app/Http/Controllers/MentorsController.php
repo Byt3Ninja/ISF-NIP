@@ -61,8 +61,9 @@ class MentorsController extends Controller
 		return view('admin.settings.mentorship.index', compact('mentors', 'id', 'companies', 'cycles'));
 	}
 
-	public function list($id = 0)
+	public function list(Request $request, $id = 0 )
 	{
+		$l = app()->getLocale();
 		$organization_id = auth()->user()->organization_id;
 		if ($id == 0) {
 			$id = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -74,6 +75,48 @@ class MentorsController extends Controller
 		$cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
 			return $q->where('organization_id', $organization_id);
 		})->get();
+
+		$selectedSpecialization = $request->specialization; // الحصول على قيمة التصفية من query string
+   
+		if ($selectedSpecialization != 0) {
+			$mentors = $mentors->filter(function ($mentor) use ($selectedSpecialization, $l) {
+				$mentorSpecialization = $mentor->bio->{'specialization_'.$l} ?? null;
+		
+				return !is_null($mentorSpecialization) && $mentorSpecialization == $selectedSpecialization;
+			});
+    }
+
+
+	if ($request->rate != 0) {
+		$rating = $request->rate;
+		$mentors = $mentors->filter(function ($mentor) use ($rating) {
+			$averageRating = $mentor->mrating() ?? 0; // حساب متوسط التقييم للمدرب
+			return round($averageRating) == $rating; // مقارنة التقييم مع القيمة المختارة
+		});
+		
+	}
+
+	// تصفية حسب حالة الـ checked
+    if ($request->assigning != 0) {
+		$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
+
+    $mentors = $mentors->filter(function ($mentor) use ($checkedStatus, $cList) {
+        $isChecked = in_array($mentor->id, $cList);
+
+        // إذا كان المستخدم اختار "checked"، نعيد فقط المدربين الموجودين في الدورة
+        if ($checkedStatus == 'checked') {
+            return $isChecked;
+        }
+        // إذا كان المستخدم اختار "unchecked"، نعيد فقط المدربين غير المسجلين
+        elseif ($checkedStatus == 'Notchecked') {
+            return !$isChecked;
+        }
+        return true; // في حالة عدم تحديد أي فلتر
+    });
+	
+    }
+
+		
 
 		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles'));
 	}
