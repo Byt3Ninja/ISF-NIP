@@ -238,7 +238,7 @@
       @endif
     @endif
 
-    @if ($_user->hasAnyRole('Mentor|organizationManager'))
+    @if ($_user->hasAnyRole('Mentor'))
       @if( $_user->ableTo('mentorshipSessions.index', $permissions) )
       <li 
         class="{{ 
@@ -325,7 +325,7 @@
       </li>
     @endif
 
-    @if ($_user->hasAnyRole('Admin|organizationManager'))
+    @if ($_user->hasAnyRole('Admin'))
       <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
         <a href="{{ route('organizations.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-board"></i>
