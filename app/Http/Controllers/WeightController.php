@@ -16,13 +16,23 @@ class WeightController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $weights = Weight::with(['stage', 'category', 'subcategory', 'question'])->get();
         $stages = Stage::all();
         $categories = Category::where('category_type', 'Assesment')->get();
         $subcategories = SubCategory::where('Type', 'Assesment')->get();
         $questions = QuestionsBank::where('group', 'assessment')->get();
+
+        if($request->category_id) {
+            $weights = Weight::where('category_id', $request->category_id)->with(['stage', 'category', 'subcategory', 'question'])->get();
+           
+        }
+        if($request->subcategory_id) {
+            $weights = Weight::where('subcategory_id', $request->subcategory_id)->with(['stage', 'category', 'subcategory', 'question'])->get();
+           
+        }
+
         return view('admin.weights', compact('weights', 'stages', 'categories', 'subcategories', 'questions'));
     }
 
