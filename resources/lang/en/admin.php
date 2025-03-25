@@ -1425,4 +1425,6 @@ return [
 	'less_than_or_equal_to' => 'Less than or equal to',
 	'more_than' => 'More than',
 	'less_than' => 'Less than',
+	'checked' => 'Checked',
+	'Notchecked' => 'Not Checked',
 ];

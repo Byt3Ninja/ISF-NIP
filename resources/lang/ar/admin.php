@@ -1448,5 +1448,7 @@ return [
 	'less_than_or_equal_to' => 'اقل من او مساوي به',
 	'more_than' => 'اكثر من',
 	'less_than' => 'اقل من',
+	'checked' => 'تم التحقق',
+	'Notchecked' => 'لم يتم التحقق',
 ]; 
 

@@ -71,6 +71,68 @@
                 <div class="card-header border-bottom">
                   <h4 class="card-title">{{ __('cycles.Mentors') }}</h4>
                 </div>
+
+                <br>
+                @php
+                    $specializations = [];
+                    $TMentors = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+                    foreach ($TMentors as $mentor) {
+                            $specialization = $mentor->bio->{'specialization_' . $l} ?? null;
+                            if ($specialization && !in_array($specialization, $specializations)) {
+                                $specializations[] = $specialization;
+                            }
+                    }
+                @endphp
+                
+                <form method="GET" action="/dashboard/mentorship/assign/{{ $id }}">
+                  <div class="d-flex align-items-center mx-2">
+                    <div style="display: flex; align-items: center;">
+                    <button
+                      class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                      style="border-radius: 17px; width: 40px; height: 40px;"
+                       type="submit"
+                    >
+                      <i class="ti ti-filter text-white ti-24px"></i>
+                    </button>
+                  </div>
+                  <!-- Search Bar -->
+                  
+                  <div class="position-relative me-3 d-none d-md-flex">
+                    <select name="specialization" class="form-control" id="specializationFilter">
+                      <option value="0">All</option>
+                        @foreach ($specializations as $specialization)
+                            <option value="{{ $specialization }}" {{ request('specialization') == $specialization ? 'selected' : '' }}>{{ $specialization }}</option>
+                        @endforeach
+                    </select>
+                  </div>
+                  
+                  
+                      
+                  <div class="position-relative me-3 d-none d-md-flex">
+                    <select name="rate" class="form-control">
+                      <option value="0" {{ request('rate') == 0 ? 'selected' : '' }} >All</option>
+                      <option value="1" {{ request('rate') == 1 ? 'selected' : '' }} > 1 </option>
+                      <option value="2" {{ request('rate') == 2 ? 'selected' : '' }} > 2 </option>
+                      <option value="3" {{ request('rate') == 3 ? 'selected' : '' }} > 3 </option>
+                      <option value="4" {{ request('rate') == 4 ? 'selected' : '' }} > 4 </option>
+                      <option value="5" {{ request('rate') == 5 ? 'selected' : '' }} > 5 </option>
+                    </select>
+                  </div>
+
+                  <div class="position-relative me-3 d-none d-md-flex">
+                    <select name="assigning" class="form-control">
+                      <option value="0" {{ request('assigning') == 0 ? 'selected' : '' }} >All</option>
+                      <option value="checked" {{ request('assigning') == 'checked' ? 'selected' : '' }} > {{ __('admin.checked') }} </option>
+                      <option value="Notchecked" {{ request('assigning') == 'Notchecked' ? 'selected' : '' }} > {{ __('admin.Notchecked') }} </option>
+                    </select>
+                  </div>
+
+  
+                </div>
+                </form>
+
+                <hr>
+
                 <form action= "/dashboard/mentorship/assign/{{ $id }}" method="POST"
                   enctype="multipart/form-data">
                   {!! csrf_field() !!}
@@ -82,7 +144,7 @@
                           <th class="text-nowrap fw-bold">{{ __('cycles.Name/Title') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Bio') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Specialization') }}</th>
-                          <th class="text-nowrap fw-bold">Linkedin</th>
+                          <th class="text-nowrap fw-bold">{{ __('admin.Linkedin') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Rate') }}</th>
                         </tr>
                       </thead>
