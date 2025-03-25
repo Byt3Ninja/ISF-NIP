@@ -9,11 +9,23 @@
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="mb-1">{{ __('admin.Roles_List') }}</h4>
-    <p class="mb-6">
-      {{ __('admin.Roles_Description_1') }} <br />
-      {{ __('admin.Roles_Description_2') }}
-    </p>
+    <div class="row">
+      <div class="col-9">
+        <h4 class="mb-1">{{ __('admin.Roles_List') }}</h4>
+        <p class="mb-6">
+          {{ __('admin.Roles_Description_1') }} <br />
+          {{ __('admin.Roles_Description_2') }}
+        </p>
+      </div>
+      <div class="col-3 text-end pt-10">
+        @if( $_user->ableTo('permissions.index', $permissions) )
+          <a href="{{ route('permissions.index') }}" class="btn btn-primary">
+            <i class="ti ti-list me-1"></i>
+            {{ __('admin.Permissions') }}
+          </a>
+        @endif
+      </div>
+    </div>
     
     <!-- Alert -->
     @if (session()->has('msg'))
