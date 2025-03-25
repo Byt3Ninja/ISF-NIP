@@ -228,10 +228,10 @@
         "responsive": true,
         "searching": true,
         "lengthChange": false,
-        "paging": false,
+        "paging": true,
         "bInfo": false,
         "columnDefs": [{
-          "orderable": false,
+          "orderable": true,
           "targets": [3]
         }, ],
         @if ($l == 'ar')
