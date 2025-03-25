@@ -9,4 +9,5 @@ class Slider extends Model
 {
   use Auditable;
   protected $table = 'sliders';
+  public static $module = 'Slider';
 }

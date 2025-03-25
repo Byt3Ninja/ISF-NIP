@@ -9,6 +9,7 @@ class CyclesMentors extends Model
 {
     use Auditable;
     protected $table = 'cycles_mentors';
+    public static $module = 'Program Mentors';
     protected $fillable = ['organization_id', 'user_id', 'cycle_id'];
 
     public function user()

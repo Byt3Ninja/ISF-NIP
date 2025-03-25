@@ -12,6 +12,7 @@ class SurveyResponses extends Model
 	use Auditable;
 	public $timestamps = true;
 	protected $table = 'survey_responses';
+	public static $module = 'Survey Responses';
 	protected $primaryKey = 'id';
 
 	protected $fillable = [

@@ -11,6 +11,7 @@ class QuestionsBank extends Model
 {
 	use Auditable;
 	public $timestamps = true;
+	public static $module = 'Questions Bank';
 	protected $table = 'questions_bank';
 	protected $primaryKey = 'id';
 

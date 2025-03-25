@@ -31,7 +31,7 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>{{ __('audit.description')}}</th>
-                                                    <th>{{ __('audit.subject_id')}}</th>
+                                                    {{--  <th>{{ __('audit.subject_id')}}</th>  --}}
                                                     <th>{{ __('audit.subject_type')}}</th>
                                                     <th>{{ __('audit.user_id')}}</th>
                                                     <th>{{ __('audit.host')}}</th>
@@ -48,14 +48,20 @@
                                                         <td>
                                                             {{ $auditLog->description ?? '' }}
                                                         </td>
-                                                        <td>
+                                                        {{--  <td>
                                                             {{ $auditLog->subject_id ?? '' }}
+                                                        </td>  --}}
+                                                        <td>
+                                                            {{ $auditLog->instance ?? '' }}
                                                         </td>
                                                         <td>
-                                                            {{ $auditLog->subject_type ?? '' }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $auditLog->user_id ?? '' }}
+                                                            @if( $auditLog->user_id > 0 && $auditLog->user )
+                                                                @if( $_user->ableTo('users.edit', $permissions) ) <a target="_blank" href="{{ route('users.edit', ['user' => $auditLog->user->id]) }}">@endif
+                                                                {{ $auditLog->user->name ?? '' }}
+                                                                @if( $_user->ableTo('users.edit', $permissions) )</a>@endif
+                                                            @else
+                                                                -
+                                                            @endif
                                                         </td>
                                                         <td>
                                                             {{ $auditLog->host ?? '' }}
