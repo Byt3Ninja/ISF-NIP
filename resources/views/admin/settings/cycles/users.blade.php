@@ -10,6 +10,7 @@
       background-color: #fff;
       margin-top: -3rem !important;
     }
+
     @media screen and (max-width: 768px) {
       #mob {
         margin-top: 10px;
@@ -21,7 +22,7 @@
 
 @section('content')
   <!-- BEGIN: Content-->
- 
+
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="content-overlay"></div>
@@ -48,7 +49,7 @@
             <input type="hidden" class="cyclesExcel" value="{{ request()->route('id') }}">
           @endif
 
-          
+
 
           <div class="row match-height">
             <div class="col-xl-12 col-md-12 col-sm-12">
@@ -68,8 +69,10 @@
                         <select id="ccycle" class="form-select select2"
                           onchange="window.open('/dashboard/cycles/'+this.options[this.selectedIndex].value+'/registered','_self');">
                           @foreach ($cycles as $cycle)
-                            <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                              ({{ __('cycles.Start') }} {{ $cycle->start->format('d-m-Y') }}) -
+                            <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>
+                              {{ $cycle->title }}
+                              ({{ __('cycles.Start') }} {{ $cycle->start->format('d-m-Y') }})
+                              -
                               {{ optional($cycle->organization)->name }} </option>
                           @endforeach
                         </select>
@@ -79,21 +82,22 @@
                       <div class="d-flex align-items-center gap-4">
                         <button class="btn btn-sm btn-label-secondary"
                           onclick="window.location.href='/dashboard/cycles/{{ $id }}'">
-                          <i class="ti ti-circles"></i> <span
-                            class="align-middle mx-2">{{ __('cycles.steps') }}</span>
+                          <i class="ti ti-circles"></i> <span class="align-middle mx-2">{{ __('cycles.steps') }}</span>
                         </button>
                         <button class="btn btn-sm btn-label-info" onclick="DoChange(1)">
-                          <i class="ti ti-edit text-info"></i> <span class="align-middle mx-2">{{ __('cycles.Edit') }}</span>
+                          <i class="ti ti-edit text-info"></i> <span
+                            class="align-middle mx-2">{{ __('cycles.Edit') }}</span>
                         </button>
                         <button class="btn btn-sm btn-label-success" onclick="DoChange(2)">
                           <i class="ti ti-plus"></i> <span class="align-middle mx-2">{{ __('cycles.New') }}</span>
                         </button>
                         <button class="btn btn-sm btn-label-danger" onclick="DoChange(3)">
-                          <i class="ti ti-trash text-danger"></i> <span class="align-middle mx-2">{{ __('cycles.Delete') }}</span>
+                          <i class="ti ti-trash text-danger"></i> <span
+                            class="align-middle mx-2">{{ __('cycles.Delete') }}</span>
                         </button>
                       </div>
                     </div>
-                  </div>                  
+                  </div>
                 </div>
               </div>
             </div>
@@ -102,149 +106,30 @@
         <section class="row mt-6">
           <div class="col-xl-12 col-md-12 col-sm-12">
             <div class="card">
-              <div class="card-header">
-                <h4 class="card-title primary">
+              <div class="card-header d-flex justify-content-between align-items-center w-100">
+                <h4 class="card-title">
                   <i class="ti ti-user ti-28px"></i>
-                  <span class="mx-2">{{ __('cycles.Cycle Registered Users') }}</span>
+                  {{ __('cycles.Cycle Registered Users') }}
                 </h4>
+                <button class="btn btn-label-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                  <i class="ti ti-filter me-2"></i>{{ __('cycles.Filter') }}
+                </button>
               </div>
               <hr style="margin:-10px 0 5px 0;">
               <div class="card-body">
                 <div class="table-responsive">
-                  <br>
-                  <!-- Filter -->
-              <form method="GET" action="{{ route('cycles.users', $id) }}">
-                <div class="d-flex align-items-center mx-2">
-                  <div style="display: flex; align-items: center;">
-                  <button
-                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
-                    style="border-radius: 17px; width: 40px; height: 40px;"
-                     type="submit"
-                  >
-                    <i class="ti ti-filter text-white ti-24px"></i>
-                  </button>
-                </div>
-                <!-- Search Bar -->
-                <div class="position-relative me-3 d-none d-md-flex">
-                  <select name="step_id" class="form-control">
-                    <option value="0">All</option>
-                    @foreach ($steps as $step)
-                    <option value="{{ $step->id }}" {{ $step->id == request('step_id') ? 'selected' : '' }}>{{ $step->title }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                <div class="position-relative me-3 d-none d-md-flex">
-                  <select name="country_id" class="form-control">
-                    <option value="0">All</option>
-                    @php
-                    $countries = App\Country::all();
-                    @endphp
-                    @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" {{ $country->id == request('country_id') ? 'selected' : '' }}>{{ $country->{'name_'.$l} }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                <div class="position-relative me-3 d-none d-md-flex">
-                  <select name="sector_id" class="form-control">
-                    <option value="0">All</option>
-                    @php
-                    $sectors = App\Sector::all();
-                    @endphp
-                    @foreach ($sectors as $sector)
-                    <option value="{{ $sector->id }}" {{ $sector->id == request('sector_id') ? 'selected' : '' }}>{{ $sector->{'name_'.$l} }}</option>
-                    @endforeach
-                  </select>
-                </div>
-  
-                <div class="position-relative me-3 d-none d-md-flex">
-                  <select name="Dstage_id" class="form-control">
-                    <option value="0">All</option>
-                    @php
-                    $stages = App\Stage::all();
-                    @endphp
-                    @foreach ($stages as $stage)
-                    <option value="{{ $stage->id }}" {{ $stage->id == request('Dstage_id') ? 'selected' : '' }}>{{ $stage->{'name_'.$l} }}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <div class="position-relative me-3 d-none d-md-flex">
-                  <select class="form-select px-10" name="funding_stage">
-              <option value="" >{{ __('admin.All') }}</option>
-              <option value="Pre_seed_funding_stage"
-                {{ request('funding_stage') == 'Pre_seed_funding_stage' ? 'selected' : '' }}>
-                {{ __('admin.Pre_seed_funding_stage') }}
-              </option>
-              <option value="Seed_funding_stage "
-                {{ request('funding_stage') == 'Seed_funding_stage' ? 'selected' : '' }}>
-                {{ __('admin.Seed_funding_stage') }}
-              </option>
-              <option value="Series_A_funding"
-                {{ request('funding_stage') == 'Series_A_funding' ? 'selected' : '' }}>
-                {{ __('admin.Series_A_funding') }}
-              </option>
-              <option value="Series_B_funding"
-                {{ request('funding_stage') == 'Series_B_funding' ? 'selected' : '' }}>
-                {{ __('admin.Series_B_funding') }}
-              </option>
-              <option value="Series_C_funding"
-                {{ request('funding_stage') == 'Series_C_funding' ? 'selected' : '' }}>
-                {{ __('admin.Series_C_funding') }}
-              </option>
-            </select>
-                </div>
-
-                <div class="position-relative me-3 d-none d-md-flex">
-                  <label>{{ __('admin.Targeted_Market') }}</label>
-                  <select class="form-control" name="targeted_market[]" multiple>
-                    <option value="0">All</option>
-                    @php
-                    $countries = App\Country::all();
-                    @endphp
-                    @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" {{ $country->id == request('country_id') ? 'selected' : '' }}>{{ $country->{'name_'.$l} }}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <div class="position-relative me-3 d-none d-md-flex">
-                  <select class="form-select px-10" name="BType">
-              <option value="0" >{{ __('admin.All') }}</option>
-              <option value="B2C"
-                {{ request('BType') == 'B2C' ? 'selected' : '' }}>
-                B2C</option>
-              <option value="B2B"
-                {{ request('BType') == 'B2B' ? 'selected' : '' }}>
-                B2B</option>
-              <option value="B2B2C"
-                {{ request('BType') == 'B2B2C' ? 'selected' : '' }}>
-                B2B2C</option>
-              <option value="C2C"
-                {{ request('BType') == 'C2C' ? 'selected' : '' }}>
-                C2C</option>
-              <option value="B2G"
-                {{ request('BType') == 'B2G' ? 'selected' : '' }}>
-                B2G</option>
-              <option value="Platform"
-                {{ request('BType') == 'Platform' ? 'selected' : '' }}>
-                Platform</option>
-            </select>
-                </div>
-  
-              </div>
-              </form>
-              <hr>
                   <!-- we get value from Select box Ely fo2 class name stepsExcel -->
                   <div class="d-flex align-items-center gap-4">
                     <div class="media align-items-center col-md-3">
                       <select class="form-select select2 ChangeAllBox">
                         <option value="0">{{ __('cycles.Disapprove') }}</option>
                         @foreach ($steps as $step)
-                        <option value="{{ $step->id }}">{{ $step->title }}</option>
+                          <option value="{{ $step->id }}">{{ $step->title }}</option>
                         @endforeach
                       </select>
                     </div>
-                    <button type="button" class="btn btn-sm btn-label-primary ExportCycleComp">{{ __('cycles.Export') }}</button>
+                    <button type="button"
+                      class="btn btn-sm btn-label-primary ExportCycleComp">{{ __('cycles.Export') }}</button>
                   </div>
                   <table class="table mt-3">
                     <thead class="bg-label-light">
@@ -258,9 +143,9 @@
                       </tr>
                     </thead>
                     <tbody>
-                    {{-- @php --}}
-                    {{--  $companies = \App\Company::where('cycle',$id)->get(); --}}
-                    {{-- @endphp --}}
+                      {{-- @php --}}
+                      {{--  $companies = \App\Company::where('cycle',$id)->get(); --}}
+                      {{-- @endphp --}}
                       @foreach ($companies as $company)
                         <tr>
                           <td>
@@ -309,7 +194,8 @@
                                 onchange="changestep({{ $company->id }},this.options[this.selectedIndex].value)">
                                 <option value="0">{{ __('cycles.Disapprove') }}</option>
                                 @foreach (\App\Step::where('cycle_id', $company->cycle)->orderBy('arr')->get() as $step)
-                                  <option value="{{ $step->id }}" {{ $step->id == $company->step ? 'selected' : '' }}>
+                                  <option value="{{ $step->id }}"
+                                    {{ $step->id == $company->step ? 'selected' : '' }}>
                                     {{ $step->title }}</option>
                                 @endforeach
                               </select>
@@ -328,6 +214,8 @@
     </div>
   </div>
   <!-- END: Content-->
+
+  <!-- Step Modal -->
   <div class="modal fade" id="cycleForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
@@ -386,33 +274,180 @@
       </div>
     </div>
   </div>
+
+  <!-- Filter Modal -->
+  <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content bg-label-secondary p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="modal-title fw-semibold mb-0 mt-2" id="filterModalLabel">
+            <i class="ti ti-filter ti-24px me-2"></i> {{ __('cycles.Filter_Startups') }}
+          </h4>
+          <button type="button" class="btn btn-xs btn-icon btn-outline-primary rounded" data-bs-dismiss="modal" aria-label="Close">
+            <i class="ti ti-x ti-16px"></i>
+          </button>
+        </div>
+        <form class="bg-label-secondary" method="GET" action="{{ route('cycles.users', $id) }}">
+          <div class="card">
+            <div class="card-body">
+              <div class="form-group mb-4">
+                <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Select_Step') }}</label>
+                <select name="step_id" class="form-select select2">
+                  <option value="0">{{ __('cycles.All') }}</option>
+                  @foreach ($steps as $step)
+                    <option value="{{ $step->id }}" {{ $step->id == request('step_id') ? 'selected' : '' }}>
+                      {{ $step->title }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="form-group mb-4">
+                <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Select_Country') }}</label>
+                <select name="country_id" class="form-select select2">
+                  <option value="0">{{ __('cycles.All') }}</option>
+                  @php
+                    $countries = App\Country::all();
+                  @endphp
+                  @foreach ($countries as $country)
+                    <option value="{{ $country->id }}"
+                      {{ $country->id == request('country_id') ? 'selected' : '' }}>{{ $country->{'name_' . $l} }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="form-group mb-4">
+                <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Select_Sector') }}</label>
+                <select name="sector_id" class="form-select select2">
+                  <option value="0">{{ __('cycles.All') }}</option>
+                  @php
+                    $sectors = App\Sector::all();
+                  @endphp
+                  @foreach ($sectors as $sector)
+                    <option value="{{ $sector->id }}"
+                      {{ $sector->id == request('sector_id') ? 'selected' : '' }}>{{ $sector->{'name_' . $l} }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="form-group mb-4">
+                <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Select_Stage') }}</label>
+                <select name="Dstage_id" class="form-select select2">
+                  <option value="0">{{ __('cycles.All') }}</option>
+                  @php
+                    $stages = App\Stage::all();
+                  @endphp
+                  @foreach ($stages as $stage)
+                    <option value="{{ $stage->id }}"
+                      {{ $stage->id == request('Dstage_id') ? 'selected' : '' }}>{{ $stage->{'name_' . $l} }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="form-group mb-4">
+                <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Select_Funding_Stage') }}</label>
+                <select class="form-select select2" name="funding_stage" data-placeholder="{{ __('cycles.Select_Funding_Stage') }}">
+                  <option value="">{{ __('cycles.All') }}</option>
+                  <option value="Pre_seed_funding_stage"
+                    {{ request('funding_stage') == 'Pre_seed_funding_stage' ? 'selected' : '' }}>
+                    {{ __('admin.Pre_seed_funding_stage') }}
+                  </option>
+                  <option value="Seed_funding_stage "
+                    {{ request('funding_stage') == 'Seed_funding_stage' ? 'selected' : '' }}>
+                    {{ __('admin.Seed_funding_stage') }}
+                  </option>
+                  <option value="Series_A_funding"
+                    {{ request('funding_stage') == 'Series_A_funding' ? 'selected' : '' }}>
+                    {{ __('admin.Series_A_funding') }}
+                  </option>
+                  <option value="Series_B_funding"
+                    {{ request('funding_stage') == 'Series_B_funding' ? 'selected' : '' }}>
+                    {{ __('admin.Series_B_funding') }}
+                  </option>
+                  <option value="Series_C_funding"
+                    {{ request('funding_stage') == 'Series_C_funding' ? 'selected' : '' }}>
+                    {{ __('admin.Series_C_funding') }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group mb-4">
+                <label for="targeted_market" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Targeted_Market') }}</label>
+                <select
+                  class="form-select select2"
+                  id="targeted_market"
+                  name="targeted_market[]"
+                  multiple
+                  autocomplete="targeted_market"
+                >
+                  @php
+                    $countries = App\Country::all();
+                  @endphp
+                  @foreach ($countries as $country)
+                    <option value="{{ $country->id }}"
+                      {{ $country->id == request('country_id') ? 'selected' : '' }}>
+                      {{$country->emoji . ' ' . $country->{'name_'.$l} }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="form-group mb-4">
+                <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Business_Type') }}</label>
+                <select class="form-select select2" name="BType">
+                  <option value="0">{{ __('admin.All') }}</option>
+                  <option value="B2C" {{ request('BType') == 'B2C' ? 'selected' : '' }}>
+                    B2C</option>
+                  <option value="B2B" {{ request('BType') == 'B2B' ? 'selected' : '' }}>
+                    B2B</option>
+                  <option value="B2B2C" {{ request('BType') == 'B2B2C' ? 'selected' : '' }}>
+                    B2B2C</option>
+                  <option value="C2C" {{ request('BType') == 'C2C' ? 'selected' : '' }}>
+                    C2C</option>
+                  <option value="B2G" {{ request('BType') == 'B2G' ? 'selected' : '' }}>
+                    B2G</option>
+                  <option value="Platform" {{ request('BType') == 'Platform' ? 'selected' : '' }}>
+                    Platform</option>
+                </select>
+              </div>
+            </div>
+          </div>
+           <!-- Footer -->
+           <div class="d-flex align-items-center justify-content-end gap-3 mt-4">
+            <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal" 
+            onclick="window.location.href='/dashboard/cycles/{{ $id }}/registered'">
+              {{ __('cycles.Cancel') }}
+              <i class="ti ti-circle-x ms-2"></i>
+            </button>
+            <button type="submit" class="btn btn-primary">
+              {{ __('cycles.Apply') }}
+              <i class="ti ti-circle-check ms-2"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 @stop
 
 @section('scripts')
-<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
-<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 @stop
 
 @section('pagescripts')
-<script src="/app-assets/js/1.js"></script>
-<script src="/vuexy/assets/js/forms-selects.js"></script>
-<script>
-  var bsRangePickerBasic = $('#bs-rangepicker-basic');
-  if (bsRangePickerBasic.length) {
-    bsRangePickerBasic.daterangepicker({
-      opens: isRtl ? 'left' : 'right',
-    });
-  }
-</script>
+  <script src="/app-assets/js/1.js"></script>
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
+  <script>
+    var bsRangePickerBasic = $('#bs-rangepicker-basic');
+    if (bsRangePickerBasic.length) {
+      bsRangePickerBasic.daterangepicker({
+        opens: isRtl ? 'left' : 'right',
+      });
+    }
+  </script>
 
   <script type="text/javascript">
-   document.addEventListener('DOMContentLoaded', () => {
-      console.log('loaded');
-    });
-
     $(document).ready(function() {
       $('.table').DataTable({
         "responsive": true,
