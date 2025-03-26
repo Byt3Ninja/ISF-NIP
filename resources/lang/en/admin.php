@@ -1364,7 +1364,7 @@ return [
 	'please_enter_valid_name' => 'Please enter a valid name of letters only',
 	'please_enter_valid_email' => 'Please enter a valid email',
 	'please_enter_valid_linkedin' => 'Please enter a valid linkedin url',
-	'percentage_must_be_between_1_and_100' => 'Percentage must be between 1 and 100',
+	'percentage_must_be_between_1_and_100' => 'Percentage must be between 0 and 100',
 	'please_enter_valid_role' => 'Please enter a valid role',
 	'shareholder_name_required' => 'Shareholder Name is required',
 	'investor_name_required' => 'Investor Name is required',
