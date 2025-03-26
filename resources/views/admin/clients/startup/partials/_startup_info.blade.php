@@ -126,22 +126,12 @@
         </div>
       </div>
       <!-- Action Button -->
-      <div class="col-md-2 d-flex align-items-center justify-content-end gap-2">
-        @if( $_user->hasAnyRole('Admin|organizationManager') )
-        @if( $_user->ableTo('my_company', $permissions) )
+      <div class="col-md-2 d-flex flex-column align-items-center justify-content-center gap-2">
+        @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('my_company', $permissions) )
         <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
           style="border-radius: 15px;">
           {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
         </a>
-        @endif
-        @endif
-        @if( isset( $_user->company()->first()->id ) && $company->id == $_user->company()->first()->id )
-        @if( $_user->ableTo('my_company', $permissions) )
-        <a href="/dashboard/myCompany" class="btn btn-label-primary shadow-sm text-primary fw-bold"
-          style="border-radius: 15px;">
-          {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>
-        </a>
-        @endif
         @else
         <a href="" data-bs-toggle="modal" data-bs-target="#MessageModal"
           class="btn btn-label-primary shadow-sm text-primary fw-bold text-nowrap" style="border-radius: 15px;">
