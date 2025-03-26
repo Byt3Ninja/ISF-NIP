@@ -305,5 +305,6 @@ return [
     'Select_Stage' => 'اختر المرحلة',
     'Select_Funding_Stage' => 'اختر مرحلة التمويل',
     'Business_Type' => 'نوع العمل',
+    'Reset' => 'إعادة تعيين',
   ];
 

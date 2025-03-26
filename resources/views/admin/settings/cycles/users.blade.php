@@ -413,7 +413,7 @@
            <div class="d-flex align-items-center justify-content-end gap-3 mt-4">
             <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal" 
             onclick="window.location.href='/dashboard/cycles/{{ $id }}/registered'">
-              {{ __('cycles.Cancel') }}
+              {{ __('cycles.Reset') }}
               <i class="ti ti-circle-x ms-2"></i>
             </button>
             <button type="submit" class="btn btn-primary">

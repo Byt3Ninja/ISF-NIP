@@ -308,5 +308,6 @@ return [
     'Select_Stage' => 'Select Stage',
     'Select_Funding_Stage' => 'Select Funding Stage',
     'Business_Type' => 'Business Type',
+    'Reset' => 'Reset',
 ];
 
