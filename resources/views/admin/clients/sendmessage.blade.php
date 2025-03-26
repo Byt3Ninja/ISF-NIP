@@ -89,6 +89,7 @@
                                 <input value="1" type="radio" id="radioshadow2" name="type" onclick="menus(1)">
                                 <label class="radioLabel" for="radioshadow2">{{ __('messages.CycleUsers') }}</label>
                               </div>
+                                  
                             </fieldset>
                           </li>
                         @endif
@@ -102,8 +103,31 @@
                             </fieldset>
                           </li>
                         @endif
+
+                        @if(Auth::user()->hasAnyRole('Admin|OrganizationManager') && $cycles->count())
+                        <li class="d-inline-block mr-2 mb-1">
+                          <fieldset>
+                            <div class="radio radio-shadow">
+                              <input value="3" type="radio" id="radioshadow4" name="type" onclick="menus(3)">
+                              <label class="radioLabel" for="radioshadow4">{{ __('admin.Organizations') }}</label>
+                            </div>
+                          </fieldset>
+                        </li>
+                        @endif
                       </ul>
+
+                    
                       <div class="mb-4" style="display: none;" id="users">
+                        @if(Auth::user()->hasAnyRole('Admin|OrganizationManager') && $cycles->count())
+                        <div class="mb-4" id="cycle-selection">
+                          <label class="form-label">{{ __('admin.SelectProgram') }}</label>
+                          <select class="form-control select2" name="cycle_id" onchange="filterUsersByCycle(this.value)">
+                            @foreach($cycles as $cycle)
+                              <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
+                            @endforeach
+                          </select>
+                        </div>
+                        @endif
                         @if ($users)
                           <label class="form-label"
                             for="users">{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}</label>
@@ -118,6 +142,7 @@
                             @endforeach
                           </select>
                         @endif
+                        
                       </div>
 
                       <div class="mb-4" style="display: none;" id="mentors">
@@ -134,6 +159,21 @@
                           </select>
                         @endif
                       </div>
+
+                      @if(Auth::user()->hasAnyRole('Admin|OrganizationManager'))
+                       <div class="mb-4" style="display: none;" id="organizations">
+                        <label class="form-label">{{ __('admin.Select Organizations') }}</label>
+                       
+                        <div id="organizationList">
+                          @foreach ($organizations as $organization)
+                            <div>
+                              <input type="checkbox" name="organizations[]" value="{{ $organization->id }}">
+                              <label>{{ $organization->{'name_' .app()->getLocale()} }}</label>
+                            </div>
+                          @endforeach
+                        </div>
+                       </div>
+                      @endif
                       <div class="mb-4">
                         <label class="form-label">{{ __('messages.Subject') }}</label>
                         <input name="subject" type="text" placeholder="{{ __('messages.Subject') }}"
@@ -145,6 +185,7 @@
                           required></textarea>
                       </div>
                     </div>
+                    
 
                     <button type="submit" class="btn btn-primary send-btn">
                       <i class="ti ti-send"></i>
@@ -172,12 +213,35 @@
       } else if (menu === 2) {
         $('#users').hide();
         $('#mentors').show();
-      } else {
+      }else if (menu === 3) {
+         $('#organizations').show();
+          $('#users, #mentors').hide(); 
+      }else {
         $('#users').hide();
         $('#mentors').hide();
       }
     }
-  </script>
+
+    function filterUsersByCycle(cycleId) {
+      if (!cycleId) return null;
+      $.ajax({
+        url: "{{ route('getUsersByProgram') }}",
+        method: "GET",
+        data: { cycle_id: cycleId },
+        success: function(response) {
+          let userSelect = $('select[name="users[]"]');
+          userSelect.empty();
+          response.users.forEach(user => {
+            userSelect.append(`<option value="${user.id}">${user.name}</option>`);
+          });
+          userSelect.trigger('change');
+        }
+      });
+    }
+
+
+</script>
+
 
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
 @stop

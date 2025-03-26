@@ -272,6 +272,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/send_message', 'MessengerController@sendmsg');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('sendmessage');
     Route::post('/sendmessage', 'MessengerController@savemessage');
+    Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('getUsersByProgram');
+
     //ShowMessages
     Route::get('/inbox', 'MessengerController@index')->name('inbox');
     Route::get('/outbox', 'MessengerController@outbox')->name('outbox');

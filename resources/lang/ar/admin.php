@@ -1458,5 +1458,7 @@ return [
     'signup_agreement_privacy' => 'من خلال التسجيل، فإنك توافق على :privacy.',
     'terms' => 'الشروط والأحكام',
     'privacy' => 'سياسة الخصوصية',
+	'SelectProgram' => 'اختر البرنامج',
+	'Select Organizations' => 'اختر المؤسسات',
 ]; 
 

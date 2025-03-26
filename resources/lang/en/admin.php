@@ -1435,4 +1435,7 @@ return [
     'signup_agreement_privacy' => 'By signing up, you agree to the :privacy.',
     'terms' => 'Terms and Conditions',
     'privacy' => 'Privacy Policy',
+	'SelectProgram' => 'Select Program',
+	'Select Organizations' => 'Select Organizations',
+	'SelectAll'=>'Select All',
 ];
