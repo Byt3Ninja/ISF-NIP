@@ -1427,4 +1427,5 @@ return [
 	'less_than' => 'Less than',
 	'checked' => 'Checked',
 	'Notchecked' => 'Not Checked',
+	'Good_progress_but_room_for_scaling' => 'Good progress, but room for scaling',
 ];

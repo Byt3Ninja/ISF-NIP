@@ -1450,5 +1450,6 @@ return [
 	'less_than' => 'اقل من',
 	'checked' => 'تم التحقق',
 	'Notchecked' => 'لم يتم التحقق',
+	'Good_progress_but_room_for_scaling' => 'تقدم جيد ولكن هناك مجال للتوسيع',
 ]; 
 
