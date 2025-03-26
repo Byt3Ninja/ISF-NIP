@@ -113,6 +113,21 @@
       </select>
     </div>
   </div>
+
+  <div class="col-md-12 col-12">
+    <div class="form-group mb-3">
+        <label class="form-label" for="terms_url">{{ __('admin.Terms and Conditions URL') }}</label>
+        <input type="url" class="form-control" name="terms_url" value="{{ $Title->terms_url }}">
+    </div>
+</div>
+
+<div class="col-md-12 col-12">
+    <div class="form-group mb-3">
+        <label class="form-label" for="privacy_url">{{ __('admin.Privacy Policy URL') }}</label>
+        <input type="url" class="form-control" name="privacy_url" value="{{ $Title->privacy_url }}">
+    </div>
+</div>
+
   <br>
   <div class="col-md-12 col-12">
     <div class="form-check form-switch mb-2">

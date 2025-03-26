@@ -1428,4 +1428,11 @@ return [
 	'checked' => 'Checked',
 	'Notchecked' => 'Not Checked',
 	'Good_progress_but_room_for_scaling' => 'Good progress, but room for scaling',
+	'Terms and Conditions URL' => 'Terms and Conditions URL',
+	'Privacy Policy URL' => 'Privacy Policy URL',
+	'signup_agreement' => 'By signing up, you agree to the :terms and :privacy.',
+    'signup_agreement_terms' => 'By signing up, you agree to the :terms.',
+    'signup_agreement_privacy' => 'By signing up, you agree to the :privacy.',
+    'terms' => 'Terms and Conditions',
+    'privacy' => 'Privacy Policy',
 ];

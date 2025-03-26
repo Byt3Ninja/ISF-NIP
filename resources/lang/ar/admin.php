@@ -1451,5 +1451,12 @@ return [
 	'checked' => 'تم التحقق',
 	'Notchecked' => 'لم يتم التحقق',
 	'Good_progress_but_room_for_scaling' => 'تقدم جيد ولكن هناك مجال للتوسيع',
+	'Terms and Conditions URL' => 'رابط الشروط والاحكام',
+	'Privacy Policy URL' => 'رابط سياسة الخصوصية',
+	'signup_agreement' => 'من خلال التسجيل، فإنك توافق على :terms و :privacy.',
+    'signup_agreement_terms' => 'من خلال التسجيل، فإنك توافق على :terms.',
+    'signup_agreement_privacy' => 'من خلال التسجيل، فإنك توافق على :privacy.',
+    'terms' => 'الشروط والأحكام',
+    'privacy' => 'سياسة الخصوصية',
 ]; 
 

@@ -120,7 +120,7 @@ class MessengerController extends Controller
     }
     public function sendmessage() {
        	$users = $mentors = null;
-	    if (Auth::user()->hasAnyRole('Admin|Manager')) {
+	    if (Auth::user()->hasAnyRole('Admin|organizationManager')) {
 	        $users = Company::get();
 	        $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
         } elseif (Auth::user()->hasRole('Mentor')) {

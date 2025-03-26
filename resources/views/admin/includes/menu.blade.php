@@ -759,14 +759,6 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           </ul>
         </li>
       @endif
-      @if( $_user->ableTo('documentation.index', $permissions) )
-        <li class="{{ Request::is('dashboard/documentation*') ? 'active' : '' }} menu-item">
-          <a class="menu-link" href="/dashboard/documentation">
-            <i class="menu-icon tf-icons ti ti-file-description"></i>
-            <div>{{ __('admin.Documentations') }}</div>
-          </a>
-        </li>
-      @endif
 
       @if ($_user->hasAnyRole('organizationManager'))
       @if ($_user->ableTo('organization-settings',$permissions))
@@ -788,6 +780,15 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
     </li>
   @endif --}}
     @endif
+
+    @if( $_user->ableTo('documentation.index', $permissions) )
+    <li class="{{ Request::is('dashboard/documentation*') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="/dashboard/documentation">
+        <i class="menu-icon tf-icons ti ti-file-description"></i>
+        <div>{{ __('admin.Documentations') }}</div>
+      </a>
+    </li>
+  @endif
 
     @if( $_user->ableTo('reports.index', $permissions) )
       <li class="{{ Request::is('dashboard/reports*') ? 'active' : '' }} menu-item">
