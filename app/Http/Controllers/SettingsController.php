@@ -335,6 +335,11 @@ class SettingsController extends Controller
 
 	public function update_settingsone(Request $request)
 	{
+		$request->validate([
+			'terms_url' => 'nullable|url|starts_with:https',
+			'privacy_url' => 'nullable|url|starts_with:https',
+		]);
+
 		$id = $request->input('id');
 		$site_ar_title = $request->input('site_ar_title');
 		$site_title = $request->input('site_title');
@@ -364,6 +369,9 @@ class SettingsController extends Controller
 		$updateSittings->HomePage = $homePage;
 		$updateSittings->mentor_list = $MentorList;
 		$updateSittings->assessment = $Assessment;
+		$updateSittings->terms_url = $request->terms_url;
+		$updateSittings->privacy_url = $request->privacy_url;
+
 		$updateSittings->save();
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}
