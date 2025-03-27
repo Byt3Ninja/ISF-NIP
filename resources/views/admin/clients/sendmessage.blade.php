@@ -40,7 +40,9 @@
                 <option value="0">{{ __('messages.PortalManagers') }}</option>
                 <option value="1">{{ __('messages.CycleUsers') }}</option>
                 <option value="2">{{ __('messages.Mentors') }}</option>
-                <option value="3">{{ __('admin.Organizations') }}</option>
+                @if (Auth::user()->hasAnyRole('Admin|OrganizationManager') && $cycles->count())
+                 <option value="3">{{ __('admin.Organizations') }}</option>
+                @endif
               </select>
             </div>
             <div class="mb-4" style="display: none;" id="users">
