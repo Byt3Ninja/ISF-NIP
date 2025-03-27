@@ -50,7 +50,7 @@ $phone_codes = App\Country::all();
 $tabs = [
 ['account', 'accountSection', 'users'],
 ['security', 'securitySection', 'lock'],
-['2FA', '2faSection', 'lock'],
+['2FA', '2faSection', 'key'],
 ['billing', 'billingSection', 'bookmark'],
 ['notifications', 'notificationsSection', 'bell'],
 ['connections', 'connectionsSection', 'link'],
@@ -85,9 +85,9 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
                 aria-controls="{{ $tab['target'] }}" 
                 aria-selected="true" 
                 @if (auth()->user()->hasRole('Mentor'))
-                  disabled="{{ $key > 2 ? 'true' : 'false' }}"
+                  disabled="{{ $key > 3 ? 'true' : 'false' }}"
                 @else
-                  disabled="{{ $key > 2 ? 'true' : 'false' }}"
+                  disabled="{{ $key > 3 ? 'true' : 'false' }}"
                 @endif
               >
                 <i class="ti-sm ti ti-{{ $tab['icon'] }} me-1_5"></i>

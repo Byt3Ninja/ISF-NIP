@@ -33,6 +33,56 @@
 							@endif
 							<div class="card-body">
 								<div class="card-text">
+									<br>
+                  <!-- Filter -->
+              <form method="GET" action="/dashboard/weights">
+                <div class="d-flex align-items-center mx-2">
+                  <div style="display: flex; align-items: center;">
+                  <button
+                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                    style="border-radius: 17px; width: 40px; height: 40px;"
+                     type="submit"
+                  >
+                    <i class="ti ti-filter text-white ti-24px"></i>
+                  </button>
+                </div>
+                <!-- Search Bar -->
+                
+                <div class="position-relative me-3 d-none d-md-flex">
+                  <select name="category_id" class="form-control">
+                    <option value="0">All</option>
+                    @php
+                    $categories = App\Category::where('category_type', 'Assesment')->get();
+                    @endphp
+                    @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" {{ $category->id == request('category_id') ? 'selected' : '' }}>{{ $category->{'category_name_'. $l} }}</option>
+                    @endforeach
+                  </select>
+                </div>
+
+				<div class="position-relative me-3 d-none d-md-flex">
+					<select name="subcategory_id" class="form-control">
+					  <option value="0">All</option>
+					  @php
+					  if(request('category_id') != 0){
+						  $subcategories = App\SubCategory::where('category_id', request('category_id'))->where('Type', 'Assesment')->get();
+					  }else{
+						$subcategories = App\SubCategory::where('Type', 'Assesment')->get();
+					  }
+					  
+					  @endphp
+					  @foreach ($subcategories as $subcategory)
+					  <option value="{{ $subcategory->id }}" {{ $subcategory->id == request('subcategory_id') ? 'selected' : '' }}>{{ $subcategory->{'name_'. $l} }}</option>
+					  @endforeach
+					</select>
+				  </div>
+                
+  
+                
+
+              </div>
+              </form>
+              <hr>
 									<div class="table-responsive">
 										<table class="table mb-0" id="userstable">
 											<thead class="thead-dark">
@@ -285,7 +335,7 @@
 				"paging": true,
 				"bInfo": false,
 				"columnDefs": [
-					{"orderable": false, "targets":	[3]},
+					{"orderable": true, "targets":	[3]},
 				],
 				@if ($l == 'ar')
 				"language": {

@@ -2,9 +2,11 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Cycle;
 use App\Company;
 use App\Messages;
 use App\Messenger;
+use App\Organization;
 use App\CyclesMentors;
 use App\Events\WebMessage;
 use Illuminate\Http\Request;
@@ -118,24 +120,66 @@ class MessengerController extends Controller
 
         }
     }
-    public function sendmessage() {
-       	$users = $mentors = null;
-	    if (Auth::user()->hasAnyRole('Admin|Manager')) {
-	        $users = Company::get();
-	        $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+    public function sendmessage(Request $request) 
+    {
+        $users = $mentors = $cycles = $organizations = null;
+           if (Auth::user()->hasAnyRole('Admin|OrganizationManager')) {
+            $cycles = Cycle::select('id', 'title')->get();
+    
+            $users = Company::get();
+    
+            $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+            $organizations = Organization::all();
+            if ($request->has('cycle_id') && !empty($request->cycle_id)) {
+                $users = Company::where('cycle', $request->cycle_id)
+                    ->whereHas('user', function ($query) {
+                        $query->role('Registered'); 
+                    })->get();
+            }
+            if ($request->has('organization_id') && !empty($request->organization_id)) {
+                $users = Company::where('organization_id', $request->organization_id)->get();
+            }
         } elseif (Auth::user()->hasRole('Mentor')) {
-	        $cycles = CyclesMentors::where('user_id',Auth::id())->get(['cycle_id'])->toArray();
-            $users = Company::whereIn('cycle',array_values($cycles))->get();
+            $cycles = CyclesMentors::where('user_id', Auth::id())->get(['cycle_id'])->toArray();
+            $users = Company::whereIn('cycle', array_values($cycles))->get();
             $mentors = null;
         } elseif (Auth::user()->company) {
-          if(Auth::user()->company->approved) {
-            $users = Company::where('cycle',Auth::user()->company->cycle)->where('id','!=',Auth::user()->company->id)->get();
-            $mentors = User::join('cycles_mentors', 'users.id', 'user_id')->where('cycle_id',Auth::user()->company->cycle)->get(['users.id','first_name_ar','first_name_en','last_name_ar','last_name_en']);}
+            if (Auth::user()->company->approved) {
+                $users = Company::where('cycle', Auth::user()->company->cycle)
+                    ->where('id', '!=', Auth::user()->company->id)
+                    ->whereHas('user', function ($query) {
+                        $query->role('Registered');
+                    })->get();
+    
+                $mentors = User::join('cycles_mentors', 'users.id', 'user_id')
+                    ->where('cycle_id', Auth::user()->company->cycle)
+                    ->get(['users.id', 'first_name_ar', 'first_name_en', 'last_name_ar', 'last_name_en']);
+            }
         }
-        if( empty( $users ) || !isset( $users ) ) { $users = Company::where('id', '<', 0)->get(); }
-        if( empty( $mentors ) || !isset( $mentors ) ) { $mentors = User::where('id', '<', 0)->get(); }
-        return view('admin/clients/sendmessage', compact('users','mentors'));
+    
+        return view('admin/clients/sendmessage', compact('users', 'mentors', 'cycles','organizations'));
     }
+
+    public function getUsersByProgram(Request $request)
+{
+    $cycleId = $request->input('cycle_id');
+
+    $users = Company::where('cycle', $cycleId)
+        ->whereHas('user', function ($query) {
+            $query->role('Registered');
+        })
+        ->with('user')
+        ->get();
+
+    $formattedUsers = $users->map(function ($company) {
+        return [
+            'id' => $company->user->id,
+            'name' => $company->user->first_name_en . ' ' . $company->user->last_name_en . ' - (' . $company->name_en . ')', 
+        ];
+    });
+
+    return response()->json(['users' => $formattedUsers]);
+}
     public function savemessage(Request $request) 
     {
         $cuser = Auth::user();
@@ -223,7 +267,54 @@ class MessengerController extends Controller
                     return redirect('/dashboard')->with(['msg' => 'error: ' . $e->getMessage(), 'class' => 'danger']);
                 }
             }
-        } else {
+        } elseif ($request->type == 3) {
+            if (!$request->organizations || !is_array($request->organizations)) {
+                return redirect('/dashboard')->with(['msg' => 'MessageError: No organizations selected', 'class' => 'danger']);
+            }
+    
+            foreach ($request->organizations as $orgId) {
+                $organization = Organization::find($orgId);
+                if (!$organization) {
+                    return redirect('/dashboard')->with(['msg' => 'Error: Selected organization does not exist', 'class' => 'danger']);
+                }
+    
+                $orgUsers = User::where('organization_id', $orgId)->get();
+    
+                foreach ($orgUsers as $user) {
+                    try {
+                        $new = new Messenger();
+                        $new->sender = $cuser->id;
+                        $new->receiver = $user->id;
+                        $new->subject = $request->input('subject');
+                        $new->message = $request->input('message');
+                        $new->save();
+    
+                        $rfullname = $user->first_name_en . " " . $user->last_name_en;
+                        $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
+                        $MSG = new TemplateEmail;
+                        $MSG->Message = [
+                            "New message received - VI portal",
+                            "Dear " . $rfullname . ",",
+                            "You have a new message from " . $sfullname . ", Needs your review.",
+                            "/dashboard/inbox"
+                        ];
+    
+                        if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+                            try {
+                                $user->notify($MSG);
+                            } catch (\Throwable $th) {
+                                Log::error('Notification Error: ' . $th->getMessage());
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        Log::error(' Error: ' . $e->getMessage());
+                        return redirect('/dashboard')->with(['msg' => 'error: ' . $e->getMessage(), 'class' => 'danger']);
+                    }
+                }
+            }
+        }
+    
+        else {
             try {
                 $new = new Messages();
                 $name = $cuser->first_name_en . ' ' . $cuser->last_name_en;
@@ -239,7 +330,7 @@ class MessengerController extends Controller
                 event(new WebMessage('mymsg', $name));
             } catch (\Exception $e) {
                 Log::error('Error: ' . $e->getMessage());
-                return redirect('/dashboard')->with(['msg' => 'Database error: ' . $e->getMessage(), 'class' => 'danger']);
+                return redirect('/dashboard')->with(['msg' => 'error: ' . $e->getMessage(), 'class' => 'danger']);
             }
         }
     

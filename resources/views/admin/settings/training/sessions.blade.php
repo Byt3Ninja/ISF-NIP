@@ -91,6 +91,45 @@
                 </div>
                 <div class="card-body">
                   <div class="card-text">
+                    <br>
+                  <!-- Filter -->
+              <form method="GET" action="{{ route('training.sessions', $id) }}">
+                <div class="d-flex align-items-center mx-2">
+                  <div style="display: flex; align-items: center;">
+                  <button
+                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                    style="border-radius: 17px; width: 40px; height: 40px;"
+                     type="submit"
+                  >
+                    <i class="ti ti-filter text-white ti-24px"></i>
+                  </button>
+                </div>
+                <!-- Search Bar -->
+                
+                <div class="position-relative me-3 d-md-flex">
+                  <select name="type" class="select2 form-control">
+                    <option value="0">All</option>
+                    @php
+                    $Types = App\TrainingSession::select('type')->distinct()->get();
+                    @endphp
+                    @foreach ($Types as $Type)
+                    <option value="{{ $Type->type }}" {{ $Type->type == request('type') ? 'selected' : '' }}>{{ $Type->type }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                
+                <div class="position-relative me-3 d-md-flex">
+                  <input type="text" name="dateFrom" value="{{ request('dateFrom') }}" class="form-control flatpickr-datefilter" placeholder="From">
+                </div>
+
+                <div class="position-relative me-3 d-md-flex">
+                  <input type="text" name="dateTo" value="{{ request('dateTo') }}" class="form-control flatpickr-datefilter" placeholder="To">
+                </div>
+                
+
+              </div>
+              </form>
+              <hr>
                     <div class="table-responsive">
                       <table class="table mb-0" id="trainingtable">
                         <thead class="bg-label-light">
@@ -744,6 +783,9 @@
     $('#eendTime').flatpickr({
       enableTime: true,
       noCalendar: true
+    });
+    $('.flatpickr-datefilter').flatpickr({
+      monthSelectorType: 'static',
     });
   </script>
 

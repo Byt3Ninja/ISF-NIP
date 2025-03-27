@@ -193,10 +193,29 @@ class ServiceController extends Controller
 		return response()->json(['state' => 'success'], 200);
 	}
 
-	public function requests()
+	public function requests(Request $request)
 	{
-		$received = ServicesRequests::whereNull('approved')->with('service')->get();
+		$received = ServicesRequests::whereNull('approved')->with('service');
 		$countold = ServicesRequests::whereNotNull('approved')->count();
+
+		if($request->Service_id != 0){
+			$received = $received->whereNull('approved')->where('service_id', $request->Service_id)->with('service');
+		}
+		if($request->status != 0){
+			$request->status == 'Done' ? $status = 1 : $status = 0;
+			
+			$received = $received->whereNull('approved')->where('done', $status)->with('service');
+		}
+		if($request->start_date != 0){
+			$received = $received->whereNull('approved')->where('date_time', '>=', $request->start_date)->with('service');
+		}
+		if($request->end_date != 0){
+			$received = $received->whereNull('approved')->where('date_time', '<=', $request->end_date)->with('service');
+		}
+
+
+		$received = $received->get();
+		
 		return view('admin.settings.services.requests', compact('received','countold') );
 	}
 

@@ -36,7 +36,7 @@
                     $client->last_name_en
                     }}
                     @role('Mentor')
-                    <a target="_blank" href="{{ $client->bio->linkedin }}" class="ms-3">
+                    <a target="_blank" href="{{ $client->bio->linkedin ?? '#' }}" class="ms-3">
                       <img src="/icons/linkedin.svg" width="24" height="24" />
                     </a>
                     @endrole
@@ -131,7 +131,7 @@
                 <h5 class="cart-title">
                   {{__('admin.ProfileSummary')}}
                 </h5>
-                {{ $client->bio->bio }}
+                {{ $client->bio->bio ?? __('admin.N/A') }}
                 {{
                 $l == 'ar'
                 ? $client->bio->bio_ar

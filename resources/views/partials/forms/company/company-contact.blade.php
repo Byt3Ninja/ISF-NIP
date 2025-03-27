@@ -154,7 +154,7 @@
                     id="website" 
                     name="website" 
                     {{-- placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}"  --}}
-                    placeholder="e.g. https?://" 
+                    placeholder="e.g. https://website.com""
                     value="{{ $client->company->website ?? old('website') }}" 
                     pattern="https?://.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid website URL.' : 'يرجى إدخال رابط موقع صالح.' }}"

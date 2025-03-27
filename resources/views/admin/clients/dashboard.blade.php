@@ -815,7 +815,7 @@
                 <img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
             @endif
 
-              <span class="mx-3 text-secondary">{{ $_user->company->cycledata->organization->name }}</span>
+              <span class="mx-3 text-secondary">{{ optional($_user->company->cycledata->organization)->name ?? __('dashboard.No Organization') }}</span>
             </div>
           </div>
           <div class="table-responsive text-nowrap">

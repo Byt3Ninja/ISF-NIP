@@ -297,5 +297,17 @@ return [
     'Edit_Step' => 'Edit Step',
     'startup_is_required' => 'Please select at least one startup form the table.',
     'Date' => 'Date',
+    'Filter' => 'Filter',
+    'Filter_Startups' => 'Filter Startups',
+    'Select_Step' => 'Select Step',
+    'Cancel' => 'Cancel',
+    'Apply' => 'Apply',
+    'All' => 'All',
+    'Select_Country' => 'Select Country',
+    'Select_Sector' => 'Select Sector',
+    'Select_Stage' => 'Select Stage',
+    'Select_Funding_Stage' => 'Select Funding Stage',
+    'Business_Type' => 'Business Type',
+    'Reset' => 'Reset',
 ];
 

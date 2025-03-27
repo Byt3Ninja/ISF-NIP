@@ -64,33 +64,35 @@
           </div>
         </div>
       </div>
-      <div class="form-group mb-6 d-grid">
-        <label for="selectExpertises" class="form-label fs-6 fw-bold">
-          {{ __('admin.SelectExpertises') }}
-        </label>
-        <small class="mb-3">{{ __('admin.SelectMultiExpertises') }}.</small>
-        <div class="input-group input-group-merge">
-          <select 
-            name="expertises[]" 
-            class="form-select select2" 
-            multiple="multiple" 
-            id="selectExpertises"
-          >
-            @foreach ($expertises as $expertise_group)
-            <optgroup label="{{ $expertise_group->title }}">
-              @foreach ($expertise_group->children as $expertise)
-              <option 
-                value="{{ $expertise->id }}" 
-                @if (in_array($expertise->id, $client->mentorExpertises()->pluck('expertises.id')->toArray())) 
-                  selected 
-                @endif
-              >
-                {{ $expertise->title }}
-              </option>
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group mb-6 d-grid">
+            <label for="selectExpertises" class="form-label fs-6 fw-bold">
+              {{ __('admin.SelectExpertises') }}
+            </label>
+            <small class="mb-3">{{ __('admin.SelectMultiExpertises') }}.</small>
+            <select 
+              name="expertises[]" 
+              class="form-select select2" 
+              multiple="multiple" 
+              id="selectExpertises"
+            >
+              @foreach ($expertises as $expertise_group)
+              <optgroup label="{{ $expertise_group->title }}">
+                @foreach ($expertise_group->children as $expertise)
+                <option 
+                  value="{{ $expertise->id }}" 
+                  @if (in_array($expertise->id, $client->mentorExpertises()->pluck('expertises.id')->toArray())) 
+                    selected 
+                  @endif
+                >
+                  {{ $expertise->title }}
+                </option>
+                @endforeach
+              </optgroup>
               @endforeach
-            </optgroup>
-            @endforeach
-          </select>
+            </select>
+          </div>
         </div>
       </div>
       <div class="form-group mb-6">
@@ -224,7 +226,7 @@
       <button type="submit" class="btn btn-primary me-3">
         {{ __('admin.Save_Changes') }}
       </button>
-      <button type="reset" class="btn btn-secondary">
+      <button type="reset" class="btn btn-label-secondary" onclick="location.reload()">
         {{ __('admin.Reset') }}
       </button>
     </div>

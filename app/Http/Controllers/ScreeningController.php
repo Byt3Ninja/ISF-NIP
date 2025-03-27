@@ -84,7 +84,7 @@ class ScreeningController extends Controller
 					foreach ($list as $key => $panel) {
 						$cpanel = $key;
 						foreach ($panel as $user) {
-							$users = json_decode($request->{'panel' . $cpanel});
+							$users = json_decode($request->{'panel' . $cpanel});					
 							if ($users == "") {
 								Screening::create(['step_id' => $request->step, 'user_id' => $user, 'panel' => $cpanel]);
 							} else {

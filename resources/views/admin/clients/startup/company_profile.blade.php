@@ -82,7 +82,7 @@
       <div class="section-3">
         <div class="row">
           <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="background-color: #c4b5fd;">
+            <div class="card" style="height: 170px; background-color: #c4b5fd;">
               <div class="card-body">
                 <div class="align-self-center d-flex flex-column text-center align-items-center">
                   <div class="text-center">
@@ -99,7 +99,7 @@
             </div>
           </div>
           <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="background-color: #7dd3fc;">
+            <div class="card" style="height: 170px; background-color: #7dd3fc;">
               <div class="card-body">
                 <div class="align-self-center d-flex flex-column text-center align-items-center">
                   <div class="text-center">
@@ -118,7 +118,7 @@
             </div>
           </div>
           <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="background-color: #fdba74;">
+            <div class="card" style="height: 170px; background-color: #fdba74;">
               <div class="card-body">
                 <div class="align-self-center d-flex flex-column text-center align-items-center">
                   <div class="text-center">
@@ -143,14 +143,16 @@
             </div>
           </div>
           <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="background-color: #5eead4;">
+            <div class="card" style="height: 170px; background-color: #5eead4; overflow: hidden;">
               <div class="card-body">
-                <div class="align-self-center d-flex flex-column text-center align-items-center">
+                <div class="align-self-center d-flex flex-column text-center align-items-center w-100">
                   <div class="text-center">
-                    <img class="card-icon mb-2" src="/icons/target-market.svg" alt="icon" />
+                    <img class="card-icon mb-2" src="/icons/target-market.svg" alt="icon"
+                      style="width: 50px; height: 50px;"
+                    />
                   </div>
-                  <h5 class="mb-1 fw-semibold">{{ __('admin.Targeted_Market') }}</h5>
-                  <div class="d-flex align-items-center justify-content-center mt-2" style="gap: 5px;">
+                  <h5 class="mb-2 fw-semibold">{{ __('admin.Targeted_Market') }}</h5>
+                  <div class="d-flex justify-content-center align-items-center gap-1 pb-2" style="width: 99.5%; overflow: auto; white-space: nowrap;">
                     @if($company->targeted_market != null)
                     @php
                     $countryIds = json_decode($company->targeted_market, true);
@@ -162,7 +164,7 @@
                     @endphp
                     @foreach ($countryIds as $countryId)
                     <span
-                      class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                      class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3"
                       style="width: fit-content;">
                       {{ $targetedCountries[$countryId]->{'name_' . $l} ?? __('admin.N/A') }}
                     </span>
@@ -179,7 +181,7 @@
             </div>
           </div>
           <div class="col-6 col-md-4 mb-4">
-            <div class="card" style="background-color: #fca5a5;">
+            <div class="card" style="height: 170px; background-color: #fca5a5;">
               <div class="card-body">
                 <div class="align-self-center d-flex flex-column text-center align-items-center">
                   <div class="text-center">
@@ -265,7 +267,7 @@
     @if (!empty($Sustainables) && count($Sustainables) > 0)
     <section class="mt-6 row">
       <div class="col-12">
-        <div class="card" style=min-height: 290px;">
+        <div class="card" style="min-height: 290px;">
           <div class="p-4">
             <h5 class="">
               {{ $l == 'en' ? 'Sustainability Goals' : 'اهداف الاستدامة' }}

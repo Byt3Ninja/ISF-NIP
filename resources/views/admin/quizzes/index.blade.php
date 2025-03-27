@@ -48,6 +48,58 @@
 									@endif
 									<!-- datatable start -->
 									<div class="table-responsive">
+										<br>
+										<form method="GET" action="/dashboard/quizzes">
+										  <div class="d-flex align-items-center mx-2">
+											<div style="display: flex; align-items: center;">
+											<button
+											  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+											  style="border-radius: 17px; width: 40px; height: 40px;"
+											   type="submit"
+											>
+											  <i class="ti ti-filter text-white ti-24px"></i>
+											</button>
+										  </div>
+										  <!-- Search Bar -->
+										 
+							
+										  <div class="position-relative me-3 d-none d-md-flex">
+											<select name="org_id" class="form-control">
+											  <option value="0">All</option>
+											  @php
+											  $organizations = App\Organization::all();
+											  
+											  @endphp
+											  @foreach ($organizations as $organization) 
+											  <option value="{{$organization->id}}" {{ $organization->id == request('org_id') ? 'selected' : '' }}> {{ $organization->{'name_' . $l} }}</option>
+											@endforeach
+											</select>
+										  </div>
+					  
+										  {{-- <div class="position-relative me-3 d-none d-md-flex">
+											<select name="program_id" class="form-control">
+											  <option value="0">All</option>
+											  @php
+											  $Services = App\Service::all();
+											  
+											  @endphp
+											  @foreach ($Services as $Service) 
+											  <option value="{{$Service->id}}" {{ $Service->id == request('Service_id') ? 'selected' : '' }}> {{ $Service->{'name_' . $l} }}</option>
+											@endforeach
+											</select>
+										  </div> --}}
+							
+										  <div class="position-relative me-3 d-none d-md-flex">
+											<select name="status" class="form-control">
+											  <option value="0">All</option>
+											  <option value="draft" {{ 'draft' == request('status') ? 'selected' : '' }}>Draft</option>
+											  <option value="published" {{ 'published' == request('status') ? 'selected' : '' }}>Published</option>
+											</select>
+										  </div>
+							
+										</div>
+										</form>
+										<hr>
 										<table id="organizations-list-datatable" class="table">
 											<thead>
 											<tr class="table-light">
