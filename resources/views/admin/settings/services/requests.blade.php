@@ -24,6 +24,64 @@
                       </a>
                     @endif
                   </div>
+
+                  <br>
+                  <form method="GET" action="{{ route('requests') }}">
+                    <div class="d-flex align-items-center mx-2">
+                      <div style="display: flex; align-items: center;">
+                      <button
+                        class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                        style="border-radius: 17px; width: 40px; height: 40px;"
+                         type="submit"
+                      >
+                        <i class="ti ti-filter text-white ti-24px"></i>
+                      </button>
+                    </div>
+                    <!-- Search Bar -->
+                   
+      
+                    <div class="position-relative me-3 d-none d-md-flex">
+                      <select name="Service_id" class="form-control">
+                        <option value="0">All</option>
+                        @php
+                        $Services = App\Service::all();
+                        
+                        @endphp
+                        @foreach ($Services as $Service) 
+                        <option value="{{$Service->id}}" {{ $Service->id == request('Service_id') ? 'selected' : '' }}> {{ $Service->{'name_' . $l} }}</option>
+                      @endforeach
+                      </select>
+                    </div>
+
+                    <div class="position-relative me-3 d-none d-md-flex">
+                      <select name="status" class="form-control">
+                        <option value="0">All</option>
+                        <option value="Pending" {{ 'Pending' == request('status') ? 'selected' : '' }}> {{ __('admin.Pending') }}</option>
+                        <option value="Done" {{ 'Done' == request('status') ? 'selected' : '' }}> {{ __('admin.Done') }}</option>
+                      </select>
+                    </div>
+      
+                    <div class="position-relative me-3 d-none d-md-flex">
+                      <input
+                        class="form-control search border rounded mx-1 bg-transparent text-primary px-10 datepicker"
+                        
+                        placeholder="{{ __('admin.StartDate') }}"
+                        name="start_date"
+                        value="{{ request('start_date') }}" 
+                      />
+                      <input
+                        class="form-control search border rounded mx-1 bg-transparent text-primary px-10 datepicker"
+                        
+                        placeholder="{{ __('admin.EndDate') }}"
+                        name="end_date"
+                        value="{{ request('end_date') }}" 
+                      />
+                    </div>
+      
+                  </div>
+                  </form>
+
+                  
                   <div class="card-content">
                     <div class="card-body card-dashboard">
                       <div class="table-responsive">
