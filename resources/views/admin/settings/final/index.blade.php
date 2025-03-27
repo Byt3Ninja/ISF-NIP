@@ -96,6 +96,46 @@ to group of users'];
         @if (isset($cstep))
         <div class="col-xl-12 col-md-12 col-sm-12">
           <div class="card">
+            <form method="GET" action="{{ route('screening.show', $id) }}">
+              <div class="d-flex align-items-center mx-2">
+                <div style="display: flex; align-items: center;">
+                <button
+                  class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                  style="border-radius: 17px; width: 40px; height: 40px;"
+                   type="submit"
+                >
+                  <i class="ti ti-filter text-white ti-24px"></i>
+                </button>
+              </div>
+              <!-- Search Bar -->
+             
+
+              <div class="position-relative me-3 d-none d-md-flex">
+                <select name="judge_id" class="form-control">
+                  <option value="0">All</option>
+                   @foreach ($judges as $judge)
+                   <option value="{{ $judge->id }}" {{ $judge->id == request('judge_id') ? 'selected' : '' }}>{{ $judge->{'first_name_' . $l} }}
+                     {{ $judge->{'last_name_' . $l} }} ({{ $judge->email }})</option>
+                   @endforeach
+                </select>
+              </div>
+
+              <div class="position-relative me-3 d-none d-md-flex">
+                <select name="startup_id" class="form-control">
+                  <option value="0">All</option>
+                  @php
+                  $startups = App\Company::where('step', $id)->get();
+                  @endphp
+                   @foreach ($startups as $startup)
+                   <option value="{{ $startup->id }}" {{ $startup->id == request('startup_id') ? 'selected' : '' }}>
+                     {{ $startup->{'name_' . $l} }} </option>
+                   @endforeach
+                </select>
+              </div>
+
+            </div>
+            </form>
+            <hr>
             <form id="judges-form" action="/dashboard/final/update" method="POST" enctype="multipart/form-data">
               {!! csrf_field() !!}
               <div class="card-header border-bottom">
@@ -139,6 +179,9 @@ to group of users'];
                       </button>
                     </div>
                   </div>
+
+                  <br>
+                  
                   <div class="table-responsive">
                     <table class="table" id="mentorstable">
                       <thead class="table-light">

@@ -28,7 +28,7 @@ class FinalscreeningController extends Controller
         $this->meetingService =  OnlineMeetingFactory::create();
     }
 
-    public function index($id = 0)
+    public function index(Request $request, $id = 0)
     {
         $organization_id=auth()->user()->organization_id;
         $steps = Step::when(!is_null($organization_id),function ($q) use($organization_id){
@@ -43,7 +43,17 @@ class FinalscreeningController extends Controller
         } else {
             $cstep = Step::where('stype', 5)->where('id', $id)->first();
         }
-        $companies = Company::where('step',$id)->get();
+        $companies = Company::where('step',$id);
+        if($request->judge_id != 0){
+            $list = Finalscreening::whereJsonContains('judges', (string) $request->judge_id)->get();
+            $companies = $companies->whereIn('id',$list->pluck('company_id'));
+        }
+        if($request->startup_id != 0){
+            $companies = $companies->where('id',$request->startup_id);
+        }
+
+        $companies = $companies->get();
+
         return view('admin.settings.final.index', compact('cstep', 'judges', 'steps', 'id','companies'));
     }
 
