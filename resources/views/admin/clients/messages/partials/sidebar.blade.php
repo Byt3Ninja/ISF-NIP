@@ -1,6 +1,6 @@
 @php
   $folders = [
-    ['target' => 'inbox', 'icon' => 'ti-mail', 'label' => 'Inbox', 'badge' => ['count' => 21, 'class' => 'bg-label-primary']],
+    ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => $receivedMessagesCount, 'class' => 'bg-label-primary']],
     ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent'],
     // ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => 2, 'class' => 'bg-label-warning']],
     // ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => 2, 'class' => 'bg-label-warning']],
@@ -23,7 +23,7 @@
     <button class="btn btn-primary btn-compose" data-bs-toggle="modal" data-bs-target="#emailComposeSidebar"
       id="emailComposeSidebarLabel">
       <i class="ti ti-plus me-2"></i>
-      New Message
+      {{ __('admin.New Message') }}
     </button>
   </div>
   <!-- Messages Filters -->
@@ -31,10 +31,10 @@
     <!-- Messages Filters: Folder -->
     <ul class="email-filter-folders list-unstyled">
       @foreach ($folders as $folder)
-        <li class="d-flex justify-content-between align-items-center mb-1 {{ $loop->first ? 'active' : '' }}" data-target="{{ $folder['target'] }}">
+        <li id="{{ $folder['target'] }}-tab" class="d-flex justify-content-between align-items-center mb-1 {{ $loop->first ? 'active' : '' }}" data-target="{{ $folder['target'] }}">
           <a href="javascript:void(0);" class="d-flex flex-wrap align-items-center">
             <i class="ti {{ $folder['icon'] }}"></i>
-            <span class="align-middle ms-2">{{ $folder['label'] }}</span>
+            <span class="align-middle ms-2">{{ __('admin.'. $folder['label']) }}</span>
           </a>
           @if (isset($folder['badge']))
             <div class="badge {{ $folder['badge']['class'] }} rounded-pill">{{ $folder['badge']['count'] }}</div>

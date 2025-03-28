@@ -17,11 +17,15 @@ use Illuminate\Support\Facades\Auth;
 
 class MessengerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $userId = Auth::id();
+
+        // Fetch received messages
         $receivedMessages = Messenger::leftJoin('users', 'sender', '=', 'users.id')
-            ->where('receiver', Auth::user()->id)
-            ->orderBy('created_at', 'DESC')->get([
+            ->where('receiver', $userId)
+            ->orderBy('created_at', 'DESC')
+            ->get([
                 'messenger.id',
                 'first_name_en',
                 'last_name_en',
@@ -33,7 +37,15 @@ class MessengerController extends Controller
                 'messenger.sender'
             ]);
 
-        $sentMessages = Messenger::where('messenger.sender', Auth::id())
+        // Count all messages
+        $receivedMessagesCount = Messenger::where('receiver', $userId)
+            // ->where('read', 0)
+            ->count();
+
+
+
+        // Fetch sent messages
+        $sentMessages = Messenger::where('messenger.sender', $userId)
             ->join('users', 'messenger.receiver', '=', 'users.id')
             ->orderBy('messenger.created_at', 'DESC')
             ->get([
@@ -48,9 +60,68 @@ class MessengerController extends Controller
                 'messenger.created_at'
             ]);
 
+        // Fetch additional data if needed
+        $users = $mentors = $cycles = $organizations = null;
+        if (Auth::user()->hasAnyRole('Admin|OrganizationManager')) {
+            $cycles = Cycle::select('id', 'title')->get();
+            $users = Company::get();
+            $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+            $organizations = Organization::all();
+        } elseif (Auth::user()->hasRole('Mentor')) {
+            $cycles = CyclesMentors::where('user_id', $userId)->get(['cycle_id'])->toArray();
+            $users = Company::whereIn('cycle', array_values($cycles))->get();
+        } elseif (Auth::user()->company) {
+            if (Auth::user()->company->approved) {
+                $users = Company::where('cycle', Auth::user()->company->cycle)
+                    ->where('id', '!=', Auth::user()->company->id)
+                    ->whereHas('user', function ($query) {
+                        $query->role('Registered');
+                    })->get();
 
-        return view('admin.clients.messages.index', compact('sentMessages', 'receivedMessages'));
+                $mentors = User::join('cycles_mentors', 'users.id', 'user_id')
+                    ->where('cycle_id', Auth::user()->company->cycle)
+                    ->get(['users.id', 'first_name_ar', 'first_name_en', 'last_name_ar', 'last_name_en']);
+            }
+        }
+
+        // Return a single view with all data
+        return view('admin.clients.messages.index', compact('receivedMessages', 'receivedMessagesCount', 'sentMessages', 'users', 'mentors', 'cycles', 'organizations'));
     }
+
+    // public function index()
+    // {
+    //     $receivedMessages = Messenger::leftJoin('users', 'sender', '=', 'users.id')
+    //         ->where('receiver', Auth::user()->id)
+    //         ->orderBy('created_at', 'DESC')->get([
+    //             'messenger.id',
+    //             'first_name_en',
+    //             'last_name_en',
+    //             'first_name_ar',
+    //             'last_name_ar',
+    //             'subject',
+    //             'read',
+    //             'messenger.created_at',
+    //             'messenger.sender'
+    //         ]);
+
+    //     $sentMessages = Messenger::where('messenger.sender', Auth::id())
+    //         ->join('users', 'messenger.receiver', '=', 'users.id')
+    //         ->orderBy('messenger.created_at', 'DESC')
+    //         ->get([
+    //             'messenger.id',
+    //             'users.first_name_en',
+    //             'users.last_name_en',
+    //             'users.first_name_ar',
+    //             'users.last_name_ar',
+    //             'messenger.subject',
+    //             'messenger.read',
+    //             'messenger.receiver',
+    //             'messenger.created_at'
+    //         ]);
+
+
+    //     return view('admin.clients.messages.index', compact('sentMessages', 'receivedMessages'));
+    // }
 
     // public function index() {
     // $received = Messenger::leftJoin('users','sender','=','users.id')

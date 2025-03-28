@@ -169,33 +169,33 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Filter based on folder type (Inbox, Sent, Draft etc...)
-    emailFilterByFolders.forEach(emailFilterByFolder => {
-      emailFilterByFolder.addEventListener('click', e => {
-        let currentTarget = e.currentTarget,
-          currentTargetData = currentTarget.getAttribute('data-target');
+    // emailFilterByFolders.forEach(emailFilterByFolder => {
+    //   emailFilterByFolder.addEventListener('click', e => {
+    //     let currentTarget = e.currentTarget,
+    //       currentTargetData = currentTarget.getAttribute('data-target');
 
-        appEmailSidebar.classList.remove('show');
-        appOverlay.classList.remove('show');
+    //     appEmailSidebar.classList.remove('show');
+    //     appOverlay.classList.remove('show');
 
-        // Remove active class from each folder filters
-        Helpers._removeClass('active', emailFilterByFolders);
-        // Add active class to selected folder filters
-        currentTarget.classList.add('active');
-        emailListItems.forEach(emailListItem => {
-          // If folder filter is Inbox
-          if (currentTargetData == 'inbox') {
-            emailListItem.classList.add('d-block');
-            emailListItem.classList.remove('d-none');
-          } else if (emailListItem.hasAttribute('data-' + currentTargetData)) {
-            emailListItem.classList.add('d-block');
-            emailListItem.classList.remove('d-none');
-          } else {
-            emailListItem.classList.add('d-none');
-            emailListItem.classList.remove('d-block');
-          }
-        });
-      });
-    });
+    //     // Remove active class from each folder filters
+    //     Helpers._removeClass('active', emailFilterByFolders);
+    //     // Add active class to selected folder filters
+    //     currentTarget.classList.add('active');
+    //     emailListItems.forEach(emailListItem => {
+    //       // If folder filter is Inbox
+    //       if (currentTargetData == 'inbox') {
+    //         emailListItem.classList.add('d-block');
+    //         emailListItem.classList.remove('d-none');
+    //       } else if (emailListItem.hasAttribute('data-' + currentTargetData)) {
+    //         emailListItem.classList.add('d-block');
+    //         emailListItem.classList.remove('d-none');
+    //       } else {
+    //         emailListItem.classList.add('d-none');
+    //         emailListItem.classList.remove('d-block');
+    //       }
+    //     });
+    //   });
+    // });
 
     // Toggle CC/BCC input
     if (toggleBCC) {
