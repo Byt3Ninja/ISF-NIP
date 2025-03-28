@@ -278,10 +278,14 @@
                       </span>
                     </a> --}}
                   </div>
-                  <div class="mt-2 border custom-shadow radius-15 text-center">
-                    <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
-                      onerror="this.src='/images/logo-placeholder.png'" class="company-image-container"
-                      alt="logo" />
+                  <div class="mt-2 border custom-shadow radius-15 text-center p-4 w-100">
+                    <img 
+                      src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
+                      onerror="this.src='/images/logo-placeholder.png'" 
+                      class="rounded"
+                      style="height: 120px; width: 100%; object-fit: contain;"
+                      alt="logo" 
+                    />
                   </div>
                   <div class="w-100 d-flex align-items-center justify-content-between mt-2">
                     <h6 class="fw-semibold mt-2 text-capitalize line-clamp-1" style="width: 45%;">
@@ -425,9 +429,9 @@
                                   <img src="{{ $founder->image ? $founder->image : '/icons/account.svg' }}"
                                     onerror="this.src='/icons/account.svg'" class="rounded-circle" width="24"
                                     height="24" />
-                                  <span class="text-xs line-clamp-1">
+                                  <div class="text-xs">
                                     {{ $founder->Name }}
-                                  </span>
+                                  </div>
                                 </div>
                               </div>
                             @endforeach
