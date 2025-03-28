@@ -304,22 +304,26 @@ class AssessmentController extends Controller
 
     public function analysisAssessment()
     {
-        if( Auth::user()->hasRole('Registered') )
-        {
+        if (Auth::user()->hasRole('Registered')) {
             $l = app()->getLocale();
             $userid = auth()->user()->id;
             $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
-            if( $assessment_user != null )
-            {
+
+            if ($assessment_user != null) {
                 $categories = Category::where('category_type', 'Assesment')
                     ->with([
                         'subcategory',
-                        'question' => function($query) use ($assessment_user) {
+                        'question' => function ($query) use ($assessment_user) {
                             $query->where('assessment_id', $assessment_user->id);
                         }
                     ])
                     ->get();
-                $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])->where('user_id', $userid)->where('assessment_id', $assessment_user->id)->get();
+
+                $user_scores = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                    ->where('user_id', $userid)
+                    ->where('assessment_id', $assessment_user->id)
+                    ->get();
+
                 $Analysis_user_scores = $categories->map(function ($category) {
                     $questions = $category->question;
                     return $category->subcategory->map(function ($subcategory) use ($questions) {
@@ -334,16 +338,42 @@ class AssessmentController extends Controller
                         ];
                     });
                 })->flatten()->toArray();
-                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores'));
-            }
-            else
-            {
+
+                $weightedSubCategories = $categories->flatMap(function ($category) use ($userid, $assessment_user) {
+                    return $category->subcategory->map(function ($subcategory) use ($userid, $assessment_user) {
+                        $scoresTotalsub = UserScore::with(['category', 'subcategory', 'stage', 'assessment'])
+                            ->where('user_id', $userid)
+                            ->where('assessment_id', $assessment_user->id)
+                            ->where('subcategory_id', $subcategory->id)
+                            ->get();
+
+                        $scoresTotalssub = $scoresTotalsub->sum('weighted_score');
+                        $countanswered = $scoresTotalsub->whereNotNull('Result_assessment')->count();
+                        $countNotanswered = $scoresTotalsub->whereNull('Result_assessment')->count();
+                        $totalQuestions = $countanswered + $countNotanswered;
+                        $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
+
+                        return (object) [
+                            'subcategory_id' => $subcategory->id,
+                            'subcategory_name_ar' => $subcategory->name_ar,
+                            'subcategory_name_en' => $subcategory->name_en,
+                            'weighted_score' => $scoresTotalssub,
+                            'progress' => $progress,
+                        ];
+                    });
+                });
+
+                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories'));
+            } else {
                 $Analysis_user_scores = [];
                 $user_scores = [];
                 $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
-                return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories', 'Analysis_user_scores'));
+                $weightedSubCategories = [];
+                return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories'));
             }
-        } else { return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
+        } else {
+            return redirect()->route('dashboard')->with(['class' => 'danger', 'success' => __('YouHaveNotCompany')]);
+        }
     }
 
     public function historyAssessment()

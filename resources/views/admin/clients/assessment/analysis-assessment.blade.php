@@ -42,61 +42,6 @@
   $pills = ['analysis-assessment', 'question-assessment', 'history'];
   $mobilePills = ['analysis', 'questions', 'history'];
 
-  $assessmentPhases = [
-      [
-          'title' => 'business concept',
-          'progress' => 50,
-          'score' => 980,
-          'color' => 'warning',
-          'categories' => [
-              ['title' => 'business idea', 'progress' => 50, 'score' => 980, 'color' => 'warning'],
-              ['title' => 'product portfolio', 'progress' => 50, 'score' => 980, 'color' => 'warning'],
-              ['title' => 'revenu modal', 'progress' => 50, 'score' => 980, 'color' => 'warning'],
-              ['title' => 'customer portfolio', 'progress' => 50, 'score' => 980, 'color' => 'warning'],
-              ['title' => 'market position', 'progress' => 50, 'score' => 980, 'color' => 'warning'],
-          ],
-      ],
-      [
-          'title' => 'organization',
-          'progress' => 75,
-          'score' => 980,
-          'color' => 'danger',
-          'categories' => [
-              ['title' => 'ownership & board', 'progress' => 75, 'score' => 980, 'color' => 'danger'],
-              ['title' => 'employees', 'progress' => 75, 'score' => 980, 'color' => 'danger'],
-              ['title' => 'partnerships', 'progress' => 75, 'score' => 980, 'color' => 'danger'],
-              ['title' => 'business process', 'progress' => 75, 'score' => 980, 'color' => 'danger'],
-              ['title' => 'legal issues', 'progress' => 75, 'score' => 980, 'color' => 'danger'],
-          ],
-      ],
-      [
-          'title' => 'operations',
-          'progress' => 100,
-          'score' => 980,
-          'color' => 'success',
-          'categories' => [
-              ['title' => 'financials', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-              ['title' => 'funding', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-              ['title' => 'Production & deliveries', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-              ['title' => 'IT systems', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-              ['title' => 'facilities', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-          ],
-      ],
-      [
-          'title' => 'customer relation',
-          'progress' => 20,
-          'score' => 980,
-          'color' => 'info',
-          'categories' => [
-              ['title' => 'networking', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-              ['title' => 'marketing', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-              ['title' => 'sales & service', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-              ['title' => 'communication & PR', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-              ['title' => 'branding', 'progress' => 100, 'score' => 980, 'color' => 'success'],
-          ],
-      ],
-  ];
-
   $userid = auth()->user()->id;
   $assessment = App\Assessment::where('user_id', $userid)->orderBy('id', 'desc')->first();
 
@@ -386,17 +331,20 @@
 
 @section('pagescripts')
   <script>
+  </script>
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const analysisUserScores = @json($Analysis_user_scores) || [];
+      const analysisUserScores = @json($weightedSubCategories) || [];
       console.log('analysisUserScores', analysisUserScores);
       // console.log('analysisUserScores', analysisUserScores)
 
       const chartIndicatorData = analysisUserScores?.map(item => ({
-        name: document.documentElement.lang == 'ar' ? item?.name_ar : item?.name_en,
-        max: 100,
+        name: document.documentElement.lang == 'ar' ? item?.subcategory_name_ar : item?.subcategory_name_en,
+        // max: Math.ceil(item?.weighted_score || 10), // Use the ceiling of the weighted_score as the max value
+        max: 10,
       }));
 
-      const chartData = analysisUserScores?.map(item => (item?.totalAnswered / item?.total) * 100 || 0);
+      const chartData = analysisUserScores?.map(item => item?.weighted_score || 0);
 
       // Show loading spinner
       var chart = echarts.init(document.getElementById('chart'));
