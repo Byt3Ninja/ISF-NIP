@@ -275,7 +275,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('getUsersByProgram');
 
     //ShowMessages
-    Route::get('/inbox', 'MessengerController@index')->name('inbox');
+    Route::get('/messages', 'MessengerController@index')->name('messages.index');
+    // Route::get('/inbox', 'MessengerController@index')->name('inbox');
     Route::get('/outbox', 'MessengerController@outbox')->name('outbox');
     Route::get('/openmsg', 'MessengerController@openmsg');
     Route::post('/mread', 'MessengerController@makeread');
