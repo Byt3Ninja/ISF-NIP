@@ -1460,5 +1460,12 @@ return [
     'privacy' => 'سياسة الخصوصية',
 	'SelectProgram' => 'اختر البرنامج',
 	'Select Organizations' => 'اختر المؤسسات',
+	'Select_Currency' => 'اختر العملة',
+	'update_currencies' => 'تحديث العملات',
+	'currencyUpdated' => 'تم تحديث العملات بنجاح',
+	'FailedUpdate' => 'فشل تحديث العملات',
+	'Choose_Currency' => 'اختر العملة',
+	'Currency_Added_Successfully' => 'تمت اضافة العملة بنجاح',
+	'Error_Fetching_Currencies' => 'خطأ في جلب العملات',
 ]; 
 

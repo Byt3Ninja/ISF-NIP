@@ -41,7 +41,9 @@
             <div class="card">
               <div class="card-header">
                 <h4 class="card-title mb-0">{{__('admin.Currencies')}}</h4>
+                <span class="btn btn-success UpdateAllCurrencies"> {{ __('admin.update_currencies') }}</span>
               </div>
+              
               <div class="card-content">
                 <div class="card-body">
 									<!-- datatable start -->
@@ -67,9 +69,12 @@
                                                     <td class="text-center">{{ $currency->currency_symbol }}</td>
                                                     <td class="text-center">{{ $currency->exchange_rate_to_usd }}</td>
                                                     <td class="text-center">
-                                                        @if($currency->flag)
+                                                        @if(!empty($currency->flag) && file_exists(public_path($currency->flag)))
                                                         <img src="{{ asset($currency->flag) }}" width="30" alt="Flag">
+                                                        @else
+                                                        {{ $currency->flag }}
                                                         @endif
+                                                        
                                                     </td>
                                                     <td class="text-center">
                                                       <a href="{{ route('currencies.edit',$currency->id) }}" class="btn btn-label-warning btn-sm">
@@ -106,5 +111,32 @@
 <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
 <script src="/app-assets/js/scripts/datatables/datatable.js"></script>
 <script src="/app-assets/js/scripts/modal/components-modal.js"></script>
+
+<script>
+
+$(document).ready(function() {
+
+   // عند الضغط على زر "تيم تحديث العملات"
+   $('.UpdateAllCurrencies').click(function() {
+    
+    // جلب العملات من API
+    var currenciesData = {};
+
+    // جلب العملات من API
+      $.ajax({
+          url: "{{ route('currencies.UpdateAllCurrency') }}",
+          type: "GET",
+          success: function(response) {
+            alert(response.success)
+            location.reload();
+          },
+          error: function() {
+            alert(error);
+          }
+      });
+    });
+
+    });
+</script>
 
 @stop
