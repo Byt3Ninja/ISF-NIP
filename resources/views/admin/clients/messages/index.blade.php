@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @stop
 
 @section('style')
@@ -45,7 +46,7 @@
                 </div>
                 <hr class="mx-n3 emails-list-header-hr mb-2" />
                 <!-- Message List: Actions -->
-                <div class="d-flex justify-content-between align-items-center ps-1">
+                {{-- <div class="d-flex justify-content-between align-items-center ps-1">
                   <div class="d-flex align-items-center">
                     <div class="form-check mb-0 ms-2">
                       <input class="form-check-input" type="checkbox" id="email-select-all" />
@@ -119,9 +120,9 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> --}}
               </div>
-              <hr class="container-m-nx m-0" />
+              {{-- <hr class="container-m-nx m-0" /> --}}
               <!-- Message List: Items -->
               <div class="email-list pt-0" id="receivedMessages">
                 <ul class="list-unstyled m-0">
@@ -174,6 +175,7 @@
   <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 @stop
 
 @section('pagescripts')
@@ -257,5 +259,53 @@
       $('#message-details-createdBy').text(messageCreatedBy);
       $('#message-details-createdAt').text(messageCreatedAt);
     });
+  </script>
+  
+  <script>
+    window.delme = function(id, event) {
+      event.stopPropagation();
+      console.log('delete message clicked');
+      console.log('id', id);
+      console.log('element', event.target);
+      
+      var url = '/dashboard/messages/delete';
+      var token = '{{ csrf_token() }}';
+      Swal.fire({
+          title: "{{ __('admin.SureDelete') }}",
+          text: "{{ __('admin.Recover') }}",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "{{ __('admin.DYes') }}",
+          cancelButtonText: "{{ __('admin.No') }}!",
+        })
+        .then((result) => {
+          if (result.value) {
+            $.post(url, {
+                'id': id,
+                '_token': token
+              },
+              function(response) {
+                Swal.fire(
+                  '{{ __('admin.Deleted') }}!',
+                  '{{ __('admin.FileDeleted') }}.',
+                  'success'
+                );
+                location.reload();
+              }
+            ).fail(
+              function(error) {
+                Swal.fire(
+                  'Error!',
+                  'Delete fail.',
+                  'error'
+                );
+                console.log(error);
+              }
+            );
+          } else {
+            console.log('Canceled')
+          }
+        })
+    }
   </script>
 @stop

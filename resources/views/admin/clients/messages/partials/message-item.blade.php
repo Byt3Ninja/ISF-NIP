@@ -21,8 +21,8 @@
       </small>
     </div>
     <div class="email-list-item-meta ms-auto d-flex align-items-center">
-      <span class="email-list-item-label badge badge-dot bg-danger d-none d-md-inline-block me-2"
-        data-label="private"></span>
+      {{-- <span class="email-list-item-label badge badge-dot bg-danger d-none d-md-inline-block me-2"
+        data-label="private"></span> --}}
       <small
         id="message-item-createdAt"
         class="email-list-item-time text-muted"
@@ -30,14 +30,11 @@
         {{ \Carbon\Carbon::parse($message['created_at'])->format('h:i A') }}
       </small>
       <ul class="list-inline email-list-item-actions">
-        <li class="list-inline-item email-read btn btn-icon btn-text-secondary rounded-pill">
-          <i class="ti ti-mail ti-md"></i>
-        </li>
-        <li class="list-inline-item email-delete btn btn-icon btn-text-secondary rounded-pill">
+        <li 
+          onclick="delme({{ $message['id'] }}, event)"
+          class="list-inline-item btn btn-icon btn-text-secondary rounded-pill"
+        >
           <i class="ti ti-trash ti-md"></i>
-        </li>
-        <li class="list-inline-item btn btn-icon btn-text-secondary rounded-pill">
-          <i class="ti ti-info-circle ti-md"></i>
         </li>
       </ul>
     </div>

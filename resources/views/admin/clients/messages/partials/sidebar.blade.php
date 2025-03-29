@@ -43,7 +43,7 @@
       @endforeach
     </ul>
     <!-- Messages Filters: Labels -->
-    <div class="email-filter-labels pt-4">
+    {{-- <div class="email-filter-labels pt-4">
       <p class="small mx-6 text-muted text-uppercase">Labels</p>
       <ul class="list-unstyled mb-2">
         @foreach ($labels as $label)
@@ -55,7 +55,7 @@
           </li>
         @endforeach
       </ul>
-    </div>
+    </div> --}}
     <!--/ Messages Filters -->
   </div>
 </div>
