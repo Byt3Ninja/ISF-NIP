@@ -1438,4 +1438,11 @@ return [
 	'SelectProgram' => 'Select Program',
 	'Select Organizations' => 'Select Organizations',
 	'SelectAll'=>'Select All',
+	'Select_Currency' => 'Select Currency',
+	'update_currencies' => 'Update Currencies',
+	'currencyUpdated' => 'Currencies Updated Successfully',
+	'FailedUpdate' => 'Failed to Update Currencies',
+	'Choose_Currency' => 'Choose Currency',
+	'Currency_Added_Successfully' => 'Currency Added Successfully',
+	'Error_Fetching_Currencies' => 'Error Fetching Currencies',
 ];

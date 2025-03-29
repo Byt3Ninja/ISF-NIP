@@ -453,7 +453,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     /* Start of Currencies Routes */
-     Route::resource('currencies', 'CurrencyController');
+     Route::resource('currencies', 'CurrencyController')->except(['show']);
+     Route::get('currencies/UpdateCurrency', 'CurrencyController@UpdateAllCurrency')->name('currencies.UpdateAllCurrency');
     /* End of Currencies Routes */
 
     // ===============> Mentor Dashboard Routes <===============
