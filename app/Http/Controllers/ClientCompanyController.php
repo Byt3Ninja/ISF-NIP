@@ -98,14 +98,17 @@ class ClientCompanyController extends Controller
 
         try {
 
+            
             if ($id == null) {
 
                 $client = User::where('HaveCompany', 1)->with('company')
                     ->with('company.city')
                     ->find(Auth::id());
-                if (empty($client)) {
+                   
+                    if (empty($client)) {
                     return redirect()->route('my_profile')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
+                
                 $countries = Country::all();
                 $states = State::all();
                 $Setting = Settings::where('id', 1)->first();
@@ -158,9 +161,11 @@ class ClientCompanyController extends Controller
                     return $country;
                 });
             } else {
-                if (!Auth::user()->hasAnyRole('Admin|organizationManager')) {
-                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
-                }
+                
+                // if (!Auth::user()->hasAnyRole('Admin|organizationManager')) {
+                //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                // }
+             
                 if (Auth::user()->hasRole('organizationManager')) {
                     $userorg = Organization::where('user_id', Auth::id())->first();
                     $cycles = Cycle::where('organization_id', $userorg->id)->with('companies')->get();
