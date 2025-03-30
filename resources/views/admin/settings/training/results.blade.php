@@ -28,7 +28,7 @@
         <div class="d-flex flex-wrap align-items-end w-100 gap-6">
           <div class="w-50 mt-4">
             <label for="cstep" class="form-label fs-6 mb-2">{{ __('cycles.Select training from list') }}</label>
-            <select id="cstep" class="form-select cyclesExcel"
+            <select id="cstep" class="form-select select2 cyclesExcel"
               onchange="window.open('/dashboard/training/results/'+this.options[this.selectedIndex].value,'_self');">
               @foreach ($sessions as $step)
               <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }} -

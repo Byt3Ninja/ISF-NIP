@@ -67,7 +67,8 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
-{{-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" /> --}}
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 {{-- <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" /> --}}
 
 <link rel="stylesheet" href="/app-assets/plugins/sweatalert/sweetalert2.min.css">
