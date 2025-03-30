@@ -178,7 +178,7 @@ return [
 	'Provider' => 'Provider',
 	'Seeker' => 'Seeker',
 	'Individual' => 'Individual',
-	'Mentor' => 'Im Mentor',
+	'Mentor' => 'Mentor',
 	'NotActive' => 'Not Active',
 	'Administrator' => 'Administrator',
 	'SelMulti' => 'You can select multiple types, or leave it blank to download all types',
