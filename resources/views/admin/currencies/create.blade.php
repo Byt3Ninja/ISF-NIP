@@ -17,19 +17,29 @@
               </div>
               <div class="card-content">
                 <div class="card-body">
+
+                  <select id="currencySelect" class="form-control">
+                    <option value="">اختر العملة</option>
+                </select>
+
+                <button id="saveCurrency" class="btn btn-primary">إضافة العملة</button>
+
+<div id="message"></div>
+
+
                   <form action="{{ route('currencies.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
                         <div class="col-md-6">
                             <label>{{ __('admin.Name') }}</label>
-                            <input type="text" name="currency_name" class="form-control" required>
+                            <input type="text" name="currency_name" class="form-control" id="currency_name" required>
                             @error('currency_name')
                                <div class="text-danger">{{ $message }}</div>
                             @enderror
                           </div>
                       <div class="col-md-6">
                         <label>{{ __('admin.Code') }}</label>
-                        <input type="text" name="currency_code" class="form-control" required>
+                        <input type="text" name="currency_code" class="form-control" id="currency_code" required>
                         @error('currency_code')
                          <div class="text-danger">{{ $message }}</div>
                         @enderror
@@ -37,14 +47,14 @@
                      
                       <div class="col-md-6 mt-3">
                         <label>{{ __('admin.Symbol') }}</label>
-                        <input type="text" name="currency_symbol" class="form-control" required>
+                        <input type="text" name="currency_symbol" class="form-control" id="currency_symbol" required>
                         @error('currency_symbol')
                           <div class="text-danger">{{ $message }}</div>
                         @enderror
                       </div>
                       <div class="col-md-6 mt-3">
                         <label>{{ __('admin.Exchange_Rate') }}</label>
-                        <input type="number" name="exchange_rate_to_usd" step="0.000001" class="form-control" >
+                        <input type="number" name="exchange_rate_to_usd" step="0.000001" id="exchange_rate_to_usd" class="form-control" >
                         @error('exchange_rate_to_usd')
                           <div class="text-danger">{{ $message }}</div>
                        @enderror
@@ -94,6 +104,45 @@
           }
           reader.readAsDataURL(file);
       }
+  });
+
+  $(document).ready(function() {
+    // جلب العملات من API
+    var currenciesData = {};
+
+    // جلب العملات من API
+      $.ajax({
+          url: "https://www.floatrates.com/daily/usd.json",
+          type: "GET",
+          success: function(response) {
+              currenciesData = response; // تخزين البيانات لاستخدامها لاحقًا
+              $.each(response, function(key, currency) {
+                  $('#currencySelect').append('<option value="' + key + '">' + currency.name + ' (' + currency.code + ')</option>');
+              });
+          },
+          error: function() {
+              $('#message').html('<p style="color:red;">{{ __('admin.Error_Fetching_Currencies') }}</p>');
+          }
+      });
+
+      // عند الضغط على زر "إضافة العملة"
+      $('#saveCurrency').click(function() {
+          var selectedKey = $('#currencySelect').val(); // الحصول على العملة المحددة
+          
+          if (selectedKey && currenciesData[selectedKey]) {
+              var currency = currenciesData[selectedKey]; // جلب بيانات العملة المختارة
+
+              // تحديث الحقول تلقائياً
+              $('#currency_name').val(currency.name);
+              $('#currency_code').val(currency.code);
+              $('#currency_symbol').val(currency.alphaCode); // لا يوجد symbol في البيانات، لذلك استخدمت alphaCode
+              $('#exchange_rate_to_usd').val(currency.rate);
+
+              alert('{{ __('admin.Currency_Added_Successfully') }}');
+          } else {
+              $('#message').html('<p style="color:red;">{{ __('admin.Choose_Currency') }}  </p>');
+          }
+      });
   });
 </script>
 
