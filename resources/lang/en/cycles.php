@@ -310,5 +310,7 @@ return [
     'Business_Type' => 'Business Type',
     'Reset' => 'Reset',
     'Mentorship Sessions' => 'Mentorship Sessions',
+    'Select Judges' => 'Select Judges',
+    'Select Startup' => 'Select Startup',
 ];
 
