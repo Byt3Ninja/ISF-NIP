@@ -588,19 +588,11 @@
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  {{-- <script src="/vuexy/assets/vendor/libs/tagify/tagify.js"></script> --}}
-  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 @stop
 
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find(0))
-  <script src="/vuexy/assets/js/forms-selects.js"></script>
-  {{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
   <script>
     // Set Language
     const lang = '{{ $l }}';
