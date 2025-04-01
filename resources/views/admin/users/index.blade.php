@@ -35,7 +35,7 @@
                       <div class="col-12 col-sm-3 col-lg-3">
                         <label class="mb-2" for="users-list-verified">{{ __('admin.HaveCompany') }}</label>
                         <fieldset class="form-group">
-                          <select class="form-control" id="users-list-verified">
+                          <select class="form-select select2" id="users-list-verified">
                             <option value="">{{ __('admin.All') }}</option>
                             <option value="{{ __('admin.Yes') }}">{{ __('admin.Yes') }}</option>
                             <option value="{{ __('admin.No') }}">{{ __('admin.No') }}</option>
@@ -45,7 +45,7 @@
                       <div class="col-12 col-sm-3 col-lg-3">
                         <label class="mb-2" for="users-list-role">{{ __('admin.Role') }}</label>
                         <fieldset class="form-group">
-                          <select class="form-control" id="users-list-role">
+                          <select class="form-select select2" id="users-list-role">
                             <option value="">{{ __('admin.All') }}</option>
                             @foreach (App\Role::get() as $role)
                               <option value="{{ $role->name }}">{{ __('admin.' . $role->name) }}</option>
@@ -57,7 +57,7 @@
                       <div class="col-12 col-sm-3 col-lg-3">
                         <label class="mb-2" for="users-list-status">{{ __('admin.Gender') }}</label>
                         <fieldset class="form-group">
-                          <select class="form-control" id="users-list-status">
+                          <select class="form-select select2" id="users-list-status">
                             <option value="">{{ __('admin.All') }}</option>
                             <option value="{{ __('admin.Male') }}">{{ __('admin.Male') }}</option>
                             <option value="{{ __('admin.Female') }}">{{ __('admin.Female') }}</option>

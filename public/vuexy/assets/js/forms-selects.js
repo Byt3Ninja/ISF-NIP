@@ -25,7 +25,7 @@ $(function () {
     select2.each(function () {
       var $this = $(this);
       $this.wrap('<div class="position-relative"></div>').select2({
-        placeholder: language === 'en' ? 'Select value' : 'اختر القيمة',
+        placeholder: language === 'en' ? 'Select' : 'اختر',
         dropdownParent: $this.parent()
       });
     });

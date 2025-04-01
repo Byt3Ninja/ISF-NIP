@@ -38,12 +38,6 @@
     #search-table::placeholder {
       color: var(--bs-dark);
     }
-
-    /* @media screen and (min-width: 1440px) {
-                      .card-container {
-                        width: 390px;
-                      }
-                    } */
   </style>
 @stop
 
@@ -81,152 +75,117 @@
         <!-- Header -->
         <div class="card shadow-sm mb-6" style="border-radius: 20px;">
           <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="d-flex shadow-sm bg-label-info p-2 radius-15 border">
-                <div class="bg-white d-flex justify-content-center align-items-center radius-15 mx-1"
-                  style="width: 50px; height: 50px;">
-                  <img src="/icons/filled-rocket.svg" width="30" height="30" />
-                </div>
-                <div class="mx-4" style="height: 50px;">
-                  <p class="fw-medium fs-5" style="margin-bottom: -3px;">
-                    {{ $l == 'en' ? 'Companies' : 'الشركات' }}
-                  </p>
-                  <span class="text-black fs-4">
-                    <!-- Total Companies Count -->
-                    {{ count($companies) }}
-                  </span>
+            <div class="row">
+              <div class="col-12 col-lg-4">
+                <div class="d-flex shadow-sm bg-label-info p-2 radius-15 border" style="width: fit-content;">
+                  <div class="bg-white d-flex justify-content-center align-items-center radius-15 mx-1"
+                    style="width: 50px; height: 50px;">
+                    <img src="/icons/filled-rocket.svg" width="30" height="30" />
+                  </div>
+                  <div class="mx-4" style="height: 50px;">
+                    <p class="fw-medium fs-5" style="margin-bottom: -3px;">
+                      {{ $l == 'en' ? 'Companies' : 'الشركات' }}
+                    </p>
+                    <span class="text-black fs-4">
+                      <!-- Total Companies Count -->
+                      {{ count($companies) }}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div class="d-flex align-items-center justify-content-end">
-                <!-- Filter -->
-                <form method="GET" action="{{ route('users.companies') }}">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center ms-3">
-                      <button class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center"
-                        style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
-                        <i class="ti ti-filter text-white ti-24px"></i>
-                      </button>
-                    </div>
-
-                    <!-- Search Bar -->
-                    <div class="position-relative d-none d-md-flex flex-wrap gap-2">
-                      <div class="SearchName position-relative">
-                        <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
-                          <i class="ti ti-search text-muted"></i>
-                        </div>
-                        <input class="form-control search border rounded bg-transparent px-10" style="max-width: 180px;"
-                          id="search-table" placeholder="{{ __('admin.Search') }}" name="search"
-                          value="{{ request('search') }}" />
-                      </div>
-                      <div class="SearchSector">
-                        @php
-                          $sectors = App\Sector::whereNull('parent_id')->get();
-                        @endphp
-
-                        <select id="selectsector"
-                          class="form-select sector border rounded bg-transparent px-10"style="max-width: 180px;"
-                          name="sector">
-                          <option value="" selected>{{ __('admin.Sector') }}
-                          </option>
-                          @foreach ($sectors as $sector_group)
-                            <optgroup label="{{ $sector_group->name }}">
-                              @foreach ($sector_group->children as $sector)
-                                <option value="{{ $sector->name_en }} "
-                                  {{ $sector->name_en == request('sector') ? 'selected' : '' }}>{{ $sector->name }}
-                                </option>
-                              @endforeach
-                            </optgroup>
-                          @endforeach
-                        </select>
-                      </div>
-
-
-                      <div class="SearchStage">
-
-                        <select class="form-select stage border rounded bg-transparent px-10" style="max-width: 180px;"
-                          name="stage">
-                          <option value="">{{ __('admin.stage') }}</option>
-                          @php
-                            $stages = App\Stage::all();
-                          @endphp
-                          @foreach ($stages as $stage)
-                            <option value="{{ $stage->id }}" {{ $stage->id == request('stage') ? 'selected' : '' }}>
-                              {{ $stage->{'name_' . $l} ?? '' }}
-                            </option>
-                          @endforeach
-                        </select>
-
-
-                      </div>
-
-                      @role('Admin')
-                        <div class="SearchOrg">
-                          @php
-                            $orgs = App\Organization::all();
-                            $orgrequest = App\Organization::where('id', request('orgnization'))->get();
-                          @endphp
-
-                          <select class="form-select sector border rounded bg-transparent px-10" style="max-width: 180px;"
-                            name="orgnization">
-                            <option value="" selected>{{ __('admin.Organizations') }}
-                            </option>
-                            @foreach ($orgs as $org)
-                              <option value="{{ $org->id }} "
-                                {{ $org->id == request('orgnization') ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}
+              <div class="col-12 col-lg-8">
+                <form method="GET" action="{{ route('users.companies') }}" class="row">
+                  <div class="col-1">
+                    <button class="btn bg-primary p-3 justify-content-center align-items-center"
+                      style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
+                      <i class="ti ti-filter text-white ti-24px"></i>
+                    </button>
+                  </div>
+                  <div class="col-4">
+                    <div class="SearchSector">
+                      @php
+                        $sectors = App\Sector::whereNull('parent_id')->get();
+                      @endphp
+                      <select id="selectsector" class="form-select select2 sector" name="sector" data-placeholder="{{ __('admin.Sector') }}">
+                        <option value="" selected>{{ __('admin.Sector') }}
+                        </option>
+                        @foreach ($sectors as $sector_group)
+                          <optgroup label="{{ $sector_group->name }}">
+                            @foreach ($sector_group->children as $sector)
+                              <option value="{{ $sector->name_en }} "
+                                {{ $sector->name_en == request('sector') ? 'selected' : '' }}>{{ $sector->name }}
                               </option>
                             @endforeach
-                          </select>
-                        </div>
-                      @endrole
-
-
+                          </optgroup>
+                        @endforeach
+                      </select>
                     </div>
                   </div>
+                  <div class="col-4">
+                    <div class="SearchStage">
+                      <select class="form-select select2 stage" name="stage" data-placeholder="{{ __('admin.stage') }}">
+                        <option value="">{{ __('admin.stage') }}</option>
+                        @php
+                          $stages = App\Stage::all();
+                        @endphp
+                        @foreach ($stages as $stage)
+                          <option value="{{ $stage->id }}" {{ $stage->id == request('stage') ? 'selected' : '' }}>
+                            {{ $stage->{'name_' . $l} ?? '' }}
+                          </option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    @role('Admin')
+                      <div class="SearchOrg">
+                        @php
+                          $orgs = App\Organization::all();
+                          $orgrequest = App\Organization::where('id', request('orgnization'))->get();
+                        @endphp
+
+                        <select class="form-select select2 sector" name="orgnization" data-placeholder="{{ __('admin.Organizations') }}">
+                          <option value="" selected>{{ __('admin.Organizations') }}
+                          </option>
+                          @foreach ($orgs as $org)
+                            <option value="{{ $org->id }} "
+                              {{ $org->id == request('orgnization') ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}
+                            </option>
+                          @endforeach
+                        </select>
+                      </div>
+                    @endrole
+                  </div>
                 </form>
-                <!-- Add New Program Button -->
-                {{-- <button class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;"
-                    onclick="DoChange(2)">
-                    <span class="mx-2">{{ __('admin.New Program') }}</span>
-                    <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
-                  </button>
-                  <button class="btn btn-primary d-none d-md-inline-block" style="border-radius: 15px; text-wrap: nowrap;"
-                    onclick="DoChange(2)">
-                    <span class="mx-2">{{ __('admin.New Program') }}</span>
-                    <i class="menu-icon tf-icons ti ti-components ti-24px"></i>
-                  </button> --}}
               </div>
             </div>
-            <!-- Search Bar (Mobile) -->
-            <div class="d-flex align-items-center justify-content-between mx-2">
-              <div class="position-relative me-3 mt-4 d-block d-md-none">
-                <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
-                  <i class="ti ti-search text-primary ti-24px"></i>
-                </div>
-                <input class="form-control search border rounded mx-1 bg-transparent px-10" style="max-width: 180px;"
-                  id="search-table" placeholder="Search" />
-              </div>
-              <button class="btn bg-primary p-3 d-flex d-md-none justify-content-center align-items-center mt-3"
-                style="border-radius: 17px; width: 40px; height: 40px;">
-                <i class="ti ti-filter text-white ti-24px"></i>
-              </button>
-            </div>
-            <!-- / Search Bar (Mobile) -->
           </div>
         </div>
         <!-- / Header -->
         <!-- Company List -->
         <section class="mb-10 mt-4">
-          <h5 class="border-bottom pb-2 mb-6 mx-4 mx-md-0">
-            {{ $l == 'en' ? 'Companies List' : 'قائمة الشركات' }}
-          </h5>
+          <div class="d-flex justify-content-between align-items-center w-100 pb-3 mb-6 border-bottom">
+            <h5 class="mb-0">
+              {{ $l == 'en' ? 'Companies List' : 'قائمة الشركات' }}
+            </h5>
+            <div class="position-relative">
+              <div class="position-absolute top-50 translate-middle-y end-0 mx-3 search-icon">
+                <i class="ti ti-search text-muted"></i>
+              </div>
+              <input
+                id="search-input"
+                class="form-control search border rounded bg-transparent"
+                style="width: 250px;"
+                id="search-table" 
+                placeholder="{{ __('admin.Search') }}" 
+                name="search"
+                value="{{ request('search') }}" 
+              />
+            </div>
+          </div>
           <div class="row">
             @if (count($companies) == 0)
-              <div class="row d-flex justify-content-center align-items-center">
-                <img src="/icons/not-found.svg" width="337" height="234" />
-                <h3 class="text-center mt-4">
-                  {{ $l == 'en' ? 'No Companies Found' : 'لم يتم العثور على شركات' }}
-                </h3>
-              </div>
+              @include('includes.no-result')
             @endif
 
             @foreach ($companies as $company)
@@ -239,7 +198,8 @@
                   @endphp
                   <div class="w-100 d-flex justify-content-between align-items-center">
                     <a style="width: 80%" href="/dashboard/companyProfile/{{ $company->id }}">
-                      <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">{{ $company->{'name_' . $l} }}</h5>
+                      <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">{{ $company->{'name_' . $l} }}
+                      </h5>
                     </a>
                     <div class="d-flex algin-items-center gap-3">
                       @if ($company->facebook)
@@ -279,13 +239,9 @@
                     </a> --}}
                   </div>
                   <div class="mt-2 border custom-shadow radius-15 text-center p-4 w-100">
-                    <img 
-                      src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
-                      onerror="this.src='/images/logo-placeholder.png'" 
-                      class="rounded"
-                      style="height: 120px; width: 100%; object-fit: contain;"
-                      alt="logo" 
-                    />
+                    <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
+                      onerror="this.src='/images/logo-placeholder.png'" class="rounded"
+                      style="height: 120px; width: 100%; object-fit: contain;" alt="logo" />
                   </div>
                   <div class="w-100 d-flex align-items-center justify-content-between mt-2">
                     <h6 class="fw-semibold mt-2 text-capitalize line-clamp-1" style="width: 45%;">
@@ -309,8 +265,8 @@
                     @endphp
                     @if (!empty($Sustainables) && count($Sustainables) > 0)
                       <a class="btn btn-label-secondary" href="#" data-bs-toggle="modal"
-                        style="width: 30px; margin-inline-start: -0.5rem;"
-                        data-bs-target="#EditLabor"><i class="ti ti-target-arrow ti-16px text-primary"></i>
+                        style="width: 30px; margin-inline-start: -0.5rem;" data-bs-target="#EditLabor"><i
+                          class="ti ti-target-arrow ti-16px text-primary"></i>
                       </a>
                       <div class="modal fade" id="EditLabor" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg modal-simple modal-edit-user">
@@ -560,8 +516,12 @@
 
 @section('pagescripts')
   <script>
-    const companies = @json($companies);
-    console.log('companies', companies);
+    $('#search-input').on('keyup', function() {
+      var value = $(this).val().toLowerCase();
+      $('.card-container').filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    });
   </script>
   <script type="text/javascript">
     $(document).ready(function() {
