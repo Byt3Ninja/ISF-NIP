@@ -1,14 +1,4 @@
 @php
-  $folders = [
-    ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => $receivedMessagesCount, 'class' => 'bg-label-primary']],
-    ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent'],
-    // ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => 2, 'class' => 'bg-label-warning']],
-    // ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => 2, 'class' => 'bg-label-warning']],
-    // ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred'],
-    // ['target' => 'spam', 'icon' => 'ti-alert-octagon', 'label' => 'Spam', 'badge' => ['count' => 4, 'class' => 'bg-label-danger']],
-    // ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash']
-  ];
-
   $labels = [
     ['target' => 'work', 'color' => 'bg-success', 'label' => 'Personal'],
     ['target' => 'company', 'color' => 'bg-primary', 'label' => 'Company'],
@@ -34,7 +24,7 @@
         <li id="{{ $folder['target'] }}-tab" class="d-flex justify-content-between align-items-center mb-1 {{ $loop->first ? 'active' : '' }}" data-target="{{ $folder['target'] }}">
           <a href="javascript:void(0);" class="d-flex flex-wrap align-items-center">
             <i class="ti {{ $folder['icon'] }}"></i>
-            <span class="align-middle ms-2">{{ __('admin.'. $folder['label']) }}</span>
+            <span class="align-middle ms-2">{{ __('messages.'. $folder['label']) }}</span>
           </a>
           @if (isset($folder['badge']))
             <div class="badge {{ $folder['badge']['class'] }} rounded-pill">{{ $folder['badge']['count'] }}</div>

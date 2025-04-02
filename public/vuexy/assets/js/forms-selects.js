@@ -4,8 +4,6 @@
 
 'use strict';
 
-const language = document.documentElement.lang;
-
 $(function () {
   const selectPicker = $('.selectpicker'),
     select2 = $('.select2'),
@@ -25,7 +23,7 @@ $(function () {
     select2.each(function () {
       var $this = $(this);
       $this.wrap('<div class="position-relative"></div>').select2({
-        placeholder: language === 'en' ? 'Select' : 'اختر',
+        placeholder: document.documentElement.lang === 'en' ? 'Select' : 'اختر',
         dropdownParent: $this.parent()
       });
     });
