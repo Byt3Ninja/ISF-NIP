@@ -336,8 +336,8 @@ class SettingsController extends Controller
 	public function update_settingsone(Request $request)
 	{
 		$request->validate([
-			'terms_url' => 'nullable|url|starts_with:https',
-			'privacy_url' => 'nullable|url|starts_with:https',
+			'terms_url' => ['nullable', 'regex:/^https:\/\/(?!-)(?!.*--)(?!.*\.\.)(?!.*\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?<!-)(\/.*)?$/'],
+    		'privacy_url' => ['nullable', 'regex:/^https:\/\/(?!-)(?!.*--)(?!.*\.\.)(?!.*\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?<!-)(\/.*)?$/'],
 		]);
 
 		$id = $request->input('id');
