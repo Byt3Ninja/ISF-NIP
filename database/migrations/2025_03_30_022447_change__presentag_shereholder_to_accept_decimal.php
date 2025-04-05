@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('team_members', function (Blueprint $table) {
-            $table->float('PresentagShereholder', 8, 2)->nullable()->change();
+            $table->float('PresentagShereholder', 14, 2)->nullable()->change();
         });
     }
 

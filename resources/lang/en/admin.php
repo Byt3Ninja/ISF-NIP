@@ -1455,4 +1455,5 @@ return [
 	'No Result' => 'No Results Found',
 	'No Organization' => 'No Organization',
 	'No Category' => 'No Category',
+	'rolePagesEditor' => 'Pages Editor',
 ];
