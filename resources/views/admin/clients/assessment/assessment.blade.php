@@ -78,15 +78,14 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
           <ul class="nav nav-pills flex-nowrap px-2 py-3">
             @foreach ($pills as $key => $pill)
             <li class="nav-item me-1">
-              <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
-                class="nav-link {{ $key == 1 ? 'active' : '' }}">
-                <span class="fs-6">
+              <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}" class="nav-link {{ $key == 1 ? 'active' : '' }}">
+                <span>
                   @if ($pill == 'analysis-assessment')
-                  {{ __('admin.Analysis_Assessment') }}
+                    {{ __('admin.Analysis_Assessment') }}
                   @elseif($pill == 'question-assessment')
-                  {{ __('admin.Question_assessment') }}
+                    {{ __('admin.Question_assessment') }}
                   @else
-                  {{ __('admin.History') }}
+                    {{ __('admin.History') }}
                   @endif
                 </span>
               </a>

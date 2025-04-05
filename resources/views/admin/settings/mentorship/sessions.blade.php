@@ -1,314 +1,200 @@
 @extends('layouts.admin')
 
-
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-  <style>
-    #mob-extract-button {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
-    @media screen and (max-width: 768px) {
-      #mob {
-        margin-top: 10px;
-      }
-      #mob-extract-button {
-        justify-content: flex-start;
-        width: 100%;
-      }
-    }
-  </style>
-  <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
-  <style>
-    #mob-extract-button {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
-    @media screen and (max-width: 768px) {
-      #mob {
-        margin-top: 10px;
-      }
-      #mob-extract-button {
-        justify-content: flex-start;
-        width: 100%;
-      }
-    }
-  </style>
+@section('vendorstyle')
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
 @stop
 
 @section('content')
   <!-- BEGIN: Content-->
   <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-header row">
-        {{-- <div class="content-header-left col-12 mb-2 mt-1">
-          <div class="row breadcrumbs-top">
-            <div class="col-12">
-              <h5 class="content-header-title float-left pr-1 mb-0">{{ __('cycles.Mentorship requests') }}</h5>
-              <div class="breadcrumb-wrapper col-12">
-                <ol class="breadcrumb p-0 mb-0">
-                  <li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home-alt"></i></a>
-                  </li>
-                  <li class="breadcrumb-item active">
-
-                    @if (Request()->show == 'all')
-                      {{ __('cycles.All requests') }}
-                    @elseif(!Request()->show)
-                      {{ __('cycles.New requests only') }}
-                    @elseif(Request()->show == 'approved')
-                      {{ __('cycles.approved requests') }}
-                    @elseif(Request()->show == 'disapproved')
-                      {{ __('cycles.disapproved requests') }}
-                    @endif
-
-                  </li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div> --}}
+      <div class="content-header">
+        <div class="col">
+          <h3 class="fw-bold">{{ __('cycles.Mentorship Sessions') }}</h3>
+        </div>
       </div>
       <div class="content-body">
-        <section id="multiple-column-form">
+        <section id="alerts">
           @if (session()->has('message'))
-            <div class="alert alert-success alert-dismissible" role="alert">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
               {{ __('admin.' . session()->get('message')) }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           @endif
           @if (session()->has('message2'))
-            <div class="alert alert-danger alert-dismissible" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
               {{ __('admin.' . session()->get('message2')) }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           @endif
         </section>
+
         <section class="row">
-          <div class="col-xl-12 col-md-12 col-sm-12">
+          <div class="col-12">
             <div class="card">
-              <div class="card-header">
-                <div class="card-title">
-                  {{-- @if (Request()->show) --}}
-                  <!-- إدخال تاريخ النهاية -->
-
-                  <!-- الروابط المعدلة لإرسال التاريخ -->
-                  <div onclick="redirect('all')"
-                    class="btn btn-{{ request()->show == 'all' ? 'primary' : 'label-secondary' }}">
+              <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center border-bottom pb-3 mb-6">
+                <div class="mb-4 mb-md-0 d-flex flex-wrap gap-2">
+                  <button onclick="redirect('all')" class="btn btn-{{ request()->show == 'all' ? 'primary' : 'label-secondary' }}">
                     {{ __('cycles.All requests') }}
-                  </div>
-
-                  <div href="#" onclick="redirect('')"
-                    class="btn btn-{{ !request()->show ? 'primary' : 'label-secondary' }}">
+                  </button>
+                  <button onclick="redirect('')" class="btn btn-{{ !request()->show ? 'primary' : 'label-secondary' }}">
                     {{ __('cycles.New requests only') }}
-                  </div>
-
-                  <div href="#" onclick="redirect('approved')" id="mob"
-                    class="btn btn-{{ request()->show == 'approved' ? 'primary' : 'label-secondary' }}">
-
+                  </button>
+                  <button onclick="redirect('approved')" class="btn btn-{{ request()->show == 'approved' ? 'primary' : 'label-secondary' }}">
                     {{ __('cycles.approved requests') }}
-                  </div>
-
-                  <div href="#" onclick="redirect('disapproved')" id="mob"
-                    class="btn btn-{{ request()->show == 'disapproved' ? 'primary' : 'label-secondary' }}">
+                  </button>
+                  <button onclick="redirect('disapproved')" class="btn btn-{{ request()->show == 'disapproved' ? 'primary' : 'label-secondary' }}">
                     {{ __('cycles.disapproved requests') }}
-                  </div>
-                  {{-- @else --}}
-                  {{-- @endif --}}
+                  </button>
                 </div>
+                <button class="btn btn-light ExportExcelMentor">
+                  <i class="ti ti-file-arrow-right me-2 ti-16px"></i>{{ __('cycles.Export') }}
+                </button>
               </div>
 
               <div class="card-body">
-                <div class="card-text">
-                  <div class="table-responsive">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-
-                      <div class="d-flex align-items-center">
-                        <!-- إدخال تاريخ البداية -->
-                        <!-- we get value from Select box Ely fo2 class name stepsExcel -->
-                        <div class="col-md-2" style="display: inline-block">
-                          <input type="text" class="datewithouttime form-control" id="start_date"
-                            value="{{ request('start_date') }}" name="start_date" placeholder="Start Date">
-                        </div>
-                        <div class="col-md-2 mx-2" style="display: inline-block">
-                          <input type="text" class="datewithouttime form-control" id="end_date"
-                            value="{{ request('end_date') }}" name="end_date" placeholder="End Date">
-                        </div>
-                        <div class="col-md-2 mx-2" style="display: inline-block">
-                          <select class="form-control " id="showValueSelect">
-                            <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>
-                              {{ __('cycles.All requests') }}</option>
-                            <option value="" {{ !request()->show ? 'selected' : '' }}>
-                              {{ __('cycles.New requests only') }}</option>
-                            <option value="approved" {{ request()->show == 'approved' ? 'selected' : '' }}>
-                              {{ __('cycles.approved requests') }}</option>
-                            <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>
-                              {{ __('cycles.disapproved requests') }}</option>
-                          </select>
-                        </div>
-                        @php
-                            $cycles = \App\Cycle::get();
-                        @endphp
-                        <div class="col-md-3 mx-2" style="display: inline-block">
-                          <select class="form-control " id="cycle_id">
-                            @foreach ($cycles as $cycle)
-                            <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
-                              {{ $cycle->title }}</option>
-                            @endforeach
-                          </select>
-                        </div>
-
-                        <div class="btn btn-label-primary mx-3" id="searchBot">
-                          <i class="ti ti-search"></i>
-                          <span class="mx-2">{{ __('cycles.search') }} </span>
-                        </div>
+                <div class="row g-3 mb-4">
+                  <div class="col-12 col-md-10">
+                    <div class="row">
+                      <div class="col-12 col-md-6 col-lg-2">
+                        <input type="text" class="form-control datewithouttime" id="start_date" value="{{ request('start_date') }}" placeholder="Start Date">
                       </div>
-                      <div id="mob-extract-button">
-                        <div class="btn btn-label-secondary ExportExcelMentor mx-8" id="mob">{{ __('cycles.Export') }}</div>
+                      <div class="col-12 col-md-6 col-lg-2">
+                        <input type="text" class="form-control datewithouttime" id="end_date" value="{{ request('end_date') }}" placeholder="End Date">
+                      </div>
+                      <div class="col-12 col-md-6 col-lg-3">
+                        <select class="form-select select2" id="showValueSelect">
+                          <option value="all" {{ request()->show == 'all' ? 'selected' : '' }}>{{ __('cycles.All requests') }}</option>
+                          <option value="" {{ !request()->show ? 'selected' : '' }}>{{ __('cycles.New requests only') }}</option>
+                          <option value="approved" {{ request()->show == 'approved' ? 'selected' : '' }}>{{ __('cycles.approved requests') }}</option>
+                          <option value="disapproved" {{ request()->show == 'disapproved' ? 'selected' : '' }}>{{ __('cycles.disapproved requests') }}</option>
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-6 col-lg-4">
+                        <select class="form-select select2" id="cycle_id">
+                          @php
+                            $cycles = \App\Cycle::get();
+                          @endphp
+                          @foreach ($cycles as $cycle)
+                            <option value="{{ $cycle->id }}" {{ request()->cycle_id == $cycle->id ? 'selected' : '' }}>
+                              {{ $cycle->title }}
+                            </option>
+                          @endforeach
+                        </select>
                       </div>
                     </div>
-
-
-                    <input type="hidden" class="Request" value="{{ Request()->show }}">
-
-                    <table class="table mt-3" id="userstable">
-                      <thead class="bg-label-light">
-                        <tr>
-                          <th>{{ __('cycles.Company') }}</th>
-                          <th>{{ __('cycles.User/Title') }}</th>
-                          <th>{{ __('cycles.Mentor') }}</th>
-                          <th>{{ __('cycles.Rate/Comment') }}</th>
-                          <th>{{ __('cycles.Date/Time') }}</th>
-                          <th>{{ __('cycles.Approved') }}</th>
-                          <th>{{ __('cycles.Done') }}</th>
-                          <th>{{ __('cycles.Actions') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($sessions as $session)
-                          <tr>
-                            <td>
-                              <div class="d-flex align-items-center">
-                                <a class="media-left" href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                                  <img src="{{ $session->user->company->logo_url }}" alt="avatar"
-                                    class="rounded-circle" height="40" width="40">
-                                </a>
-                                <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                                  <div class="d-flex align-items-center">
-                                    {{ $session->user->company->{'name_' . $l} }}
-                                  </div>
-                                </a>
-                              </div>
-                            </td>
-                            <td>
-                              <div class="d-flex align-items-center">
-                                <a class="media-left mr-50"
-                                  href="/dashboard/users/{{ $session->user->company->user->id }}/edit">
-                                  <img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
-                                    height="40" width="40">
-                                </a>
-                                <a href="/dashboard/users/{{ $session->user_id }}/edit">
-                                  <div class="mx-2">
-                                    <h6 class="media-heading mb-0">{{ $session->user->{'first_name_' . $l} }}
-                                      {{ $session->user->{'last_name_' . $l} }}</h6>
-                                    <span class="font-small-2">{{ $session->user->{'title_' . $l} }}</span>
-                                  </div>
-                                </a>
-                              </div>
-                            </td>
-                            <td>
-                              <div style="cursor: pointer;" class="chip mr-1"
-                                onclick="mentor({{ $session->mentor_id }},'{{ $session->mentor->{'first_name_' . $l} . ' ' . $session->mentor->{'last_name_' . $l} }}','{{ $session->mentor->mrating() }}')">
-                                <div class="d-flex align-items-center">
-                                  <div class="avatar">
-                                    <img src="{{ $session->mentor->image_url }}" alt="pic" class="rounded-circle"
-                                      height="40" width="40" />
-                                  </div>
-                                  <span class="mx-2">
-                                    {{ $session->mentor->name }}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div style="width: 60px;">
-                                <small>{!! $session->rate_comment
-                                  ? str_repeat('<i class="ti tis-star" style="color: #fc960f;"></i>', $session->rating) .
-                                      '<br>' .
-                                      $session->rate_comment
-                                  : $session->comment !!}
-                                </small>
-                              </div>
-                            </td>
-                            <td>
-                              <small>
-                                {{ $session->zoom_date }}
-                                {{-- <br> --}}
-                                ({{ $session->period }}M)
-                              </small>
-                            </td>
-                            <td>
-                              <div class="d-flex align-items-center" style="width: 30px;">
-                                {!! __($session->approved) ?? '<span class="warning">' . __('Waiting') . '</span>' !!}
-                              </div>
-                            </td>
-                            <td>
-                              <div style="width: 30px;">
-                                {{ $session->done ? __('Yes') : __('No') }}
-                              </div>
-                            </td>
-                            <td>
-                              <button title="Edit" onclick="edit({{ $session->id }})" type="button"
-                                class="btn btn-icon rounded-circle btn-label-info">
-                                <i class="ti ti-edit text-info"></i></button>
-                              <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
-                                class="btn btn-icon rounded-circle btn-label-danger">
-                                <i class="ti ti-trash text-danger"></i></button>
-                              @if (!$session->approved)
-                                <button title="Approve" onclick="approve({{ $session->id }},'Yes')" type="button"
-                                  class="btn btn-icon rounded-circle btn-label-success">
-                                  <i class="ti ti-check"></i></button>
-                                <button title="Dispprove" onclick="approve({{ $session->id }}, 'No')" type="button"
-                                  class="btn btn-icon rounded-circle btn-label-danger">
-                                  <i class="ti ti-x"></i></button>
-                              @endif
-                              @if ($session->join_url)
-                                <a href="{{ $session->start_url }}" target="_blank">
-                                  <button title="Start Meeting" type="button"
-                                    class="btn btn-icon rounded-circle btn-label-secondary">
-                                    <i class="ti ti-device-computer-camera"></i></button></a>
-                                <a href="{{ $session->join_url }}" target="_blank">
-                                  <button title="Join only" type="button"
-                                    class="btn btn-icon rounded-circle btn-label-primary">
-                                    <i class="ti ti-user"></i></button></a>
-                              @endif
-                              @if ($session->fileurl)
-                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank"
-                                  title="Download attched" class="btn btn-icon rounded-circle btn-label-primary">
-                                  <i class="ti ti-download text-secondary"></i></a>
-                              @endif
-                            </td>
-                          </tr>
-                        @endforeach
-
-                      </tbody>
-                    </table>
+                  </div>
+                  <div class="col-8 col-lg-2 d-flex gap-2">
+                    <button class="btn btn-primary btn-icon rounded-circle" id="searchBot">
+                      <i class="ti ti-filter"></i>
+                    </button>
+                    <button class="btn btn-light btn-icon rounded-circle" onclick="window.location.href='/dashboard/mentorship/sessions'">
+                      <i class="ti ti-reload"></i> 
+                    </button>
                   </div>
                 </div>
 
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-12 col-md-12 col-sm-12">
-            <div class="card">
-              <div id="mentors" style="display: none;">
-                <div class="card-header">
-                  <h4 class="card-title"><b id="name"></b> {{ __('cycles.Schedule') }}: </h4>
-                </div>
                 <div class="table-responsive">
-                  <table class="table" id="mentorstable">
+                  <table class="table" id="userstable">
+                    <thead class="table-light">
+                      <tr>
+                        <th>{{ __('cycles.Company') }}</th>
+                        <th>{{ __('cycles.User/Title') }}</th>
+                        <th>{{ __('cycles.Mentor') }}</th>
+                        <th>{{ __('cycles.Rate/Comment') }}</th>
+                        <th>{{ __('cycles.Date/Time') }}</th>
+                        <th>{{ __('cycles.Approved') }}</th>
+                        <th>{{ __('cycles.Done') }}</th>
+                        <th>{{ __('cycles.Actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach ($sessions as $session)
+                        <tr>
+                          <td>
+                            <div class="d-flex align-items-center">
+                              <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
+                                <img 
+                                  onerror="this.src='/images/logo-placeholder.png'"
+                                  src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle me-2 border bg-label-light" height="40" width="40">
+                              </a>
+                              <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
+                                {{ $session->user->company->{'name_' . $l} }}
+                              </a>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex align-items-center">
+                              <a href="/dashboard/users/{{ $session->user_id }}/edit">
+                                <img 
+                                  onerror="this.src='/icons/account.svg'"
+                                  src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                              </a>
+                              <div>
+                                <h6 class="mb-0 text-nowrap">{{ $session->user->{'first_name_' . $l} }} {{ $session->user->{'last_name_' . $l} }}</h6>
+                                <small>{{ $session->user->{'title_' . $l} }}</small>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="d-flex align-items-center">
+                              <img 
+                                onerror="this.src='/icons/account.svg'"
+                                src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                              {{ $session->mentor->name }}
+                            </div>
+                          </td>
+                          <td>
+                            <small>{!! $session->rate_comment ? str_repeat('<i class="ti tis-star text-warning"></i>', $session->rating) . '<br>' . $session->rate_comment : $session->comment !!}</small>
+                          </td>
+                          <td>
+                            <small>{{ $session->zoom_date }} ({{ $session->period }}M)</small>
+                          </td>
+                          <td>
+                            <span class="badge bg-label-{{ $session->approved ? 'success' : 'warning' }}">
+                              {{ $session->approved ? __('Yes') : __('Waiting') }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="badge bg-label-{{ $session->done ? 'success' : 'danger' }}">
+                              {{ $session->done ? __('Yes') : __('No') }}
+                            </span>
+                          </td>
+                          <td>
+                            <div class="btn-group">
+                              <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-info" onclick="edit({{ $session->id }})" title="Edit">
+                                <i class="ti ti-edit"></i>
+                              </button>
+                              <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="deleteme({{ $session->id }})" title="Delete">
+                                <i class="ti ti-trash"></i>
+                              </button>
+                              @if (!$session->approved)
+                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-success" onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
+                                  <i class="ti ti-check"></i>
+                                </button>
+                                <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="approve({{ $session->id }}, 'No')" title="Disapprove">
+                                  <i class="ti ti-x"></i>
+                                </button>
+                              @endif
+                              @if ($session->join_url)
+                                <a href="{{ $session->start_url }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-label-secondary" title="Start Meeting">
+                                  <i class="ti ti-device-computer-camera"></i>
+                                </a>
+                                <a href="{{ $session->join_url }}" target="_blank" class="me-1 btn-icon rounded-circle btn btn-sm btn-label-primary" title="Join only">
+                                  <i class="ti ti-user"></i>
+                                </a>
+                              @endif
+                              @if ($session->fileurl)
+                                <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="btn btn-sm btn-primary" title="Download attached">
+                                  <i class="ti ti-download"></i>
+                                </a>
+                              @endif
+                            </div>
+                          </td>
+                        </tr>
+                      @endforeach
+                    </tbody>
                   </table>
                 </div>
               </div>
@@ -372,10 +258,15 @@
       </div>
     </div>
   </div>
-
 @stop
+
+@section('scripts')
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+@stop
+
 @section('pagescripts')
-  <script src="/js/jquery.datetimepicker.full.min.js"></script>
   <script>
     $(document).ready(function() {
       $('.table').DataTable({
@@ -421,12 +312,14 @@
     });
   </script>
   <script>
-    $('.date').datetimepicker({
-      timepicker: true,
-      format: 'Y-m-d H:i'
-    });
-    $('.datewithouttime').datetimepicker({
-      format: 'Y-m-d'
+    // $('.date').datetimepicker({
+    //   timepicker: true,
+    //   format: 'Y-m-d H:i'
+    // });
+
+    $('.datewithouttime').flatpickr({
+      enableTime: false,
+      dateFormat: "Y-m-d",
     });
 
     function edit(id) {
@@ -479,7 +372,7 @@
         const formattedEndDate = formatDate(endDate);
         url += `&start_date=${encodeURIComponent(formattedStartDate)}&end_date=${encodeURIComponent(formattedEndDate)}`;
       }
-      if(CycleId){
+      if (CycleId) {
         url += `&cycle_id=${CycleId}`;
       }
 
@@ -572,7 +465,7 @@
     }
 
     function approve(id, stat) {
-       alert('{{ __('admin.sending_request') }}')
+      alert('{{ __('admin.sending_request') }}')
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

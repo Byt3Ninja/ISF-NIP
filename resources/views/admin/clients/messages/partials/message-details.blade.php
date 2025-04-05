@@ -124,7 +124,7 @@
               <i class="ti ti-dots-vertical ti-md"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownEmailTwo">
-              <a class="dropdown-item scroll-to-reply" href="javascript:void(0)">
+              <a id="reply-btn" class="dropdown-item scroll-to-reply" href="javascript:void(0)">
                 <i class="ti ti-corner-up-left me-1"></i>
                 <span class="align-middle">Reply</span>
               </a>
@@ -148,6 +148,7 @@
         <p id="message-details-text"></p>
       </div>
     </div>
+    @include('admin.clients.messages.partials.reply-message')
   </div>
 </div>
-<!-- Message View -->
+<!--/ Message View -->

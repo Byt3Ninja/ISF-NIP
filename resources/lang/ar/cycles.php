@@ -306,5 +306,8 @@ return [
     'Select_Funding_Stage' => 'اختر مرحلة التمويل',
     'Business_Type' => 'نوع العمل',
     'Reset' => 'إعادة تعيين',
+    'Mentorship Sessions' => 'جلسات الإرشاد',
+    'Select Judges' => 'اختر المحكمين',
+    'Select Startup' => 'اختر الشركة',
   ];
 

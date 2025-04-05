@@ -54,8 +54,13 @@
     <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
     <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
     <script src="/vuexy/assets/vendor/js/menu.js"></script>
+    <!-- For Searchable Select -->
     <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
     <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>  
+    <!-- For Date & Time Picker -->
+    <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+    <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
     <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
     <!-- endbuild -->
 
@@ -69,10 +74,9 @@
     <script src="/vuexy/assets/js/main.js"></script>
 
     <!-- Custom JS -->
-    {{-- <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script> --}}
-    {{-- <script src="/app-assets/js/1.js"></script> --}}
     <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>
     <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
+    <!-- For Searchable Select -->
     <script src="/vuexy/assets/js/forms-selects.js"></script>
 
     @auth

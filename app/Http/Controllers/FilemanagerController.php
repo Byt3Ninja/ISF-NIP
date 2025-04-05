@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class FilemanagerController extends Controller
 {
@@ -14,9 +15,15 @@ class FilemanagerController extends Controller
     }
     public function showfile($id,$filename) {
         if (Auth::id() == $id || Auth::user()->ableTo('myFiles.showFile')) {
-            $storagePath = storage_path('app/uploads/files/' . $id . '/' . $filename);
+            
+        $storagePath = storage_path('app/uploads/files/' . $id . '/' . $filename);
+        if (!File::exists($storagePath)) {
+            return abort(404, 'File not found.');
+        }
             return response()->file($storagePath);
-        } else {abort(401);}
+        } else {
+          abort(401);
+        }
     }
     public function showimage($id,$filename) {
         if (Auth::id() == $id || Auth::user()->ableTo('myFiles.showImage')) {

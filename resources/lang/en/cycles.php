@@ -121,7 +121,7 @@ return [
     'New requests' => 'New requests',
     'New requests only' => 'New requests only',
     'All requests' => 'All requests',
-    'approved requests' => 'approved requests',
+    'approved requests' => 'Approved requests',
     'disapproved requests' => 'Disapproved requests',
     'Modify mentorship session' => 'Modify mentorship session',
     'Approve & notify users' => 'Approve & notify users',
@@ -309,5 +309,8 @@ return [
     'Select_Funding_Stage' => 'Select Funding Stage',
     'Business_Type' => 'Business Type',
     'Reset' => 'Reset',
+    'Mentorship Sessions' => 'Mentorship Sessions',
+    'Select Judges' => 'Select Judges',
+    'Select Startup' => 'Select Startup',
 ];
 

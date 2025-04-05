@@ -3,15 +3,23 @@
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @stop
 
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-email.css" />
 @stop
+
+@php
+   $folders = [
+    ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => $receivedMessagesCount, 'class' => 'bg-label-primary']],
+    ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent'],
+    ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => 2, 'class' => 'bg-label-warning']],
+    ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred'],
+    ['target' => 'spam', 'icon' => 'ti-alert-octagon', 'label' => 'Spam', 'badge' => ['count' => 4, 'class' => 'bg-label-danger']],
+    ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash']
+  ];
+@endphp
 
 @section('content')
   <!-- Content wrapper -->
@@ -28,101 +36,14 @@
             <div class="card shadow-none border-0 rounded-0">
               <div class="card-body emails-list-header p-3 py-2">
                 <!-- Message List: Search -->
-                <div class="d-flex justify-content-between align-items-center px-3 mt-2">
-                  <div class="d-flex align-items-center w-100">
-                    <i class="ti ti-menu-2 ti-lg cursor-pointer d-block d-lg-none me-4 mb-4" data-bs-toggle="sidebar"
-                      data-target="#app-email-sidebar" data-overlay></i>
-                    <div class="mb-4 w-100">
-                      <div class="input-group input-group-merge shadow-none">
-                        <span class="input-group-text border-0 ps-0 py-0" id="email-search">
-                          <i class="ti ti-search ti-lg"></i>
-                        </span>
-                        <input type="text" class="form-control email-search-input border-0 py-0"
-                          placeholder="{{ __('admin.Search Messages') }}" aria-label="Search mail"
-                          aria-describedby="email-search" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                @include('admin.clients.messages.partials.search-messages')
+                <!--/ Message List: Search -->
                 <hr class="mx-n3 emails-list-header-hr mb-2" />
                 <!-- Message List: Actions -->
-                {{-- <div class="d-flex justify-content-between align-items-center ps-1">
-                  <div class="d-flex align-items-center">
-                    <div class="form-check mb-0 ms-2">
-                      <input class="form-check-input" type="checkbox" id="email-select-all" />
-                      <label class="form-check-label" for="email-select-all"></label>
-                    </div>
-                    <div class="btn btn-text-secondary btn-icon rounded-pill me-1">
-                      <i class="ti ti-trash ti-md email-list-delete cursor-pointer"></i>
-                    </div>
-                    <div class="btn btn-text-secondary btn-icon rounded-pill me-1">
-                      <i class="ti ti-mail-opened ti-md email-list-read cursor-pointer"></i>
-                    </div>
-                    <div class="dropdown me-1">
-                      <button class="btn btn-icon btn-text-secondary rounded-pill p-0" type="button"
-                        id="dropdownMenuFolderOne" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="ti ti-folder ti-md"></i>
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuFolderOne">
-                        <a class="dropdown-item" href="javascript:void(0)">
-                          <i class="ti ti-info-circle ti-sm me-1"></i>
-                          <span class="align-middle">Spam</span>
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0)">
-                          <i class="ti ti-file ti-sm me-1"></i>
-                          <span class="align-middle">Draft</span>
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0)">
-                          <i class="ti ti-trash ti-sm me-1"></i>
-                          <span class="align-middle">Trash</span>
-                        </a>
-                      </div>
-                    </div>
-                    <div class="dropdown mx-1">
-                      <button class="btn btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow"
-                        data-bs-toggle="dropdown" aria-expanded="true" id="dropdownLabelOne">
-                        <i class="ti ti-tag ti-md"></i>
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLabelOne">
-                        <a class="dropdown-item" href="javascript:void(0)">
-                          <i class="badge badge-dot bg-success me-1"></i>
-                          <span class="align-middle">Workshop</span>
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0)">
-                          <i class="badge badge-dot bg-primary me-1"></i>
-                          <span class="align-middle">Company</span>
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0)">
-                          <i class="badge badge-dot bg-warning me-1"></i>
-                          <span class="align-middle">Important</span>
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0)">
-                          <i class="badge badge-dot bg-danger me-1"></i>
-                          <span class="align-middle">Private</span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="d-flex align-items-center">
-                    <span class="btn btn-icon btn-text-secondary rounded-pill me-1">
-                      <i class="ti ti-refresh ti-md scaleX-n1-rtl cursor-pointer email-refresh"></i>
-                    </span>
-                    <div class="dropdown">
-                      <button class="btn btn-icon btn-text-secondary rounded-pill p-0" type="button" id="emailsActions"
-                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="ti ti-dots-vertical ti-md"></i>
-                      </button>
-                      <div class="dropdown-menu dropdown-menu-end" aria-labelledby="emailsActions">
-                        <a class="dropdown-item" href="javascript:void(0)">Mark as read</a>
-                        <a class="dropdown-item" href="javascript:void(0)">Mark as unread</a>
-                        <a class="dropdown-item" href="javascript:void(0)">Delete</a>
-                        <a class="dropdown-item" href="javascript:void(0)">Archive</a>
-                      </div>
-                    </div>
-                  </div>
-                </div> --}}
+                @include('admin.clients.messages.partials.messeges-actions')
+                <!-- Message List: Actions -->
               </div>
-              {{-- <hr class="container-m-nx m-0" /> --}}
+              <hr class="container-m-nx m-0" />
               <!-- Message List: Items -->
               <div class="email-list pt-0" id="receivedMessages">
                 <ul class="list-unstyled m-0">
@@ -136,7 +57,7 @@
               </div>
               <div class="email-list pt-0" id="sentMessages">
                 <ul class="list-unstyled m-0">
-                  @foreach ($receivedMessages as $message)
+                  @foreach ($sentMessages as $message)
                     @include('admin.clients.messages.partials.message-item', ['message' => $message])
                   @endforeach
                 </ul>
@@ -171,10 +92,7 @@
   </script>
   <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 @stop
 
@@ -307,5 +225,11 @@
           }
         })
     }
+  </script>
+  <script>
+    $('#reply-btn').on('click', function() {
+      console.log('reply button clicked');
+      $('#reply-message-container').toggleClass('d-none');
+    });
   </script>
 @stop

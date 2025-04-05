@@ -425,9 +425,13 @@
                     <div class="widget-todo-item-action d-flex align-items-center">
                       <div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-conetnt-center"
                         style="width: 200px; height: 30px">
-                        <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
-                          {{ $serv->serviceCategory->{'name_' . $l} }}
-                        </a>
+                        @if ($serv->serviceCategory)
+                          <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
+                            {{ $serv->serviceCategory->{'name_' . $l} }}
+                          </a>
+                        @else
+                          <span>{{ __('dashboard.No Category') }}</span>
+                        @endif
                       </div>
                     </div>
                   </div>

@@ -41,4 +41,10 @@ return [
     'IP' => 'IP',
     'replied with' =>'replied with',
     'Replied' => 'Replied',
+    'Starred' => 'Starred',
+    'Spam' => 'Spam',
+    'Trash' => 'Trash',
+    'Inbox' => 'Inbox',
+    'Sent' => 'Sent',
+    'Draft' => 'Draft',
 ];

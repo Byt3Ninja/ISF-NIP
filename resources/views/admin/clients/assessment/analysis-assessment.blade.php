@@ -80,17 +80,17 @@
           <ul class="nav nav-pills">
             @foreach ($mobilePills as $key => $pill)
               <li class="nav-item me-1">
-                <a href="/dashboard/{{ $pill }}" class="nav-link {{ $key == 0 ? 'active' : '' }}">
-                  <span>
-                    @if ($pill == 'analysis-assessment')
-                      {{ __('admin.Analysis_Assessment') }}
-                    @elseif($pill == 'question-assessment')
-                      {{ __('admin.Question_assessment') }}
-                    @else
-                      {{ __('admin.History') }}
-                    @endif
-                  </span>
-                </a>
+               <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}" class="nav-link {{ $key == 1 ? 'active' : '' }}">
+                <span>
+                  @if ($pill == 'analysis-assessment')
+                    {{ __('admin.Analysis_Assessment') }}
+                  @elseif($pill == 'question-assessment')
+                    {{ __('admin.Question_assessment') }}
+                  @else
+                    {{ __('admin.History') }}
+                  @endif
+                </span>
+              </a>
               </li>
             @endforeach
           </ul>

@@ -1472,5 +1472,10 @@ return [
 	'Search Messages' => 'البحث في الرسائل',
 	'Inbox' => 'صندوق الوارد',
 	'Sent' => 'المرسلة',
+	'Select Status' => 'اختر الحالة',
+	'Select Service' => 'اختر الخدمة',
+	'No Result' => 'لا توجد نتائج',
+	'No Organization' => 'لا توجد مؤسسة',
+	'No Category' => 'لا يوجد فئة',
 ]; 
 

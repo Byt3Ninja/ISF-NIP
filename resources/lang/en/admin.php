@@ -1450,4 +1450,10 @@ return [
 	'Search Messages' => 'Search Messages',
 	'Inbox' => 'Inbox',
 	'Sent' => 'Sent',
+	'Select Status' => 'Select Status',
+	'Select Service' => 'Select Service',
+	'No Result' => 'No Results Found',
+	'No Organization' => 'No Organization',
+	'No Category' => 'No Category',
+	'rolePagesEditor' => 'Pages Editor',
 ];
