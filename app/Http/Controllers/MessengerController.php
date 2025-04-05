@@ -254,6 +254,7 @@ class MessengerController extends Controller
     }
     public function sendmessage(Request $request)
     {
+        
         $users = $mentors = $cycles = $organizations = null;
         if (Auth::user()->hasAnyRole('Admin|OrganizationManager')) {
             $cycles = Cycle::select('id', 'title')->get();
@@ -314,6 +315,7 @@ class MessengerController extends Controller
     }
     public function savemessage(Request $request)
     {
+        
         $cuser = Auth::user();
         if ($request->type == 1) {
             if (!$request->users) {
@@ -447,6 +449,7 @@ class MessengerController extends Controller
                 }
             }
         } else {
+           
             try {
                 $new = new Messages();
                 $name = $cuser->first_name_en . ' ' . $cuser->last_name_en;
@@ -458,7 +461,6 @@ class MessengerController extends Controller
                 $new->message = $request->input('message');
                 $new->userip = $request->getClientIp();
                 $new->save();
-
                 event(new WebMessage('mymsg', $name));
             } catch (\Exception $e) {
                 Log::error('Error: ' . $e->getMessage());
