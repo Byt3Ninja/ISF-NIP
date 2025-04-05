@@ -57,7 +57,7 @@
               </div>
               <div class="email-list pt-0" id="sentMessages">
                 <ul class="list-unstyled m-0">
-                  @foreach ($receivedMessages as $message)
+                  @foreach ($sentMessages as $message)
                     @include('admin.clients.messages.partials.message-item', ['message' => $message])
                   @endforeach
                 </ul>

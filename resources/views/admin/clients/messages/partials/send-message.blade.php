@@ -15,6 +15,7 @@
       <div class="modal-body flex-grow-1 pb-sm-0 p-5 py-2">
         <form class="email-compose-form" method="post" action="/dashboard/sendmessage" enctype="multipart/form-data">
           {!! csrf_field() !!}
+          
           <div class="form-group mb-4">
             <label class="form-label">{{ __('messages.SelectUsers') }}:</label>
             <select id="select-type" class="form-select" name="type">

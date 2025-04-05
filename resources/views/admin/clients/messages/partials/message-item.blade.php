@@ -33,9 +33,11 @@
         <li class="list-inline-item email-read btn btn-icon btn-text-secondary rounded-pill">
           <i class="ti ti-mail ti-md"></i>
         </li>
-        <li class="list-inline-item email-delete btn btn-icon btn-text-secondary rounded-pill">
+
+        <li class="list-inline-item email-delete btn btn-icon btn-text-secondary rounded-pill" onclick="delme({{ $message['id'] }}, event)">
           <i class="ti ti-trash ti-md"></i>
         </li>
+
         <li class="list-inline-item btn btn-icon btn-text-secondary rounded-pill">
           <i class="ti ti-info-circle ti-md"></i>
         </li>
