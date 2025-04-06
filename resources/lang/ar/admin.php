@@ -1477,5 +1477,6 @@ return [
 	'No Result' => 'لا توجد نتائج',
 	'No Organization' => 'لا توجد مؤسسة',
 	'No Category' => 'لا يوجد فئة',
+	'Not_Available' => 'غير متوفر',
 ]; 
 
