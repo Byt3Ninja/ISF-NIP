@@ -784,6 +784,26 @@
 							</section>
 						</div>
 					</div>
+				@else
+					<div class="col-12">
+						<section>
+							<div class="row">
+								<div class="col-md-12">
+									<div class="card mt-10">
+										<div class="card-header border-bottom mb-4">
+											<h5 class="card-title align-items-center">
+												<i class="ti ti-calendar-stats ti-24px"></i>
+												<span class="mx-2">{{ __("dashboard.My next mentorship sessions") }}</span>
+											</h5>
+										</div>
+										<div class="card-body">
+											<h3>{{__('dashboard.No sessions added yet')}}.</h3>
+										</div>
+									</div>
+								</div>
+							</div>
+						</section>
+					</div>
 				@endif
 			</div>
 		</div>

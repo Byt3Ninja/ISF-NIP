@@ -236,7 +236,7 @@
                           {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
                         </span>
                         <span>
-                          {{ $client->country_id ? $client->country->{'name_' . $l} : __('admin.Egypt') }}
+                          {{ $client->country_id ? $client->country->{'name_' . $l} : __('admin.Not_Available') }}
                         </span>
                       </li>
                       <li class="d-flex align-items-center mb-2">
@@ -244,7 +244,14 @@
                           {{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}
                         </span>
                         <span>
-                          {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
+                         
+                         @if ($client->language === 'ar')
+                            {{ $l == 'ar' ? 'العربية' : 'Arabic' }}
+                         @elseif ($client->language === 'en')
+                            {{ $l == 'ar' ? 'الإنجليزية' : 'English' }}
+                         @else
+                            {{ __('admin.Not_Available') }}
+                         @endif
                         </span>
                       </li>
                     </ul>

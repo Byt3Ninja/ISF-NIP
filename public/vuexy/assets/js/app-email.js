@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modules: {
           toolbar: '.email-reply-toolbar'
         },
-        placeholder: 'Write your message... ',
+        placeholder: document.documentElement.lang == 'en' ? 'Write your message... ' : 'اكتب رسالتك... ',
         theme: 'snow'
       });
     }
@@ -211,11 +211,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Empty compose email message inputs when modal is hidden
-    emailCompose.addEventListener('hidden.bs.modal', event => {
-      document.querySelector('.email-editor .ql-editor').innerHTML = '';
-      $('#emailContacts').val('');
-      initSelect2();
-    });
+    if (emailCompose) {
+      emailCompose.addEventListener('hidden.bs.modal', event => {
+        document.querySelector('.email-editor .ql-editor').innerHTML = '';
+        $('#emailContacts').val('');
+        initSelect2();
+      });
+    }
 
     // Delete multiple email
     if (emailListDelete) {

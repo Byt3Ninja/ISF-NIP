@@ -92,6 +92,7 @@ return [
     'kindly add your schedule' => 'kindly add your schedule',
     'here' => 'here',
     'My next mentorship sessions' => 'My next mentorship sessions',
+    'No sessions added yet' => 'No sessions added yet',
     'User' => 'User',
     'Date' => 'Date',
     'Admin Notes' => 'Admin Notes',
@@ -151,4 +152,5 @@ return [
     'Date' => 'Date',
     'From' => 'From',
     'To' => 'To',
+    'Category not available' => 'Category not available',
 ];

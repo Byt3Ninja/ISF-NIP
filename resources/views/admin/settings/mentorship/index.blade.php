@@ -282,7 +282,7 @@
             <div class="input-group mb-2">
               <input type="text" name="date" placeholder="{{ __('admin.selectDate') }}" class="form-control"
                 id="flatpickr-date-time"
-                required
+                required 
               />
             </div>
             <span class="fw-semibold text-danger" id="dateError"></span>
@@ -373,6 +373,7 @@
       flatpickr(flatpickerDataTime, {
       enableTime: true,
       minDate: "today",
+      mode: "multiple",
       onChange: function(selectedDates, dateStr, instance) {
         dateError.innerText = '';
         // remove is-invalid class
