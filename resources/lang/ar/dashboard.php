@@ -152,4 +152,5 @@ return [
     'Date' => 'التاريخ',
     'From' => 'من',
     'To' => 'إلى',
+    'Category not available' => 'الفئة غير متاحة',
 ];

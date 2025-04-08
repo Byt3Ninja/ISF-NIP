@@ -121,5 +121,5 @@ return [
     'Show all' => 'Show all',
     'Final pending screening'=>'Pending Evaluation Session',
     'screening pending sessions'=>'Pending Filtration Session',
-
+    'Category not available' => 'Category not available',
 ];

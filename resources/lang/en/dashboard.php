@@ -152,4 +152,5 @@ return [
     'Date' => 'Date',
     'From' => 'From',
     'To' => 'To',
+    'Category not available' => 'Category not available',
 ];
