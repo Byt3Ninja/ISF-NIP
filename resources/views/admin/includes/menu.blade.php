@@ -164,7 +164,7 @@
     $l == 'ar' ? ($arrow = 'left') : ($arrow = 'right');
     ?>
 
-    @if( $_user->ableToAny(['inbox', 'outbox', 'sendmessage', 'messages.view', 'messages.index'], $permissions) )
+    @if( $_user->ableToAny(['messages.index'], $permissions) )
     <li class="{{ Request::is('dashboard/inbox', 'dashboard/outbox', 'dashboard/mymsg', 'dashboard/sendmessage', 'dashboard/messages') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-messages"></i>
