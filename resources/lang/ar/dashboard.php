@@ -92,6 +92,7 @@ return [
     'kindly add your schedule' => 'يرجى إضافة مواعيدك',
     'here' => 'هنا',
     'My next mentorship sessions' => 'الاجتماع القادم',
+    'No sessions added yet' => 'لا توجد مواعيد حالياً',
     'User' => 'المستخدم',
     'Date' => 'التاريخ',
     'Admin Notes' => 'ملاحظات الإدارة',

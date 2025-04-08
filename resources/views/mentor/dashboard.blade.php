@@ -610,6 +610,13 @@
               </tbody>
             </table>
           </div>
+        @else
+          <div class="card-body">
+            <div class="widget-todo-title-area d-flex align-items-center">
+              <span class="widget-todo-title ml-50">
+                {{ __('dashboard.No sessions added yet') }}.</span>
+            </div>
+          </div>
         @endif
       </div>
       <!--/ Mentor Sessions Table -->
