@@ -129,6 +129,8 @@
   $googleSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب جوجل' : 'Sign in with Google';
   $linkdinSignIn = $l == 'ar' ? 'تسجيل الدخول بحساب لينكد ان' : 'Sign in with Linkedin';
   $accountRoles = ['Mentor', 'Founder'];
+  $termsUrl = $setting ? $setting->terms_url : '#';
+  $privacyUrl = $setting ? $setting->privacy_url : '#';
   @endphp
 
   @if (App\Settings::findOrFail(1)->set_order)
@@ -325,16 +327,28 @@
                   </div>
                 </div>
                 <div class="mb-6 mt-2">
-                  <div class="form-check mb-0 ms-2">
-                    <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
-                    <label class="form-check-label" for="terms-conditions">
-                      {{ __('auth.I agree to') }}
-                      <a href="https://growthlabs.app/terms-and-condition/">
-                        {{ __('auth.Privacy policy & terms') }}
-                      </a>
-                    </label>
-                  </div>
-                </div>
+                  @if(!empty($termsUrl) && !empty($privacyUrl))
+                      <p class="ms-2">
+                          {!! __('admin.signup_agreement', [
+                              'terms' => '<a href="'. $termsUrl .'" target="_blank">'. __('admin.terms') .'</a>',
+                              'privacy' => '<a href="'. $privacyUrl .'" target="_blank">'. __('admin.privacy') .'</a>'
+                          ]) !!}
+                      </p>
+                  @elseif(!empty($termsUrl))
+                      <p class="ms-2">
+                          {!! __('admin.signup_agreement_terms', [
+                              'terms' => '<a href="'. $termsUrl .'" target="_blank">'. __('admin.terms') .'</a>'
+                          ]) !!}
+                      </p>
+                  @elseif(!empty($privacyUrl))
+                      <p class="ms-2">
+                          {!! __('admin.signup_agreement_privacy', [
+                              'privacy' => '<a href="'. $privacyUrl .'" target="_blank">'. __('admin.privacy') .'</a>'
+                          ]) !!}
+                      </p>
+                  @endif
+              </div>
+              
                 <div class="col-12">
                   <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
                 </div>

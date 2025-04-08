@@ -44,7 +44,7 @@ class SettingsController extends Controller
 		$Img3 =  Settings::findOrFail('9');
 		$Counters = Settings::where('type','6')->get();
 		$countries = Country::all();
-		$currencies = Currency::all();
+		$currencies = Currency::where('enabled',1)->get();
 		$states= State::all();
 		$json = File::get(base_path('database/dbFiles/countries.json'));
 		$_countries = json_decode($json, true);
@@ -335,6 +335,11 @@ class SettingsController extends Controller
 
 	public function update_settingsone(Request $request)
 	{
+		$request->validate([
+			'terms_url' => ['nullable', 'regex:/^https:\/\/(?!-)(?!.*--)(?!.*\.\.)(?!.*\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?<!-)(\/.*)?$/'],
+    		'privacy_url' => ['nullable', 'regex:/^https:\/\/(?!-)(?!.*--)(?!.*\.\.)(?!.*\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?<!-)(\/.*)?$/'],
+		]);
+
 		$id = $request->input('id');
 		$site_ar_title = $request->input('site_ar_title');
 		$site_title = $request->input('site_title');
@@ -364,6 +369,9 @@ class SettingsController extends Controller
 		$updateSittings->HomePage = $homePage;
 		$updateSittings->mentor_list = $MentorList;
 		$updateSittings->assessment = $Assessment;
+		$updateSittings->terms_url = $request->terms_url;
+		$updateSittings->privacy_url = $request->privacy_url;
+
 		$updateSittings->save();
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}
@@ -783,7 +791,7 @@ class SettingsController extends Controller
     public function showSettings()
     {
         $organization = auth()->user()->organization; 
-        $currencies = Currency::all();  
+        $currencies = Currency::where('enabled',1)->get();  
         $timezones = collect(\DateTimeZone::listIdentifiers())
         ->mapWithKeys(function ($timezone) {
 			$zone = new \DateTimeZone($timezone);

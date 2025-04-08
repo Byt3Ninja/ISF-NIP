@@ -18,7 +18,7 @@ class quizzesController extends Controller
 	 */
 	public function __construct() { $this->middleware('auth'); }
 
-	public function index()
+	public function index(Request $request)
 	{
 		$user = auth()->user();
 		$organization_id = $user->organization_id;
@@ -28,6 +28,14 @@ class quizzesController extends Controller
 			if( is_array( $organization_id ) ) { $quizzes = $quizzes->whereIn('organization_id', $organization_id); }
 			else { $quizzes = $quizzes->where('organization_id', $organization_id); }
 		}
+		if($request->org_id != 0){
+			$quizzes = $quizzes->where('organization_id', $request->org_id);
+		}
+		if($request->status != 0){
+			$quizzes = $quizzes->where('status', $request->status);
+		}
+
+
 		$quizzes = $quizzes->get();
 		return view('admin.quizzes.index', compact('quizzes'));
 	}

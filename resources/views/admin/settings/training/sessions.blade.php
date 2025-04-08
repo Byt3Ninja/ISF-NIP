@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 @stop
 
 @section('style')
@@ -25,18 +25,16 @@
       <div class="content-body">
         <section id="multiple-column-form">
           @if (session()->has('message'))
-          <div 
-            class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
-            role="alert"
-          >
-            {{ __('admin.' . session()->get('message')) }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-      @endif
+            <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
+              role="alert">
+              {{ __('admin.' . session()->get('message')) }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          @endif
         </section>
         @if (count($steps) > 0)
-          <section id="multiple-column-form">
-            <div class="row match-height">
+          <section>
+            <div class="row">
               <div class="col-xl-12 col-md-12 col-sm-12">
                 <div class="card mb-4">
                   <div class="card-header" style="padding-bottom: 15px;">
@@ -44,46 +42,49 @@
                   </div>
                   <hr>
                   @php
-                  $cycleId = $steps->where('id', $id)->first()->cycle_id;
+                    $cycleId = $steps->where('id', $id)->first()->cycle_id;
                   @endphp
-                  <div class="card-body">
-                    <label class="form-label fs-5 mb-2">{{ __('cycles.Select Step') }}</label>
-                    <fieldset class="d-flex flex-column flex-md-row gap-3">
-                      <select id="ccycle" class="select2 form-control"
-                        style="margin-left: {{ $l == 'ar' ? '10px' : '0' }}; margin-right: {{ $l == 'ar' ? '0' : '10px' }}; width: 60%;"
-                        onchange="window.open('/dashboard/training/sessions/'+this.options[this.selectedIndex].value,'_self');">
-                        @foreach ($steps as $step)
-                          @php
-                            if ($step->id == $id) {
-                                $ccycle = $step->cycle->id;
-                            }
-                          @endphp
-                          <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
-                            ({{ $step->cycle->title }}-{{ __('cycles.Start') . ' ' . $step->cycle->start->format('d-m-Y') }})
-                            - {{ optional(optional($step->cycle)->organization)->name }}</option>
-                        @endforeach
-                      </select>
-                      <div class="input-group-append">
-                        <button data-bs-toggle="modal" data-bs-target="#addsession" type="button"
-                          class="btn btn-label-primary block">
-                          <i class="ti ti-plus"></i> <span
-                            class="mx-1">{{ __('cycles.Add new training') }}</span>
-                        </button>
-                        <a class="btn btn-label-success" href="/dashboard/cycles/{{ $step->id == $id ? $ccycle : '' }}">
-                          <i class="ti ti-pencil"></i> <span class="mx-1">{{ __('cycles.Cycle') }}</span>
-                        </a>
-                       
-                        <a class="btn btn-label-dark" href="/dashboard/training/{{ $cycleId ?? 0 }}/surveys">
-                          <i class="ti ti-question-mark"></i> <span class="mx-1">{{ __('cycles.Manage Surveys') }}</span>
-                        </a>
-                        
+                  <div class="card-body row">
+                    <div class="col-12 col-lg-6">
+                      <div class="form-group">
+                        <label class="form-label fs-5 mb-2">{{ __('cycles.Select Step') }}</label>
+                        <select id="ccycle" class="select2 form-select"
+                          onchange="window.open('/dashboard/training/sessions/'+this.options[this.selectedIndex].value,'_self');">
+                          @foreach ($steps as $step)
+                            @php
+                              if ($step->id == $id) {
+                                  $ccycle = $step->cycle->id;
+                              }
+                            @endphp
+                            <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>
+                              {{ $step->title }}
+                              ({{ $step->cycle->title }}-{{ __('cycles.Start') . ' ' . $step->cycle->start->format('d-m-Y') }})
+                              - {{ optional(optional($step->cycle)->organization)->name }}</option>
+                          @endforeach
+                        </select>
                       </div>
-                    </fieldset>
+                    </div>
+                    <div class="col-12 col-lg-6 mt-4 mt-lg-0">
+                      <div class="d-flex flex-wrap h-100 align-items-end gap-3">
+                        <button data-bs-toggle="modal" data-bs-target="#addsession" type="button"
+                          class="text-nowrap btn btn-label-primary">
+                          <i class="ti ti-plus me-2"></i> {{ __('cycles.Add new training') }}
+                        </button>
+                        <a class="text-nowrap btn btn-label-success"
+                          href="/dashboard/cycles/{{ $step->id == $id ? $ccycle : '' }}">
+                          <i class="ti ti-pencil me-2"></i>{{ __('cycles.Cycle') }}
+                        </a>
+                        <a class="text-nowrap btn btn-label-dark" href="/dashboard/training/{{ $cycleId ?? 0 }}/surveys">
+                          <i class="ti ti-question-mark me-2"></i>{{ __('cycles.Manage Surveys') }}
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </section>
+
           <section class="row">
             <div class="col-xl-12 col-md-12 col-sm-12">
               <div class="card">
@@ -91,6 +92,41 @@
                 </div>
                 <div class="card-body">
                   <div class="card-text">
+                    <br>
+                    <!-- Filter -->
+                    <form method="GET" action="{{ route('training.sessions', $id) }}"
+                      class="row g-3 align-items-center">
+                      <div class="col-auto">
+                        <button class="btn btn-primary d-flex justify-content-center align-items-center"
+                          style="border-radius: 50%; width: 40px; height: 40px;" type="submit">
+                          <i class="ti ti-filter text-white"></i>
+                        </button>
+                      </div>
+
+                      <div class="col-auto">
+                        <select name="type" class="form-select">
+                          <option value="0">All</option>
+                          @php
+                            $Types = App\TrainingSession::select('type')->distinct()->get();
+                          @endphp
+                          @foreach ($Types as $Type)
+                            <option value="{{ $Type->type }}" {{ $Type->type == request('type') ? 'selected' : '' }}>
+                              {{ $Type->type }}</option>
+                          @endforeach
+                        </select>
+                      </div>
+
+                      <div class="col-auto">
+                        <input type="text" name="dateFrom" value="{{ request('dateFrom') }}"
+                          class="form-control flatpickr-datefilter" placeholder="From">
+                      </div>
+
+                      <div class="col-auto">
+                        <input type="text" name="dateTo" value="{{ request('dateTo') }}"
+                          class="form-control flatpickr-datefilter" placeholder="To">
+                      </div>
+                    </form>
+                    <hr>
                     <div class="table-responsive">
                       <table class="table mb-0" id="trainingtable">
                         <thead class="bg-label-light">
@@ -123,20 +159,20 @@
                                     <button title="Join only" type="button"
                                       class="btn btn-icon btn-label-info rounded-circle waves-effect">
                                       <i class="ti ti-user"></i></button></a> |
-                                      {{-- @if ($session->reports->count() > 0)
+                                  {{-- @if ($session->reports->count() > 0)
                                       <button title="View Report" type="button" data-bs-toggle="modal" 
                                         data-bs-target="#reportModal{{ $session->id }}" 
                                         class="btn btn-icon btn-label-warning rounded-circle waves-effect">
                                         <i class="ti ti-file-text"></i>
                                       </button>
                                     @endif --}}
-                                    
-                        <button title="View Report" type="button" data-bs-toggle="modal" 
-                          data-bs-target="#reportModal{{ $session->id }}" 
-                          class="btn btn-icon btn-label-warning rounded-circle waves-effect">
-                          <i class="ti ti-file-text"></i>
-                        </button>
-                      {{-- @endif --}}
+
+                                  <button title="View Report" type="button" data-bs-toggle="modal"
+                                    data-bs-target="#reportModal{{ $session->id }}"
+                                    class="btn btn-icon btn-label-warning rounded-circle waves-effect">
+                                    <i class="ti ti-file-text"></i>
+                                  </button>
+                                  {{-- @endif --}}
                                 @elseif ($session->type == 'offline')
                                   <b>{{ __('cycles.trainer name') }}:</b>
                                   {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
@@ -147,24 +183,24 @@
                                 @endif
 
                               </td>
-                              <td> 
-                                @if($session->type == 'offline')
-                                @if ($session->QrCode != null)
-                                <button title="QRCode"
-                                class="btn btn-icon btn-label-warning rounded-circle waves-effect" data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}" > 
-                                <i class="ti ti-qrcode text-warning"></i></button>
-                                @else
-                                <button title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
-                                class="btn btn-icon btn-label-success rounded-circle waves-effect" > 
-                                <i class="ti ti-qrcode text-success"></i></button>
+                              <td>
+                                @if ($session->type == 'offline')
+                                  @if ($session->QrCode != null)
+                                    <button title="QRCode"
+                                      class="btn btn-icon btn-label-warning rounded-circle waves-effect"
+                                      data-bs-toggle="modal" data-bs-target="#qrCodeModal{{ $session->id }}">
+                                      <i class="ti ti-qrcode text-warning"></i></button>
+                                  @else
+                                    <button title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
+                                      class="btn btn-icon btn-label-success rounded-circle waves-effect">
+                                      <i class="ti ti-qrcode text-success"></i></button>
+                                  @endif
+                                  <a title="Attendance"
+                                    href="/dashboard/training/Attendance-offline/{{ $session->id }}"
+                                    class="btn btn-icon btn-label-dark rounded-circle waves-effect">
+                                    <i class="ti ti-calendar-check text-dark"></i></a>
                                 @endif
-                                <a title="Attendance" href="/dashboard/training/Attendance-offline/{{ $session->id }}"
-                                class="btn btn-icon btn-label-dark rounded-circle waves-effect" > 
-                                <i class="ti ti-calendar-check text-dark"></i></a>
 
-
-                                @endif
-                               
                                 <button title="Edit" onclick="editme({{ $session->id }})" type="button"
                                   class="btn btn-icon btn-label-info rounded-circle waves-effect">
                                   <i class="ti ti-edit text-info"></i></button>&nbsp;
@@ -175,25 +211,26 @@
                               </td>
                             </tr>
                             <!-- المودال نفسه -->
-<div class="modal fade" id="qrCodeModal{{ $session->id }}" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="qrCodeModalLabel">QR Code</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body text-center">
-              <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
-              
-            </div>
-            <div title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
-              class="btn btn-label-info" > 
-              {{ __('admin.Re_generate') }}</div>
-          
-      </div>
-  </div>
-</div>
+                            <div class="modal fade" id="qrCodeModal{{ $session->id }}" tabindex="-1"
+                              aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="qrCodeModalLabel">QR Code</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                      aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body text-center">
+                                    <img src="{{ asset($session->QrCode) }}" alt="QR Code" class="img-fluid">
 
+                                  </div>
+                                  <div title="CreateQRCode" onclick="createQrCode({{ $session->id }})"
+                                    class="btn btn-label-info">
+                                    {{ __('admin.Re_generate') }}</div>
+
+                                </div>
+                              </div>
+                            </div>
                           @endforeach
 
                         </tbody>
@@ -228,129 +265,131 @@
 
 
   @foreach ($sessions as $session)
-  <!-- Modal for Session Reports and Recordings -->
-  <div class="modal fade" id="reportModal{{ $session->id }}" tabindex="-1" aria-labelledby="reportModalLabel{{ $session->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="reportModalLabel{{ $session->id }}">
-            {{ __('admin.session_reports') }}: {{ $session->title }}
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Total Meeting Duration -->
-          <div class="mb-3">
-            <strong>{{ __('admin.total_meeting_duration') }}:</strong> 
-            {{ round($session->reports->sum('attendance_duration') / 60, 2) }} {{ __('admin.minutes') }}
+    <!-- Modal for Session Reports and Recordings -->
+    <div class="modal fade" id="reportModal{{ $session->id }}" tabindex="-1"
+      aria-labelledby="reportModalLabel{{ $session->id }}" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="reportModalLabel{{ $session->id }}">
+              {{ __('admin.session_reports') }}: {{ $session->title }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <!-- Total Number of Participants -->
-          <div class="mb-3">
-            <strong>{{ __('admin.total_number_of_participants') }}:</strong> 
-            {{ $session->reports->count() }}
+          <div class="modal-body">
+            <!-- Total Meeting Duration -->
+            <div class="mb-3">
+              <strong>{{ __('admin.total_meeting_duration') }}:</strong>
+              {{ round($session->reports->sum('attendance_duration') / 60, 2) }} {{ __('admin.minutes') }}
+            </div>
+            <!-- Total Number of Participants -->
+            <div class="mb-3">
+              <strong>{{ __('admin.total_number_of_participants') }}:</strong>
+              {{ $session->reports->count() }}
+            </div>
+
+            <!-- Session Reports Section -->
+            @if ($session->reports->count() > 0)
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <h5>{{ __('admin.session_reports') }}</h5>
+                <a href="{{ route('training.session-report', $session->id) }}" class="btn btn-info">
+                  {{ __('admin.update_reports') }}
+                </a>
+              </div>
+              <table class="table table-bordered mt-2">
+                <thead>
+                  <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-center">{{ __('admin.participant_name') }}</th>
+                    <th class="text-center">{{ __('admin.participant_email') }}</th>
+                    <th class="text-center">{{ __('admin.join_time') }}</th>
+                    <th class="text-center">{{ __('admin.leave_time') }}</th>
+                    <th class="text-center">{{ __('admin.attendance_duration') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach ($session->reports as $key => $report)
+                    <tr>
+                      <td class="text-center">{{ $key + 1 }}</td>
+                      <td class="text-center">{{ $report->participant_name }}</td>
+                      <td class="text-center">{{ $report->participant_email }}</td>
+                      <td class="text-center">{{ $report->participant_join_date }}</td>
+                      <td class="text-center">{{ $report->participant_end_date }}</td>
+                      <td class="text-center">{{ round($report->attendance_duration / 60, 2) }}
+                        {{ __('admin.minutes') }}</td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            @else
+              <!-- No Reports: Display Update Button -->
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <h5>{{ __('admin.session_reports') }}</h5>
+                <a href="{{ route('training.session-report', $session->id) }}" class="btn btn-info">
+                  {{ __('admin.update_reports') }}
+                </a>
+              </div>
+            @endif
+
+            <!-- Session Recordings Section -->
+            @if ($session->recordings->count() > 0)
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <h5>{{ __('admin.session_recordings') }}</h5>
+                <a href="{{ route('training.session-record', $session->id) }}" class="btn btn-warning">
+                  {{ __('admin.update_recordings') }}
+                </a>
+              </div>
+              <div class="mt-2">
+                <strong>{{ __('admin.recording_passcode') }}:</strong>
+                <span>{{ $session->recordings->first()->passcode ?? __('admin.not_available') }}</span>
+              </div>
+              <table class="table table-bordered mt-2">
+                <thead>
+                  <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-center">{{ __('admin.recording_type') }}</th>
+                    <th class="text-center">{{ __('admin.recording_time') }}</th>
+                    <th class="text-center">{{ __('admin.view_recording') }}</th>
+                    <th class="text-center">{{ __('admin.download_recording') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach ($session->recordings as $key => $recording)
+                    <tr>
+                      <td class="text-center">{{ $key + 1 }}</td>
+                      <td class="text-center">{{ $recording->recording_type }}</td>
+                      <td class="text-center">{{ $recording->recording_time }}</td>
+                      <td class="text-center">
+                        <a href="{{ $recording->recording_view_url }}" target="_blank" class="btn btn-primary">
+                          {{ __('admin.View') }}
+                        </a>
+                      </td>
+                      <td class="text-center">
+                        <a href="{{ $recording->recording_download_url }}" target="_blank" class="btn btn-success">
+                          {{ __('admin.Download') }}
+                        </a>
+                      </td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            @else
+              <!-- No Recordings: Display Update Button -->
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <h5>{{ __('admin.session_recordings') }}</h5>
+                <a href="{{ route('training.session-record', $session->id) }}" class="btn btn-warning">
+                  {{ __('admin.update_recordings') }}
+                </a>
+              </div>
+            @endif
           </div>
-
-          <!-- Session Reports Section -->
-          @if ($session->reports->count() > 0)
-            <div class="d-flex justify-content-between align-items-center mt-3">
-              <h5>{{ __('admin.session_reports') }}</h5>
-              <a href="{{ route('training.session-report', $session->id) }}" class="btn btn-info">
-                {{ __('admin.update_reports') }}
-              </a>
-            </div>
-            <table class="table table-bordered mt-2">
-              <thead>
-                <tr>
-                  <th class="text-center">#</th>
-                  <th class="text-center">{{ __('admin.participant_name') }}</th>
-                  <th class="text-center">{{ __('admin.participant_email') }}</th>
-                  <th class="text-center">{{ __('admin.join_time') }}</th>
-                  <th class="text-center">{{ __('admin.leave_time') }}</th>
-                  <th class="text-center">{{ __('admin.attendance_duration') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($session->reports as $key => $report)
-                  <tr>
-                    <td class="text-center">{{ $key + 1 }}</td>
-                    <td class="text-center">{{ $report->participant_name }}</td>
-                    <td class="text-center">{{ $report->participant_email }}</td>
-                    <td class="text-center">{{ $report->participant_join_date }}</td>
-                    <td class="text-center">{{ $report->participant_end_date }}</td>
-                    <td class="text-center">{{ round($report->attendance_duration / 60, 2) }} {{ __('admin.minutes') }}</td>
-                  </tr>
-                @endforeach
-              </tbody>
-            </table>
-          @else
-            <!-- No Reports: Display Update Button -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-              <h5>{{ __('admin.session_reports') }}</h5>
-              <a href="{{ route('training.session-report', $session->id) }}" class="btn btn-info">
-                {{ __('admin.update_reports') }}
-              </a>
-            </div>
-          @endif
-
-          <!-- Session Recordings Section -->
-          @if ($session->recordings->count() > 0)
-            <div class="d-flex justify-content-between align-items-center mt-4">
-              <h5>{{ __('admin.session_recordings') }}</h5>
-              <a href="{{ route('training.session-record', $session->id) }}" class="btn btn-warning">
-                {{ __('admin.update_recordings') }}
-              </a>
-            </div>
-            <div class="mt-2">
-              <strong>{{ __('admin.recording_passcode') }}:</strong>
-              <span>{{ $session->recordings->first()->passcode ?? __('admin.not_available') }}</span>
-            </div>
-            <table class="table table-bordered mt-2">
-              <thead>
-                <tr>
-                  <th class="text-center">#</th>
-                  <th class="text-center">{{ __('admin.recording_type') }}</th>
-                  <th class="text-center">{{ __('admin.recording_time') }}</th>
-                  <th class="text-center">{{ __('admin.view_recording') }}</th>
-                  <th class="text-center">{{ __('admin.download_recording') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($session->recordings as $key => $recording)
-                  <tr>
-                    <td class="text-center">{{ $key + 1 }}</td>
-                    <td class="text-center">{{ $recording->recording_type }}</td>
-                    <td class="text-center">{{ $recording->recording_time }}</td>
-                    <td class="text-center">
-                      <a href="{{ $recording->recording_view_url }}" target="_blank" class="btn btn-primary">
-                        {{ __('admin.View') }}
-                      </a>
-                    </td>
-                    <td class="text-center">
-                      <a href="{{ $recording->recording_download_url }}" target="_blank" class="btn btn-success">
-                        {{ __('admin.Download') }}
-                      </a>
-                    </td>
-                  </tr>
-                @endforeach
-              </tbody>
-            </table>
-          @else
-            <!-- No Recordings: Display Update Button -->
-            <div class="d-flex justify-content-between align-items-center mt-4">
-              <h5>{{ __('admin.session_recordings') }}</h5>
-              <a href="{{ route('training.session-record', $session->id) }}" class="btn btn-warning">
-                {{ __('admin.update_recordings') }}
-              </a>
-            </div>
-          @endif
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-@endforeach
+  @endforeach
 
 
 
@@ -459,7 +498,7 @@
         <form method="post" action="/dashboard/training/addsession" enctype="multipart/form-data" autocomplete="off">
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Add new training session') }} </h4>
-            
+
           </div>
           <div class="modal-body">
             @csrf
@@ -543,8 +582,7 @@
             </div>
             <div class="form-group mb-3" id="address" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input name="training_location" type="text" placeholder="google map link"
-                class="form-control">
+              <input name="training_location" type="text" placeholder="google map link" class="form-control">
             </div>
           </div>
           <div class="modal-footer">
@@ -568,7 +606,7 @@
           autocomplete="off">
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Edit training session') }} </h4>
-            
+
           </div>
           <div class="modal-body">
             @csrf
@@ -596,7 +634,7 @@
               <label class="form-label fs-6 mb-1">{{ __('cycles.Date/Time') }}</label>
               {{-- <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
                 class="form-control" required> --}}
-                <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date') }}"
+              <input id="edatetime" name="datetime" type="text" placeholder="{{ __('cycles.Date') }}"
                 class="form-control flatpickr-date" required>
             </div>
             {{-- <div class="form-group mb-3" style="display: none;" id="senddatetime">
@@ -646,20 +684,20 @@
 
             <div class="form-group mb-3" id="saddress" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
-              <input id="eaddress" name="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
-                class="form-control">
+              <input id="eaddress" name="training_Address" type="text"
+                placeholder="{{ __('cycles.training Address') }}" class="form-control">
             </div>
 
             <div class="form-group mb-3" id="slocation" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input id="elocation" name="training_location" type="text" placeholder="{{ __('cycles.training location') }}"
-                class="form-control">
+              <input id="elocation" name="training_location" type="text"
+                placeholder="{{ __('cycles.training location') }}" class="form-control">
             </div>
 
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary ml-1">
-              
+
               <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
             </button>
           </div>
@@ -669,8 +707,8 @@
   </div>
 
 
-<!-- المودال نفسه -->
-{{-- <div class="modal fade" id="Attendance" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+  <!-- المودال نفسه -->
+  {{-- <div class="modal fade" id="Attendance" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
           <div class="modal-header">
@@ -707,12 +745,12 @@
 @stop
 
 @section('scripts')
-<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 @stop
 
 @section('pagescripts')
@@ -730,7 +768,7 @@
       enableTime: true,
       noCalendar: true
     });
-    
+
     $('#endTime').flatpickr({
       enableTime: true,
       noCalendar: true
@@ -740,10 +778,13 @@
       enableTime: true,
       noCalendar: true
     });
-    
+
     $('#eendTime').flatpickr({
       enableTime: true,
       noCalendar: true
+    });
+    $('.flatpickr-datefilter').flatpickr({
+      monthSelectorType: 'static',
     });
   </script>
 
@@ -875,10 +916,10 @@
         },
         success: function(response) {
           let type = response.type;
-          let startDate = response.datetime.split(' ')[0];  
-          
-          let startTime = response.datetime.split(' ')[1].substring(0, 5);  
-          
+          let startDate = response.datetime.split(' ')[0];
+
+          let startTime = response.datetime.split(' ')[1].substring(0, 5);
+
           $('#ctype').hide();
           $('#etitle').val(response.title);
           $('#edsc').val(response.dsc);
@@ -888,7 +929,7 @@
           $('#stype').val(type);
           if (type === 'offline') {
             let endDate = response.enddatetime.split(' ')[0];
-            let endTime = response.enddatetime.split(' ')[1].substring(0, 5); 
+            let endTime = response.enddatetime.split(' ')[1].substring(0, 5);
             $('#sonline').hide();
             // $('#senddatetime').show();
             $('#estarttime').show();
@@ -968,10 +1009,10 @@
 
 
     function formatDateTime(dateTime) {
-    if (!dateTime) return 'غير متوفر'; // التحقق من عدم وجود قيمة
+      if (!dateTime) return 'غير متوفر'; // التحقق من عدم وجود قيمة
 
-    let date = new Date(dateTime);
-    return date.toLocaleString( {
+      let date = new Date(dateTime);
+      return date.toLocaleString({
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -979,10 +1020,10 @@
         minute: '2-digit',
         second: '2-digit',
         hour12: true // 24 ساعة
-    });
-}
+      });
+    }
 
-    function Attendance(training){
+    function Attendance(training) {
       $.ajaxSetup({
         headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -996,17 +1037,17 @@
         },
         success: function(response) {
           let attendanceHtml = "";
-                response.attendances.forEach(function(att) {
-                  attendanceHtml += `<tr>
+          response.attendances.forEach(function(att) {
+            attendanceHtml += `<tr>
         <td class="text-center">${att?.training_session?.title ?? 'غير متوفر'}</td> 
         <td class="text-center">${att?.training_session?.trainer_name ?? 'غير متوفر'}</td> 
         <td class="text-center">${att?.cycle?.title ?? 'غير متوفر'}</td> 
         <td class="text-center">${att?.user?.first_name_en +" "+att?.user?.last_name_en +" <br> ( "+ att?.company?.name_en +" ) " ?? 'غير متوفر'}</td> 
         <td class="text-center text-success">${formatDateTime(att?.created_at) ?? 'غير متوفر'}</td>
     </tr>`;
-                });
+          });
 
-                $(".Attendance_body").html(attendanceHtml);
+          $(".Attendance_body").html(attendanceHtml);
 
           $('#Attendance').modal('show');
         },
@@ -1016,8 +1057,5 @@
         }
       });
     }
-
-
-
   </script>
 @stop

@@ -97,11 +97,11 @@
                     placeholder="e.g. https://x.com/" 
                     value="{{ $client->company->twitter ?? old('twitter') }}" 
                     pattern="https://twitter.com/.*|https://x.com/.*|https://X.com/.*" 
-                    title="{{ $l == 'en' ? 'Please enter a valid Twitter URL.' : 'يرجى إدخال رابط تويتر صالح.' }}"
+                    title="{{ $l == 'en' ? 'Please enter a valid X URL.' : 'يرجى إدخال رابط اكس صالح.' }}"
                   />
-                  <span class="input-group-text text-light"><i class="ti ti-brand-twitter"></i></span>
+                  <span class="input-group-text text-light"><i class="ti ti-brand-x"></i></span>
                 </div>
-                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid Twitter URL' : 'رابط تويتر غير صالح' }}.</div>
+                <div class="invalid-feedback">{{ $l == 'en' ? 'Invalid X URL' : 'رابط اكس غير صالح' }}.</div>
               </div>
             </div>
             <div class="col-md-6">
@@ -154,7 +154,7 @@
                     id="website" 
                     name="website" 
                     {{-- placeholder="{{ $l == 'en' ? 'Website URL' : 'رابط الموقع' }}"  --}}
-                    placeholder="e.g. https?://" 
+                    placeholder="e.g. https://website.com""
                     value="{{ $client->company->website ?? old('website') }}" 
                     pattern="https?://.*" 
                     title="{{ $l == 'en' ? 'Please enter a valid website URL.' : 'يرجى إدخال رابط موقع صالح.' }}"

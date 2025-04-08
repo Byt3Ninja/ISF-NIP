@@ -322,9 +322,13 @@
                     </div>
                     <div class="widget-todo-item-action d-flex align-items-center">
                       <button class="btn btn-sm btn-label-primary" style="width: 156px;">
-                        <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
-                          {{ $serv->serviceCategory->{'name_' . $l} }}
-                        </a>
+                        @if ($serv->serviceCategory)
+                          <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
+                            {{ $serv->serviceCategory->{'name_' . $l} }}
+                          </a>
+                        @else
+                          <span>{{ __('dashboard.Category not available') }}</span>
+                        @endif
                       </button>
                     </div>
                   </div>
@@ -605,6 +609,13 @@
                 @endforeach
               </tbody>
             </table>
+          </div>
+        @else
+          <div class="card-body">
+            <div class="widget-todo-title-area d-flex align-items-center">
+              <span class="widget-todo-title ml-50">
+                {{ __('dashboard.No sessions added yet') }}.</span>
+            </div>
           </div>
         @endif
       </div>

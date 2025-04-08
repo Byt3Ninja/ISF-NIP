@@ -25,9 +25,10 @@ class StoreCurrencyRequest extends FormRequest
             'currency_code' => 'required|string|max:3|unique:currencies,currency_code',
             'currency_name' => 'required|string|max:100',
             'currency_symbol' => 'nullable|string|max:10',
-            'exchange_rate_to_usd' => 'nullable|numeric|min:0|regex:/^\d+(\.\d{1,6})?$/',
+            'exchange_rate_to_usd' => 'nullable|numeric|min:0',
+            // 'exchange_rate_to_usd' => 'nullable|numeric|min:0|regex:/^\d+(\.\d{1,6})?$/',
             'enabled' => 'nullable|boolean',
-            'flag' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+            'flag' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ];
     }
 }

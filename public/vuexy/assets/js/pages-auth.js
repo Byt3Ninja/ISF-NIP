@@ -219,6 +219,13 @@ function getValidationConfig(lang, isMentor) {
           },
         }
       },
+      terms: {
+        validators: {
+          notEmpty: {
+            message: translations[lang].terms.notEmpty
+          }
+        }
+      },
     },
     plugins: {
       trigger: new FormValidation.plugins.Trigger(),

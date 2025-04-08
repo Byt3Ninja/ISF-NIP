@@ -664,7 +664,7 @@ class TrainingController extends Controller
 
 		return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
 	}
-	public function sessions($id = 0)
+	public function sessions(Request $request, $id = 0)
 	{
 		$organization_id = auth()->user()->organization_id;
 		$steps = Step::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -675,8 +675,23 @@ class TrainingController extends Controller
 		if ($id == 0) {
 			$id = $steps->pluck('id')->first();
 		}
-		$sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC')->get();
+		$sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
 		$online = Training::get();
+		if($request->type != 0){
+			$sessions = $sessions->where('type', $request->type);
+		}
+		if ($request->dateFrom != 0) {
+			$sessions = $sessions->where('datetime', '>=', $request->dateFrom);
+		}
+		
+		if ($request->dateTo != 0) {
+			$sessions = $sessions->where('datetime', '<=', $request->dateTo);
+		}
+
+
+
+
+		$sessions = $sessions->get();
 		return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'online'));
 	}
 

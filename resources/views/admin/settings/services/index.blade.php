@@ -65,9 +65,9 @@
                               <td>{{ $service->name_en }}</td>
                               <td>{{ $service->name_ar }}</td>
                               <td>{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
-                              <td>{{ $service->vendor_name}}</td>
-                              <td>{{ $service->vendor_email }}</td>
-                              <td>{{ $service->vendor_phone}}</td>
+                              <td>{{ $service->vendor_name ?? '-'}}</td>
+                              <td>{{ $service->vendor_email ?? '-' }}</td>
+                              <td>{{ $service->vendor_phone ?? '-'}}</td>
                               <td>{{ $service->created_at }}</td>
                               @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions) )
                               <td>

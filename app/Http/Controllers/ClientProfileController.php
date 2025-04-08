@@ -53,7 +53,7 @@ class ClientProfileController extends Controller
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id',null)->get();
-            $Currencies = Currency::all();
+            $Currencies = Currency::where('enabled',1)->get();
             $json = File::get(base_path('database/dbFiles/countries.json'));
             $_countries = json_decode($json, true);
             $_countries = collect( $_countries )->map(function ($country) {
@@ -370,9 +370,9 @@ class ClientProfileController extends Controller
         
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
-        $ExpertiesSearch = $request->input('ExpertiesSearch');
+        $ExpertiesSearch = $request->input('expertises');
 
-        
+     
         if($setting->mentor_list == 1){
             if (Auth::user()->hasanyRole('Mentor|Registered|Admin')){
     $l = app()->getLocale();
@@ -396,7 +396,7 @@ class ClientProfileController extends Controller
     
     if (!empty($ExpertiesSearch)) {
         // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
-        $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
+        $expertiesMentor = Expertise::where('id', '=', $ExpertiesSearch)->first();
 
         if ($expertiesMentor) { // تأكد من وجود الخبرة
             $expid = $expertiesMentor->id;

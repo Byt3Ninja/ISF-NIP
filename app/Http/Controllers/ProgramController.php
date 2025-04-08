@@ -40,12 +40,12 @@ class ProgramController extends Controller
             // إذا كان المستخدم Admin
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
-            })->get();
+            });
         }
         else if (Auth()->user()->hasRole('organizationManager')) {
             $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
-            })->get();
+            });
         }
         else {
             // إذا كان المستخدم ليس Admin
@@ -55,11 +55,27 @@ class ProgramController extends Controller
                 $cycles = Cycle::where('organization_id', $Organization->id)
                     ->when($search, function ($query, $search) {
                         return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
-                    })->get();
+                    });
             } else {
-                $cycles = Cycle::where('id', 0)->get(); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
+                $cycles = Cycle::where('id', 0); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
             }
         }
+if($request->organization_id != 0) {
+        $cycles = $cycles->where('organization_id', $request->organization_id);
+}
+if($request->start_date != null) {
+    $cycles = $cycles->where('start', '>=', $request->start_date);
+}
+if($request->end_date != null) {
+    $cycles = $cycles->where('end', '<=', $request->end_date);
+}
+if($request->private == 'Yes') {
+$cycles = $cycles->whereNotNull('private');
+}
+if($request->private == 'No') {
+    $cycles = $cycles->whereNull('private');
+}
+    $cycles = $cycles->get();
         return view('admin.programs.index', compact('cycles'));
     }
 

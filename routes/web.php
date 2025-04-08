@@ -272,8 +272,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/send_message', 'MessengerController@sendmsg');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('sendmessage');
     Route::post('/sendmessage', 'MessengerController@savemessage');
+    Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('getUsersByProgram');
+
     //ShowMessages
-    Route::get('/inbox', 'MessengerController@index')->name('inbox');
+    Route::get('/messages', 'MessengerController@index')->name('messages.index');
+    // Route::get('/inbox', 'MessengerController@index')->name('inbox');
     Route::get('/outbox', 'MessengerController@outbox')->name('outbox');
     Route::get('/openmsg', 'MessengerController@openmsg');
     Route::post('/mread', 'MessengerController@makeread');
@@ -311,7 +314,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('builder/organization/{id?}', 'FormBuilderController@builderByOrganization');
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('index.cycle');
-    Route::get('cycles/{id}/registered', 'CyclesController@users');
+    Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users');
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
     Route::post('cycles/save', 'CyclesController@saveForm');
@@ -405,6 +408,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('training/QrCode-offline', 'TrainingController@QrCodeTraining')->name('training.createQrCode');
     Route::get('training/Attendance-offline/{id}', 'TrainingController@getattendanceOffline')->name('training.getattendanceOffline');
 
+
+    Route::get('/Totalsurveys', 'MentorsController@total_surveys')->name('total.surveys');
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
     Route::resource('questions-bank', 'QuestionsBankController');
@@ -449,7 +454,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     /* Start of Currencies Routes */
-     Route::resource('currencies', 'CurrencyController');
+     Route::resource('currencies', 'CurrencyController')->except(['show']);
+     Route::get('currencies/UpdateCurrency', 'CurrencyController@UpdateAllCurrency')->name('currencies.UpdateAllCurrency');
     /* End of Currencies Routes */
 
     // ===============> Mentor Dashboard Routes <===============

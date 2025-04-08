@@ -76,6 +76,7 @@ return [
     'kindly add your schedule' => 'kindly add your schedule',
     'here' => 'here',
     'My next mentorship sessions' => 'My next mentorship sessions',
+    'No sessions added yet' => 'No sessions added yet',
     'User' => 'User',
     'Date' => 'Date',
     'Admin Notes' => 'Admin Notes',
@@ -120,5 +121,5 @@ return [
     'Show all' => 'Show all',
     'Final pending screening'=>'Pending Evaluation Session',
     'screening pending sessions'=>'Pending Filtration Session',
-
+    'Category not available' => 'Category not available',
 ];

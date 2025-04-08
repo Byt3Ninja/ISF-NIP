@@ -14,6 +14,7 @@ class Role extends Model
 		'created_at',
 		'updated_at',
 	];
+	public static $module = 'Roles';
 	public function permissions()
 	{
 		return $this->belongsToMany(Permission::class,'role_has_permissions');

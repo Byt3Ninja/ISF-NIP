@@ -20,4 +20,16 @@ class AuditLog extends Model
     protected $casts = [
         'properties' => 'collection',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function getSubjectAttribute()
+    {
+        $model = $this->subject_type;
+        $model = explode('#', $model)[0];
+        return $model;
+    }
 }

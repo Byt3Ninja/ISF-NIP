@@ -8,6 +8,7 @@ use App\Traits\Auditable;
 class Faq extends Model
 {
     use Auditable;
+    public static $module = 'FAQ';
     protected $fillable = [
         'title_ar',
         'title_en',

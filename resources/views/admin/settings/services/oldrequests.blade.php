@@ -40,11 +40,11 @@
                                 <td>
                                   <div class="d-flex align-items-center gap-1">
                                     <a class="media-left mr-50"
-                                      href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
+                                      href="/dashboard/companyProfile/{{ $rec->user->company->id ?? 0 }}">
                                       <img src="/191014/{{ $rec->user->img_url ?? '../images/placeholder.jpg' }}"
                                         alt="avatar" class="rounded-circle" height="40" width="40">
                                     </a>
-                                    <a href="/dashboard/companyProfile/{{ $rec->user->company->id }}">
+                                    <a href="/dashboard/companyProfile/{{ $rec->user->company->id ?? 0 }}">
                                       <div class="media-body">
                                         <h6 class="media-heading mb-0">
                                           {{ $user = $rec->user->{'first_name_' . $l} . ' ' . $rec->user->{'last_name_' . $l} }}

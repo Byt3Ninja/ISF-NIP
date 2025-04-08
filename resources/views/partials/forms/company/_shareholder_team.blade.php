@@ -60,7 +60,7 @@
               <label class="fs-6 form-label mb-2 fw-semibold" for="shareholder_ownership_percentage">{{ __('admin.shareholder_ownership_percentage') }}</label>
               <div class="input-group input-group-merge">
                 <input
-                  type="number"
+                  type="text"
                   class="form-control shareholder_ownership_percentage"
                   id="shareholder_ownership_percentage"
                   placeholder="{{ __('admin.shareholder_ownership_percentage') }}"

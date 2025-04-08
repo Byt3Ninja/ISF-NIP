@@ -64,76 +64,81 @@
           </div>
         </div>
       </div>
-      <div class="form-group mb-6 d-grid">
-        <label for="selectExpertises" class="form-label fs-6 fw-bold">
-          {{ __('admin.SelectExpertises') }}
-        </label>
-        <small class="mb-3">{{ __('admin.SelectMultiExpertises') }}.</small>
-        <div class="input-group input-group-merge">
-          <select 
-            name="expertises[]" 
-            class="form-select select2" 
-            multiple="multiple" 
-            id="selectExpertises"
-          >
-            @foreach ($expertises as $expertise_group)
-            <optgroup label="{{ $expertise_group->title }}">
-              @foreach ($expertise_group->children as $expertise)
-              <option 
-                value="{{ $expertise->id }}" 
-                @if (in_array($expertise->id, $client->mentorExpertises()->pluck('expertises.id')->toArray())) 
-                  selected 
-                @endif
-              >
-                {{ $expertise->title }}
-              </option>
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group mb-6 d-grid">
+            <label for="selectExpertises" class="form-label fs-6 fw-bold">
+              {{ __('admin.SelectExpertises') }}
+            </label>
+            <small class="mb-3">{{ __('admin.SelectMultiExpertises') }}.</small>
+            <select 
+              name="expertises[]" 
+              class="form-select select2" 
+              multiple="multiple" 
+              id="selectExpertises"
+            >
+              @foreach ($expertises as $expertise_group)
+              <optgroup label="{{ $expertise_group->title }}">
+                @foreach ($expertise_group->children as $expertise)
+                <option 
+                  value="{{ $expertise->id }}" 
+                  @if (in_array($expertise->id, $client->mentorExpertises()->pluck('expertises.id')->toArray())) 
+                    selected 
+                  @endif
+                >
+                  {{ $expertise->title }}
+                </option>
+                @endforeach
+              </optgroup>
               @endforeach
-            </optgroup>
-            @endforeach
-          </select>
+            </select>
+          </div>
         </div>
       </div>
       <div class="form-group mb-6">
         <label for="entrepreneurial_experience" class="form-label fs-6 fw-bold">
-          {{ __('admin.Entrepreneurial Experience') }}
+            {{ __('admin.Entrepreneurial Experience') }}
         </label>
         <select 
-          name="entrepreneurial_experience" 
-          id="entrepreneurial_experience" 
-          class="form-select select2"
+            name="entrepreneurial_experience" 
+            id="entrepreneurial_experience" 
+            class="form-select select2"
+            onchange="toggleExperienceBrief()"
         >
-          <option 
-            value="1" 
-            {{ optional($client->bio)->entrepreneurial_experience ? 'selected' : '' }}
-          >
-            {{ __('Yes') }}
-          </option>
-          <option 
-            value="0" 
-            {{ optional($client->bio)->entrepreneurial_experience ? '' : 'selected' }}
-          >
-            {{ __('No') }}
-          </option>
+            <option 
+                value="1" 
+                {{ optional($client->bio)->entrepreneurial_experience ? 'selected' : '' }}
+            >
+                {{ __('Yes') }}
+            </option>
+            <option 
+                value="0" 
+                {{ optional($client->bio)->entrepreneurial_experience ? '' : 'selected' }}
+            >
+                {{ __('No') }}
+            </option>
         </select>
-      </div>
-      <div class="form-group mb-6">
+    </div>
+    
+    <div class="form-group mb-6" id="experience_brief_container" style="display: none;">
         <label class="form-label fs-6 fw-bold">
-          {{ __('admin.Entrepreneurial Experience desc') }}.
+            {{ __('admin.Entrepreneurial Experience desc') }}.
         </label>
         <textarea 
-          class="form-control" 
-          id="basicTextarea" 
-          rows="8" 
-          name="entrepreneurial_experience_brief"
-          oninput="this.value = this.value.trimStart()"
-          required
+            class="form-control" 
+            id="basicTextarea" 
+            rows="8" 
+            name="entrepreneurial_experience_brief"
+            oninput="this.value = this.value.trimStart()"
+            required
         >
-          {{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }}
+            {{ $client->bio ? $client->bio->entrepreneurial_experience_brief : old('entrepreneurial_experience_brief') }}
         </textarea>
         <label for="tcontent" class="mt-2">
-          {{ __('admin.Entrepreneurial Experience Brief') }}
+            {{ __('admin.Entrepreneurial Experience Brief') }}
         </label>
-      </div>
+    </div>
+     
       <div class="form-group mb-6">
         <label for="profile_privacy" class="form-label fs-6 fw-bold">
           {{ __('admin.Profile Privacy') }}
@@ -221,7 +226,7 @@
       <button type="submit" class="btn btn-primary me-3">
         {{ __('admin.Save_Changes') }}
       </button>
-      <button type="reset" class="btn btn-secondary">
+      <button type="reset" class="btn btn-label-secondary" onclick="location.reload()">
         {{ __('admin.Reset') }}
       </button>
     </div>
@@ -322,5 +327,20 @@
       const fv = FormValidation.formValidation(document.getElementById('jobInfoForm'), jobInfoFormConfig);
     })();
   });
+
+  function toggleExperienceBrief() {
+        let select = document.getElementById('entrepreneurial_experience');
+        let briefContainer = document.getElementById('experience_brief_container');
+        
+        if (select.value == "1") {
+            briefContainer.style.display = "block";
+        } else {
+            briefContainer.style.display = "none";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleExperienceBrief();
+    });
 
 </script>

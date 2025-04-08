@@ -36,7 +36,7 @@
                     $client->last_name_en
                     }}
                     @role('Mentor')
-                    <a target="_blank" href="{{ $client->bio->linkedin }}" class="ms-3">
+                    <a target="_blank" href="{{ $client->bio->linkedin ?? '#' }}" class="ms-3">
                       <img src="/icons/linkedin.svg" width="24" height="24" />
                     </a>
                     @endrole
@@ -131,7 +131,7 @@
                 <h5 class="cart-title">
                   {{__('admin.ProfileSummary')}}
                 </h5>
-                {{ $client->bio->bio }}
+                {{ $client->bio->bio ?? __('admin.N/A') }}
                 {{
                 $l == 'ar'
                 ? $client->bio->bio_ar
@@ -236,7 +236,7 @@
                           {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
                         </span>
                         <span>
-                          {{ $client->country_id ? $client->country->{'name_' . $l} : __('admin.Egypt') }}
+                          {{ $client->country_id ? $client->country->{'name_' . $l} : __('admin.Not_Available') }}
                         </span>
                       </li>
                       <li class="d-flex align-items-center mb-2">
@@ -244,7 +244,14 @@
                           {{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}
                         </span>
                         <span>
-                          {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
+                         
+                         @if ($client->language === 'ar')
+                            {{ $l == 'ar' ? 'العربية' : 'Arabic' }}
+                         @elseif ($client->language === 'en')
+                            {{ $l == 'ar' ? 'الإنجليزية' : 'English' }}
+                         @else
+                            {{ __('admin.Not_Available') }}
+                         @endif
                         </span>
                       </li>
                     </ul>

@@ -292,40 +292,20 @@ class UserController extends Controller
 			}
 			$errorMessage =  "";
 		} else if (Auth::user()->hasRole('Mentor')) {
-
-			$organization_id = auth()->user()->organization_id;
-			$cycle_ids = Cycle::where('organization_id', $organization_id)
-				->whereHas('mentors', function ($query) {
-					$query->where('user_id', auth()->id());
-				})
-				->pluck('id');
-
-			// foreach ($cycle_ids as $cycle) {
-			//	 $cycle_companies = Company::where('cycle', $cycle->id)->get();
-			//	 $companies = $companies->merge($cycle_companies); // دمج المجموعات
-			// }
-
-			$companies = collect();
-			$name = ($l == 'ar') ? 'name_ar' : 'name_en';
-			// استعراض الـ cycles للحصول على الشركات المرتبطة
-			foreach ($cycle_ids as $cycle_id) {
-
-				$cycle_companies = Company::where('cycle', $cycle_id)
-					->when($request->search, function ($query) use ($request, $name) {
-						$query->where($name, 'like', '%' . $request->search . '%');
-					})
-					->when($request->sector, function ($query) use ($request) {
-						$query->where('sector', 'like', '%' . $request->sector . '%');
-					})
-					->when($request->stage, function ($query) use ($request) {
-						$query->where('stage', 'like', '%' . $request->stage . '%');
-					})
-					->get();
-
-				$companies = $companies->merge($cycle_companies);
-			}
-			$errorMessage = $cycle_id === null ? 'انت غير مشترك في البرامج الحالية' : null;
-		} else {
+			$companies = Company::when($request->search, function ($query) use ($request, $l) {
+				$name = ($l == 'ar') ? 'name_ar' : 'name_en';
+				$query->where($name, 'like', '%' . $request->search . '%');
+			})
+			->when($request->sector, function ($query) use ($request) {
+				$query->where('sector', 'like', '%' . $request->sector . '%');
+			})
+			->when($request->stage, function ($query) use ($request) {
+				$query->where('stage', 'like', '%' . $request->stage . '%');
+			})
+			->get();
+	
+			$errorMessage = "";
+		}  else {
 
 			// $organization_id=auth()->user()->organization_id;
 			// $companies = Company::when(!is_null($organization_id))->where('organization_id',$organization_id)->get();

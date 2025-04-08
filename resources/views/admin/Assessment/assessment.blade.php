@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('style')
-	<link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-	<link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
+	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
+	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
 @stop
 
 @section('content')
@@ -34,6 +34,53 @@
 							</div>
 							@endif
 							<div class="card-body">
+								<form method="GET" action="{{ route('assessments.index') }}" class="row g-3 align-items-center">
+									<div class="col-12 col-md-auto d-flex justify-content-center align-items-center">
+										<button
+											class="btn btn-primary d-flex justify-content-center align-items-center me-2"
+											style="border-radius: 50%; width: 40px; height: 40px;"
+											type="submit">
+											<i class="ti ti-filter text-white"></i>
+										</button>
+										@if(request()->has('startup_id') && request('startup_id') != 0)
+											<button
+												onclick="window.location.href='{{ route('assessments.index') }}'"
+												class="btn btn-light d-flex justify-content-center align-items-center"
+												style="border-radius: 50%; width: 40px; height: 40px;"
+												type="reset">
+												<i class="ti ti-reload text-black"></i>
+											</button>
+										@endif
+									</div>
+									<div class="col-12 col-md-3">
+										<select name="startup_id" class="form-select select2">
+											<option value="0">All</option>
+											@php
+											$startups = App\Company::all();
+											@endphp
+											@foreach ($startups as $startup)
+											<option value="{{ $startup->id }}" {{ $startup->id == request('startup_id') ? 'selected' : '' }}>{{ $startup->{'name_'.$l} }}</option>
+											@endforeach
+										</select>
+									</div>
+									<div class="col-12 col-md-3">
+										<select name="founder_id" class="form-select select2">
+											<option value="0">All</option>
+											@php
+											$founders = App\User::role('Registered')->get();
+											@endphp
+											@foreach ($founders as $founder)
+											<option value="{{ $founder->id }}" {{ $founder->id == request('founder_id') ? 'selected' : '' }}>{{ $founder->{'first_name_'.$l} }} {{ $founder->{'last_name_'.$l} }}</option>
+											@endforeach
+										</select>
+									</div>
+									<div class="col-12 col-md-2">
+										<input type="text" name="datefrom" class="form-control date" placeholder="From" value="{{ request('datefrom') }}">
+									</div>
+									<div class="col-12 col-md-2">
+										<input type="text" name="dateto" class="form-control date" placeholder="To" value="{{ request('dateto') }}">
+									</div>
+								</form>
 								<div class="card-text">
 									<div class="table-responsive">
 										<table class="table mb-0" id="userstable">
@@ -54,7 +101,11 @@
 														<td>{{$c++}}</td>
 														<td>{{$assessment->start_date }}</td>
 														<td>{{$assessment->end_date }}</td>
-														<td>{{$assessment->user->name }}</td>
+														<td>
+															<a href="{{ route('company_profile', $assessment->user->company->id) }}">
+																{{ $assessment->user->company->{'name_'.app()->getLocale()} }}
+															</a>
+														</td>
 														<td>{{$assessment->created_at}}</td>
 														@if( $_user->ableToAny(['assessments.show', 'question-assessment_admin', 'assessments.edit', 'assessments.update', 'assessments.destroy'], $permissions) )
 														<td>
@@ -143,6 +194,7 @@
 			</div>
 		</div>
 	</div>
+
 	<!-- END: Content-->
 	@if( $_user->ableToAny(['assessments.create', 'assessments.store'], $permissions) )
 	<!-- Create JobOrder Modal -->
@@ -158,7 +210,7 @@
 							<div class="col-md-12">
 								<div class="mb-6 width49">
 									<label class="form-label fs-6"> {{ __('admin.user') }} </label>
-									<select class="form-select" name="user_id">
+									<select class="form-select select2" name="user_id">
 										<option value="" disabled selected> {{ $l == 'en' ? 'Choose User' : 'اختر مستخدم ' }} </option>
 										@foreach ($users as $user)
 											<option value="{{ $user->id }}">{{ $user->name }}</option>
@@ -199,50 +251,50 @@
 	<script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
 	<script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
 	<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-	<!-- Page JS -->
-	<script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
+	<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+	<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+	<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 @stop
+
 @section('pagescripts')
-	<script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-	<script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-	<script src="/js/jquery.datetimepicker.full.min.js"></script>
 	<script>
-		$('.date').datetimepicker({
-			timepicker: false,
-			format: 'Y-m-d'
+		$('.date').flatpickr({
+			enableTime: false,
+			dateFormat: "Y-m-d",
 		});
+
 		$(document).ready(function() {
 			$('#userstable').DataTable({
-				"responsive": true,
-				"searching": true,
-				"lengthChange": false,
-				"paging": true,
-				"bInfo": false,
-				"columnDefs": [
-					{"orderable": false, "targets":	[3]},
+				responsive: true,
+				searching: true,
+				lengthChange: false,
+				paging: true,
+				bInfo: false,
+				columnDefs: [
+					{ orderable: false, targets: [3] }
 				],
 				@if ($l == 'ar')
-				"language": {
-					"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-					"sLoadingRecords": "جارٍ التحميل...",
-					"sProcessing": "جارٍ التحميل...",
-					"sLengthMenu": "أظهر _MENU_ مدخلات",
-					"sZeroRecords": "لم يعثر على أية سجلات",
-					"sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-					"sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-					"sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-					"sInfoPostFix": "",
-					"sSearch": "ابحث:",
-					"sUrl": "",
-					"oPaginate": {
-						"sFirst": "الأول",
-						"sPrevious": "السابق",
-						"sNext": "التالي",
-						"sLast": "الأخير"
+				language: {
+					sEmptyTable: "ليست هناك بيانات متاحة في الجدول",
+					sLoadingRecords: "جارٍ التحميل...",
+					sProcessing: "جارٍ التحميل...",
+					sLengthMenu: "أظهر _MENU_ مدخلات",
+					sZeroRecords: "لم يعثر على أية سجلات",
+					sInfo: "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+					sInfoEmpty: "يعرض 0 إلى 0 من أصل 0 سجل",
+					sInfoFiltered: "(منتقاة من مجموع _MAX_ مُدخل)",
+					sInfoPostFix: "",
+					sSearch: "ابحث:",
+					sUrl: "",
+					oPaginate: {
+						sFirst: "الأول",
+						sPrevious: "السابق",
+						sNext: "التالي",
+						sLast: "الأخير"
 					},
-					"oAria": {
-						"sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-						"sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+					oAria: {
+						sSortAscending: ": تفعيل لترتيب العمود تصاعدياً",
+						sSortDescending: ": تفعيل لترتيب العمود تنازلياً"
 					}
 				}
 				@endif
@@ -252,17 +304,19 @@
 				var $state = $('.subcategory_id');
 				$.ajax({
 					url: "{{ route('get_subcategory_by_category') }}",
-					method: 'GET',
+					method: "GET",
 					data: {
 						category_id: category_id
 					},
 					success: function(data) {
-						$state.html('<option value="">{{ __('admin.SubName') }}</option>');
+						$state.html('<option value="">{{ __("admin.SubName") }}</option>');
 						$.each(data, function(id, value) {
-							$state.append('<option value="' + id + '" >' + value + '</option>');
+							$state.append('<option value="' + id + '">' + value + '</option>');
 						});
 					},
-					error: function(xhr, status, error) { console.error('Error:', error); }
+					error: function(xhr, status, error) { 
+						console.error("Error:", error); 
+					}
 				});
 			});
 		});

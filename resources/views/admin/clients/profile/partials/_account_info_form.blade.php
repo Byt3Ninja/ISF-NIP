@@ -268,15 +268,14 @@
             @endforeach
           </select>
         </div>
-
-
-
       </div>
       <!-- /Personal Information -->
 
       <div class="mt-4">
         <button type="submit" class="btn btn-primary me-3">{{ __('admin.Save_Changes') }}</button>
-        <button type="reset" class="btn btn-label-secondary">{{ __('admin.Reset') }}</button>
+        <button type="reset" class="btn btn-label-secondary" onclick="location.reload()">
+          {{ __('admin.Reset') }}
+        </button>
       </div>
     </div>
   </form>
