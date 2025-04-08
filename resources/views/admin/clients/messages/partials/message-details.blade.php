@@ -38,7 +38,7 @@
             </a>
           </div>
         </div>
-        <div class="dropdown">
+        {{-- <div class="dropdown">
           <button class="btn btn-icon btn-text-secondary rounded-pill p-0" type="button"
             id="dropdownLabelTwo" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="ti ti-tag ti-md"></i>
@@ -57,7 +57,7 @@
               <span class="align-middle">Important</span>
             </a>
           </div>
-        </div>
+        </div> --}}
       </div>
       <div class="d-flex align-items-center">
         <span class="btn btn-icon btn-text-secondary rounded-pill p-0">
@@ -81,7 +81,7 @@
               <i class="ti ti-star ti-sm me-1"></i>
               <span class="align-middle">Add star</span>
             </a>
-            <a class="dropdown-item" href="javascript:void(0)">
+            {{-- <a class="dropdown-item" href="javascript:void(0)">
               <i class="ti ti-calendar me-1"></i>
               <span class="align-middle">Create Event</span>
             </a>
@@ -92,7 +92,7 @@
             <a class="dropdown-item d-sm-none d-block" href="javascript:void(0)">
               <i class="ti ti-printer me-1"></i>
               <span class="align-middle">Print</span>
-            </a>
+            </a> --}}
           </div>
         </div>
       </div>
@@ -108,14 +108,14 @@
           <img id="message-details-image" src="/vuexy/assets/img/avatars/1.png" alt="user-avatar"
             class="flex-shrink-0 rounded-circle me-4" height="38" width="38" />
           <div class="flex-grow-1 ms-1">
-            <h6 id="message-details-createdBy" class="m-0 fw-normal">Chandler Bing</h6>
-            <small class="text-body">iAmAhoot@email.com</small>
+            <h6 id="message-details-createdBy" class="m-0 fw-normal"></h6>
+            {{-- <small class="text-body">iAmAhoot@email.com</small> --}}
           </div>
         </div>
         <div class="d-flex align-items-center">
-          <p class="mb-0 me-4 text-muted">June 20th 2020, 08:10 AM</p>
-          <span class="btn btn-icon btn-text-secondary rounded-pill"><i
-              class="ti ti-paperclip ti-md cursor-pointer"></i></span>
+          <p class="mb-0 me-4 text-muted" id="message-details-createdAt"></p>
+          {{-- <span class="btn btn-icon btn-text-secondary rounded-pill"><i
+              class="ti ti-paperclip ti-md cursor-pointer"></i></span> --}}
           <span class="btn btn-icon btn-text-secondary rounded-pill"><i
               class="email-list-item-bookmark ti ti-star ti-md cursor-pointer"></i></span>
           <div class="dropdown">
@@ -141,9 +141,9 @@
         </div>
       </div>
       <div class="card-body pt-5">
-        <p class="fw-medium">{{ __('messages.Subject') }}:</p>
+        {{-- <p class="fw-medium">{{ __('messages.Subject') }}:</p>
         <p id="message-details-subject"></p>
-        <br /><br />
+        <br /><br /> --}}
         <p class="fw-medium">{{ __('messages.Message') }}:</p>
         <p id="message-details-text"></p>
       </div>

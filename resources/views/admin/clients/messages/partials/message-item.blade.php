@@ -1,5 +1,10 @@
-<li id="message-item" class="email-list-item email-marked-read d-flex align-items-center" data-starred="true"
+<li 
+  id="message-item" 
+  class="email-list-item email-marked-read d-flex align-items-center message-item" 
+  data-starred="true"
   data-bs-toggle="sidebar" 
+  data-message="{{ json_encode($message) }}"
+  onclick="getMessageDetails({{ json_encode($message) }}, event)"
   data-target="#app-email-view"
 >
   <div class="d-flex align-items-center w-100">
@@ -20,16 +25,17 @@
         {{ $message['subject'] }}
       </small>
     </div>
-    <div class="email-list-item-meta ms-auto d-flex align-items-center">
-      <span class="email-list-item-label badge badge-dot bg-danger d-none d-md-inline-block me-2"
-        data-label="private"></span>
+    <div class="text-end" style="flex: 1;">
+      {{-- <span class="email-list-item-label badge badge-dot bg-danger d-none d-md-inline-block me-2"
+        data-label="private">
+      </span> --}}
       <small
         id="message-item-createdAt"
-        class="email-list-item-time text-muted"
+        class="text-muted text-nowrap"
       >
-        {{ \Carbon\Carbon::parse($message['created_at'])->format('h:i A') }}
+        {{ \Carbon\Carbon::parse($message['created_at'])->format('F jS Y, g:i A') }}
       </small>
-      <ul class="list-inline email-list-item-actions">
+      {{-- <ul class="list-inline email-list-item-actions">
         <li class="list-inline-item email-read btn btn-icon btn-text-secondary rounded-pill">
           <i class="ti ti-mail ti-md"></i>
         </li>
@@ -41,7 +47,7 @@
         <li class="list-inline-item btn btn-icon btn-text-secondary rounded-pill">
           <i class="ti ti-info-circle ti-md"></i>
         </li>
-      </ul>
+      </ul> --}}
     </div>
   </div>
 </li>

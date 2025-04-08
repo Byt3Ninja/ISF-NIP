@@ -47,4 +47,7 @@ return [
     'Inbox' => 'Inbox',
     'Sent' => 'Sent',
     'Draft' => 'Draft',
+    'Mark as read' => 'Mark as read',
+    'Mark as unread' => 'Mark as unread',
+    'Add Reply' => 'Add Reply',
 ];

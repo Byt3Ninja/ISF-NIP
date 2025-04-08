@@ -4,12 +4,17 @@
       data-target="#app-email-sidebar" data-overlay></i>
     <div class="mb-4 w-100">
       <div class="input-group input-group-merge shadow-none">
-        <span class="input-group-text border-0 ps-0 py-0" id="email-search">
+        <span class="input-group-text border-0 ps-0 py-0" id="messages-search">
           <i class="ti ti-search ti-lg"></i>
         </span>
-        <input type="text" class="form-control email-search-input border-0 py-0"
-          placeholder="{{ __('admin.Search Messages') }}" aria-label="Search mail"
-          aria-describedby="email-search" />
+        <input 
+          type="text" 
+          class="form-control messages-search-input border-0 py-0"
+          placeholder="{{ __('admin.Search Messages') }}" 
+          aria-label="Search messages"
+          aria-describedby="messages-search" 
+          onkeyup="filterMessages(this.value)"
+        />
       </div>
     </div>
   </div>
