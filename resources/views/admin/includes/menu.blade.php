@@ -806,6 +806,15 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
       </li>
     @endif
 
+    @if( $_user->ableTo('license.activate-form', $permissions) )
+    <li class="{{ Request::is('dashboard/license/activate*') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="{{ route('license.activate-form') }}">
+        <i class="menu-icon tf-icons ti ti-key"></i>
+        <div>{{ __('admin.License Key') }}</div>
+      </a>
+    </li>
+   @endif
+
      
   
     @if ($_user->hasAnyRole('Admin'))

@@ -1485,5 +1485,13 @@ return [
 	'Selected organization does not exist' => 'المؤسسة المحددة غير موجودة',
 	'MessageDraftSuccessfully' => 'تم حفظ الرسالة بنجاح',
 	'Saved_successfully' => 'تم الحفظ بنجاح',
+	'licenseActivated' => 'تم التفعيل بنجاح',
+	'License Activation Result' => 'نتيجة التفعيل',
+	'Go To Dashboard' => 'الذهاب الى لوحة التحكم',
+	'Activate License' => 'تفعيل الترخيص',
+	'License Key' => 'رقم الترخيص',
+	'License Key Format' => 'صيغة رقم الترخيص',
+	'Try Again' => 'حاول مرة اخرى',
+	'enter_License_Key' => 'ادخل رقم الترخيص',
 ]; 
 
