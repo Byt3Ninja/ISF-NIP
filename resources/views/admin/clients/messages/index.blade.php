@@ -14,9 +14,9 @@
    $folders = [
     ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => $receivedMessagesCount, 'class' => 'bg-label-primary']],
     ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => count($sentMessages), 'class' => 'bg-label-success']],
-    ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => 0, 'class' => 'bg-label-secondary']],
-    ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => 0, 'class' => 'bg-label-warning']],
-    ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => 0, 'class' => 'bg-label-danger']]
+    ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => count($drafts), 'class' => 'bg-label-secondary']],
+    ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => count($starred), 'class' => 'bg-label-warning']],
+    ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => count($trashedMessages), 'class' => 'bg-label-danger']]
   ];
 @endphp
 
@@ -65,6 +65,49 @@
                   @include('includes.no-result', ['message' => __('admin.No Messages')])
                 @endif
               </div>
+              
+              <div class="email-list pt-0" id="draftMessages" style="display: none; overflow-y: auto;">
+                @if (count($drafts) > 0)
+                  @include('admin.clients.messages.partials.messeges-actions', ['ids' => $drafts->pluck('id')])
+                  <hr class="mx-n3 emails-list-header-hr mb-2" />
+                  <ul id="message-list" class="list-unstyled m-0">
+                    @foreach ($drafts as $message)
+                      @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                    @endforeach
+                  </ul>
+                @else
+                  @include('includes.no-result', ['message' => __('admin.No Messages')])
+                @endif
+              </div>
+
+              <div class="email-list pt-0" id="starredMessages" style="display: none; overflow-y: auto;">
+                @if (count($starred) > 0)
+                  @include('admin.clients.messages.partials.messeges-actions', ['ids' => $starred->pluck('id')])
+                  <hr class="mx-n3 emails-list-header-hr mb-2" />
+                  <ul id="message-list" class="list-unstyled m-0">
+                    @foreach ($starred as $message)
+                      @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                    @endforeach
+                  </ul>
+                @else
+                  @include('includes.no-result', ['message' => __('admin.No Messages')])
+                @endif
+              </div>
+
+              <div class="email-list pt-0" id="trashMessages" style="display: none; overflow-y: auto;">
+                @if (count($trashedMessages) > 0)
+                  @include('admin.clients.messages.partials.messeges-actions', ['ids' => $starred->pluck('id')])
+                  <hr class="mx-n3 emails-list-header-hr mb-2" />
+                  <ul id="message-list" class="list-unstyled m-0">
+                    @foreach ($trashedMessages as $message)
+                      @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                    @endforeach
+                  </ul>
+                @else
+                  @include('includes.no-result', ['message' => __('admin.No Messages')])
+                @endif
+              </div>
+
             </div>
             <div class="app-overlay"></div>
           </div>
@@ -104,6 +147,7 @@
       console.log('inbox tab clicked');
       $('#receivedMessages').show();
       $('#sentMessages').hide();
+      $('#trashMessages').hide();
       $('#sent-tab').removeClass('active');
       $('#starred-tab').removeClass('active');
       $('#trash-tab').removeClass('active');
@@ -115,6 +159,9 @@
       console.log('sent tab clicked');
       $('#receivedMessages').hide();
       $('#sentMessages').show();
+      $('#draftMessages').hide();
+      $('#starredMessages').hide();
+      $('#trashMessages').hide();
       $('#inbox-tab').removeClass('active');
       $('#starred-tab').removeClass('active');
       $('#trash-tab').removeClass('active');
@@ -126,6 +173,9 @@
       console.log('draft tab clicked');
       $('#receivedMessages').hide();
       $('#sentMessages').hide();
+      $('#starredMessages').hide();
+      $('#draftMessages').show();
+      $('#trashMessages').hide();
       $('#inbox-tab').removeClass('active');
       $('#sent-tab').removeClass('active');
       $('#starred-tab').removeClass('active');
@@ -135,7 +185,10 @@
     $('#starred-tab').on('click', () => {
       console.log('starred tab clicked');
       $('#receivedMessages').hide();
+      $('#starredMessages').show();
       $('#sentMessages').hide();
+      $('#draftMessages').hide();
+      $('#trashMessages').hide();
       $('#inbox-tab').removeClass('active');
       $('#sent-tab').removeClass('active');
       $('#draft-tab').removeClass('active');
@@ -146,6 +199,9 @@
       console.log('trash tab clicked');
       $('#receivedMessages').hide();
       $('#sentMessages').hide();
+      $('#starredMessages').hide();
+      $('#trashMessages').show();
+      $('#draftMessages').hide();
       $('#inbox-tab').removeClass('active');
       $('#sent-tab').removeClass('active');
       $('#draft-tab').removeClass('active');
@@ -219,15 +275,21 @@
     function getMessageDetails(messageData, event) {
       const {
         created_at , first_name_en, id, last_name_ar, 
-        last_name_en, read, receiver, subject 
+        last_name_en, read, receiver, subject, message, starred
       } = messageData || {};
 
+      if (id) $('.StarredToggele').attr('data-id', id);
+      if (id) $('.ToggleMarkRead').attr('do', id);
+      if (id) $('.ToggleMarkUnRead').attr('do', id);
+      if (id) $('.ToggleMarkRead').attr('mark', 'read');
+      if (id) $('.ToggleMarkUnRead').attr('mark', 'unRead');
+      if (starred) $('.StarredToggele i').removeClass('far').addClass('fas text-warning');
       if (subject) $('#message-details-subject').text(subject);
       if (created_at) $('#message-details-createdAt').text(moment(created_at).format('MMMM Do YYYY, h:mm A'));
       if (first_name_en || first_name_en) $('#message-details-createdBy').text(`${first_name_en} ${last_name_en}`);
       if (receiver) $('#message-details-image').attr('src', receiver.image);
 
-      $('#message-details-text').text('lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
+      $('#message-details-text').text(message);
       $('#message-details-subject').text(subject);
     };
   </script>
@@ -335,9 +397,10 @@
 
 }
 
-$(document).on('click', '.StarredToggele', function() {
-    var messageId = $(this).attr('do');
-   alert(messageId);
+$(document).on('click', '.StarredToggele', function(e) {
+  e.preventDefault();
+    var button = $(this);
+    var messageId = $(this).attr('data-id');
     $.ajax({
         url: '/dashboard/messages/toggleStarredStatus', // الرoutes المناسب
         type: 'POST',
@@ -345,13 +408,16 @@ $(document).on('click', '.StarredToggele', function() {
             id: messageId,
             _token: '{{ csrf_token() }}'
         },
-        success: function(response) {
+        success: function (response) {
+            console.log(response);
             if (response.state === 'success') {
-                // تغيير الأيقونة بناءً على الحالة الجديدة
-                if (response.starred) {
-                    $(this).find('i').removeClass('far fa-star').addClass('fas fa-star');
+                var icon = button.find('i'); // استخدم العنصر المحفوظ
+                if (response.starred == 1) {
+                    console.log('starred');
+                    icon.removeClass('far').addClass('fas text-warning');
                 } else {
-                    $(this).find('i').removeClass('fas fa-star').addClass('far fa-star');
+                    console.log('Notstarred');
+                    icon.removeClass('fas text-warning').addClass('far');
                 }
             }
         },
@@ -360,7 +426,27 @@ $(document).on('click', '.StarredToggele', function() {
     }
     });
 });
-
+$(document).on('click', '.ToggleMarkRead, .ToggleMarkUnRead', function() {
+    var messageId = $(this).attr('do');
+    var mark = $(this).attr('mark');
+   alert(messageId);
+    $.ajax({
+        url: '/dashboard/messages/toggleMarkReadStatus', // الرoutes المناسب
+        type: 'POST',
+        data: {
+            id: messageId,
+            mark: mark,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+          console.log(response);
+            
+        },
+        error: function(xhr) {
+        console.error('Error:', xhr.responseText);
+    }
+    });
+});
 
 
   </script>

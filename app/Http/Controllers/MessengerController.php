@@ -34,7 +34,9 @@ class MessengerController extends Controller
                 'first_name_ar',
                 'last_name_ar',
                 'subject',
+                'message',
                 'read',
+                'starred',
                 'messenger.created_at',
                 'messenger.sender'
             ]);
@@ -57,7 +59,9 @@ class MessengerController extends Controller
                 'users.first_name_ar',
                 'users.last_name_ar',
                 'messenger.subject',
+                'messenger.message',
                 'messenger.read',
+                'messenger.starred',
                 'messenger.receiver',
                 'messenger.created_at'
             ]);
@@ -85,9 +89,100 @@ class MessengerController extends Controller
                     ->get(['users.id', 'first_name_ar', 'first_name_en', 'last_name_ar', 'last_name_en']);
             }
         }
+       
+        // $drafts = DB::table('message_drafts')->where('sender', $userId)->get();
+
+        $drafts = MessageDraft::leftJoin('users', 'sender', '=', 'users.id')
+            ->where('sender', $userId)
+            ->orderBy('created_at', 'DESC')
+            ->get([
+                'message_drafts.id',
+                'first_name_en',
+                'last_name_en',
+                'first_name_ar',
+                'last_name_ar',
+                'subject',
+                'message',
+                'message_drafts.created_at',
+                'message_drafts.sender'
+            ]);
+
+    //     $trashedMessages = DB::table('messenger')
+    // ->whereNotNull('deleted_at')
+    // ->where(function($query) {
+    //     $query->where('sender', Auth::id())
+    //           ->orWhere('receiver', Auth::id());
+    // })
+    // ->get();
+
+    $trashedMessages = DB::table('messenger')
+    ->whereNotNull('messenger.deleted_at')
+    ->where(function($query) {
+        $query->where('sender', Auth::id())
+              ->orWhere('receiver', Auth::id());
+    })
+    ->join('users', function($join) {
+        $join->on('users.id', '=', DB::raw("
+            CASE
+                WHEN messenger.sender = " . Auth::id() . " THEN messenger.receiver
+                ELSE messenger.sender
+            END
+        "));
+    })
+    ->orderBy('messenger.created_at', 'DESC')
+    ->select(
+        'messenger.*',
+        'users.first_name_en',
+        'users.last_name_en',
+        'users.first_name_ar',
+        'users.last_name_ar'
+    )
+    ->get()
+    ->map(function ($item) {
+        return (array) $item; // ← نحوله إلى مصفوفة
+    });
+
+    // $starred = DB::table('messenger')
+    // ->where('starred', 1)
+    // ->where(function($query) {
+    //     $query->where('sender', Auth::id())
+    //           ->orWhere('receiver', Auth::id());
+    // })
+    // ->get();
+
+    $starred = Messenger::where(function($query) use ($userId) {
+                $query->where('sender', $userId)
+                    ->orWhere('receiver', $userId);
+                    })->where('starred', 1)
+            ->join('users', 'messenger.receiver', '=', 'users.id')
+            ->orderBy('messenger.created_at', 'DESC')
+            ->get([
+                'messenger.id',
+                'users.first_name_en',
+                'users.last_name_en',
+                'users.first_name_ar',
+                'users.last_name_ar',
+                'messenger.subject',
+                'messenger.message',
+                'messenger.read',
+                'messenger.starred',
+                'messenger.receiver',
+                'messenger.created_at'
+            ]);
 
         // Return a single view with all data
-        return view('admin.clients.messages.index', compact('receivedMessages', 'receivedMessagesCount', 'sentMessages', 'users', 'mentors', 'cycles', 'organizations'));
+        return view('admin.clients.messages.index', compact(
+        'receivedMessages', 
+        'receivedMessagesCount', 
+        'sentMessages', 
+        'users', 
+        'mentors', 
+        'cycles', 
+        'organizations', 
+        'drafts',
+        'trashedMessages',
+        'starred'
+        ));
     }
 
     // public function index()
@@ -335,6 +430,9 @@ class MessengerController extends Controller
     {
         
         $cuser = Auth::user();
+        // if ($request->draftsNumber > 0) {
+        //     DB::table('message_drafts')->where('drafts', $request->draftsNumber)->delete();
+        // }
         if ($request->type == 1) {
             if (!$request->users) {
                 return redirect('/dashboard')->with(['msg' => 'MessageError', 'class' => 'danger']);
@@ -584,7 +682,6 @@ class MessengerController extends Controller
             'success' => __('admin.MessageDraftSuccessfully'),
             'draftsNumber'=> $drafts ]);
     }
-
     public function deleteDraft(Request $request){
         $draft = DB::table('message_drafts')->where('drafts',$request->draftsNumber);
         if (!$draft) {
@@ -642,6 +739,51 @@ class MessengerController extends Controller
     })
     ->get();
     return response()->json(['Starred'=>$starred]);
+    }
+
+    public function toggleMarkReadStatus(Request $request)
+    {
+    try {
+        // تحويل id من نص إلى مصفوفة
+        $ids = json_decode($request->id);
+        // التحقق من أن النتيجة مصفوفة
+        if (!is_array($ids)) {
+            // return response()->json(['state' => 'failed', 'message' => 'Invalid ID format'], 400);
+            $ids = $request->id;
+            $message = Messenger::where('id', $ids)
+            ->where('receiver', Auth::id())
+            ->first();
+            if($request->mark == 'read'){
+                $message->read = 1;
+            }else{
+                $message->read = 0;
+            }
+            $message->save();
+        }else{
+            $messages = Messenger::whereIn('id', $ids)
+            ->where('receiver', Auth::id())
+            ->get();
+            foreach ($messages as $message) {
+                if($request->mark == 'read'){
+                    $message->read = 1;
+                }else{
+                    $message->read = 0;
+                }
+                $message->save();
+            }
+        }
+        
+        return response()->json([
+            'state' => 'success',
+            'updated_ids' => $ids
+        ]);
+    } catch (Exception $e) {
+        // تسجيل الخطأ
+        Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+        return response()->json([
+            'state' => 'failed'
+        ], 500);
+    }
     }
 
 }
