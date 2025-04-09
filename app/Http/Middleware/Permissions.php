@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use Spatie\Permission\PermissionRegistrar;
 
 class Permissions
 {
@@ -40,6 +41,8 @@ class Permissions
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $cached = app(PermissionRegistrar::class)->getPermissions();
+        $core_permissions = $cached->where('is_core', true)->values()->pluck('name')->toArray();
         if( env('PERMISSION_BYPASS', false) === true ) { return $next($request); }
         $user = auth()->user();
         if( auth()->check() )
@@ -49,9 +52,13 @@ class Permissions
             if( !trim( $permission ) || in_array( $permission, ['', 'admin', 'dashboard']) ) { return $next($request); }
             else
             {
-                if( $this->match( $route ) && !$user->ableTo( $permission ) )
+                if( in_array( $permission, $core_permissions ) ) { return $next($request); }
+                else
                 {
-                    abort('401', $permission);
+                    if( $this->match( $route ) && !$user->ableTo( $permission ) )
+                    {
+                        abort('401', $permission);
+                    }
                 }
             }
         }

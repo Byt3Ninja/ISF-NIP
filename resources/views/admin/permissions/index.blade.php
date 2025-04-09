@@ -54,7 +54,12 @@
                                             @foreach($_permissions as $key => $permission)
                                                     <tr>
                                                         <td> {{ $permission->id ?? '' }} </td>
-                                                        <td> {{ $permission->name  ?? '' }} </td>
+                                                        <td>
+                                                            @if( $permission->core )
+                                                            <i title="Core Permission" class="fas fa-fw fa-check-circle text-success"></i>
+                                                            @endif
+                                                            {{ $permission->name  ?? '' }}
+                                                        </td>
                                                         <td>
                                                             @foreach( $permission->roles as $role )
                                                                 <a target="_blank" href="{{ route('roles.edit', ['role' => $role->id]) }}" class="mx-2 btn btn-xs btn-label-primary">{{ $role->name ?? '' }} </a/>
