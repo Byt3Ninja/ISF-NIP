@@ -1457,4 +1457,10 @@ return [
 	'No Category' => 'No Category',
 	'rolePagesEditor' => 'Pages Editor',
 	'Not_Available' => 'Not Available',
+	'Send_Message' => 'Send Message',
+	'Selected User does not exist' => 'Selected User does not exist',
+	'No mentors selected' => 'No mentors selected',
+	'Selected mentor does not exist' => 'Selected mentor does not exist',
+	'Selected organization does not exist' => 'Selected organization does not exist',
+	'MessageDraftSuccessfully' => 'Message Draft Successfully',
 ];

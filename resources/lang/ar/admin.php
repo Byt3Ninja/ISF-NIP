@@ -1478,5 +1478,11 @@ return [
 	'No Organization' => 'لا توجد مؤسسة',
 	'No Category' => 'لا يوجد فئة',
 	'Not_Available' => 'غير متوفر',
+	'Send_Message' => 'إرسال رسالة',
+	'Selected User does not exist' => 'المستخدم المحدد غير موجود',
+	'No mentors selected' => 'لم يتم اختيار مرشدين',
+	'Selected mentor does not exist' => 'المرشد المحدد غير موجود',
+	'Selected organization does not exist' => 'المؤسسة المحددة غير موجودة',
+	'MessageDraftSuccessfully' => 'تم حفظ الرسالة بنجاح',
 ]; 
 

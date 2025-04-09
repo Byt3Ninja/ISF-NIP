@@ -284,5 +284,84 @@
       console.log('reply button clicked');
       $('#reply-message-container').toggleClass('d-none');
     });
+  $(document).on('click', '.DeleteDraft', function() {
+    $.ajax({
+    url: '/dashboard/deleteDraft',
+    type: 'POST',
+    data: {
+        draftsNumber: $('.draftsNumber').val(),
+        _token: $('meta[name="csrf-token"]').attr('content') // مهم جداً للـ CSRF
+    },
+    success: function(response) {
+        console.log(response); // أو أي بيانات جاية من السيرفر
+    },
+    error: function(xhr) {
+        console.error('Error:', xhr.responseText);
+    }
+});
+
+
+  });
+    $(document).on('keyup', '.SubjectDraft, .messagedraft', function() {
+    handleDraftChange(); // استدعاء الفنكشن المشتركة
+  });
+
+  $(document).on('change', '.typedraft, .usersdraft, .mentorsdraft', function() {
+      handleDraftChange(); // نفس الفنكشن برضو
+  });
+  function handleDraftChange() {
+      $.ajax({
+    url: '/dashboard/draftMessage',
+    type: 'POST',
+    data: {
+        type: $('.typedraft').val(),
+        draftsNumber: $('.draftsNumber').val(),
+        users: $('.usersdraft').val(),
+        mentors: $('.mentorsdraft').val(),
+        organizations: $('.organizationsdraft').val(),
+        subject: $('.SubjectDraft').val(),
+        message: $('.messagedraft').val(),
+        _token: $('meta[name="csrf-token"]').attr('content') // مهم جداً للـ CSRF
+    },
+    success: function(response) {
+      // أو أي بيانات جاية من السيرفر
+        console.log(response); // أو أي بيانات جاية من السيرفر
+        $('.draftsNumber').val(response.draftsNumber);
+    },
+    error: function(xhr) {
+        console.error('Error:', xhr.responseText);
+    }
+});
+
+}
+
+$(document).on('click', '.StarredToggele', function() {
+    var messageId = $(this).attr('do');
+   alert(messageId);
+    $.ajax({
+        url: '/dashboard/messages/toggleStarredStatus', // الرoutes المناسب
+        type: 'POST',
+        data: {
+            id: messageId,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            if (response.state === 'success') {
+                // تغيير الأيقونة بناءً على الحالة الجديدة
+                if (response.starred) {
+                    $(this).find('i').removeClass('far fa-star').addClass('fas fa-star');
+                } else {
+                    $(this).find('i').removeClass('fas fa-star').addClass('far fa-star');
+                }
+            }
+        },
+        error: function(xhr) {
+        console.error('Error:', xhr.responseText);
+    }
+    });
+});
+
+
+
   </script>
 @stop
