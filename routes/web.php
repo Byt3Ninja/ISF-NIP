@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
+use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
@@ -526,6 +527,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('/projects/{project}/remove-team-member/{teamMember}', 'ProjectController@removeTeamMember')->name('projects.removeTeamMember');
     Route::resource('projects', 'ProjectController');    
     /* End of Projectss Routes */
+
+    Route::get('/license/activate', [LicenseController::class, 'showActivateForm'])->name('license.activate-form');
+    Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate');
 
     
 
