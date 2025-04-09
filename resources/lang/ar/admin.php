@@ -1484,5 +1484,6 @@ return [
 	'Selected mentor does not exist' => 'المرشد المحدد غير موجود',
 	'Selected organization does not exist' => 'المؤسسة المحددة غير موجودة',
 	'MessageDraftSuccessfully' => 'تم حفظ الرسالة بنجاح',
+	'Saved_successfully' => 'تم الحفظ بنجاح',
 ]; 
 
