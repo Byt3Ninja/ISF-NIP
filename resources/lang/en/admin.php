@@ -1464,4 +1464,12 @@ return [
 	'Selected organization does not exist' => 'Selected organization does not exist',
 	'MessageDraftSuccessfully' => 'Message Draft Successfully',
 	'Saved_successfully' => 'Saved successfully',
+	'licenseActivated' => 'License Activated Successfully!',
+	'License Activation Result' => 'License Activation Result',
+	'Go To Dashboard' => 'Go To Dashboard',
+	'Activate License' => 'Activate License',
+	'License Key' => 'License Key',
+	'License Key Format' => 'License Key Format',
+	'Try Again' => 'Try Again',
+	'enter_License_Key' => 'Enter License Key',
 ];
