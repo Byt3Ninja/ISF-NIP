@@ -113,7 +113,7 @@ class CurrencyController extends Controller
     $data = json_decode($json, true);
 
     if (!$data) {
-        return response()->json(['error' => __('admin.FailedUpdate')], 500);
+        return response()->json(['error' => __('admin.FailedUpdate')]);
     }
 
     // تحميل ملف الدول مرة واحدة فقط
