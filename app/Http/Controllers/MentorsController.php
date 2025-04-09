@@ -544,6 +544,9 @@ Thanks from " . env('APP_NAME');
 
 	public function modifySession(Request $request)
 	{
+	
+		$request->date = \Carbon\Carbon::createFromFormat('Y-m-d h:i a', $request->date)->format('Y-m-d H:i:s');
+		
 		if ($request) {
 			$approved = $start = $join = null;
 			if ($request->approved) {
@@ -618,7 +621,7 @@ Thanks from " . env('APP_NAME');
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
 			/// End of mail send
-			return back()->with(['message' => 'ٍsaved successfully']);
+			return back()->with(['message' => 'Saved_successfully']);
 		} else {
 			return back()->with(['message2' => 'Error saving data']);
 		}

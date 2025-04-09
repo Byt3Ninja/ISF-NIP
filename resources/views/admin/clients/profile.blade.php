@@ -131,11 +131,11 @@
                 <h5 class="cart-title">
                   {{__('admin.ProfileSummary')}}
                 </h5>
-                {{ $client->bio->bio ?? __('admin.N/A') }}
+                {{ optional($client->bio)->bio ?? __('admin.N/A') }}
                 {{
                 $l == 'ar'
-                ? $client->bio->bio_ar
-                : $client->bio->bio_en
+                ? optional($client->bio)->bio_ar ?? __('admin.N/A')
+                : optional($client->bio)->bio_en ?? __('admin.N/A')
                 }}
 
               </div>

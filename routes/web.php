@@ -276,11 +276,16 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //ShowMessages
     Route::get('/messages', 'MessengerController@index')->name('messages.index');
-    // Route::get('/inbox', 'MessengerController@index')->name('inbox');
+    Route::post('/draftMessage', 'MessengerController@draftmessage')->name('messages.draftmessage');
+    Route::post('/deleteDraft', 'MessengerController@deleteDraft')->name('messages.deleteDraft');
+    Route::get('/getAllDraft', 'MessengerController@getAllDrafts')->name('messages.getAllDrafts');
     Route::get('/outbox', 'MessengerController@outbox')->name('outbox');
     Route::get('/openmsg', 'MessengerController@openmsg');
     Route::post('/mread', 'MessengerController@makeread');
-    Route::post('/messages/delete', 'MessengerController@destroy');
+    Route::post('/messages/delete', 'MessengerController@destroy')->name('messages.delete');
+    Route::get('/messages/trash', 'MessengerController@MessengerTrash')->name('messages.trash');
+    Route::post('/messages/toggleStarredStatus', 'MessengerController@toggleStarredStatus')->name('messages.ToggleStarred');
+    Route::get('/messages/getAllStarred', 'MessengerController@getAllStarred')->name('messages.Starred');
     //Contact US Messages
     Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
     Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
