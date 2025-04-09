@@ -544,6 +544,9 @@ Thanks from " . env('APP_NAME');
 
 	public function modifySession(Request $request)
 	{
+		
+		$request->date = \Carbon\Carbon::createFromFormat('Y-m-d h:i a', $request->date)->format('Y-m-d H:i:s');
+		
 		if ($request) {
 			$approved = $start = $join = null;
 			if ($request->approved) {
