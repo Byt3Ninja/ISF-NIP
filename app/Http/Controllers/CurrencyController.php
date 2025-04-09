@@ -115,11 +115,11 @@ class CurrencyController extends Controller
     if (!$data) {
         return response()->json(['error' => __('admin.FailedUpdate')]);
     }
-dd($json, $data);
+
     // تحميل ملف الدول مرة واحدة فقط
     $jsonCountries = File::get(base_path('database/dbFiles/countries+states+cities.json'));
     $countriesData = json_decode($jsonCountries, true);
-
+    dd($json, $data);
     // تحويل الدول إلى مصفوفة مفهرسة بكود العملة
     $countriesIndexed = [];
     foreach ($countriesData as $country) {
