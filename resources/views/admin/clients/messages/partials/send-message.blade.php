@@ -4,7 +4,7 @@
   <div class="modal-dialog modal-dialog-centered modal-simple">
     <div class="modal-content p-0">
       <div class="modal-header py-3 justify-content-between">
-        <h5 class="modal-title text-body fs-5">Send Message</h5>
+        <h5 class="modal-title text-body fs-5">{{ __('admin.Send_Message') }}</h5>
         <div class="d-flex align-items-center gap-2">
           <button type="button" class="btn btn-sm btn-icon btn-text-secondary rounded-pill" data-bs-dismiss="modal"
             aria-label="Close">
@@ -15,10 +15,10 @@
       <div class="modal-body flex-grow-1 pb-sm-0 p-5 py-2">
         <form class="email-compose-form" method="post" action="/dashboard/sendmessage" enctype="multipart/form-data">
           {!! csrf_field() !!}
-          
+          <input type="hidden" name="draftsNumber" class="draftsNumber" value="0">
           <div class="form-group mb-4">
             <label class="form-label">{{ __('messages.SelectUsers') }}:</label>
-            <select id="select-type" class="form-select" name="type">
+            <select id="select-type" class="form-select typedraft" name="type">
               <option value="0">{{ __('messages.PortalManagers') }}</option>
               <option value="1">{{ __('messages.CycleUsers') }}</option>
               <option value="2">{{ __('messages.Mentors') }}</option>
@@ -42,7 +42,7 @@
             @if ($users)
               <label class="form-label"
                 for="users">{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}:</label>
-              <select class="select2 form-select" name="users[]"
+              <select class="select2 form-select usersdraft" name="users[]"
                 data-placeholder="{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}" multiple>
                 @foreach ($users as $index => $user)
                   @if ($user->user)
@@ -59,7 +59,7 @@
             @if ($mentors)
               <label class="form-label"
                 for="mentors">{{ $l == 'ar' ? 'اختر المدربين' : 'Select mentors' }}:</label>
-              <select class="select2 form-select" name="mentors[]"
+              <select class="select2 form-select mentorsdraft" name="mentors[]"
                 data-placeholder="{{ $l == 'ar' ? 'اختر المدربين' : 'Select mentors' }}" multiple>
                 @foreach ($mentors as $index => $mentor)
                   <option value="{{ $mentor->id }}" {{ $index === 0 ? 'selected' : '' }}>
@@ -73,7 +73,7 @@
           @if (Auth::user()->hasAnyRole('Admin|OrganizationManager'))
             <div class="mb-4" style="display: none;" id="organizations">
               <label class="form-label">{{ __('admin.Select Organizations') }}:</label>
-              <select class="select2 form-select" name="organizations[]" multiple
+              <select class="select2 form-select organizationsdraft" name="organizations[]" multiple
                 data-placeholder="{{ __('admin.Select Organizations') }}">
                 @foreach ($organizations as $index => $organization)
                   <option value="{{ $organization->id }}" {{ $index === 0 ? 'selected' : '' }}>
@@ -86,15 +86,14 @@
 
           <div class="mb-4">
             <label class="form-label">{{ __('messages.Subject') }}:</label>
-            <input name="subject" type="text" placeholder="{{ __('messages.Subject') }}" class="form-control"
+            <input name="subject" type="text" placeholder="{{ __('messages.Subject') }}" class="form-control SubjectDraft"
               required>
           </div>
 
           <div class="form-group">
             <label class="form-label">{{ __('messages.yourMessage') }}:</label>
-            <textarea class="form-control" name='message' rows="4" placeholder="{{ __('messages.Write your message') }}"
-              required>
-            </textarea>
+            <textarea class="form-control messagedraft" name='message' rows="4" placeholder="{{ __('messages.Write your message') }}"
+              required></textarea>
           </div>
 
           {{-- <div class="email-compose-message">
@@ -131,7 +130,7 @@
               </div>
             </div> --}}
             <div class="d-flex align-items-center gap-2">
-              <button type="reset" class="btn btn-sm btn-icon btn-text-secondary rounded-pill" data-bs-dismiss="modal"
+              <button type="reset" class="btn btn-sm btn-icon btn-text-secondary rounded-pill DeleteDraft" data-bs-dismiss="modal"
                 aria-label="Close">
                 <i class="ti ti-trash"></i>
               </button>

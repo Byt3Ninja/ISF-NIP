@@ -7,10 +7,12 @@ use App\Cycle;
 use App\Company;
 use App\Messages;
 use App\Messenger;
+use App\MessageDraft;
 use App\Organization;
 use App\CyclesMentors;
 use App\Events\WebMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
@@ -229,11 +231,27 @@ class MessengerController extends Controller
         }
     }
 
+    public function MessengerTrash(Request $request){
+        $trashedMessages = DB::table('messenger')
+    ->whereNotNull('deleted_at')
+    ->where(function($query) {
+        $query->where('sender', Auth::id())
+              ->orWhere('receiver', Auth::id());
+    })
+    ->get();
+    return response()->json(['Trashed'=>$trashedMessages]);
+    }
+
     public function destroy(Request $request)
     {
         try {
             $id = $request->input('id');
-            $del = Messenger::where('sender', Auth::user()->id)->where('id', $id)->first();
+            $del = Messenger::where(function($query) {
+                $query->where('sender', Auth::user()->id)
+                      ->orWhere('receiver', Auth::user()->id);
+            })
+            ->where('id', $id)
+            ->first();
             if ($del) {
                 Messenger::Destroy($id);
                 return response()->json([
@@ -468,6 +486,162 @@ class MessengerController extends Controller
             }
         }
 
-        return redirect('/dashboard')->with(['msg' => 'MessageSentSuccessfully', 'class' => 'success']);
+        return redirect('/dashboard/messages')->with(['msg' => 'MessageSentSuccessfully', 'class' => 'success']);
     }
+    public function draftmessage(Request $request)
+    {
+       
+        $cuser = Auth::user();
+        if ($request->draftsNumber > 0) {
+            DB::table('message_drafts')->where('drafts', $request->draftsNumber)->delete();
+        }
+        
+        $lastDraft = DB::table('message_drafts')->max('drafts');
+        $drafts = $lastDraft ? $lastDraft + 1 : 1;
+            
+        if ($request->type == 1) {
+            if (!$request->users) {
+                return response()->json(['error' => __('admin.MessageError')]);
+            }
+            foreach ($request->users as $key => $rec) {
+                $rname = User::find($rec);
+                if (!$rname) {
+                    return response()->json(['error' => __('admin.Selected User does not exist')]);
+                }
+                try {
+                    $draft = new MessageDraft();
+                    $draft->sender = $cuser->id;
+                    $draft->receiver = $rec;
+                    $draft->subject = $request->subject;
+                    $draft->message = $request->message;
+                    $draft->drafts = $drafts;
+                    $draft->type = $request->type;
+                    $draft->save(); // Save to DB
+                    
+                }catch (\Exception $e) {
+                    Log::error('Database Error: ' . $e->getMessage());
+                    return response()->json(['error' => 'Database error: ' . $e->getMessage() ]);
+                }
+            }
+        } elseif ($request->type == 2) {
+            if (!$request->mentors || !is_array($request->mentors)) {
+                return response()->json(['error' => __('admin.No mentors selected')]);
+            }
+
+            foreach ($request->mentors as $rec) {
+                $rname = User::find($rec);
+
+                if (!$rname) {
+                    return response()->json(['error' => __('admin.Selected mentor does not exist')]);
+                }
+
+                try {
+                    $draft = new MessageDraft();
+                    $draft->sender = $cuser->id;
+                    $draft->receiver = $rec;
+                    $draft->subject = $request->subject;
+                    $draft->message = $request->message;
+                    $draft->drafts = $drafts;
+                    $draft->type = $request->type;
+                    $draft->save(); // Save to DB
+                    
+                   
+                } catch (\Exception $e) {
+                    Log::error('Error: ' . $e->getMessage());
+                    return response()->json(['error' => 'Database error: ' . $e->getMessage() ]);
+                }
+            }
+        } elseif ($request->type == 3) {
+            if (!$request->organizations || !is_array($request->organizations)) {
+                return redirect('/dashboard/messages')->with(['msg' => 'MessageError: No organizations selected', 'class' => 'danger']);
+            }
+            foreach ($request->organizations as $orgId) {
+                $organization = Organization::find($orgId);
+                if (!$organization) {
+                    return response()->json(['error' => __('admin.Selected organization does not exist')]);
+                }
+                $orgUsers = User::where('organization_id', $orgId)->get();
+                foreach ($orgUsers as $user) {
+                    try {
+                        $draft = new MessageDraft();
+                        $draft->sender = $cuser->id;
+                        $draft->receiver = $user->id;
+                        $draft->subject = $request->subject;
+                        $draft->message = $request->message;
+                        $draft->drafts = $drafts;
+                        $draft->type = $request->type;
+                        $draft->save(); // Save to DB
+
+                    } catch (\Exception $e) {
+                        Log::error(' Error: ' . $e->getMessage());
+                        return response()->json(['error' => 'Database error: ' . $e->getMessage() ]);
+                    }
+                }
+            }
+        } 
+        
+        return response()->json([
+            'success' => __('admin.MessageDraftSuccessfully'),
+            'draftsNumber'=> $drafts ]);
+    }
+
+    public function deleteDraft(Request $request){
+        $draft = DB::table('message_drafts')->where('drafts',$request->draftsNumber);
+        if (!$draft) {
+            return response()->json(['error' => __('admin.MessageError')]);
+        }
+        $draft->delete();
+        return response()->json(['success' => __('admin.MessageDraftDeletedSuccessfully')]);
+    }
+
+    public function getAllDrafts() {
+        $cuser = Auth::user();
+        $drafts = DB::table('message_drafts')->where('sender', $cuser->id)->get();
+        return response()->json(['drafts' => $drafts]);
+    }
+
+    public function toggleStarredStatus(Request $request)
+    {
+        try {
+            $id = $request->id;
+            $message = Messenger::where('id', $id)
+            ->where(function($query) {
+                $query->where('sender', Auth::id())
+                      ->orWhere('receiver', Auth::id());
+            })
+            ->first();
+            if ($message) {
+                if($message->starred == 0){
+                    $message->starred = 1;
+                }else{
+                    $message->starred = 0;
+                }
+                $message->save();
+    
+                return response()->json([
+                    'state' => 'success',
+                    'starred' => $message->starred
+                ]);
+            }
+        } catch (Exception $e) {
+            // تسجيل الخطأ
+            Log::channel('system_exceptions')->info('Exceptions:', [$e]);
+            return response()->json([
+                'state' => 'failed'
+            ], 500);
+        }
+    }
+
+    public function getAllStarred() {
+       
+        $starred = DB::table('messenger')
+    ->where('starred', 1)
+    ->where(function($query) {
+        $query->where('sender', Auth::id())
+              ->orWhere('receiver', Auth::id());
+    })
+    ->get();
+    return response()->json(['Starred'=>$starred]);
+    }
+
 }

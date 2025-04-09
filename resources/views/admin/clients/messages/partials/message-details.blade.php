@@ -60,7 +60,7 @@
         </div> --}}
       </div>
       <div class="d-flex align-items-center">
-        <span class="btn btn-icon btn-text-secondary rounded-pill p-0">
+        <span class="btn btn-icon btn-text-secondary rounded-pill p-0 StarredToggele">
           <i class="ti ti-star ti-md"></i>
         </span>
         <div class="dropdown ms-1">
@@ -77,7 +77,7 @@
               <i class="ti ti-mail-opened me-1"></i>
               <span class="align-middle">Mark as read</span>
             </a>
-            <a class="dropdown-item" href="javascript:void(0)">
+            <a class="dropdown-item StarredToggele" href="javascript:void(0)">
               <i class="ti ti-star ti-sm me-1"></i>
               <span class="align-middle">Add star</span>
             </a>
