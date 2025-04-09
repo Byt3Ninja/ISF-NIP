@@ -111,11 +111,11 @@ class CurrencyController extends Controller
         $url = 'https://www.floatrates.com/daily/usd.json';
     $json = file_get_contents($url);
     $data = json_decode($json, true);
-    dd($json, $data);
+    
     if (!$data) {
         return response()->json(['error' => __('admin.FailedUpdate')]);
     }
-
+dd($json, $data);
     // تحميل ملف الدول مرة واحدة فقط
     $jsonCountries = File::get(base_path('database/dbFiles/countries+states+cities.json'));
     $countriesData = json_decode($jsonCountries, true);
