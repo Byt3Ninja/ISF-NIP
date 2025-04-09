@@ -12,8 +12,11 @@
       <input class="email-list-item-input form-check-input" type="checkbox" id="email-{{ $message['id'] }}" />
       <label class="form-check-label" for="email-{{ $message['id'] }}"></label>
     </div>
-    <span class="ms-sm-3 me-4 d-sm-inline-block d-none"><i
-        class="email-list-item-bookmark ti ti-star ti-md cursor-pointer"></i></span>
+    {{-- <span class="ms-sm-3 me-4 d-sm-inline-block d-none StarredToggele"><i
+        class="email-list-item-bookmark ti ti-star ti-md cursor-pointer"></i></span> --}}
+        <button type="button" class="btn btn-icon p-0 StarredToggele" data-id="{{ $message['id'] }}">
+          <i class="{{ $message['starred'] == 1 ? 'fas text-warning' : 'far' }} fa-star fs-5"></i>
+        </button>
     <img id="message-item-image-src" src="/icons/account.svg" alt="user-avatar"
       class="d-block flex-shrink-0 rounded-circle me-sm-2 me-0" height="32" width="32" />
     <div class="email-list-item-content ms-2 ms-sm-0 me-2">

@@ -60,27 +60,28 @@
         </div> --}}
       </div>
       <div class="d-flex align-items-center">
-        <span class="btn btn-icon btn-text-secondary rounded-pill p-0 StarredToggele">
-          <i class="ti ti-star ti-md"></i>
-        </span>
+        <button type="button" class="btn btn-icon btn-text-secondary rounded-pill p-0 StarredToggele" data-id="">
+          <i class="far fa-star fs-5"></i>
+        </button>
+        
         <div class="dropdown ms-1">
           <button class="btn btn-icon btn-text-secondary rounded-pill p-0" type="button"
             id="dropdownMoreOptions" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="ti ti-dots-vertical ti-md"></i>
           </button>
           <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMoreOptions">
-            <a class="dropdown-item" href="javascript:void(0)">
+            <a class="dropdown-item ToggleMarkUnRead" do="" mark="" href="javascript:void(0)">
               <i class="ti ti-mail me-1"></i>
               <span class="align-middle">Mark as unread</span>
             </a>
-            <a class="dropdown-item" href="javascript:void(0)">
+            <a class="dropdown-item ToggleMarkRead" do="" mark="" href="javascript:void(0)">
               <i class="ti ti-mail-opened me-1"></i>
               <span class="align-middle">Mark as read</span>
             </a>
-            <a class="dropdown-item StarredToggele" href="javascript:void(0)">
+            {{-- <a class="dropdown-item StarredToggele" href="javascript:void(0)">
               <i class="ti ti-star ti-sm me-1"></i>
               <span class="align-middle">Add star</span>
-            </a>
+            </a> --}}
             {{-- <a class="dropdown-item" href="javascript:void(0)">
               <i class="ti ti-calendar me-1"></i>
               <span class="align-middle">Create Event</span>

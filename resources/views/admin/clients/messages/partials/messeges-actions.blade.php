@@ -66,10 +66,10 @@
         <i class="ti ti-dots-vertical ti-md"></i>
       </button>
       <div class="dropdown-menu dropdown-menu-end" aria-labelledby="emailsActions">
-        <a class="dropdown-item" href="javascript:void(0)">
+        <a class="dropdown-item ToggleMarkRead" do="{{ $ids }}" mark="read" href="javascript:void(0)">
           {{ __('messages.Mark as read') }}
         </a>
-        <a class="dropdown-item" href="javascript:void(0)">
+        <a class="dropdown-item ToggleMarkUnRead" do="{{ $ids }}" mark="unRead" href="javascript:void(0)">
           {{ __('messages.Mark as unread') }}
         </a>
         {{-- <a class="dropdown-item" href="javascript:void(0)">Delete</a>

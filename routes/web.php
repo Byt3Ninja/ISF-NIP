@@ -286,6 +286,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/messages/trash', 'MessengerController@MessengerTrash')->name('messages.trash');
     Route::post('/messages/toggleStarredStatus', 'MessengerController@toggleStarredStatus')->name('messages.ToggleStarred');
     Route::get('/messages/getAllStarred', 'MessengerController@getAllStarred')->name('messages.Starred');
+    Route::post('/messages/toggleMarkReadStatus', 'MessengerController@toggleMarkReadStatus')->name('messages.ToggleMarkRead');
     //Contact US Messages
     Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
     Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
