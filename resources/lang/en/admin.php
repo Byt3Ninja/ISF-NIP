@@ -1463,4 +1463,5 @@ return [
 	'Selected mentor does not exist' => 'Selected mentor does not exist',
 	'Selected organization does not exist' => 'Selected organization does not exist',
 	'MessageDraftSuccessfully' => 'Message Draft Successfully',
+	'Saved_successfully' => 'Saved successfully',
 ];

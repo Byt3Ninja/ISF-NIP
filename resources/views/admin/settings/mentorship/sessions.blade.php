@@ -222,6 +222,7 @@
             <input type="hidden" name="id" value="0" id="sid">
             <input type="hidden" name="mentorid" value="0" id="mentorid">
             <input type="hidden" name="userid" value="0" id="userid">
+            <input type="hidden" name="approved" value="Yes" >
             <div class="form-group mt-4" id="showdates">
               <label class="mb-2">{{ __('cycles.Date/Time') }}:</label>
               <input class='date width-200 form-control' type="text" id="sdate" name="date" value=""
@@ -316,10 +317,10 @@
     });
   </script>
   <script>
-    $('.date').datetimepicker({
-      timepicker: true,
-      format: 'Y-m-d H:i'
-    });
+    // $('.date').datetimepicker({
+    //   timepicker: true,
+    //   format: 'Y-m-d H:i'
+    // });
 
     $('.datewithouttime').flatpickr({
       enableTime: false,
