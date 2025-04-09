@@ -134,8 +134,8 @@
                 {{ optional($client->bio)->bio ?? __('admin.N/A') }}
                 {{
                 $l == 'ar'
-                ? optional($client->bio)->bio_ar
-                : optional($client->bio)->bio_en
+                ? optional($client->bio)->bio_ar ?? __('admin.N/A')
+                : optional($client->bio)->bio_en ?? __('admin.N/A')
                 }}
 
               </div>
