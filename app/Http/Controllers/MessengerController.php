@@ -41,6 +41,29 @@ class MessengerController extends Controller
                 'messenger.sender'
             ]);
 
+             // إضافة الردود
+        $receivedMessages->transform(function ($message) {
+            $replies = DB::table('message_replies')
+                ->join('messenger as reply', 'message_replies.reply_id', '=', 'reply.id')
+                ->join('users', 'reply.sender', '=', 'users.id')
+                ->where('message_replies.messenger_id', $message->id)
+                ->orderBy('reply.created_at', 'ASC')
+                ->get([
+                    'reply.id',
+                    'reply.message',
+                    'reply.created_at',
+                    'users.first_name_en',
+                    'users.last_name_en',
+                    'users.first_name_ar',
+                    'users.last_name_ar',
+                ]);
+        
+            $message->replies = $replies;
+        
+            return $message;
+        });
+
+
         // Count all messages
         $receivedMessagesCount = Messenger::where('receiver', $userId)
             // ->where('read', 0)
@@ -853,8 +876,26 @@ class MessengerController extends Controller
                 'reply_id' => $message->id,
             ]);
         }
+
+        // جلب الرسالة المضافة بعد الربط مع معلومات المرسل
+    $replyWithSender = Messenger::leftJoin('users', 'messenger.sender', '=', 'users.id')
+    ->where('messenger.id', $message->id)
+    ->select(
+        'messenger.id',
+        'messenger.subject',
+        'messenger.message',
+        'messenger.receiver',
+        'messenger.created_at',
+        'users.first_name_ar',
+        'users.last_name_ar',
+        'messenger.sender'
+    )
+    ->first();
+
+
+
     
-        return response()->json(['message' => 'Message sent successfully']);
+        return response()->json(['message' => 'Message sent successfully', 'messages' => $replyWithSender]);
     }
 
 
