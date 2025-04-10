@@ -467,7 +467,7 @@ $(document).on('click', '.SendReplyMessage', function() {
             _token: '{{ csrf_token() }}'
         },
         success: function(response) {
-          console.log(response);
+          console.log('Messages: ',response.messages);
             
         },
         error: function(xhr) {
