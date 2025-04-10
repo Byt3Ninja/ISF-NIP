@@ -6,8 +6,8 @@
       <div class="d-flex align-items-center overflow-hidden">
         <span class="ms-sm-2 me-4"><i class="ti ti-chevron-left ti-md cursor-pointer"
             data-bs-toggle="sidebar" data-target="#app-email-view"></i></span>
-        <h6 id="message-details-subject" class="text-truncate mb-0 me-2 fw-normal">Focused impactful open issues</h6>
-        <span class="badge bg-label-warning rounded-pill">Important</span>
+        <h6 id="message-details-subject" class="text-truncate mb-0 me-2 fw-normal"></h6>
+        {{-- <span class="badge bg-label-warning rounded-pill">Important</span> --}}
       </div>
     </div>
     <hr class="app-email-view-hr mx-n5 mb-2" />

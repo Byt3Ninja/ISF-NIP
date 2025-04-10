@@ -1,149 +1,154 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @stop
 
 @section('style')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-email.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-email.css" />
 @stop
 
 @php
-   $folders = [
-    ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => $receivedMessagesCount, 'class' => 'bg-label-primary']],
-    ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => count($sentMessages), 'class' => 'bg-label-success']],
-    ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => count($drafts), 'class' => 'bg-label-secondary']],
-    ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => count($starred), 'class' => 'bg-label-warning']],
-    ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => count($trashedMessages), 'class' => 'bg-label-danger']]
-  ];
+$folders = [
+['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => $receivedMessagesCount, 'class'
+=> 'bg-label-primary']],
+['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => count($sentMessages), 'class' =>
+'bg-label-success']],
+['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => count($drafts), 'class' =>
+'bg-label-secondary']],
+['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => count($starred), 'class' =>
+'bg-label-warning']],
+['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => count($trashedMessages), 'class'
+=> 'bg-label-danger']]
+];
 @endphp
 
 @section('content')
-  <!-- Content wrapper -->
-  <div class="content-wrapper">
-    <!-- Content -->
+<!-- Content wrapper -->
+<div class="content-wrapper">
+  <!-- Content -->
 
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="app-email card">
-        <div class="row g-0">
-          @include('admin.clients.messages.partials.sidebar')
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="app-email card">
+      <div class="row g-0">
+        @include('admin.clients.messages.partials.sidebar')
 
-          <!-- Messages List -->
-          <div class="col app-emails-list">
-            <div class="card shadow-none border-0 rounded-0">
-              <div class="card-body emails-list-header p-3 py-2">
-                <!-- Message List: Search -->
-                @include('admin.clients.messages.partials.search-messages')
-                <!--/ Message List: Search -->
-              </div>
-              <hr class="container-m-nx m-0" />
-              <!-- Message List: Items -->
-              <div class="email-list pt-0" id="receivedMessages" style="overflow-y: auto;">
-                @if (count($receivedMessages) > 0)
-                  @include('admin.clients.messages.partials.messeges-actions', ['ids' => $receivedMessages->pluck('id')])
-                  <ul id="message-list" class="list-unstyled m-0">
-                    @foreach ($receivedMessages as $message)
-                      @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                    @endforeach
-                  </ul>
-                @else
-                  @include('includes.no-result', ['message' => __('admin.No Messages')])
-                @endif
-              </div>
-              <div class="email-list pt-0" id="sentMessages" style="display: none; overflow-y: auto;">
-                @if (count($sentMessages) > 0)
-                  @include('admin.clients.messages.partials.messeges-actions', ['ids' => $sentMessages->pluck('id')])
-                  <hr class="mx-n3 emails-list-header-hr mb-2" />
-                  <ul id="message-list" class="list-unstyled m-0">
-                    @foreach ($sentMessages as $message)
-                      @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                    @endforeach
-                  </ul>
-                @else
-                  @include('includes.no-result', ['message' => __('admin.No Messages')])
-                @endif
-              </div>
-              
-              <div class="email-list pt-0" id="draftMessages" style="display: none; overflow-y: auto;">
-                @if (count($drafts) > 0)
-                  @include('admin.clients.messages.partials.messeges-actions', ['ids' => $drafts->pluck('id')])
-                  <hr class="mx-n3 emails-list-header-hr mb-2" />
-                  <ul id="message-list" class="list-unstyled m-0">
-                    @foreach ($drafts as $message)
-                      @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                    @endforeach
-                  </ul>
-                @else
-                  @include('includes.no-result', ['message' => __('admin.No Messages')])
-                @endif
-              </div>
-
-              <div class="email-list pt-0" id="starredMessages" style="display: none; overflow-y: auto;">
-                @if (count($starred) > 0)
-                  @include('admin.clients.messages.partials.messeges-actions', ['ids' => $starred->pluck('id')])
-                  <hr class="mx-n3 emails-list-header-hr mb-2" />
-                  <ul id="message-list" class="list-unstyled m-0">
-                    @foreach ($starred as $message)
-                      @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                    @endforeach
-                  </ul>
-                @else
-                  @include('includes.no-result', ['message' => __('admin.No Messages')])
-                @endif
-              </div>
-
-              <div class="email-list pt-0" id="trashMessages" style="display: none; overflow-y: auto;">
-                @if (count($trashedMessages) > 0)
-                  @include('admin.clients.messages.partials.messeges-actions', ['ids' => $starred->pluck('id')])
-                  <hr class="mx-n3 emails-list-header-hr mb-2" />
-                  <ul id="message-list" class="list-unstyled m-0">
-                    @foreach ($trashedMessages as $message)
-                      @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                    @endforeach
-                  </ul>
-                @else
-                  @include('includes.no-result', ['message' => __('admin.No Messages')])
-                @endif
-              </div>
-
+        <!-- Messages List -->
+        <div class="col app-emails-list">
+          <div class="card shadow-none border-0 rounded-0">
+            <div class="card-body emails-list-header p-3 py-2">
+              <!-- Message List: Search -->
+              @include('admin.clients.messages.partials.search-messages')
+              <!--/ Message List: Search -->
             </div>
-            <div class="app-overlay"></div>
+            <hr class="container-m-nx m-0" />
+            <!-- Message List: Items -->
+            <div class="email-list pt-0" id="receivedMessages" style="overflow-y: auto;">
+              @if (count($receivedMessages) > 0)
+              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $receivedMessages->pluck('id')])
+              <ul id="message-list" class="list-unstyled m-0">
+                @foreach ($receivedMessages as $message)
+                @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                @endforeach
+              </ul>
+              @else
+              @include('includes.no-result', ['message' => __('admin.No Messages')])
+              @endif
+            </div>
+            <div class="email-list pt-0" id="sentMessages" style="display: none; overflow-y: auto;">
+              @if (count($sentMessages) > 0)
+              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $sentMessages->pluck('id')])
+              <hr class="mx-n3 emails-list-header-hr mb-2" />
+              <ul id="message-list" class="list-unstyled m-0">
+                @foreach ($sentMessages as $message)
+                @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                @endforeach
+              </ul>
+              @else
+              @include('includes.no-result', ['message' => __('admin.No Messages')])
+              @endif
+            </div>
+
+            <div class="email-list pt-0" id="draftMessages" style="display: none; overflow-y: auto;">
+              @if (count($drafts) > 0)
+              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $drafts->pluck('id')])
+              <hr class="mx-n3 emails-list-header-hr mb-2" />
+              <ul id="message-list" class="list-unstyled m-0">
+                @foreach ($drafts as $message)
+                @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                @endforeach
+              </ul>
+              @else
+              @include('includes.no-result', ['message' => __('admin.No Messages')])
+              @endif
+            </div>
+
+            <div class="email-list pt-0" id="starredMessages" style="display: none; overflow-y: auto;">
+              @if (count($starred) > 0)
+              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $starred->pluck('id')])
+              <hr class="mx-n3 emails-list-header-hr mb-2" />
+              <ul id="message-list" class="list-unstyled m-0">
+                @foreach ($starred as $message)
+                @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                @endforeach
+              </ul>
+              @else
+              @include('includes.no-result', ['message' => __('admin.No Messages')])
+              @endif
+            </div>
+
+            <div class="email-list pt-0" id="trashMessages" style="display: none; overflow-y: auto;">
+              @if (count($trashedMessages) > 0)
+              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $starred->pluck('id')])
+              <hr class="mx-n3 emails-list-header-hr mb-2" />
+              <ul id="message-list" class="list-unstyled m-0">
+                @foreach ($trashedMessages as $message)
+                @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                @endforeach
+              </ul>
+              @else
+              @include('includes.no-result', ['message' => __('admin.No Messages')])
+              @endif
+            </div>
+
           </div>
-          <!-- /Messages List -->
-
-          @include('admin.clients.messages.partials.message-details')
+          <div class="app-overlay"></div>
         </div>
+        <!-- /Messages List -->
 
-        @include('admin.clients.messages.partials.send-message')
+        @include('admin.clients.messages.partials.message-details')
       </div>
-    </div>
-    <!-- / Content -->
 
-    <div class="content-backdrop fade"></div>
+      @include('admin.clients.messages.partials.send-message')
+    </div>
   </div>
-  <!-- Content wrapper -->
+  <!-- / Content -->
+
+  <div class="content-backdrop fade"></div>
+</div>
+<!-- Content wrapper -->
 @endsection
 
 @section('scripts')
-  {{-- <script>
-    const receivedMessages = @json($receivedMessages);
-    const sentMessages = @json($sentMessages);
-    console.log('Received Messages:', receivedMessages);
-    console.log('Sent Messages:', sentMessages);
-  </script> --}}
-  <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
-  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-  <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
-  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+<script>
+  // const receivedMessages = @json($receivedMessages);
+  const sentMessages = @json($sentMessages);
+  // console.log('Received Messages:', receivedMessages);
+  console.log('Sent Messages:', sentMessages);
+</script>
+<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+<script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+<script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
+<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 @stop
 
 @section('pagescripts')
-  <script src="/vuexy/assets/js/app-email.js"></script>
-  <script src="/vuexy/assets/js/forms-selects.js"></script>
-  <script>
-    $('#inbox-tab').on('click', () => {
+<script src="/vuexy/assets/js/app-email.js"></script>
+<script src="/vuexy/assets/js/forms-selects.js"></script>
+<script>
+  $('#inbox-tab').on('click', () => {
       console.log('inbox tab clicked');
       $('#receivedMessages').show();
       $('#sentMessages').hide();
@@ -208,10 +213,10 @@
       $('#starred-tab').removeClass('active');
       $('#trash-tab').addClass('active');
     });
-  </script>
+</script>
 
-  <script>
-    const typeSelect = document.getElementById('select-type');
+<script>
+  const typeSelect = document.getElementById('select-type');
     typeSelect.addEventListener('change', function() {
       let type = +this.value;
       console.log('type', type);
@@ -253,10 +258,10 @@
         }
       });
     }
-  </script>
-  
-  <script>
-    function filterMessages(value) {
+</script>
+
+<script>
+  function filterMessages(value) {
       const searchInput = value.toLowerCase();
       const messageItems = $('#message-list #message-item');
 
@@ -273,29 +278,55 @@
     };
 
     function getMessageDetails(messageData, event) {
+      console.log('messageData' , messageData)
       const {
-        created_at , first_name_en, id, last_name_ar, 
+        created_at , first_name_en, id, last_name_ar, sender,
         last_name_en, read, receiver, subject, message, starred
       } = messageData || {};
 
-      if (id) $('.StarredToggele').attr('data-id', id);
-      if (id) $('.ToggleMarkRead').attr('do', id);
-      if (id) $('.ToggleMarkUnRead').attr('do', id);
-      if (id) $('.ToggleMarkRead').attr('mark', 'read');
-      if (id) $('.ToggleMarkUnRead').attr('mark', 'unRead');
-      if (starred) $('.StarredToggele i').removeClass('far').addClass('fas text-warning');
-      if (subject) $('#message-details-subject').text(subject);
-      if (created_at) $('#message-details-createdAt').text(moment(created_at).format('MMMM Do YYYY, h:mm A'));
-      if (first_name_en || first_name_en) $('#message-details-createdBy').text(`${first_name_en} ${last_name_en}`);
-      if (receiver) $('#message-details-image').attr('src', receiver.image);
+      if (id) {
+        $('.StarredToggele').attr('data-id', id);
+        $('.ToggleMarkRead').attr('do', id);
+        $('.ToggleMarkUnRead').attr('do', id);
+        $('.ToggleMarkRead').attr('mark', 'read');
+        $('.ToggleMarkUnRead').attr('mark', 'unRead');
+        $('#message-reply-id').val(id);
+      }
 
-      $('#message-details-text').text(message);
-      $('#message-details-subject').text(subject);
+      if (sender) {
+        $('#message-reply-receiver_id').val(sender);
+      }
+      
+      if (subject) {
+        $('#message-reply-subject').val(subject);
+        $('#message-details-subject').text(subject);
+      } 
+
+      if (message) {
+        $('#message-details-text').text(message);
+      }
+
+      if (first_name_en || first_name_en) {
+        $('#message-details-createdBy').text(`${first_name_en} ${last_name_en}`);
+      }
+
+      if (receiver) {
+        $('#message-details-image').attr('src', receiver.image);
+      }
+      
+      if (created_at) {
+        $('#message-details-createdAt').text(moment(created_at).format('MMMM Do YYYY, h:mm A'));
+      }
+
+      if (starred) {
+        $('.StarredToggele i').removeClass('far').addClass('fas text-warning');
+      }
+
     };
-  </script>
-  
-  <script>
-    window.delme = function(id, event) {
+</script>
+
+<script>
+  window.delme = function(id, event) {
       event.stopPropagation();
       console.log('delete message clicked');
       console.log('id', id);
@@ -340,9 +371,9 @@
           }
         })
     }
-  </script>
-  <script>
-    $('#reply-btn').on('click', function() {
+</script>
+<script>
+  $('#reply-btn').on('click', function() {
       console.log('reply button clicked');
       $('#reply-message-container').toggleClass('d-none');
     });
@@ -449,12 +480,26 @@ $(document).on('click', '.ToggleMarkRead, .ToggleMarkUnRead', function() {
     });
 });
 
+  const messageReplyEditor = new Quill('.message-reply-editor', {
+    modules: {
+      toolbar: '.message-reply-toolbar'
+    },
+    placeholder: '{{ $l }}' == 'en' ? 'Write your message... ' : 'اكتب رسالتك... ',
+    theme: 'snow',
+  });
+
+  messageReplyEditor.on('text-change', function(e) {
+    console.log('$(this)', $(this))
+    console.log('value', messageReplyEditor.root.innerHTML);
+    $('#message-reply-text').val(messageReplyEditor.root.innerHTML);
+  });
+
 $(document).on('click', '.SendReplyMessage', function() {
     // var id = $(this).attr('data-id');
-    var message_id = $('.message_id').val();
-    var message_receiver = $('.message_receiver').val();
-    var message_subject = $('.message_subject').val();
-    var message_message = $('.message_message').val();
+    var message_id = $('#message-reply-id').val();
+    var message_receiver = $('#message-reply-receiver_id').val();
+    var message_subject = $('#message-reply-subject').val();
+    var message_message = $('#message-reply-text').val();
    
     $.ajax({
         url: '/dashboard/sendReplymessage',
@@ -467,8 +512,10 @@ $(document).on('click', '.SendReplyMessage', function() {
             _token: '{{ csrf_token() }}'
         },
         success: function(response) {
+          console.log('response', response)
           console.log('Messages: ',response.messages);
-            
+          $('#message-reply-text').val('');
+          messageReplyEditor.setText(''); // Clear the editor
         },
         error: function(xhr) {
         console.error('Error:', xhr.responseText);
@@ -476,5 +523,5 @@ $(document).on('click', '.SendReplyMessage', function() {
     });
 });
 
-  </script>
+</script>
 @stop
