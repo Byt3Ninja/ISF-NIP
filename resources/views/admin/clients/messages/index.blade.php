@@ -600,7 +600,7 @@ $(document).on('click', '.SendReplyMessage', function() {
           $('#message-replies-container').show();
           $('#message-details-replies').prepend(`
              <li class="list-group-item gap-3 p-2 border-bottom">
-              <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-2 ">
                 <div class="fw-semibold fs-6">${first_name_en} ${last_name_en}</div>
                 <div class="d-flex align-items-center">
                   <span class="me-2 text-muted">${moment(created_at).format('MMMM Do YYYY, h:mm A')}</span>
