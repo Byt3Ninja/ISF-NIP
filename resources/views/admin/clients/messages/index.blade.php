@@ -519,6 +519,12 @@ $(document).on('click', '.SendReplyMessage', function() {
         },
         error: function(xhr) {
         console.error('Error:', xhr.responseText);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to send the reply message.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
     }
     });
 });
