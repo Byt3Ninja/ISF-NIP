@@ -2,7 +2,7 @@
   <div class="d-flex flex-column">
     <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
     <h6 class="text-center text-secondary">
-      {{ $message ? $message : __('admin.No Result') }}
+      {{ $message ?? __('admin.No Result') }}
     </h6>
     <div class="text-center">
       @if(request()->query())
