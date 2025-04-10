@@ -119,6 +119,7 @@ $folders = [
         <!-- /Messages List -->
 
         @include('admin.clients.messages.partials.message-details')
+
       </div>
 
       @include('admin.clients.messages.partials.send-message')
@@ -280,7 +281,7 @@ $folders = [
     function getMessageDetails(messageData, event) {
       console.log('messageData' , messageData)
       const {
-        created_at , first_name_en, id, last_name_ar, sender,
+        created_at , first_name_en, id, last_name_ar, sender, replies,
         last_name_en, read, receiver, subject, message, starred
       } = messageData || {};
 
@@ -292,6 +293,34 @@ $folders = [
         $('.ToggleMarkUnRead').attr('mark', 'unRead');
         $('#message-reply-id').val(id);
       }
+      console.log('replies', replies)
+
+      if (replies && replies.length > 0) {
+        $('#message-replies-container').show();
+        
+        $('#message-details-replies').html('');
+        replies.forEach(reply => {
+          $('#message-details-replies').append(`
+            <li class="list-group-item gap-3 p-2 border-bottom">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-semibold fs-6">${reply.first_name_en} ${reply.last_name_en}</div>
+                <div class="d-flex align-items-center">
+                  <span class="me-2 text-muted">${moment(reply.created_at).format('MMMM Do YYYY, h:mm A')}</span>
+                  <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${reply.id}, event)">
+                    <i class="ti ti-trash ti-sm"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="pe-0 pe-md-12">
+                <p class="mb-1 text-muted">${reply.message}</p>
+              </div>
+            </li>
+          `);
+        });
+      } 
+      // else {
+      //   $('#message-details-replies').html('<p>{{ __('messages.No replies yet.') }}</p>');
+      // }
 
       if (sender) {
         $('#message-reply-receiver_id').val(sender);
@@ -303,7 +332,7 @@ $folders = [
       } 
 
       if (message) {
-        $('#message-details-text').text(message);
+        $('#message-details-text').html(message);
       }
 
       if (first_name_en || first_name_en) {
@@ -323,6 +352,39 @@ $folders = [
       }
 
     };
+
+  $('#send-message-form').on('submit', function(e) {
+    if (!$('#send-message-subject').val()) {
+      e.preventDefault();
+
+      $('.subject-error').show();
+      $('#send-message-subject').addClass('is-invalid');
+      console.log('Subject is required');
+    } else if (!$('#send-message-text').val()) {
+      e.preventDefault();
+      $('.subject-error').hide();
+      $('#send-message-subject').removeClass('is-invalid');
+      console.log('Message is required');
+      $('.message-error').show();
+      $('#send-message-text').addClass('is-invalid');
+    } else {
+      $('.subject-error').hide();
+      $('#send-message-subject').removeClass('is-invalid');
+      $('.message-error').hide();
+      $('#send-message-text').removeClass('is-invalid');
+      console.log('Form submitted');
+    }
+  });
+
+  $('#send-message-subject').on('input', function() {
+    if ($(this).val()) {
+      $('.subject-error').hide();
+      $(this).removeClass('is-invalid');
+    } else {
+      $('.subject-error').show();
+      $(this).addClass('is-invalid');
+    }
+  });
 </script>
 
 <script>
@@ -488,10 +550,26 @@ $(document).on('click', '.ToggleMarkRead, .ToggleMarkUnRead', function() {
     theme: 'snow',
   });
 
+  const sendMessageEditor = new Quill('.send-message-editor', {
+    modules: {
+      toolbar: '.send-message-toolbar'
+    },
+    placeholder: '{{ $l }}' == 'en' ? 'Write your message... ' : 'اكتب رسالتك... ',
+    theme: 'snow',
+  });
+
   messageReplyEditor.on('text-change', function(e) {
     console.log('$(this)', $(this))
     console.log('value', messageReplyEditor.root.innerHTML);
     $('#message-reply-text').val(messageReplyEditor.root.innerHTML);
+  });
+
+  sendMessageEditor.on('text-change', function(e) {
+    console.log('$(this)', $(this))
+    console.log('value', sendMessageEditor.root.innerHTML);
+    $('#send-message-text').val(sendMessageEditor.root.innerHTML);
+    $('.message-error').hide();
+    $('#send-message-text').removeClass('is-invalid');
   });
 
 $(document).on('click', '.SendReplyMessage', function() {
@@ -516,6 +594,28 @@ $(document).on('click', '.SendReplyMessage', function() {
           console.log('Messages: ',response.messages);
           $('#message-reply-text').val('');
           messageReplyEditor.setText(''); // Clear the editor
+
+          const { first_name_en, last_name_en, created_at, id, message} = response.messages || {};
+
+          $('#message-replies-container').show();
+          $('#message-details-replies').prepend(`
+             <li class="list-group-item gap-3 p-2 border-bottom">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-semibold fs-6">${first_name_en} ${last_name_en}</div>
+                <div class="d-flex align-items-center">
+                  <span class="me-2 text-muted">${moment(created_at).format('MMMM Do YYYY, h:mm A')}</span>
+                  <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${id}, event)">
+                    <i class="ti ti-trash text-danger ti-sm"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="pe-0 pe-md-12">
+                <p class="mb-1 text-muted">${message}</p>
+              </div>
+            </li>
+          `);
+
+          $('.app-email-view-content').animate({ scrollTop: 0 }, 'slow');
         },
         error: function(xhr) {
         console.error('Error:', xhr.responseText);

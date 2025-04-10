@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="modal-body flex-grow-1 pb-sm-0 p-5 py-2">
-        <form class="email-compose-form" method="post" action="/dashboard/sendmessage" enctype="multipart/form-data">
+        <form id="send-message-form" class="email-compose-form" method="post" action="/dashboard/sendmessage" enctype="multipart/form-data">
           {!! csrf_field() !!}
           <input type="hidden" name="draftsNumber" class="draftsNumber" value="0">
           <div class="form-group mb-4">
@@ -86,20 +86,24 @@
 
           <div class="mb-4">
             <label class="form-label">{{ __('messages.Subject') }}:</label>
-            <input name="subject" type="text" placeholder="{{ __('messages.Subject') }}" class="form-control SubjectDraft"
-              required>
+            <input 
+              id="send-message-subject"
+              name="subject" 
+              type="text" 
+              placeholder="{{ __('messages.Subject') }}" 
+              class="form-control SubjectDraft" 
+              {{-- required --}}
+            />
+            <div class="invalid-feedback subject-error">
+              {{ __('messages.Subject is required') }}
+            </div>
           </div>
 
           <div class="form-group">
             <label class="form-label">{{ __('messages.yourMessage') }}:</label>
-            <textarea class="form-control messagedraft" name='message' rows="4" placeholder="{{ __('messages.Write your message') }}"
-              required></textarea>
-          </div>
-
-          {{-- <div class="email-compose-message">
-            <hr class="mx-n5 my-0" />
-            <div class="d-flex justify-content-end mx-n1">
-              <div class="email-editor-toolbar border-0 w-100 px-0">
+            <input type="hidden" name="message" id="send-message-text">
+            <div class="d-flex justify-content-start">
+              <div class="send-message-toolbar border-0 w-100 ps-0 pb-4">
                 <span class="ql-formats me-0">
                   <button class="ql-bold"></button>
                   <button class="ql-italic"></button>
@@ -111,24 +115,21 @@
                 </span>
               </div>
             </div>
-            <hr class="mx-n5 my-0" />
-            <div class="email-editor border-0 mx-n5"></div>
-            <hr class="mx-n5 mt-0 mb-2" />
-          </div> --}}
-
+            <div class="send-message-editor rounded overflow-hidden"></div>
+            <div class="invalid-feedback message-error">
+              {{ __('messages.Message is required') }}
+            </div>
+          </div>
 
           <div class="email-compose-actions d-flex justify-content-between align-items-center my-4">
-            <button type="submit" class="btn btn-primary">
-              Send <i class="ti ti-send ti-xs scaleX-n1-rtl ms-2"></i>
-            </button>
-            {{-- <div class="d-flex align-items-center">
-              <div class="btn-group">
-                
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="javascript:void(0);">Save draft</a></li>
-                </ul>
-              </div>
-            </div> --}}
+            <div class="d-flex align-items-center gap-3">
+              <button type="submit" class="btn btn-primary">
+                {{ __('messages.Send') }} <i class="ti ti-send ti-xs scaleX-n1-rtl ms-2"></i>
+              </button>
+              <button type="button" class="btn btn-label-secondary">
+                {{ __('messages.Save as draft') }} <i class="ti ti-edit ti-xs scaleX-n1-rtl ms-2"></i>
+              </button>
+            </div>
             <div class="d-flex align-items-center gap-2">
               <button type="reset" class="btn btn-sm btn-icon btn-text-secondary rounded-pill DeleteDraft" data-bs-dismiss="modal"
                 aria-label="Close">
