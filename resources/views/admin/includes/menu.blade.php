@@ -164,7 +164,25 @@
     $l == 'ar' ? ($arrow = 'left') : ($arrow = 'right');
     ?>
 
-    @if( $_user->ableToAny(['messages.index'], $permissions) )
+    @if( $_user->ableTo('messages.index', $permissions) )
+      <li class="{{ Request::is('dashboard/messages') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/messages" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-messages"></i>
+          <span class="menu-item">{{ __('admin.Messages') }}</span>
+        </a>
+      </li>
+    @endif
+
+    @if( $_user->ableTo('messages.view', $permissions) )
+      <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
+          <i class="menu-icon tf-icons ti ti-world"></i>
+          <span class="menu-item">{{ __('admin.contactus') }}</span>
+        </a>
+      </li>
+    @endif
+
+    {{-- @if( $_user->ableToAny(['messages.index'], $permissions) )
     <li class="{{ Request::is('dashboard/inbox', 'dashboard/outbox', 'dashboard/mymsg', 'dashboard/sendmessage', 'dashboard/messages') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-messages"></i>
@@ -178,15 +196,15 @@
             </a>
           </li>
         @endif
-        {{-- @if( $_user->ableTo('sendmessage', $permissions) )
+        @if( $_user->ableTo('sendmessage', $permissions) )
           <li class="{{ Request::is('dashboard/sendmessage') ? 'active' : '' }} menu-item"><a
               href="/dashboard/sendmessage" class="menu-link">
               <i class="bx bx-message"></i>
               <span class="menu-item">{{ __('admin.New Message') }}</span>
             </a>
           </li>
-        @endif --}}
-        {{-- @if( $_user->ableTo('inbox', $permissions) )
+        @endif
+        @if( $_user->ableTo('inbox', $permissions) )
           <li class="{{ Request::is('dashboard/inbox') ? 'active' : '' }} menu-item"><a href="/dashboard/inbox"
               class="menu-link"><i class="bx bxs-inbox"></i>
               <span class="menu-item">{{ __('admin.myinbox') }}</span>
@@ -196,14 +214,14 @@
               @endif
             </a>
           </li>
-        @endif --}}
-        {{-- @if( $_user->ableTo('outbox', $permissions) )
+        @endif
+        @if( $_user->ableTo('outbox', $permissions) )
           <li class="{{ Request::is('dashboard/outbox') ? 'active' : '' }} menu-item">
             <a href="/dashboard/outbox" class="menu-link"><i class="bx bx-mail-send"></i>
               <span class="menu-item">{{ __('admin.myoutbox') }}</span>
             </a>
           </li>
-        @endif --}}
+        @endif
         @if( $_user->ableTo('messages.view', $permissions) )
           <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
             <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
@@ -213,7 +231,8 @@
         @endif
       </ul>
     </li>
-    @endif
+    @endif --}}
+    
     @if (!$_user->hasAnyRole('Mentor|Judger'))
       @if( $_user->ableTo('directory', $permissions) )
       <li class="{{ Request::is('dashboard/directory') ? 'active' : '' }} menu-item"><a href="/dashboard/directory"
