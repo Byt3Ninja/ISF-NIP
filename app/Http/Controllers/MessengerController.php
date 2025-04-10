@@ -49,43 +49,22 @@ class MessengerController extends Controller
 
 
         // Fetch sent messages
-        $sentMessages = Messenger::where('messenger.sender', $userId)
-            ->join('users', 'messenger.receiver', '=', 'users.id')
-            ->orderBy('messenger.created_at', 'DESC')
-            ->get([
-                'messenger.id',
-                'users.first_name_en',
-                'users.last_name_en',
-                'users.first_name_ar',
-                'users.last_name_ar',
-                'messenger.subject',
-                'messenger.message',
-                'messenger.read',
-                'messenger.starred',
-                'messenger.receiver',
-                'messenger.created_at'
-            ]);
-
-// إضافة الردود
-$sentMessages->transform(function ($Replymessages) {
-    $replies = DB::table('message_replies')
-        ->join('messenger as reply', 'message_replies.reply_id', '=', 'reply.id')
-        ->join('users', 'reply.sender', '=', 'users.id')
-        ->where('message_replies.messenger_id', $Replymessages->id)
-        ->orderBy('reply.created_at', 'ASC')
-        ->get([
-            'reply.id',
-            'reply.message',
-            'reply.created_at',
-            'users.first_name_en',
-            'users.last_name_en',
-            'users.first_name_ar',
-            'users.last_name_ar',
-        ]);
-        $Replymessages->replies = $replies;
-
-    return $Replymessages;
-});
+        // $sentMessages = Messenger::where('messenger.sender', $userId)
+        //     ->join('users', 'messenger.receiver', '=', 'users.id')
+        //     ->orderBy('messenger.created_at', 'DESC')
+        //     ->get([
+        //         'messenger.id',
+        //         'users.first_name_en',
+        //         'users.last_name_en',
+        //         'users.first_name_ar',
+        //         'users.last_name_ar',
+        //         'messenger.subject',
+        //         'messenger.message',
+        //         'messenger.read',
+        //         'messenger.starred',
+        //         'messenger.receiver',
+        //         'messenger.created_at'
+        //     ]);
 
         // Fetch additional data if needed
         $users = $mentors = $cycles = $organizations = null;
@@ -188,17 +167,52 @@ $sentMessages->transform(function ($Replymessages) {
                 'messenger.read',
                 'messenger.starred',
                 'messenger.receiver',
+                'messenger.sender',
                 'messenger.created_at'
             ]);
 
-        //     $Replymessages = Messenger::whereDoesntHave('repliedTo') // يعني ما تم الرد بها على رسالة ثانية
-        // ->where(function ($query) use ($userId) {
-        //     $query->where('sender', $userId)
-        //           ->orWhere('receiver', $userId);
-        // })
-        // ->with(['senderUser', 'receiverUser', 'replies.senderUser'])
-        // ->orderBy('created_at', 'desc')
-        // ->get();
+            $sentMessages = Messenger::where('messenger.sender', $userId)
+            ->join('users', 'messenger.receiver', '=', 'users.id')
+            ->orderBy('messenger.created_at', 'DESC')
+            ->get([
+                'messenger.id',
+                'users.first_name_en',
+                'users.last_name_en',
+                'users.first_name_ar',
+                'users.last_name_ar',
+                'messenger.subject',
+                'messenger.message',
+                'messenger.read',
+                'messenger.starred',
+                'messenger.receiver',
+                'messenger.sender',
+                'messenger.created_at'
+            ]);
+        
+        // إضافة الردود
+        $sentMessages->transform(function ($message) {
+            $replies = DB::table('message_replies')
+                ->join('messenger as reply', 'message_replies.reply_id', '=', 'reply.id')
+                ->join('users', 'reply.sender', '=', 'users.id')
+                ->where('message_replies.messenger_id', $message->id)
+                ->orderBy('reply.created_at', 'ASC')
+                ->get([
+                    'reply.id',
+                    'reply.message',
+                    'reply.created_at',
+                    'users.first_name_en',
+                    'users.last_name_en',
+                    'users.first_name_ar',
+                    'users.last_name_ar',
+                ]);
+        
+            $message->replies = $replies;
+        
+            return $message;
+        });
+
+
+
 
         // Return a single view with all data
         return view('admin.clients.messages.index', compact(
@@ -212,6 +226,7 @@ $sentMessages->transform(function ($Replymessages) {
         'drafts',
         'trashedMessages',
         'starred',
+        'Replymessages'
         ));
     }
 
