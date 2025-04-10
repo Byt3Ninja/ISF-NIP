@@ -50,4 +50,9 @@ return [
     'Mark as read' => 'Mark as read',
     'Mark as unread' => 'Mark as unread',
     'Add Reply' => 'Add Reply',
+    'Replies' => 'Replies',
+    'No replies yet.' => 'No replies yet.',
+    'Save as draft' => 'Save as draft',
+    'Message is required' => 'Message is required',
+    'Subject is required' => 'Subject is required',
 ];
