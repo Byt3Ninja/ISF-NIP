@@ -346,6 +346,7 @@
       console.log('reply button clicked');
       $('#reply-message-container').toggleClass('d-none');
     });
+
   $(document).on('click', '.DeleteDraft', function() {
     $.ajax({
     url: '/dashboard/deleteDraft',
@@ -448,6 +449,32 @@ $(document).on('click', '.ToggleMarkRead, .ToggleMarkUnRead', function() {
     });
 });
 
+$(document).on('click', '.SendReplyMessage', function() {
+    // var id = $(this).attr('data-id');
+    var message_id = $('.message_id').val();
+    var message_receiver = $('.message_receiver').val();
+    var message_subject = $('.message_subject').val();
+    var message_message = $('.message_message').val();
+   
+    $.ajax({
+        url: '/dashboard/sendReplymessage',
+        type: 'POST',
+        data: {
+            message_id: message_id,
+            message_receiver: message_receiver,
+            message_subject: message_subject,
+            message_message: message_message,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+          console.log(response);
+            
+        },
+        error: function(xhr) {
+        console.error('Error:', xhr.responseText);
+    }
+    });
+});
 
   </script>
 @stop

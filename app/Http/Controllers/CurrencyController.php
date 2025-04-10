@@ -118,7 +118,6 @@ class CurrencyController extends Controller
 
     // تحميل ملف الدول مرة واحدة فقط
     $jsonCountries = File::get(base_path('database/dbFiles/countries+states+cities.json'));
-
     $countriesData = json_decode($jsonCountries, true);
     
     // تحويل الدول إلى مصفوفة مفهرسة بكود العملة

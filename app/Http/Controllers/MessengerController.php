@@ -66,6 +66,27 @@ class MessengerController extends Controller
                 'messenger.created_at'
             ]);
 
+// إضافة الردود
+$sentMessages->transform(function ($Replymessages) {
+    $replies = DB::table('message_replies')
+        ->join('messenger as reply', 'message_replies.reply_id', '=', 'reply.id')
+        ->join('users', 'reply.sender', '=', 'users.id')
+        ->where('message_replies.messenger_id', $Replymessages->id)
+        ->orderBy('reply.created_at', 'ASC')
+        ->get([
+            'reply.id',
+            'reply.message',
+            'reply.created_at',
+            'users.first_name_en',
+            'users.last_name_en',
+            'users.first_name_ar',
+            'users.last_name_ar',
+        ]);
+        $Replymessages->replies = $replies;
+
+    return $Replymessages;
+});
+
         // Fetch additional data if needed
         $users = $mentors = $cycles = $organizations = null;
         if (Auth::user()->hasAnyRole('Admin|OrganizationManager')) {
@@ -170,6 +191,15 @@ class MessengerController extends Controller
                 'messenger.created_at'
             ]);
 
+        //     $Replymessages = Messenger::whereDoesntHave('repliedTo') // يعني ما تم الرد بها على رسالة ثانية
+        // ->where(function ($query) use ($userId) {
+        //     $query->where('sender', $userId)
+        //           ->orWhere('receiver', $userId);
+        // })
+        // ->with(['senderUser', 'receiverUser', 'replies.senderUser'])
+        // ->orderBy('created_at', 'desc')
+        // ->get();
+
         // Return a single view with all data
         return view('admin.clients.messages.index', compact(
         'receivedMessages', 
@@ -181,7 +211,7 @@ class MessengerController extends Controller
         'organizations', 
         'drafts',
         'trashedMessages',
-        'starred'
+        'starred',
         ));
     }
 
@@ -785,5 +815,36 @@ class MessengerController extends Controller
         ], 500);
     }
     }
+
+    public function sendReplyMessage(Request $request)
+    {
+        $request->validate([
+            'message_subject' => 'nullable|string|max:255',
+            'message_message' => 'required|string',
+            'message_receiver' => 'required|exists:users,id',
+            'message_id' => 'nullable|exists:messenger,id',
+        ]);
+        
+        $message = Messenger::create([
+            'subject' => $request->message_subject,
+            'message' => $request->message_message,
+            'receiver' => $request->message_receiver,
+            'sender' => auth()->id(),
+        ]);
+    
+        // ربطها كـ رد إذا كانت reply
+        if ($request->message_id) {
+            DB::table('message_replies')->insert([
+                'messenger_id' => $request->message_id,
+                'reply_id' => $message->id,
+            ]);
+        }
+    
+        return response()->json(['message' => 'Message sent successfully']);
+    }
+
+
+
+
 
 }

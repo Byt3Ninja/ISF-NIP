@@ -273,6 +273,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/send_message', 'MessengerController@sendmsg');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('sendmessage');
     Route::post('/sendmessage', 'MessengerController@savemessage');
+    Route::post('/sendReplymessage', 'MessengerController@sendReplyMessage')->name('messages.sendReplymessage');
     Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('getUsersByProgram');
 
     //ShowMessages
