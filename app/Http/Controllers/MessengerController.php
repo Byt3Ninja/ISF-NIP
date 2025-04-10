@@ -226,7 +226,6 @@ class MessengerController extends Controller
         'drafts',
         'trashedMessages',
         'starred',
-        'Replymessages'
         ));
     }
 
