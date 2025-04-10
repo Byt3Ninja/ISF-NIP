@@ -605,7 +605,7 @@ $(document).on('click', '.SendReplyMessage', function() {
                 <div class="d-flex align-items-center">
                   <span class="me-2 text-muted">${moment(created_at).format('MMMM Do YYYY, h:mm A')}</span>
                   <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${id}, event)">
-                    <i class="ti ti-trash text-danger ti-sm"></i>
+                    <i class="ti ti-trash ti-sm"></i>
                   </button>
                 </div>
               </div>
