@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.css" />
+@stop
+
 @section('style')
 <style>
 .card {
@@ -69,11 +73,45 @@
     width: 75%;
   }
 }
+
+.screening-gavel {
+  position: absolute;
+  background-color: var(--bs-primary-border-subtle);
+  height: 56px;
+  width: 70px;
+  display: grid;
+  place-items: center;
+  top: 45%;
+  @if($l == 'en')
+    right: 0;
+    border-top-left-radius: 35px;
+    border-bottom-left-radius: 35px;
+  @else
+    left: 0;
+    border-top-right-radius: 35px;
+    border-bottom-right-radius: 35px;
+  @endif
+  z-index: 2;
+  border: 1px solid var(--bs-primary);
+  cursor: pointer;
+}
+.transposed-icon {
+  transform: rotate(360deg);
+}
+.screening-gavel:hover {
+  background-color: var(--bs-white);
+  transition: all 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transform: scale(1.2);
+}
 </style>
 @stop
 
 @section('content')
-<div class="content-wrapper">
+{{-- @if($_user->hasRole('Judger')) --}}
+  @include('admin.clients.startup.partials._startup_screening_canvas')
+{{-- @endif --}}
+
+<div class="content-wrapper position-relative">
   <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold mb-4">{{ __('admin.My company') }}</h4>
     @include('admin.clients.startup.partials._startup_info')
@@ -726,12 +764,15 @@
 </div>
 <!-- / Modal -->
 @stop
+
 @section('scripts')
-<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
-
+  <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.js"></script>
 @stop
-@section('pagescripts')
 
+@section('pagescripts')
+  <script src="/vuexy/assets/js/form-wizard-numbered.js"></script>
+  <script src="/vuexy/assets/js/form-wizard-validation.js"></script>
 <script>
 var url = {
   {
