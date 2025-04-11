@@ -153,4 +153,5 @@ return [
     'From' => 'من',
     'To' => 'إلى',
     'Category not available' => 'الفئة غير متاحة',
+    'No category' => 'لا توجد فئة',
 ];
