@@ -1472,4 +1472,5 @@ return [
 	'License Key Format' => 'License Key Format',
 	'Try Again' => 'Try Again',
 	'enter_License_Key' => 'Enter License Key',
+	'Screening' => 'Screening',
 ];

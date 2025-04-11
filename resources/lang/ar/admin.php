@@ -1493,5 +1493,6 @@ return [
 	'License Key Format' => 'صيغة رقم الترخيص',
 	'Try Again' => 'حاول مرة اخرى',
 	'enter_License_Key' => 'ادخل رقم الترخيص',
+	'Screening' => 'المراجعة',
 ]; 
 

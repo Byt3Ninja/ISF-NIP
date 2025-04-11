@@ -6,6 +6,7 @@ use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
+use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
 Route::get('test', function () {});
@@ -79,7 +80,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('documentation/view/{id?}', 'HomeController@help');
     Route::resource('documentation', 'DocumentationController');
 
-
+    // Judger
+    Route::get('judger/screening','Judger\JudgerScreeningController@index');
+   
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.update');
     Route::get('calendar/{id}/delete', 'SettingsController@delcal')->name('calendar.destroy');
