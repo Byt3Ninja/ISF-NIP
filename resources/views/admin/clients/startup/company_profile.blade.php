@@ -152,7 +152,7 @@
                     />
                   </div>
                   <h5 class="mb-2 fw-semibold">{{ __('admin.Targeted_Market') }}</h5>
-                  <div class="d-flex justify-content-center align-items-center gap-1 pb-2" style="width: 99.5%; overflow: auto; white-space: nowrap;">
+                  <div class="d-flex align-items-center gap-1 pb-2" style="width: 99.5%; overflow: auto; white-space: nowrap;">
                     @if($company->targeted_market != null)
                     @php
                     $countryIds = json_decode($company->targeted_market, true);
