@@ -1494,5 +1494,14 @@ return [
 	'Try Again' => 'حاول مرة اخرى',
 	'enter_License_Key' => 'ادخل رقم الترخيص',
 	'Screening' => 'المراجعة',
+	'Screening Criteria' => 'معايير المراجعة',
+	'Final Comments' => 'التعليقات النهائية',
+	'Comment' => 'تعليق',
+	'View Evaluation' => 'عرض التقييم',
+	'Enter your comments here...' => 'ادخل تعليقاتك هنا...',
+	'Enter your comment here...' => 'ادخل تعليقك هنا...',
+	'Evaluate' => 'تقييم',
+	'Provide your evaluation for' => 'قدم تقييمك لـ',
+	'Select score' => 'اختر النقاط',
 ]; 
 

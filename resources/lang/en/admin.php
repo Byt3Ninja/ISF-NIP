@@ -1473,4 +1473,13 @@ return [
 	'Try Again' => 'Try Again',
 	'enter_License_Key' => 'Enter License Key',
 	'Screening' => 'Screening',
+	'Screening Criteria' => 'Screening Criteria',
+	'Final Comments' => 'Final Comments',
+	'Comment' => 'Comment',
+	'View Evaluation' => 'View Evaluation',
+	'Enter your comments here...' => 'Enter your comments here...',
+	'Enter your comment here...' => 'Enter your comment here...',
+	'Evaluate' => 'Evaluate',
+	'Provide your evaluation for' => 'Provide your evaluation for',
+	'Select score' => 'Select score',
 ];
