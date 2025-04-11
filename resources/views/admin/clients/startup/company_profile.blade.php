@@ -305,15 +305,18 @@
                 <div class="d-flex flex-column justify-content-between align-items-center h-100">
                   <iframe src="{{ url($company->pitch_deck) }}" target="_blank"
                     style="width: 100%; height: 350px; object-fit:" class="img-fluid">
-                    <p>Your browser does not support iframes.</p>
+                    <p>
+                      {{ $l == 'en' ? 'Your browser does not support iframes.' : 'متصفحك لا يدعم إطارات iframe.' }}
+                    </p>
                   </iframe>
                   <div class="mt-auto d-flex flex-column mb-6">
-                    <span class="text-muted">To get analysis for your pitch
-                      deck please</span>
+                    <span class="text-muted">
+                      {{ $l == 'en' ? 'To get analysis for your pitch deck please' : 'للحصول على تحليل لعرضك التقديمي، يرجى' }}
+                    </span>
                     <a role="button"
                       onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                      Click here
+                      {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
                   </div>
                 </div>
@@ -323,12 +326,13 @@
                 <div class="d-flex flex-column justify-content-between align-items-center h-100">
                   <img src="/images/deck.svg" style="width: 350px; height: 350px;" />
                   <div class="mt-auto d-flex flex-column mb-6">
-                    <span class="text-muted">To get analysis for your pitch
-                      deck please</span>
+                    <span class="text-muted">
+                      {{ $l == 'en' ? 'To get analysis for your pitch deck please upload your pitch deck' : 'للحصول على تحليل لعرضك التقديمي، يرجى تحميل عرضك التقديمي' }}
+                    </span>
                     <a role="button"
                       onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                      Click here
+                      {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
                   </div>
                 </div>
@@ -369,11 +373,13 @@
                 {{-- Direct Video File --}}
                 <video class="h-100 w-100" controls>
                   <source src="{{ $videoUrl }}" type="video/mp4">
-                  Your browser does not support the video tag.
+                    {{ $l == 'en' ? 'Your browser does not support the video tag.' : 'متصفحك لا يدعم علامة الفيديو.' }}
                 </video>
                 @else
                 {{-- Unknown format --}}
-                <a href="{{ $videoUrl }}" target="_blank" class="btn btn-primary">View Video</a>
+                <a href="{{ $videoUrl }}" target="_blank" class="btn btn-primary">
+                  {{ $l == 'en' ? 'View Video' : 'عرض الفيديو' }}
+                </a>
                 @endif
 
                 @else
@@ -382,13 +388,12 @@
 
                 <div class="mt-auto d-flex flex-column pt-4 text-center">
                   <span class="text-muted">
-                    {{-- To get analysis for your pitch deck please upload your pitch deck video --}}
                     {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
                   </span>
                   <a role="button"
                     onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
                     class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                    Click here
+                    {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                   </a>
                 </div>
               </div>
