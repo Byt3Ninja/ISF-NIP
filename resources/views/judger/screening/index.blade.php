@@ -24,6 +24,7 @@
       background-color: var(--bs-white);
       color: var(--bs-white);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       opacity: 0;
@@ -36,45 +37,56 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-      @forEach($screeningData as $screening)
-        <div class="col-12 col-md-2 col-lg-3 col-xl-4 mb-4">
-          <div class="card">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <img 
-                  src="/images/background/logo.png" 
-                  alt="startup-logo" 
-                  class="rounded shadow-sm border p-2"
-                  style="object-fit: contain; width: 100px; height: 65px;" 
-                />
-                <div class="d-flex flex-column align-items-center justify-content-center gap-1">
-                  <img src="/icons/{{ $screening->status }}.svg" />
-                  <span class="text-capitalize fs-sm fs-semibold">
-                    {{ str_replace('-', ' ', $screening->status) }}
-                  </span>
-                </div>
-              </div>
-              <h5 class="card-title text-truncate mb-2 text-dark">{{ $screening->startupTitle }}</h5>
-              <p class="card-text line-clamp-4 text-muted">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Dolorum, itaque nam? Sint dolore, reiciendis soluta eveniet impedit 
-                consectetur rerum nam quidem delectus amet nostrum repudiandae, 
-                quos aspernatur dolor reprehenderit nesciunt.
-              </p>
-            </div>
-            <div class="card-overlay">
-              <h5 class="text-center text-uppercase">{{ str_replace('-', ' ', $screening->status) }}</h5>
-            </div>
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      @include('judger.screening.partials.screening-header-card')
+      <div class="row">
+        @forEach($screeningData as $screening)
+          <div class="col-12 col-md-6 col-lg-3 col-xl-4 mb-6">
+            @include('judger.screening.partials.screening-card', ['screening' => $screening])
           </div>
-        </div>
-      @endforeach
+        @endforeach
+      </div>
     </div>
   </div>
-</div>
 @stop
 
-@section('scripts')
+@section('pagescripts')
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchInput');
+      const cards = document.querySelectorAll('.screening-card');
+
+      searchInput.addEventListener('input', function() {
+        const searchTerm = searchInput.value.toLowerCase();
+        cards.forEach(card => {
+          const title = card.querySelector('.card-title').textContent.toLowerCase();
+          const desc = card.querySelector('.card-text').textContent.toLowerCase();
+          const status = card.querySelector('.status').textContent.toLowerCase();
+          if (title.includes(searchTerm) || desc.includes(searchTerm) || status.includes(searchTerm)) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    const statusFilter = document.querySelectorAll('input[name="statusFilter"]');
+    statusFilter.forEach(radio => {
+      radio.addEventListener('change', function() {
+        const selectedStatus = this.value;
+        const cards = document.querySelectorAll('.screening-card');
+        console.log('selectedStatus:', selectedStatus);
+        cards.forEach(card => {
+          const status = card.querySelector('.status').getAttribute('data-id').toLowerCase();
+          if (selectedStatus === 'all' || status.includes(selectedStatus)) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
 @stop
