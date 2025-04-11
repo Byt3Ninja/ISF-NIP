@@ -336,6 +336,7 @@
       </li>
       @endif
     @endif
+
     @if( $_user->ableTo('myFiles.index', $permissions) )
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
       <a href="/dashboard/myFiles" class="menu-link">
@@ -343,6 +344,15 @@
         <div>{{ __('admin.filemanager') }}</div>
       </a>
     </li>
+    @endif
+
+    @if($_user->hasRole('Judger'))
+      <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/judger/screening" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-gavel"></i>
+          <div>{{ __('admin.Screening') }}</div>
+        </a>
+      </li>
     @endif
 
     @if( $_user->ableToAny(['view_user', 'view_log', 'view_forms', 'view_report'], $permissions) )
