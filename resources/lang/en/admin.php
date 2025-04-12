@@ -1482,4 +1482,7 @@ return [
 	'Evaluate' => 'Evaluate',
 	'Provide your evaluation for' => 'Provide your evaluation for',
 	'Select score' => 'Select score',
+	'Point' => 'Point',
+	'All Comments' => 'All Comments',
+	'All Notes' => 'All Notes',
 ];

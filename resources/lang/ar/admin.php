@@ -1503,5 +1503,8 @@ return [
 	'Evaluate' => 'تقييم',
 	'Provide your evaluation for' => 'قدم تقييمك لـ',
 	'Select score' => 'اختر النقاط',
+	'Point' => 'نقاط',
+	'All Comments' => 'جميع التعليقات',
+	'All Notes' => 'جميع الملاحظات',
 ]; 
 
