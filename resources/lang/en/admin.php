@@ -1485,4 +1485,7 @@ return [
 	'Point' => 'Point',
 	'All Comments' => 'All Comments',
 	'All Notes' => 'All Notes',
+	'Established in' => 'Established in',
+	'Confirm Save' => 'Confirm Save',
+	'Confirm_Save_Screening' => 'Are you sure you want to save screening?',
 ];
