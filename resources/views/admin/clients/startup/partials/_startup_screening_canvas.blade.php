@@ -1,17 +1,20 @@
 @php
-$criterias = [
-'market-fit' => 'Market Fit',
-'team-strenth' => 'Team Strength',
-'financial-viability' => 'Financial Viability',
-'sustainability' => 'Sustainability',
-'innovation' => 'Innovation',
-'scalability' => 'Scalability',
-'social-impact' => 'Social Impact',
-'technology' => 'Technology',
-'business-model' => 'Business Model',
-'customer-acquisition' => 'Customer Acquisition',
-'competition' => 'Competition',
-];
+  // Show the canvas if the query parameter 'screening' is set to 'true'
+  $showCanvas = request()->query('screening') === 'true';
+
+  $criterias = [
+    'market-fit' => 'Market Fit',
+    'team-strenth' => 'Team Strength',
+    'financial-viability' => 'Financial Viability',
+    'sustainability' => 'Sustainability',
+    'innovation' => 'Innovation',
+    'scalability' => 'Scalability',
+    'social-impact' => 'Social Impact',
+    'technology' => 'Technology',
+    'business-model' => 'Business Model',
+    'customer-acquisition' => 'Customer Acquisition',
+    'competition' => 'Competition',
+  ];
 @endphp
 
 <div class="screening-gavel">
@@ -21,7 +24,7 @@ $criterias = [
   </div>
 </div>
 
-<div class="offcanvas offcanvas-end fade show active" tabindex="-1" id="rightModalCanvas"
+<div class="offcanvas offcanvas-end {{ $showCanvas ? 'show' : '' }}" tabindex="-1" id="rightModalCanvas"
   aria-labelledby="rightModalCanvasLabel" style="width: 50vw;">
   <div class="offcanvas-body">
     <form>
@@ -39,111 +42,215 @@ $criterias = [
         </div>
       </div>
 
-      <ul class="nav nav-pills mb-3 pb-3 border-bottom" id="pills-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="pills-screening-criteria-tab" data-bs-toggle="pill"
-            data-bs-target="#pills-screening-criteria" type="button" role="tab" aria-controls="pills-screening-criteria"
-            aria-selected="true">
-            {{ __('admin.Screening Criteria')}}
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="pills-final-comments-tab" data-bs-toggle="pill"
-            data-bs-target="#pills-final-comments" type="button" role="tab" aria-controls="pills-final-comments"
-            aria-selected="false">
-            {{ __('admin.Final Comments')}}
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="pills-view-evaluation-tab" data-bs-toggle="pill"
-            data-bs-target="#pills-view-evaluation" type="button" role="tab" aria-controls="pills-view-evaluation"
-            aria-selected="false">
-            {{ __('admin.View Evaluation')}}
-          </button>
-        </li>
-      </ul>
-
-      <div class="tab-content shadow-none p-2" id="pills-tabContent">
-        <div class="tab-pane fade show active" id="pills-screening-criteria" role="tabpanel"
-          aria-labelledby="pills-screening-criteria-tab">
-          <!-- Content for Screening Criteria -->
-          <div class="steps">
-            <div class="row">
-              <div class="col-12">
-                <h5 class="mb-0">{{ __('admin.Screening Criteria')}}</h5>
-              </div>
-
-              <!-- Default Wizard -->
-              <div class="col-12 mb-6">
-                <div class="bs-stepper wizard-numbered mt-2 shadow-none p-0">
-                  <div class="bs-stepper-header px-0 overflow-auto d-flex flex-nowrap">
-                    @foreach ($criterias as $key => $label)
-                    <div class="step flex-shrink-0" data-target="#{{ $key }}">
-                      <button type="button" class="step-trigger">
-                        <span class="bs-stepper-circle">{{ $loop->iteration }}</span>
-                        <span class="bs-stepper-label">
-                          <span class="bs-stepper-title">{{ $label }}</span>
-                          <span class="bs-stepper-subtitle">{{ __('admin.Evaluate') }}</span>
-                        </span>
-                      </button>
-                    </div>
-                    @if (!$loop->last)
-                    <div class="line flex-shrink-0">
-                      <i class="ti ti-chevron-right"></i>
-                    </div>
-                    @endif
-                    @endforeach
+      <div class="row">
+        <div class="col-12">
+          <ul class="nav nav-pills mb-3 pb-3 border-bottom" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="pills-screening-criteria-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-screening-criteria" type="button" role="tab" aria-controls="pills-screening-criteria"
+                aria-selected="true">
+                {{ __('admin.Screening Criteria')}}
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="pills-final-comments-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-final-comments" type="button" role="tab" aria-controls="pills-final-comments"
+                aria-selected="false">
+                {{ __('admin.Final Comments')}}
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="pills-view-evaluation-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-view-evaluation" type="button" role="tab" aria-controls="pills-view-evaluation"
+                aria-selected="false">
+                {{ __('admin.View Evaluation')}}
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content shadow-none p-2" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-screening-criteria" role="tabpanel"
+              aria-labelledby="pills-screening-criteria-tab">
+              <!-- Content for Screening Criteria -->
+              <div class="steps">
+                <div class="row">
+                  <div class="col-12">
+                    <h5 class="mb-0">{{ __('admin.Screening Criteria')}}</h5>
                   </div>
-                  <div class="bs-stepper-content px-0">
-                    @foreach ($criterias as $key => $label)
-                    <div id="{{ $key }}" class="content">
-                      <div class="content-header mb-4">
-                        <h6 class="mb-0">{{ $label }}</h6>
-                        <small>{{ __('admin.Provide your evaluation for') }} {{ $label }}.</small>
+    
+                  <!-- Default Wizard -->
+                  <div class="col-12 mb-6">
+                    <div class="bs-stepper wizard-numbered mt-2 shadow-none p-0">
+                      <div class="bs-stepper-header px-0 overflow-auto d-flex flex-nowrap">
+                        @foreach ($criterias as $key => $label)
+                        <div class="step flex-shrink-0" data-target="#{{ $key }}">
+                          <button type="button" class="step-trigger">
+                            <span class="bs-stepper-circle">{{ $loop->iteration }}</span>
+                            <span class="bs-stepper-label">
+                              <span class="bs-stepper-title">{{ $label }}</span>
+                              <span class="bs-stepper-subtitle">{{ __('admin.Evaluate') }}</span>
+                            </span>
+                          </button>
+                        </div>
+                        @if (!$loop->last)
+                        <div class="line flex-shrink-0">
+                          <i class="ti ti-chevron-right"></i>
+                        </div>
+                        @endif
+                        @endforeach
                       </div>
-                      <div class="form-group mb-4">
-                        <label for="{{ $key }}-score" class="form-label">{{ __('admin.Score') }}</label>
-                        <select class="form-select" id="{{ $key }}-score" name="{{ $key }}_score">
-                          <option value="">{{ __('admin.Select score') }}</option>
-                          @for ($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }}</option>
-                            @endfor
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <label for="{{ $key }}-comment" class="form-label">{{ __('admin.Comment') }}</label>
-                        <textarea class="form-control" id="{{ $key }}-comment" name="{{ $key }}_comment" rows="3"
-                          placeholder="{{ __('admin.Enter your comment here...') }}"></textarea>
-                      </div>
-                      <div class="col-12 d-flex justify-content-between mt-12">
-                        <button type="button" class="btn btn-label-secondary btn-prev" {{ $loop->first ? 'disabled' : ''
-                          }}>
-                          <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
-                          <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
-                        </button>
-                        <button type="button" class="btn btn-primary btn-next" {{ $loop->last ? 'disabled' : '' }}>
-                          <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Next') }}</span>
-                          <i class="ti ti-arrow-right ti-xs"></i>
-                        </button>
+                      <div class="bs-stepper-content px-0">
+                        @foreach ($criterias as $key => $label)
+                        <div id="{{ $key }}" class="content">
+                          <div class="content-header mb-4">
+                            <h6 class="mb-0">{{ $label }}</h6>
+                            <small>{{ __('admin.Provide your evaluation for') }} {{ $label }}.</small>
+                          </div>
+                          <div class="form-group mb-4">
+                            <label for="{{ $key }}-score" class="form-label">{{ __('admin.Score') }}</label>
+                            <select class="form-select" id="{{ $key }}-score" name="{{ $key }}_score">
+                              <option value="">{{ __('admin.Select score') }}</option>
+                              @for ($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }}</option>
+                                @endfor
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <label for="{{ $key }}-comment" class="form-label">{{ __('admin.Comment') }}</label>
+                            <textarea class="form-control" id="{{ $key }}-comment" name="{{ $key }}_comment" rows="3"
+                              placeholder="{{ __('admin.Enter your comment here...') }}"></textarea>
+                          </div>
+                          <div class="col-12 d-flex justify-content-between mt-12">
+                            <button type="button" class="btn btn-label-secondary btn-prev" {{ $loop->first ? 'disabled' : ''
+                              }}>
+                              <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
+                              <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
+                            </button>
+                            <button type="button" class="btn btn-primary btn-next" {{ $loop->last ? 'disabled' : '' }}>
+                              <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Next') }}</span>
+                              <i class="ti ti-arrow-right ti-xs"></i>
+                            </button>
+                          </div>
+                        </div>
+                        @endforeach
                       </div>
                     </div>
-                    @endforeach
+                  </div>
+                  <!-- /Default Wizard -->
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="pills-final-comments" role="tabpanel" aria-labelledby="pills-final-comments-tab">
+              <div class="form-group">
+                <label for="final-comments" class="form-label">{{ __('admin.Final Comments')}}</label>
+                <textarea 
+                  oninput="this.value = this.value.replace(/^\s+/g, '')"
+                  class="form-control" 
+                  id="final-comments" 
+                  rows="16"
+                  placeholder="{{ __('admin.Enter your comments here...')}}"
+                  >
+                </textarea>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="pills-view-evaluation" role="tabpanel" aria-labelledby="pills-view-evaluation-tab">
+              <div class="row mb-6">
+                <div class="col-3">
+                  <div class="border border-dark rounded px-3 py-2">
+                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
+                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="border border-dark rounded px-3 py-2">
+                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
+                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="border border-dark rounded px-3 py-2">
+                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
+                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-3">
+                  <div class="border border-dark rounded px-3 py-2">
+                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
+                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-              <!-- /Default Wizard -->
+              
+              <div class="row">
+                <div class="col-12 mb-5 border-bottom pb-4">
+                  <h5 class="text-primary fw-semibold">{{ __('admin.All Comments')}}</h5>
+                  <div class="d-flex flex-column mb-4">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="badge bg-primary rounded-pill">1</span>
+                      <span class="fs-5 mb-0 text-dark">Market Fit</span>
+                    </div>
+                    <small class="text-light line-clamp-3 mt-2 w-75">
+                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+                      At expedita ab dolore odit et iure aperiam, quibusdam dolorum
+                    </small>
+                  </div>
+                  <div class="d-flex flex-column">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="badge bg-primary rounded-pill">2</span>
+                      <span class="fs-5 mb-0 text-dark">Financial Viability</span>
+                    </div>
+                    <small class="text-light line-clamp-3 mt-2 w-75">
+                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+                      At expedita ab dolore odit et iure aperiam, quibusdam dolorum
+                    </small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 mb-5">
+                <h5 class="text-primary fw-semibold">{{ __('admin.All Notes')}}</h5>
+                <div class="d-flex flex-column mb-4">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary rounded-pill">1</span>
+                    <span class="fs-5 mb-0 text-dark">Market Fit</span>
+                  </div>
+                  <small class="text-light line-clamp-3 mt-2 w-75">
+                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+                    At expedita ab dolore odit et iure aperiam, quibusdam dolorum
+                  </small>
+                </div>
+                <div class="d-flex flex-column">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary rounded-pill">2</span>
+                    <span class="fs-5 mb-0 text-dark">Financial Viability</span>
+                  </div>
+                  <small class="text-light line-clamp-3 mt-2 w-75">
+                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+                    At expedita ab dolore odit et iure aperiam, quibusdam dolorum
+                  </small>
+                </div>
+              </div>
+              <div class="col-12">
+                <h5 class="text-primary fw-semibold mb-2">{{ __('admin.Final Comments')}}</h5>
+                <small class="text-light line-clamp-3 mt-2 w-75">
+                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                  Ad minus, optio repellat odit pariatur accusantium, quas,
+                  natus tenetur delectus voluptas tempora sint corporis. Autem omnis
+                  maxime cumque blanditiis labore perferendis.
+                </small>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="tab-pane fade" id="pills-final-comments" role="tabpanel" aria-labelledby="pills-final-comments-tab">
-        <div class="form-group">
-          <label for="final-comments" class="form-label">{{ __('admin.Final Comments')}}</label>
-          <textarea class="form-control" id="final-comments" rows="16"
-            placeholder="{{ __('admin.Enter your comments here...')}}"></textarea>
-        </div>
-      </div>
-      <div class="tab-pane fade" id="pills-view-evaluation" role="tabpanel" aria-labelledby="pills-view-evaluation-tab">
-        <!-- Content for View Evaluation -->
       </div>
     </form>
   </div>
