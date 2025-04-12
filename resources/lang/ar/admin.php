@@ -1507,5 +1507,7 @@ return [
 	'All Comments' => 'جميع التعليقات',
 	'All Notes' => 'جميع الملاحظات',
 	'Established in' => 'تأسست في',
+	'Confirm Save' => 'تأكيد الحفظ',
+	'Confirm_Save_Screening' => 'هل أنت متأكد أنك تريد حفظ هذا التقييم؟',
 ]; 
 
