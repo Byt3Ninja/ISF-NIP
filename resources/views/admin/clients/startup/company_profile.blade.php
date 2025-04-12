@@ -114,7 +114,40 @@
 
 <div class="content-wrapper position-relative">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold mb-4">{{ __('admin.My company') }}</h4>
+    @if($_user->hasRole('Judger'))
+      <div class="d-flex align-items-center gap-3 mb-6">
+        <a id="save-screening-btn" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
+          <i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-md text-dark"></i>
+        </a>
+        <a id="save-screening-btn" class="d-flex align-items-center gap-2 text-capitalize">
+          <i class="ti ti-gavel fs-4 text-primary"></i>
+          <strong class="text-dark">{{ __('admin.Screening') }}</strong>
+        </a>
+        <i class="ti ti-chevrons-{{ $l== 'en' ? 'right' : 'left' }}"></i>
+        <div class="d-flex align-items-center gap-2 text-capitalize">
+          <i class="ti ti ti-file-text fs-4 text-primary"></i>
+          <strong class="text-dark">{{ __('admin.Company profile') }}</strong>
+        </div>
+      </div>
+    @else
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <h4 class="fw-bold mb-0">{{ __('admin.My company') }}</h4>
+        <div class="d-flex align-items-center gap-3">
+          @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('my_company', $permissions) )
+            <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-primary"
+              style="border-radius: 15px;">
+              {{ __('admin.Edit') }} <i class="ti ti-edit ms-2"></i>
+            </a>
+          @else
+            <a href="" data-bs-toggle="modal" data-bs-target="#MessageModal"
+              class="btn btn-label-primary" style="border-radius: 15px;">
+              {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
+            </a>
+          @endif
+        </div>
+      </div>
+    @endif
+
     @include('admin.clients.startup.partials._startup_info')
 
     <section class="w-100 mt-6 d-flex flex-column flex-md-row" style="gap: 2rem;">
@@ -764,6 +797,16 @@
   </div>
 </div>
 <!-- / Modal -->
+
+<!-- Warning Modal -->
+  @include(
+    'partials.warning-modal',
+    [
+      'title' => 'Confirm Save',
+      'message' => 'Confirm_Save_Screening',
+    ]
+  )
+<!--/ Warning Modal -->
 @stop
 
 @section('scripts')
@@ -807,4 +850,9 @@ loadingTask.promise.then(function(pdf) {
 });
 </script>
 
+<script>
+  $('#save-screening-btn').on('click', function() {
+    $('#warningModal').modal('show');
+  });
+</script>
 @stop
