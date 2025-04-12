@@ -1485,4 +1485,5 @@ return [
 	'Point' => 'Point',
 	'All Comments' => 'All Comments',
 	'All Notes' => 'All Notes',
+	'Established in' => 'Established in',
 ];

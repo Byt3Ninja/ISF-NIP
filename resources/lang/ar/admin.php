@@ -1506,5 +1506,6 @@ return [
 	'Point' => 'نقاط',
 	'All Comments' => 'جميع التعليقات',
 	'All Notes' => 'جميع الملاحظات',
+	'Established in' => 'تأسست في',
 ]; 
 
