@@ -107,9 +107,10 @@
 @stop
 
 @section('content')
-{{-- @if($_user->hasRole('Judger')) --}}
+
+@if($_user->hasRole('Judger'))
   @include('admin.clients.startup.partials._startup_screening_canvas')
-{{-- @endif --}}
+@endif
 
 <div class="content-wrapper position-relative">
   <div class="container-xxl flex-grow-1 container-p-y">
