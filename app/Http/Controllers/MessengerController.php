@@ -16,16 +16,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
+use stdClass;
 
 class MessengerController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::id();
-
+        $userId = Auth::user()->id;
+        $messages = $this->messenger_query(null, $request);
+        //  dd( $messages );
+        
         // Fetch received messages
         $receivedMessages = Messenger::leftJoin('users', 'sender', '=', 'users.id')
             ->where('receiver', $userId)
+            ->whereNull('reply_id')
             ->orderBy('created_at', 'DESC')
             ->get([
                 'messenger.id',
@@ -40,29 +44,23 @@ class MessengerController extends Controller
                 'messenger.created_at',
                 'messenger.sender'
             ]);
+            
+            // الآن نجيب الردود المرتبطة بكل رسالة
+            $messageIds = $receivedMessages->pluck('id')->toArray();
 
-             // إضافة الردود
-        $receivedMessages->transform(function ($message) {
-            $replies = DB::table('message_replies')
-                ->join('messenger as reply', 'message_replies.reply_id', '=', 'reply.id')
-                ->join('users', 'reply.sender', '=', 'users.id')
-                ->where('message_replies.messenger_id', $message->id)
-                ->orderBy('reply.created_at', 'ASC')
-                ->get([
-                    'reply.id',
-                    'reply.message',
-                    'reply.created_at',
-                    'users.first_name_en',
-                    'users.last_name_en',
-                    'users.first_name_ar',
-                    'users.last_name_ar',
-                ]);
-        
-            $message->replies = $replies;
-        
-            return $message;
-        });
+            $replies = DB::table('messenger')
+                ->whereIn('reply_id', $messageIds)
+                ->get();
 
+            // تجميع الردود تحت كل رسالة
+            $groupedReplies = $replies->groupBy('reply_id');
+
+            // دمج الردود مع الرسائل
+            $receivedMessages = $receivedMessages->map(function ($message) use ($groupedReplies) {
+                $message->replies = $groupedReplies[$message->id] ?? collect();
+                return $message;
+            });
+            
 
         // Count all messages
         $receivedMessagesCount = Messenger::where('receiver', $userId)
@@ -195,6 +193,7 @@ class MessengerController extends Controller
             ]);
 
             $sentMessages = Messenger::where('messenger.sender', $userId)
+            ->whereNull('reply_id')
             ->join('users', 'messenger.receiver', '=', 'users.id')
             ->orderBy('messenger.created_at', 'DESC')
             ->get([
@@ -212,33 +211,27 @@ class MessengerController extends Controller
                 'messenger.created_at'
             ]);
         
-        // إضافة الردود
-        $sentMessages->transform(function ($message) {
-            $replies = DB::table('message_replies')
-                ->join('messenger as reply', 'message_replies.reply_id', '=', 'reply.id')
-                ->join('users', 'reply.sender', '=', 'users.id')
-                ->where('message_replies.messenger_id', $message->id)
-                ->orderBy('reply.created_at', 'ASC')
-                ->get([
-                    'reply.id',
-                    'reply.message',
-                    'reply.created_at',
-                    'users.first_name_en',
-                    'users.last_name_en',
-                    'users.first_name_ar',
-                    'users.last_name_ar',
-                ]);
-        
-            $message->replies = $replies;
-        
-            return $message;
-        });
+            // الآن نجيب الردود المرتبطة بكل رسالة
+            $messageIdssent = $sentMessages->pluck('id')->toArray();
 
+            $replies = DB::table('messenger')
+                ->whereIn('reply_id', $messageIdssent)
+                ->get();
 
+            // تجميع الردود تحت كل رسالة
+            $groupedReplies = $replies->groupBy('reply_id');
+
+            // دمج الردود مع الرسائل
+            $sentMessages = $sentMessages->map(function ($message) use ($groupedReplies) {
+                $message->replies = $groupedReplies[$message->id] ?? collect();
+                return $message;
+            });
+        
 
 
         // Return a single view with all data
         return view('admin.clients.messages.index', compact(
+            'messages',
         'receivedMessages', 
         'receivedMessagesCount', 
         'sentMessages', 
@@ -250,6 +243,12 @@ class MessengerController extends Controller
         'trashedMessages',
         'starred',
         ));
+    }
+
+    public function show($id, Request $request)
+    {
+        $message = $this->messenger_query($id, $request);
+        dd( $message );
     }
 
     // public function index()
@@ -867,39 +866,103 @@ class MessengerController extends Controller
             'message' => $request->message_message,
             'receiver' => $request->message_receiver,
             'sender' => auth()->id(),
+            'reply_id' => $request->message_id,
         ]);
-    
-        // ربطها كـ رد إذا كانت reply
-        if ($request->message_id) {
-            DB::table('message_replies')->insert([
-                'messenger_id' => $request->message_id,
-                'reply_id' => $message->id,
-            ]);
-        }
 
-        // جلب الرسالة المضافة بعد الربط مع معلومات المرسل
-    $replyWithSender = Messenger::leftJoin('users', 'messenger.sender', '=', 'users.id')
-    ->where('messenger.id', $message->id)
-    ->select(
-        'messenger.id',
-        'messenger.subject',
-        'messenger.message',
-        'messenger.receiver',
-        'messenger.created_at',
-        'users.first_name_ar',
-        'users.last_name_ar',
-        'messenger.sender'
-    )
-    ->first();
-
-
+    // جلب الرسالة مع الرسالة الأصلية اللي بيرد عليها
+    $replyWithSender = Messenger::with('reply')->find($message->id);
 
     
         return response()->json(['message' => 'Message sent successfully', 'messages' => $replyWithSender]);
     }
 
 
+    private function messenger_query( $id = null, $request )
+    {
+        $l = app()->getLocale();
+        $userId = Auth::id();
+        $query = "SELECT
+                m.id,
+                m.sender AS sender_id,
+                sender.first_name_en AS sender_first_name_en,
+                sender.last_name_en AS sender_last_name_en,
+                sender.first_name_ar AS sender_first_name_ar,
+                sender.last_name_ar AS sender_last_name_ar,
+                m.receiver AS receiver_id,
+                m.subject,
+                m.message,
+                m.read,
+                m.created_at,
+                reply.id AS reply_id,
+                reply.subject AS reply_subject,
+                reply.message AS reply_message,
+                reply.created_at AS reply_created_at,
+                reply.sender AS reply_sender_id,
+                reply_sender.first_name_en AS reply_sender_first_name_en,
+                reply_sender.last_name_en AS reply_sender_last_name_en,
+                reply_sender.first_name_ar AS reply_sender_first_name_ar,
+                reply_sender.last_name_ar AS reply_sender_last_name_ar
+            FROM
+                messenger m
+            LEFT JOIN
+                users sender ON m.sender = sender.id
+            LEFT JOIN
+                messenger reply ON reply.reply_id = m.id
+            LEFT JOIN
+                users reply_sender ON reply.sender = reply_sender.id
+            WHERE
+                 m.reply_id IS NULL
+        ";
+        if( !is_null( $id ) )
+        {
+            $query .= " AND m.id = $id";
+        }
+        else
+        {
+            $type = $request->type ?? 'inbox';
+           switch ($type) {
+        case 'inbox':
+            $query .= " AND m.receiver = $userId AND m.deleted_at IS NULL";
+            break;
+        case 'sent':
+            $query .= " AND m.sender = $userId AND m.deleted_at IS NULL";
+            break;
+        case 'starred':
+            $query .= " AND m.starred = 1 AND (m.sender = $userId OR m.receiver = $userId) AND m.deleted_at IS NULL";
+            break;
+        case 'trashed':
+            $query .= " AND m.deleted_at IS NOT NULL AND (m.sender = $userId OR m.receiver = $userId)";
+            break;
+    }
+        }
 
-
+        $messages = collect( DB::select( $query ) );
+        $messages = $messages->groupBy('id')->map(function($groupedMessage) use ($l) {
+            $msg = $groupedMessage->first();
+            $message = new stdClass;
+            $message->id = $msg->id;
+            $message->subject = $msg->subject;
+            $message->body = $msg->message;
+            $message->read = $msg->read;
+            $message->created_at = $msg->created_at;
+            $message->sender = new stdClass;
+            $message->sender->id = $msg->sender_id;
+            $message->sender->name = $msg->{'sender_first_name_' . $l} . ' ' . $msg->{'sender_last_name_' . $l};
+            $message->replies = $groupedMessage->filter(function($reply) { return !is_null( $reply->reply_id ); })->map(function($_reply) use ($l) {
+                $reply = new stdClass;
+                $reply->id = $_reply->reply_id;
+                $reply->subject = $_reply->reply_subject;
+                $reply->body = $_reply->reply_message;
+                $reply->created_at = $_reply->reply_created_at;
+                $reply->sender = new stdClass;
+                $reply->sender->id = $_reply->reply_sender_id;
+                $reply->sender->name = $_reply->{'reply_sender_first_name_' . $l} . ' ' . $_reply->{'reply_sender_last_name_' . $l};
+                return $reply;
+            })->values();
+            return $message;
+        })->values();
+        if( !is_null( $id ) ) { $messages = $messages->first(); }
+        return $messages;
+    }
 
 }

@@ -16,6 +16,7 @@ class Messenger extends Model
         'read',
         'reported',
         'starred',
+        'reply_id',
     ];
     protected $table = 'messenger';
     use SoftDeletes;
@@ -30,14 +31,9 @@ class Messenger extends Model
     }
 
     // الرسائل التي تم الرد بها على هذه الرسالة
-    public function replies()
+    public function reply()
     {
-        return $this->belongsToMany(Messenger::class, 'message_replies', 'messenger_id', 'reply_id');
+        return $this->belongsTo(Messenger::class, 'reply_id');
     }
-
-    // الرسالة التي تم الرد عليها
-    public function repliedTo()
-    {
-        return $this->belongsToMany(Messenger::class, 'message_replies', 'reply_id', 'messenger_id');
-    }
+    
 }
