@@ -281,6 +281,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //ShowMessages
     Route::get('/messages', 'MessengerController@index')->name('messages.index');
+    Route::get('/messages/{id}', 'MessengerController@show')->name('messages.show');
     Route::post('/draftMessage', 'MessengerController@draftmessage')->name('messages.draftmessage');
     Route::post('/deleteDraft', 'MessengerController@deleteDraft')->name('messages.deleteDraft');
     Route::get('/getAllDraft', 'MessengerController@getAllDrafts')->name('messages.getAllDrafts');

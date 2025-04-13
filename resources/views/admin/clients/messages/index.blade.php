@@ -149,6 +149,14 @@ $folders = [
 <script src="/vuexy/assets/js/app-email.js"></script>
 <script src="/vuexy/assets/js/forms-selects.js"></script>
 <script>
+  messages = '{{ $messages }}'
+    console.log('Received Messages:', messages);
+    function updateUrlParam(param, value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set(param, value);
+    window.location.href = url;
+    // history.pushState({}, '', url); // لتحديث الرابط بدون ريفرش
+    }
   $('#inbox-tab').on('click', () => {
       console.log('inbox tab clicked');
       $('#receivedMessages').show();
@@ -159,6 +167,7 @@ $folders = [
       $('#trash-tab').removeClass('active');
       $('#draft-tab').removeClass('active');
       $('#inbox-tab').addClass('active');
+      updateUrlParam('type', 'inbox');
     });
 
     $('#sent-tab').on('click', () => {
@@ -173,6 +182,7 @@ $folders = [
       $('#trash-tab').removeClass('active');
       $('#draft-tab').removeClass('active');
       $('#sent-tab').addClass('active');
+      updateUrlParam('type', 'sent');
     });
 
     $('#draft-tab').on('click', () => {
@@ -200,6 +210,7 @@ $folders = [
       $('#draft-tab').removeClass('active');
       $('#trash-tab').removeClass('active');
       $('#starred-tab').addClass('active');
+      updateUrlParam('type', 'starred');
     });
     $('#trash-tab').on('click', () => {
       console.log('trash tab clicked');
@@ -213,6 +224,7 @@ $folders = [
       $('#draft-tab').removeClass('active');
       $('#starred-tab').removeClass('active');
       $('#trash-tab').addClass('active');
+      updateUrlParam('type', 'trashed');
     });
 </script>
 
