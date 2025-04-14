@@ -512,7 +512,7 @@
     @endphp
     <tr class="text-{{ $schedules->first()->active ? 'primary' : 'danger' }}">
         <td>{{ $loop->iteration }}</td>
-        <td>Weekly ({{ $day }})</td>
+        <td>{{ __('admin.Weekly') }} ({{ __('admin.'.$day) }})</td>
         <td>{{ $times }}</td>
         <td>{{ $schedules->first()->notes ? $schedules->first()->notes : '...' }}</td>
         <td>
@@ -522,15 +522,15 @@
                 </button>
                 <div class="dropdown-menu">
                     <button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button">
-                        <i class="ti ti-pencil me-2"></i> Edit
+                        <i class="ti ti-pencil me-2"></i> {{ __('admin.Edit') }}
                     </button>
                     <button class="dropdown-item" onclick="modify(2, {{ $schedules->first()->id }}, {{ $schedules->first()->active }})"
                         type="button">
                         <i class="ti ti-{{ $schedules->first()->active ? 'eye' : 'eye-off' }} me-2"></i>
-                        {{ $schedules->first()->active ? 'Deactivate' : 'Activate' }}
+                        {{ $schedules->first()->active ? __('admin.Deactivate') : __('admin.Activate') }}
                     </button>
                     <button onclick="modify(3,{{ $schedules->first()->id }},0)" type="button" class="dropdown-item"><i
-                            class="ti ti-trash me-2"></i> Delete</button>
+                            class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
                 </div>
             </div>
         </td>

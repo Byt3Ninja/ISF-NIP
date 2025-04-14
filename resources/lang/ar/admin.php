@@ -1509,5 +1509,15 @@ return [
 	'Established in' => 'تأسست في',
 	'Confirm Save' => 'تأكيد الحفظ',
 	'Confirm_Save_Screening' => 'هل أنت متأكد أنك تريد حفظ هذا التقييم؟',
+	'Deactivate' => 'تعطيل',
+	'Activate' => 'تفعيل',
+	'Weekly' => 'أسبوعيا',
+	'Saturday' => 'السبت',
+	'Sunday' => 'الأحد',
+	'Monday' => 'الإثنين',
+	'Tuesday' => 'الثلاثاء',
+	'Wednesday' => 'الأربعاء',
+	'Thursday' => 'الخميس',
+	'Friday' => 'الجمعة',
 ]; 
 
