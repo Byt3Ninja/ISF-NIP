@@ -123,13 +123,16 @@
         // جلب العملات من API
         $.ajax({
           url: "{{ route('currencies.UpdateAllCurrency') }}",
-          type: "GET",
+          type: "PATCH",
+          headers: {
+           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+           },
           success: function(response) {
             alert(response.success)
             location.reload();
           },
           error: function() {
-            alert('An error occurred while updating currencies.');
+             alert('An error occurred while updating currencies.');
           }
         });
       });

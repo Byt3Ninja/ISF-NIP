@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.css" />
+@stop
+
 @section('style')
 <style>
 .card {
@@ -69,13 +73,81 @@
     width: 75%;
   }
 }
+
+.screening-gavel {
+  position: absolute;
+  background-color: var(--bs-primary-border-subtle);
+  height: 56px;
+  width: 70px;
+  display: grid;
+  place-items: center;
+  top: 45%;
+  @if($l == 'en')
+    right: 0;
+    border-top-left-radius: 35px;
+    border-bottom-left-radius: 35px;
+  @else
+    left: 0;
+    border-top-right-radius: 35px;
+    border-bottom-right-radius: 35px;
+  @endif
+  z-index: 2;
+  border: 1px solid var(--bs-primary);
+  cursor: pointer;
+}
+.transposed-icon {
+  transform: rotate(360deg);
+}
+.screening-gavel:hover {
+  background-color: var(--bs-white);
+  transition: all 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transform: scale(1.2);
+}
 </style>
 @stop
 
 @section('content')
-<div class="content-wrapper">
+
+@if($_user->hasRole('Judger'))
+  @include('admin.clients.startup.partials._startup_screening_canvas')
+@endif
+
+<div class="content-wrapper position-relative">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold mb-4">{{ __('admin.My company') }}</h4>
+    @if($_user->hasRole('Judger'))
+      <div class="d-flex align-items-center gap-3 mb-6">
+        <a id="save-screening-btn" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
+          <i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-md text-dark"></i>
+        </a>
+        <a id="save-screening-btn" class="d-flex align-items-center gap-2 text-capitalize">
+          <i class="ti ti-gavel fs-4 text-primary"></i>
+          <strong class="text-dark">{{ __('admin.Screening') }}</strong>
+        </a>
+        <i class="ti ti-chevrons-{{ $l== 'en' ? 'right' : 'left' }}"></i>
+        <div class="d-flex align-items-center gap-2 text-capitalize">
+          <i class="ti ti ti-file-text fs-4 text-primary"></i>
+          <strong class="text-dark">{{ __('admin.Company profile') }}</strong>
+        </div>
+      </div>
+    @else
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <h4 class="fw-bold mb-0">{{ __('admin.My company') }}</h4>
+        <div class="d-flex align-items-center gap-3">
+          @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('my_company', $permissions) )
+            <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-primary"
+              style="border-radius: 15px;">
+              {{ __('admin.Edit') }} <i class="ti ti-edit ms-2"></i>
+            </a>
+          @else
+            <a href="" data-bs-toggle="modal" data-bs-target="#MessageModal"
+              class="btn btn-label-primary" style="border-radius: 15px;">
+              {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
+            </a>
+          @endif
+        </div>
+      </div>
+    @endif
+
     @include('admin.clients.startup.partials._startup_info')
 
     <section class="w-100 mt-6 d-flex flex-column flex-md-row" style="gap: 2rem;">
@@ -152,7 +224,7 @@
                     />
                   </div>
                   <h5 class="mb-2 fw-semibold">{{ __('admin.Targeted_Market') }}</h5>
-                  <div class="d-flex justify-content-center align-items-center gap-1 pb-2" style="width: 99.5%; overflow: auto; white-space: nowrap;">
+                  <div class="d-flex align-items-center gap-1 pb-2" style="width: 99.5%; overflow: auto; white-space: nowrap;">
                     @if($company->targeted_market != null)
                     @php
                     $countryIds = json_decode($company->targeted_market, true);
@@ -305,15 +377,18 @@
                 <div class="d-flex flex-column justify-content-between align-items-center h-100">
                   <iframe src="{{ url($company->pitch_deck) }}" target="_blank"
                     style="width: 100%; height: 350px; object-fit:" class="img-fluid">
-                    <p>Your browser does not support iframes.</p>
+                    <p>
+                      {{ $l == 'en' ? 'Your browser does not support iframes.' : 'متصفحك لا يدعم إطارات iframe.' }}
+                    </p>
                   </iframe>
                   <div class="mt-auto d-flex flex-column mb-6">
-                    <span class="text-muted">To get analysis for your pitch
-                      deck please</span>
+                    <span class="text-muted">
+                      {{ $l == 'en' ? 'To get analysis for your pitch deck please' : 'للحصول على تحليل لعرضك التقديمي، يرجى' }}
+                    </span>
                     <a role="button"
                       onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                      Click here
+                      {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
                   </div>
                 </div>
@@ -323,12 +398,13 @@
                 <div class="d-flex flex-column justify-content-between align-items-center h-100">
                   <img src="/images/deck.svg" style="width: 350px; height: 350px;" />
                   <div class="mt-auto d-flex flex-column mb-6">
-                    <span class="text-muted">To get analysis for your pitch
-                      deck please</span>
+                    <span class="text-muted">
+                      {{ $l == 'en' ? 'To get analysis for your pitch deck please upload your pitch deck' : 'للحصول على تحليل لعرضك التقديمي، يرجى تحميل عرضك التقديمي' }}
+                    </span>
                     <a role="button"
                       onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                      Click here
+                      {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
                   </div>
                 </div>
@@ -369,11 +445,13 @@
                 {{-- Direct Video File --}}
                 <video class="h-100 w-100" controls>
                   <source src="{{ $videoUrl }}" type="video/mp4">
-                  Your browser does not support the video tag.
+                    {{ $l == 'en' ? 'Your browser does not support the video tag.' : 'متصفحك لا يدعم علامة الفيديو.' }}
                 </video>
                 @else
                 {{-- Unknown format --}}
-                <a href="{{ $videoUrl }}" target="_blank" class="btn btn-primary">View Video</a>
+                <a href="{{ $videoUrl }}" target="_blank" class="btn btn-primary">
+                  {{ $l == 'en' ? 'View Video' : 'عرض الفيديو' }}
+                </a>
                 @endif
 
                 @else
@@ -382,13 +460,12 @@
 
                 <div class="mt-auto d-flex flex-column pt-4 text-center">
                   <span class="text-muted">
-                    {{-- To get analysis for your pitch deck please upload your pitch deck video --}}
                     {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
                   </span>
                   <a role="button"
                     onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
                     class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
-                    Click here
+                    {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                   </a>
                 </div>
               </div>
@@ -720,13 +797,26 @@
   </div>
 </div>
 <!-- / Modal -->
+
+<!-- Warning Modal -->
+  @include(
+    'partials.warning-modal',
+    [
+      'title' => 'Confirm Save',
+      'message' => 'Confirm_Save_Screening',
+    ]
+  )
+<!--/ Warning Modal -->
 @stop
+
 @section('scripts')
-<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
-
+  <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+  <script src="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.js"></script>
 @stop
-@section('pagescripts')
 
+@section('pagescripts')
+  <script src="/vuexy/assets/js/form-wizard-numbered.js"></script>
+  <script src="/vuexy/assets/js/form-wizard-validation.js"></script>
 <script>
 var url = {
   {
@@ -760,4 +850,9 @@ loadingTask.promise.then(function(pdf) {
 });
 </script>
 
+<script>
+  $('#save-screening-btn').on('click', function() {
+    $('#warningModal').modal('show');
+  });
+</script>
 @stop

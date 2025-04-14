@@ -94,14 +94,24 @@
                 </div>
               </div>
               <div class="col-12 col-lg-8">
-                <form method="GET" action="{{ route('users.companies') }}" class="row">
-                  <div class="col-1">
-                    <button class="btn bg-primary p-3 justify-content-center align-items-center"
-                      style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
-                      <i class="ti ti-filter text-white ti-24px"></i>
-                    </button>
+                <form method="GET" action="{{ route('users.companies') }}" class="row h-100 align-items-center">
+                  <div class="col-2">
+                    <div class="d-flex align-items-center justify-content-end gap-3">
+                      @if(request()->query())
+                        <button class="btn bg-label-secondary p-3 justify-content-center align-items-center"
+                          style="border-radius: 17px; width: 40px; height: 40px;" type="button"
+                          onclick="window.location.href='/dashboard/companies'"
+                        >
+                          <i class="ti ti-reload ti-sm"></i>
+                        </button>
+                      @endif
+                      <button class="btn bg-primary p-3 justify-content-center align-items-center"
+                        style="border-radius: 17px; width: 40px; height: 40px;" type="submit">
+                        <i class="ti ti-filter text-white ti-sm"></i>
+                      </button>
+                    </div>
                   </div>
-                  <div class="col-4">
+                  <div class="col-3">
                     <div class="SearchSector">
                       @php
                         $sectors = App\Sector::whereNull('parent_id')->get();

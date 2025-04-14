@@ -10,8 +10,13 @@
 <!-- Messages Sidebar -->
 <div class="col app-email-sidebar border-end flex-grow-0" id="app-email-sidebar">
   <div class="btn-compost-wrapper d-grid">
-    <button class="btn btn-primary btn-compose" data-bs-toggle="modal" data-bs-target="#emailComposeSidebar"
-      id="emailComposeSidebarLabel">
+    <button 
+      class="btn btn-primary btn-compose" 
+      data-bs-toggle="modal" 
+      data-bs-target="#sendMessageModal"
+      id="emailComposeSidebarLabel"
+      {{-- onclick="document.getElementById('save-draft-button').classList.remove('d-none');" --}}
+    >
       <i class="ti ti-plus me-2"></i>
       {{ __('admin.New Message') }}
     </button>

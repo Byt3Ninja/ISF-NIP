@@ -50,4 +50,9 @@ return [
     'Mark as read' => 'تحديد كمقروء',
     'Mark as unread' => 'تحديد كغير مقروء',
     'Add Reply' => 'إضافة رد',
+    'Replies' => 'الردود',
+    'No replies yet.' => 'لا توجد ردود بعد',
+    'Save as draft' => 'حفظ كمسودة',
+    'Message is required' => 'محتوى الرسالة مطلوب',
+    'Subject is required' => 'عنوان الرسالة مطلوب',
 ];

@@ -112,7 +112,7 @@
                         {{ $thementor = $mentor->user->{'first_name_' . $l} . ' ' . $mentor->user->{'last_name_' . $l}
                         }}
                       </span>
-                      <input type="radio" value="{{ $mentor->user_id }}" id="mentor{{ $mentor->user_id }}" name="mentor"
+                      <input type="radio" value="{{ $mentor->user_id }}" id="mentor{{ $mentor->user_id }}" name="mentor" class="mentor_radio"
                         onclick="mentor({{ $mentor->user_id }},'{{ $thementor }}','{{ $mentor->mrating() }}')">
                     </div>
                   </div>
@@ -535,5 +535,24 @@
         }
       });
     }
+
+    $(document).on('click', '.mentor_radio', function() {
+    var mentor_id = $(this).val();
+    $.ajax({
+        url: '/dashboard/mentorship/getDates', // الرoutes المناسب
+        type: 'POST',
+        data: {
+          mentor_id: mentor_id,
+            _token: '{{ csrf_token() }}'
+        },
+        success: function(response) {
+          console.log(response.dates);
+            
+        },
+        error: function(xhr) {
+        console.error('Error:', xhr.responseText);
+    }
+    });
+});
 </script>
 @stop

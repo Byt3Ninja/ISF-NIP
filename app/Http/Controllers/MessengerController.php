@@ -16,16 +16,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
+use stdClass;
 
 class MessengerController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::id();
-
+        $userId = Auth::user()->id;
+        $messages = $this->messenger_query(null, $request);
+        //  dd( $messages );
+        
         // Fetch received messages
         $receivedMessages = Messenger::leftJoin('users', 'sender', '=', 'users.id')
             ->where('receiver', $userId)
+            ->whereNull('reply_id')
             ->orderBy('created_at', 'DESC')
             ->get([
                 'messenger.id',
@@ -40,6 +44,23 @@ class MessengerController extends Controller
                 'messenger.created_at',
                 'messenger.sender'
             ]);
+            
+            // الآن نجيب الردود المرتبطة بكل رسالة
+            $messageIds = $receivedMessages->pluck('id')->toArray();
+
+            $replies = DB::table('messenger')
+                ->whereIn('reply_id', $messageIds)
+                ->get();
+
+            // تجميع الردود تحت كل رسالة
+            $groupedReplies = $replies->groupBy('reply_id');
+
+            // دمج الردود مع الرسائل
+            $receivedMessages = $receivedMessages->map(function ($message) use ($groupedReplies) {
+                $message->replies = $groupedReplies[$message->id] ?? collect();
+                return $message;
+            });
+            
 
         // Count all messages
         $receivedMessagesCount = Messenger::where('receiver', $userId)
@@ -49,22 +70,22 @@ class MessengerController extends Controller
 
 
         // Fetch sent messages
-        $sentMessages = Messenger::where('messenger.sender', $userId)
-            ->join('users', 'messenger.receiver', '=', 'users.id')
-            ->orderBy('messenger.created_at', 'DESC')
-            ->get([
-                'messenger.id',
-                'users.first_name_en',
-                'users.last_name_en',
-                'users.first_name_ar',
-                'users.last_name_ar',
-                'messenger.subject',
-                'messenger.message',
-                'messenger.read',
-                'messenger.starred',
-                'messenger.receiver',
-                'messenger.created_at'
-            ]);
+        // $sentMessages = Messenger::where('messenger.sender', $userId)
+        //     ->join('users', 'messenger.receiver', '=', 'users.id')
+        //     ->orderBy('messenger.created_at', 'DESC')
+        //     ->get([
+        //         'messenger.id',
+        //         'users.first_name_en',
+        //         'users.last_name_en',
+        //         'users.first_name_ar',
+        //         'users.last_name_ar',
+        //         'messenger.subject',
+        //         'messenger.message',
+        //         'messenger.read',
+        //         'messenger.starred',
+        //         'messenger.receiver',
+        //         'messenger.created_at'
+        //     ]);
 
         // Fetch additional data if needed
         $users = $mentors = $cycles = $organizations = null;
@@ -167,11 +188,50 @@ class MessengerController extends Controller
                 'messenger.read',
                 'messenger.starred',
                 'messenger.receiver',
+                'messenger.sender',
                 'messenger.created_at'
             ]);
 
+            $sentMessages = Messenger::where('messenger.sender', $userId)
+            ->whereNull('reply_id')
+            ->join('users', 'messenger.receiver', '=', 'users.id')
+            ->orderBy('messenger.created_at', 'DESC')
+            ->get([
+                'messenger.id',
+                'users.first_name_en',
+                'users.last_name_en',
+                'users.first_name_ar',
+                'users.last_name_ar',
+                'messenger.subject',
+                'messenger.message',
+                'messenger.read',
+                'messenger.starred',
+                'messenger.receiver',
+                'messenger.sender',
+                'messenger.created_at'
+            ]);
+        
+            // الآن نجيب الردود المرتبطة بكل رسالة
+            $messageIdssent = $sentMessages->pluck('id')->toArray();
+
+            $replies = DB::table('messenger')
+                ->whereIn('reply_id', $messageIdssent)
+                ->get();
+
+            // تجميع الردود تحت كل رسالة
+            $groupedReplies = $replies->groupBy('reply_id');
+
+            // دمج الردود مع الرسائل
+            $sentMessages = $sentMessages->map(function ($message) use ($groupedReplies) {
+                $message->replies = $groupedReplies[$message->id] ?? collect();
+                return $message;
+            });
+        
+
+
         // Return a single view with all data
         return view('admin.clients.messages.index', compact(
+            'messages',
         'receivedMessages', 
         'receivedMessagesCount', 
         'sentMessages', 
@@ -181,8 +241,14 @@ class MessengerController extends Controller
         'organizations', 
         'drafts',
         'trashedMessages',
-        'starred'
+        'starred',
         ));
+    }
+
+    public function show($id, Request $request)
+    {
+        $message = $this->messenger_query($id, $request);
+        dd( $message );
     }
 
     // public function index()
@@ -588,7 +654,6 @@ class MessengerController extends Controller
     }
     public function draftmessage(Request $request)
     {
-       
         $cuser = Auth::user();
         if ($request->draftsNumber > 0) {
             DB::table('message_drafts')->where('drafts', $request->draftsNumber)->delete();
@@ -612,6 +677,7 @@ class MessengerController extends Controller
                     $draft->receiver = $rec;
                     $draft->subject = $request->subject;
                     $draft->message = $request->message;
+                    $draft->cycle_id = $request->cycleId;
                     $draft->drafts = $drafts;
                     $draft->type = $request->type;
                     $draft->save(); // Save to DB
@@ -786,4 +852,204 @@ class MessengerController extends Controller
     }
     }
 
+    public function sendReplyMessage(Request $request)
+    {
+        $request->validate([
+            'message_subject' => 'nullable|string|max:255',
+            'message_message' => 'required|string',
+            'message_receiver' => 'required|exists:users,id',
+            'message_id' => 'nullable|exists:messenger,id',
+        ]);
+        
+        $message = Messenger::create([
+            'subject' => $request->message_subject,
+            'message' => $request->message_message,
+            'receiver' => $request->message_receiver,
+            'sender' => auth()->id(),
+            'reply_id' => $request->message_id,
+        ]);
+
+    // جلب الرسالة مع الرسالة الأصلية اللي بيرد عليها
+    $replyWithSender = Messenger::with('reply')->find($message->id);
+    
+        return response()->json(['message' => 'Message sent successfully', 'messages' => $replyWithSender]);
+    }
+
+
+    private function messenger_query( $id = null, $request )
+    {
+        $l = app()->getLocale();
+        $userId = (int) Auth::id();
+        $type = $request->type ?? 'inbox';
+
+        if ($type === 'draft') {
+            // استعلام الرسائل المحفوظة كمسودات
+            $rawDrafts = MessageDraft::leftJoin('users as sender_user', 'sender', '=', 'sender_user.id')
+                ->leftJoin('users as receiver_user', 'receiver', '=', 'receiver_user.id')
+                ->leftJoin('companies as co', 'co.id', '=', 'receiver_user.company_id')
+                ->leftJoin('organizations as org', 'org.id', '=', 'receiver_user.organization_id')
+                ->leftJoin('cycles as cy', 'cy.id', '=', 'message_drafts.cycle_id')
+                ->where('sender', $userId)
+                ->orderBy('message_drafts.created_at', 'DESC')
+                ->get([
+                    'message_drafts.id',
+                    'message_drafts.drafts',
+                    'message_drafts.subject',
+                    'message_drafts.message',
+                    'message_drafts.created_at',
+                    'message_drafts.sender',
+                    'message_drafts.receiver',
+                    'message_drafts.type',
+
+                    // بيانات المرسل
+                    'sender_user.first_name_en as sender_first_name_en',
+                    'sender_user.last_name_en as sender_last_name_en',
+                    'sender_user.first_name_ar as sender_first_name_ar',
+                    'sender_user.last_name_ar as sender_last_name_ar',
+                    'sender_user.img_url as img_url',
+
+                    // بيانات المستقبل
+                    'receiver_user.id as receiver_id',
+                    'receiver_user.first_name_en as receiver_first_name_en',
+                    'receiver_user.last_name_en as receiver_last_name_en',
+                    'receiver_user.first_name_ar as receiver_first_name_ar',
+                    'receiver_user.last_name_ar as receiver_last_name_ar',
+
+                    'co.id as company_id',
+                    'co.name_en as company_name_en',
+                    'co.name_ar as company_name_ar',
+                    'co.logo as company_logo_url',
+
+                    'org.id as organization_id',
+                    'org.name_en as organization_name_en',
+                    'org.name_ar as organization_name_ar',
+                    'org.img_url as organization_img_url',
+
+                    'cy.id as cycle_id',
+                    'cy.title as cycle_title',
+                ]);
+
+            // groupBy drafts
+            $grouped = $rawDrafts->groupBy('drafts');
+
+            // إنشاء المخرجات
+            $messages = $grouped->map(function ($group) use ($l) {
+                $first = $group->first();
+
+                $message = new stdClass;
+                $message->id = $first->id;
+                $message->subject = $first->subject;
+                $message->body = $first->message;
+                $message->type = $first->type;
+                $message->created_at = $first->created_at;
+
+                // المرسل
+                $message->sender = new stdClass;
+                $message->sender->id = $first->sender;
+                $message->sender->img_url = $first->img_url;
+                $message->sender->name = $first->{'sender_first_name_' . $l} . ' ' . $first->{'sender_last_name_' . $l};
+
+                // المستقبلين داخل المجموعة
+                $message->receivers = $group->map(function ($msg) use ($l) {
+                    return (object)[
+                        'id' => $msg->receiver_id,
+                        'name' => $msg->{'receiver_first_name_' . $l} . ' ' . $msg->{'receiver_last_name_' . $l},
+                        'company_id' => $msg->company_id,
+                        'company_name' => $msg->{'company_name_' . $l},
+                        'company_logo_url' => $msg->company_logo_url,
+                        'organization_id' => $msg->organization_id,
+                        'organization_name' => $msg->{'organization_name_' . $l},
+                        'organization_img_url' => $msg->organization_img_url,
+                        'cycle_id' => $msg->cycle_id,
+                        'cycle_title' => $msg->cycle_title,
+                    ];
+                })->unique('id')->values(); // إزالة التكرار
+
+                return $message;
+            })->values();
+
+            return $messages;
+
+        }
+
+        // باقي الحالات: inbox, sent, starred, trash
+        $query = "
+            SELECT
+                m.id,
+                m.sender AS sender_id,
+                sender.first_name_$l AS sender_first_name,
+                sender.last_name_$l AS sender_last_name,
+                sender.img_url AS img_url,
+                m.receiver AS receiver_id,
+                m.subject,
+                m.message,
+                m.read,
+                m.starred,
+                m.created_at,
+                reply.id AS reply_id,
+                reply.subject AS reply_subject,
+                reply.message AS reply_message,
+                reply.created_at AS reply_created_at,
+                reply.sender AS reply_sender_id,
+                reply_sender.first_name_$l AS reply_sender_first_name,
+                reply_sender.last_name_$l AS reply_sender_last_name
+            FROM
+                messenger m
+            LEFT JOIN
+                users sender ON m.sender = sender.id
+            LEFT JOIN
+                messenger reply ON reply.reply_id = m.id
+            LEFT JOIN
+                users reply_sender ON reply.sender = reply_sender.id
+            WHERE
+                m.reply_id IS NULL
+        ";
+
+        switch ($type) {
+            case 'inbox':
+                $query .= " AND m.receiver = $userId AND m.deleted_at IS NULL";
+                break;
+            case 'sent':
+                $query .= " AND m.sender = $userId AND m.deleted_at IS NULL";
+                break;
+            case 'starred':
+                $query .= " AND m.starred = 1 AND (m.sender = $userId OR m.receiver = $userId) AND m.deleted_at IS NULL";
+                break;
+            case 'trash':
+                $query .= " AND m.deleted_at IS NOT NULL AND (m.sender = $userId OR m.receiver = $userId)";
+                break;
+        }
+
+        $messages = collect(DB::select($query));
+
+        $messages = $messages->groupBy('id')->map(function ($groupedMessage) use ($l) {
+            $msg = $groupedMessage->first();
+            $message = new stdClass;
+            $message->id = $msg->id;
+            $message->subject = $msg->subject;
+            $message->body = $msg->message;
+            $message->read = $msg->read;
+            $message->starred = $msg->starred;
+            $message->created_at = $msg->created_at;
+            $message->sender = new stdClass;
+            $message->sender->id = $msg->sender_id;
+            $message->sender->img_url = $msg->img_url;
+            $message->sender->name = $msg->{"sender_first_name"} . ' ' . $msg->{"sender_last_name"};
+            $message->replies = $groupedMessage->filter(fn($reply) => !is_null($reply->reply_id))->map(function ($_reply) use ($l) {
+                $reply = new stdClass;
+                $reply->id = $_reply->reply_id;
+                $reply->subject = $_reply->reply_subject;
+                $reply->body = $_reply->reply_message;
+                $reply->created_at = $_reply->reply_created_at;
+                $reply->sender = new stdClass;
+                $reply->sender->id = $_reply->reply_sender_id;
+                $reply->sender->name = $_reply->{"reply_sender_first_name"} . ' ' . $_reply->{"reply_sender_last_name"};
+                return $reply;
+            })->values();
+            return $message;
+        })->values();
+        
+        return $messages;
+        
+    }
 }

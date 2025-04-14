@@ -108,9 +108,10 @@
                         <div class="widget-todo-item-action d-flex align-items-center">
                           <div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-conetnt-center"
                             style="width: 200px; height: 30px">
-                            @if( $_user->ableTo('directory', $permissions) ) <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}"> @endif
-                              {{ $serv->serviceCategory->{'name_' . $l} }}
-                              @if( $_user->ableTo('directory', $permissions) ) </a> @endif
+                            @if( $_user->ableTo('directory', $permissions) && $serv->serviceCategory ) <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}"> @endif
+                              {{ $serv->serviceCategory ? $serv->serviceCategory->{'name_' . $l} : __('dashboard.No category') }}
+                              @if( $_user->ableTo('directory', $permissions) && $serv->serviceCategory ) 
+                            </a> @endif
                           </div>
                         </div>
                       </div>

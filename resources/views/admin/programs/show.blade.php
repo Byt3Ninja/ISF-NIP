@@ -826,10 +826,10 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <div class="d-flex align-items-center gap-4">
                     <h6 class="mb-0 text-nowrap">{{ __('cycles.steps') }} {{ $step->arr }}</h6>
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                      <a id="mentors" href="/dashboard/mentorship/assign/{{ $step->id }}" class="btn btn-primary">
+                      <a id="mentors" href="/dashboard/mentorship/assign/{{ $step->cycle_id }}" class="btn btn-primary">
                         <i class="ti ti-user me-2"></i> {{ __('admin.Mentors') }}
                       </a>
-                      <a id="manage" href="/dashboard/mentorship/view/{{ $step->id }}" class="btn btn-primary">
+                      <a id="manage" href="/dashboard/mentorship/view/{{ $step->cycle_id }}" class="btn btn-primary">
                         <i class="ti ti-settings me-2"></i> {{ __('admin.Manage') }}
                       </a>
                       <a id="sessions" href="/dashboard/mentorship/sessions?show=all&cycle_id={{ $step->cycle_id }}" class="btn btn-primary">

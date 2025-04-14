@@ -13,8 +13,14 @@ class Permission extends Model
 
 	protected $fillable = [
 		'name',
+		'is_core',
 		'created_at',
 		'updated_at',
+	];
+
+	protected $casts = [
+		'name' => 'string',
+		'is_core' => 'boolean',
 	];
 
 	public static function default_permissions()
