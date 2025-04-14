@@ -56,4 +56,9 @@ return [
     'redirect' => config('services.linkedin.redirect'),
     ],
 
+    'keygen' => [
+    'token' => env('KEYGEN_TOKEN'),
+    'account' => env('KEYGEN_ACCOUNT'),
+   ],
+
 ];

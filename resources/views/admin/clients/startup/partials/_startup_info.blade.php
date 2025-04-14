@@ -2,7 +2,7 @@
   <!-- Company Info Card -->
   <div class="card" style="border-radius: 15px;">
     <div class="card-body row">
-      <div class="col-md-10 py-4">
+      <div class="col-md-12 py-4">
         <div class="d-flex w-100" style="gap: 1rem;">
           <div class="border d-none d-md-flex radius-15 d-flex flex-shrink-0" style="width: 90px; height: 90px;">
             <img src="{{ $company->logo ? asset( $company->logo) : '/images/logo-placeholder.png' }}"
@@ -11,7 +11,7 @@
           </div>
           <div class="d-flex flex-column w-100">
             <div class="d-flex flex-wrap align-items-center justify-content-between">
-              <div class="d-flex">
+              <div class="d-flex align-items-center">
                 <i class="ti ti-building-skyscraper ti-23px me-2 text-primary"></i>
                 <div class="d-flex flex-column">
                   <div class="d-flex align-items-center gap-2">
@@ -25,7 +25,12 @@
                     @endif
                     </h5>
                     @if ($company->est_date)
-                    <div class="fs-6">Established in <span class="fw-bold">{{ \Carbon\Carbon::parse($company->est_date)->year }}</span></div>
+                    <div class="badge bg-label-secondary fw-semibold">
+                      {{ __('admin.Established in') }} 
+                      <span class="fw-bold text-dark ms-1">
+                        {{ \Carbon\Carbon::parse($company->est_date)->format('Y-m-d') }}
+                      </span>
+                    </div>
                     @endif
                   </div>
                   <!-- @php
@@ -126,7 +131,7 @@
         </div>
       </div>
       <!-- Action Button -->
-      <div class="col-md-2 d-flex flex-column align-items-center justify-content-center gap-2">
+      {{-- <div class="col-md-2 d-flex flex-column align-items-center justify-content-center gap-2">
         @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('my_company', $permissions) )
         <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
           style="border-radius: 15px;">
@@ -138,7 +143,7 @@
           {{ __('admin.Contact') }} <i class="ti ti-message mx-2"></i>
         </a>
         @endif
-      </div>
+      </div> --}}
       <!-- / Action Button -->
     </div>
   </div>

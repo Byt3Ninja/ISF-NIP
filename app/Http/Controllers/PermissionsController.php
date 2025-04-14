@@ -18,6 +18,7 @@ class PermissionsController extends Controller
         $permission_q = "SELECT
                 p.id,
                 p.name,
+                p.is_core AS core,
                 r.id AS role_id,
                 r.name AS role_name
             FROM
@@ -32,6 +33,7 @@ class PermissionsController extends Controller
             $permission = new stdClass;
             $permission->id = $p->id;
             $permission->name = $p->name;
+            $permission->core = $p->core;
             $permission->roles = $groupedPermissions->filter(function($roles) {
                 return !is_null($roles->role_id);
             })->map(function($roles) {
@@ -52,7 +54,10 @@ class PermissionsController extends Controller
 
     public function store(StorePermissionRequest $request)
     {
-        $permission = Permission::create($request->all());
+        $permission = new Permission;
+        $permission->name = $request->input('name', null);
+        $permission->is_core = $request->has('is_core') ? true : false;
+        $permission->save();
         app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         return redirect()->route('permissions.index');
     }
@@ -64,7 +69,9 @@ class PermissionsController extends Controller
 
     public function update(UpdatePermissionRequest $request, Permission $permission)
     {
-        $permission->update($request->all());
+        $permission->name = $request->input('name', null);
+        $permission->is_core = $request->has('is_core') ? true : false;
+        $permission->save();
         app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         return redirect()->route('permissions.index');
     }

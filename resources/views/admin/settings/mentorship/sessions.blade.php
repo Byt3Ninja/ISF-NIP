@@ -127,10 +127,12 @@
                           <td>
                             <div class="d-flex align-items-center">
                               <a href="/dashboard/users/{{ $session->user_id }}/edit">
+                                @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                                 <img 
                                   onerror="this.src='/icons/account.svg'"
                                   src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
-                              </a>
+                              @endif
+                                </a>
                               <div>
                                 <h6 class="mb-0 text-nowrap">{{ $session->user->{'first_name_' . $l} }} {{ $session->user->{'last_name_' . $l} }}</h6>
                                 <small>{{ $session->user->{'title_' . $l} }}</small>
@@ -139,9 +141,11 @@
                           </td>
                           <td>
                             <div class="d-flex align-items-center">
+                              @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                               <img 
                                 onerror="this.src='/icons/account.svg'"
                                 src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                                @endif
                               {{ $session->mentor->name }}
                             </div>
                           </td>
@@ -218,6 +222,7 @@
             <input type="hidden" name="id" value="0" id="sid">
             <input type="hidden" name="mentorid" value="0" id="mentorid">
             <input type="hidden" name="userid" value="0" id="userid">
+            <input type="hidden" name="approved" value="Yes" >
             <div class="form-group mt-4" id="showdates">
               <label class="mb-2">{{ __('cycles.Date/Time') }}:</label>
               <input class='date width-200 form-control' type="text" id="sdate" name="date" value=""
@@ -245,10 +250,10 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="btn btn-label-secondary ml-1">
+            <div class="btn btn-label-secondary ml-1">
               <i class="ti ti-check d-block d-sm-none"></i>
               <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
-            </button>
+            </div>
             <button type="submit" class="btn btn-primary ml-1">
               <i class="ti ti-check d-block d-sm-none"></i>
               <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>

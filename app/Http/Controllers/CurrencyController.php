@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Currency;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use App\Http\Requests\StoreCurrencyRequest;
 use App\Http\Requests\UpdateCurrencyRequest;
-use Illuminate\Support\Facades\File;
 
 class CurrencyController extends Controller
 {
@@ -108,48 +109,32 @@ class CurrencyController extends Controller
 
     public function UpdateAllCurrency(Request $request)
     {
-        $url = 'https://www.floatrates.com/daily/usd.json';
-    $json = file_get_contents($url);
-    $data = json_decode($json, true);
-
-    if (!$data) {
-        return response()->json(['error' => __('admin.FailedUpdate')], 500);
-    }
-
-    // تحميل ملف الدول مرة واحدة فقط
-    $jsonCountries = File::get(base_path('database/dbFiles/countries+states+cities.json'));
-    $countriesData = json_decode($jsonCountries, true);
-
-    // تحويل الدول إلى مصفوفة مفهرسة بكود العملة
-    $countriesIndexed = [];
-    foreach ($countriesData as $country) {
-        $countriesIndexed[strtoupper($country['currency'])] = $country;
-    }
-
-    // تحديث جميع العملات في قاعدة البيانات
-    $currencies = Currency::where('currency_code', '!=', 'USD')->get();
-
-    foreach ($currencies as $currency) {
-        $currencyCode = strtoupper($currency->currency_code); 
-
-        if (isset($data[strtolower($currencyCode)])) {
-            $apiCurrency = $data[strtolower($currencyCode)];
-            
-            $currency->currency_name = $apiCurrency['name'];
-            $currency->exchange_rate_to_usd = $apiCurrency['rate'];
-
-            // جلب العلم والرمز إذا كان موجودًا
-            if (isset($countriesIndexed[$currencyCode])) {
-                $currency->currency_symbol = $countriesIndexed[$currencyCode]['currency_symbol'] ?? $currency->currency_symbol;
-                $currency->flag = $countriesIndexed[$currencyCode]['emoji'] ?? $currency->flag;
+        try {
+            $response = Http::timeout(10)->get('https://www.floatrates.com/daily/usd.json');
+    
+            if (!$response->ok()) {
+                return response()->json(['error' => __('admin.FailedUpdate')], 500);
             }
-
-            $currency->save();
+    
+            $data = $response->json();
+    
+            $currencies = Currency::where('currency_code', '!=', 'USD')->get();
+    
+            foreach ($currencies as $currency) {
+                $code = strtolower($currency->currency_code);
+                if (isset($data[$code])) {
+                    $currency->exchange_rate_to_usd = $data[$code]['rate'];
+                    $currency->save();
+                }
+            }
+    
+            return response()->json(['success' => __('admin.currencyUpdated')]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Server Error',
+                'message' => $e->getMessage()
+            ], 500);
         }
-    }
-
-    return response()->json(['success' => __('admin.currencyUpdated')]);
-        // return redirect()->route('currencies.index')->with('msg', 'currencyUpdated');
 
     }
 }

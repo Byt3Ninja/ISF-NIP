@@ -498,51 +498,44 @@
                 </tr>
               </thead>
               <tbody>
-                @foreach ($myschedules as $key => $schedule)
-                  <tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
-                    <td>{{ $key + 1 }}</td>
-                    <td>
-                      @switch($schedule->type)
-                        @case('Weekly')
-                          Weekly({{ str_replace(['[', ']', '"'], ' ', json_encode($schedule->days)) }})
-                        @break
+                @php
+    $groupedSchedules = $myschedules->groupBy('days'); // تجميع الجداول حسب الأيام
+@endphp
 
-                        @case('WorkingDays')
-                          {{ __('dashboard.All working days') }}
-                        @break
-
-                        @case('Period')
-                          {{ __('dashboard.from') . $schedule->dfrom->format('d-m-Y') . __('dashboard.to') . $schedule->dto->format('d-m-Y') }}
-                        @break
-
-                        @default
-                          {{ $schedule->dfrom->format('d-m-Y') }}
-                      @endswitch
-                    </td>
-                    <td>{{ __('dashboard.from') }} {{ substr($schedule->tfrom, 0, 5) }}
-                      {{ __('dashboard.to') }} {{ substr($schedule->tto, 0, 5) }}</td>
-                    <td>{{ $schedule->notes ? $schedule->notes : '...' }}</td>
-                    <td>
-                      <div class="dropdown">
-                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                          <i class="ti ti-dots-vertical"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                          <button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button">
-                            <i class="ti ti-pencil me-2"></i> Edit
-                          </button>
-                          <button class="dropdown-item" onclick="modify(2, {{ $schedule->id }}, {{ $schedule->active }})"
-                            type="button">
-                            <i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
-                            {{ $schedule->active ? 'Deactivate' : 'Activate' }}
-                          </button>
-                          <button onclick="modify(3,{{ $schedule->id }},0)" type="button" class="dropdown-item"><i
-                              class="ti ti-trash me-2"></i> Delete</button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                @endforeach
+@foreach ($groupedSchedules as $day => $schedules)
+    @php
+        $times = ''; // تخزين الأوقات المجمعة
+        foreach ($schedules as $schedule) {
+            $times .= __('dashboard.from') . ' ' . substr($schedule->tfrom, 0, 5) . ' ' . __('dashboard.to') . ' ' . substr($schedule->tto, 0, 5) . ' | ';
+        }
+        $times = rtrim($times, ' | '); // إزالة الفاصل الأخير
+    @endphp
+    <tr class="text-{{ $schedules->first()->active ? 'primary' : 'danger' }}">
+        <td>{{ $loop->iteration }}</td>
+        <td>{{ __('admin.Weekly') }} ({{ __('admin.'.$day) }})</td>
+        <td>{{ $times }}</td>
+        <td>{{ $schedules->first()->notes ? $schedules->first()->notes : '...' }}</td>
+        <td>
+            <div class="dropdown">
+                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <i class="ti ti-dots-vertical"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button">
+                        <i class="ti ti-pencil me-2"></i> {{ __('admin.Edit') }}
+                    </button>
+                    <button class="dropdown-item" onclick="modify(2, {{ $schedules->first()->id }}, {{ $schedules->first()->active }})"
+                        type="button">
+                        <i class="ti ti-{{ $schedules->first()->active ? 'eye' : 'eye-off' }} me-2"></i>
+                        {{ $schedules->first()->active ? __('admin.Deactivate') : __('admin.Activate') }}
+                    </button>
+                    <button onclick="modify(3,{{ $schedules->first()->id }},0)" type="button" class="dropdown-item"><i
+                            class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
+                </div>
+            </div>
+        </td>
+    </tr>
+@endforeach
               </tbody>
             </table>
           </div>

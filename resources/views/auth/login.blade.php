@@ -230,7 +230,8 @@
                 </div>
               @elseif ($errors->has('email'))
                 <div class="text-danger mb-6 bg-label-danger p-3 rounded">
-                  {{ $errors->first('email') }}
+                  {{-- {{ $errors->first('email') }} --}}
+                  {{ $l == 'ar' ? 'بيانات الاعتماد هذه غير متطابقة مع البيانات المسجلة لدينا.' : 'These credentials do not match our records.' }}
                 </div>
               @elseif ($errors->has('password'))
                 <div class="text-danger mb-6 bg-label-danger p-3 rounded">

@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
+use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
+use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
 Route::get('test', function () {});
@@ -78,7 +80,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('documentation/view/{id?}', 'HomeController@help');
     Route::resource('documentation', 'DocumentationController');
 
-
+    // Judger
+    Route::get('judger/screening','Judger\JudgerScreeningController@index');
+   
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.update');
     Route::get('calendar/{id}/delete', 'SettingsController@delcal')->name('calendar.destroy');
@@ -272,15 +276,23 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/send_message', 'MessengerController@sendmsg');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('sendmessage');
     Route::post('/sendmessage', 'MessengerController@savemessage');
+    Route::post('/sendReplymessage', 'MessengerController@sendReplyMessage')->name('messages.sendReplymessage');
     Route::get('/get-users-by-cycle', 'MessengerController@getUsersByProgram')->name('getUsersByProgram');
 
     //ShowMessages
     Route::get('/messages', 'MessengerController@index')->name('messages.index');
-    // Route::get('/inbox', 'MessengerController@index')->name('inbox');
+    Route::get('/messages/{id}', 'MessengerController@show')->name('messages.show');
+    Route::post('/draftMessage', 'MessengerController@draftmessage')->name('messages.draftmessage');
+    Route::post('/deleteDraft', 'MessengerController@deleteDraft')->name('messages.deleteDraft');
+    Route::get('/getAllDraft', 'MessengerController@getAllDrafts')->name('messages.getAllDrafts');
     Route::get('/outbox', 'MessengerController@outbox')->name('outbox');
     Route::get('/openmsg', 'MessengerController@openmsg');
     Route::post('/mread', 'MessengerController@makeread');
-    Route::post('/messages/delete', 'MessengerController@destroy');
+    Route::post('/messages/delete', 'MessengerController@destroy')->name('messages.delete');
+    Route::get('/messages/trash', 'MessengerController@MessengerTrash')->name('messages.trash');
+    Route::post('/messages/toggleStarredStatus', 'MessengerController@toggleStarredStatus')->name('messages.ToggleStarred');
+    Route::get('/messages/getAllStarred', 'MessengerController@getAllStarred')->name('messages.Starred');
+    Route::post('/messages/toggleMarkReadStatus', 'MessengerController@toggleMarkReadStatus')->name('messages.ToggleMarkRead');
     //Contact US Messages
     Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
     Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
@@ -361,7 +373,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('mentorship/rate', 'MentorsController@rate')->name('mentorship.rate');
     Route::post('mentorship/delsession/{id}', 'MentorsController@delSession')->name('mentorship.delSession');
     Route::get('/export-mentorship', 'MentorsController@exportMentorship')->name('mentorship.exportMentorship');
-
+    Route::post('/mentorship/getDates', 'MentorsController@MentorDates')->name('mentorship.getDates');
 
 
 
@@ -454,8 +466,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('exportProg');
 
     /* Start of Currencies Routes */
-     Route::resource('currencies', 'CurrencyController')->except(['show']);
-     Route::get('currencies/UpdateCurrency', 'CurrencyController@UpdateAllCurrency')->name('currencies.UpdateAllCurrency');
+    Route::patch('currencies/UpdateCurrency', 'CurrencyController@UpdateAllCurrency')->name('currencies.UpdateAllCurrency');
+    Route::resource('currencies', 'CurrencyController')->except(['show']);
     /* End of Currencies Routes */
 
     // ===============> Mentor Dashboard Routes <===============
@@ -520,6 +532,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('/projects/{project}/remove-team-member/{teamMember}', 'ProjectController@removeTeamMember')->name('projects.removeTeamMember');
     Route::resource('projects', 'ProjectController');    
     /* End of Projectss Routes */
+
+    Route::get('/license/activate', [LicenseController::class, 'showActivateForm'])->name('license.activate-form');
+    Route::post('/license/activate', [LicenseController::class, 'activate'])->name('license.activate');
 
     
 

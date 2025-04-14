@@ -18,6 +18,10 @@ class UpdatePermissionRequest extends FormRequest
                 'string',
                 'required',
             ],
+            'is_core' => [
+                'sometimes',
+                'nullable',
+            ]
         ];
     }
 }

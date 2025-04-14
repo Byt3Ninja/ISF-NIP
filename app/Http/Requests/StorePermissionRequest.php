@@ -28,6 +28,10 @@ class StorePermissionRequest extends FormRequest
                 'string',
                 'required',
             ],
+            'is_core' => [
+                'sometimes',
+                'nullable',
+            ]
         ];
     }
 }

@@ -153,4 +153,7 @@ return [
     'From' => 'From',
     'To' => 'To',
     'Category not available' => 'Category not available',
+    'No category' => 'No category',
+    'No Category' => 'No Category',
+    'No Organization' => 'No Organization',
 ];

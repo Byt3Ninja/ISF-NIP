@@ -718,7 +718,7 @@ class HomeController extends Controller
         $company = $user->company;
         $sessions = collect([]);
         $organization_id = null;
-        if( $company )
+        if( $company && $company->cycledata )
         {
             $sessions_q = "SELECT
                     ts.id,

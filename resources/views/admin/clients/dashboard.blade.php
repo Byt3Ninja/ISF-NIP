@@ -977,7 +977,7 @@
                     <i class='bx bx-card font-medium-4 mr-1'></i> {{ __("admin.Final_Session") }}
                   </h4>
                 </div>
-                @if( is_null($myfinal)&&$myfinal->join_url )
+                @if( !is_null($myfinal)&&$myfinal->join_url )
                   <div class="">
                     <div class="">
                       <div class="table-responsive">
