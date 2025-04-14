@@ -35,7 +35,16 @@ class RolePermissionSeeder extends Seeder
                 $value
             ]);
         }
-        $user=User::first();
-        $user->allotRole(Role::first()->name);
+        $user = User::first();
+        $getRole = Role::where('default_for', 'LIKE', '%admin%')->first();
+        if( empty( $getRole ) )
+        {
+            $getRole = new Role;
+            $getRole->name = 'admin';
+            $getRole->default_for = 'admin';
+            $getRole->guard_name = 'web';
+            $getRole->save();
+        }
+        $user->allotRole('admin');
     }
 }
