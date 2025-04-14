@@ -1519,5 +1519,6 @@ return [
 	'Wednesday' => 'الأربعاء',
 	'Thursday' => 'الخميس',
 	'Friday' => 'الجمعة',
+	'Cant_add_request_date_is_Exist' => 'لا يمكن إضافة التاريخ المطلوب لأنه موجود بالفعل مع المرشد',
 ]; 
 

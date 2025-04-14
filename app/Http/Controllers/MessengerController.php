@@ -654,7 +654,6 @@ class MessengerController extends Controller
     }
     public function draftmessage(Request $request)
     {
-       
         $cuser = Auth::user();
         if ($request->draftsNumber > 0) {
             DB::table('message_drafts')->where('drafts', $request->draftsNumber)->delete();
@@ -678,6 +677,7 @@ class MessengerController extends Controller
                     $draft->receiver = $rec;
                     $draft->subject = $request->subject;
                     $draft->message = $request->message;
+                    $draft->cycle_id = $request->cycleId;
                     $draft->drafts = $drafts;
                     $draft->type = $request->type;
                     $draft->save(); // Save to DB
@@ -871,7 +871,6 @@ class MessengerController extends Controller
 
     // جلب الرسالة مع الرسالة الأصلية اللي بيرد عليها
     $replyWithSender = Messenger::with('reply')->find($message->id);
-
     
         return response()->json(['message' => 'Message sent successfully', 'messages' => $replyWithSender]);
     }
@@ -889,6 +888,7 @@ class MessengerController extends Controller
                 ->leftJoin('users as receiver_user', 'receiver', '=', 'receiver_user.id')
                 ->leftJoin('companies as co', 'co.id', '=', 'receiver_user.company_id')
                 ->leftJoin('organizations as org', 'org.id', '=', 'receiver_user.organization_id')
+                ->leftJoin('cycles as cy', 'cy.id', '=', 'message_drafts.cycle_id')
                 ->where('sender', $userId)
                 ->orderBy('message_drafts.created_at', 'DESC')
                 ->get([
@@ -924,6 +924,9 @@ class MessengerController extends Controller
                     'org.name_en as organization_name_en',
                     'org.name_ar as organization_name_ar',
                     'org.img_url as organization_img_url',
+
+                    'cy.id as cycle_id',
+                    'cy.title as cycle_title',
                 ]);
 
             // groupBy drafts
@@ -957,6 +960,8 @@ class MessengerController extends Controller
                         'organization_id' => $msg->organization_id,
                         'organization_name' => $msg->{'organization_name_' . $l},
                         'organization_img_url' => $msg->organization_img_url,
+                        'cycle_id' => $msg->cycle_id,
+                        'cycle_title' => $msg->cycle_title,
                     ];
                 })->unique('id')->values(); // إزالة التكرار
 
@@ -967,7 +972,7 @@ class MessengerController extends Controller
 
         }
 
-        // باقي الحالات: inbox, sent, starred, trashed
+        // باقي الحالات: inbox, sent, starred, trash
         $query = "
             SELECT
                 m.id,
@@ -1010,7 +1015,7 @@ class MessengerController extends Controller
             case 'starred':
                 $query .= " AND m.starred = 1 AND (m.sender = $userId OR m.receiver = $userId) AND m.deleted_at IS NULL";
                 break;
-            case 'trashed':
+            case 'trash':
                 $query .= " AND m.deleted_at IS NOT NULL AND (m.sender = $userId OR m.receiver = $userId)";
                 break;
         }
@@ -1043,7 +1048,8 @@ class MessengerController extends Controller
             })->values();
             return $message;
         })->values();
-
+        
         return $messages;
+        
     }
 }

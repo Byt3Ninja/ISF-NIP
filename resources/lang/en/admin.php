@@ -1498,4 +1498,5 @@ return [
 	'Wednesday' => 'Wednesday',
 	'Thursday' => 'Thursday',
 	'Friday' => 'Friday',
+	'Cant_add_request_date_is_Exist' => 'Can\'t add request date is exist',
 ];

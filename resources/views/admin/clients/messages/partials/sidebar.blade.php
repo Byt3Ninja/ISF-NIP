@@ -15,7 +15,7 @@
       data-bs-toggle="modal" 
       data-bs-target="#sendMessageModal"
       id="emailComposeSidebarLabel"
-      onclick="document.getElementById('save-draft-button').classList.remove('d-none');"
+      {{-- onclick="document.getElementById('save-draft-button').classList.remove('d-none');" --}}
     >
       <i class="ti ti-plus me-2"></i>
       {{ __('admin.New Message') }}
