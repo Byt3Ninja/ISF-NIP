@@ -173,7 +173,7 @@
       
       $('#sendMessageModal').modal('show');
 
-      $('#save-draft-button').addClass('d-none');
+      // $('#save-draft-button').addClass('d-none');
       $('#select-type').val(type ?? 0);
       $('#send-message-subject').val(subject ?? '');
       $('#send-message-text').val(body ?? '');
@@ -368,6 +368,7 @@
     // });
     
     function saveMessageAsDraft() {
+   
       $.ajax({
         url: '/dashboard/draftMessage',
         type: 'POST',
@@ -375,6 +376,7 @@
           type: $('.typedraft').val(),
           draftsNumber: $('.draftsNumber').val(),
           users: $('.usersdraft').val(),
+          cycleId: $('.cycle_id').val(),
           mentors: $('.mentorsdraft').val(),
           organizations: $('.organizationsdraft').val(),
           subject: $('.SubjectDraft').val(),

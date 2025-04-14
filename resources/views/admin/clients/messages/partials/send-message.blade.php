@@ -32,7 +32,7 @@
             @if (Auth::user()->hasAnyRole('Admin|OrganizationManager') && $cycles->count())
               <div class="mb-4" id="cycle-selection">
                 <label class="form-label">{{ __('admin.SelectProgram') }}:</label>
-                <select class="form-control select2" name="cycle_id" onchange="filterUsersByCycle(this.value)">
+                <select class="form-control select2 cycle_id" name="cycle_id" onchange="filterUsersByCycle(this.value)">
                   @foreach ($cycles as $cycle)
                     <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
                   @endforeach

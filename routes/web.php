@@ -373,7 +373,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('mentorship/rate', 'MentorsController@rate')->name('mentorship.rate');
     Route::post('mentorship/delsession/{id}', 'MentorsController@delSession')->name('mentorship.delSession');
     Route::get('/export-mentorship', 'MentorsController@exportMentorship')->name('mentorship.exportMentorship');
-
+    Route::post('/mentorship/getDates', 'MentorsController@MentorDates')->name('mentorship.getDates');
 
 
 
