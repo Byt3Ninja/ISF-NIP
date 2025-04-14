@@ -25,5 +25,11 @@ class PermissionsTableSeeder extends Seeder
             if( empty( $found ) ) { $toAdd[] = ['name' => $permission['name'], 'guard_name' => 'web', 'is_core' => 0]; }
         }
         Permission::insert( $toAdd );
+
+        foreach( $toAdd as $entry )
+        {
+            $name = $entry['name'];
+            $this->command->info("Permission created successfully for: {$name}");
+        }
     }
 }

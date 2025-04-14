@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(AdminSeeder::class);
         $this->call(SettingSeeder::class);
-        //         $this->call(CountryStateCitySeeder::class);
+        // $this->call(CountryStateCitySeeder::class);
         $this->call(FieldSeeder::class);
         $this->call(SectorSeeder::class);
         $this->call(RolePermissionSeeder::class);
@@ -24,5 +24,10 @@ class DatabaseSeeder extends Seeder
         $this->call(ExpertiseSeeder::class);
         $this->call(StagesTableSeeder::class);
         $this->call(QuestionsBankSeeder::class);
+        $this->call(CurrencySeeder::class);
+        $this->call(MigrateOrgIdSeeder::class);
+        $this->call(SustainableIconSeeder::class);
+        $this->call(WeightsTableSeeder::class);
+        $this->call(PermissionsTableSeeder::class);
     }
 }
