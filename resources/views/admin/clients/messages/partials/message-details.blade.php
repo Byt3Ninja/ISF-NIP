@@ -1,11 +1,16 @@
  <!-- Message View -->
- <div class="col app-email-view flex-grow-0 bg-lighter" id="app-email-view">
+ <div class="col app-email-view flex-grow-0 bg-lighter" id="message-details-view">
   <div class="card shadow-none border-0 rounded-0 app-email-view-header p-5 pt-md-4 py-2">
     <!-- Message View : Title  bar-->
     <div class="d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center overflow-hidden">
-        <span class="ms-sm-2 me-4"><i class="ti ti-chevron-left ti-md cursor-pointer"
-            data-bs-toggle="sidebar" data-target="#app-email-view"></i></span>
+        <span 
+          onclick="document.getElementById('message-details-view').classList.remove('show');"
+          class="ms-sm-2 me-4"
+        >
+          <i class="ti ti-chevron-left ti-md cursor-pointer">
+          </i>
+          </span>
         <h6 id="message-details-subject" class="text-truncate mb-0 me-2 fw-normal"></h6>
         {{-- <span class="badge bg-label-warning rounded-pill">Important</span> --}}
       </div>
@@ -13,9 +18,15 @@
     <hr class="app-email-view-hr mx-n5 mb-2" />
     <div class="d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center">
-        <span class="btn btn-icon btn-text-secondary rounded-pill me-1">
+        <button 
+          id="message-details-delete"
+          data-id=""
+          class="btn btn-icon btn-text-secondary rounded-pill me-1"
+          onclick="deleteMessages('single', this.getAttribute('data-id'), event)"
+          type="button"
+        >
           <i class="ti ti-trash ti-md cursor-pointer"></i>
-        </span>
+        </button>
         {{-- <span class="btn btn-icon btn-text-secondary rounded-pill me-1"><i
             class="ti ti-mail ti-md cursor-pointer" data-bs-toggle="sidebar"
             data-target="#app-email-view"></i></span> --}}

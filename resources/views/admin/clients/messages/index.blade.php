@@ -12,7 +12,7 @@
 
 @php
   $folders = collect([
-    ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => count($sentMessages), 'class' => 'bg-label-primary']],
+    ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => count($receivedMessages), 'class' => 'bg-label-primary']],
     ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => count($sentMessages), 'class' => 'bg-label-success']],
     ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => count($drafts), 'class' => 'bg-label-secondary']],
     ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => count($starred), 'class' => 'bg-label-warning']],
@@ -42,9 +42,17 @@
             <!-- Message List: Items -->
 
             <div class="email-list pt-0" id="all-messages" style="overflow-y: auto;">
-              @foreach ($messages as $message)
-                @include('admin.clients.messages.partials.message-item', ['message' => $message])
-              @endforeach
+              @if (count($messages) > 0)
+                @include('admin.clients.messages.partials.messeges-actions', ['ids' => $messages->pluck('id')])
+                <hr class="mx-n3 emails-list-header-hr mb-2" />
+                <ul id="message-list" class="list-unstyled m-0">
+                  @foreach ($messages as $message)
+                    @include('admin.clients.messages.partials.message-item', ['message' => $message])
+                  @endforeach
+                </ul>
+              @else
+                @include('includes.no-result', ['message' => __('admin.No Messages')])
+              @endif
             </div>
           </div>
           <div class="app-overlay"></div>
@@ -67,8 +75,8 @@
 @section('scripts')
   <script>
     // const receivedMessages = @json($receivedMessages);
-    const messages = @json($messages);
-    console.log('messages:', messages);
+    // const messages = @json($messages);
+    // console.log('messages:', messages);
     // console.log('Received Messages:', receivedMessages);
   </script>
   <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
@@ -91,6 +99,9 @@
     tabs.forEach(tab => {
       // Bind the click event to change the URL
       $(`#${tab}-tab`).on('click', () => {
+        if (typeParam === tab) {
+          return; // Do nothing if the tab is already active
+        }
         window.location.href = `/dashboard/messages?type=${tab}`;
       });
 
@@ -109,7 +120,7 @@
 
     $('#select-type').on('change', function() {
       let type = +this.value;
-      console.log('type', type);
+    // console.log('type', type);
       menus(type);
     });
 
@@ -168,7 +179,9 @@
     };
 
     function getDraftMessageDetails(draftMessageData, event) {
-      console.log('draftMessageData', draftMessageData)
+      $('#message-details-view').removeClass('show');
+
+    // console.log('draftMessageData', draftMessageData)
       const { receivers, type, subject, body } = draftMessageData || {};
       
       $('#sendMessageModal').modal('show');
@@ -181,7 +194,8 @@
     }
 
     function getMessageDetails(messageData, event) {
-      console.log('messageData' , messageData)
+      $('#message-details-view').addClass('show');
+    // console.log('messageData' , messageData)
       const {
         created_at , id, sender, replies,
         last_name_en, read, receiver, subject, body, starred
@@ -194,8 +208,9 @@
         $('.ToggleMarkRead').attr('mark', 'read');
         $('.ToggleMarkUnRead').attr('mark', 'unRead');
         $('#message-reply-id').val(id);
+        $('#message-details-delete').attr('data-id', id);
       }
-      console.log('replies', replies)
+    // console.log('replies', replies)
 
       if (replies && replies.length > 0) {
         $('#message-replies-container').show();
@@ -259,12 +274,12 @@
 
         $('.subject-error').show();
         $('#send-message-subject').addClass('is-invalid');
-        console.log('Subject is required');
+      // console.log('Subject is required');
       } else if (!$('#send-message-text').val()) {
         e.preventDefault();
         $('.subject-error').hide();
         $('#send-message-subject').removeClass('is-invalid');
-        console.log('Message is required');
+      // console.log('Message is required');
         $('.message-error').show();
         $('#send-message-text').addClass('is-invalid');
       } else {
@@ -272,7 +287,7 @@
         $('#send-message-subject').removeClass('is-invalid');
         $('.message-error').hide();
         $('#send-message-text').removeClass('is-invalid');
-        console.log('Form submitted');
+      // console.log('Form submitted');
       }
     });
 
@@ -288,14 +303,32 @@
   </script>
 
   <script>
-    window.delme = function(id, event) {
+    function deleteMessages(select = 'single', id, event) {
+      const messageSelectAll = $('#message-select-all');
+      const messageSelect = $('#message-select:checked'); // Only get checked checkboxes
+      const selectedIds = messageSelect.map(function() {
+      return $(this).val();
+      }).get();
+
       event.stopPropagation();
-      console.log('delete message clicked');
-      console.log('id', id);
-      console.log('element', event.target);
-        
+    // console.log('delete message clicked');
+    // console.log('id', id);
+    // console.log('selectedIds', selectedIds);
+
       var url = '/dashboard/messages/delete';
       var token = '{{ csrf_token() }}';
+      const idsToDelete = id && select == 'single' ? [id] : selectedIds; // Use selected IDs or fallback to single ID
+
+      if (!idsToDelete || idsToDelete.length === 0) {
+        Swal.fire({
+          title: "{{ __('admin.No Messages Selected') }}",
+          text: "{{ __('admin.Select at least one message') }}",
+          icon: "warning",
+          confirmButtonText: "{{ __('admin.OK') }}"
+        });
+        return;
+      }
+
       Swal.fire({
         title: "{{ __('admin.SureDelete') }}",
         text: "{{ __('admin.Recover') }}",
@@ -304,20 +337,29 @@
         confirmButtonText: "{{ __('admin.DYes') }}",
         cancelButtonText: "{{ __('admin.No') }}!",
       })
-      .then((result) => {
+        .then((result) => {
         if (result.value) {
           $.post(url, {
-              'id': id,
-              '_token': token
-            },
-            function(response) {
-              Swal.fire(
-                '{{ __('admin.Deleted') }}!',
-                '{{ __('admin.FileDeleted') }}.',
-                'success'
-              );
-              location.reload();
-            }
+            'id': idsToDelete ,
+            '_token': token
+          },
+          function(response) {
+          // console.log('response', response);
+            Swal.fire(
+              '{{ __('admin.Deleted') }}!',
+              '{{ __('admin.FileDeleted') }}.',
+              'success',
+            ).then(() => {
+              if (response.state === 'success') {
+                // Remove the deleted messages from the UI
+                idsToDelete.forEach(id => {
+                  $(`#message-item[data-id="${id}"]`).remove();
+                });
+                // Optionally, refresh the page or update the message list
+                location.reload();
+              }
+            });
+          }
           ).fail(
             function(error) {
               Swal.fire(
@@ -325,19 +367,19 @@
                 'Delete fail.',
                 'error'
               );
-              console.log(error);
+            // console.log(error);
             }
           );
         } else {
-          console.log('Canceled')
+        // console.log('Canceled');
         }
-      })
+      });
     }
   </script>
 
   <script>
     $('#reply-btn').on('click', function() {
-      console.log('reply button clicked');
+    // console.log('reply button clicked');
       $('#reply-message-container').toggleClass('d-none');
     });
 
@@ -350,7 +392,7 @@
         _token: $('meta[name="csrf-token"]').attr('content') // مهم جداً للـ CSRF
       },
       success: function(response) {
-        console.log(response); // أو أي بيانات جاية من السيرفر
+      // console.log(response); // أو أي بيانات جاية من السيرفر
       },
       error: function(xhr) {
         console.error('Error:', xhr.responseText);
@@ -385,7 +427,7 @@
         },
         success: function(response) {
           // أو أي بيانات جاية من السيرفر
-            console.log(response); // أو أي بيانات جاية من السيرفر
+          // console.log(response); // أو أي بيانات جاية من السيرفر
             $('.draftsNumber').val(response.draftsNumber);
             location.reload();
         },
@@ -395,8 +437,9 @@
       });
     }
     
-    $(document).on('click', '.StarredToggele', function(e) {
-      e.preventDefault();
+    $(document).on('click', '.StarredToggele', function(event) {
+    // console.log('event', event)
+      event.stopPropagation();
       var button = $(this);
       var messageId = $(this).attr('data-id');
       $.ajax({
@@ -407,14 +450,14 @@
           _token: '{{ csrf_token() }}'
         },
         success: function (response) {
-          console.log(response);
+        // console.log(response);
           if (response.state === 'success') {
             var icon = button.find('i'); // استخدم العنصر المحفوظ
             if (response.starred == 1) {
-                console.log('starred');
+              // console.log('starred');
                 icon.removeClass('far').addClass('fas text-warning');
             } else {
-                console.log('Notstarred');
+              // console.log('Notstarred');
                 icon.removeClass('fas text-warning').addClass('far');
             }
           }
@@ -438,7 +481,7 @@
           _token: '{{ csrf_token() }}'
         },
         success: function(response) {
-          console.log(response);
+        // console.log(response);
         },
         error: function(xhr) {
          console.error('Error:', xhr.responseText);
@@ -463,14 +506,14 @@
     });
 
     messageReplyEditor.on('text-change', function(e) {
-      console.log('$(this)', $(this))
-      console.log('value', messageReplyEditor.root.innerHTML);
+    // console.log('$(this)', $(this))
+    // console.log('value', messageReplyEditor.root.innerHTML);
       $('#message-reply-text').val(messageReplyEditor.root.innerHTML);
     });
 
     sendMessageEditor.on('text-change', function(e) {
-      console.log('$(this)', $(this))
-      console.log('value', sendMessageEditor.root.innerHTML);
+    // console.log('$(this)', $(this))
+    // console.log('value', sendMessageEditor.root.innerHTML);
       $('#send-message-text').val(sendMessageEditor.root.innerHTML);
       $('.message-error').hide();
       $('#send-message-text').removeClass('is-invalid');
@@ -494,8 +537,8 @@
             _token: '{{ csrf_token() }}'
         },
         success: function(response) {
-          console.log('response', response)
-          console.log('Messages: ',response.messages);
+        // console.log('response', response)
+        // console.log('Messages: ',response.messages);
           $('#message-reply-text').val('');
           messageReplyEditor.setText(''); // Clear the editor
 

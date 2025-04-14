@@ -28,7 +28,7 @@
         <i class="ti ti-paperclip ti-16px text-heading me-2"></i>
         <span class="align-middle">Attachments</span>
       </div> --}}
-      <button class="btn btn-primary SendReplyMessage" data-id="{{ $message->id }}">
+      <button class="btn btn-primary SendReplyMessage" data-id="{{ isset($message->id) ? $message->id : '' }}">
         <span class="align-middle">{{ __('messages.Send') }}</span>
         <i class="ti ti-send ti-16px ms-2 scaleX-n1-rtl"></i>
       </button>

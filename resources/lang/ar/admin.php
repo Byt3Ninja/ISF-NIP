@@ -1520,5 +1520,8 @@ return [
 	'Thursday' => 'الخميس',
 	'Friday' => 'الجمعة',
 	'Cant_add_request_date_is_Exist' => 'لا يمكن إضافة التاريخ المطلوب لأنه موجود بالفعل مع المرشد',
+	'No Messages Selected' => 'لم يتم تحديد رسائل',
+	'Select at least one message' => 'يرجى تحديد رسالة واحدة على الأقل للحذف',
+	'OK' => 'حسناً',
 ]; 
 

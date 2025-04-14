@@ -5,7 +5,7 @@
       {{ $message ?? __('admin.No Result') }}
     </h6>
     <div class="text-center">
-      @if(request()->query())
+      @if(request()->query() && !str_contains(request()->url(), 'messages'))
         <button type="button" class="btn btn-light" onclick="window.location.href='{{ request()->url() }}'">
           <i class="ti ti-reload me-2"></i>
           <span class="mx-1">{{ __('admin.Reset') }}</span>
