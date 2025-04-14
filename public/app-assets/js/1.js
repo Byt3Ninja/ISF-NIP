@@ -580,7 +580,7 @@ $('#investor-form #investor_name').on('input', function() {
         $(this).addClass('is-invalid').trigger('focus');
         $('#investor-form #investor-error1').show();
         $('#investor-form #investor-error2').hide();
-    } else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+    } else if (val && !/^[\p{L}\d\s]+$/u.test(val)) {
         $(this).addClass('is-invalid').trigger('focus');
         $('#investor-form #investor-error2').show();
     } else {
@@ -606,7 +606,7 @@ $('#edit-investor-form .investor_name').on('input', function() {
         $(this).addClass('is-invalid').trigger('focus');
         $('#edit-investor-form #investor-error1').show();
         $('#edit-investor-form #investor-error2').hide();
-    } else if (val && !/^[\p{L}\s]+$/u.test(val)) {
+    } else if (val && !/^[\p{L}\d\s]+$/u.test(val)) {
         $(this).addClass('is-invalid').trigger('focus');
         $('#edit-investor-form #investor-error2').show();
     } else {
@@ -723,7 +723,7 @@ $('.AddTeams').click(function(event) {
             $('#investor_name').addClass('is-invalid').trigger('focus');
             $('#investor-form #investor-error1').show();
             return;
-        } else if (investor_name && !/^[\p{L}\s]+$/u.test(investor_name)) {
+        } else if (investor_name && !/^[\p{L}\d\s]+$/u.test(investor_name)) {
             $('#investor_name').addClass('is-invalid').trigger('focus');
             $('#investor-form #investor-error2').show();
             return;
@@ -920,7 +920,7 @@ $('.EditTeams').click(function(event) {
             $('#edit-investor-form .investor_name').addClass('is-invalid').trigger('focus');
             $('#edit-investor-form #investor-error1').show();
             return;
-        } else if (investor_name && !/^[\p{L}\s]+$/u.test(investor_name)) {
+        } else if (investor_name && !/^[\p{L}\d\s]+$/u.test(investor_name)) {
             $('#edit-investor-form .investor_name').addClass('is-invalid').trigger('focus');
             $('#edit-investor-form #investor-error2').show();
             return;

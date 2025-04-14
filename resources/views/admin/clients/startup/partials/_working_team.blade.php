@@ -37,7 +37,7 @@ $team_num = '10001+ '.__('admin.employees');
               <div class="mt-3" style="width: 100%;">
                 <h5 class="fw-bold mb-1">{{ __('admin.Working_Team_Details') }}</h5>
                 <p class="text-muted line-clamp-2">
-                  {{ $company->working_team_summary ?? __('admin.N/A') }} Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet ipsum eum, ullam aliquid earum dolor repellat est deserunt voluptate, animi sint! Velit soluta eos, magni impedit eligendi quis quos facilis.
+                  {{ $company->working_team_summary ?? __('admin.N/A') }}
                 </p>
               </div>
             </div>
