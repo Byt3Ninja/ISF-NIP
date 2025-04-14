@@ -1461,7 +1461,7 @@ return [
 	'SelectProgram' => 'اختر البرنامج',
 	'Select Organizations' => 'اختر المؤسسات',
 	'Select_Currency' => 'اختر العملة',
-	'update_currencies' => 'تحديث العملات',
+	'update_currencies' => 'مزامنة أسعار الصرف',
 	'currencyUpdated' => 'تم تحديث العملات بنجاح',
 	'FailedUpdate' => 'فشل تحديث العملات',
 	'Choose_Currency' => 'اختر العملة',

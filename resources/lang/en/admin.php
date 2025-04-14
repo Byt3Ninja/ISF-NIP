@@ -1439,7 +1439,7 @@ return [
 	'Select Organizations' => 'Select Organizations',
 	'SelectAll'=>'Select All',
 	'Select_Currency' => 'Select Currency',
-	'update_currencies' => 'Update Currencies',
+	'update_currencies' => 'Sync Exchange Rates',
 	'currencyUpdated' => 'Currencies Updated Successfully',
 	'FailedUpdate' => 'Failed to Update Currencies',
 	'Choose_Currency' => 'Choose Currency',
