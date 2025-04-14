@@ -1,5 +1,5 @@
 <!-- Send Message Modal -->
-<div class="modal fade" id="emailComposeSidebar" tabindex="-1" aria-labelledby="emailComposeSidebarLabel"
+<div class="modal fade" id="sendMessageModal" tabindex="-1" aria-labelledby="sendMessageModalLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-simple">
     <div class="modal-content p-0">
@@ -92,7 +92,6 @@
               type="text" 
               placeholder="{{ __('messages.Subject') }}" 
               class="form-control SubjectDraft" 
-              {{-- required --}}
             />
             <div class="invalid-feedback subject-error">
               {{ __('messages.Subject is required') }}
@@ -126,8 +125,14 @@
               <button type="submit" class="btn btn-primary">
                 {{ __('messages.Send') }} <i class="ti ti-send ti-xs scaleX-n1-rtl ms-2"></i>
               </button>
-              <button type="button" class="btn btn-label-secondary">
-                {{ __('messages.Save as draft') }} <i class="ti ti-edit ti-xs scaleX-n1-rtl ms-2"></i>
+              <button 
+                type="button" 
+                id="save-draft-button"
+                class="btn btn-label-secondary"
+                onclick="saveMessageAsDraft()"
+              >
+                {{ __('messages.Save as draft') }} 
+                <i class="ti ti-edit ti-xs scaleX-n1-rtl ms-2"></i>
               </button>
             </div>
             <div class="d-flex align-items-center gap-2">

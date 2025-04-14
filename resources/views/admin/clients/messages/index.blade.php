@@ -1,28 +1,23 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
 @stop
 
 @section('style')
-<link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-email.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-email.css" />
 @stop
 
 @php
-$folders = [
-['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => $receivedMessagesCount, 'class'
-=> 'bg-label-primary']],
-['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => count($sentMessages), 'class' =>
-'bg-label-success']],
-['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => count($drafts), 'class' =>
-'bg-label-secondary']],
-['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => count($starred), 'class' =>
-'bg-label-warning']],
-['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => count($trashedMessages), 'class'
-=> 'bg-label-danger']]
-];
+  $folders = collect([
+    ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => count($sentMessages), 'class' => 'bg-label-primary']],
+    ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => count($sentMessages), 'class' => 'bg-label-success']],
+    ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => count($drafts), 'class' => 'bg-label-secondary']],
+    ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => count($starred), 'class' => 'bg-label-warning']],
+    ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => count($trashedMessages), 'class' => 'bg-label-danger']]
+  ]);
 @endphp
 
 @section('content')
@@ -45,81 +40,18 @@ $folders = [
             </div>
             <hr class="container-m-nx m-0" />
             <!-- Message List: Items -->
-            <div class="email-list pt-0" id="receivedMessages" style="overflow-y: auto;">
-              @if (count($receivedMessages) > 0)
-              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $receivedMessages->pluck('id')])
-              <ul id="message-list" class="list-unstyled m-0">
-                @foreach ($receivedMessages as $message)
-                @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                @endforeach
-              </ul>
-              @else
-              @include('includes.no-result', ['message' => __('admin.No Messages')])
-              @endif
-            </div>
-            <div class="email-list pt-0" id="sentMessages" style="display: none; overflow-y: auto;">
-              @if (count($sentMessages) > 0)
-              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $sentMessages->pluck('id')])
-              <hr class="mx-n3 emails-list-header-hr mb-2" />
-              <ul id="message-list" class="list-unstyled m-0">
-                @foreach ($sentMessages as $message)
-                @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                @endforeach
-              </ul>
-              @else
-              @include('includes.no-result', ['message' => __('admin.No Messages')])
-              @endif
-            </div>
 
-            <div class="email-list pt-0" id="draftMessages" style="display: none; overflow-y: auto;">
-              @if (count($drafts) > 0)
-              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $drafts->pluck('id')])
-              <hr class="mx-n3 emails-list-header-hr mb-2" />
-              <ul id="message-list" class="list-unstyled m-0">
-                @foreach ($drafts as $message)
+            <div class="email-list pt-0" id="all-messages" style="overflow-y: auto;">
+              @foreach ($messages as $message)
                 @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                @endforeach
-              </ul>
-              @else
-              @include('includes.no-result', ['message' => __('admin.No Messages')])
-              @endif
+              @endforeach
             </div>
-
-            <div class="email-list pt-0" id="starredMessages" style="display: none; overflow-y: auto;">
-              @if (count($starred) > 0)
-              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $starred->pluck('id')])
-              <hr class="mx-n3 emails-list-header-hr mb-2" />
-              <ul id="message-list" class="list-unstyled m-0">
-                @foreach ($starred as $message)
-                @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                @endforeach
-              </ul>
-              @else
-              @include('includes.no-result', ['message' => __('admin.No Messages')])
-              @endif
-            </div>
-
-            <div class="email-list pt-0" id="trashMessages" style="display: none; overflow-y: auto;">
-              @if (count($trashedMessages) > 0)
-              @include('admin.clients.messages.partials.messeges-actions', ['ids' => $starred->pluck('id')])
-              <hr class="mx-n3 emails-list-header-hr mb-2" />
-              <ul id="message-list" class="list-unstyled m-0">
-                @foreach ($trashedMessages as $message)
-                @include('admin.clients.messages.partials.message-item', ['message' => $message])
-                @endforeach
-              </ul>
-              @else
-              @include('includes.no-result', ['message' => __('admin.No Messages')])
-              @endif
-            </div>
-
           </div>
           <div class="app-overlay"></div>
         </div>
         <!-- /Messages List -->
 
         @include('admin.clients.messages.partials.message-details')
-
       </div>
 
       @include('admin.clients.messages.partials.send-message')
@@ -133,148 +65,93 @@ $folders = [
 @endsection
 
 @section('scripts')
-<script>
-  // const receivedMessages = @json($receivedMessages);
-  const sentMessages = @json($sentMessages);
-  // console.log('Received Messages:', receivedMessages);
-  console.log('Sent Messages:', sentMessages);
-</script>
-<script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
-<script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-<script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
-<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+  <script>
+    // const receivedMessages = @json($receivedMessages);
+    const messages = @json($messages);
+    console.log('messages:', messages);
+    // console.log('Received Messages:', receivedMessages);
+  </script>
+  <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
+  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 @stop
 
 @section('pagescripts')
-<script src="/vuexy/assets/js/app-email.js"></script>
-<script src="/vuexy/assets/js/forms-selects.js"></script>
-<script>
-  messages = '{{ $messages }}'
-    console.log('Received Messages:', messages);
-    function updateUrlParam(param, value) {
-    const url = new URL(window.location.href);
-    url.searchParams.set(param, value);
-    window.location.href = url;
-    // history.pushState({}, '', url); // لتحديث الرابط بدون ريفرش
-    }
-  $('#inbox-tab').on('click', () => {
-      console.log('inbox tab clicked');
-      $('#receivedMessages').show();
-      $('#sentMessages').hide();
-      $('#trashMessages').hide();
-      $('#sent-tab').removeClass('active');
-      $('#starred-tab').removeClass('active');
-      $('#trash-tab').removeClass('active');
-      $('#draft-tab').removeClass('active');
-      $('#inbox-tab').addClass('active');
-      updateUrlParam('type', 'inbox');
-    });
+  <script src="/vuexy/assets/js/app-email.js"></script>
+  <script src="/vuexy/assets/js/forms-selects.js"></script>
 
-    $('#sent-tab').on('click', () => {
-      console.log('sent tab clicked');
-      $('#receivedMessages').hide();
-      $('#sentMessages').show();
-      $('#draftMessages').hide();
-      $('#starredMessages').hide();
-      $('#trashMessages').hide();
-      $('#inbox-tab').removeClass('active');
-      $('#starred-tab').removeClass('active');
-      $('#trash-tab').removeClass('active');
-      $('#draft-tab').removeClass('active');
-      $('#sent-tab').addClass('active');
-      updateUrlParam('type', 'sent');
-    });
+  <script>
+    const tabs = ['inbox', 'sent', 'draft', 'starred', 'trash'];
 
-    $('#draft-tab').on('click', () => {
-      console.log('draft tab clicked');
-      $('#receivedMessages').hide();
-      $('#sentMessages').hide();
-      $('#starredMessages').hide();
-      $('#draftMessages').show();
-      $('#trashMessages').hide();
-      $('#inbox-tab').removeClass('active');
-      $('#sent-tab').removeClass('active');
-      $('#starred-tab').removeClass('active');
-      $('#trash-tab').removeClass('active');
-      $('#draft-tab').addClass('active');
-    });
-    $('#starred-tab').on('click', () => {
-      console.log('starred tab clicked');
-      $('#receivedMessages').hide();
-      $('#starredMessages').show();
-      $('#sentMessages').hide();
-      $('#draftMessages').hide();
-      $('#trashMessages').hide();
-      $('#inbox-tab').removeClass('active');
-      $('#sent-tab').removeClass('active');
-      $('#draft-tab').removeClass('active');
-      $('#trash-tab').removeClass('active');
-      $('#starred-tab').addClass('active');
-      updateUrlParam('type', 'starred');
-    });
-    $('#trash-tab').on('click', () => {
-      console.log('trash tab clicked');
-      $('#receivedMessages').hide();
-      $('#sentMessages').hide();
-      $('#starredMessages').hide();
-      $('#trashMessages').show();
-      $('#draftMessages').hide();
-      $('#inbox-tab').removeClass('active');
-      $('#sent-tab').removeClass('active');
-      $('#draft-tab').removeClass('active');
-      $('#starred-tab').removeClass('active');
-      $('#trash-tab').addClass('active');
-      updateUrlParam('type', 'trashed');
-    });
-</script>
+    // Get the 'type' parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam = urlParams.get('type') || 'inbox'; // default to 'inbox' if not set
 
-<script>
-  const typeSelect = document.getElementById('select-type');
-    typeSelect.addEventListener('change', function() {
+    tabs.forEach(tab => {
+      // Bind the click event to change the URL
+      $(`#${tab}-tab`).on('click', () => {
+        window.location.href = `/dashboard/messages?type=${tab}`;
+      });
+
+      // Apply the 'active' class if it matches the typeParam
+      
+      if (tab === typeParam) {
+        $(`#${tab}-tab`).addClass('active');
+      } else {
+        $(`#${tab}-tab`).removeClass('active');
+      }
+    });
+  </script>
+
+  <script>
+    const typeSelect = document.getElementById('select-type');
+
+    $('#select-type').on('change', function() {
       let type = +this.value;
       console.log('type', type);
       menus(type);
     });
 
-    function menus(menu) {
-      if (menu === 0) {
-        $('#users, #mentors, #organizations').hide();
-      } else if (menu === 1) {
-        $('#users').show();
-        $('#mentors, #organizations').hide();
-      } else if (menu === 2) {
-        $('#mentors').show();
-        $('#users, #organizations').hide();
-      } else if (menu === 3) {
-        $('#organizations').show();
-        $('#users, #mentors').hide();
-      } else {
-        $('#users, #mentors, #organizations').hide();
-      }
-    }
-
-    function filterUsersByCycle(cycleId) {
-      if (!cycleId) return null;
-      $.ajax({
-        url: "{{ route('getUsersByProgram') }}",
-        method: "GET",
-        data: {
-          cycle_id: cycleId
-        },
-        success: function(response) {
-          let userSelect = $('select[name="users[]"]');
-          userSelect.empty();
-          response.users.forEach(user => {
-            userSelect.append(`<option value="${user.id}">${user.name}</option>`);
-          });
-          userSelect.trigger('change');
+      function menus(menu) {
+        if (menu === 0) {
+          $('#users, #mentors, #organizations').hide();
+        } else if (menu === 1) {
+          $('#users').show();
+          $('#mentors, #organizations').hide();
+        } else if (menu === 2) {
+          $('#mentors').show();
+          $('#users, #organizations').hide();
+        } else if (menu === 3) {
+          $('#organizations').show();
+          $('#users, #mentors').hide();
+        } else {
+          $('#users, #mentors, #organizations').hide();
         }
-      });
-    }
-</script>
+      }
 
-<script>
-  function filterMessages(value) {
+      function filterUsersByCycle(cycleId) {
+        if (!cycleId) return null;
+        $.ajax({
+          url: "{{ route('getUsersByProgram') }}",
+          method: "GET",
+          data: {
+            cycle_id: cycleId
+          },
+          success: function(response) {
+            let userSelect = $('select[name="users[]"]');
+            userSelect.empty();
+            response.users.forEach(user => {
+              userSelect.append(`<option value="${user.id}">${user.name}</option>`);
+            });
+            userSelect.trigger('change');
+          }
+        });
+      }
+  </script>
+
+  <script>
+    function filterMessages(value) {
       const searchInput = value.toLowerCase();
       const messageItems = $('#message-list #message-item');
 
@@ -290,11 +167,24 @@ $folders = [
       });
     };
 
+    function getDraftMessageDetails(draftMessageData, event) {
+      console.log('draftMessageData', draftMessageData)
+      const { receivers, type, subject, body } = draftMessageData || {};
+      
+      $('#sendMessageModal').modal('show');
+
+      $('#save-draft-button').addClass('d-none');
+      $('#select-type').val(type ?? 0);
+      $('#send-message-subject').val(subject ?? '');
+      $('#send-message-text').val(body ?? '');
+      menus(type);
+    }
+
     function getMessageDetails(messageData, event) {
       console.log('messageData' , messageData)
       const {
-        created_at , first_name_en, id, last_name_ar, sender, replies,
-        last_name_en, read, receiver, subject, message, starred
+        created_at , id, sender, replies,
+        last_name_en, read, receiver, subject, body, starred
       } = messageData || {};
 
       if (id) {
@@ -336,6 +226,9 @@ $folders = [
 
       if (sender) {
         $('#message-reply-receiver_id').val(sender);
+        if (sender.name) {
+          $('#message-details-createdBy').text(`${sender.name}`);
+        }
       }
       
       if (subject) {
@@ -343,12 +236,8 @@ $folders = [
         $('#message-details-subject').text(subject);
       } 
 
-      if (message) {
-        $('#message-details-text').html(message);
-      }
-
-      if (first_name_en || first_name_en) {
-        $('#message-details-createdBy').text(`${first_name_en} ${last_name_en}`);
+      if (body) {
+        $('#message-details-text').html(body);
       }
 
       if (receiver) {
@@ -362,236 +251,237 @@ $folders = [
       if (starred) {
         $('.StarredToggele i').removeClass('far').addClass('fas text-warning');
       }
-
     };
 
-  $('#send-message-form').on('submit', function(e) {
-    if (!$('#send-message-subject').val()) {
-      e.preventDefault();
+    $('#send-message-form').on('submit', function(e) {
+      if (!$('#send-message-subject').val()) {
+        e.preventDefault();
 
-      $('.subject-error').show();
-      $('#send-message-subject').addClass('is-invalid');
-      console.log('Subject is required');
-    } else if (!$('#send-message-text').val()) {
-      e.preventDefault();
-      $('.subject-error').hide();
-      $('#send-message-subject').removeClass('is-invalid');
-      console.log('Message is required');
-      $('.message-error').show();
-      $('#send-message-text').addClass('is-invalid');
-    } else {
-      $('.subject-error').hide();
-      $('#send-message-subject').removeClass('is-invalid');
-      $('.message-error').hide();
-      $('#send-message-text').removeClass('is-invalid');
-      console.log('Form submitted');
-    }
-  });
+        $('.subject-error').show();
+        $('#send-message-subject').addClass('is-invalid');
+        console.log('Subject is required');
+      } else if (!$('#send-message-text').val()) {
+        e.preventDefault();
+        $('.subject-error').hide();
+        $('#send-message-subject').removeClass('is-invalid');
+        console.log('Message is required');
+        $('.message-error').show();
+        $('#send-message-text').addClass('is-invalid');
+      } else {
+        $('.subject-error').hide();
+        $('#send-message-subject').removeClass('is-invalid');
+        $('.message-error').hide();
+        $('#send-message-text').removeClass('is-invalid');
+        console.log('Form submitted');
+      }
+    });
 
-  $('#send-message-subject').on('input', function() {
-    if ($(this).val()) {
-      $('.subject-error').hide();
-      $(this).removeClass('is-invalid');
-    } else {
-      $('.subject-error').show();
-      $(this).addClass('is-invalid');
-    }
-  });
-</script>
+    $('#send-message-subject').on('input', function() {
+      if ($(this).val()) {
+        $('.subject-error').hide();
+        $(this).removeClass('is-invalid');
+      } else {
+        $('.subject-error').show();
+        $(this).addClass('is-invalid');
+      }
+    });
+  </script>
 
-<script>
-  window.delme = function(id, event) {
+  <script>
+    window.delme = function(id, event) {
       event.stopPropagation();
       console.log('delete message clicked');
       console.log('id', id);
       console.log('element', event.target);
-      
+        
       var url = '/dashboard/messages/delete';
       var token = '{{ csrf_token() }}';
       Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
-        .then((result) => {
-          if (result.value) {
-            $.post(url, {
-                'id': id,
-                '_token': token
-              },
-              function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.FileDeleted') }}.',
-                  'success'
-                );
-                location.reload();
-              }
-            ).fail(
-              function(error) {
-                Swal.fire(
-                  'Error!',
-                  'Delete fail.',
-                  'error'
-                );
-                console.log(error);
-              }
-            );
-          } else {
-            console.log('Canceled')
-          }
-        })
+        title: "{{ __('admin.SureDelete') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}!",
+      })
+      .then((result) => {
+        if (result.value) {
+          $.post(url, {
+              'id': id,
+              '_token': token
+            },
+            function(response) {
+              Swal.fire(
+                '{{ __('admin.Deleted') }}!',
+                '{{ __('admin.FileDeleted') }}.',
+                'success'
+              );
+              location.reload();
+            }
+          ).fail(
+            function(error) {
+              Swal.fire(
+                'Error!',
+                'Delete fail.',
+                'error'
+              );
+              console.log(error);
+            }
+          );
+        } else {
+          console.log('Canceled')
+        }
+      })
     }
-</script>
-<script>
-  $('#reply-btn').on('click', function() {
+  </script>
+
+  <script>
+    $('#reply-btn').on('click', function() {
       console.log('reply button clicked');
       $('#reply-message-container').toggleClass('d-none');
     });
 
-  $(document).on('click', '.DeleteDraft', function() {
-    $.ajax({
-    url: '/dashboard/deleteDraft',
-    type: 'POST',
-    data: {
-        draftsNumber: $('.draftsNumber').val(),
-        _token: $('meta[name="csrf-token"]').attr('content') // مهم جداً للـ CSRF
-    },
-    success: function(response) {
-        console.log(response); // أو أي بيانات جاية من السيرفر
-    },
-    error: function(xhr) {
-        console.error('Error:', xhr.responseText);
-    }
-});
-
-
-  });
-    $(document).on('keyup', '.SubjectDraft, .messagedraft', function() {
-    handleDraftChange(); // استدعاء الفنكشن المشتركة
-  });
-
-  $(document).on('change', '.typedraft, .usersdraft, .mentorsdraft', function() {
-      handleDraftChange(); // نفس الفنكشن برضو
-  });
-  function handleDraftChange() {
+    $(document).on('click', '.DeleteDraft', function() {
       $.ajax({
-    url: '/dashboard/draftMessage',
-    type: 'POST',
-    data: {
-        type: $('.typedraft').val(),
+      url: '/dashboard/deleteDraft',
+      type: 'POST',
+      data: {
         draftsNumber: $('.draftsNumber').val(),
-        users: $('.usersdraft').val(),
-        mentors: $('.mentorsdraft').val(),
-        organizations: $('.organizationsdraft').val(),
-        subject: $('.SubjectDraft').val(),
-        message: $('.messagedraft').val(),
         _token: $('meta[name="csrf-token"]').attr('content') // مهم جداً للـ CSRF
-    },
-    success: function(response) {
-      // أو أي بيانات جاية من السيرفر
+      },
+      success: function(response) {
         console.log(response); // أو أي بيانات جاية من السيرفر
-        $('.draftsNumber').val(response.draftsNumber);
-    },
-    error: function(xhr) {
+      },
+      error: function(xhr) {
         console.error('Error:', xhr.responseText);
+      }
+    });
+
+
+    });
+    //   $(document).on('keyup', '.SubjectDraft, .messagedraft', function() {
+    //   saveMessageAsDraft(); // استدعاء الفنكشن المشتركة
+    // });
+
+    // $(document).on('change', '.typedraft, .usersdraft, .mentorsdraft', function() {
+    //     saveMessageAsDraft(); // نفس الفنكشن برضو
+    // });
+    
+    function saveMessageAsDraft() {
+      $.ajax({
+        url: '/dashboard/draftMessage',
+        type: 'POST',
+        data: {
+          type: $('.typedraft').val(),
+          draftsNumber: $('.draftsNumber').val(),
+          users: $('.usersdraft').val(),
+          mentors: $('.mentorsdraft').val(),
+          organizations: $('.organizationsdraft').val(),
+          subject: $('.SubjectDraft').val(),
+          message: $('.messagedraft').val(),
+          _token: $('meta[name="csrf-token"]').attr('content') // مهم جداً للـ CSRF
+        },
+        success: function(response) {
+          // أو أي بيانات جاية من السيرفر
+            console.log(response); // أو أي بيانات جاية من السيرفر
+            $('.draftsNumber').val(response.draftsNumber);
+            location.reload();
+        },
+        error: function(xhr) {
+            console.error('Error:', xhr.responseText);
+        }
+      });
     }
-});
-
-}
-
-$(document).on('click', '.StarredToggele', function(e) {
-  e.preventDefault();
-    var button = $(this);
-    var messageId = $(this).attr('data-id');
-    $.ajax({
+    
+    $(document).on('click', '.StarredToggele', function(e) {
+      e.preventDefault();
+      var button = $(this);
+      var messageId = $(this).attr('data-id');
+      $.ajax({
         url: '/dashboard/messages/toggleStarredStatus', // الرoutes المناسب
         type: 'POST',
         data: {
-            id: messageId,
-            _token: '{{ csrf_token() }}'
+          id: messageId,
+          _token: '{{ csrf_token() }}'
         },
         success: function (response) {
-            console.log(response);
-            if (response.state === 'success') {
-                var icon = button.find('i'); // استخدم العنصر المحفوظ
-                if (response.starred == 1) {
-                    console.log('starred');
-                    icon.removeClass('far').addClass('fas text-warning');
-                } else {
-                    console.log('Notstarred');
-                    icon.removeClass('fas text-warning').addClass('far');
-                }
+          console.log(response);
+          if (response.state === 'success') {
+            var icon = button.find('i'); // استخدم العنصر المحفوظ
+            if (response.starred == 1) {
+                console.log('starred');
+                icon.removeClass('far').addClass('fas text-warning');
+            } else {
+                console.log('Notstarred');
+                icon.removeClass('fas text-warning').addClass('far');
             }
+          }
         },
         error: function(xhr) {
-        console.error('Error:', xhr.responseText);
-    }
+          console.error('Error:', xhr.responseText);
+        }
+      });
     });
-});
-$(document).on('click', '.ToggleMarkRead, .ToggleMarkUnRead', function() {
-    var messageId = $(this).attr('do');
-    var mark = $(this).attr('mark');
-   alert(messageId);
-    $.ajax({
+
+    $(document).on('click', '.ToggleMarkRead, .ToggleMarkUnRead', function() {
+      var messageId = $(this).attr('do');
+      var mark = $(this).attr('mark');
+      alert(messageId);
+      $.ajax({
         url: '/dashboard/messages/toggleMarkReadStatus', // الرoutes المناسب
         type: 'POST',
         data: {
-            id: messageId,
-            mark: mark,
-            _token: '{{ csrf_token() }}'
+          id: messageId,
+          mark: mark,
+          _token: '{{ csrf_token() }}'
         },
         success: function(response) {
           console.log(response);
-            
         },
         error: function(xhr) {
-        console.error('Error:', xhr.responseText);
-    }
+         console.error('Error:', xhr.responseText);
+        }
+      });
     });
-});
 
-  const messageReplyEditor = new Quill('.message-reply-editor', {
-    modules: {
-      toolbar: '.message-reply-toolbar'
-    },
-    placeholder: '{{ $l }}' == 'en' ? 'Write your message... ' : 'اكتب رسالتك... ',
-    theme: 'snow',
-  });
+    const messageReplyEditor = new Quill('.message-reply-editor', {
+      modules: {
+        toolbar: '.message-reply-toolbar'
+      },
+      placeholder: '{{ $l }}' == 'en' ? 'Write your message... ' : 'اكتب رسالتك... ',
+      theme: 'snow',
+    });
 
-  const sendMessageEditor = new Quill('.send-message-editor', {
-    modules: {
-      toolbar: '.send-message-toolbar'
-    },
-    placeholder: '{{ $l }}' == 'en' ? 'Write your message... ' : 'اكتب رسالتك... ',
-    theme: 'snow',
-  });
+    const sendMessageEditor = new Quill('.send-message-editor', {
+      modules: {
+        toolbar: '.send-message-toolbar'
+      },
+      placeholder: '{{ $l }}' == 'en' ? 'Write your message... ' : 'اكتب رسالتك... ',
+      theme: 'snow',
+    });
 
-  messageReplyEditor.on('text-change', function(e) {
-    console.log('$(this)', $(this))
-    console.log('value', messageReplyEditor.root.innerHTML);
-    $('#message-reply-text').val(messageReplyEditor.root.innerHTML);
-  });
+    messageReplyEditor.on('text-change', function(e) {
+      console.log('$(this)', $(this))
+      console.log('value', messageReplyEditor.root.innerHTML);
+      $('#message-reply-text').val(messageReplyEditor.root.innerHTML);
+    });
 
-  sendMessageEditor.on('text-change', function(e) {
-    console.log('$(this)', $(this))
-    console.log('value', sendMessageEditor.root.innerHTML);
-    $('#send-message-text').val(sendMessageEditor.root.innerHTML);
-    $('.message-error').hide();
-    $('#send-message-text').removeClass('is-invalid');
-  });
+    sendMessageEditor.on('text-change', function(e) {
+      console.log('$(this)', $(this))
+      console.log('value', sendMessageEditor.root.innerHTML);
+      $('#send-message-text').val(sendMessageEditor.root.innerHTML);
+      $('.message-error').hide();
+      $('#send-message-text').removeClass('is-invalid');
+    });
 
-$(document).on('click', '.SendReplyMessage', function() {
-    // var id = $(this).attr('data-id');
-    var message_id = $('#message-reply-id').val();
-    var message_receiver = $('#message-reply-receiver_id').val();
-    var message_subject = $('#message-reply-subject').val();
-    var message_message = $('#message-reply-text').val();
-   
-    $.ajax({
+    $(document).on('click', '.SendReplyMessage', function() {
+      // var id = $(this).attr('data-id');
+      var message_id = $('#message-reply-id').val();
+      var message_receiver = $('#message-reply-receiver_id').val();
+      var message_subject = $('#message-reply-subject').val();
+      var message_message = $('#message-reply-text').val();
+      
+      $.ajax({
         url: '/dashboard/sendReplymessage',
         type: 'POST',
         data: {
@@ -611,7 +501,7 @@ $(document).on('click', '.SendReplyMessage', function() {
 
           $('#message-replies-container').show();
           $('#message-details-replies').prepend(`
-             <li class="list-group-item gap-3 p-2 border-bottom">
+            <li class="list-group-item gap-3 p-2 border-bottom">
               <div class="d-flex justify-content-between align-items-center mb-2 ">
                 <div class="fw-semibold fs-6">${first_name_en} ${last_name_en}</div>
                 <div class="d-flex align-items-center">
@@ -630,16 +520,15 @@ $(document).on('click', '.SendReplyMessage', function() {
           $('.app-email-view-content').animate({ scrollTop: 0 }, 'slow');
         },
         error: function(xhr) {
-        console.error('Error:', xhr.responseText);
-        Swal.fire({
-          title: 'Error!',
-          text: 'Failed to send the reply message.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-    }
+          console.error('Error:', xhr.responseText);
+          Swal.fire({
+            title: 'Error!',
+            text: 'Failed to send the reply message.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        },
+      });
     });
-});
-
-</script>
+  </script>
 @stop
