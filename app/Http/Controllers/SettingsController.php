@@ -528,8 +528,8 @@ class SettingsController extends Controller
 
 		$updateSittings = Settings::where('id', $id)->first();
 		$updateSittings->Meeting = $Meeting;
-	
-		if( $Meeting == 'Teams' )
+
+		if( strtolower($Meeting) == 'teams' )
 		{
 			$updateSittings->MICROSOFT_CLIENT_ID = $MICROSOFT_CLIENT_ID;
 			$updateSittings->MICROSOFT_CLIENT_SECRET_VALUE = $MICROSOFT_CLIENT_SECRET_VALUE;
@@ -539,7 +539,7 @@ class SettingsController extends Controller
 			$updateSittings->MICROSOFT_REDIRECT_URI = $MICROSOFT_REDIRECT_URI;
 			$updateSittings->save();
 		}
-		if( $Meeting == 'Zoom' )
+		if( strtolower($Meeting) == 'zoom' )
 		{
 			$updateSittings->ZOOM_CLIENT_ID = $ZOOM_CLIENT_ID;
 			$updateSittings->ZOOM_CLIENT_SECRET = $ZOOM_CLIENT_SECRET;

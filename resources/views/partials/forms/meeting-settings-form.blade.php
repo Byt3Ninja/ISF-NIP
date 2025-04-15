@@ -10,8 +10,8 @@
       <fieldset class="form-label-group">
         <select class="form-control Meeting" id="Meeting" name="Meeting" required>
           <option value="0">{{ __('settings.Choose') }}</option>
-          <option value="zoom" {{ $Title->Meeting == 'Zoom' ? 'selected' : '' }}>{{__('admin.Zoom')}}</option>
-          <option value="teams" {{ $Title->Meeting == 'Teams' ? 'selected' : '' }}>{{__('admin.Teams')}}</option>
+          <option value="zoom" {{ strtolower( $Title->Meeting ) == 'zoom' ? 'selected' : '' }}>{{__('admin.Zoom')}}</option>
+          <option value="teams" {{ strtolower( $Title->Meeting ) == 'teams' ? 'selected' : '' }}>{{__('admin.Teams')}}</option>
 
         </select>
       </fieldset>
