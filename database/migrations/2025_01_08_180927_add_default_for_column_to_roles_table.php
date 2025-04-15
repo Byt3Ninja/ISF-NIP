@@ -27,7 +27,7 @@ return new class extends Migration
 					$role->default_for = $name;
 					$role->save();
 				}
-				Permission::default_permissions();
+				if( Permission::get()->count() > 0 ) { Permission::default_permissions(); }
 			}
 		}
 	}
