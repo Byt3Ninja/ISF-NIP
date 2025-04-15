@@ -214,13 +214,12 @@
 
       if (replies && replies.length > 0) {
         $('#message-replies-container').show();
-        
         $('#message-details-replies').html('');
         replies.forEach(reply => {
           $('#message-details-replies').append(`
             <li class="list-group-item gap-3 p-2 border-bottom">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="fw-semibold fs-6">${reply.first_name_en} ${reply.last_name_en}</div>
+                <div class="fw-semibold fs-6">${reply.sender.name}</div>
                 <div class="d-flex align-items-center">
                   <span class="me-2 text-muted">${moment(reply.created_at).format('MMMM Do YYYY, h:mm A')}</span>
                   <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${reply.id}, event)">
@@ -229,7 +228,7 @@
                 </div>
               </div>
               <div class="pe-0 pe-md-12">
-                <p class="mb-1 text-muted">${reply.message}</p>
+                <p class="mb-1 text-muted">${reply.body}</p>
               </div>
             </li>
           `);
@@ -240,7 +239,7 @@
       // }
 
       if (sender) {
-        $('#message-reply-receiver_id').val(sender);
+        $('#message-reply-receiver_id').val(sender.id);
         if (sender.name) {
           $('#message-details-createdBy').text(`${sender.name}`);
         }

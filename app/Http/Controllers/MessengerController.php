@@ -854,6 +854,8 @@ class MessengerController extends Controller
 
     public function sendReplyMessage(Request $request)
     {
+       
+
         $request->validate([
             'message_subject' => 'nullable|string|max:255',
             'message_message' => 'required|string',
@@ -1002,21 +1004,21 @@ class MessengerController extends Controller
             LEFT JOIN
                 users reply_sender ON reply.sender = reply_sender.id
             WHERE
-                m.reply_id IS NULL
+                
         ";
 
         switch ($type) {
             case 'inbox':
-                $query .= " AND m.receiver = $userId AND m.deleted_at IS NULL";
+                $query .= " m.receiver = $userId AND m.deleted_at IS NULL AND m.reply_id IS NULL";
                 break;
             case 'sent':
-                $query .= " AND m.sender = $userId AND m.deleted_at IS NULL";
+                $query .= "  m.sender = $userId AND m.deleted_at IS NULL";
                 break;
             case 'starred':
-                $query .= " AND m.starred = 1 AND (m.sender = $userId OR m.receiver = $userId) AND m.deleted_at IS NULL";
+                $query .= "  m.starred = 1 AND (m.sender = $userId OR m.receiver = $userId) AND m.deleted_at IS NULL AND m.reply_id IS NULL";
                 break;
             case 'trash':
-                $query .= " AND m.deleted_at IS NOT NULL AND (m.sender = $userId OR m.receiver = $userId)";
+                $query .= "  m.deleted_at IS NOT NULL AND (m.sender = $userId OR m.receiver = $userId) AND m.reply_id IS NULL";
                 break;
         }
 
