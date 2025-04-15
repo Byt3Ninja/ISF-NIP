@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Form;
 use App\Step;
+use App\User;
 use App\Cycle;
 use App\Company;
 use App\Formdata;
@@ -14,12 +15,12 @@ use Carbon\Carbon;
 use App\BuilderForm;
 use App\BuilderField;
 use http\Env\Response;
-use App\Services\WhatsAppService;
 
 use App\Finalscreening;
 use App\TrainingSession;
 use Illuminate\Http\Request;
 use App\Jobs\ExportCycleCompData;
+use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
@@ -491,6 +492,22 @@ class CyclesController extends Controller
 
     function view($c, Request $request)
     {
+       
+        $cycle2 = Cycle::where('id', $c)->first();
+        if($cycle2->allow_non_company == 1){
+           
+            if(!Auth::user()->HaveCompany){
+                $user = Auth::user();
+                $result = new Company();
+                $result->name_en = $user->first_name_en." ".$user->last_name_en;
+                $result->name_ar = $user->first_name_ar." ".$user->last_name_ar;
+                $result->address_en = $user->address ?? 'Not Set';
+                $result->address_ar = $user->address ?? 'Not Set';
+                $result->save();
+                User::where('id', $user->id)->update(['company_id' => $result->id, 'HaveCompany' => 1]);
+            }
+            }
+        
         $private = Cycle::where('private', $c)->first();
 
         if ($private == null) {
@@ -499,16 +516,16 @@ class CyclesController extends Controller
         } else {
             $c = $private->id;
         }
-
+      $user = User::where('id', Auth::user()->id)->first();
         // Check Company ---> forward to profile
-        if (!Auth::user()->HaveCompany) {
+        if (!$user->HaveCompany) {
             return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
-        if (!Auth::user()->company) {
+        if (!$user->company) {
             return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
         }
         // Check enrolled in Cycle
-        if (Auth::user()->company->cycle && Auth::user()->company->cycle != $c) {
+        if ($user->company->cycle && $user->company->cycle != $c) {
             return redirect()->back()->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);
         }
         //Check private
@@ -520,7 +537,7 @@ class CyclesController extends Controller
         //         }
 
         // Check STEPS
-        if (!Auth::user()->company->cycle || Auth::user()->company->cycle == $c) {
+        if (!$user->company->cycle || $user->company->cycle == $c) {
             $step = Step::where('cycle_id', $c)->orderBy('arr')->first();
             if ($step->stype != 1) {
                 return redirect()->back()->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
@@ -538,7 +555,7 @@ class CyclesController extends Controller
                 'form_id' => $step->id,
                 'field_ids' => implode(",", $field_map_ids)
             ];
-            if (Auth::user()->company->step == $id) {
+            if ($user->company->step == $id) {
                 $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('id', 'ASC')->select('answer')->pluck('answer')->toArray();
             }
             return view('admin.settings.cycles.form', $data)->with('step', $step)->with('c', $c)->with('answers', $answers);
