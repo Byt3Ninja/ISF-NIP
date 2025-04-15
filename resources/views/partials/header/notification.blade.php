@@ -1,43 +1,62 @@
+@php
+$user = auth()->user();
+$notifications = collect();
+$all = 0;
+
+if ($user && $user->hasRole('Registered')) {
+    $notifications = $user->unreadNotifications()->latest()->take(5)->get();
+    $all = $notifications->count();
+}
+@endphp
+
+
 <!-- Notification -->
 <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
   <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);"
     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
     <span class="position-relative">
       <i class="ti ti-bell ti-md"></i>
-      <span class="badge rounded-pill bg-danger badge-dot badge-notifications border"></span>
+      {{-- @if ($all > 0) --}}
+      <div id="notification-count-container">
+
+      </div>
+      {{-- @endif --}}
     </span>
   </a>
 
   <!-- Notification Dropdown -->
   <ul class="dropdown-menu dropdown-menu-end p-0">
-    @if ($all > 0)
+    {{-- @if ($all > 0) --}}
       <li class="dropdown-menu-header border-bottom">
         <div class="dropdown-header d-flex align-items-center py-3">
           <h6 class="mb-0 me-auto" style="text-transform:capitalize;">Notification</h6>
           <div class="d-flex align-items-center h6 mb-0">
-            <span class="badge bg-label-primary me-2">{{ $all . ' ' . 'New' }} </span>
+            <span class="badge bg-label-primary me-2" id="new-count">0 {{ $l == 'en' ? 'New': 'جديد' }}</span>
+
             <a href="javascript:void(0)" class="btn btn-text-secondary rounded-pill btn-icon dropdown-notifications-all"
               data-bs-toggle="tooltip" data-bs-placement="top" title="Mark all as read"><i
                 class="ti ti-mail-opened text-heading"></i></a>
           </div>
         </div>
       </li>
-    @endif
+    {{-- @endif --}}
 
     <!-- Notification List -->
     <li class="dropdown-notifications-list scrollable-container">
-      <ul class="list-group list-group-flush">
-        @if ($all == 0)
-          <li class="list-group-item list-group-item-action dropdown-notifications-item">
-            <div class="dropdown-header px-1 py-75 d-flex justify-content-between"><span
-                class="notification-title" style="text-transform:capitalize;">
-                <span class="notif-count">{{ $all }}</span>
-                {{ __('admin.NewNotify') }}
-              </span><span class="text-bold-400 cursor-pointer"><a
-                  onclick="location.reload();">{{ __('admin.MarkRead') }}</a></span>
-            </div>
+      <ul id="notification-list" class="list-group list-group-flush">
+        {{-- @role('Registered')
+        @if ($notifications->isEmpty())
+          <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">
+            <span class="text-muted">No new notifications</span>
           </li>
+        @else
+          @foreach ($notifications as $notification)
+            <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                <h6 class="media-heading">{{ $notification->data['message'] ?? 'New Notification' }}</h6>
+            </li>
+          @endforeach
         @endif
+        @endrole --}}
 
         @if ($messages)
           <li class="list-group-item list-group-item-action dropdown-notifications-item">
@@ -49,6 +68,14 @@
             </a>
           </li>
         @endif
+        
+        {{-- @role('Registered')
+         @if ($notifications)
+           <li class="list-group-item list-group-item-action dropdown-notifications-item">
+            <h6 class="media-heading">{{ $notifications->data['message'] ?? 'New Notification' }}</h6>
+           </li>
+         @endif
+        @endrole --}}
 
         @hasanyrole('Admin|Manager')
           @if ($msgs)
@@ -89,7 +116,7 @@
       </ul>
     </li>
 
-    @if ($messages)
+    {{-- @if ($messages)
       <li class="border-top">
         <div class="d-grid p-4">
           <a class="btn btn-primary btn-sm d-flex" href="javascript:void(0);">
@@ -97,8 +124,11 @@
           </a>
         </div>
       </li>
-    @endif
+    @endif --}}
 
   </ul>
 </li>
 <!--/ Notification -->
+
+
+

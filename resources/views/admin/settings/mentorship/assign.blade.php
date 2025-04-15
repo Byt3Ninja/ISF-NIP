@@ -38,7 +38,7 @@
                       onchange="window.open('/dashboard/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
                       @foreach ($cycles as $cycle)
                         <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                          {{ __('cycles.from') }} {{ $cycle->start->format('d-m') }} {{ __('cycles.to') }}
+                          {{ __('cycles.from') }} {{ $cycle->start->format('d-m-Y') }} {{ __('cycles.to') }}
                           {{ $cycle->end->format('d-m-Y') }} - {{ optional($cycle->organization)->name }}</option>
                       @endforeach
                       @if (!$id)
@@ -67,10 +67,63 @@
         <section>
           <div class="row">
             <div class="col-md-12">
-              <div class="card">
-                <div class="card-header border-bottom">
+              <div class="card card-body">
+                <div class="border-bottom">
                   <h4 class="card-title">{{ __('cycles.Mentors') }}</h4>
                 </div>
+
+                <br>
+                @php
+                    $specializations = [];
+                    $TMentors = App\User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+                    foreach ($TMentors as $mentor) {
+                            $specialization = $mentor->bio->{'specialization_' . $l} ?? null;
+                            if ($specialization && !in_array($specialization, $specializations)) {
+                                $specializations[] = $specialization;
+                            }
+                    }
+                @endphp
+                
+                <form id="filter-form" method="GET" action="/dashboard/mentorship/assign/{{ $id }}">
+                  <div class="row">
+                    <div class="col-8">
+                      <div class="row">
+                        <div class="col-auto col-md-4">
+                          <select name="specialization" class="form-select select2" id="specializationFilter" data-placeholder="{{ __('cycles.Specialization') }}">
+                              <option value="">{{ __('cycles.Specialization') }}</option>
+                              @php
+                                  $specializations = array_unique($specializations);
+                              @endphp
+                            <option value="0">All</option>
+                              @foreach ($specializations as $specialization)
+                                  <option value="{{ $specialization }}" {{ request('specialization') == $specialization ? 'selected' : '' }}>{{ $specialization }}</option>
+                              @endforeach
+                          </select>    
+                        </div>
+                        <div class="col-auto col-md-4">
+                          <select name="rate" class="form-select select2">
+                            <option value="0" {{ request('rate') == 0 ? 'selected' : '' }} >All</option>
+                            <option value="1" {{ request('rate') == 1 ? 'selected' : '' }} > 1 </option>
+                            <option value="2" {{ request('rate') == 2 ? 'selected' : '' }} > 2 </option>
+                            <option value="3" {{ request('rate') == 3 ? 'selected' : '' }} > 3 </option>
+                            <option value="4" {{ request('rate') == 4 ? 'selected' : '' }} > 4 </option>
+                            <option value="5" {{ request('rate') == 5 ? 'selected' : '' }} > 5 </option>
+                          </select>
+                        </div>
+                        <div class="col-auto col-md-4">
+                          <select name="assigning" class="form-select select2">
+                            <option value="0" {{ request('assigning') == 0 ? 'selected' : '' }} >All</option>
+                            <option value="checked" {{ request('assigning') == 'checked' ? 'selected' : '' }} > {{ __('admin.checked') }} </option>
+                            <option value="Notchecked" {{ request('assigning') == 'Notchecked' ? 'selected' : '' }} > {{ __('admin.Notchecked') }} </option>
+                          </select>  
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+
+                <hr>
+
                 <form action= "/dashboard/mentorship/assign/{{ $id }}" method="POST"
                   enctype="multipart/form-data">
                   {!! csrf_field() !!}
@@ -82,7 +135,7 @@
                           <th class="text-nowrap fw-bold">{{ __('cycles.Name/Title') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Bio') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Specialization') }}</th>
-                          <th class="text-nowrap fw-bold">Linkedin</th>
+                          <th class="text-nowrap fw-bold">{{ __('admin.Linkedin') }}</th>
                           <th class="text-nowrap fw-bold">{{ __('cycles.Rate') }}</th>
                         </tr>
                       </thead>
@@ -166,10 +219,10 @@
         "responsive": true,
         "searching": true,
         "lengthChange": false,
-        "paging": false,
+        "paging": true,
         "bInfo": false,
         "columnDefs": [{
-          "orderable": false,
+          "orderable": true,
           "targets": [3]
         }, ],
         @if ($l == 'ar')
@@ -209,6 +262,10 @@
     $('.date').datetimepicker({
       timepicker: true,
       format: 'Y-m-d H:i'
+    });
+
+    $('#filter-form .form-select').on('change', function() {
+      $('#filter-form').submit();
     });
   </script>
 @stop

@@ -1,4 +1,10 @@
-@php $setting = \App\Settings::where('id', 1)->first(); @endphp
+@php
+  $setting = \App\Settings::where('id', 1)->first();
+  if( $_user->HaveCompany && $_user->company && $_user->company->cycledata && $_user->company->cycledata->organization)
+  {
+    $_user->organization = $_user->company->cycledata->organization;
+  }
+@endphp
 <style>
   /* Add this to your CSS file */
 .logo-img {
@@ -8,16 +14,24 @@
 }
 </style>
 <!-- Menu -->
+@php
+      $updateSittings = App\Settings::where('id', 1)->first();
+    @endphp
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
       
-  @if (!is_null(auth()->user()->organization))
-    @php
-    $imageUrl = auth()->user()->organization->image_url;
+      @if (!is_null($_user->organization))
+      @php
+       $imageUrl = $_user->organization->img_url ? asset($_user->organization->img_url) : null;
+
+     // استخراج المسار من الرابط
+     $imagePath = parse_url($imageUrl, PHP_URL_PATH);
+
+     // إزالة أي أجزاء غير ضرورية في البداية مثل `/dashboard/uploads/files/`
+     $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
     @endphp
-     
-    <img src="{{ asset($imageUrl) }}" alt="avatar" class="logo-img">
+          <img src="{{ $imageUrl }}" alt="avatar" class="logo-img">
          
       @else
       @if(!empty($setting->Logo))
@@ -40,7 +54,7 @@
   <ul class="menu-inner py-1">
     {{-- <li class="menu-item">
       <a href="/dashboard" class="menu-link">
-        {{ is_null(auth()->user()->organization_id)? $setting->Platform_Name : auth()->user()->organization->name }}
+        {{ is_null($_user->organization_id)? $setting->Platform_Name : $_user->organization->name }}
       </a>
     </li> --}}
     <!-- Dashboards -->
@@ -59,13 +73,14 @@
       </a>
     </li>
 
-    @if (auth()->user()->HaveCompany == 1 && !auth()->user()->company)
+    @if( $_user->HaveCompany == 1 && !$_user->company && $_user->ableToAny(['company_profile', 'analysis-assessment', 'swot.view'], $permissions) )
       <li class="{{ Request::is('*companyProfile') ? 'active' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="ti ti-building me-3 ti-md"></i>
           <div>{{ __('admin.My company') }}</div>
         </a>
         <ul class="menu-sub">
+          @if( $_user->ableTo('company_profile', $permissions) )
           <li class="{{ Request::is('dashboard/companyProfile') ? 'active' : '' }} menu-item">
             <a href="{{ route('my_company') }}" class="menu-link">
               <span class="menu-item">
@@ -73,7 +88,10 @@
               </span>
             </a>
           </li>
+          @endif
+          @if($updateSittings->assessment == 1)
           {{-- @if (!app()->environment('production', 'beta')) --}}
+          @if( $_user->ableTo('analysis-assessment', $permissions) )
           <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
             <a href="/dashboard/analysis-assessment" class="menu-link">
               <span class="menu-item">
@@ -81,8 +99,9 @@
               </span>
             </a>
           </li>
-
-          @if( in_array(env('APP_ENV', 'local'), ['dev', 'local']) )
+          @endif
+          @endif
+          @if( in_array(env('APP_ENV', 'local'), ['dev', 'local']) && $_user->ableTo('swot.view', $permissions) )
           <li class="{{ Request::is('dashboard/swot-analysis*') ? 'active' : '' }} menu-item">
             <a href="{{ route('swot.view') }}" class="menu-link">
               <div>{{ __('admin.swot_analysis') }}</div>
@@ -95,21 +114,25 @@
       </li>
     @endif
     
-    @if (auth()->user()->HaveCompany != 0 &&auth()->user()->company)
+    @if( $_user->HaveCompany != 0 && $_user->company && $_user->ableToAny(['company_profile', 'analysis-assessment', 'swot.view'], $permissions) )
     <li class="{{ Request::is('*companyProfile*') ? 'active' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="ti ti-building me-3 ti-md"></i>
         <div>{{ __('admin.My company') }}</div>
       </a>
       <ul class="menu-sub">
+        @if( $_user->ableTo('company_profile', $permissions) )
         <li class="{{ Request::is('dashboard/companyProfile') ? 'active' : '' }} menu-item">
-          <a href="{{ route('company_profile', auth()->user()->company->id) }}" class="menu-link">
+          <a href="{{ route('company_profile', $_user->company->id) }}" class="menu-link">
             <span class="menu-item">
               {{ $l == 'en' ? 'Company Profile' : ' عرض شركتي' }}
             </span>
           </a>
         </li>
+        @endif
+        @if($updateSittings->assessment == 1)
         {{-- @if (!app()->environment('production', 'beta')) --}}
+        @if( $_user->ableTo('analysis-assessment', $permissions) )
         <li class="{{ Request::is('dashboard/analysis-assessment') ? 'active' : '' }} menu-item">
           <a href="/dashboard/analysis-assessment" class="menu-link">
             <span class="menu-item">
@@ -117,8 +140,10 @@
             </span>
           </a>
         </li>
+        @endif
+        @endif
 
-        @if( in_array(env('APP_ENV', 'local'), ['dev', 'local']) )
+        @if( in_array(env('APP_ENV', 'local'), ['dev', 'local']) && $_user->ableTo('swot.view', $permissions) )
         <li class="{{ Request::is('dashboard/swot-analysis*') ? 'active' : '' }} menu-item">
           <a href="{{ route('swot.view') }}" class="menu-link">
             <div>{{ __('admin.swot_analysis') }}</div>
@@ -145,43 +170,77 @@
     $l == 'ar' ? ($arrow = 'left') : ($arrow = 'right');
     ?>
 
-    <li
-      class="{{ Request::is('dashboard/inbox', 'dashboard/outbox', 'dashboard/mymsg', 'dashboard/sendmessage') ? 'sidebar-group-active open' : '' }} menu-item">
+    @if( $_user->ableTo('messages.index', $permissions) )
+      <li class="{{ Request::is('dashboard/messages') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/messages" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-messages"></i>
+          <span class="menu-item">{{ __('admin.Messages') }}</span>
+        </a>
+      </li>
+    @endif
+
+    @if( $_user->ableTo('messages.view', $permissions) )
+      <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
+          <i class="menu-icon tf-icons ti ti-world"></i>
+          <span class="menu-item">{{ __('admin.contactus') }}</span>
+        </a>
+      </li>
+    @endif
+
+    {{-- @if( $_user->ableToAny(['messages.index'], $permissions) )
+    <li class="{{ Request::is('dashboard/inbox', 'dashboard/outbox', 'dashboard/mymsg', 'dashboard/sendmessage', 'dashboard/messages') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-messages"></i>
         <div>{{ __('admin.My messages') }}</div>
       </a>
       <ul class="menu-sub">
-        <li class="{{ Request::is('dashboard/sendmessage') ? 'active' : '' }} menu-item"><a
-            href="/dashboard/sendmessage" class="menu-link">
-            <i class="bx bx-message"></i>
-            <span class="menu-item">{{ __('admin.New Message') }}</span>
-          </a>
-        </li>
-        <li class="{{ Request::is('dashboard/inbox') ? 'active' : '' }} menu-item"><a href="/dashboard/inbox"
-            class="menu-link"><i class="bx bxs-inbox"></i>
-            <span class="menu-item">{{ __('admin.myinbox') }}</span>
-            @if ($unread > 0)
-              <span
-                class="badge badge-pill badge-round badge-dark-info float-right mr-50 ml-auto">{{ $unread }}</span>
-            @endif
-          </a>
-        </li>
-        <li class="{{ Request::is('dashboard/outbox') ? 'active' : '' }} menu-item">
-          <a href="/dashboard/outbox" class="menu-link"><i class="bx bx-mail-send"></i>
-            <span class="menu-item">{{ __('admin.myoutbox') }}</span>
-          </a>
-        </li>
-        @can('view_messages')
+        @if( $_user->ableTo('messages.index', $permissions) )
+          <li class="{{ Request::is('dashboard/messages') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/messages" class="menu-link">
+              <span class="menu-item">{{ __('admin.Messages') }}</span>
+            </a>
+          </li>
+        @endif
+        @if( $_user->ableTo('sendmessage', $permissions) )
+          <li class="{{ Request::is('dashboard/sendmessage') ? 'active' : '' }} menu-item"><a
+              href="/dashboard/sendmessage" class="menu-link">
+              <i class="bx bx-message"></i>
+              <span class="menu-item">{{ __('admin.New Message') }}</span>
+            </a>
+          </li>
+        @endif
+        @if( $_user->ableTo('inbox', $permissions) )
+          <li class="{{ Request::is('dashboard/inbox') ? 'active' : '' }} menu-item"><a href="/dashboard/inbox"
+              class="menu-link"><i class="bx bxs-inbox"></i>
+              <span class="menu-item">{{ __('admin.myinbox') }}</span>
+              @if ($unread > 0)
+                <span
+                  class="badge badge-pill badge-round badge-dark-info float-right mr-50 ml-auto">{{ $unread }}</span>
+              @endif
+            </a>
+          </li>
+        @endif
+        @if( $_user->ableTo('outbox', $permissions) )
+          <li class="{{ Request::is('dashboard/outbox') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/outbox" class="menu-link"><i class="bx bx-mail-send"></i>
+              <span class="menu-item">{{ __('admin.myoutbox') }}</span>
+            </a>
+          </li>
+        @endif
+        @if( $_user->ableTo('messages.view', $permissions) )
           <li class="{{ Request::is('dashboard/mymsg') ? 'active' : '' }} menu-item">
             <a href="/dashboard/mymsg" class="menu-link"><i class="bx bx-support"></i>
               <span class="menu-item">{{ __('admin.contactus') }}</span>
             </a>
           </li>
-        @endcan
+        @endif
       </ul>
     </li>
-    @if (!Auth::user()->hasanyRole('Mentor|Judger'))
+    @endif --}}
+    
+    @if (!$_user->hasAnyRole('Mentor|Judger'))
+      @if( $_user->ableTo('directory', $permissions) )
       <li class="{{ Request::is('dashboard/directory') ? 'active' : '' }} menu-item"><a href="/dashboard/directory"
           class="menu-link">
           <i class="ti ti-search ti-md me-2 me-lg-4 ti-lg"></i>
@@ -189,37 +248,30 @@
         </a>
       </li>
       @endif
-    @if (Auth::user()->hasanyRole('Registered|Mentor|organizationManager'))
-    <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
-      <a class="menu-link" href="{{ route('users.companies') }}">
-        <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
-        <span class="menu-item">{{ __('admin.Companies') }}</span>
-      </a>
-    </li>
     @endif
-    @if($setting->mentor_list == 1)
-    @if (Auth::user()->hasanyRole('Mentor|Registered|Admin'))
+    @if ($_user->hasAnyRole('Registered|Mentor|organizationManager'))
+      @if( $_user->ableTo('users.companies', $permissions) )
+      <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('users.companies') }}">
+          <i class="ti ti-building ti-md me-2 me-lg-4 ti-lg"></i>
+          <span class="menu-item">{{ __('admin.Companies') }}</span>
+        </a>
+      </li>
+      @endif
+    @endif
+    @if ($_user->hasAnyRole('Mentor|Registered|Admin'))
+      @if( $_user->ableTo('mentors.list', $permissions) )
       <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
           href="/dashboard/show/Mentors" class="menu-link">
           <i class="ti ti-users ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('admin.Mentors') }}</div>
         </a>
       </li>
+      @endif
     @endif
 
-    @else
-    @if (Auth::user()->hasanyRole('Admin'))
-    <li class="{{ Request::is('dashboard/show/Mentors') ? 'active' : '' }} menu-item"><a
-        href="/dashboard/show/Mentors" class="menu-link">
-        <i class="ti ti-users ti-md me-2 me-lg-4 ti-lg"></i>
-        <div>{{ __('admin.Mentors') }}</div>
-      </a>
-    </li>
-  @endif
-
-
-    @endif
-    @role('Mentor')
+    @if ($_user->hasAnyRole('Mentor'))
+      @if( $_user->ableTo('mentorshipSessions.index', $permissions) )
       <li 
         class="{{ 
           Request::is(
@@ -232,46 +284,56 @@
           <div>{{ __('mentor.mentorshipTasks.index') }}</div>
         </a>
       </li>
-    @endrole
-    @role('Registered')
+      @endif
+    @endif
+    @if ($_user->hasAnyRole('Registered'))
     {{-- @if (!app()->environment('production', 'beta')) --}}
-      <li
-        class="{{ Request::is('dashboard/requests/mine', '/dashboard/mentorship/mine') ? 'sidebar-group-active open' : '' }} menu-item">
+      @if( $_user->ableToAny(['myrequests', 'my.mentorships'], $permissions) )
+      <li class="{{ Request::is('dashboard/requests/mine', '/dashboard/mentorship/mine') ? 'sidebar-group-active open' : '' }} menu-item">
         <a href="#" class="menu-link menu-toggle">
           <i class="ti ti-file-text  ti-md me-2 me-lg-4 ti-lg"></i>
           <div>{{ __('admin.My Requests') }}</div>
         </a>
         <ul class="menu-sub">
+          @if( $_user->ableTo('myrequests', $permissions) )
           <li class="{{ Request::is('dashboard/requests/mine') ? 'active' : '' }} menu-item"><a
               href="/dashboard/requests/mine" class="menu-link"><i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Services') }}</span>
             </a>
           </li>
+          @endif
 
+          @if( $_user->ableTo('my.mentorships', $permissions) )
           <li class="{{ Request::is('dashboard/mentorship/mine') ? 'active' : '' }} menu-item"><a
               href="/dashboard/mentorship/mine" class="menu-link"><i class="bx bx-{{ $arrow }}-arrow-alt"></i>
               <span class="menu-item">{{ __('admin.Mentorship') }}</span>
             </a>
           </li>
+          @endif
         </ul>
       </li>
-      {{-- @endif --}}
+      @endif
+    {{-- @endif --}}
+      @if( $_user->ableTo('training.my', $permissions) )
       <li class="{{ Request::is('dashboard/training/my*') ? 'active' : '' }} menu-item"><a href="/dashboard/training/my"
           class="menu-link">
           <i class="menu-icon tf-icons ti ti-forms"></i>
           <div>{{ __('admin.My courses') }}</div>
         </a>
       </li>
+      @endif
 
+      @if( $_user->ableTo('quizzes.dashboard', $permissions) )
       <li class="{{ Request::is('dashboard/quizzes/my*') ? 'active' : '' }} menu-item"> <a href="/dashboard/quizzes/my"
           class="menu-link">
           <i class="menu-icon tf-icons ti ti-question-mark"></i>
           <div>{{ __('admin.My Quizzes') }}</div>
         </a>
       </li>
+      @endif
 
       
-      @if (auth()->user()->HaveCompany != 0 && auth()->user()->company)
+      @if( $_user->HaveCompany != 0 && $_user->company && $_user->ableTo('mentorshipSessions.index', $permissions) )
       <li class="{{ Request::is('dashboard/mentor/mentorshipSessions*') ? 'active' : '' }} menu-item">
         <a href="{{ route('mentorshipSessions.index') }}" class="menu-link">
           <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
@@ -279,44 +341,61 @@
         </a>
       </li>
       @endif
+    @endif
 
-    
-    @endrole
+    @if( $_user->ableTo('myFiles.index', $permissions) )
     <li class="{{ Request::is('dashboard/myFiles') ? 'active' : '' }} menu-item">
       <a href="/dashboard/myFiles" class="menu-link">
         <i class="menu-icon tf-icons ti ti-file"></i>
         <div>{{ __('admin.filemanager') }}</div>
       </a>
     </li>
+    @endif
 
-    @canany(['view_user', 'view_log', 'view_forms', 'view_report'])
+    @if($_user->hasRole('Judger'))
+      <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/judger/screening" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-gavel"></i>
+          <div>{{ __('admin.Screening') }}</div>
+        </a>
+      </li>
+    @endif
+
+    @if( $_user->ableToAny(['view_user', 'view_log', 'view_forms', 'view_report'], $permissions) )
       <li class="menu-header small">
         <span>{{ __('admin.Portal Settings') }}</span>
       </li>
-    @endcanany
+    @endif
 
-    @if (auth()->user()->hasRole('Admin'))
+    @if ($_user->hasAnyRole('Admin'))
       <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
         <a href="{{ route('organizations.index') }}" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-settings"></i>
+          <i class="menu-icon tf-icons ti ti-layout-board"></i>
           <div>{{ __('admin.Manage Organizations') }}</div>
         </a>
       </li>
-      
+    
     @endif
 
-    
+    @if( $_user->ableTo('projects.index', $permissions) )
+      <li class="{{ Request::is('dashboard/projects*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('projects.index') }}">
+          <i class="menu-icon tf-icons ti ti-folder"></i>
+           <div>{{ __('admin.Projects') }}</div>
+        </a>
+     </li>
+    @endif
 
-    @can('edit_forms')
+    @if( $_user->ableToAny(['show.builder', 'show.form'], $permissions) )
       <li class="{{ Request::is('dashboard/show-builder*', 'dashboard/show-form*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/show-builder" class="menu-link">
           <i class="menu-icon tf-icons ti ti-forms"></i>
           <div>{{ __('admin.Forms builder') }}</div>
         </a>
       </li>
-    @endcan
+    @endif
 
-    @can('edit_cycles')
+    @if( $_user->ableToAny(['index.cycle', 'programlist.index'], $permissions) )
       <li
         class="{{ Request::is('dashboard/cycles*', 'dashboard/programlist*') ? 'sidebar-group-active open' : '' }} menu-item">
         <a class="menu-link menu-toggle">
@@ -598,6 +677,13 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item"> {{ __('admin.surveys') }}</span>
             </a>
           </li>
+
+          <li class="{{ Request::is('dashboard/Totalsurveys*') ? 'active' : '' }} menu-item">
+            <a class="menu-link" href="{{ route('total.surveys') }}">
+              <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
+              <span class="menu-item"> {{ __('admin.Survey_Results') }}</span>
+            </a>
+          </li>
         </ul>
       </li>
       <li class="{{ Request::is('dashboard/final/*') ? 'sidebar-group-active open' : '' }} menu-item">
@@ -621,7 +707,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
         </ul>
       </li>
 
-      @if (!Auth::user()->hasanyRole('organizationManager|Mentor|Judger'))
+      @if (!$_user->hasAnyRole('organizationManager|Mentor|Judger'))
         <li
           class="{{ Request::is('*services*', '', 'dashboard/requests/all', 'dashboard/room*') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
@@ -665,9 +751,9 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           </ul>
         </li>
       @endif
-    @endcan
-    @if (!Auth::user()->hasanyRole('organizationManager'))
-      @can('view_user')
+    @endif
+    @if ($_user->hasAnyRole('organizationManager|Admin'))
+      @if( $_user->ableToAny(['users.index '], $permissions) )
         <li class="{{ Request::is('*users*') ? 'sidebar-group-active open' : '' }} menu-item">
           <a class="menu-link menu-toggle">
             <i class="menu-icon tf-icons ti ti-users"></i>
@@ -692,7 +778,13 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                 <span class="menu-item">{{ __('admin.Companies') }}</span>
               </a>
             </li>
-            @can('view_permissions')
+            <li class="{{ Request::is('*roles') ? 'active' : '' }} menu-item">
+              <a href="{{ route('roles.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-user-cog"></i>
+                <div>{{ __('admin.Roles_and_permissions') }}</div>
+              </a>
+            </li>
+            @if( $_user->ableTo('permissions.index', $permissions) )
               {{-- <li class="{{ Request::is('dashboard/permissions*') ? 'active' : '' }} menu-item">
             <a href="{{ route('permissions.index') }}">
               <i class="bx bx-{{ $arrow }}-arrow-alt"></i>
@@ -705,47 +797,62 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <span class="menu-item">{{ __('admin.Roles') }}</span>
             </a>
           </li> --}}
-            @endcan
+            @endif
           </ul>
         </li>
-      @endcan
-      @can('view_documentation')
-        <li class="{{ Request::is('dashboard/documentation*') ? 'active' : '' }} menu-item">
-          <a class="menu-link" href="/dashboard/documentation">
-            <i class="menu-icon tf-icons ti ti-file-description"></i>
-            <div>{{ __('admin.Documentations') }}</div>
-          </a>
-        </li>
-      @endcan
-      {{-- @can('view_log')
+      @endif
+
+      @if ($_user->hasAnyRole('organizationManager'))
+      @if ($_user->ableTo('organization-settings',$permissions))
+      <li class="{{ Request::is('dashboard/organizations/settings*') ? 'active' : '' }} menu-item">
+        <a class="menu-link" href="{{ route('organization-settings') }}">
+          <i class="menu-icon tf-icons ti ti-settings"></i>
+          <div>{{ __('admin.settings') }}</div>
+        </a>
+      </li>
+      @endif
+      @endif
+  
+      {{-- @if( $_user->ableTo('audit-logs.index', $permissions) )
     <li class="{{ Request::is('*audit-logs*') ? 'active' : '' }} menu-item">
       <a href="/dashboard/audit-logs">
         <i class="menu-livicon" data-icon="lab"></i>
         <div>{{ __('admin.Log viewer') }}</div>
       </a>
     </li>
-  @endcan --}}
+  @endif --}}
     @endif
 
-    @can('view_report')
+    @if( $_user->ableTo('documentation.index', $permissions) )
+    <li class="{{ Request::is('dashboard/documentation*') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="/dashboard/documentation">
+        <i class="menu-icon tf-icons ti ti-file-description"></i>
+        <div>{{ __('admin.Documentations') }}</div>
+      </a>
+    </li>
+  @endif
+
+    @if( $_user->ableTo('reports.index', $permissions) )
       <li class="{{ Request::is('dashboard/reports*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('reports.index') }}">
           <i class="menu-icon tf-icons ti ti-id"></i>
           <div>{{ __('admin.Reports') }}</div>
         </a>
       </li>
-    @endcan
+    @endif
 
-    @if (auth()->user()->hasanyRole('organizationManager'))
-    <li class="{{ Request::is('dashboard/organizations/settings*') ? 'active' : '' }} menu-item">
-      <a class="menu-link" href="{{ route('organization-settings') }}">
-        <i class="menu-icon tf-icons ti ti-settings"></i>
-        <div>{{ __('admin.settings') }}</div>
+    @if( $_user->ableTo('license.activate-form', $permissions) )
+    <li class="{{ Request::is('dashboard/license/activate*') ? 'active' : '' }} menu-item">
+      <a class="menu-link" href="{{ route('license.activate-form') }}">
+        <i class="menu-icon tf-icons ti ti-key"></i>
+        <div>{{ __('admin.License Key') }}</div>
       </a>
     </li>
-    @endif
+   @endif
+
+     
   
-    @can('edit_settings')
+    @if ($_user->hasAnyRole('Admin'))
       <li class="{{ Request::is('dashboard/settings*') ? 'active' : '' }} menu-item">
         <a class="menu-link menu-toggle">
           <i class="menu-icon tf-icons ti ti-settings"></i>
@@ -761,7 +868,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
             <a href="{{ route('currencies.index') }}" class="menu-link">
               <i class="menu-icon fas fa-money-bill-wave"></i>
-                <div>{{ __('admin.manage_currencies') }}</div>
+                <div>{{ __('admin.Currencies') }}</div>
             </a>
         </li>
           @if (!app()->environment('production', 'beta'))
@@ -798,21 +905,19 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           @endif
         </ul>
       </li>
-    @endcan
+    @endif
 
-    @php
-      $updateSittings = App\Settings::where('id', 1)->first();
-    @endphp
+    
     @if ($updateSittings->HomePage == true)
-      @if (auth()->user()->hasRole('Admin'))
-        @can('edit_settings')
+      @if ($_user->hasRole('Admin'))
+        @if( $_user->ableToAny(['settings.list', 'settings.save'], $permissions) )
           <li id="settingMenu" class="menu-item">
             <a class="menu-link menu-toggle">
               <i class="ti ti-home-cog me-3 ti-md" data-icon="wrench"></i>
               <div>{{ __('admin.Homesettings') }}</div>
             </a>
             <ul class="menu-sub">
-                @can('edit_settings')
+                @if( $_user->ableToAny(['settings.list', 'settings.save'], $permissions) )
                   <li class="{{ Request::is('dashboard/setaboutus*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/setaboutus">
                       <i class="menu-livicon" data-icon="globe"></i>
@@ -825,73 +930,73 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                       <span>{{ __('admin.Contact Settings') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('manage_menus')
+                @endif
+                @if( $_user->ableTo('menus.index', $permissions) )
                   <li class="{{ Request::is('*menu*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/menus">
                       <i class="menu-livicon" data-icon="morph-menu-arrow-bottom"></i>
                       <span>{{ __('admin.Menusettings') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('view_slide')
+                @endif
+                @if( $_user->ableTo('slides.index', $permissions) )
                   <li class="{{ Request::is('*slide*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/slides">
                       <i class="menu-livicon" data-icon="settings"></i>
                       <span>{{ __('admin.Slidersettings') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('manage_pages')
+                @endif
+                @if( $_user->ableToAny(['pages.index', 'pages.editMyPage'], $permissions) )
                   <li class="{{ Request::is('*page*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/pages">
                       <i class="menu-livicon" data-icon="briefcase"></i>
                       <span>{{ __('admin.Pagesettings') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('manage_posts')
+                @endif
+                @if( $_user->ableTo('posts.index', $permissions) )
                   <li class="{{ Request::is('*post*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/posts">
                       <i class="menu-livicon" data-icon="box-add"></i>
                       <span>{{ __('admin.Postsettings') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('view_faqs')
+                @endif
+                @if( $_user->ableTo('faqs.index', $permissions) )
                   <li class="{{ Request::is('*faqs*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/faqs">
                       <i class="menu-livicon" data-icon="comments"></i>
                       <span>{{ __('admin.Faqs settings') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('view_partner')
+                @endif
+                @if( $_user->ableTo('partners.index', $permissions) )
                   <li class="{{ Request::is('*partners*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/partners">
                       <i class="menu-livicon" data-icon="share"></i>
                       <span>{{ __('admin.partners settings') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('view_press')
+                @endif
+                @if( $_user->ableTo('press.index', $permissions) )
                   <li class="{{ Request::is('*press*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/press">
                       <i class="menu-livicon" data-icon="paper-clip"></i>
                       <span>{{ __('admin.press settings') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('manage_events')
+                @endif
+                @if( $_user->ableTo('events.index', $permissions) )
                   <li class="{{ Request::is('*event*') ? 'active' : '' }} menu-item">
                     <a class="menu-link" href="/dashboard/allevents">
                       <i class="menu-livicon" data-icon="calendar"></i>
                       <span>{{ __('admin.manageevents') }}</span>
                     </a>
                   </li>
-                @endcan
-                @can('manage_page')
-                  @if (Auth::user()->PageId)
+                @endif
+                @if( $_user->ableTo('pages.editMyPage', $permissions) )
+                  @if ($_user->PageId)
                     <li class="{{ Request::is('editmypage') ? 'active' : '' }} menu-item">
                       <a class="menu-link" href="/dashboard/editmypage">
                         <i class="menu-livicon" data-icon="briefcase"></i>
@@ -899,10 +1004,10 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
                       </a>
                     </li>
                   @endif
-                @endcan
+                @endif
             </ul>
           </li>
-        @endcan
+        @endif
       @endif
     @endif
   </ul>

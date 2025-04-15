@@ -3,14 +3,13 @@
     <div class="border-bottom mb-4">
       <h5 class="card-title">{{ $tab['label'] }}</h5>
     </div>
-    @php($action = Auth::user()->hasanyRole('Admin|organizationManager') ? route('update_my_company', $client->company->id) : route('update_my_company'))
-    <form 
-      method="post" 
-      id="company-social-form" 
-      onsubmit="return validateForm()"
-      enctype="multipart/form-data" 
-      action="{{ $action }}" 
-    >
+    @if($_user->hasAnyRole('Admin|organizationManager'))
+    <form method="post" action="{{ route('update_my_company', $client->company->id) }}"
+      enctype="multipart/form-data">
+@else
+<form method="post" action="{{ route('update_my_company') }}"
+  enctype="multipart/form-data">
+@endif
       {!! csrf_field() !!}
       <input type="hidden" value="8" name="CompanyN">
       <div class="row">

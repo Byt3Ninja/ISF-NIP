@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateServiceRequest extends FormRequest
@@ -23,22 +24,22 @@ class UpdateServiceRequest extends FormRequest
      */
     public function rules()
     {
-        if(UpdateServiceRequest::hasFile('img_url')){
-            return [
-                'name_en' => 'required',
-                'name_ar' => 'required',
-                'description_en' => 'required',
-                'description_ar' => 'required',
-                'img_url' => 'required',
-            ];
-        }else{
-            return [
-                'name_en' => 'required',
-                'name_ar' => 'required',
-                'description_en' => 'required',
-                'description_ar' => 'required',
-            ];
-
-        }
+        $rules = [
+            'name_en' => 'required',
+            'description_en' => 'required',
+            'service_category_id' => 'required|exists:service_categories,id',
+            'vendor_name' => 'required|string|max:50',
+            'vendor_email' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('services', 'vendor_email')->ignore($this->route('service')),
+            ],
+            'vendor_phone' => 'required|string|max:11',
+            'organization_ids' => 'nullable|array',
+            'organization_ids.*' => 'exists:organizations,id',
+        ];
+        if( UpdateServiceRequest::hasFile('img_url') ) { $rules['img_url'] = 'required'; }
+        return $rules;
     }
 }

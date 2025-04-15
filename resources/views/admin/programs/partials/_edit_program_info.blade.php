@@ -30,7 +30,9 @@
       </label>
       <input type="hidden" name="type" id="type">
       <input type="hidden" name="cycleid" id="cycleid">
-    
+      <input type="hidden" name="start" id="start" />
+      <input type="hidden" name="end" id="end" />
+
       <input 
         type="text" 
         class="form-control" 
@@ -42,7 +44,7 @@
     </div>
     <div class="col-12 mb-4">
       <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('cycles.Valid_from_to') }}:</label>
-      <input type="text" id="date-range-picker" class="form-control" />
+      <input type="text" name="date_range" id="date-range-picker" class="form-control" />
     </div>
     {{-- <div class="row">
       <div class="col-12 col-md-6">
@@ -123,17 +125,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('loaded');
-    var bsRangePickers = document.querySelectorAll('#date-range-picker');
-    bsRangePickers.forEach((picker) => {
-      console.log('bsRangePicker', picker);
-      $(picker).daterangepicker({
-        opens: isRtl ? 'left' : 'right',
-        drops: 'up'
-      });
-    });
-  });
-</script>

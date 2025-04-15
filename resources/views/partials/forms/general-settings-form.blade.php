@@ -105,14 +105,29 @@
       <label class="form-label" for="Currency">{{ __('settings.Currency') }} *</label>
       <select class="form-control" id="Currency" name='Currency'>
         <option value="">{{ __('settings.Currency') }}</option>
-       @foreach ($currencies as $currency)
-       <option value="{{ $currency->id }}" {{ $currency->id == $Title->Currency
-       ? 'selected' : '' }}>
-       {{ $currency->currency_name }}</option>
-       @endforeach
+        @foreach ($currencies->where('enabled', 1) as $currency)
+        <option value="{{ $currency->id }}" {{ $currency->id == $Title->Currency ? 'selected' : '' }}>
+            {{ $currency->currency_name }}
+        </option>
+    @endforeach
       </select>
     </div>
   </div>
+
+  <div class="col-md-12 col-12">
+    <div class="form-group mb-3">
+        <label class="form-label" for="terms_url">{{ __('admin.Terms and Conditions URL') }}</label>
+        <input type="url" class="form-control" name="terms_url" value="{{ $Title->terms_url }}">
+    </div>
+</div>
+
+<div class="col-md-12 col-12">
+    <div class="form-group mb-3">
+        <label class="form-label" for="privacy_url">{{ __('admin.Privacy Policy URL') }}</label>
+        <input type="url" class="form-control" name="privacy_url" value="{{ $Title->privacy_url }}">
+    </div>
+</div>
+
   <br>
   <div class="col-md-12 col-12">
     <div class="form-check form-switch mb-2">
@@ -126,6 +141,13 @@
     <div class="form-check form-switch mb-2">
       <input class="form-check-input" name="MentorList" type="checkbox" {{ $Title->mentor_list == '1' ? 'checked' : '' }} />
       <label class="form-check-label">{{ __('settings.MentorList') }}</label>
+    </div>
+  </div>
+
+  <div class="col-md-12 col-12">
+    <div class="form-check form-switch mb-2">
+      <input class="form-check-input" name="Assessment" type="checkbox" {{ $Title->assessment == '1' ? 'checked' : '' }} />
+      <label class="form-check-label">{{ __('settings.Assessment') }}</label>
     </div>
   </div>
 

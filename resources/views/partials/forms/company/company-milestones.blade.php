@@ -61,7 +61,7 @@
                     {{ __('admin.Edit') }}
                   </div>
                   
-                    @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+                    @if($_user->hasAnyRole('Admin|organizationManager'))
                     <form action="{{ route('DeleteMileStone_Comp', $client->company->id) }}"
                       method="POST" style="display: inline-block;">
                     @else
@@ -206,7 +206,7 @@
                     <i class="ti ti-pencil me-2"></i>
                     {{ __('admin.Edit') }}
                   </div>
-                  @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+                  @if($_user->hasAnyRole('Admin|organizationManager'))
                     <form action="{{ route('DeleteMileStone_Comp', $client->company->id) }}"
                       method="POST" style="display: inline-block;">
                     @else
@@ -367,7 +367,7 @@
                     <i class="ti ti-pencil me-2"></i>
                     {{ __('admin.Edit') }}
                   </div>
-                  @if(Auth::user()->hasanyRole('Admin|organizationManager'))
+                  @if($_user->hasAnyRole('Admin|organizationManager'))
                     <form action="{{ route('DeleteMileStone_Comp', $client->company->id) }}"
                       method="POST" style="display: inline-block;">
                     @else

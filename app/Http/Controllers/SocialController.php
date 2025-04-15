@@ -64,7 +64,7 @@ use Illuminate\Support\Facades\Http;
                 'provider_id' => $getInfo->id,
               	'email_verified_at' => now()
             ]);
-          $user->assignRole('Registered');
+          $user->allotRole('Registered');
           event(new WebMessage('NewUser', $getInfo->name, 1));
         }
         return $user;
@@ -102,7 +102,7 @@ use Illuminate\Support\Facades\Http;
                     'google_id'=> $guser->id,
 					'email_verified_at' => now()
                 ]);
-				$newUser->assignRole('Registered');
+				$newUser->allotRole('Registered');
                 event(new WebMessage('NewUser', $guser->name, 1));
               	auth()->login($newUser);
                 return redirect('/dashboard');

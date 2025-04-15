@@ -30,6 +30,8 @@
                   <i class="ti ti-user"></i>
                 </div>
               </div>
+              <div id="shareholder-error1" class="invalid-feedback">{{ __('admin.shareholder_name_required') }}</div>
+              <div id="shareholder-error2" class="invalid-feedback">{{ __('admin.please_enter_valid_name') }}</div>
             </div>
           </div>
           <div class="col-12">
@@ -50,6 +52,7 @@
                   <i class="ti ti-briefcase"></i>
                 </div>
               </div>
+              <div id="role-error" class="invalid-feedback">{{ __('admin.please_enter_valid_role') }}</div>
             </div>
           </div>
           <div class="col-12">
@@ -57,7 +60,7 @@
               <label class="fs-6 form-label mb-2 fw-semibold" for="shareholder_ownership_percentage">{{ __('admin.shareholder_ownership_percentage') }}</label>
               <div class="input-group input-group-merge">
                 <input
-                  type="number"
+                  type="text"
                   class="form-control shareholder_ownership_percentage"
                   id="shareholder_ownership_percentage"
                   placeholder="{{ __('admin.shareholder_ownership_percentage') }}"
@@ -70,13 +73,16 @@
                   <i class="ti ti-percentage"></i>
                 </div>
               </div>
+              <div id="ownership-error" class="invalid-feedback">
+                {{ __('admin.percentage_must_be_between_1_and_100') }}
+              </div>
             </div>
           </div>
         </div>
         <div class="col-12 text-end mt-3" style="height: 40px;">
           <input type="hidden" name="TeamsNo" value="Shareholders" />
           <button
-            {{--  type="submit"  --}}
+             type="button" 
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
             do="Shareholders"
             company="{{ optional($client->company)->id }}"
@@ -185,7 +191,7 @@
                           <div class="input-group input-group-merge">
                             <input
                               type="text"
-                              class="form-control shareholder_name{{ $Shareholder->id }}"
+                              class="form-control shareholder_name"
                               id="shareholder_name{{ $Shareholder->id }}"
                               placeholder="{{ __('admin.shareholder_name') }}"
                               value="{{ $Shareholder->Name ? $Shareholder->Name : old('shareholder_name') }}"
@@ -197,6 +203,12 @@
                               <i class="ti ti-user"></i>
                             </div>
                           </div>
+                          <div id="shareholder-error1" class="invalid-feedback">
+                            {{ __('admin.shareholder_name_required') }}
+                          </div>
+                          <div id="shareholder-error2" class="invalid-feedback">
+                            {{ __('admin.please_enter_valid_name') }}
+                          </div>
                         </div>
                         <div class=" form-group mb-4">
                           <label class="form-label mb-2 fs-6 fw-semibold">
@@ -205,7 +217,7 @@
                           <div class="input-group input-group-merge">
                             <input
                               type="text"
-                              class="form-control shareholder_role{{ $Shareholder->id }}"
+                              class="form-control shareholder_role"
                               id="shareholder_role{{ $Shareholder->id }}"
                               placeholder="{{ __('admin.shareholder_role') }}"
                               value="{{ $Shareholder->RoleShereholder ? $Shareholder->RoleShereholder : old('shareholder_role') }}"
@@ -217,6 +229,9 @@
                               <i class="ti ti-briefcase"></i>
                             </div>
                           </div>
+                          <div id="role-error" class="invalid-feedback">
+                            {{ __('admin.please_enter_valid_role') }}
+                          </div>
                         </div>
                         <div class=" form-group mb-4">
                           <label class="form-label mb-2 fs-6 fw-semibold">
@@ -225,7 +240,7 @@
                           <div class="input-group input-group-merge">
                             <input
                               type="text"
-                              class="form-control shareholder_ownership_percentage{{ $Shareholder->id }}"
+                              class="form-control shareholder_ownership_percentage"
                               id="shareholder_ownership_percentage{{ $Shareholder->id }}"
                               placeholder="{{ __('admin.shareholder_ownership_percentage') }}"
                               value="{{ $Shareholder->PresentagShereholder ? $Shareholder->PresentagShereholder : old('shareholder_ownership_percentage') }}"
@@ -237,13 +252,17 @@
                               <i class="ti ti-percentage"></i>
                             </div>
                           </div>
+                          <div id="ownership-error" class="invalid-feedback">
+                            {{ __('admin.percentage_must_be_between_1_and_100') }}
+                          </div>
                         </div>
                       </div>
                       <div class="mt-6">
                         <button
-                          {{--  type="submit"  --}}
+                          type="button" 
                           class="btn btn-primary me-3 data-submit EditTeams"
                           do="{{ $Shareholder->id }}"
+                          data-id="Shareholders"
                           company="{{ optional($client->company)->id }}"
                         >
                           {{ __('admin.submit') }}

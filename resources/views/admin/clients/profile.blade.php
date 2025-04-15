@@ -36,7 +36,7 @@
                     $client->last_name_en
                     }}
                     @role('Mentor')
-                    <a target="_blank" href="{{ $client->bio->linkedin }}" class="ms-3">
+                    <a target="_blank" href="{{ $client->bio->linkedin ?? '#' }}" class="ms-3">
                       <img src="/icons/linkedin.svg" width="24" height="24" />
                     </a>
                     @endrole
@@ -75,12 +75,14 @@
                     </li>
                   </ul>
                 </div>
+                @if( $_user->ableTo('my_profile', $permissions) )
                 <a href="/dashboard/myProfile" class="btn btn-primary mb-1">
                   <i class="ti ti-settings me-3 ti-md"></i>
                   <span class="align-middle">
                     {{$l=='ar'?'تعديل':'Edit'}}
                   </span>
                 </a>
+                @endif
               </div>
             </div>
           </div>
@@ -129,11 +131,11 @@
                 <h5 class="cart-title">
                   {{__('admin.ProfileSummary')}}
                 </h5>
-                {{ $client->bio->bio }}
+                {{ optional($client->bio)->bio ?? __('admin.N/A') }}
                 {{
                 $l == 'ar'
-                ? $client->bio->bio_ar
-                : $client->bio->bio_en
+                ? optional($client->bio)->bio_ar ?? __('admin.N/A')
+                : optional($client->bio)->bio_en ?? __('admin.N/A')
                 }}
 
               </div>
@@ -234,7 +236,7 @@
                           {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
                         </span>
                         <span>
-                          {{ $client->country_id ? $client->country->{'name_' . $l} : __('admin.Egypt') }}
+                          {{ $client->country_id ? $client->country->{'name_' . $l} : __('admin.Not_Available') }}
                         </span>
                       </li>
                       <li class="d-flex align-items-center mb-2">
@@ -242,7 +244,14 @@
                           {{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}
                         </span>
                         <span>
-                          {{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}
+                         
+                         @if ($client->language === 'ar')
+                            {{ $l == 'ar' ? 'العربية' : 'Arabic' }}
+                         @elseif ($client->language === 'en')
+                            {{ $l == 'ar' ? 'الإنجليزية' : 'English' }}
+                         @else
+                            {{ __('admin.Not_Available') }}
+                         @endif
                         </span>
                       </li>
                     </ul>
@@ -327,30 +336,30 @@
                         <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
                           <td class="text-center">
                             <div class="d-flex align-items-center gap-1">
-                              <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">
+                              @if( $_user->ableTo('show_mentor_profile', $permissions) ) <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">@endif
                                 <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40"
                                   width="40">
-                              </a>
-                              <a href="{{ route('show_mentor_profile', $task->user_id) }}">
+                              @if( $_user->ableTo('show_mentor_profile', $permissions) )</a> @endif
+                              @if( $_user->ableTo('show_mentor_profile', $permissions) )<a href="{{ route('show_mentor_profile', $task->user_id) }}"> @endif
                                 <div class="media-body">
                                   <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
                                   <span class="font-small-2">{{$task->user->title}}</span>
                                 </div>
-                              </a>
+                              @if( $_user->ableTo('show_mentor_profile', $permissions) )</a>@endif
                             </div>
                           </td>
 
                           <td class="text-center">
                             <div class="d-flex align-items-center gap-1">
-                              <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">
+                              @if( $_user->ableTo('company_profile', $permissions) ) <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">@endif
                                 <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40"
                                   width="40">
-                              </a>
-                              <a href="/dashboard/companyProfile/{{$task->company->id}}">
+                              @if( $_user->ableTo('company_profile', $permissions) )</a> @endif
+                              @if( $_user->ableTo('company_profile', $permissions) ) <a href="/dashboard/companyProfile/{{$task->company->id}}"> @endif
                                 <div class="d-flex align-items-center gap-1">
                                   {{$task->company->name }}
                                 </div>
-                              </a>
+                              @if( $_user->ableTo('company_profile', $permissions) ) </a> @endif
                             </div>
                           </td>
 
@@ -454,22 +463,22 @@
 
       $('.zero-configuration').DataTable({
                     "language": {
-                        "sEmptyTable":     "ليست هناك بيانات متاحة في الجدول",
-                        "sLoadingRecords": "جارٍ التحميل...",
-                        "sProcessing":   "جارٍ التحميل...",
-                        "sLengthMenu":   "أظهر _MENU_ مدخلات",
-                        "sZeroRecords":  "لم يعثر على أية سجلات",
-                        "sInfo":         "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-                        "sInfoEmpty":    "يعرض 0 إلى 0 من أصل 0 سجل",
-                        "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                        "sEmptyTable":     "{{ __('admin.No_data_available_in_table') }}",
+                        "sLoadingRecords": "{{ __('admin.Loading') }}...",
+                        "sProcessing":   "{{ __('admin.Loading') }}...",
+                        "sLengthMenu":   "{{ __('admin.Show') }} _MENU_ {{ __('admin.Entries') }}",
+                        "sZeroRecords":  "{{ __('admin.No_matching_records_found') }}",
+                        "sInfo":         "{{ __('admin.Show') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.Of') }} _TOTAL_ {{ __('admin.Entries') }}",
+                        "sInfoEmpty":    "{{ __('admin.Showing_0_to_0_of_0_entries') }}",
+                        "sInfoFiltered": "({{ __('admin.Filtered') }} _MAX_ {{ __('admin.Entries2') }})",
                         "sInfoPostFix":  "",
-                        "sSearch":       "ابحث:",
+                        "sSearch":       "{{ __('admin.Search') }}:",
                         "sUrl":          "",
                         "oPaginate": {
-                            "sFirst":    "الأول",
-                            "sPrevious": "السابق",
-                            "sNext":     "التالي",
-                            "sLast":     "الأخير"
+                            "sFirst":    "{{ __('admin.First') }}",
+                            "sPrevious": "{{ __('admin.Previous') }}",
+                            "sNext":     "{{ __('admin.Next') }}",
+                            "sLast":     "{{ __('admin.Last') }}"
                         },
                         "oAria": {
                             "sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً",

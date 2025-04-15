@@ -46,7 +46,7 @@ class GeminiController extends Controller
 
         if (!empty($missingFields)) {
             return response()->json([
-                'error' => 'Please complete the Following Fields From Your Profile Before Generating the SWOT Analysis:',
+                'error' => __('admin.swot_error'),
                 'missing_fields' => $missingFields
             ], 400);
         }

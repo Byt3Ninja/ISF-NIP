@@ -95,9 +95,9 @@
     
 
     $user_id = Auth::id();
-    $circle_ids = Auth::user()->mentorCycles()->get()->pluck('id');
+    $circle_ids = $_user->mentorCycles()->get()->pluck('id');
     
-    if( Auth::user()->hasRole('Mentor') )
+    if( $_user->hasRole('Mentor') )
   {
     /// Rating
     $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
@@ -322,9 +322,13 @@
                     </div>
                     <div class="widget-todo-item-action d-flex align-items-center">
                       <button class="btn btn-sm btn-label-primary" style="width: 156px;">
-                        <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
-                          {{ $serv->serviceCategory->{'name_' . $l} }}
-                        </a>
+                        @if ($serv->serviceCategory)
+                          <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
+                            {{ $serv->serviceCategory->{'name_' . $l} }}
+                          </a>
+                        @else
+                          <span>{{ __('dashboard.Category not available') }}</span>
+                        @endif
                       </button>
                     </div>
                   </div>
@@ -345,7 +349,8 @@
 
         <!-- / Latest Survey -->
         @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
-          @if( Auth::user()->hasRole('Mentor') )
+          @if( $_user->hasRole('Mentor') )
+          @if( $_user->ableToAll(['surveys.taking', 'surveys.submit'], $permissions) )
           <div class="col-sm-6 col-12 mb-6" style="max-height: 355px; overflow-y: auto; border-radius: 1rem;">
             <div class="card">
               <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -416,6 +421,7 @@
               </div>
             </div>
           </div>
+          @endif
           @endif
         @endif
         <!-- Latest Survey -->
@@ -492,51 +498,44 @@
                 </tr>
               </thead>
               <tbody>
-                @foreach ($myschedules as $key => $schedule)
-                  <tr class="text-{{ $schedule->active ? 'primary' : 'danger' }}">
-                    <td>{{ $key + 1 }}</td>
-                    <td>
-                      @switch($schedule->type)
-                        @case('Weekly')
-                          Weekly({{ str_replace(['[', ']', '"'], ' ', json_encode($schedule->days)) }})
-                        @break
+                @php
+    $groupedSchedules = $myschedules->groupBy('days'); // تجميع الجداول حسب الأيام
+@endphp
 
-                        @case('WorkingDays')
-                          {{ __('dashboard.All working days') }}
-                        @break
-
-                        @case('Period')
-                          {{ __('dashboard.from') . $schedule->dfrom->format('d-m-Y') . __('dashboard.to') . $schedule->dto->format('d-m-Y') }}
-                        @break
-
-                        @default
-                          {{ $schedule->dfrom->format('d-m-Y') }}
-                      @endswitch
-                    </td>
-                    <td>{{ __('dashboard.from') }} {{ substr($schedule->tfrom, 0, 5) }}
-                      {{ __('dashboard.to') }} {{ substr($schedule->tto, 0, 5) }}</td>
-                    <td>{{ $schedule->notes ? $schedule->notes : '...' }}</td>
-                    <td>
-                      <div class="dropdown">
-                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                          <i class="ti ti-dots-vertical"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                          <button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button">
-                            <i class="ti ti-pencil me-2"></i> Edit
-                          </button>
-                          <button class="dropdown-item" onclick="modify(2, {{ $schedule->id }}, {{ $schedule->active }})"
-                            type="button">
-                            <i class="ti ti-{{ $schedule->active ? 'eye' : 'eye-off' }} me-2"></i>
-                            {{ $schedule->active ? 'Deactivate' : 'Activate' }}
-                          </button>
-                          <button onclick="modify(3,{{ $schedule->id }},0)" type="button" class="dropdown-item"><i
-                              class="ti ti-trash me-2"></i> Delete</button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                @endforeach
+@foreach ($groupedSchedules as $day => $schedules)
+    @php
+        $times = ''; // تخزين الأوقات المجمعة
+        foreach ($schedules as $schedule) {
+            $times .= __('dashboard.from') . ' ' . substr($schedule->tfrom, 0, 5) . ' ' . __('dashboard.to') . ' ' . substr($schedule->tto, 0, 5) . ' | ';
+        }
+        $times = rtrim($times, ' | '); // إزالة الفاصل الأخير
+    @endphp
+    <tr class="text-{{ $schedules->first()->active ? 'primary' : 'danger' }}">
+        <td>{{ $loop->iteration }}</td>
+        <td>{{ __('admin.Weekly') }} ({{ __('admin.'.$day) }})</td>
+        <td>{{ $times }}</td>
+        <td>{{ $schedules->first()->notes ? $schedules->first()->notes : '...' }}</td>
+        <td>
+            <div class="dropdown">
+                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <i class="ti ti-dots-vertical"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="modify(1, undefined, 0)" type="button">
+                        <i class="ti ti-pencil me-2"></i> {{ __('admin.Edit') }}
+                    </button>
+                    <button class="dropdown-item" onclick="modify(2, {{ $schedules->first()->id }}, {{ $schedules->first()->active }})"
+                        type="button">
+                        <i class="ti ti-{{ $schedules->first()->active ? 'eye' : 'eye-off' }} me-2"></i>
+                        {{ $schedules->first()->active ? __('admin.Deactivate') : __('admin.Activate') }}
+                    </button>
+                    <button onclick="modify(3,{{ $schedules->first()->id }},0)" type="button" class="dropdown-item"><i
+                            class="ti ti-trash me-2"></i> {{ __('admin.Delete') }}</button>
+                </div>
+            </div>
+        </td>
+    </tr>
+@endforeach
               </tbody>
             </table>
           </div>
@@ -603,6 +602,13 @@
                 @endforeach
               </tbody>
             </table>
+          </div>
+        @else
+          <div class="card-body">
+            <div class="widget-todo-title-area d-flex align-items-center">
+              <span class="widget-todo-title ml-50">
+                {{ __('dashboard.No sessions added yet') }}.</span>
+            </div>
           </div>
         @endif
       </div>

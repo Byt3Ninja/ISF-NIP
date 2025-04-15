@@ -13,6 +13,7 @@ class QuizResults extends Model
 	public $timestamps = true;
 	protected $table = 'quiz_results';
 	protected $primaryKey = 'id';
+	public static $module = 'Quiz Results';
 
 	protected $fillable = [
 		'quiz_id',

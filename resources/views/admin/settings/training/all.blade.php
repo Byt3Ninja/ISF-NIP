@@ -27,7 +27,7 @@
             <div class="card">
               <div class="card-header">
 
-                @if (Auth::user()->hasanyRole('organizationManager|Mentor|Admin'))
+                @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
                   <a class="btn btn-primary"
                     href="{{ route('training.create') }}">
                     <i class="ti ti-plus me-1"></i>
@@ -92,7 +92,7 @@
                               @endforeach
                             </td>
                             <th>{{ $count_content }}</th>
-                            @if (Auth::user()->hasanyRole('organizationManager|Mentor|Admin'))
+                            @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
                               <td>
                                 <a title="Edit" href="/dashboard/training/EditTR/{{ $course->id }}"
                                   class="btn btn-icon btn-label-info rounded-circle">

@@ -78,15 +78,14 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
           <ul class="nav nav-pills flex-nowrap px-2 py-3">
             @foreach ($pills as $key => $pill)
             <li class="nav-item me-1">
-              <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
-                class="nav-link {{ $key == 1 ? 'active' : '' }}">
-                <span class="fs-6">
+              <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}" class="nav-link {{ $key == 1 ? 'active' : '' }}">
+                <span>
                   @if ($pill == 'analysis-assessment')
-                  {{ __('admin.Analysis_Assessment') }}
+                    {{ __('admin.Analysis_Assessment') }}
                   @elseif($pill == 'question-assessment')
-                  {{ __('admin.Question_assessment') }}
+                    {{ __('admin.Question_assessment') }}
                   @else
-                  {{ __('admin.History') }}
+                    {{ __('admin.History') }}
                   @endif
                 </span>
               </a>
@@ -121,6 +120,8 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
         <div class="col-md-3 col-12 position-relative" style="height: fit-content;">
           @foreach ($user_scores as $key => $assessment)
           @php
+          
+          if($assessment != null){
           $totalQuestions = $assessment->question->where('assessment_id', $assessment_user->id)->count();
           $totalAnswered = $assessment->question->where('Result_assessment', '!=', null)
                                         ->where('assessment_id', $assessment_user->id)
@@ -128,6 +129,11 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
           $totalNotAnswered = $assessment->question->where('Result_assessment', '=', null)
                                         ->where('assessment_id', $assessment_user->id)
                                         ->count();
+          }else{
+            $totalQuestions = 0;
+            $totalAnswered =0;
+            $totalNotAnswered =0;
+          }
           // حساب التقدم الإجمالي عبر جميع الأقسام
           $progress = $totalQuestions > 0 ? ($totalAnswered / $totalQuestions) * 100 : 0;
 
@@ -143,7 +149,9 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
             <div class="d-flex justify-content-between align-items-center p-4">
               <div class="d-flex flex-column">
                 <h6 class="mb-0 text-capitalize">
+                  @if($assessment != null)
                   {{ str_replace('-', ' ', $assessment['category_name_' . $l]) }}
+                  @endif
                 </h6>
                 {{-- @if ($totalAnswered && $totalAnswered == $totalQuestions) --}}
                 <span id="category-completed" class="text-success fw-bold text-sm mt-2" style="display: {{ $totalAnswered > 0 && $totalAnswered == $totalQuestions ? 'block' : 'none' }};">
@@ -180,13 +188,16 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
         @endphp
         <div class="col-md-9 col-12">
           @foreach ($user_scores as $key => $assessment)
+          @if($assessment != null)
           @php
           $categoryId = $assessment['id'];
           @endphp
+          @endif
           <section id="assessmentContent"
             style="{{ $key == 0 ? 'display: block;' : 'display: none;' }}">
             <div class="d-flex flex-column gap-6">
               <div class="d-flex justify-content-md-between flex-wrap gap-3 gap-md-0">
+                @if($assessment != null)
                 @foreach ($assessment['subcategories'] as $key => $subcategory)
                 @php
                 $totalQuestionsSub = Count($subcategory['questions']);
@@ -217,8 +228,9 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
                   </div>
                 </div>
                 @endforeach
+                @endif
               </div>
-              
+              @if($assessment != null)
               @foreach ($assessment['subcategories'] as $key => $subcategory)
               <div class="row" style="display: {{ $key == 0 ? 'block' : 'none' }};" id="questionsContainer">
                 @foreach ($subcategory['questions'] as $key => $question)
@@ -265,11 +277,13 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
                 @endforeach
               </div>
               @endforeach
+              @endif
             </div>
           </section>
             
           @endforeach
           <div>
+            @if($assessment != null)
             @foreach ($assessment['subcategories'] as $key => $subcategory)
             <div id="submitContainer" style="{{ $key == 0 ? 'display: flex;' : 'display: none;' }}">
               <div class="w-100 d-flex justify-content-end">
@@ -277,6 +291,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
               </div>
             </div>
             @endforeach
+            @endif
           </div>
         </div>
       </div>

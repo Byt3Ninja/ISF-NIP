@@ -16,11 +16,12 @@ class OnlineMeetingFactory
             $service = $Setting->Meeting;
         }
 
+        $service = strtolower( $service );
 
         switch ($service) {
-            case 'Zoom':
+            case 'zoom':
                 return new ZoomService();
-            case 'Teams':
+            case 'teams':
                 return new TeamsService();
             default:
               throw new \Exception("Unsupported online meeting service: $service");

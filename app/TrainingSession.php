@@ -7,9 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class TrainingSession extends Model
 {
-    //    use Auditable;
+    // use Auditable;.
+    // stype
+    // 1: Custom Form
+    // 2: Screening Step
+    // 3: Mentorship Step
+    // 4: Training Step
+    // 5: Final screening Step
     protected $table = 'training_sessions';
-    protected $fillable = ['step_id', 'title', 'dsc', 'datetime', 'duration', 'zoom_id', 'start_url', 'join_url', 'trainer_name', 'trainer_email', 'location'];
+    public static $module = 'Training Sessions';
+    protected $fillable = ['step_id', 'title', 'dsc', 'datetime', 'enddatetime', 'duration', 'zoom_id', 'start_url', 'join_url', 'trainer_name', 'trainer_email', 'training_Address', 'training_location', 'QrCode', 'user_id', 'type'];
     protected $casts = ['datetime'  => 'date:Y-m-d H:i',];
 
 

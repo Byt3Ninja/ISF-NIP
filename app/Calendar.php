@@ -8,6 +8,7 @@ use App\Traits\Auditable;
 class Calendar extends Model
 {
     use Auditable;
+    public static $module = 'Calendar';
 
     protected $fillable = ['organization_id', 'title', 'start', 'end','body','user_id','color','allDay','isPrivate', ];
     protected $casts = [

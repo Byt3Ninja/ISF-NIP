@@ -70,7 +70,7 @@ class ClientCompanyController extends Controller
                 ->where('Company_id', $id)->get();
             $Planned_Milestones = Milestone::where('plan', 'Planned_Milestones')
                 ->where('Company_id', $id)->get();
-            $Currencies = Currency::all(); // جلب جميع الأعضاء
+            $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
             // مسار الملف
             $pathToFile = storage_path($company->pitch_deck);
             // تحقق من وجود الملف
@@ -79,7 +79,7 @@ class ClientCompanyController extends Controller
 
 
 
-            return view('admin/clients/company_profile', compact('company', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
+            return view('admin/clients/startup/company_profile', compact('company', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
         } catch (Exception $e) {
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
@@ -98,14 +98,17 @@ class ClientCompanyController extends Controller
 
         try {
 
+            
             if ($id == null) {
 
                 $client = User::where('HaveCompany', 1)->with('company')
                     ->with('company.city')
                     ->find(Auth::id());
-                if (empty($client)) {
+                   
+                    if (empty($client)) {
                     return redirect()->route('my_profile')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
+                
                 $countries = Country::all();
                 $states = State::all();
                 $Setting = Settings::where('id', 1)->first();
@@ -138,7 +141,7 @@ class ClientCompanyController extends Controller
                 }
                 $Stages = Stage::all();
 
-                $Currencies = Currency::all(); // جلب جميع الأعضاء
+                $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
                 $json = File::get(base_path('database/dbFiles/countries.json'));
                 $_countries = json_decode($json, true);
                 $_countries = collect($_countries)->map(function ($country) {
@@ -158,9 +161,11 @@ class ClientCompanyController extends Controller
                     return $country;
                 });
             } else {
-                if (!Auth::user()->hasanyRole('Admin|organizationManager')) {
-                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
-                }
+                
+                // if (!Auth::user()->hasAnyRole('Admin|organizationManager')) {
+                //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                // }
+             
                 if (Auth::user()->hasRole('organizationManager')) {
                     $userorg = Organization::where('user_id', Auth::id())->first();
                     $cycles = Cycle::where('organization_id', $userorg->id)->with('companies')->get();
@@ -221,7 +226,7 @@ class ClientCompanyController extends Controller
                 }
                 $Stages = Stage::all();
 
-                $Currencies = Currency::all(); // جلب جميع الأعضاء
+                $Currencies = Currency::where('enabled',1)->get(); // جلب جميع الأعضاء
                 $json = File::get(base_path('database/dbFiles/countries.json'));
                 $_countries = json_decode($json, true);
                 $_countries = collect($_countries)->map(function ($country) {
@@ -397,9 +402,6 @@ class ClientCompanyController extends Controller
                 $result->Commercial_Register = $Commercial_Register;
                 $result->Tax_Card = $Tax_Card;
                 $result->Country_Register_id = $cuntryReg ?? 0;
-                $result->institutions = 'null';
-                $result->phone = '0';
-                $result->email = 'null';
             }
             if( $data['CompanyN'] == 2 )
             {
@@ -443,7 +445,7 @@ class ClientCompanyController extends Controller
 
                     // إنشاء رابط الصورة
                     $img_url = Storage::disk('public_uploads')->url($img_path);
-                } else { $img_url = $company->logo; }
+                } else { $img_url = $company->logo ?? 'null'; }
 
                 $result->country_code = $data['country_code'];  // مثال لإضافة حقل الهاتف
                 $result->phone = $data['phone'];  // مثال لإضافة حقل الهاتف
@@ -471,9 +473,14 @@ class ClientCompanyController extends Controller
                     'about_monetize' => 'nullable',
                     'about_challenges' => 'nullable',
                 ]);
+                if (isset($data['Sustainable_development'])) {
+                    $result->Sustainable_development = json_encode($data['Sustainable_development']);
+                }else{
+                    $result->Sustainable_development = '';
+                }
 
                 $result->info_company = $data['company_description'];
-                $result->Sustainable_development = json_encode($data['Sustainable_development']);
+                // $result->Sustainable_development = json_encode($data['Sustainable_development']);
                 $result->about_problem = $data['about_problem'];
                 $result->about_market_opportunity = $data['about_market_opportunity'];
                 $result->about_competitors = $data['about_competitors'];
@@ -697,7 +704,7 @@ class ClientCompanyController extends Controller
                 $request->validate([
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
-                    'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:2048',
+                    'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:20480', // max limit to be defined later from admin panel settings
                 ], [
                     'business_model.required' => __('admin.business_model is required'),
                     'business_model_description.required' => __('admin.business_model_description is required'),
@@ -745,7 +752,7 @@ class ClientCompanyController extends Controller
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (Exception $e) {
-            dd($e);
+            // dd($e);
             // تسجيل الأخطاء الأخرى
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             return redirect()->back()->with(['msg' => __('An unexpected error occurred, please try again later'), 'class' => 'danger']);
@@ -847,13 +854,13 @@ class ClientCompanyController extends Controller
                 if( $request->ajax() ) { return response()->json(['state' => __('admin.founder_email_exist'),]); }
                 else { return redirect()->back()->with('error', __('admin.founder_email_exist')); }
             }
-            $linkedin = $request->input('founder_linkedin');
-            $linked = Team_member::where('LinkedIn', $linkedin)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
-            if ($linked != null) 
-            {
-                if( $request->ajax() ) { return response()->json(data: ['state' => __('admin.founder_linkedin_exist'),]); }
-                else { return redirect()->back()->with('error', __('admin.founder_linkedin_exist')); }
-            }
+            // $linkedin = $request->input('founder_linkedin');
+            // $linked = Team_member::where('LinkedIn', $linkedin)->where('Company_id', $companyId)->where('TeamMember', 'Founder')->first();
+            // if ($linked != null) 
+            // {
+            //     if( $request->ajax() ) { return response()->json(data: ['state' => __('admin.founder_linkedin_exist'),]); }
+            //     else { return redirect()->back()->with('error', __('admin.founder_linkedin_exist')); }
+            // }
 
             $founder = 'Founder';
             // إنشاء وحفظ بيانات العضو في قاعدة البيانات
@@ -969,7 +976,7 @@ class ClientCompanyController extends Controller
         }
         // $user = Auth::user();
         $companyId = $user->company_id;
-
+        
         // إنشاء وحفظ بيانات العضو في قاعدة البيانات
         $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
         if ($teamMember->TeamMember == "Founder") {

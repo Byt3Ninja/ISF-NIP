@@ -26,6 +26,7 @@ use App\Http\Requests\UpdateClientProfileRequest;
 use Intervention\Image\ImageManagerStatic as Image;
 use Storage, Hash, Exception, Session, URL, File;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
+use PragmaRX\Google2FA\Google2FA;
 
 class ClientProfileController extends Controller
 {
@@ -52,7 +53,7 @@ class ClientProfileController extends Controller
             $client = Auth::user();
             $countries = Country::all();
             $expertises = Expertise::where('parent_id',null)->get();
-            $Currencies = Currency::all();
+            $Currencies = Currency::where('enabled',1)->get();
             $json = File::get(base_path('database/dbFiles/countries.json'));
             $_countries = json_decode($json, true);
             $_countries = collect( $_countries )->map(function ($country) {
@@ -67,7 +68,31 @@ class ClientProfileController extends Controller
                 $country->emoji = $emoji;
                 return $country;
             });
-            return view('admin/clients/profile/editProfile', compact('client','Currencies', 'countries','expertises'));
+
+            
+            $google2fa_url = "";
+            $secret_key = "";
+    
+            if($client->exists()){
+                $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+                $google2fa_url = $google2fa->getQRCodeInline(
+                    env('APP_NAME'),
+                    $client->email,
+                    $client->google2fa_secret
+                );
+                $secret_key = $client->google2fa_secret;
+            }
+    
+            $data = array(
+                'user' => $client,
+                'secret' => $secret_key,
+                'google2fa_url' => $google2fa_url
+            );
+
+
+
+
+            return view('admin/clients/profile/editProfile', compact('client','Currencies', 'countries','expertises','data'));
         }
         catch (Exception $e)
         {
@@ -120,8 +145,8 @@ class ClientProfileController extends Controller
                     'profile_privacy'=>$request->profile_privacy,
                     'mentorship_approach'=>json_encode($request->mentorship_approach),
                 ];
-                if ($request->entrepreneurial_experience == 1){
-                    $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief;
+                if ($request->entrepreneurial_experience == 1 ){
+                    $data['entrepreneurial_experience_brief']=$request->entrepreneurial_experience_brief ?? 0;
                 }else{
                     $data['entrepreneurial_experience_brief']=0;
                 }
@@ -136,6 +161,7 @@ class ClientProfileController extends Controller
             $first_name_ar = substr($request->first_name_en, 0, 250);
             $last_name_ar = substr($request->last_name_en, 0, 250);
             $user = Auth::user();
+           
             // // Mentor Bio section
             // if ($request->mentor_section){
             //     $data =[
@@ -170,6 +196,7 @@ class ClientProfileController extends Controller
                 $result = $user->update($request->except(['img_url','password','email','first_name_ar','last_name_ar']) + ['img_url' => $img_url]);
                 $user->first_name_ar = $first_name_ar;
                     $user->last_name_ar = $last_name_ar;
+                   
                     $user->save();
             }else{
                     // if email changed send email verification
@@ -185,6 +212,7 @@ class ClientProfileController extends Controller
                 $user->last_name_ar = $last_name_ar;
               
                     $user->new_email = $request->email;
+                  
                     $user->save();
                      // إرسال رابط التحقق
                     $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
@@ -204,12 +232,13 @@ class ClientProfileController extends Controller
                     $result = $user->update($request->except(['password','email','first_name_ar','last_name_ar']));
                     $user->first_name_ar = $first_name_ar;
                     $user->last_name_ar = $last_name_ar;
+                  
                     $user->save();
                 }else{
                     $result = $user->update($request->except(['password','email','first_name_ar','last_name_ar']));
                     $user->first_name_ar = $first_name_ar;
                     $user->last_name_ar = $last_name_ar;
-              
+                   
                     $user->new_email = $request->email;
                     $user->save();
                      // إرسال رابط التحقق
@@ -341,9 +370,9 @@ class ClientProfileController extends Controller
         
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
-        $ExpertiesSearch = $request->input('ExpertiesSearch');
+        $ExpertiesSearch = $request->input('expertises');
 
-        
+     
         if($setting->mentor_list == 1){
             if (Auth::user()->hasanyRole('Mentor|Registered|Admin')){
     $l = app()->getLocale();
@@ -367,7 +396,7 @@ class ClientProfileController extends Controller
     
     if (!empty($ExpertiesSearch)) {
         // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
-        $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
+        $expertiesMentor = Expertise::where('id', '=', $ExpertiesSearch)->first();
 
         if ($expertiesMentor) { // تأكد من وجود الخبرة
             $expid = $expertiesMentor->id;
@@ -566,6 +595,90 @@ class ClientProfileController extends Controller
     private function generateOtp()
     {
         return mt_rand(100000, 999999);
+    }
+
+    /**
+     * Show 2FA Setting form
+     */
+    public function show2faForm(Request $request){
+        $user = Auth::user();
+        $google2fa_url = "";
+        $secret_key = "";
+
+        if($user->exists()){
+            $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+            $google2fa_url = $google2fa->getQRCodeInline(
+                env('APP_NAME'),
+                $user->email,
+                $user->google2fa_secret
+            );
+            $secret_key = $user->google2fa_secret;
+        }
+
+        $data = array(
+            'user' => $user,
+            'secret' => $secret_key,
+            'google2fa_url' => $google2fa_url
+        );
+
+        return view('auth.2fa_settings')->with('data', $data);
+    }
+
+    /**
+     * Generate 2FA secret key
+     */
+    public function generate2faSecret(Request $request){
+        
+        $user = Auth::user();
+        // Initialise the 2FA class
+        $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+        
+        // Add the secret key to the registration data
+        
+        $user->two_factor_enabled = 0;
+        $user->google2fa_secret = $google2fa->generateSecretKey();
+        $user->save();
+
+        return redirect('/dashboard/myProfile')->with('success',"Secret key is generated.");
+    }
+
+    /**
+     * Enable 2FA
+     */
+    public function enable2fa(Request $request){
+        
+        $user = Auth::user();
+        $google2fa = (new \PragmaRX\Google2FAQRCode\Google2FA());
+
+        $secret = $request->input('secret');
+        $valid = $google2fa->verifyKey($user->google2fa_secret, $secret);
+
+        if($valid){
+            $user->two_factor_enabled = 1;
+            $user->save();
+            return redirect('/dashboard/myProfile')->with('success',"2FA is enabled successfully.");
+        }else{
+            return redirect('/dashboard/myProfile')->with('error',"Invalid verification Code, Please try again.");
+        }
+    }
+
+    /**
+     * Disable 2FA
+     */
+    public function disable2fa(Request $request){
+        if (!(Hash::check($request->get('current-password'), Auth::user()->password))) {
+            // The passwords matches
+            return redirect()->back()->with("error","Your password does not matches with your account password. Please try again.");
+        }
+
+        $validatedData = $request->validate([
+            'current-password' => 'required',
+        ]);
+        $user = Auth::user();
+        $user->two_factor_enabled = 0;
+        $user->google2fa_secret = null;
+        $user->save();
+        return redirect('/dashboard/myProfile')->with('success',"2FA is now disabled.");
     }
 
 

@@ -18,7 +18,7 @@ class quizzesController extends Controller
 	 */
 	public function __construct() { $this->middleware('auth'); }
 
-	public function index()
+	public function index(Request $request)
 	{
 		$user = auth()->user();
 		$organization_id = $user->organization_id;
@@ -28,6 +28,14 @@ class quizzesController extends Controller
 			if( is_array( $organization_id ) ) { $quizzes = $quizzes->whereIn('organization_id', $organization_id); }
 			else { $quizzes = $quizzes->where('organization_id', $organization_id); }
 		}
+		if($request->org_id != 0){
+			$quizzes = $quizzes->where('organization_id', $request->org_id);
+		}
+		if($request->status != 0){
+			$quizzes = $quizzes->where('status', $request->status);
+		}
+
+
 		$quizzes = $quizzes->get();
 		return view('admin.quizzes.index', compact('quizzes'));
 	}
@@ -193,10 +201,10 @@ class quizzesController extends Controller
 	public function my()
 	{
 		$user = auth()->user();
-		if( $user->hasRole(['Registered']) )
+		if( $user->hasAnyRole(['Registered']) )
 		{
-			if( !$user->HaveCompany ) { return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first.', 'class' => 'danger']); }
-			if( !$user->company ) { return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first.', 'class' => 'danger']); }
+			if( !$user->HaveCompany ) { return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']); }
+			if( !$user->company ) { return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']); }
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;

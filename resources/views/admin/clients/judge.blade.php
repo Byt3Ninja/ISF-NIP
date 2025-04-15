@@ -99,18 +99,19 @@
                     @foreach ($services_latest as $serv)
                       <div class="d-flex justify-content-between align-items-center my-2">
                         <div class="widget-todo-title-area d-flex align-items-center">
-                          <a href="/dashboard/directory?find={{ $serv->{'name_' . $l} }}">
-                            <span class="widget-todo-title ml-50 text-secondary">
+                          @if( $_user->ableTo('directory', $permissions) )<a href="/dashboard/directory?find={{ $serv->{'name_' . $l} }}">
+                            <span class="widget-todo-title ml-50 text-secondary"> @endif
                               <i class="ti ti-link"></i>
                               {{ $serv->{'name_' . $l} }}</span>
-                          </a>
+                          @if( $_user->ableTo('directory', $permissions) )</a> @endif
                         </div>
                         <div class="widget-todo-item-action d-flex align-items-center">
                           <div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-conetnt-center"
                             style="width: 200px; height: 30px">
-                            <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}">
-                              {{ $serv->serviceCategory->{'name_' . $l} }}
-                            </a>
+                            @if( $_user->ableTo('directory', $permissions) && $serv->serviceCategory ) <a href="/dashboard/directory?type={{ $serv->serviceCategory->id }}"> @endif
+                              {{ $serv->serviceCategory ? $serv->serviceCategory->{'name_' . $l} : __('dashboard.No category') }}
+                              @if( $_user->ableTo('directory', $permissions) && $serv->serviceCategory ) 
+                            </a> @endif
                           </div>
                         </div>
                       </div>
@@ -143,12 +144,12 @@
                     @foreach ($events_latest as $event)
                       <div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
                         <div class="widget-todo-title-area d-flex align-items-center">
-                          <a href="/dashboard/calendar">
+                          @if( $_user->ableTo('calendar', $permissions) )<a href="/dashboard/calendar"> @endif
                             <span class="widget-todo-title ml-50 text-secondary">
                               <i class="ti ti-link"></i>
                               {{ $event->title }}
                             </span>
-                          </a>
+                          @if( $_user->ableTo('calendar', $permissions) )</a>@endif
                         </div>
                         <div
                           class="btn btn-label-success text-success py-1 rounded d-flex align-items-center justify-conetnt-center"
@@ -235,9 +236,9 @@
                               <td>
                                 <div class="d-flex align-items-center">
                                   <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
-                                  <a href="/dashboard/screening/{{ $form->id }}/{{ $company->id }}" class="text-decoration-none">
+                                  @if( $_user->ableTo('screening.show', $permissions) )<a href="/dashboard/screening/{{ $form->id }}/{{ $company->id }}" class="text-decoration-none"> @endif
                                     {{ $company->name }}
-                                  </a>
+                                  @if( $_user->ableTo('screening.show', $permissions) ) </a> @endif
                                 </div>
                               </td>
                               <td>
@@ -306,15 +307,15 @@
                         <i class="ti ti-bell ti-24px"></i>
                         <span class="mx-2">
                           {{ $step->title }} - ({{ $step->cycle->title }})
-                          - {{ __('dashboard.start from') }} {{ $step->from->format('d-M') }}
-                          {{ __('dashboard.to') }} {{ $step->to->format('d-M-Y') }}
+                          - {{ __('dashboard.start from') }} {{ $step->from->format('d-m-Y') }}
+                          {{ __('dashboard.to') }} {{ $step->to->format('d-m-Y') }}
                         </span>
                       </h5>
                     </div>
                     <div class="card-body">
                       <p class="card-text">{{ $step->description }}</p>
                       <small class="text-muted">{{ __('dashboard.This Cycle Start from') }}
-                        {{ $step->cycle->start->format('d-m') }} {{ __('dashboard.to') }}
+                        {{ $step->cycle->start->format('d-m-Y') }} {{ __('dashboard.to') }}
                         {{ $step->cycle->end->format('d-m-Y') }}</small>
                     </div>
                     <div class="table-responsive">
@@ -329,15 +330,14 @@
                           </tr>
                         </thead>
                         <tbody>
-                          
                           @foreach ($fcompanies as $fcompany)
                             <tr>
                               <td>
                                 <div class="d-flex align-items-center">
                                   <img src="{{ $fcompany->company->logo_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
-                                  <a href="/dashboard/companyProfile/{{ $fcompany->company_id }}" class="text-decoration-none">
+                                  @if( $_user->ableTo('company_profile', $permissions) )<a href="/dashboard/companyProfile/{{ $fcompany->company_id }}" class="text-decoration-none">@endif
                                     {{ $fcompany->company->name }}
-                                  </a>
+                                  @if( $_user->ableTo('company_profile', $permissions) )</a>@endif
                                 </div>
                               </td>
                               <td>
@@ -372,9 +372,11 @@
                                   <a href="{{ $fcompany->join_url }}" target="_blank" class="btn btn-primary btn-sm">
                                     <i class="ti ti-user"></i> {{ __('dashboard.Join') }}
                                   </a>
+                                  @if( $_user->ableTo('screening.openForm', $permissions) )
                                   <a href="/dashboard/final/{{ $step->id }}/{{ $fcompany->company_id }}" target="_blank" class="btn btn-success btn-sm">
                                     <i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
                                   </a>
+                                  @endif
                                 @else
                                   {{ __('dashboard.Not started') }}
                                 @endif

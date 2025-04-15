@@ -16,10 +16,12 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-@can ('manage_log')
-@if (count($auditLogs)>0)           <a href="/reports/audit-log" class="btn btn-primary glow">{{__('audit.Download all records')}}</a>
-                                    <a href="#" id="deleteAll" data-url="/dashboard/audit-logs/0" class="btn btn-danger glow">{{__('audit.Empty Log table')}}</a> @endif
-@endcan
+                                @if( $_user->ableTo('manage_log', $permissions) )
+                                    @if (count($auditLogs)>0)
+                                        <a href="/reports/audit-log" class="btn btn-primary glow">{{__('audit.Download all records')}}</a>
+                                        <a href="#" id="deleteAll" data-url="/dashboard/audit-logs/0" class="btn btn-danger glow">{{__('audit.Empty Log table')}}</a>
+                                    @endif
+                                @endif
                             </div>
                             <div class="card-content">
                                 <div class="card-body card-dashboard">
@@ -29,7 +31,7 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>{{ __('audit.description')}}</th>
-                                                    <th>{{ __('audit.subject_id')}}</th>
+                                                    {{--  <th>{{ __('audit.subject_id')}}</th>  --}}
                                                     <th>{{ __('audit.subject_type')}}</th>
                                                     <th>{{ __('audit.user_id')}}</th>
                                                     <th>{{ __('audit.host')}}</th>
@@ -46,14 +48,20 @@
                                                         <td>
                                                             {{ $auditLog->description ?? '' }}
                                                         </td>
-                                                        <td>
+                                                        {{--  <td>
                                                             {{ $auditLog->subject_id ?? '' }}
+                                                        </td>  --}}
+                                                        <td>
+                                                            {{ $auditLog->instance ?? '' }}
                                                         </td>
                                                         <td>
-                                                            {{ $auditLog->subject_type ?? '' }}
-                                                        </td>
-                                                        <td>
-                                                            {{ $auditLog->user_id ?? '' }}
+                                                            @if( $auditLog->user_id > 0 && $auditLog->user )
+                                                                @if( $_user->ableTo('users.edit', $permissions) ) <a target="_blank" href="{{ route('users.edit', ['user' => $auditLog->user->id]) }}">@endif
+                                                                {{ $auditLog->user->name ?? '' }}
+                                                                @if( $_user->ableTo('users.edit', $permissions) )</a>@endif
+                                                            @else
+                                                                -
+                                                            @endif
                                                         </td>
                                                         <td>
                                                             {{ $auditLog->host ?? '' }}

@@ -11,6 +11,7 @@ class Menu extends Model
   public $timestamps = false;
 
   protected $table = 'menus';
+  public static $module = 'Menus';
 
   protected $fillable = ['organization_id', 'parent_id','title','ar_title','url','target','order'];
 

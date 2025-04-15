@@ -26,6 +26,7 @@ class StoreServiceCategoryRequest extends FormRequest
         return [
             'name_en' => 'required',
             'name_ar' => 'required',
+            'organization_id' => 'required|exists:organizations,id',
         ];
     }
 }

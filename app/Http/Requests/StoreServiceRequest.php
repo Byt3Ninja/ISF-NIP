@@ -25,10 +25,14 @@ class StoreServiceRequest extends FormRequest
     {
         return [
             'name_en' => 'required',
-            'name_ar' => 'required',
             'description_en' => 'required',
-            'description_ar' => 'required',
-            'img_url' => 'required',
+            'img_url' => 'nullable',
+            'service_category_id' => 'required|exists:service_categories,id',
+            'vendor_name' => 'required|string|max:50',
+            'vendor_email' => 'required|string|max:50|unique:services,vendor_email,except,id',
+            'vendor_phone' => 'required|string|max:11',
+            'organization_ids' => 'nullable|array',
+            'organization_ids.*' => 'exists:organizations,id',
         ];
     }
 }

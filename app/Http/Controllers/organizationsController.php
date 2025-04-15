@@ -31,10 +31,14 @@ class organizationsController extends Controller
 		$this->middleware('auth');
 	}
 
-	public function index()
+	public function index(Request $request)
 	{
-		$organizations = Organization::with(['user', 'cycles'])->get();
-
+		$organizations = Organization::with(['user', 'cycles']);
+		if($request->status !== null && $request->status !== 'all') {
+		$organizations = $organizations->where('status', $request->status)->get();
+		}else{
+			$organizations = $organizations->get();
+		}
 		foreach ($organizations as $organization) {
 			$organization->total_startups = Company::whereHas('cycle', function ($query) use ($organization) {
 				$query->where('organization_id', $organization->id);
@@ -60,15 +64,16 @@ class organizationsController extends Controller
 			'name_ar' => ['required', 'string', 'max:255'],
 			'name_en' => ['required', 'string', 'max:255'],
 		]);
-		$role = Roles::where('name', 'organizationManager')->first();
+		$role = Roles::where('default_for', 'organizationManager')->first();
 		if (empty($role)) {
 			$role = new Roles;
 			$role->name = 'organizationManager';
+			$role->default_for = 'organizationManager';
 			$role->guard_name = 'web';
 			$role->save();
 		}
 		$user = User::create($request->except(['_token', 'name_en', 'name_ar', 'password_confirmation']));
-		$user->assignRole($role->id);
+		$user->allotRole($role->default_for);
 
 		$organization = new Organization;
 		$organization->name_ar = $request->name_ar;

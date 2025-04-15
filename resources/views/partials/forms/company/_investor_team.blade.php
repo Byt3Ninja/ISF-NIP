@@ -23,6 +23,12 @@
               <i class="ti ti-user"></i>
             </div>
           </div>
+          <div id="investor-error1" class="invalid-feedback">
+            {{ __('admin.investor_name_required') }}
+          </div>
+          <div id="investor-error2" class="invalid-feedback">
+            {{ __('admin.please_enter_valid_name') }}
+          </div>
         </div>
         <div class="form-group mb-4">
           <label class="form-label fw-semibole mb-2 fs-6" for="investment_type">{{ __('admin.investment_type') }}</label>
@@ -35,7 +41,7 @@
               autocomplete="investment_type"
               required
             >
-              <option value="{{ __('admin.investment_type') }}" selected disabled>
+              <option value="" selected disabled>
                 {{ __('admin.investment_type') }}
               </option>
               <option value="Angel_Investor">{{ __('admin.Angel_Investor') }}</option>
@@ -53,20 +59,24 @@
               <i class="ti ti-world"></i>
             </div>
           </div>
+          <div id="investment-error" class="invalid-feedback">
+            {{ __('admin.investment_type_required') }}
+          </div>
+        </div>
+        <div class="col-12 text-end mt-3" style="height: 40px;">
+          <input type="hidden" name="TeamsNo" value="Investors" />
+          <button
+             type="button" 
+            class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
+            do="Investors"
+            company="{{ optional($client->company)->id }}"
+          >
+            <i class="ti ti-plus me-3"></i>
+            {{ $l == 'en' ? 'Add new investor' : 'إضافة مستثمر جديد' }}
+          </button>
         </div>
       </form>
-      <div class="col-12 text-end mt-3" style="height: 40px;">
-        <input type="hidden" name="TeamsNo" value="Investors" />
-        <button
-          {{--  type="submit"  --}}
-          class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams"
-          do="Investors"
-          company="{{ optional($client->company)->id }}"
-        >
-          <i class="ti ti-plus me-3"></i>
-          {{ $l == 'en' ? 'Add new investor' : 'إضافة مستثمر جديد' }}
-        </button>
-      </div>
+      
       @if($client->company)
       <div class="ShowTableInvestors">
         <div class="row px-4 mt-4">
@@ -158,6 +168,12 @@
                             <i class="ti ti-user"></i>
                           </div>
                         </div>
+                        <div id="investor-error1" class="invalid-feedback">
+                          {{ __('admin.investor_name_required') }}
+                        </div>
+                        <div id="investor-error2" class="invalid-feedback">
+                          {{ __('admin.please_enter_valid_name') }}
+                        </div>
                       </div>
                       <div class="form-group mb-4">
                         <label class="form-label mb-2 fs-6 fw-semibold">
@@ -165,7 +181,7 @@
                         </label>
                         <div class="input-group input-group-merge">
                           <select
-                            class="form-select form-control investment_type{{ $Investor->id }}"
+                            class="form-select form-control investment_type"
                             id="investment_type{{ $Investor->id }}"
                             name="investment_type"
                             aria-placeholder="{{ __('admin.investment_type') }}"
@@ -208,14 +224,18 @@
                             <i class="ti ti-world"></i>
                           </div>
                         </div>
+                        <div id="investment-error" class="invalid-feedback">
+                          {{ __('admin.investment_type_required') }}
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div class="mt-6">
                     <button 
-                      {{--  type="submit"   --}}
+                      type="button"
                       class="btn btn-primary me-3 data-submit EditTeams" 
                       do="{{ $Investor->id }}"
+                      data-id="Investors"
                       company="{{ optional($client->company)->id }}"
                     >
                       {{ __('admin.submit') }}

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Cycle extends Model
 {
     use Auditable;
+    public static $module = 'Program';
     protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d',];
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
@@ -38,5 +39,10 @@ class Cycle extends Model
     public function CalenderSync()
     {
         return $this->morphMany(CalenderSync::class, 'calenderable');
+    }
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'cycle_project')->withPivot(['status','created_at'])->withTimestamps(); 
     }
 }

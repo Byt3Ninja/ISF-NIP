@@ -1,0 +1,71 @@
+@extends('layouts.admin')
+@section('title', __('admin.Projects') )
+
+@section('style')
+<style>
+  #basic-input {
+    width: 70%;
+    margin: 2rem auto 4rem auto;
+  }
+
+  @media (max-width: 768px) {
+    #basic-input {
+      width: 100%;
+    }
+  }
+</style>
+@stop
+
+@section('content')
+<!-- BEGIN: Content-->
+
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="content-body">
+      <section id="basic-input">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+              <div class="card-header">
+                <h4 class="card-title fw-bold pb-3 border-bottom">{{__('admin.add_new_project')}}</h4>
+              </div>
+              <div class="card-content">
+                <div class="card-body">
+                  <form action="{{ route('projects.store') }}" method="POST">
+                    @csrf
+                    <div class="row">
+                      <div class="col-md-12 mb-4">
+                        <label class="fw-semibold mb-1 fs-6 form-label">{{ __('admin.Name') }}</label>
+                        <input type="text" name="name" class="form-control" required placeholder="{{ __('admin.Name') }}" />
+                        @error('name')
+                        <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                      </div>
+                      <div class="col-md-12">
+                        <label class="fw-semibold mb-1 fs-6 form-label">{{__('admin.Description')}}</label>
+                        <textarea name="description" rows="5" class="form-control" placeholder="{{__('admin.Description')}}"></textarea>
+                      </div>
+                    </div>
+                    <div class="w-100 d-flex justify-content-end mt-6">
+                      <button type="submit" class="btn btn-primary">
+                        {{ __('admin.Save') }}
+                        <i class="ti ti-circle-check ms-3"></i>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+@stop
+
+<!-- END: Content-->
+
+{{-- @section('pagescripts')
+<script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
+@stop --}}

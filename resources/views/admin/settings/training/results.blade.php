@@ -28,12 +28,12 @@
         <div class="d-flex flex-wrap align-items-end w-100 gap-6">
           <div class="w-50 mt-4">
             <label for="cstep" class="form-label fs-6 mb-2">{{ __('cycles.Select training from list') }}</label>
-            <select id="cstep" class="form-select cyclesExcel"
+            <select id="cstep" class="form-select select2 cyclesExcel"
               onchange="window.open('/dashboard/training/results/'+this.options[this.selectedIndex].value,'_self');">
               @foreach ($sessions as $step)
               <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }} -
                 {{ $step->step->title }} ({{ __('cycles.Cycle') }} "{{ $step->step->cycle->title }}" -
-                {{ __('cycles.Start') }} {{ $step->step->from->format('d-m') }}) -
+                {{ __('cycles.Start') }} {{ $step->step->from->format('d-m-Y') }}) -
                 {{ optional(optional(optional($step->step)->cycle)->organization)->name }}</option>
               @endforeach
             </select>
@@ -57,7 +57,7 @@
             <h4 class="card-title">
               {{ $step->title }} - {{ $csession->step->title }} 
               <small class="text-muted">
-                {{ __('cycles.from') }} {{ $csession->step->from->format('d-m') }}
+                {{ __('cycles.from') }} {{ $csession->step->from->format('d-m-Y') }}
                 {{ __('cycles.to') }} {{ $csession->step->to->format('d-m-Y') }}
               </small>
             </h4>

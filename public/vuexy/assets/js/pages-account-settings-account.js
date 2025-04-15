@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
   (function () {
     const formAccSettings = document.querySelector('#formAccountSettings'),
       deactivateAcc = document.querySelector('#formAccountDeactivation'),
-      deactivateButton = deactivateAcc.querySelector('.deactivate-account');
+      deactivateButton = deactivateAcc ? deactivateAcc.querySelector('.deactivate-account') : null;
 
     // Form validation for Add new record
     if (formAccSettings) {

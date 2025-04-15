@@ -6,7 +6,7 @@
       <form 
         id="founder-form" 
         method="post" 
-        action="{{ route('AddTeams_Comp') }}" 
+        {{-- action="{{ route('AddTeams_Comp') }}"  --}}
         enctype="multipart/form-data"
       >
         @csrf
@@ -34,6 +34,8 @@
                   <i class="ti ti-user"></i>
                 </div>
               </div>
+              <div id="founder-error1" class="invalid-feedback">{{__('admin.founder_name_is_required')}}</div>
+              <div id="founder-error2" class="invalid-feedback">{{__('admin.please_enter_valid_name')}}</div>
             </div>
           </div>
           <div class="col-12">
@@ -59,6 +61,7 @@
                   <i class="ti ti-mail"></i>
                 </div>
               </div>
+              <div id="email-error" class="invalid-feedback">{{__('admin.please_enter_valid_email')}}</div>
             </div>
           </div>
           <div class="col-12">
@@ -78,21 +81,20 @@
                   name="founder_linkedin" 
                   autocomplete="founder_linkedin" 
                   placeholder="e.g. https://www.linkedin.com/in/username" 
-                  pattern="https://www.linkedin.com/.*" 
-                  title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
                   oninput="this.value = this.value.trimStart()"
                 />
                 <div class="input-group-text">
                   <i class="ti ti-brand-linkedin"></i>
                 </div>
               </div>
+              <div id="linkedin-error" class="invalid-feedback">{{__('admin.please_enter_valid_linkedin')}}</div>
             </div>
           </div>
         </div>
         <div class="col-12 text-end mt-3" style="height: 40px;">
           <input type="hidden" name="TeamsNo" value="Founders" />
           <button 
-            {{--  type="submit"   --}}
+            type="button"  
             class="btn btn-outline-primary text-black fw-bold rounded-pill AddTeams" 
             do="Founders" 
             company="{{ optional($client->company)->id }}"
@@ -133,10 +135,12 @@
                   <i class="ti ti-mail"></i>
                   <span class="text-muted text-xs">{{ $fonder->Email }}</span>
                 </div>
+                @if ($fonder->LinkedIn)
                 <div class="d-flex align-items-center gap-2">
                   <img src="/icons/linkedin.svg" width="18" height="18" />
-                  <span class="text-muted text-xs">{{ $fonder->LinkedIn }}</span>
+                  <span class="text-muted text-xs">{{ $fonder->LinkedIn == null ? __('admin.No_LinkedIn') : $fonder->LinkedIn }}</span>
                 </div>
+                @endif
               </div>
               <div class="ms-auto position-relative">
                 <div 
@@ -148,6 +152,7 @@
                     class="d-flex align-items-center gap-2 p-2 cursor-pointer" 
                     data-bs-toggle="modal" 
                     data-bs-target="#EditTeams{{ $fonder->id }}"
+                    id="edit-founder-link"
                   >
                     <i class="ti ti-pencil text-primary fs-6"></i>
                     <span style="font-size: 11px;" class="fw-bold">{{ __('admin.Edit') }}</span>
@@ -216,7 +221,7 @@
                       <div class="input-group input-group-merge">
                         <input 
                           type="text" 
-                          class="form-control founder_name{{ $fonder->id }}" 
+                          class="form-control founder_name" 
                           id="founder_name{{ $fonder->id }}" 
                           placeholder="{{ __('admin.founder_name') }}" 
                           value="{{ $fonder->Name ? $fonder->Name : old('founder_name') }}" 
@@ -228,6 +233,8 @@
                           <i class="ti ti-user"></i>
                         </div>
                       </div>
+                      <div id="founder-error1" class="invalid-feedback">{{__('admin.founder_name_is_required')}}</div>
+                      <div id="founder-error2" class="invalid-feedback">{{__('admin.please_enter_valid_name')}}</div>
                     </div>
                     <div class="form-group mb-4">
                       <label 
@@ -238,7 +245,7 @@
                       <div class="input-group input-group-merge">
                         <input 
                           type="email" 
-                          class="form-control founder_email{{ $fonder->id }}" 
+                          class="form-control founder_email" 
                           id="founder_email{{ $fonder->id }}" 
                           placeholder="{{ __('admin.founder_email') }}" 
                           value="{{ $fonder->Email ? $fonder->Email : old('founder_email') }}" 
@@ -250,6 +257,7 @@
                           <i class="ti ti-mail"></i>
                         </div>
                       </div>
+                      <div id="email-error" class="invalid-feedback">{{__('admin.please_enter_valid_email')}}</div>
                     </div>
                     <div class="form-group mb-4">
                       <label 
@@ -261,28 +269,28 @@
                         <div class="input-group input-group-merge">
                           <input 
                             type="url" 
-                            class="form-control founder_linkedin{{ $fonder->id }}" 
+                            class="form-control founder_linkedin" 
                             id="founder_linkedin{{ $fonder->id }}" 
                             value="{{ $fonder->LinkedIn ? $fonder->LinkedIn : old('founder_linkedin') }}" 
                             name="founder_linkedin" 
                             autocomplete="founder_linkedin" 
                             placeholder="e.g. https://www.linkedin.com/in/username"
-                            pattern="https://www.linkedin.com/.*"
-                            title="{{ $l == 'en' ? 'Please enter a valid LinkedIn URL.' : 'يرجى إدخال رابط لينكد إن صالح.' }}"
                             oninput="this.value = this.value.trimStart()"
                           />
                           <div class="input-group-text">
                             <i class="ti ti-brand-linkedin"></i>
                           </div>
                         </div>
+                        <div id="linkedin-error" class="invalid-feedback">{{__('admin.please_enter_valid_linkedin')}}</div>
                       </div>
                     </div>
                   </div>
                   <div class="mt-6">
                     <button 
-                      {{--  type="submit"   --}}
+                      {{-- type="submit" --}}
                       class="btn btn-primary me-3 data-submit EditTeams" 
                       do="{{ $fonder->id }}" 
+                      data-id="Founders"
                       company="{{ optional($client->company)->id }}"
                     >
                       {{ __('admin.submit') }}

@@ -9,11 +9,23 @@
 @section('content')
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="mb-1">{{ __('admin.Roles_List') }}</h4>
-    <p class="mb-6">
-      {{ __('admin.Roles_Description_1') }} <br />
-      {{ __('admin.Roles_Description_2') }}
-    </p>
+    <div class="row">
+      <div class="col-9">
+        <h4 class="mb-1">{{ __('admin.Roles_List') }}</h4>
+        <p class="mb-6">
+          {{ __('admin.Roles_Description_1') }} <br />
+          {{ __('admin.Roles_Description_2') }}
+        </p>
+      </div>
+      <div class="col-3 text-end pt-10">
+        @if( $_user->ableTo('permissions.index', $permissions) )
+          <a href="{{ route('permissions.index') }}" class="btn btn-primary">
+            <i class="ti ti-list me-1"></i>
+            {{ __('admin.Permissions') }}
+          </a>
+        @endif
+      </div>
+    </div>
     
     <!-- Alert -->
     @if (session()->has('msg'))
@@ -34,6 +46,7 @@
     <!-- Roles List -->
     <div class="row g-6">
       <!-- Add New Role Card -->
+      @if($_user->ableToAny(['roles.create', 'roles.store'], $permissions))
       <div class="col-xl-4 col-lg-6 col-md-6">
         <div class="card h-100">
           <div class="row h-100">
@@ -66,31 +79,35 @@
           </div>
         </div>
       </div>
+      @endif
       <!--/ Add New Role Card -->
       @foreach ($roles as $key => $role)
+        @php
+          $roleUsers = $role->users;
+          $totalUsers = $roleUsers->count();
+        @endphp
         <!-- Role Card -->
         <div class="col-xl-4 col-lg-6 col-md-6">
           <div class="card">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-4">
-                <h6 class="fw-normal mb-0 text-body text-capitalize">
-                  @php($totalUsers = 10)
-                  {{ __('admin.TOTAL').' '.$totalUsers.' '.__('admin.USERS') }}
+                <h6 class="fw-normal mb-0 text-body">
+                  {{ __('admin.totalUsers', ['num' => $totalUsers]) }}
                 </h6>
-                @php($userImages = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])
                 <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                  @foreach ($userImages as $key => $userImage)
+                  @foreach ($roleUsers as $key => $roleUser)
                     @if ($key < 3)
                       <li
                         data-bs-toggle="tooltip"
                         data-popup="tooltip-custom"
                         data-bs-placement="top"
-                        title="User {{ $key + 1 }}"
+                        title="{{ $roleUser->name }}"
                         class="avatar pull-up"
                       >
                         <img
                           class="rounded-circle"
-                          src="/vuexy/assets/img/avatars/{{ $userImage }}.png"
+                          src="{{ $roleUser->image_url ? $roleUser->image_url : '/images/user-placeholder.jpeg'}}"
+                          onerror="this.src='/images/user-placeholder.jpeg'"
                           alt="Avatar"
                         />
                       </li>
@@ -113,6 +130,7 @@
               <div class="d-flex justify-content-between align-items-end">
                 <div class="role-heading">
                   <h5 class="mb-1">{{ $role->name ?? '' }}</h5>
+                  @if($_user->ableToAny(['roles.edit', 'roles.update'], $permissions))
                   <a
                     class="role-edit-modal"
                     href="{{ route('roles.edit', ['role' => $role->id]) }}"
@@ -121,8 +139,8 @@
                     {{-- data-bs-target="#addRoleModal" --}}
                   >
                     <span>{{ __('admin.Edit_Role') }}</span>
-                  </a
-                  >
+                  </a>
+                  @endif
                 </div>
                 @if (!in_array($role->id, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
                   <button 

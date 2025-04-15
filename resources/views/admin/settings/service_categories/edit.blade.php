@@ -2,6 +2,11 @@
 @section('title', __('admin.Services Categories') )
 @section('index_url', route('serviceCategories.index') )
 @section('subTitle', __('admin.Edit service category'))
+@php
+    $user = auth()->user();
+    $isOrgMan = $user->hasRole('organizationManager');
+    $org_id = $user->organization_id ?? 0;
+@endphp
 @section('content')
 <!-- BEGIN: Content-->
   <div class="content-wrapper">
@@ -23,10 +28,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-warning alert-danger mb-2" role="alert">
-                                                    <button type="button" class="close" data-bs-dismiss="alert"
-                                                        aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                     <div class="d-flex align-items-center">
                                                         <i class="ti ti-error"></i>
                                                         <span>
@@ -43,7 +45,16 @@
                                         @method('patch')
                                         <div class="row">
                                             <div class="col-md-12">
-
+                                                <fieldset class="form-group {{ $isOrgMan ? 'd-none' : '' }}">
+                                                    <label for="organization_id">{{ __('cycles.Select_Organization')}}</label>
+                                                    <select required class="form-select" id="organization_id" name="organization_id" data-placeholder="{{ __('cycles.Select_Organization') }}">
+                                                        @if( !$isOrgMan ) <option selected disabled value="">{{ __('cycles.Select_Organization') }}</option>  @endif
+                                                        @foreach( \App\Organization::all() as $org )
+                                                            @php if( $isOrgMan && $org->id != $org_id ) { continue; } @endphp
+                                                            <option {{ ( ( $isOrgMan && $org->id == $org_id ) || $org->id == $serviceCategory->organization_id ) ? 'selected' : '' }} value="{{ $org->id }}">{{ $org->{'name_' . app()->getLocale()} }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </fieldset>
                                                 <fieldset class="form-group">
                                                     <label for="basicInput">{{ __('admin.English Name')}}</label>
                                                     <input style="direction: ltr;" type="text" class="form-control" id="name_en" name='name_en'
@@ -59,14 +70,15 @@
 
                                             </div>
                                         </div>
+                                        @if( $_user->ableToAny(['serviceCategories.edit', 'serviceCategories.update'], $permissions) )
                                         <div class="row">
                                             <div class="col-12 d-flex justify-content-end">
-                                                <button type="submit"
-                                                    class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
+                                                <button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
                                             </div>
                                         </div>
+                                        @endif
+                                    </form>
                                 </div>
-                                </form>
                             </div>
                         </div>
                     </div>

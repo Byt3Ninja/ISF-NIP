@@ -30,6 +30,8 @@ class BroadcastConfigService
                     'LINKEDIN_CLIENT_SECRET' => '',
                     'LINKEDIN_REDIRECT_URI' => '',
 
+                    'locale' => 'en',
+
                 ];
             }
         }
@@ -55,6 +57,8 @@ class BroadcastConfigService
             'MICROSOFT_CLIENT_SECRET_ID' => $settings->MICROSOFT_CLIENT_SECRET_ID ?? '',
             'MICROSOFT_APP_EMAIL' => $settings->MICROSOFT_APP_EMAIL ?? '',
             'MICROSOFT_REDIRECT_URI' => $settings->MICROSOFT_REDIRECT_URI ?? '',
+
+            'locale' => $settings->Default_Language ?? 'en',
 
         ];
     }

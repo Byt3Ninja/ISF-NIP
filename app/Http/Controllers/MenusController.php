@@ -8,55 +8,56 @@ use Redirect;
 
 class MenusController extends Controller
 {
-    public function add_Menu() {
-        $this->preProcessingCheck('manage_menus');
+    public function add_Menu()
+    {
         return view('admin.settings.menus.add_new_menu');
     }
+
     public function store_Menu(Request $request)
     {
-            $this->preProcessingCheck('manage_menus');
-            $newMenu = new Menu();
-            $newMenu->menu_type = $request->input('menu_type');
-            $newMenu->parent_id = $request->input('parent_id');
-            $newMenu->title = $request->input('title');
-			$newMenu->ar_title = $request->input('ar_title');
-            $newMenu->url = $request->input('url');
-			$newMenu->order = $request->input('order');
-			$newMenu->target = $request->input('target');
-            $newMenu->user_added = Auth::user()->id;
-            $newMenu->Save();
-            return redirect('dashboard/menus')->with('message', 'StoredSuccessfully');
+        $newMenu = new Menu();
+        $newMenu->menu_type = $request->input('menu_type');
+        $newMenu->parent_id = $request->input('parent_id');
+        $newMenu->title = $request->input('title');
+        $newMenu->ar_title = $request->input('ar_title');
+        $newMenu->url = $request->input('url');
+        $newMenu->order = $request->input('order');
+        $newMenu->target = $request->input('target');
+        $newMenu->user_added = Auth::user()->id;
+        $newMenu->Save();
+        return redirect('dashboard/menus')->with('message', 'StoredSuccessfully');
     }
-    public function myMenus(){
-        $this->preProcessingCheck('manage_menus');
+
+    public function myMenus()
+    {
         $getMenus = Menu::orderBy('order','ASC')->get();
-        return view('admin.settings.menus.menus')
-            ->with('getMenus',$getMenus);
+        return view('admin.settings.menus.menus')->with('getMenus',$getMenus);
     }
-    public function editMenu($id,Request $request){
-            $this->preProcessingCheck('manage_menus');
-            $getMenu = Menu::findOrfail($id);
-            return view('admin.settings.menus.edit_menu')
-                ->with('getMenu',$getMenu);
+
+    public function editMenu($id,Request $request)
+    {
+        $getMenu = Menu::findOrFail($id);
+        return view('admin.settings.menus.edit_menu')->with('getMenu',$getMenu);
     }
-    public function updatemenu($id,Request $request){
-            $this->preProcessingCheck('manage_menus');
-            $updateMenu = Menu::findOrfail($id);
-           	$updateMenu->menu_type = $request->input('menu_type');
-           	$updateMenu->parent_id = $request->input('parent_id');
-            $updateMenu->title = $request->input('title');
-			$updateMenu->ar_title = $request->input('ar_title');
-            $updateMenu->url = $request->input('url');
-			$updateMenu->order = $request->input('order');
-			$updateMenu->target = $request->input('target');
-            $updateMenu->user_added = Auth::user()->id;
-            $updateMenu->Save();
-         return redirect('dashboard/menus')->with('message', 'StoredSuccessfully');
+
+    public function updatemenu($id,Request $request)
+    {
+        $updateMenu = Menu::findOrfail($id);
+        $updateMenu->menu_type = $request->input('menu_type');
+        $updateMenu->parent_id = $request->input('parent_id');
+        $updateMenu->title = $request->input('title');
+        $updateMenu->ar_title = $request->input('ar_title');
+        $updateMenu->url = $request->input('url');
+        $updateMenu->order = $request->input('order');
+        $updateMenu->target = $request->input('target');
+        $updateMenu->user_added = Auth::user()->id;
+        $updateMenu->Save();
+        return redirect('dashboard/menus')->with('message', 'StoredSuccessfully');
     }
+
     public function deleteMenu($id)
     {
-            $this->preProcessingCheck('manage_menus');
-            Menu::Destroy($id);
-            return redirect()->back()->with('message', 'DeletedSuccessfully');
+        Menu::Destroy($id);
+        return redirect()->back()->with('message', 'DeletedSuccessfully');
     }
 }

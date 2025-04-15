@@ -2,31 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\BuilderField;
-use App\Company;
-use App\FinalData;
-use App\Finalscreening;
-use App\Formdata;
-use App\Formfield;
-use App\Jobs\ExportCycleCompData;
-use App\Screening;
-use App\TrainingSession;
-use Carbon\Carbon;
-use http\Env\Response;
-use Illuminate\Http\Request;
-
-use App\Cycle;
-use App\Step;
 use App\Form;
+use App\Step;
+use App\Cycle;
+use App\Company;
+use App\Formdata;
+use App\FinalData;
+use App\Formfield;
+use App\Screening;
+use Carbon\Carbon;
 use App\BuilderForm;
+use App\BuilderField;
+use http\Env\Response;
+use App\Services\WhatsAppService;
+
+use App\Finalscreening;
+use App\TrainingSession;
+use Illuminate\Http\Request;
+use App\Jobs\ExportCycleCompData;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
+use App\Notifications\StartupJoiningNotification;
 
 class CyclesController extends Controller
 {
+
+    protected $whatsAppService;
+	public function __construct(WhatsAppService $whatsAppService)
+	{
+		$this->whatsAppService = $whatsAppService;
+	}
 
     public function exportcyclesComp(Request $request)
     {
@@ -70,8 +78,6 @@ class CyclesController extends Controller
     }
     public function index($id = 0)
     {
-        $this->preProcessingCheck('edit_cycles');
-
         $organization_id = auth()->user()->organization_id;
 
         $cycles = Cycle::when(!is_null($organization_id), function ($q) use ($organization_id) {
@@ -90,9 +96,8 @@ class CyclesController extends Controller
         return view('admin.settings.cycles.index', compact('cycles', 'steps', 'id', 'svgs'));
     }
 
-    public function users($id)
+    public function users(Request $request, $id)
     {
-        $this->preProcessingCheck('edit_cycles');
         $organization_id = auth()->user()->organization_id;
 
         if ($id == 0) {
@@ -107,19 +112,48 @@ class CyclesController extends Controller
                 return $q->where('organization_id', $organization_id);
             })->get();
         }
-        $companies = Company::where('cycle', $id)->get();
+        $companies = Company::where('cycle', $id);
         $uniqueCycleIds = $companies->pluck('cycle')->unique();
         $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
+        if($request->step_id != 0){
+            $companies = $companies->where('step', $request->step_id);
+        }
+        if($request->country_id != 0){
+            $companies = $companies->where('country_id', $request->country_id);
+        }
+        if($request->sector_id != 0){
+            $companies = $companies->where('sector', $request->sector_id);
+        }
+        if($request->Dstage_id != 0){
+            $companies = $companies->where('stage', $request->Dstage_id);
+        }
+        if($request->funding_stage != 0){
+            $companies = $companies->where('development_stage', $request->funding_stage);
+        }
+        if($request->targeted_market != 0){
+            $companies = $companies->where(function ($query) use ($request) {
+                foreach ($request->targeted_market as $market) {
+                    $query->orWhereJsonContains('targeted_market', $market);
+                }
+            });
+        }
+        if($request->BType != 0){
+            $companies = $companies->where('business_type', $request->BType);
+        }
+
+
+        $companies = $companies->get();
         return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps'));
     }
 
     public function modify(Request $request)
     {
-        $this->preProcessingCheck('edit_cycles');
+
         $id = $request->cycleid;
         $type = $request->type;
-
+        
         if ($request->has('date_range')) {
+            
             $dates = explode(' - ', $request->date_range);
             $request->merge([
                 'start' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
@@ -128,20 +162,22 @@ class CyclesController extends Controller
                 'toDate' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
 
             ]);
+            
         }
        
         if ($type == 1) {
             
-
+            
             /// Edit Cycle
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
                 'description' => 'required|string|max:2000',
-                'date_range' => 'required|date',
+                'start' => 'required|date',
+                'end' => 'required|date',
             ]);
 
-
+            
 
             $cycle = Cycle::find($id);
 
@@ -466,7 +502,7 @@ class CyclesController extends Controller
 
         // Check Company ---> forward to profile
         if (!Auth::user()->HaveCompany) {
-            return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first.', 'class' => 'danger']);
+            return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
         if (!Auth::user()->company) {
             return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
@@ -592,7 +628,37 @@ class CyclesController extends Controller
             ]);
         }
 
+        $data =[];
+        $user = Auth::user();
+		$name = $user->first_name_en . ' ' . $user->last_name_en;
+        
+        $data = [
+            'name' => $name,
+            'email' => $user->email,
+            'step' => $user->company->stepdata->title,
+            'cycle' => $user->company->cycledata->title,
+        ];
+        
+        // إرسال الإشعار
+        if( !in_array(env('APP_ENV', 'local'), ['local']) )
+        {
+            try {
+                $user->notify(new StartupJoiningNotification($data));
+                log::info('Sent notification to ' . $user->email);
+            } catch (\Throwable $th) {
+                throw $th;
+            }
 
+            $phoneNumber = $user->country_code_w_a . $user->whatsapp;
+					$Massage = "Dear " . $user->name . ",
+Congratulations! You have successfully joined the" . $data['cycle'] .", 
+We are excited to have you on board and look forward to supporting your journey.
+Thanks from " . env('APP_NAME');
+					$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+        }
+
+            
         return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
     }
 }

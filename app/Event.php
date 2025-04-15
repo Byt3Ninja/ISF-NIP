@@ -8,4 +8,5 @@ use App\Traits\Auditable;
 class Event extends Model
 {
     use Auditable;
+    public static $module = 'Events';
 }

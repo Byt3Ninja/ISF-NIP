@@ -10,13 +10,9 @@
   <div class="container-xxl flex-grow-1 container-p-y">
     <div class="content-overlay"></div>
     
-        <div class="content-header mb-4">
-          <h4 class="content-card-title">{{ $l == 'en' ? 'Permissions List' : 'قائمة الصلاحيات' }}</h4>
-        </div>
+        <div class="content-header mb-4"> <h4 class="content-card-title">{{ $l == 'en' ? 'Permissions List' : 'قائمة الصلاحيات' }}</h4> </div>
         <div class="content-body">
           <section id="basic-datatable">
-            
-            
             <div class="row">
               <div class="col-12">
                 <div class="card">
@@ -32,10 +28,7 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="alert alert-success alert-dismissible mb-2" role="alert">
-                                                    <button type="button" class="close" data-bs-dismiss="alert"
-                                                            aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                     <div class="d-flex align-items-center">
                                                         <i class="ti ti-check"></i>
                                                         <span>
@@ -53,23 +46,29 @@
                                                 <tr>
                                                     <th>{{ __('ID')}}</th>
                                                     <th>{{ __('Title')}}</th>
+                                                    <th>{{ $l == 'en' ? 'Assigned To' : 'الموظفين المُستخدمين'}}</th>
                                                     <th>{{ __('Edit/ Delete')}}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                            @foreach($permissions as $key => $permission)
+                                            @foreach($_permissions as $key => $permission)
                                                     <tr>
+                                                        <td> {{ $permission->id ?? '' }} </td>
                                                         <td>
-                                                            {{ $permission->id ?? '' }}
-                                                        </td>
-                                                        <td>
+                                                            @if( $permission->core )
+                                                            <i title="Core Permission" class="fas fa-fw fa-check-circle text-success"></i>
+                                                            @endif
                                                             {{ $permission->name  ?? '' }}
                                                         </td>
                                                         <td>
-                                                            <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
-{{--                                                            <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>--}}
+                                                            @foreach( $permission->roles as $role )
+                                                                <a target="_blank" href="{{ route('roles.edit', ['role' => $role->id]) }}" class="mx-2 btn btn-xs btn-label-primary">{{ $role->name ?? '' }} </a/>
+                                                            @endforeach
                                                         </td>
-
+                                                        <td>
+                                                            <a href="{{route('permissions.edit', ['permission' => $permission->id])}}" class="btn btn-label-info"><i class="ti ti-edit text-info"> </i></a>
+                                                            {{--  <button id='deleteAction' data-id='{{$permission->id}}' data-url="{{route('permissions.destroy', ['permission' => $permission->id])}}" type="button" class="btn btn-label-danger"><i class="ti ti-trash text-danger"> </i></button>  --}}
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -81,8 +80,7 @@
                         </div>
                     </div>
                 </div>
-
-        </div>
+            </div>
         </section>
     </div>
 </div>
