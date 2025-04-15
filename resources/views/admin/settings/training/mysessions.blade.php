@@ -67,7 +67,7 @@
                           {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
                           {{ $session->location }} <br>
                           @else
-                          <a title="Show course contents" href="/dashboard/training/my/{{ $session->location }}">{{
+                          <a title="Show course contents" href="/dashboard/training/my/{{ $session->training_Address }}">{{
                             __('cycles.Display course contents') }}
                           </a>
                           @endif
