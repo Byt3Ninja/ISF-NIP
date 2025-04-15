@@ -704,7 +704,7 @@ class ClientCompanyController extends Controller
                 $request->validate([
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
-                    'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:2048',
+                    'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:20480', // max limit to be defined later from admin panel settings
                 ], [
                     'business_model.required' => __('admin.business_model is required'),
                     'business_model_description.required' => __('admin.business_model_description is required'),

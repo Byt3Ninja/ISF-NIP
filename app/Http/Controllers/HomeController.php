@@ -1490,11 +1490,11 @@ class HomeController extends Controller
                 users u
             INNER JOIN 
                 countries c ON u.country_id = c.id
-            GROUP BY
-                c.name_en,
-                c.name_ar
         ";
-        if( $has_org ) { $users_gender_q .= " WHERE u.organization_id = " . $user->organization_id; }
+        if( $has_org ) { $country_data_q .= " WHERE u.organization_id = " . $user->organization_id; }
+        $country_data_q .= " GROUP BY
+                c.name_en,
+                c.name_ar";
 
         $country_data = collect( DB::select($country_data_q) )->map(function ($item) {
             return [
@@ -1758,11 +1758,12 @@ class HomeController extends Controller
                 users u
             INNER JOIN
                 states s ON u.state_id = s.id
-            GROUP BY
-                `name_en`,
-                `name_ar`
         ";
         if( $has_org ) { $users_gov_q .= " WHERE u.organization_id = " . $user->organization_id; }
+        $users_gov_q .= " GROUP BY
+                        s.name_en,
+                        s.name_ar";
+
         $users_gov = collect( DB::select($users_gov_q) );
 
         $users_gender_q = "SELECT
@@ -1770,10 +1771,9 @@ class HomeController extends Controller
                 count(*) as total
             FROM
                 users u
-            GROUP BY
-                gender
         ";
         if( $has_org ) { $users_gender_q .= " WHERE u.organization_id = " . $user->organization_id; }
+        $users_gender_q .= " GROUP BY gender";
         $users_gender = collect( DB::select($users_gender_q) );
 
         $data['countries'] = $country_data;

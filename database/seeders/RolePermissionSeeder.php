@@ -17,25 +17,41 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
+        $installed_roles = Collect( DB::select('SELECT id,name, default_for, guard_name FROM roles') );
         $jsonRole = File::get(base_path('database/dbFiles/roles.json'));
         $dataRole = json_decode($jsonRole,true);
-        $jsonPermission = File::get(base_path('database/dbFiles/permissions.json'));
-        $dataPermission = json_decode($jsonPermission,true);
-        $jsonPermissionRole = File::get(base_path('database/dbFiles/role_has_permissions.json'));
-        $dataPermissionRole = json_decode($jsonPermissionRole,true);
+        // $jsonPermission = File::get(base_path('database/dbFiles/permissions.json'));
+        // $dataPermission = json_decode($jsonPermission,true);
+        // $jsonPermissionRole = File::get(base_path('database/dbFiles/role_has_permissions.json'));
+        // $dataPermissionRole = json_decode($jsonPermissionRole,true);
 
-        foreach ($dataRole as $value){
-            Role::create($value);
+        foreach( $dataRole as $value )
+        {
+            $check = $installed_roles->where('name', $value['name'])->first();
+            if( empty( $check ) )
+            {
+                Role::create($value);
+            }
         }
-        foreach ($dataPermission as $value){
-            Permission::create($value);
-        }
-        foreach ($dataPermissionRole as $value) {
-            DB::table('role_has_permissions')->insert([
-                $value
-            ]);
-        }
-        $user=User::first();
-        $user->allotRole(Role::first()->name);
+        Permission::default_permissions();
+        // foreach ($dataPermission as $value){
+        //     Permission::create($value);
+        // }
+        // foreach( $dataPermissionRole as $value ) {
+        //     DB::table('role_has_permissions')->insert([
+        //         $value
+        //     ]);
+        // }
+        // $user = User::first();
+        // $getRole = Role::where('default_for', 'LIKE', '%admin%')->first();
+        // if( empty( $getRole ) )
+        // {
+        //     $getRole = new Role;
+        //     $getRole->name = 'admin';
+        //     $getRole->default_for = 'admin';
+        //     $getRole->guard_name = 'web';
+        //     $getRole->save();
+        // }
+        // $user->allotRole('admin');
     }
 }

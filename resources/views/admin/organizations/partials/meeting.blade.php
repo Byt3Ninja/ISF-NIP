@@ -7,8 +7,8 @@
       <div class="form-group mb-3">
           <label class="form-label mb-1">{{ __('admin.Meeting') }}</label>
           <select class="form-control" id="meeting_platform" name="meeting_platform" required>
-              <option value="zoom" {{ old('meeting_platform', $organization->meeting_platform) == 'zoom' ? 'selected' : '' }}>{{__('admin.Zoom')}}</option>
-              <option value="teams" {{ old('meeting_platform', $organization->meeting_platform) == 'teams' ? 'selected' : '' }}>{{__('admin.Teams')}}</option>
+              <option value="zoom" {{ strtolower( old('meeting_platform', $organization->meeting_platform) ) == 'zoom' ? 'selected' : '' }}>{{__('admin.Zoom')}}</option>
+              <option value="teams" {{ strtolower( old('meeting_platform', $organization->meeting_platform) ) == 'teams' ? 'selected' : '' }}>{{__('admin.Teams')}}</option>
           </select>
       </div>
 
