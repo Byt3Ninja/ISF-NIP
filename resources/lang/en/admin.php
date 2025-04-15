@@ -97,7 +97,7 @@ return [
 	'Password' => 'Password',
 	'Confirm' => 'Confirm',
 	'Company' => 'Startup',
-	'My company' => 'My Startup',
+	'My company' => 'My Startup / Idea',
 	'Manage Organizations' => 'Manage Organizations',
 	'Organizations' => 'Organizations',
 	'Organization' => 'Organization ',
