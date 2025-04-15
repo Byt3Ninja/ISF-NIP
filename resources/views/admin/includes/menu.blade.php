@@ -1,4 +1,10 @@
-@php $setting = \App\Settings::where('id', 1)->first(); @endphp
+@php
+  $setting = \App\Settings::where('id', 1)->first();
+  if( $_user->HaveCompany && $_user->company && $_user->company->cycledata && $_user->company->cycledata->organization)
+  {
+    $_user->organization = $_user->company->cycledata->organization;
+  }
+@endphp
 <style>
   /* Add this to your CSS file */
 .logo-img {
