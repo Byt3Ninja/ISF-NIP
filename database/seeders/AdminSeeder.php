@@ -29,7 +29,7 @@ class AdminSeeder extends Seeder
         if( empty( $getRole ) )
         {
             $getRole = new Role;
-            $getRole->name = 'admin';
+            $getRole->name = 'Admin';
             $getRole->default_for = 'admin';
             $getRole->guard_name = 'web';
             $getRole->save();

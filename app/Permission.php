@@ -85,7 +85,7 @@ class Permission extends Model
 			$mentor->permissions()->sync( $mentor_ids );
 		}
 		$judgers = Role::where('default_for', 'judger')->get();
-		if( empty( $judger ) )
+		if( empty( $judgers ) )
 		{
 			Role::create([
 				'name' => 'Judger',

@@ -286,6 +286,7 @@
                                 <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
                                  <div class="avatar">
                                   <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle"
+                                  onerror="this.onerror=null;this.src='/app-assets/images/logo_placeholder.png';"
                                   height="40" width="40">
                                  </div>
                                 </a>
