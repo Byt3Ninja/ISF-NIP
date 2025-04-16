@@ -805,11 +805,16 @@ class MessengerController extends Controller
             'draftsNumber'=> $drafts ]);
     }
     public function deleteDraft(Request $request){
-        $draft = DB::table('message_drafts')->where('drafts',$request->draftsNumber);
+
+        
+        $draft = DB::table('message_drafts')->where('id',$request->draftsNumber)->first();
+        $drafts = $draft->drafts;
+        
         if (!$draft) {
             return response()->json(['error' => __('admin.MessageError')]);
         }
-        $draft->delete();
+        $delete = DB::table('message_drafts')->where('drafts', $drafts)->delete();
+        
         return response()->json(['success' => __('admin.MessageDraftDeletedSuccessfully')]);
     }
 
