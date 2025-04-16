@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-email.css" />
 @stop
 
-@php
+{{-- @php
   $folders = collect([
     ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => count($receivedMessages), 'class' => 'bg-label-primary']],
     ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => count($sentMessages), 'class' => 'bg-label-success']],
@@ -18,7 +18,7 @@
     ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => count($starred), 'class' => 'bg-label-warning']],
     ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => count($trashedMessages), 'class' => 'bg-label-danger']]
   ]);
-@endphp
+@endphp --}}
 
 @section('content')
 <!-- Content wrapper -->
