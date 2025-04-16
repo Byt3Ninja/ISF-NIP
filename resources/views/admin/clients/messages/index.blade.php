@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/app-email.css" />
 @stop
 
-@php
+{{-- @php
   $folders = collect([
     ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => count($receivedMessages), 'class' => 'bg-label-primary']],
     ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => count($sentMessages), 'class' => 'bg-label-success']],
@@ -18,7 +18,7 @@
     ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => count($starred), 'class' => 'bg-label-warning']],
     ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => count($trashedMessages), 'class' => 'bg-label-danger']]
   ]);
-@endphp
+@endphp --}}
 
 @section('content')
 <!-- Content wrapper -->
@@ -144,10 +144,10 @@
       function filterUsersByCycle(cycleId) {
         if (!cycleId) return null;
         $.ajax({
-          url: "{{ route('getUsersByProgram') }}",
+          url: "{{ route('messages.recipients_list_by_program') }}",
           method: "GET",
           data: {
-            cycle_id: cycleId
+            id: cycleId
           },
           success: function(response) {
             let userSelect = $('select[name="users[]"]');
@@ -182,7 +182,7 @@
       $('#message-details-view').removeClass('show');
 
     // console.log('draftMessageData', draftMessageData)
-      const { receivers, type, subject, body } = draftMessageData || {};
+      const { receivers, type, subject, body, id } = draftMessageData || {};
       
       $('#sendMessageModal').modal('show');
 
@@ -190,6 +190,7 @@
       $('#select-type').val(type ?? 0);
       $('#send-message-subject').val(subject ?? '');
       $('#send-message-text').val(body ?? '');
+      $('#draftsNumber').val(id ?? '');
       menus(type);
     }
 
@@ -214,22 +215,19 @@
 
       if (replies && replies.length > 0) {
         $('#message-replies-container').show();
-        
         $('#message-details-replies').html('');
         replies.forEach(reply => {
           $('#message-details-replies').append(`
             <li class="list-group-item gap-3 p-2 border-bottom">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="fw-semibold fs-6">${reply.first_name_en} ${reply.last_name_en}</div>
+                <div class="fw-semibold fs-6">${reply.sender.name}</div>
                 <div class="d-flex align-items-center">
                   <span class="me-2 text-muted">${moment(reply.created_at).format('MMMM Do YYYY, h:mm A')}</span>
-                  <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${reply.id}, event)">
-                    <i class="ti ti-trash ti-sm"></i>
-                  </button>
+                 
                 </div>
               </div>
               <div class="pe-0 pe-md-12">
-                <p class="mb-1 text-muted">${reply.message}</p>
+                <p class="mb-1 text-muted">${reply.body}</p>
               </div>
             </li>
           `);
@@ -239,8 +237,11 @@
       //   $('#message-details-replies').html('<p>{{ __('messages.No replies yet.') }}</p>');
       // }
 
+      // <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${reply.id}, event)">
+      //               <i class="ti ti-trash ti-sm"></i>
+      //             </button>
       if (sender) {
-        $('#message-reply-receiver_id').val(sender);
+        $('#message-reply-receiver_id').val(sender.id);
         if (sender.name) {
           $('#message-details-createdBy').text(`${sender.name}`);
         }
@@ -392,7 +393,8 @@
         _token: $('meta[name="csrf-token"]').attr('content') // مهم جداً للـ CSRF
       },
       success: function(response) {
-      // console.log(response); // أو أي بيانات جاية من السيرفر
+      console.log(response); // أو أي بيانات جاية من السيرفر
+      location.reload();
       },
       error: function(xhr) {
         console.error('Error:', xhr.responseText);
@@ -575,5 +577,42 @@
         },
       });
     });
+
+    // $(document).on('change', '.cycle_id', function() {
+    //   var messageId = $(this).val();
+      
+    //   $.ajax({
+    //     url: '/dashboard/get-users-by-cycle', // الرoutes المناسب
+    //     type: 'get',
+    //     data: {
+    //       id: messageId,
+    //       _token: '{{ csrf_token() }}'
+    //     },
+    //     success: function(response) {
+    //       console.log(response);
+    //       var users = response.users;
+    //   var select = $('.usersdraft');
+    //   select.empty(); // إزالة الخيارات القديمة
+
+    //   if (users.length > 0) {
+    //     users.forEach(function(user, index) {
+    //       var isSelected = index === 0 ? 'selected' : '';
+    //       var option = `<option value="${user.id}" ${isSelected}>${user.full_name}</option>`;
+    //       select.append(option);
+    //     });
+    //   } else {
+    //     select.append('<option disabled>لا يوجد مستخدمين</option>');
+    //   }
+
+    //   select.trigger('change'); // لإعادة تفعيل Select2 بعد التحديث
+    
+    //     },
+    //     error: function(xhr) {
+    //      console.error('Error:', xhr.responseText);
+    //     }
+    //   });
+    // });
+
+
   </script>
 @stop

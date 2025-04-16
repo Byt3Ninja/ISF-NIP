@@ -13,9 +13,12 @@ return new class extends Migration
 	{
 		if( Schema::hasTable('permissions') )
 		{
-			Schema::table('permissions', function (Blueprint $table) {
-				$table->boolean('is_core')->nullable()->default(false)->comment('core permission will be allowed to any role')->after('guard_name');
-			});
+			if( !Schema::hasColumn('permissions', 'is_core') )
+			{
+				Schema::table('permissions', function (Blueprint $table) {
+					$table->boolean('is_core')->nullable()->default(false)->comment('core permission will be allowed to any role')->after('guard_name');
+				});
+			}
 		}
 	}
 
@@ -26,9 +29,12 @@ return new class extends Migration
 	{
 		if( Schema::hasTable('permissions') )
 		{
-			Schema::table('permissions', function (Blueprint $table) {
-				$table->dropColumn('is_core');
-			});
+			if( Schema::hasColumn('permissions', 'is_core') )
+			{
+				Schema::table('permissions', function (Blueprint $table) {
+					$table->dropColumn('is_core');
+				});
+			}
 		}
 	}
 };

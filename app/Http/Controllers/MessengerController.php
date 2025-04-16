@@ -113,20 +113,20 @@ class MessengerController extends Controller
        
         // $drafts = DB::table('message_drafts')->where('sender', $userId)->get();
 
-        $drafts = MessageDraft::leftJoin('users', 'sender', '=', 'users.id')
-            ->where('sender', $userId)
-            ->orderBy('created_at', 'DESC')
-            ->get([
-                'message_drafts.id',
-                'first_name_en',
-                'last_name_en',
-                'first_name_ar',
-                'last_name_ar',
-                'subject',
-                'message',
-                'message_drafts.created_at',
-                'message_drafts.sender'
-            ]);
+        // $drafts = MessageDraft::leftJoin('users', 'sender', '=', 'users.id')
+        //     ->where('sender', $userId)
+        //     ->orderBy('created_at', 'DESC')
+        //     ->get([
+        //         'message_drafts.id',
+        //         'first_name_en',
+        //         'last_name_en',
+        //         'first_name_ar',
+        //         'last_name_ar',
+        //         'subject',
+        //         'message',
+        //         'message_drafts.created_at',
+        //         'message_drafts.sender'
+        //     ]);
 
     //     $trashedMessages = DB::table('messenger')
     // ->whereNotNull('deleted_at')
@@ -226,7 +226,62 @@ class MessengerController extends Controller
                 $message->replies = $groupedReplies[$message->id] ?? collect();
                 return $message;
             });
+
+            $rawDrafts = MessageDraft::leftJoin('users as sender_user', 'sender', '=', 'sender_user.id')
+                ->leftJoin('users as receiver_user', 'receiver', '=', 'receiver_user.id')
+                ->leftJoin('companies as co', 'co.id', '=', 'receiver_user.company_id')
+                ->leftJoin('organizations as org', 'org.id', '=', 'receiver_user.organization_id')
+                ->leftJoin('cycles as cy', 'cy.id', '=', 'message_drafts.cycle_id')
+                ->where('sender', $userId)
+                ->orderBy('message_drafts.created_at', 'DESC')
+                ->get([
+                    'message_drafts.id',
+                    'message_drafts.drafts',
+                    'message_drafts.subject',
+                    'message_drafts.message',
+                    'message_drafts.created_at',
+                    'message_drafts.sender',
+                    'message_drafts.receiver',
+                    'message_drafts.type',
+
+                    // بيانات المرسل
+                    'sender_user.first_name_en as sender_first_name_en',
+                    'sender_user.last_name_en as sender_last_name_en',
+                    'sender_user.first_name_ar as sender_first_name_ar',
+                    'sender_user.last_name_ar as sender_last_name_ar',
+                    'sender_user.img_url as img_url',
+
+                    // بيانات المستقبل
+                    'receiver_user.id as receiver_id',
+                    'receiver_user.first_name_en as receiver_first_name_en',
+                    'receiver_user.last_name_en as receiver_last_name_en',
+                    'receiver_user.first_name_ar as receiver_first_name_ar',
+                    'receiver_user.last_name_ar as receiver_last_name_ar',
+
+                    'co.id as company_id',
+                    'co.name_en as company_name_en',
+                    'co.name_ar as company_name_ar',
+                    'co.logo as company_logo_url',
+
+                    'org.id as organization_id',
+                    'org.name_en as organization_name_en',
+                    'org.name_ar as organization_name_ar',
+                    'org.img_url as organization_img_url',
+
+                    'cy.id as cycle_id',
+                    'cy.title as cycle_title',
+                ]);
+
+            // groupBy drafts
+            $drafts = $rawDrafts->groupBy('drafts');
         
+            $folders = collect([
+                ['target' => 'inbox', 'icon' => 'ti-inbox', 'label' => 'Inbox', 'badge' => ['count' => $this->getMessageCountByType($userId, 'inbox'), 'class' => 'bg-label-primary']],
+                ['target' => 'sent', 'icon' => 'ti-send', 'label' => 'Sent', 'badge' => ['count' => $this->getMessageCountByType($userId, 'sent'), 'class' => 'bg-label-success']],
+                ['target' => 'draft', 'icon' => 'ti-edit', 'label' => 'Draft', 'badge' => ['count' => count($drafts), 'class' => 'bg-label-secondary']],
+                ['target' => 'starred', 'icon' => 'ti-star', 'label' => 'Starred', 'badge' => ['count' => $this->getMessageCountByType($userId, 'starred'), 'class' => 'bg-label-warning']],
+                ['target' => 'trash', 'icon' => 'ti-trash', 'label' => 'Trash', 'badge' => ['count' => $this->getMessageCountByType($userId, 'trash'), 'class' => 'bg-label-danger']],
+            ]);
 
 
         // Return a single view with all data
@@ -242,6 +297,7 @@ class MessengerController extends Controller
         'drafts',
         'trashedMessages',
         'starred',
+        'folders'
         ));
     }
 
@@ -405,6 +461,7 @@ class MessengerController extends Controller
 
     public function destroy(Request $request)
     {
+        
         try {
             $id = $request->input('id');
             $del = Messenger::where(function($query) {
@@ -415,6 +472,8 @@ class MessengerController extends Controller
             ->first();
             if ($del) {
                 Messenger::Destroy($id);
+                // حذف جميع الردود التابعة لها
+                Messenger::where('reply_id', $id)->delete();
                 return response()->json([
                     'state' => 'success'
                 ], 200);
@@ -474,8 +533,8 @@ class MessengerController extends Controller
 
     public function getUsersByProgram(Request $request)
     {
-        $cycleId = $request->input('cycle_id');
-
+        $cycleId = $request->input('id');
+       
         $users = Company::where('cycle', $cycleId)
             ->whereHas('user', function ($query) {
                 $query->role('Registered');
@@ -749,11 +808,16 @@ class MessengerController extends Controller
             'draftsNumber'=> $drafts ]);
     }
     public function deleteDraft(Request $request){
-        $draft = DB::table('message_drafts')->where('drafts',$request->draftsNumber);
+
+        
+        $draft = DB::table('message_drafts')->where('id',$request->draftsNumber)->first();
+        $drafts = $draft->drafts;
+        
         if (!$draft) {
             return response()->json(['error' => __('admin.MessageError')]);
         }
-        $draft->delete();
+        $delete = DB::table('message_drafts')->where('drafts', $drafts)->delete();
+        
         return response()->json(['success' => __('admin.MessageDraftDeletedSuccessfully')]);
     }
 
@@ -854,6 +918,8 @@ class MessengerController extends Controller
 
     public function sendReplyMessage(Request $request)
     {
+       
+
         $request->validate([
             'message_subject' => 'nullable|string|max:255',
             'message_message' => 'required|string',
@@ -1002,21 +1068,21 @@ class MessengerController extends Controller
             LEFT JOIN
                 users reply_sender ON reply.sender = reply_sender.id
             WHERE
-                m.reply_id IS NULL
+                
         ";
 
         switch ($type) {
             case 'inbox':
-                $query .= " AND m.receiver = $userId AND m.deleted_at IS NULL";
+                $query .= " m.receiver = $userId AND m.deleted_at IS NULL AND m.reply_id IS NULL";
                 break;
             case 'sent':
-                $query .= " AND m.sender = $userId AND m.deleted_at IS NULL";
+                $query .= "  m.sender = $userId AND m.deleted_at IS NULL";
                 break;
             case 'starred':
-                $query .= " AND m.starred = 1 AND (m.sender = $userId OR m.receiver = $userId) AND m.deleted_at IS NULL";
+                $query .= "  m.starred = 1 AND (m.sender = $userId OR m.receiver = $userId) AND m.deleted_at IS NULL AND m.reply_id IS NULL";
                 break;
             case 'trash':
-                $query .= " AND m.deleted_at IS NOT NULL AND (m.sender = $userId OR m.receiver = $userId)";
+                $query .= "  m.deleted_at IS NOT NULL AND (m.sender = $userId OR m.receiver = $userId) AND m.reply_id IS NULL";
                 break;
         }
 
@@ -1051,5 +1117,28 @@ class MessengerController extends Controller
         
         return $messages;
         
+    }
+    private function getMessageCountByType($userId, $type)
+    {
+        $where = '';
+
+        switch ($type) {
+            case 'inbox':
+                $where = "receiver = $userId AND deleted_at IS NULL AND reply_id IS NULL";
+                break;
+            case 'sent':
+                $where = "sender = $userId AND deleted_at IS NULL";
+                break;
+            case 'starred':
+                $where = "starred = 1 AND (sender = $userId OR receiver = $userId) AND deleted_at IS NULL AND reply_id IS NULL";
+                break;
+            case 'trash':
+                $where = "deleted_at IS NOT NULL AND (sender = $userId OR receiver = $userId) AND reply_id IS NULL";
+                break;
+            default:
+                return 0;
+        }
+
+        return DB::table('messenger')->whereRaw($where)->count();
     }
 }
