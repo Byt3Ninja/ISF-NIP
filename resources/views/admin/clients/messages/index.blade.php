@@ -182,7 +182,7 @@
       $('#message-details-view').removeClass('show');
 
     // console.log('draftMessageData', draftMessageData)
-      const { receivers, type, subject, body } = draftMessageData || {};
+      const { receivers, type, subject, body, id } = draftMessageData || {};
       
       $('#sendMessageModal').modal('show');
 
@@ -190,6 +190,7 @@
       $('#select-type').val(type ?? 0);
       $('#send-message-subject').val(subject ?? '');
       $('#send-message-text').val(body ?? '');
+      $('#draftsNumber').val(id ?? '');
       menus(type);
     }
 
@@ -391,7 +392,8 @@
         _token: $('meta[name="csrf-token"]').attr('content') // مهم جداً للـ CSRF
       },
       success: function(response) {
-      // console.log(response); // أو أي بيانات جاية من السيرفر
+      console.log(response); // أو أي بيانات جاية من السيرفر
+      location.reload();
       },
       error: function(xhr) {
         console.error('Error:', xhr.responseText);

@@ -1523,5 +1523,6 @@ return [
 	'No Messages Selected' => 'لم يتم تحديد رسائل',
 	'Select at least one message' => 'يرجى تحديد رسالة واحدة على الأقل للحذف',
 	'OK' => 'حسناً',
+	'MessageDraftDeletedSuccessfully' => 'تم حذف الرسالة المحفوظة بنجاح',
 ]; 
 
