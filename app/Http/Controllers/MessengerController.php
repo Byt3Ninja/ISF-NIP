@@ -461,6 +461,7 @@ class MessengerController extends Controller
 
     public function destroy(Request $request)
     {
+        
         try {
             $id = $request->input('id');
             $del = Messenger::where(function($query) {
@@ -471,6 +472,8 @@ class MessengerController extends Controller
             ->first();
             if ($del) {
                 Messenger::Destroy($id);
+                // حذف جميع الردود التابعة لها
+                Messenger::where('reply_id', $id)->delete();
                 return response()->json([
                     'state' => 'success'
                 ], 200);
@@ -530,8 +533,8 @@ class MessengerController extends Controller
 
     public function getUsersByProgram(Request $request)
     {
-        $cycleId = $request->input('cycle_id');
-
+        $cycleId = $request->input('id');
+       
         $users = Company::where('cycle', $cycleId)
             ->whereHas('user', function ($query) {
                 $query->role('Registered');

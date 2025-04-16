@@ -144,10 +144,10 @@
       function filterUsersByCycle(cycleId) {
         if (!cycleId) return null;
         $.ajax({
-          url: "{{ route('getUsersByProgram') }}",
+          url: "{{ route('messages.recipients_list_by_program') }}",
           method: "GET",
           data: {
-            cycle_id: cycleId
+            id: cycleId
           },
           success: function(response) {
             let userSelect = $('select[name="users[]"]');
@@ -223,9 +223,7 @@
                 <div class="fw-semibold fs-6">${reply.sender.name}</div>
                 <div class="d-flex align-items-center">
                   <span class="me-2 text-muted">${moment(reply.created_at).format('MMMM Do YYYY, h:mm A')}</span>
-                  <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${reply.id}, event)">
-                    <i class="ti ti-trash ti-sm"></i>
-                  </button>
+                 
                 </div>
               </div>
               <div class="pe-0 pe-md-12">
@@ -239,6 +237,9 @@
       //   $('#message-details-replies').html('<p>{{ __('messages.No replies yet.') }}</p>');
       // }
 
+      // <button class="btn btn-icon btn-text-secondary rounded-pill" onclick="delme(${reply.id}, event)">
+      //               <i class="ti ti-trash ti-sm"></i>
+      //             </button>
       if (sender) {
         $('#message-reply-receiver_id').val(sender.id);
         if (sender.name) {
@@ -576,5 +577,42 @@
         },
       });
     });
+
+    // $(document).on('change', '.cycle_id', function() {
+    //   var messageId = $(this).val();
+      
+    //   $.ajax({
+    //     url: '/dashboard/get-users-by-cycle', // الرoutes المناسب
+    //     type: 'get',
+    //     data: {
+    //       id: messageId,
+    //       _token: '{{ csrf_token() }}'
+    //     },
+    //     success: function(response) {
+    //       console.log(response);
+    //       var users = response.users;
+    //   var select = $('.usersdraft');
+    //   select.empty(); // إزالة الخيارات القديمة
+
+    //   if (users.length > 0) {
+    //     users.forEach(function(user, index) {
+    //       var isSelected = index === 0 ? 'selected' : '';
+    //       var option = `<option value="${user.id}" ${isSelected}>${user.full_name}</option>`;
+    //       select.append(option);
+    //     });
+    //   } else {
+    //     select.append('<option disabled>لا يوجد مستخدمين</option>');
+    //   }
+
+    //   select.trigger('change'); // لإعادة تفعيل Select2 بعد التحديث
+    
+    //     },
+    //     error: function(xhr) {
+    //      console.error('Error:', xhr.responseText);
+    //     }
+    //   });
+    // });
+
+
   </script>
 @stop
