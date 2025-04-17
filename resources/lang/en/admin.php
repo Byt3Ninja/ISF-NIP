@@ -1503,4 +1503,6 @@ return [
 	'Select at least one message' => 'Please select at least one message to delete',
 	'OK' => 'OK',
 	'MessageDraftDeletedSuccessfully' => 'Message Draft Deleted Successfully',
+	'visability_status' => 'Visability Status',
+   'licenseAlreadyActivated' => 'You already have an active license until :',
 ];

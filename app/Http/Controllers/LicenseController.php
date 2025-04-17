@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\License;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -11,6 +13,16 @@ class LicenseController extends Controller
 {
     public function showActivateForm()
     {
+        $activeLicense = License::where('status', 'ACTIVE')
+        ->where('expires_at', '>', now())
+        ->first();
+
+    if ($activeLicense) {
+        return view('admin.license.result', [
+            'message' => __('admin.licenseAlreadyActivated') . ' ' . $activeLicense->expires_at->translatedFormat('Y-m-d H:i'),
+            'success' => true,
+        ]);
+    }
         return view('admin.license.activate');
     }
 
@@ -36,9 +48,20 @@ class LicenseController extends Controller
             }
     
             $valid = $response->json('meta.valid');
-            $licenseStatus = $response->json('meta.status');
+            $licenseStatus = $response->json('data.attributes.status');
+            $expiresAt = Carbon::parse($response->json('data.attributes.expiry'));
+
     
             if ($valid) {
+            License::updateOrCreate(
+                    ['key' => $licenseKey],
+                    [
+                        'status' => $licenseStatus,
+                        'activated_at' => now(),
+                        'expires_at' => $expiresAt,
+                    ]
+                );
+    
                 return view('admin.license.result', ['message' => __('admin.licenseActivated'), 'success' => true]);
             }
     
