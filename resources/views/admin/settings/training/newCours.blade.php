@@ -258,93 +258,9 @@
                             @endforeach
                         </select>
                       </div>
-                   
-
-                    <div class="form-group mb-3">
-                      <label class="form-label fs-6">
-                        {{ __('cycles.Instractor') }}
-                        <span class="text-secondary">
-                          {{ $l == 'en' ? '(Choose one or more)' : '(اختر واحد أو أكثر)' }}
-                        </span>
-                      </label>
-                      <select class="select2 form-select" name="Instractor">
-                        <option value="" disabled selected>
-                          {{ $l == 'en' ? 'Choose Instructors' : 'اختر المدرب' }}
-                        </option>
-                        @foreach ($instructors as $instructor)
-                          <option value="{{ $instructor->id }}">
-                            {{ $instructor->first_name_ar . ' ' . $instructor->last_name_ar }}
-                          </option>
-                        @endforeach
-                      </select>
-                    </div>
-
-                    <div classs="form-group">
-                      <h6 class="fw-bold" style="font-size: 14;">{{ $l == 'en' ? 'History' : 'التاريخ'}}</h6>
-                      <div class="d-flex align-items-center">
-                        <div id="dateInputContainer" class="col-md-3">
-                          <label for="start_date" class="form-label fs-6">{{ __('cycles.CoursStart') }}</label>
-                          <input 
-                            type="text" 
-                            class="datewithouttime form-control"
-                            id="start_date"
-                            value="{{ request('start_date') }}"
-                            name="start_date" 
-                            placeholder="YYYY-MM-DD"
-                          />
-                          <img 
-                            src="/icons/calendar-time.svg" 
-                            alt="calendar icon"
-                            style="
-                            {{ $l == 'ar' ? 'left: 10px;' : 'right: 10px;' }}"
-                          />
-                        </div>
-                        <div id="dateInputContainer" class="col-md-3 mx-2">
-                          <label for="end_date" class="form-label fs-6">{{ __('cycles.CoursEnd') }}</label>
-                          <input 
-                            type="text" 
-                            class="datewithouttime form-control" id="end_date"
-                            value="{{ request('end_date') }}" 
-                            name="end_date" 
-                            placeholder="YYYY-MM-DD"
-                          />
-                          <img 
-                            src="/icons/calendar-time.svg" 
-                            alt="calendar icon"
-                            style="
-                            {{ $l == 'ar' ? 'left: 10px;' : 'right: 10px;' }}" 
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="form-group mb-3 mt-4">
-                      <label class="form-label fs-6">{{ $visibilityStatus }}</label>
-                      <input type="hidden" name="Status" id="Status" value="0">
-                      <div 
-                        style="height: 45px; width: fit-content; background-color: #F5F3FF; padding: 0 0.5rem;" 
-                        class="row align-items-center rounded-pill"
-                      >
-                        <button
-                          id="statusButton"
-                          type="button"
-                          style="width: 140px; height: 30px; font-size: 12px;"
-                          class="rounded-pill border-none Val0 text-primary fw-bold mx-1 StatusDraft"
-                        >
-                          {{ __('cycles.Draft') }}
-                        </button>
-                        <button
-                          id="statusButton"
-                          type="button"
-                          style="width: 140px; height: 30px; font-size: 12px;"
-                          class="rounded-pill border-none Val1 text-primary fw-bold StatusPublished"
-                        >
-                          {{ __('cycles.Published') }}
-                        </button>
-                       
-                      </div>
-                    </div>
-
-                    {{-- <div class="row">
+              
+                     <div class="row mt-3">
+                      <span class="form-label font-semibold fs-6 mt-4">{{ __('admin.visability_status') }}</span>
                       <div class="col-md mb-md-0 mb-5">
                         <div class="form-check custom-option custom-option-basic checked">
                           <label class="form-check-label custom-option-content" for="customRadioTemp1">
@@ -368,9 +284,8 @@
                           </label>
                         </div>
                       </div>
-                    </div> --}}
-                    {{-- <input class="getVal" name="Status" type="hidden" > --}}
-                    <div class="form-group mb-3">
+                    </div> 
+                    <div class="form-group mt-4">
                       <label class="form-label fs-6">{{ __('cycles.Add a description') }}</label>
                       <textarea 
                         class="form-control border-light light-input-shadow" 

@@ -1524,5 +1524,7 @@ return [
 	'Select at least one message' => 'يرجى تحديد رسالة واحدة على الأقل للحذف',
 	'OK' => 'حسناً',
 	'MessageDraftDeletedSuccessfully' => 'تم حذف الرسالة المحفوظة بنجاح',
+	'visability_status' => 'حالة الظهور',
+	'licenseAlreadyActivated' => 'لديك بالفعل ترخيص نشط حتى :',
 ]; 
 

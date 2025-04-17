@@ -126,7 +126,7 @@ class TrainingController extends Controller
 
 	public function all($id = 0)
 	{
-		$courses = Training::orderBy('created_at', 'DESC')->get();
+		$courses = Training::orderBy('created_at', 'DESC')->where('status', 1)->get();
 		if ($id == 0 && count($courses)) { $id = $courses->pluck('id')[0]; }
 		$contents = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get();
 
@@ -208,9 +208,6 @@ class TrainingController extends Controller
 					'code' => $request->code,
 					'CoursLevel' => $request->CoursLevel,
 					'Quizs' => $request->Quizs,
-					'Instractor' => $request->Instractor,
-					'start_date' => $request->start_date,
-					'end_date' => $request->end_date,
 					'Status' => $request->Status,
 					'user_id' => Auth::id()
 
@@ -364,8 +361,17 @@ class TrainingController extends Controller
 			}
 			// save progress
 			TrainingCompleted::updateOrInsert(['training_id' => $ccontent->id, 'user_id' => Auth::id()], ['course_id' => $id]);
+
+			$completedCount = TrainingCompleted::where('course_id', $id)
+		    ->where('user_id', Auth::id())
+		    ->count();
+
+	        $totalContent = $contents->count();
+	        $progressPercentage = $totalContent > 0 ? round(($completedCount / $totalContent) * 100) : 0;
+
+
 			$quizzes = Quizzes::where('training_id', $id)->where('status', 'published')->get();
-			return view('admin/clients/training', compact('contents', 'ccontent', 'quizzes'));
+			return view('admin/clients/training', compact('contents', 'ccontent', 'quizzes', 'progressPercentage'));
 		} else {
 			return back()->with(['class' => 'danger', 'message' => 'ErrorNoPermissions']);
 		}
@@ -1395,11 +1401,11 @@ Thanks from " . env('APP_NAME');
 
 		$Tags = Tags::all();
 
-		$instructors = User::whereHas('roles', function ($query) {
-			$query->where('name', 'Mentor');
-		})->get();
+		// $instructors = User::whereHas('roles', function ($query) {
+		// 	$query->where('name', 'Mentor');
+		// })->get();
 
-		return view('admin/settings/training/newCours', compact('randomNumber', 'Tags', 'expertises', 'client', 'Quizzes', 'instructors'));
+		return view('admin/settings/training/newCours', compact('randomNumber', 'Tags', 'expertises', 'client', 'Quizzes'));
 	}
 
 	public function list_surveys($id, Request $request)

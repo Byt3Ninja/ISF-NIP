@@ -134,7 +134,9 @@
                           style="width: 40px; height: 40px;">
                           <span
                             class="position-absolute text-black fw-bold"
-                            style="font-size: 13px;">30%</span>
+                            style="font-size: 13px;">  {{ $progressPercentage }}%
+
+                             </span>
                           <svg class="position-absolute" width="54"
                             height="54" viewBox="0 0 36 36">
                             <path class="circle-bg"
@@ -148,7 +150,7 @@
                               a 15.9155 15.9155 0 0 1 0 -31.831"
                               fill="none" stroke="#007bff"
                               stroke-width="2.5"
-                              stroke-dasharray="30, 100" />
+                              stroke-dasharray="{{ $progressPercentage }}, 100" />
                           </svg>
                         </div>
                         <!-- Circular Progress -->
