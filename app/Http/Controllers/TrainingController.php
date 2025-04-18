@@ -713,18 +713,20 @@ class TrainingController extends Controller
 	public function addsession(Request $request)
 	{
 		
-
+		$type = $request->type;
 		$startDate = $request->datetime; // التاريخ
 		$startTime = $request->starttime;   // وقت البداية
 		$endTime = $request->endtime;     // وقت النهاية
 		$start_datetime = "$startDate $startTime";
 		$end_datetime = "$startDate $endTime";
-
+		if($start_datetime == null || $end_datetime == null){
+			return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
+		}
 		$step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
 		$datetime = $start_datetime;
-		$type = $request->type;
+		
 		if ($type == 'sessions') {
 			// Add Zoom
 			$topic = "Training (" . $title . ')';
@@ -786,7 +788,8 @@ class TrainingController extends Controller
 					// }
 					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
-New Training Session has been created: ". $data['title'] ."
+New Training Session has been created: ". $data['title'] .",
+Join Link : ". $data['join_url'] ."
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));

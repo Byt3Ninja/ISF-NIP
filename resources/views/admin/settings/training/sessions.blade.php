@@ -540,14 +540,14 @@
             </div>
             {{-- <div class="row">
               <div class="col-12 col-md-6">
-                <div class="form-group mb-3" style="display: none;" id="startdatetime">
+                <div class="form-group mb-3"  id="startdatetime">
                   <label class="form-label fs-6 mb-1">{{ __('cycles.Start') }}</label>
                   <input id="startTime" name="starttime" type="text" placeholder="{{ __('cycles.Start') }}"
                     class="form-control">
                 </div>
               </div>
               <div class="col-12 col-md-6">
-                <div class="form-group mb-3" style="display: none;" id="enddatetime">
+                <div class="form-group mb-3"  id="enddatetime">
                   <label class="form-label fs-6 mb-1">{{ __('cycles.End') }}</label>
                   <input id="endTime" name="endtime" type="text" placeholder="{{ __('cycles.End') }}"
                     class="form-control">
