@@ -1505,4 +1505,5 @@ return [
 	'MessageDraftDeletedSuccessfully' => 'Message Draft Deleted Successfully',
 	'visability_status' => 'Visability Status',
    'licenseAlreadyActivated' => 'You already have an active license until :',
+	 'End_time_should_be_greater_than_start_time' => 'End time should be greater than start time',
 ];

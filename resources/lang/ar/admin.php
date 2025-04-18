@@ -1526,5 +1526,6 @@ return [
 	'MessageDraftDeletedSuccessfully' => 'تم حذف الرسالة المحفوظة بنجاح',
 	'visability_status' => 'حالة الظهور',
 	'licenseAlreadyActivated' => 'لديك بالفعل ترخيص نشط حتى :',
+	'End_time_should_be_greater_than_start_time' => 'يجب أن يكون وقت الانتهاء أكبر من وقت البدء',
 ]; 
 

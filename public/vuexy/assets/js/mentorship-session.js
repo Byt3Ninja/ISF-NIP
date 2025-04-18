@@ -98,25 +98,25 @@ function renderScheduleData(response) {
       switch (item.type) {
         case 'OneDay':
           $('<li>')
-            .html('<b>' + item.dfrom + '</b> (' + time + ').')
-            .appendTo('#schedule');
+        .html('<b>' + item.dfrom + '</b> (' + moment(item.tfrom, 'HH:mm:ss').format('hh:mm A') + ' - ' + moment(item.tto, 'HH:mm:ss').format('hh:mm A') + ').')
+        .appendTo('#schedule');
           break;
         case 'Weekly':
           $('<li>')
-            .html('<b>' + (en ? 'Weekly' : 'أسبوعي') + '</b> (' + item.days + ') - (' + time + ').')
-            .appendTo('#schedule');
+        .html('<b>' + (en ? 'Weekly' : 'أسبوعي') + '</b> (' + item.days + ') - (' + moment(item.tfrom, 'HH:mm:ss').format('hh:mm A') + ' - ' + moment(item.tto, 'HH:mm:ss').format('hh:mm A') + ').')
+        .appendTo('#schedule');
           break;
         case 'WorkingDays':
           $('<li>')
-            .html('<b>' + (en ? 'All working days' : 'جميع أيام العمل') + '</b> (' + time + ').')
-            .appendTo('#schedule');
+        .html('<b>' + (en ? 'All working days' : 'جميع أيام العمل') + '</b> (' + moment(item.tfrom, 'HH:mm:ss').format('hh:mm A') + ' - ' + moment(item.tto, 'HH:mm:ss').format('hh:mm A') + ').')
+        .appendTo('#schedule');
           break;
         case 'Period':
           $('<li>')
-            .html(
-              '<b>' + (en ? 'From ' : 'من ') + item.dfrom + (en ? ' To ' : ' إلى ') + item.dto + '</b> (' + time + ').'
-            )
-            .appendTo('#schedule');
+        .html(
+          '<b>' + (en ? 'From ' : 'من ') + item.dfrom + (en ? ' To ' : ' إلى ') + item.dto + '</b> (' + moment(item.tfrom, 'HH:mm:ss').format('hh:mm A') + ' - ' + moment(item.tto, 'HH:mm:ss').format('hh:mm A') + ').'
+        )
+        .appendTo('#schedule');
           break;
         default:
       }
@@ -138,6 +138,16 @@ function renderScheduleData(response) {
 
 $('#session-form').on('submit', e => {
   const selectedDateValue = $('#flatpickr-datetimeLimit').val();
+
+  const timeFromValue = $('#timeFrom').val();
+  const timeToValue = $('#timeTo').val();
+
+  // Ensure that timeToValue is greater than timeFromValue
+  if (moment(timeToValue, 'HH:mm:ss').isBefore(moment(timeFromValue, 'HH:mm:ss'))) {
+    e.preventDefault();
+    $('#time-feedback').show();
+    return;
+  }
 
   if (!selectedDateValue) {
     e.preventDefault();
@@ -205,24 +215,47 @@ $('#flatpickr-datetimeLimit').on('change', e => {
   }
 });
 
+$('#timeFrom').on('change', (e) => {
+  const timeFromValue = e.target.value;
+  const timeToValue = $('#timeTo').val();
+
+
+  // Ensure that timeFromValue is less than timeToValue
+  if (moment(timeFromValue, 'HH:mm:ss').isAfter(moment(timeToValue, 'HH:mm:ss'))) {
+    $('#time-feedback').show();
+    // alert(en ? 'Start time must be less than end time.' : 'يجب أن يكون وقت البدء أقل من وقت الانتهاء.');
+    // $('#timeFrom').val(''); // Reset to timeToValue
+    return;
+  } else {
+    $('#time-feedback').hide();
+  }
+
+});
+
 $('#timeTo').on('change', (e) => {
   const timeFromValue = $('#timeFrom').val();
   const timeToValue = e.target.value;
 
+  // Ensure that timeToValue is greater than timeFromValue
+  if (moment(timeToValue, 'HH:mm:ss').isBefore(moment(timeFromValue, 'HH:mm:ss'))) {
+    $('#time-feedback').show();
+    return;
+  } else {
+    $('#time-feedback').hide();
+  }
+
   const duration = moment.duration(moment(timeToValue, 'HH:mm:ss').diff(moment(timeFromValue, 'HH:mm:ss')));
-  const hours = duration.asMinutes(); // Convert duration to minutes
+  const minutes = duration.asMinutes(); // Convert duration to minutes
+
+  $('#duration-container').removeClass('d-none').addClass('d-flex');
+  $('#duration').html(`${minutes} ${en ? 'minutes' : 'دقائق'}`);
 
   const periodSelect = $('#period');
-  const matchingOption = periodSelect.find(`option[value="${hours}"]`);
+  const matchingOption = periodSelect.find(`option[value="${minutes}"]`);
 
   if (matchingOption.length > 0) {
-    periodSelect.val(hours).trigger('change');
+    periodSelect.val(minutes).trigger('change');
   } else {
     periodSelect.val(30).trigger('change'); // Default to 30 minutes
   }
-
-  console.log('timeFromValue', timeFromValue);
-  console.log('timeToValue', timeToValue);
-  console.log('duration', duration);
-  console.log('hours', hours);
 });
