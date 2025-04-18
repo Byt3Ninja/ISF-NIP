@@ -179,6 +179,7 @@
     };
 
     function getDraftMessageDetails(draftMessageData, event) {
+      console.log('draftMessageData',  draftMessageData)
       $('#message-details-view').removeClass('show');
 
     // console.log('draftMessageData', draftMessageData)
@@ -186,12 +187,28 @@
       
       $('#sendMessageModal').modal('show');
 
-      // $('#save-draft-button').addClass('d-none');
       $('#select-type').val(type ?? 0);
       $('#send-message-subject').val(subject ?? '');
       $('#send-message-text').val(body ?? '');
       $('#draftsNumber').val(id ?? '');
       menus(type);
+
+      if (type == 1) {
+        $('#users').show();
+        $('#mentors, #organizations').hide();
+        $('#select-programs').val(receivers?.map(item => item?.cycle_id)).trigger('change');
+        $('#select-companies').val(receivers?.map(item => item?.company_id)).trigger('change');
+      } else if (type == 2) {
+        $('#mentors').show();
+        $('#users, #organizations').hide();
+        $('#select-mentors').val(receivers?.map(item => item?.id)).trigger('change');
+      } else if (type == 3) {
+        $('#organizations').show();
+        $('#users, #mentors').hide();
+        $('#select-organizations').val(receivers?.map(item => item?.organization_id)).trigger('change');
+      } else {
+        $('#users, #mentors, #organizations').hide();
+      }
     }
 
     function getMessageDetails(messageData, event) {

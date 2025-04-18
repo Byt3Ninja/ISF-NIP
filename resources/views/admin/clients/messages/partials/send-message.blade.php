@@ -32,7 +32,7 @@
             @if (Auth::user()->hasAnyRole('Admin|OrganizationManager') && $cycles->count())
               <div class="mb-4" id="cycle-selection">
                 <label class="form-label">{{ __('admin.SelectProgram') }}:</label>
-                <select class="form-control select2 cycle_id" name="cycle_id" onchange="filterUsersByCycle(this.value)">
+                <select id="select-programs" class="form-control select2 cycle_id" name="cycle_id" onchange="filterUsersByCycle(this.value)">
                   @foreach ($cycles as $cycle)
                     <option value="{{ $cycle->id }}">{{ $cycle->title }}</option>
                   @endforeach
@@ -42,9 +42,10 @@
             @if ($users)
               <label class="form-label"
                 for="users">{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}:</label>
-              <select class="select2 form-select usersdraft" name="users[]"
+              <select id="select-companies" class="select2 form-select usersdraft" name="users[]"
                 data-placeholder="{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}" multiple>
                 @foreach ($users as $index => $user)
+                <p>{{$user->user->id}}</p>
                   @if ($user->user)
                     <option value="{{ $user->user->id }}" {{ $index === 0 ? 'selected' : '' }}>
                       {{ $user->user->{'first_name_' . $l} . ' ' . $user->user->{'last_name_' . $l} . ' - (' . $user->{'name_' . $l} . ')' }}
@@ -59,7 +60,7 @@
             @if ($mentors)
               <label class="form-label"
                 for="mentors">{{ $l == 'ar' ? 'اختر المدربين' : 'Select mentors' }}:</label>
-              <select class="select2 form-select mentorsdraft" name="mentors[]"
+              <select id="select-mentors" class="select2 form-select mentorsdraft" name="mentors[]"
                 data-placeholder="{{ $l == 'ar' ? 'اختر المدربين' : 'Select mentors' }}" multiple>
                 @foreach ($mentors as $index => $mentor)
                   <option value="{{ $mentor->id }}" {{ $index === 0 ? 'selected' : '' }}>
@@ -73,7 +74,7 @@
           @if (Auth::user()->hasAnyRole('Admin|OrganizationManager'))
             <div class="mb-4" style="display: none;" id="organizations">
               <label class="form-label">{{ __('admin.Select Organizations') }}:</label>
-              <select class="select2 form-select organizationsdraft" name="organizations[]" multiple
+              <select id="select-organizations" class="select2 form-select organizationsdraft" name="organizations[]" multiple
                 data-placeholder="{{ __('admin.Select Organizations') }}">
                 @foreach ($organizations as $index => $organization)
                   <option value="{{ $organization->id }}" {{ $index === 0 ? 'selected' : '' }}>
