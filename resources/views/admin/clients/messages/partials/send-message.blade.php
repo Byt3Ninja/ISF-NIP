@@ -45,7 +45,6 @@
               <select id="select-companies" class="select2 form-select usersdraft" name="users[]"
                 data-placeholder="{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}" multiple>
                 @foreach ($users as $index => $user)
-                <p>{{$user->user->id}}</p>
                   @if ($user->user)
                     <option value="{{ $user->user->id }}" {{ $index === 0 ? 'selected' : '' }}>
                       {{ $user->user->{'first_name_' . $l} . ' ' . $user->user->{'last_name_' . $l} . ' - (' . $user->{'name_' . $l} . ')' }}
