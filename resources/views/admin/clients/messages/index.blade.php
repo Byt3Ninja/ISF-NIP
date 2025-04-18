@@ -197,7 +197,7 @@
         $('#users').show();
         $('#mentors, #organizations').hide();
         $('#select-programs').val(receivers?.map(item => item?.cycle_id)).trigger('change');
-        $('#select-companies').val(receivers?.map(item => item?.company_id)).trigger('change');
+        $('#select-companies').val(receivers?.map(item => item?.id)).trigger('change');
       } else if (type == 2) {
         $('#mentors').show();
         $('#users, #organizations').hide();
