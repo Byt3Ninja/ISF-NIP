@@ -495,7 +495,7 @@
     aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form method="post" action="/dashboard/training/addsession" enctype="multipart/form-data" autocomplete="off">
+        <form id="add-session-form" method="post" action="/dashboard/training/addsession" enctype="multipart/form-data" autocomplete="off">
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Add new training session') }} </h4>
 
@@ -534,11 +534,11 @@
                 placeholder="{{ __('cycles.Write your description here') }}."></textarea>
             </div>
             <div class="form-group mb-3">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.Date') }}</label>
-              <input id="datetime" name="datetime" type="text" placeholder="{{ __('cycles.Date') }}"
-                class="form-control flatpickr-date" required>
+              <label class="form-label fs-6 mb-1">{{ __('cycles.Date/Time') }}</label>
+              <input id="datetime" name="datetime" type="text" placeholder="{{ __('cycles.Date/Time') }}"
+                class="form-control flatpickr-date-time" required>
             </div>
-            <div class="row">
+            {{-- <div class="row">
               <div class="col-12 col-md-6">
                 <div class="form-group mb-3" style="display: none;" id="startdatetime">
                   <label class="form-label fs-6 mb-1">{{ __('cycles.Start') }}</label>
@@ -553,8 +553,8 @@
                     class="form-control">
                 </div>
               </div>
-            </div>
-            <div class="form-group mb-3" style="display: none;" id="sessions">
+            </div> --}}
+            {{-- <div class="form-group mb-3" style="display: none;" id="sessions">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Session duration') }}:</label>
               <select name="duration" class="select form-control" required>
                 <option value="30">30 {{ __('cycles.Minutes') }}</option>
@@ -564,7 +564,7 @@
                 <option value="240">4 {{ __('cycles.Hours') }}</option>
                 <option value="300">5 {{ __('cycles.Hours') }}</option>
               </select>
-            </div>
+            </div> --}}
             <div class="form-group mb-3" id="trainer" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.trainer name') }}</label>
               <input name="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}"
@@ -759,9 +759,26 @@
   <script src="/js/jquery.datetimepicker.full.min.js"></script>
 
   <script>
+    $('#add-session-form').on('submit', function(e) {
+      console.log('submitted', e);
+      const dateTimeValue = $('#datetime').val();
+
+      if (!dateTimeValue) {
+        e.preventDefault();
+        $('#datetime').addClass('is-invalid');
+        $('#datetime').after('<div class="invalid-feedback">{{ __('cycles.date_time_required') }}</div>');
+      }
+    });
+
     $('.flatpickr-date').flatpickr({
       monthSelectorType: 'static',
       minDate: "today",
+    });
+    
+    $('.flatpickr-date-time').flatpickr({
+      monthSelectorType: 'static',
+      minDate: "today",
+      enableTime: true,
     });
 
     $('#startTime').flatpickr({
