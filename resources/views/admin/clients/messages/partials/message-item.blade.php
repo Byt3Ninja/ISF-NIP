@@ -9,7 +9,7 @@
   {{-- data-starred="true" --}}
   data-bs-toggle="sidebar" 
   data-message="{{ json_encode($message) }}"
-  style="height: 56px; cursor: pointer;" 
+  style="height: 56px; cursor: pointer; opacity: {{ $message->read === null ? '1' : ($message->read == 0 ? '0.5' : '1') }};" 
   onmouseover="this.style.backgroundColor='#f8f9fa';" 
   onmouseout="this.style.backgroundColor='';"
   >
