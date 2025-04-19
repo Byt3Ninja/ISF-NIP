@@ -124,41 +124,7 @@
                       @endforeach
                     </select>
                   </div>
-                  <div class="form-group mb-4">
-                    <label class="form-label font-semibold fs-6 mb-1" class="form-label">{{ __('cycles.Instractor') }}</label>
-                    <select class="form-select select2" name="Instractor">
-                      @foreach ($instructors as $instructor)
-                        <option value="{{ $instructor->id }}" @if ($course->Instractor == $instructor->id) selected @endif>
-                          {{ $instructor->first_name_ar . ' ' . $instructor->last_name_ar }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="form-group mb-4">
-                    <label class="form-label font-semibold fs-6 mb-1" for="flatpickr-date" class="form-label">
-                      {{ __('cycles.CoursStart') }}
-                    </label>
-                    <input 
-                      type="text" 
-                      class="form-control flatpickr-input active" 
-                      value="{{ $course->start_date }}" 
-                      name="start_date"
-                      placeholder="YYYY-MM-DD" 
-                      id="flatpickr-date"
-                    />
-                  </div>
-                  <div class="form-group mb-4">
-                    <label class="form-label font-semibold fs-6 mb-1" for="flatpickr-date" class="form-label">
-                      {{ __('cycles.CoursEnd') }}
-                    </label>
-                    <input 
-                      type="text" 
-                      class="form-control flatpickr-input active" 
-                      value="{{ $course->end_date }}" 
-                      name="end_date"
-                      placeholder="YYYY-MM-DD" 
-                      id="flatpickr-date"
-                    />
-                  </div>
+                 
                   <div class="row mb-3">
                     <span class="form-label font-semibold fs-6 mb-1">{{ $visibilityStatus }}</span>
                     <div class="col-md-4">

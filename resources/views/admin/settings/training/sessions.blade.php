@@ -871,9 +871,9 @@
       if (training === 'offline') {
         $('#online').hide();
         $('#startdatetime').show();
-        // $('#enddatetime').show();
-        $('#starttime').show();
-        $('#endtime').show();
+        $('#enddatetime').show();
+        // $('#starttime').show();
+        // $('#endtime').show();
         $('#sessions').hide();
         $('#trainer').show();
         $('#trainer_email').show();
@@ -881,9 +881,9 @@
         $('#address').show();
       } else if (training === 'sessions') {
         $('#online').hide();
-        // $('#enddatetime').hide();
-        $('#starttime').hide();
-        $('#endtime').hide();
+        $('#enddatetime').show();
+        $('#startdatetime').show();
+        // $('#endtime').show();
         $('#sessions').show();
         $('#trainer').show();
         $('#trainer_email').show();
@@ -891,8 +891,8 @@
         $('#address').hide();
       } else {
         $('#online').show();
-        // $('#enddatetime').hide();
-        $('#starttime').hide();
+        $('#enddatetime').hide();
+        $('#startdatetime').hide();
         $('#endtime').hide();
         $('#sessions').hide();
         $('#trainer').hide();

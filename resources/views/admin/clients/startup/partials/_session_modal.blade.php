@@ -54,8 +54,15 @@
               </div>
             </div>
           </div>
-          <div class="mb-3">
-            <label for="period" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Meeting duration')}}:</label>
+
+          <div class="col-12 mb-6">
+            <div class="invalid-feedback" id="time-feedback">{{ __('admin.End_time_should_be_greater_than_start_time') }}</div>
+          </div>
+
+          <div id="duration-container" class="d-none align-items-center gap-4 mb-6 border-bottom pb-3">
+            <span class="fs-6 mb-0 text-dark fw-semi">{{__('dashboard.Meeting duration')}}:</span>
+            <span id="duration" class="fw-bold fs-6 mb-0"></span>
+            {{-- <label for="period" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Meeting duration')}}:</label>
             <select name="period" class="form-select" id="period">
               <option value="30" selected>30 {{__('dashboard.Minutes')}}</option>
               <option value="60">1 {{__('dashboard.Hour')}}</option>
@@ -63,7 +70,7 @@
               <option value="180">3 {{__('dashboard.Hours')}}</option>
               <option value="240">4 {{__('dashboard.Hours')}}</option>
               <option value="300">5 {{__('dashboard.Hours')}}</option>
-            </select>
+            </select> --}}
           </div>
           <div class="mb-3">
             <label for="inputGroupFile01" class="form-label fs-6 fw-semibold mb-1">
