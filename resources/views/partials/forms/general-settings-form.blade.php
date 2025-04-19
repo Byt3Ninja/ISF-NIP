@@ -41,10 +41,10 @@
   </div>
   <div class="col-md-12 col-12">
     <div class="form-group mb-3">
-      <label class="form-label" for="state_id">{{ __('admin.Country') }}</label>
+      <label class="form-label" for="country_id">{{ __('admin.Country') }}</label>
 
       <select class="form-control" id="country_id" name='Country'>
-        <option value="">{{ __('admin.Country') }}</option>
+        <option value="" disabled>{{ __('admin.Country') }}</option>
         @foreach ($countries as $country)
           <option value="{{ $country->id }}" {{ $country->id == $Title->Country ? 'selected' : '' }}>
             {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
@@ -57,7 +57,7 @@
     <div class="form-group mb-3">
       <label class="form-label" for="state_id">{{ __('admin.State') }} *</label>
       <select class="form-control" id="state_id" name='State'>
-        <option value="">{{ __('admin.State') }}</option>
+        <option value="" disabled>{{ __('admin.State') }}</option>
         @foreach ($states as $state)
           <option value="{{ $state->id }}" {{ $state->id == $Title->State ? 'selected' : '' }}>
             {{ $state->{'name_' . $l} }}</option>
