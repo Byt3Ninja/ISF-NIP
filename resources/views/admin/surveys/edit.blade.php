@@ -101,7 +101,7 @@
               </div>
             </div>
           </div>
-          ggg
+
           <input type="hidden" name="selected_questions" id="selected-questions" value="[{{ implode(',', array_map(fn($id) => "\"$id\"", $survey_questions)) }}]" />
           @foreach( $questions as $key => $question )
          
