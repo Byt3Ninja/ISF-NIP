@@ -828,8 +828,9 @@ Thanks from " . env('APP_NAME');
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] ."
-Thanks from " . env('APP_NAME');
+Thanks from " . env('APP_NAME'); // should be from organization name not from APP Name
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				// instead of waiting of response it should be pushed to job queue and dispatched later on the server - for all whatsapp messages
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 			}
 		}
