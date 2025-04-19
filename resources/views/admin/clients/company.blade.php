@@ -351,7 +351,7 @@
         },
         success: function(data) {
           $state.html(
-          '<option value="" >{{ __('admin.State') }}</option>');
+          '<option value="" disabled >{{ __('admin.State') }}</option>');
           $.each(data, function(id, value) {
             // selected = '';
             if (currentState === id) {
@@ -381,7 +381,7 @@
           state_id: state_id
         },
         success: function(data) {
-          $city.html('<option value="" >{{ __('admin.City') }}</option>');
+          $city.html('<option value="" disabled >{{ __('admin.City') }}</option>');
           $.each(data, function(id, value) {
             if (currentCity == id) {
               selected = 'selected';
