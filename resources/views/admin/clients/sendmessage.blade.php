@@ -159,7 +159,7 @@
     function filterUsersByCycle(cycleId) {
       if (!cycleId) return null;
       $.ajax({
-        url: "{{ route('getUsersByProgram') }}",
+        url: "{{ route('messages.recipients_list_by_program') }}",
         method: "GET",
         data: {
           cycle_id: cycleId

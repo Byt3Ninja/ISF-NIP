@@ -9,7 +9,13 @@
   {{-- data-starred="true" --}}
   data-bs-toggle="sidebar" 
   data-message="{{ json_encode($message) }}"
-  style="height: 56px; cursor: pointer;" 
+  style="height: 56px; cursor: pointer; 
+  @if ($type != 'draft')
+  opacity: {{ $message->read === null ? '1' : ($message->read == 0 ? '0.5' : '1') }};
+  @else
+  opacity: 1;
+  @endif
+  " 
   onmouseover="this.style.backgroundColor='#f8f9fa';" 
   onmouseout="this.style.backgroundColor='';"
   >

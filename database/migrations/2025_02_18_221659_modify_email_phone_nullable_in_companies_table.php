@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('companies', function (Blueprint $table) {
             $table->string('email')->nullable()->change();
             $table->string('phone')->nullable()->change();
-            $table->string('institutions')->nullable()->change();
+            $table->text('institutions')->nullable()->change();
         });
     }
 

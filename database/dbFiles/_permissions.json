@@ -303,7 +303,7 @@
   {"name": "get_states_by_country", "guard_name": "web"},
   {"name": "sendmessage", "guard_name": "web"},
   {"name": "messages.sendReplymessage", "guard_name": "web"},
-  {"name": "getUsersByProgram", "guard_name": "web"},
+  {"name": "messages.recipients_list_by_program", "guard_name": "web"},
   {"name": "messages.index", "guard_name": "web"},
   {"name": "messages.show", "guard_name": "web"},
   {"name": "messages.draftmessage", "guard_name": "web"},
