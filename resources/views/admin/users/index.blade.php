@@ -87,7 +87,7 @@
                       <th>{{ __('admin.HaveCompany') }}</th>
                       <th>{{ __('admin.Date') }}</th>
                       <th>
-                        @if( $_user->ableTo('delete_user', $permissions) )
+                        @if( $_user->ableTo('users.destroy', $permissions) )
                           {{ __('admin.Delete') }}
                         @endif
                       </th>
@@ -107,7 +107,7 @@
                         <td style="font-size: small;">{{ $user->company ? __('admin.Yes') : __('admin.No') }}</td>
                         <td style="font-size: small;">{{ $user->created_at }}</td>
                         <td style="padding: 0px;font-size: small;">
-                          @if( $_user->ableTo('delete_user', $permissions) )
+                          @if( $_user->ableTo('users.destroy', $permissions) )
                             <button id='deleteAction' data-id='{{ $user->id }}'
                               data-url="{{ route('users.destroy', ['user' => $user->id]) }}" type="button"
                               class="btn btn-label-danger btn-sm">
