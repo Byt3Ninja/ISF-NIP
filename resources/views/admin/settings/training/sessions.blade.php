@@ -204,10 +204,11 @@
                                 <button title="Edit" onclick="editme({{ $session->id }})" type="button"
                                   class="btn btn-icon btn-label-info rounded-circle waves-effect">
                                   <i class="ti ti-edit text-info"></i></button>&nbsp;
+                                  @if( $session->datetime >= now() )
                                 <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
                                   class="btn btn-label-danger btn-icon rounded-circle waves-effect">
                                   <i class="ti ti-trash text-danger"></i></button>
-
+                                  @endif
                               </td>
                             </tr>
                             <!-- المودال نفسه -->

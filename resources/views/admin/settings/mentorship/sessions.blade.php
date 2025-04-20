@@ -170,9 +170,11 @@
                               <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-info" onclick="edit({{ $session->id }})" title="Edit">
                                 <i class="ti ti-edit"></i>
                               </button>
+                              @if( $session->datetime >= now() )
                               <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-danger" onclick="deleteme({{ $session->id }})" title="Delete">
                                 <i class="ti ti-trash"></i>
                               </button>
+                              @endif
                               @if (!$session->approved)
                                 <button class="me-1 btn-icon rounded-circle btn btn-sm btn-label-success" onclick="approve({{ $session->id }}, 'Yes')" title="Approve">
                                   <i class="ti ti-check"></i>
