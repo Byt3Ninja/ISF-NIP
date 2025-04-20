@@ -49,9 +49,22 @@
                                         @csrf
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <fieldset class="form-group">
+                                                <fieldset class="form-group my-6">
                                                     <label class="fs-6 mb-1" for="basicInput">{{ __('admin.Title')}}</label>
                                                     <input type="text" class="form-control" id="name" name='name' required placeholder="{{__('admin.Title')}}" style="direction: ltr;" value="{{ $permission->name }}" />
+                                                </fieldset>
+                                                <fieldset class="form-group my-6">
+                                                    <label class="fs-6 mb-2" for="description">{{ __('admin.Description')}}</label>
+                                                    <input type="text" class="form-control" id="description" name='description' placeholder="{{__('admin.Description')}}" value="{{ $permission->description }}" />
+                                                </fieldset>
+                                                <fieldset class="form-group my-6">
+                                                    <label class="fs-6 mb-1" for="permission_group_id">{{ __('admin.permissionsGroup')}}</label>
+                                                    <select class="form-control form-select" name="permission_group_id" id="permission_group_id">
+                                                        <option value="">Un categorized</option>
+                                                        @foreach( $groups as $group )
+                                                            <option {{ $group->id == $permission->permission_group_id ? 'selected' : '' }} value="{{ $group->id }}">{{ $group->name }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </fieldset>
                                                 <div class="form-check my-6">
                                                     <input type="checkbox" name="is_core" class="form-check-input select-all-row" id="is_core" @if($permission->is_core) checked="checked" @endif>

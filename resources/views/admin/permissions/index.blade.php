@@ -16,12 +16,10 @@
             <div class="row">
               <div class="col-12">
                 <div class="card">
-                  <div class="card-header mb-4">
-                              <a href="{{route('permissions.create')}}" class="btn btn-primary glow">
-                                <i class="ti ti-plus me-1"></i>
-                                {{ __('admin.Add New')}}
-                              </a>
-                            </div>
+                    <div class="card-header mb-4">
+                        <a href="{{route('permissions.create')}}" class="mx-2 btn btn-primary glow"> <i class="ti ti-plus me-1"></i> {{ __('admin.Add New')}} </a>
+                        <a href="{{route('permission-groups.index')}}" class="mx-2 btn btn-dark glow"> <i class="ti ti-list me-1"></i> {{ __('admin.permissionGroups')}} </a>
+                    </div>
                             <div class="card-content">
                                 <div class="card-body card-dashboard">
                                     @if(session()->has('msg'))
