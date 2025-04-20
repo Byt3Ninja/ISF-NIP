@@ -718,8 +718,8 @@ class TrainingController extends Controller
 		$startDate = $request->datetime; // التاريخ
 		$startTime = $request->starttime;   // وقت البداية
 		$endTime = $request->endtime;     // وقت النهاية
-		$start_datetime = "$startDate $startTime";
-		$end_datetime = "$startDate $endTime";
+		$start_datetime = $startDate.' '. $startTime;
+		$end_datetime = $startDate.' '.$endTime;
 		if($start_datetime == null || $end_datetime == null){
 			return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 		}
@@ -758,9 +758,11 @@ class TrainingController extends Controller
 			]);
 			
 			// ======> notify Trainer <=================
-			$mail['trainer_name'] = $request->trainer_name;
-			$mail['title'] = $topic;
-			$mail['date'] = $datetime;
+			$mail['trainer_name'] = $request->trainer_name ?? 'Unknown Trainer';
+			$mail['title'] = $topic ?? 'Unknown Title';
+			$mail['date'] = $datetime ?? 'Unknown Date';
+			$mail['type'] = 'sessions';
+			$mail['join_url'] = $join ?? 'Unknown Join URL';
 			$mail['organization_name_en'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_en ?? 'Unknown Organization';
 			$mail['organization_name_ar'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';;
 			$MSG = new TrainerEmail($mail);
@@ -776,13 +778,14 @@ class TrainingController extends Controller
 				$cycleId = Step::find($step)->cycle_id;
 				$companies = Company::where('cycle', $cycleId)->get();
 				foreach ($companies as $company) {
-					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
-					$data['email'] = $company->user->email;
-					$data['cycle'] = $company->cycledata->title;
-					$data['step'] = $company->stepdata->title;
-					$data['join_url'] = $join;
-					$data['title'] = $topic;
-					$data['date'] = $datetime;
+					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en ?? 'Unknown Name';
+					$data['email'] = $company->user->email ?? 'Unknown Email';
+					$data['cycle'] = $company->cycledata->title ?? 'Unknown Cycle';
+					$data['step'] = $company->stepdata->title ?? 'Unknown Step';
+					$data['type'] = 'sessions';
+					$data['join_url'] = $join ?? 'Unknown Join URL';
+					$data['title'] = $topic ?? 'Unknown Title';
+					$data['date'] = $datetime ?? 'Unknown Date';
 					// try {
 					// 	$company->user->notify(new NewTrainingNotification($data));
 					// 	log::info('Sent New Training notification to ' . $company->user->email);
@@ -815,13 +818,14 @@ Thanks from " . env('APP_NAME');
 			// ======> notify Trainer <=================
 
 			foreach ($companies as $company) {
-				$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
-				$data['email'] = $company->user->email;
-				$data['cycle'] = $company->cycledata->title;
-				$data['step'] = $company->stepdata->title;
+				$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en ?? 'Unknown User';
+				$data['email'] = $company->user->email ?? 'Unknown Email';
+				$data['cycle'] = $company->cycledata->title ?? 'Unknown Cycle';
+				$data['step'] = $company->stepdata->title ?? 'Unknown Step';
 				$data['join_url'] = '';
-				$data['title'] = $title;
-				$data['date'] = $datetime;
+				$data['type'] = 'online';
+				$data['title'] = $title ?? 'Unknown Title';
+				$data['date'] = $datetime ?? 'Unknown Date';
 				try {
 					$company->user->notify(new NewTrainingNotification($data));
 					log::info('Sent New Training notification to ' . $company->user->email);
@@ -839,9 +843,6 @@ Thanks from " . env('APP_NAME'); // should be from organization name not from AP
 		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} elseif ($type == 'offline') {
-			
-		
-			
 		
 			$trainingSession = TrainingSession::create([
 				'type' => $type,
@@ -860,6 +861,9 @@ Thanks from " . env('APP_NAME'); // should be from organization name not from AP
 			$mail['trainer_name'] = $request->trainer_name;
 			$mail['title'] = $title;
 			$mail['date'] = $datetime;
+			$mail['type'] = 'offline';
+			$mail['join_url'] = $request->training_location;
+			$mail['Address'] = $request->training_Address;
 			$mail['organization_name_en'] = Step::find($step)->cycle->organization->name_en;
 			$mail['organization_name_ar'] = Step::find($step)->cycle->organization->name_ar;
 			$MSG = new TrainerEmail($mail);
@@ -889,13 +893,15 @@ Thanks from " . env('APP_NAME'); // should be from organization name not from AP
 							]);
 
 
-					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
-					$data['email'] = $company->user->email;
-					$data['cycle'] = $company->cycledata->title;
-					$data['step'] = $company->stepdata->title;
-					$data['join_url'] = 'offline';
-					$data['title'] = $title;
-					$data['date'] = $datetime;
+					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en ?? 'No Name';
+					$data['email'] = $company->user->email ?? 'No Email';
+					$data['cycle'] = $company->cycledata->title ?? 'No Cycle';
+					$data['step'] = $company->stepdata->title ?? 'No Step';
+					$data['title'] = $title ?? 'No Title';
+					$data['date'] = $datetime ?? 'No Date';
+					$data['type'] = 'offline';
+					$data['join_url'] = $request->training_location ?? 'No Location';
+					$data['Address'] = $request->training_Address ?? 'No Address';
 					try {
 						$company->user->notify(new NewTrainingNotification($data));
 						log::info('Sent New Training notification to ' . $company->user->email);
@@ -904,7 +910,9 @@ Thanks from " . env('APP_NAME'); // should be from organization name not from AP
 					}
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
-New Training Session has been created: ". $data['title'] ."
+New Training Session has been created: ". $data['title'] .",
+Google Map Link: " . $data['join_url'] . ",
+Address: " . $data['Address'] . "
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
@@ -973,11 +981,13 @@ Thanks from " . env('APP_NAME');
 			]);
 			$session = TrainingSession::find($id);
 			// ======> notify Trainer <=================
-			$mail['trainer_name'] = $request->trainer_name;
-			$mail['title'] = $topic;
-			$mail['date'] = $datetime;
-			$mail['organization_name_en'] = $session->step->cycle->organization->name_en;
-			$mail['organization_name_ar'] = $session->step->cycle->organization->name_ar;
+			$mail['trainer_name'] = $request->trainer_name ?? 'Unknown Trainer Name';
+			$mail['title'] = $topic ?? 'Unknown Title';
+			$mail['date'] = $datetime ?? 'Unknown Date';
+			$mail['type'] = 'sessions';
+			$mail['join_url'] = $join ?? 'Unknown Join URL';
+			$mail['organization_name_en'] = $session->step->cycle->organization->name_en ?? 'Unknown Organization Name';
+			$mail['organization_name_ar'] = $session->step->cycle->organization->name_ar ?? 'Unknown Organization Name';
 			$MSG = new TrainerEmail($mail);
             if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
@@ -991,13 +1001,14 @@ Thanks from " . env('APP_NAME');
 				$cycleId = Step::find($step)->cycle_id;
 				$companies = Company::where('cycle', $cycleId)->get();
 				foreach ($companies as $company) {
-					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
-					$data['email'] = $company->user->email;
-					$data['cycle'] = $company->cycledata->title;
-					$data['step'] = $company->stepdata->title;
-					$data['join_url'] = $join;
-					$data['title'] = $topic;
-					$data['date'] = $datetime;
+					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en ?? 'Unknown Name';
+					$data['email'] = $company->user->email ?? 'Unknown Email';
+					$data['cycle'] = $company->cycledata->title ?? 'Unknown Cycle';
+					$data['step'] = $company->stepdata->title ?? 'Unknown Step';
+					$data['join_url'] = $join ?? 'Unknown Join URL';
+					$data['type'] = 'sessions';
+					$data['title'] = $topic ?? 'Unknown Title';
+					$data['date'] = $datetime ?? 'Unknown Date';
 					// try {
 					// 	$company->user->notify(new NewTrainingNotification($data));
 					// 	log::info('Sent New Training notification to ' . $company->user->email);
@@ -1006,7 +1017,8 @@ Thanks from " . env('APP_NAME');
 					// }
 					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
-Training Session has been Updated: ". $data['title'] ."
+Training Session has been Updated: ". $data['title'] .",
+Join Link : ". $data['join_url'] ."
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
@@ -1030,13 +1042,14 @@ Thanks from " . env('APP_NAME');
 			$companies = Company::where('cycle', $cycleId)->get();
 			// ======> notify Trainer <=================
 			foreach ($companies as $company) {
-				$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
-				$data['email'] = $company->user->email;
-				$data['cycle'] = $company->cycledata->title;
-				$data['step'] = $company->stepdata->title;
+				$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en ?? 'Unknown Name';
+				$data['email'] = $company->user->email ?? 'Unknown Email';
+				$data['cycle'] = $company->cycledata->title	?? 'Unknown Cycle';
+				$data['step'] = $company->stepdata->title ?? 'Unknown Step';
 				$data['join_url'] = '';
-				$data['title'] = $title;
-				$data['date'] = $datetime;
+				$data['type'] = 'online';
+				$data['title'] = $title ?? 'Unknown Title';
+				$data['date'] = $datetime ?? 'Unknown Date';
 				try {
 					$company->user->notify(new NewTrainingNotification($data));
 					log::info('Sent New Training notification to ' . $company->user->email);
@@ -1067,11 +1080,14 @@ Thanks from " . env('APP_NAME');
 			]);
 			$session = TrainingSession::find($id);
 			// ======> notify Trainer <=================
-			$mail['trainer_name'] = $request->trainer_name;
-			$mail['title'] = $title;
-			$mail['date'] = $datetime;
-			$mail['organization_name_en'] = $session->step->cycle->organization->name_en;
-			$mail['organization_name_ar'] = $session->step->cycle->organization->name_ar;
+			$mail['trainer_name'] = $request->trainer_name ?? 'Unknown Trainer Name';
+			$mail['title'] = $title ?? 'Unknown Title';
+			$mail['date'] = $datetime ?? 'Unknown Date';
+			$mail['type'] = 'offline';
+			$mail['join_url'] = $request->training_location ?? 'Unknown Join URL';
+			$mail['Address'] = $request->training_Address ?? 'Unknown Address';
+			$mail['organization_name_en'] = $session->step->cycle->organization->name_en ?? 'Unknown Organization Name';
+			$mail['organization_name_ar'] = $session->step->cycle->organization->name_ar ?? 'Unknown Organization Name';
 			$MSG = new TrainerEmail($mail);
             if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
@@ -1085,13 +1101,16 @@ Thanks from " . env('APP_NAME');
 				$cycleId = Step::find($step)->cycle_id;
 				$companies = Company::where('cycle', $cycleId)->get();
 				foreach ($companies as $company) {
-					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en;
-					$data['email'] = $company->user->email;
-					$data['cycle'] = $company->cycledata->title;
-					$data['step'] = $company->stepdata->title;
+					$data['name'] = $company->user->first_name_en . " " . $company->user->last_name_en ?? 'Unknown Name';
+					$data['email'] = $company->user->email ?? 'Unknown Email';
+					$data['cycle'] = $company->cycledata->title ?? 'Unknown Cycle';
+					$data['step'] = $company->stepdata->title ?? 'Unknown Step';
 					$data['join_url'] = 'offline';
-					$data['title'] = $title;
-					$data['date'] = $datetime;
+					$data['title'] = $title ?? 'Unknown Title';
+					$data['date'] = $datetime ?? 'Unknown Date';
+					$data['type'] = 'offline';
+					$data['join_url'] = $request->training_location ?? 'No Location';
+					$data['Address'] = $request->training_Address ?? 'No Address';
 					try {
 						$company->user->notify(new NewTrainingNotification($data));
 						log::info('Sent New Training notification to ' . $company->user->email);
@@ -1101,7 +1120,9 @@ Thanks from " . env('APP_NAME');
 				
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
-Training Session has been Updated: ". $data['title'] ."
+Training Session has been Updated: ". $data['title'] .",
+Google Map Link: " . $data['join_url'] . ",
+Address: " . $data['Address'] . "
 Thanks from " . env('APP_NAME');
 				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
 				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
