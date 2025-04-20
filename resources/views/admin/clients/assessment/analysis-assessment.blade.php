@@ -392,7 +392,7 @@
           type: 'radar',
           data: [{
             value: chartData,
-            name: $l == 'en' ? 'Current Status' : 'الحالة الحالية',
+            name: '{{$l}}' == 'en' ? 'Current Status' : 'الحالة الحالية',
           },
           {
             value: Array(chartData?.length).fill(100),
