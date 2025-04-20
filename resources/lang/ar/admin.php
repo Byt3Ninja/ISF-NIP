@@ -1441,6 +1441,7 @@ return [
         'other' => 'أخرى',
     ],
 	'Export_assessment_pdf' => 'تصدير التقييمات PDF',
+	'Export_assessment_all' => 'تصدير كل التقييمات',
 	'MessageSentSuccessfully' => 'تم ارسال الرسالة بنجاح',
 	'No sent Messages' => 'لا يوجد رسائل مرسلة',
 	'equal_to' => 'مساوي به',

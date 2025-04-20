@@ -1344,6 +1344,7 @@ return [
 	'Hide_Price'=> 'Hide Price',
 	'Hide_Vendor' => 'Hide Vendor Info',
 	'Service_Name' => 'Service Name',
+	'Export_assessment_all' => 'Export All Assessments',
 	'youareNotRegisterAttendee' => 'You are not registered to attend this training',
 	'youareRegisterAttendee' => 'You are registered to attend this training',
 	'2FA' => '2FA',

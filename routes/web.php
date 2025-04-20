@@ -219,6 +219,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/category-assessment', 'CatigoriesController@index')->name('category-assessment');
     Route::post('/answer-assessment', 'AssessmentController@AnswerAssessment')->name('answer-assessment');
     Route::get('/exportAssessment-pdf', 'AssessmentController@generatePDF')->name('assessment.pdf');
+    Route::get('/exportAssessment-pdf-all', 'AssessmentController@exportPDF')->name('assessment.pdf-all');
 
 
     Route::get('/assessment-admin/{id}', 'AssessmentController@assessmentAdmin')->name('question-assessment_admin');
