@@ -69,7 +69,7 @@ return [
 	'Edit service category' => 'Edit service category',
 	'List All' => 'All Users',
 	'Services' => 'Services',
-	'Add new service' => 'Add new service',
+	'Add new service' => 'Add New Service',
 	'Image' => 'Image',
 	'Description' => 'Description',
 	'Arabic Description' => 'Arabic Description',

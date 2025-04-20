@@ -43,14 +43,14 @@
                           <tr>
                             <th>#</th>
                             <th class="text-center">{{__('admin.Organization')}}</th>
-                            <th>{{ __('cycles.English Name') }}</th>
-                            <th>{{ __('cycles.Arabic Name') }}</th>
-                            <th>{{ __('cycles.Price') }}</th>
-                            <th>{{ __('admin.Vendor_Name') }}</th>
-                            <th>{{ __('admin.Vendor_Email') }}</th>
-                            <th>{{ __('admin.Vendor_Phone') }}</th>
-                            <th>{{ __('cycles.Created At') }}</th>
-                            @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions) )<th>{{ __('admin.Actions') }}</th>@endif
+                            <th class="text-center">{{ __('cycles.English Name') }}</th>
+                            <th class="text-center">{{ __('cycles.Arabic Name') }}</th>
+                            <th class="text-center">{{ __('cycles.Price') }}</th>
+                            <th class="text-center">{{ __('admin.Vendor_Name') }}</th>
+                            <th class="text-center">{{ __('admin.Vendor_Email') }}</th>
+                            <th class="text-center">{{ __('admin.Vendor_Phone') }}</th>
+                            <th class="text-center">{{ __('cycles.Created At') }}</th>
+                            @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions) )<th class="text-center">{{ __('admin.Actions') }}</th>@endif
                           </tr>
                         </thead>
                         <tbody>
@@ -58,35 +58,46 @@
                             <tr>
                               <td>{{ $index++ }}</td>
                               <td class="text-center">
-                                <a href="{{ URL::to('dashboard/organizations/' . $service->organization_id . '/edit') }}">
-                                  {{ $service->organization ? $service->organization->{'name_'.$l} : '-' }}
-                                </a>
-                              </td>
-                              <td>{{ $service->name_en }}</td>
-                              <td>{{ $service->name_ar }}</td>
-                              <td>{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
-                              <td>{{ $service->vendor_name ?? '-'}}</td>
-                              <td>{{ $service->vendor_email ?? '-' }}</td>
-                              <td>{{ $service->vendor_phone ?? '-'}}</td>
-                              <td>{{ $service->created_at }}</td>
-                              @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions) )
-                              <td>
-                                @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions) )
-                                  <a href="{{ route('services.edit', ['service' => $service->id]) }}"
-                                    class="btn btn-label-primary">
-                                    <i class="ti ti-pencil"></i>
-                                  </a>
+                                @if($service->organizations && $service->organizations->count())
+                                    <div class="d-flex flex-wrap justify-content-center">
+                                        @foreach($service->organizations as $organization)
+                                            <a href="{{ URL::to('dashboard/organizations/' . $organization->id . '/edit') }}" 
+                                               class="btn btn-outline-primary mx-1" 
+                                               title="Edit {{ $organization->{'name_'.$l} }}">
+                                                  {{ $organization->{'name_'.$l} }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span>-</span>
                                 @endif
-
-                                @if( $_user->ableTo('services.destroy', $permissions) )
-                                  <button id='deleteAction' data-id='{{ $service->id }}'
-                                    data-url="{{ route('services.destroy', ['service' => $service->id]) }}" type="button"
-                                    class="btn btn-label-danger">
-                                    <i class="ti ti-trash text-danger"></i>
-                                  </button>
-                                @endif
+                            </td>
+                              <td class="text-center">{{ $service->name_en }}</td>
+                              <td class="text-center">{{ $service->name_ar }}</td>
+                              <td class="text-center">{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
+                              <td class="text-center">{{ $service->vendor_name ?? '-'}}</td>
+                              <td class="text-center">{{ $service->vendor_email ?? '-' }}</td>
+                              <td class="text-center">{{ $service->vendor_phone ?? '-'}}</td>
+                              <td class="text-center">{{ $service->created_at }}</td>
+                              @if($_user->ableToAny(['services.show', 'services.edit', 'services.update', 'services.destroy'], $permissions))
+                              <td class="text-center">
+                                  <div class="d-flex justify-content-center">
+                                      @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
+                                          <a href="{{ route('services.edit', ['service' => $service->id]) }}" class="btn btn-label-primary mx-1" title="Edit Service">
+                                              <i class="ti ti-pencil"></i>
+                                          </a>
+                                      @endif
+                          
+                                      @if($_user->ableTo('services.destroy', $permissions))
+                                          <button id="deleteAction" data-id="{{ $service->id }}"
+                                                  data-url="{{ route('services.destroy', ['service' => $service->id]) }}" 
+                                                  type="button" class="btn btn-label-danger mx-1" title="Delete Service">
+                                              <i class="ti ti-trash"></i>
+                                          </button>
+                                      @endif
+                                  </div>
                               </td>
-                              @endif
+                          @endif
                             </tr>
                           @endforeach
                         </tbody>
