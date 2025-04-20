@@ -919,6 +919,7 @@ class MessengerController extends Controller
     public function sendReplyMessage(Request $request)
     {
        
+        $l = app()->getLocale();
 
         $request->validate([
             'message_subject' => 'nullable|string|max:255',
@@ -936,9 +937,84 @@ class MessengerController extends Controller
         ]);
 
     // جلب الرسالة مع الرسالة الأصلية اللي بيرد عليها
-    $replyWithSender = Messenger::with('reply')->find($message->id);
+    // $replyWithSender = Messenger::with('reply')->find($message->id);
+    $replyWithSender = DB::table('messenger as m')
+    ->leftJoin('messenger as reply', 'm.reply_id', '=', 'reply.id')
+    ->leftJoin('users as u', 'reply.sender', '=', 'u.id')
+    ->where('m.id', $message->id)
+    ->select([
+        'm.id',
+        'm.subject',
+        'm.message',
+        'm.created_at',
+        'm.updated_at',
+        'm.deleted_at',
+        'm.sender',
+        'm.receiver',
+        'm.reply_id',
+        'm.read',
+        'm.reported',
+        'm.starred',
+        'm.messgeId',
+
+        // reply fields
+        'reply.id as reply_id',
+        'reply.subject as reply_subject',
+        'reply.message as reply_message',
+        'reply.created_at as reply_created_at',
+        'reply.updated_at as reply_updated_at',
+        'reply.deleted_at as reply_deleted_at',
+        'reply.sender as reply_sender',
+        'reply.receiver as reply_receiver',
+        'reply.read as reply_read',
+        'reply.reported as reply_reported',
+        'reply.starred as reply_starred',
+        'reply.messgeId as reply_messgeId',
+        'reply.reply_id as reply_reply_id',
+        'u.first_name_en as reply_first_name_en',
+        'u.last_name_en as reply_last_name_en',
+        'u.first_name_ar as reply_first_name_ar',
+        'u.last_name_ar as reply_last_name_ar',
+    ])
+    ->get()
+    ->map(function ($item) {
+        return [
+            'message' => 'Message sent successfully',
+            'messages' => [
+                'id' => $item->id,
+                'subject' => $item->subject,
+                'message' => $item->message,
+                'created_at' => $item->created_at,
+                'updated_at' => $item->updated_at,
+                'deleted_at' => $item->deleted_at,
+                'sender' => $item->sender,
+                'receiver' => $item->receiver,
+                'reply_id' => $item->reply_id,
+                'read' => $item->read,
+                'reported' => $item->reported,
+                'starred' => $item->starred,
+                'messgeId' => $item->messgeId,
+                'reply' => $item->reply_id ? [
+                    'id' => $item->reply_id,
+                    'subject' => $item->reply_subject,
+                    'message' => $item->reply_message,
+                    'created_at' => $item->reply_created_at,
+                    'updated_at' => $item->reply_updated_at,
+                    'deleted_at' => $item->reply_deleted_at,
+                    'sender' => $item->reply_sender,
+                    'sender_name' => $item->reply_first_name_en . ' ' . $item->reply_last_name_en,
+                    'receiver' => $item->reply_receiver,
+                    'reply_id' => $item->reply_reply_id,
+                    'read' => $item->reply_read,
+                    'reported' => $item->reply_reported,
+                    'starred' => $item->reply_starred,
+                    'messgeId' => $item->reply_messgeId,
+                ] : null,
+            ],
+        ];
+    })->first(); 
     
-        return response()->json(['message' => 'Message sent successfully', 'messages' => $replyWithSender]);
+        return response()->json([$replyWithSender]);
     }
 
 
