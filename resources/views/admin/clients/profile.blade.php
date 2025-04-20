@@ -59,7 +59,7 @@
                     class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-4 my-2">
                     <li class="list-inline-item d-flex gap-2 align-items-center">
                       <i class="ti ti-palette ti-lg"></i><span class="fw-medium">
-                        {{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
+                        {{ $client->title_en }}</span>
                       </span>
                     </li>
                     <li class="list-inline-item d-flex gap-2 align-items-center">
@@ -223,14 +223,16 @@
                         </span>
                         <span>{{ $l == 'ar' ? 'نشط' : 'Active' }}</span>
                       </li>
-                      <li class="d-flex align-items-center mb-4">
-                        <i class="ti ti-crown ti-lg"></i><span class="fw-medium mx-2 text-nowrap">
-                          {{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:
-                        </span>
-                        <span class="text-nowrap">
-                          {{ $l == 'ar' ? $client->title_ar : $client->title_en }}
-                        </span>
-                      </li>
+                      @if ($client->title_en)
+                        <li class="d-flex align-items-center mb-4">
+                          <i class="ti ti-crown ti-lg"></i><span class="fw-medium mx-2 text-nowrap">
+                            {{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:
+                          </span>
+                          <span class="text-nowrap">
+                            {{ $client->title_en }}
+                          </span>
+                        </li>
+                      @endif
                       <li class="d-flex align-items-center mb-4">
                         <i class="ti ti-flag ti-lg"></i><span class="fw-medium mx-2 text-nowrap">
                           {{ $l == 'ar' ? 'الدولة:' : 'Country:' }}
