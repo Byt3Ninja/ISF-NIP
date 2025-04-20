@@ -36,6 +36,12 @@
     </style>
 </head>
 <body>
+    
+    <p><strong>Company Name:</strong> {{ $companyName }}</p>
+    <p><strong>Assessment Start Date:</strong> {{ \Carbon\Carbon::parse($start_date)->format('Y-m-d') }}</p>
+    <p><strong>Assessment End Date:</strong> {{ \Carbon\Carbon::parse($end_date)->format('Y-m-d') }}</p>
+    <p><strong>Overall Weighted Score:</strong> {{ number_format($scoresTotals, 2) }}</p>
+
     <h2>Categories</h2>
     @foreach ($user_scores as $key => $assessment)
         <h3>category: {{ $assessment->name }}</h3>

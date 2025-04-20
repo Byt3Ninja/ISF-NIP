@@ -13,15 +13,24 @@ class Permission extends Model
 
 	protected $fillable = [
 		'name',
+		'description',
 		'is_core',
+		'permission_group_id',
 		'created_at',
 		'updated_at',
 	];
 
 	protected $casts = [
 		'name' => 'string',
+		'description' => 'string',
 		'is_core' => 'boolean',
+		'permission_group_id' => 'integer',
 	];
+
+	public function permissionsGroup()
+	{
+		return $this->belongsTo(permissionsGroup::class, 'permission_group_id');
+	}
 
 	public static function default_permissions()
 	{

@@ -4,189 +4,203 @@
 @section('index_url', route('services.index'))
 @section('subTitle', __('admin.Add new service'))
 
+@section('style')
+  <style>
+  .ql-toolbar.ql-snow {
+    border-top-right-radius: 0.5rem;
+    border-top-left-radius: 0.5rem;
+  }
+  </style>
+@stop
+
 @section('content')
-  <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <div class="content-overlay"></div>
-      <div class="content-body">
-        <!-- BuilderForm start -->
-        <section id="basic-input">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="card">
-                <div class="card-header">
-                  <h4 class="card-title">{{ __('admin.Add new service') }}</h4>
-                </div>
-                <div class="card-content">
-                  <div class="card-body">
-                    @if (session()->has('msg'))
-                      <div class="row">
-                        <div class="col-md-12">
-                          <div class="alert alert-warning alert-danger mb-2" role="alert">
-                            {{ __('admin.' . session()->get('msg')) }}
-                            {{ Session::forget('msg') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                          </div>
-                        </div>
+<!-- BEGIN: Content-->
+<div class="content-wrapper">
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="content-overlay"></div>
+    <div class="content-body">
+      <!-- BuilderForm start -->
+      <section id="basic-input">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+              <div class="card-header">
+                <h4 class="card-title">{{ __('admin.Add new service') }}</h4>
+              </div>
+              <div class="card-content">
+                <div class="card-body">
+                  @if (session()->has('msg'))
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="alert alert-warning alert-danger mb-2" role="alert">
+                        {{ __('admin.' . session()->get('msg')) }}
+                        {{ Session::forget('msg') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                       </div>
-                    @endif
-                    <!-- Validation messages -->
-                    @if (count($errors) > 0)
-                      <div class="row">
-                        <div class="col-md-12">
-                          <div class="alert alert-danger">
-                            <ul>
-                              @foreach ($errors->all() as $error)
-                                <li>{{ $error }} </li>
-                              @endforeach
-                            </ul>
-                          </div>
-                        </div>
+                    </div>
+                  </div>
+                  @endif
+                  <!-- Validation messages -->
+                  @if (count($errors) > 0)
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="alert alert-danger">
+                        <ul>
+                          @foreach ($errors->all() as $error)
+                          <li>{{ $error }} </li>
+                          @endforeach
+                        </ul>
                       </div>
-                    @endif
-                    <form method="post" action="{{ route('services.store') }}" enctype="multipart/form-data">
-                      {!! csrf_field() !!}
-                      <div class="row">
-                        <div class="col-md-12">
-                          
-                          <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Service_Name') }}</label>
-                            <input style="direction: ltr;" type="text" class="form-control col-md-6 col-sm-12"
-                              id="name_en" name='name_en' required 
-                              value="{{ old('name_en') }}">
-                          </fieldset>
+                    </div>
+                  </div>
+                  @endif
+                  <form method="post" action="{{ route('services.store') }}" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    <div class="row">
+                      <div class="col-md-12">
 
-                          <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Price') }}
-                              {{ $Setting->Currency }}</label>
-                            <input style="direction: ltr;" type="text" class="form-control col-md-3 col-sm-12"
-                              id="price" name='price' required
-                              placeholder="{{ __('admin.Price') }} {{ $Setting->Currency }}"
-                              value="{{ old('price') }}">
-                          </fieldset>
-
-                          <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Description') }}</label>
-                            <textarea class="form-control" id="basicTextarea" name='description_en' required
-                               value="{{ old('description_en') }}"></textarea>
-                          </fieldset>
-
-                          <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Services Categories') }}</label>
-                            <select class="select2 form-control" required id="service_category_id"
-                              name='service_category_id'>
-                              <option value="">{{ __('admin.Services Categories') }}</option>
-                              @foreach ($serviceCategories as $category)
-                                <option value="{{ $category->id }}"
-                                  {{ old('service_category_id') == $category->id ? 'selected' : '' }}>
-                                  {{ $category->{'name_' . $l} }}</option>
-                              @endforeach
-                            </select>
-                          </fieldset>
-
-                          <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2">{{ __('admin.Organizations') }}</label>
-                            <div class="row">
-                                @foreach ($organizations as $organization)
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" 
-                                                id="organization_{{ $organization->id }}" 
-                                                name="organization_ids[]" 
-                                                value="{{ $organization->id }}">
-                                            <label class="form-check-label" for="organization_{{ $organization->id }}">
-                                                {{ $organization->{'name_' . app()->getLocale()} }}
-                                            </label>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Service_Name') }}</label>
+                          <input style="direction: ltr;" type="text" class="form-control col-md-6 col-sm-12"
+                            id="name_en" name='name_en' required value="{{ old('name_en') }}">
                         </fieldset>
 
-                          <!-- Vendor Details -->
-                  <fieldset class="form-group mb-4">
-                    <label class="fs-5 mb-2">{{ __('admin.Vendor_Name') }}</label>
-                    <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_name"
-                       value="{{ old('vendor_name') }}">
-                  </fieldset>
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Price') }}
+                            {{ $Setting->Currency }}</label>
+                          <input style="direction: ltr;" type="text" class="form-control col-md-3 col-sm-12" id="price"
+                            name='price' required placeholder="{{ __('admin.Price') }} {{ $Setting->Currency }}"
+                            value="{{ old('price') }}">
+                        </fieldset>
 
-                  <fieldset class="form-group mb-4">
-                    <label class="fs-5 mb-2">{{ __('admin.Vendor_Email') }}</label>
-                    <input type="email" class="form-control col-md-6 col-sm-12" name="vendor_email"
-                       value="{{ old('vendor_email') }}">
-                  </fieldset>
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Description') }}</label>
+                          <input type="hidden" name="description_en" id="description_en"
+                            value="{{ old('description_en') }}" />
+                          <div id="quill-editor" style="height: 200px;">{!! old('description_en') !!}</div>
+                        </fieldset>
 
-                  <fieldset class="form-group mb-4">
-                    <label class="fs-5 mb-2">{{ __('admin.Vendor_Phone') }}</label>
-                    <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_phone"
-                     value="{{ old('vendor_phone') }}">
-                  </fieldset>
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Services Categories') }}</label>
+                          <select class="select2 form-control" required id="service_category_id"
+                            name='service_category_id'>
+                            <option value="">{{ __('admin.Services Categories') }}</option>
+                            @foreach ($serviceCategories as $category)
+                            <option value="{{ $category->id }}" {{ old('service_category_id')==$category->id ?
+                              'selected' : '' }}>
+                              {{ $category->{'name_' . $l} }}</option>
+                            @endforeach
+                          </select>
+                        </fieldset>
 
-                  <!-- Visibility Controls -->
-                  <fieldset class="form-group mb-4">
-                    <div class="form-check">
-                        <input type="hidden" name="hide_price" value="0">
-                        <input type="checkbox" class="form-check-input" id="hide_price" name="hide_price" value="1"
-                               {{ old('hide_price') ? 'checked' : '' }}>
-                        <label class="form-check-label" for="hide_price">{{ __('admin.Hide_Price') }}</label>
-                    </div>
-                </fieldset>
-
-                <fieldset class="form-group mb-4">
-                  <div class="form-check">
-                      <input type="hidden" name="hide_vendor_info" value="0">
-                      <input type="checkbox" class="form-check-input" id="hide_vendor_info" name="hide_vendor_info" value="1"
-                             {{ old('hide_vendor_info') ? 'checked' : '' }}>
-                      <label class="form-check-label" for="hide_vendor_info">{{ __('admin.Hide_Vendor') }}</label>
-                  </div>
-              </fieldset>
-
-                          <fieldset class="form-group mb-4">
-                            <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Image') }}</label>
-                            <br />
-                            <div>
-                              {{-- <div class="input-group-prepend">
-                                <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
-                              </div> --}}
-                              <div class="d-flex align-items-center border rounded py-1 px-2">
-                                <input type="file" class="custom-file-input" id="img_url" name="img_url"
-                                  accept="image/*" aria-describedby="inputGroupFileAddon01">
-                                <label class="fs-5 mb-2 custom-file-label"
-                                  for="inputGroupFile01">{{ __('admin.SelectFile') }}</label>
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2">{{ __('admin.Organizations') }}</label>
+                          <div class="row">
+                            @foreach ($organizations as $organization)
+                            <div class="col-md-4">
+                              <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                  id="organization_{{ $organization->id }}" name="organization_ids[]"
+                                  value="{{ $organization->id }}">
+                                <label class="form-check-label" for="organization_{{ $organization->id }}">
+                                  {{ $organization->{'name_' . app()->getLocale()} }}
+                                </label>
                               </div>
                             </div>
-                          </fieldset>
-                        </div>
+                            @endforeach
+                          </div>
+                        </fieldset>
+
+                        <!-- Vendor Details -->
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2">{{ __('admin.Vendor_Name') }}</label>
+                          <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_name"
+                            value="{{ old('vendor_name') }}">
+                        </fieldset>
+
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2">{{ __('admin.Vendor_Email') }}</label>
+                          <input type="email" class="form-control col-md-6 col-sm-12" name="vendor_email"
+                            value="{{ old('vendor_email') }}">
+                        </fieldset>
+
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2">{{ __('admin.Vendor_Phone') }}</label>
+                          <input type="text" class="form-control col-md-6 col-sm-12" name="vendor_phone"
+                            value="{{ old('vendor_phone') }}">
+                        </fieldset>
+
+                        <!-- Visibility Controls -->
+                        <fieldset class="form-group mb-4">
+                          <div class="form-check">
+                            <input type="hidden" name="hide_price" value="0">
+                            <input type="checkbox" class="form-check-input" id="hide_price" name="hide_price" value="1"
+                              {{ old('hide_price') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="hide_price">{{ __('admin.Hide_Price') }}</label>
+                          </div>
+                        </fieldset>
+
+                        <fieldset class="form-group mb-4">
+                          <div class="form-check">
+                            <input type="hidden" name="hide_vendor_info" value="0">
+                            <input type="checkbox" class="form-check-input" id="hide_vendor_info"
+                              name="hide_vendor_info" value="1" {{ old('hide_vendor_info') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="hide_vendor_info">{{ __('admin.Hide_Vendor') }}</label>
+                          </div>
+                        </fieldset>
+
+                        <fieldset class="form-group mb-4">
+                          <label class="fs-5 mb-2" for="basicInput">{{ __('admin.Image') }}</label>
+                          <br />
+                          <div>
+                            {{-- <div class="input-group-prepend">
+                              <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                            </div> --}}
+                            <div class="d-flex align-items-center border rounded py-1 px-2">
+                              <input type="file" class="custom-file-input" id="img_url" name="img_url" accept="image/*"
+                                aria-describedby="inputGroupFileAddon01">
+                              <label class="fs-5 mb-2 custom-file-label" for="inputGroupFile01">{{
+                                __('admin.SelectFile') }}</label>
+                            </div>
+                          </div>
+                        </fieldset>
                       </div>
-                      @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
-                      <div class="row">
-                        <div class="col-12 d-flex justify-content-end">
-                          <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Save') }}</button>
-                        </div>
+                    </div>
+                    @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
+                    <div class="row">
+                      <div class="col-12 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('admin.Save') }}</button>
                       </div>
-                      @endif
-                    </form>
-                  </div>
+                    </div>
+                    @endif
+                  </form>
                 </div>
               </div>
             </div>
           </div>
-        </section>
-        <!-- BuilderForm end -->
-      </div>
+        </div>
+      </section>
+      <!-- BuilderForm end -->
     </div>
   </div>
-  <!-- END: Content-->
+</div>
+<!-- END: Content-->
 @stop
+
 @section('pagescripts')
-  <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
-  <script>
-    CKEDITOR.replace('description_ar', {
-      language: 'ar'
+@parent
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      var quill = new Quill('#quill-editor', {
+        theme: 'snow'
+      });
+
+      var descriptionInput = document.getElementById('description_en');
+      quill.on('text-change', function () {
+        descriptionInput.value = quill.root.innerHTML;
+      });
     });
-    CKEDITOR.replace('description_en', {
-      language: 'en'
-    });
-  </script>
+</script>
 @stop

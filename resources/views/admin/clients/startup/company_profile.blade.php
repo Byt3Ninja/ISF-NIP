@@ -216,40 +216,52 @@
           </div>
           <div class="col-6 col-md-4 mb-4">
             <div class="card" style="height: 170px; background-color: #5eead4; overflow: hidden;">
-              <div class="card-body">
+                <div class="py-6 px-2">
                 <div class="align-self-center d-flex flex-column text-center align-items-center w-100">
                   <div class="text-center">
-                    <img class="card-icon mb-2" src="/icons/target-market.svg" alt="icon"
-                      style="width: 50px; height: 50px;"
-                    />
+                  <img class="card-icon mb-2" src="/icons/target-market.svg" alt="icon"
+                    style="width: 50px; height: 50px;"
+                  />
                   </div>
                   <h5 class="mb-2 fw-semibold">{{ __('admin.Targeted_Market') }}</h5>
-                  <div class="d-flex align-items-center gap-1 pb-2" style="width: 99.5%; overflow: auto; white-space: nowrap;">
-                    @if($company->targeted_market != null)
-                    @php
-                    $countryIds = json_decode($company->targeted_market, true);
-                    @endphp
+                  <div class="d-flex justify-content-center align-items-center gap-1 pb-2" style="width: 99.5%; overflow: auto; white-space: nowrap;">
+                  @if($company->targeted_market != null)
+                  @php
+                  $countryIds = json_decode($company->targeted_market, true);
+                  @endphp
 
-                    @if (is_array($countryIds) && count($countryIds) > 0)
-                    @php
-                    $targetedCountries = App\Country::whereIn('id', $countryIds)->get()->keyBy('id');
-                    @endphp
-                    @foreach ($countryIds as $countryId)
-                    <span
-                      class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3"
-                      style="width: fit-content;">
-                      {{ $targetedCountries[$countryId]->{'name_' . $l} ?? __('admin.N/A') }}
-                    </span>
+                  @if (is_array($countryIds) && count($countryIds) > 0)
+                  @php
+                  $targetedCountries = App\Country::whereIn('id', $countryIds)->get()->keyBy('id');
+                  @endphp
+                    @foreach (array_slice($countryIds, 0, 1) as $index => $countryId)
+                      <div
+                        class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-2"
+                        style="min-width: 110px;">
+                        <span class="line-clamp-1">
+                          {{ $targetedCountries[$countryId]->{'name_' . $l} ?? __('admin.N/A') }}
+                        </span>
+                      </div>
                     @endforeach
-                    @else
-                    <span
-                      class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
-                      style="width: fit-content;">{{ __('admin.N/A') }}</span>
+                    @if (is_array($countryIds) && count($countryIds) > 1)
+                      <span
+                        class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
+                        style="width: fit-content;"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#targetedMarketModal"
+                        >
+                        <i class="ti ti-dots ti-16px"></i>
+                      </span>
                     @endif
-                    @endif
+                  @else
+                  <span
+                    class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-4"
+                    style="width: fit-content;">{{ __('admin.N/A') }}</span>
+                  @endif
+                  @endif
                   </div>
                 </div>
-              </div>
+                </div>
             </div>
           </div>
           <div class="col-6 col-md-4 mb-4">
@@ -807,6 +819,30 @@
     ]
   )
 <!--/ Warning Modal -->
+
+<!-- Targeted Market Modal -->
+<div class="modal fade" id="targetedMarketModal" tabindex="-1" aria-labelledby="targetedMarketModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="targetedMarketModalLabel">{{ __('admin.Targeted_Market') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
+      </div>
+      <div class="modal-body d-flex flex-wrap gap-2">
+        @if (is_array($countryIds) && count($countryIds) > 0)
+          @foreach ($countryIds as $countryId)
+            <span class="text-xs badge bg-label-light text-dark rounded-pill px-3">
+              {{ $targetedCountries[$countryId]->{'name_' . $l} ?? __('admin.N/A') }}
+            </span>
+          @endforeach
+        @else
+          <span class="text-xs">{{ __('admin.N/A') }}</span>
+        @endif
+      </div>
+    </div>
+  </div>
+</div>
+
 @stop
 
 @section('scripts')

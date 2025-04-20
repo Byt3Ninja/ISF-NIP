@@ -918,7 +918,7 @@ class MessengerController extends Controller
 
     public function sendReplyMessage(Request $request)
     {
-       
+        $l = app()->getLocale();
 
         $request->validate([
             'message_subject' => 'nullable|string|max:255',
@@ -934,11 +934,83 @@ class MessengerController extends Controller
             'sender' => auth()->id(),
             'reply_id' => $request->message_id,
         ]);
+        $reply_id = $message->id;
 
     // جلب الرسالة مع الرسالة الأصلية اللي بيرد عليها
-    $replyWithSender = Messenger::with('reply')->find($message->id);
+    $replyWithSender1 = Messenger::with('reply')->find($message->id);
+    $replyWithSender2 = DB::table('messenger as m')
+    ->leftJoin('users as u', 'm.sender', '=', 'u.id')
+    ->leftJoin('users as ur', 'm.receiver', '=', 'ur.id')
+    ->leftJoin('messenger as reply', 'reply.sender', '=', 'ur.id')
+    ->leftJoin('users as urs', 'reply.sender', '=', 'urs.id')
+    ->where('m.id', $request->message_id)
+    ->get([
+        'm.id',
+        'm.subject',
+        'm.message as message',
+        'm.created_at',
+        'm.updated_at',
+        'm.deleted_at',
+        'm.sender as sender',
+        'm.receiver as receiver',
+        'm.reply_id',
+        'm.read',
+        'm.reported',
+        'm.starred',
+        'm.messgeId',
+
+        // reply fields
+        'reply.id as reply_id',
+        'reply.subject as reply_subject',
+        'reply.message as reply_message',
+        'reply.created_at as reply_created_at',
+        'reply.updated_at as reply_updated_at',
+        'reply.deleted_at as reply_deleted_at',
+        'reply.sender as reply_sender',
+        'reply.receiver as reply_receiver',
+        'reply.read as reply_read',
+        'reply.updated_at as reply_updated_at',
+        'reply.reported as reply_reported',
+        'reply.starred as reply_starred',
+        'reply.messgeId as reply_messgeId',
+        'reply.reply_id as reply_reply_id',
+        'urs.first_name_en as reply_first_name_en',
+        'urs.last_name_en as reply_last_name_en',
+        'urs.first_name_ar as reply_first_name_ar',
+        'urs.last_name_ar as reply_last_name_ar',
+        'urs.img_url as reply_img_url',]);
+
+        $messages = $replyWithSender2->groupBy('id')->map(function ($groupedMessage) use ($l, $reply_id) {
+            $msg = $groupedMessage->first();
+            $message = new stdClass;
+            $message->id = $msg->id;
+            $message->reply_id = $msg->reply_id;
+            $message->sender = $msg->sender;
+            $message->receiver = $msg->receiver;
+            $message->subject = $msg->subject;
+            $message->message = $msg->message;
+            $message->read = $msg->read;
+            $message->starred = $msg->starred;
+            $message->created_at = $msg->created_at;
+            $message->reply = $groupedMessage->filter(fn($reply) => !is_null($reply->reply_id))->map(function ($_reply) use ($l, $reply_id) {
+                $reply = new stdClass;
+                $reply->id = $_reply->reply_id;
+                $reply->subject = $_reply->reply_subject;
+                $reply->message = $_reply->reply_message;
+                $reply->receiver = $_reply->reply_receiver;
+                $reply->reply_updated_at = $_reply->reply_updated_at;
+                $reply->created_at = $_reply->reply_created_at;
+                $reply->sender = $_reply->reply_sender;
+                $reply->sender_name = $_reply->{"reply_first_name_".$l} . ' ' . $_reply->{"reply_last_name_".$l};
+                return $reply;
+            })->where('id', $reply_id)->values()->first();
+            return $message;
+        })->values();
+        
+        
+        $message = collect($messages)->first();
     
-        return response()->json(['message' => 'Message sent successfully', 'messages' => $replyWithSender]);
+        return response()->json(['message' => 'Message sent successfully', 'messages' => $message]);
     }
 
 

@@ -226,8 +226,8 @@ return [
     'sessions' =>'Online Sessions',
     'trainer name'=>'Trainer name',
     'trainer email'=>'Trainer Email',
-    'training location'=>'Training location',
-    'training Address'=>'Training Address',
+    'training location'=>'Training map link',
+    'training Address'=>'Training Location Address',
     'select online'=>'Select online course',
     'Display course contents' => 'View course contents',
     'Edit training session' => 'Edit training session',
@@ -312,5 +312,7 @@ return [
     'Mentorship Sessions' => 'Mentorship Sessions',
     'Select Judges' => 'Select Judges',
     'Select Startup' => 'Select Startup',
+    'Time From' => 'الوقت من',
+    'Time To' => 'الوقت إلى',
 ];
 

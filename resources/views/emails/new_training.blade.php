@@ -220,16 +220,30 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">New Training created</p>
                                                     <p style="margin: 0;"> </p>
-                                                    
+                                                  
                                                     <p style="margin: 0;">We are excited to inforam you that a new training session has been created: {{ $data['title'] }}.  
                                                         This training will provide valuable insights and skills to help your company grow.</p>
                                                     
                                                     <p style="margin: 0;">
                                                         📅 **Date:** {{ $data['date'] }} </p>
                                                         <p style="margin: 0;"> </p>
+                                                        @if($data['type'] == 'sessions')
                                                     <p style="margin: 0;">
                                                         🔗 **Link:** {{ $data['join_url'] }} 
                                                     </p>
+                                                    @elseif($data['type'] == 'online')
+                                                    <p style="margin: 0;">
+                                                        🔗 **Link:** {{ $data['join_url'] }} 
+                                                    </p>
+                                                    @elseif($data['type'] == 'offline')
+                                                    <p style="margin: 0;">
+                                                        🔗 **Google Map Link:** {{ $data['join_url'] }} 
+                                                    </p>
+                                                    <p style="margin: 0;">
+                                                        🔗 **Address:** {{ $data['Address'] }} 
+                                                    </p>
+                                                    @endif
+
                                                     
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Best regards,</p>
@@ -257,10 +271,28 @@ $setting = \App\settings::where('id', 1)->first();
                                                         يسعدنا إعلامكم بأنه قد تم إنشاء تدريب جديد:  {{ $data['title'] }}.  
                                                         سيوفر هذا التدريب رؤى ومهارات قيّمة لمساعدتكم على تطوير أعمالكم.</p>
                                                     
-                                                    <p style="margin: 0;">
-                                                        📅 **التاريخ:** {{ $data['date'] }} 
-                                                        🔗 **الرابط:** {{ $data['join_url'] }}
-                                                    </p>
+                                                        <p style="margin: 0;">
+                                                            📅 **التاريخ:** {{ $data['date'] }} </p>
+                                                            <p style="margin: 0;"> </p>
+                                                            @if($data['type'] == 'sessions')
+                                                        <p style="margin: 0;">
+                                                            🔗 **لينك:** {{ $data['join_url'] }} 
+                                                        </p>
+                                                        @elseif($data['type'] == 'online')
+                                                        <p style="margin: 0;">
+                                                            🔗 **لينك:** {{ $data['join_url'] }} 
+                                                        </p>
+                                                        @elseif($data['type'] == 'offline')
+                                                        <p style="margin: 0;">
+                                                            🔗 **لينك خرائط جوجل:** {{ $data['join_url'] }} 
+                                                        </p>
+                                                        <p style="margin: 0;">
+                                                            🔗 **العنوان:** {{ $data['Address'] }} 
+                                                        </p>
+                                                        @endif
+    
+                                                        
+                                                        <p style="margin: 0;"> </p>
 
 
                                                     <p style="margin: 0;"> </p>

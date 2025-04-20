@@ -28,14 +28,14 @@ class UpdateServiceRequest extends FormRequest
             'name_en' => 'required',
             'description_en' => 'required',
             'service_category_id' => 'required|exists:service_categories,id',
-            'vendor_name' => 'required|string|max:50',
+            'vendor_name' => 'nullable|string|max:50',
             'vendor_email' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 Rule::unique('services', 'vendor_email')->ignore($this->route('service')),
             ],
-            'vendor_phone' => 'required|string|max:11',
+            'vendor_phone' => 'nullable|string|max:11',
             'organization_ids' => 'nullable|array',
             'organization_ids.*' => 'exists:organizations,id',
         ];

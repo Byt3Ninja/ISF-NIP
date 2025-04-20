@@ -153,4 +153,49 @@
     <!-- / Content -->
   </div>
   <!-- / Content wrapper -->
+  <script>
+    $(document).ready(function() {
+      getStates($('#country_id').val());
+      $('#country_id').change(function() {
+        getStates($(this).val());
+      });
+      $('#state_id').change(function() {
+        getCities($(this).val());
+      });
+    });
+
+    function getStates(country_id) {
+      var $state = $('#state_id');
+     
+      var currentState = '{{ $Title->State }}';
+      var selected = '';
+      $.ajax({
+        url: "{{ route('get_states_by_country') }}",
+        data: {
+          country_id: country_id
+        },
+        success: function(data) {
+          // console.log(data);
+          $state.html('<option value="" disabled >{{ __('admin.State') }}</option>');
+          $.each(data, function(id, value) {
+            console.log(id, value);
+            // selected = '';
+            
+            if (currentState == id) {
+              selected = 'selected';
+              // getCities(id)
+            } else {
+              selected = '';
+            }
+            
+            $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
+            $('#city_id').html('<option value="" >{{ __('admin.City') }}</option>');
+          });
+          $('#state').show(150);
+        }
+      });
+    }
+
+    
+  </script>
 @stop

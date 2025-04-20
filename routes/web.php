@@ -313,6 +313,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('audit-logs', 'AuditLogsController', ['except' => ['create', 'store', 'edit', 'update']]);
     //Permissions
     Route::resource('permissions', 'PermissionsController');
+    // permissions groups
+    Route::resource('permission-groups', 'PermissionGroupsController');
     //Roles
     Route::resource('roles', 'RolesController');
     //Faqs

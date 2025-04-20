@@ -310,6 +310,10 @@ return [
 	'Permissions' => 'الصلاحيات',
 	'CreatePermission' => 'إنشاء صلاحية',
 	'EditPermission' => 'تحرير صلاحية',
+	'permissionGroups' => 'مجموعات الصلاحيات',
+	'permissionsGroup' => 'مجموعة الصلاحيات',
+	'CreatePermissionGroup' => 'إنشاء مجموعة صلاحيات',
+	'EditPermissionGroup' => 'تعديل مجموعة صلاحيات',
 	'CreateRole' => 'إنشاء دور جديد',
 	'EditRole' => 'تحرير الدور',
 	'Log viewer' => 'عرض سجل النظام',
@@ -1441,6 +1445,7 @@ return [
         'other' => 'أخرى',
     ],
 	'Export_assessment_pdf' => 'تصدير التقييمات PDF',
+	'Export_assessment_all' => 'تصدير كل التقييمات',
 	'MessageSentSuccessfully' => 'تم ارسال الرسالة بنجاح',
 	'No sent Messages' => 'لا يوجد رسائل مرسلة',
 	'equal_to' => 'مساوي به',
@@ -1527,5 +1532,7 @@ return [
 	'visability_status' => 'حالة الظهور',
 	'licenseAlreadyActivated' => 'لديك بالفعل ترخيص نشط حتى :',
 	'End_time_should_be_greater_than_start_time' => 'يجب أن يكون وقت الانتهاء أكبر من وقت البدء',
+	'zoom_error' => 'يجب عليك تعبئة كلمات التعريف من الاعدادات',
+	'teams_error' => 'يجب عليك تعبئة كلمات التعريف من الاعدادات',
 ]; 
 
