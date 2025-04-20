@@ -40,7 +40,7 @@
     $circle_id = $_user->company->cycle ?? 0;
     $organization_id = $_user->organization_id ?? 0;
     if( $organization_id == 0 ) { $organization_id = $_user->company->cycledata->organization_id ?? 0; }
-    $s_count = \App\Service::count();
+    $s_count = \App\Service::whereHas('organizations')->count();
     $s_r_count = \App\ServicesRequests::where('user_id', $user_id)->count();
     $nm_count = \App\Messenger::where('receiver', $user_id)->whereNull('read')->count();
     $mentors = \App\CyclesMentors::where('cycle_id', $circle_id)->get();
