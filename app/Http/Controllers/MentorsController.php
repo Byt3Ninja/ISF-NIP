@@ -315,6 +315,10 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
+		$datefrom = $request->date .' '. $request->timeFrom;
+		$dateto = $request->date .' '. $request->timeTo;
+		$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
+
 		if ($request->mentorid) {
 			if ($request->date < date("Y-m-d 00:00:00")) {
 				return back()->with(['msg' => "Error, can't add late date.", 'class' => 'danger']);
@@ -328,8 +332,8 @@ class MentorsController extends Controller
 				'mentor_id' => $request->mentorid,
 				'user_id' => Auth::id(),
 				'comment' => $request->notes,
-				'zoom_date' => $request->date,
-				'period' => $request->period,
+				'zoom_date' => $datefrom,
+				'period' => $period,
 				'fileurl' => $fileName,
 				'organization_id' => $request->organization_id,
 				'cycle_id' => $request->cycle_id
