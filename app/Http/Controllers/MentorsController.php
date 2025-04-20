@@ -373,7 +373,7 @@ Thanks from " . env('APP_NAME');
 			$dates = explode(',', $request->date);
 			foreach ($dates as $key) {
 				
-				$dateDatabase = MentorshipRequest::where('zoom_date', $key)->where('mentor_id', $request->mentorid)->get();
+				$dateDatabase = MentorshipRequest::where('zoom_date', $key)->where('mentor_id', $request->mentorid)->where('user_id', $request->userid)->get();
 				if(count($dateDatabase) > 0) {
 					return back()->with(['message2' => "Cant_add_request_date_is_Exist", 'notAdd' => 2]);
 				}
@@ -836,12 +836,13 @@ Thanks from " . env('APP_NAME');
 		}
 	}
 
-	public function MentorDates(Request $request)
-	{
-			$mentor_id = $request->mentor_id;
-			$dates  = "Select mentor_id, zoom_date from mentorship_requests where mentor_id = $mentor_id AND approved = 'Yes' ";
-			$dates = DB::select($dates);
-			return response()->json(['dates' => $dates]);
+	// public function MentorDates(Request $request)
+	// {
+	// 		$mentor_id = $request->mentor_id;
+
+	// 		$dates  = "Select mentor_id, zoom_date, user_id from mentorship_requests where mentor_id = $mentor_id AND approved = 'Yes' ";
+	// 		$dates = DB::select($dates);
+	// 		return response()->json(['dates' => $dates]);
 		
-	}
+	// }
 }

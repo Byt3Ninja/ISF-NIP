@@ -556,7 +556,7 @@
             _token: '{{ csrf_token() }}'
         },
         success: function(response) {
-        // console.log('response', response)
+        console.log('response', response)
         // console.log('Messages: ',response.messages);
           $('#message-reply-text').val('');
           messageReplyEditor.setText(''); // Clear the editor

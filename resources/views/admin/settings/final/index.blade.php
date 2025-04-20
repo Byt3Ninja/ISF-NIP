@@ -223,10 +223,12 @@
                                 <td>
                                   <div class="d-flex align-items-center gap-2">
                                     <a class="" href="/dashboard/users/{{ $company->user->id }}/edit">
+                                      @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                                       <img
                                         src="{{ isset($company->user->img_url) ? asset("191014/{$company->user->img_url}") : asset('icons/account.svg') }}"
                                         onerror="this.src='/icons/account.svg'" alt="avatar" class="rounded-circle"
                                         height="40" width="40" />
+                                        @endif
                                     </a>
                                     <a href="/dashboard/users/{{ $company->user->id }}/edit">
                                       <div class="media-body">
@@ -640,6 +642,11 @@
       // alert(company);
       $('.cid').val(company);
       $('#ModifyRequest').modal('show');
+      let date_zoom = '{{ $company->fsession($cstep->id)->datetime }}';
+      let Period = '{{ $company->fsession($cstep->id)->duration }}';
+      $('#sdate').val(date_zoom);
+      $('#editNeededZoomDateTime').val(date_zoom);
+      $('#period').val(Period);
     }
 
     function deleteme(id) {
