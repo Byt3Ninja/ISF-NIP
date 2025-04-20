@@ -224,7 +224,7 @@ return [
     'sessions' =>'تدريب عن بعد',
     'trainer name'=>'اسم المدرب',
     'trainer email'=>'البريد الالكتروني للمدرب',
-    'training location'=>'مكان التدريب',
+    'training location'=>'لينك مكان التدريب',
     'training Address'=>'عنوان التدريب',
     'select online'=>'اختر محتوى من القائمة',
     'Display course contents' => 'عرض محتويات الكورس التعليمي',
@@ -309,5 +309,7 @@ return [
     'Mentorship Sessions' => 'جلسات الإرشاد',
     'Select Judges' => 'اختر المحكمين',
     'Select Startup' => 'اختر الشركة',
+    'Time From' => 'الوقت من',
+    'Time To' => 'الوقت إلى',
   ];
 
