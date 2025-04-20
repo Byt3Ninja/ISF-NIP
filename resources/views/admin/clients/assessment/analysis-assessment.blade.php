@@ -370,40 +370,35 @@
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             borderColor: '#ccc',
             zIndex: 9999,
-            position: function(point, params, dom, rect, size) {
-              return [point[0], point[1]];
-            },
+            position: [10, 10], // Fixed position for the tooltip
             borderWidth: 1,
             textStyle: {
               color: '#fff',
               fontSize: 14,
             },
-            // formatter: function (params) {
-            //   return `${params.seriesName}<br>${params.name}: ${params.value}`;
-            // },
           },
           radar: {
-            shape: 'circle',
-            name: {
-              textStyle: {
-                color: config.colors.dark,
-                fontSize: window.innerWidth < 768 ? 12 : 16,
-              },
-            },
-            indicator: chartIndicatorData,
+        shape: 'circle',
+        name: {
+          textStyle: {
+            color: config.colors.dark,
+            fontSize: window.innerWidth < 768 ? 12 : 16,
+          },
+        },
+        indicator: chartIndicatorData,
           },
           series: [{
-            name: 'Analysis',
-            type: 'radar',
-            data: [{
-                value: chartData,
-                name: 'Current Status',
-              },
-              {
-                value: Array(chartData?.length).fill(100),
-                name: 'Goal',
-              },
-            ],
+          name: 'Analysis',
+          type: 'radar',
+          data: [{
+            value: chartData,
+            name: $l == 'en' ? 'Current Status' : 'الحالة الحالية',
+          },
+          {
+            value: Array(chartData?.length).fill(100),
+            name: 'Goal',
+          },
+        ],
           }, ],
         };
 
