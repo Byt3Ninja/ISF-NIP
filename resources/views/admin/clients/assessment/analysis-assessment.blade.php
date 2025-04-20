@@ -162,18 +162,7 @@
                   @endif
 
                   @if ($assessment && $assessment->end_date != null)
-                  <a href="{{ route('assessment.pdf-all') }}" class="btn btn-sm btn-success light-shadow radius-10 ms-2">
-                    {{ __('admin.Export_assessment_all') }}
-                  </a>
-                @else
-                  <a class="bg-light hover-none radius-10 disabled px-4 py-2 ms-2"
-                    style="cursor: not-allowed !important;">
-                    {{ __('admin.Export_assessment_all') }}
-                  </a>
-                @endif
-
-                  @if ($assessment && $assessment->end_date != null)
-                    <a href="{{ route('assessment.pdf') }}" class="btn btn-sm btn-primary light-shadow radius-10 ms-2">
+                    <a href="{{ route('assessment.pdf') }}" class="btn btn-sm btn-danger light-shadow radius-10 ms-2">
                       {{ __('admin.Export_assessment_pdf') }}
                     </a>
                   @else

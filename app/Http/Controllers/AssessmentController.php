@@ -627,34 +627,6 @@ public function generatePDF()
     return $pdf->download('completed_assessment.pdf');
 }
 
-public function exportPDF()
-{
-    $userid = auth()->user()->id;
-    
-    $assessment_user = Assessment::where('user_id', $userid)->whereNotNull('end_date')->latest()->first();
-     // Get total weighted score
-    $scoresTotal = UserScore::where('user_id', $userid)
-    ->where('assessment_id', $assessment_user->id)
-    ->get();
-    $scoresTotals = $scoresTotal->sum('weighted_score');
 
-    $start_date = $assessment_user->start_date;
-    $end_date = $assessment_user->end_date;
-
-    $user = auth()->user();
-    $companyName = $user->company->name_en;
-
-    // Generate PDF
-    $pdf = Pdf::loadView('admin.clients.assessment.assessment-all-pdf', [
-        'assessment_user' => $assessment_user,
-        'scoresTotals' => $scoresTotals,
-        'start_date' => $start_date,
-        'end_date' => $end_date,
-        'companyName' => $companyName
-    ]);
-
-    return $pdf->download('assessment.pdf');
-
-}
 
 }
