@@ -1513,4 +1513,11 @@ return [
 	'End_time_should_be_greater_than_start_time' => 'End time should be greater than start time',
 	'zoom_error'=>'Zoom credentials are missing. Please fill in Client ID, Client Secret, and Account ID From Settings',
 	'teams_error'=>'Teams credentials are missing. Please fill in MICROSOFT TENANT ID, MICROSOFT CLIENT ID, and  MICROSOFT CLIENT SECRET VALUE From Settings',
+	'licenseDetails' => 'License Details',
+	'ID' => 'ID',
+	'Key'=> 'Key',
+	'Name' => 'Name',
+	'Expiry' => 'Expiry',
+	'Max Machines' => 'Max Machines',
+	'Uses Left' => 'Uses Left',
 ];
