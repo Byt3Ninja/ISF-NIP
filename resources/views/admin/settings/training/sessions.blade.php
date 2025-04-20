@@ -27,7 +27,7 @@
           @if (session()->has('message'))
             <div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2"
               role="alert">
-              {{ __('admin.' . session()->get('message')) }}
+              {{ __(session()->get('message')) }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           @endif

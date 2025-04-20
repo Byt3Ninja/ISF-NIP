@@ -48,7 +48,6 @@ class TrainingController extends Controller
 	protected $whatsAppService;
 	public function __construct(WhatsAppService $whatsAppService)
 	{
-		$this->meetingService =  OnlineMeetingFactory::create();
 		$this->whatsAppService = $whatsAppService;
 	}
 
@@ -712,6 +711,8 @@ class TrainingController extends Controller
 
 	public function addsession(Request $request)
 	{
+		$this->meetingService =  OnlineMeetingFactory::create();
+
 		
 		$type = $request->type;
 		$startDate = $request->datetime; // التاريخ
@@ -732,9 +733,11 @@ class TrainingController extends Controller
 			$topic = "Training (" . $title . ')';
 			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $request->duration, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
-
-			if (!$onlineMeeting) {
-				return back()->with(['message' => 'Can\'t create zoom meeting, API error', 'class' => 'danger']);
+			if (!$onlineMeeting['success']) {
+				return back()->with([
+					'message' => $onlineMeeting['data'],
+					'class' => 'danger'
+				]);
 			}
 			$zoomid =  $onlineMeeting['data']['id'];
 			$start = $onlineMeeting['data']['start_url'];

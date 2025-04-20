@@ -1505,6 +1505,8 @@ return [
 	'OK' => 'OK',
 	'MessageDraftDeletedSuccessfully' => 'Message Draft Deleted Successfully',
 	'visability_status' => 'Visability Status',
-   'licenseAlreadyActivated' => 'You already have an active license until :',
-	 'End_time_should_be_greater_than_start_time' => 'End time should be greater than start time',
+    'licenseAlreadyActivated' => 'You already have an active license until :',
+	'End_time_should_be_greater_than_start_time' => 'End time should be greater than start time',
+	'zoom_error'=>'Zoom credentials are missing. Please fill in Client ID, Client Secret, and Account ID From Settings',
+	'teams_error'=>'Teams credentials are missing. Please fill in MICROSOFT TENANT ID, MICROSOFT CLIENT ID, and  MICROSOFT CLIENT SECRET VALUE From Settings',
 ];
