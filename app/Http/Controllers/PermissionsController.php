@@ -49,14 +49,17 @@ class PermissionsController extends Controller
 
     public function create()
     {
-        return view('admin.permissions.create');
+        $groups = collect( DB::select("SELECT pg.id, pg.name FROM permission_groups pg") );
+        return view('admin.permissions.create', compact('groups'));
     }
 
     public function store(StorePermissionRequest $request)
     {
         $permission = new Permission;
         $permission->name = $request->input('name', null);
+        $permission->description = $request->input('description', null);
         $permission->is_core = $request->has('is_core') ? true : false;
+        $permission->permission_group_id = $request->input('permission_group_id', null);
         $permission->save();
         app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         return redirect()->route('permissions.index');
@@ -64,13 +67,16 @@ class PermissionsController extends Controller
 
     public function edit(Permission $permission)
     {
-        return view('admin.permissions.edit', compact('permission'));
+        $groups = collect( DB::select("SELECT pg.id, pg.name FROM permission_groups pg") );
+        return view('admin.permissions.edit', compact('permission', 'groups'));
     }
 
     public function update(UpdatePermissionRequest $request, Permission $permission)
     {
         $permission->name = $request->input('name', null);
+        $permission->description = $request->input('description', null);
         $permission->is_core = $request->has('is_core') ? true : false;
+        $permission->permission_group_id = $request->input('permission_group_id', null);
         $permission->save();
         app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         return redirect()->route('permissions.index');

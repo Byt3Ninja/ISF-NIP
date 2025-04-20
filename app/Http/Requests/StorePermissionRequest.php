@@ -28,6 +28,11 @@ class StorePermissionRequest extends FormRequest
                 'string',
                 'required',
             ],
+            'permission_group_id' => [
+                'nullable',
+                'sometimes',
+                'exists:permission_groups,id',
+            ],
             'is_core' => [
                 'sometimes',
                 'nullable',

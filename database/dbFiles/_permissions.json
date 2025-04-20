@@ -537,5 +537,12 @@
   {"name": "cycles.users", "guard_name": "web"},
   {"name": "currencies.UpdateAllCurrency", "guard_name": "web"},
   {"name": "license.activate-form", "guard_name": "web"},
-  {"name": "license.activate", "guard_name": "web"}
+  {"name": "license.activate", "guard_name": "web"},
+  {"name": "permission-groups.index", "guard_name": "web"},
+  {"name": "permission-groups.create", "guard_name": "web"},
+  {"name": "permission-groups.store", "guard_name": "web"},
+  {"name": "permission-groups.show", "guard_name": "web"},
+  {"name": "permission-groups.edit", "guard_name": "web"},
+  {"name": "permission-groups.update", "guard_name": "web"},
+  {"name": "permission-groups.destroy", "guard_name": "web"}
 ]
