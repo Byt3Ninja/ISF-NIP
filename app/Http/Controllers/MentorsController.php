@@ -371,12 +371,12 @@ Thanks from " . env('APP_NAME');
 	{
 		if ($request->userid) {
 			$dates = explode(',', $request->date);
-			foreach ($dates as $key) {
-				
-				$dateDatabase = MentorshipRequest::where('zoom_date', $key)->where('mentor_id', $request->mentorid)->where('user_id', $request->userid)->get();
-				if(count($dateDatabase) > 0) {
+			
+			$dateDatabase = MentorshipRequest::whereIn('zoom_date', $dates)->where('mentor_id', $request->mentorid)->where('user_id', $request->userid)->get();
+			if(count($dateDatabase) > 0) {
 					return back()->with(['message2' => "Cant_add_request_date_is_Exist", 'notAdd' => 2]);
 				}
+			foreach ($dates as $key) {
 				$date = ltrim($key);
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
