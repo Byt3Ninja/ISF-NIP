@@ -829,11 +829,17 @@
       const timeToValue = $(`${formId} #flatpickr-time-to`).val();
       const titleValue = $(`${formId} #title`).val();
     
-      if (!dateRangeValue && typeValue === 'online') {
-        // alert('Please select a date range for online sessions.');
-        dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">Please select a date range for online sessions.</div>');
-        e.preventDefault();
-        return;
+      if (typeValue === 'online') {
+        if (!dateRangeValue) {
+          dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">Please select a date range for online sessions.</div>');
+          e.preventDefault();
+          return;
+        }
+        if (!titleValue) {
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          e.preventDefault();
+          return;
+        }
       }  
 
       if (typeValue === 'offline' || typeValue === 'sessions') {
@@ -852,6 +858,11 @@
           e.preventDefault();
           return
         } 
+        if (!titleValue) {
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          e.preventDefault();
+          return;
+        }
       }  
 
     });
@@ -918,11 +929,17 @@
       const timeToValue = $(`${formId} #flatpickr-time-to`).val();
       const titleValue = $(`${formId} #title`).val();
 
-      if (!dateRangeValue && typeValue === 'online') {
-        // alert('Please select a date range for online sessions.');
-        dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">Please select a date range for online sessions.</div>');
-        e.preventDefault();
-        return;
+      if (typeValue === 'online') {
+        if (!dateRangeValue) {
+          dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">Please select a date range for online sessions.</div>');
+          e.preventDefault();
+          return;
+        }
+        if (!titleValue) {
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          e.preventDefault();
+          return;
+        }
       }  
 
       if (typeValue === 'offline' || typeValue === 'sessions') {
@@ -941,6 +958,11 @@
           e.preventDefault();
           return
         } 
+        if (!titleValue) {
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          e.preventDefault();
+          return;
+        }
       }
     });
 
