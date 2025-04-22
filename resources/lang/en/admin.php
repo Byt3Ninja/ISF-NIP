@@ -1520,4 +1520,5 @@ return [
 	'Expiry' => 'Expiry',
 	'Max Machines' => 'Max Machines',
 	'Uses Left' => 'Uses Left',
+	'Show more' => 'Show more',
 ];

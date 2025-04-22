@@ -244,14 +244,16 @@
                       </div>
                     @endforeach
                     @if (is_array($countryIds) && count($countryIds) > 1)
+                    <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#targetedMarketModal">
                       <span
-                        class="cursor-pointer text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
+                        class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
                         style="width: fit-content;"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#targetedMarketModal"
-                        >
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-title="{{ __('admin.Show more') }}">
                         <i class="ti ti-dots ti-16px"></i>
                       </span>
+                    </button>
                     @endif
                   @else
                   <span
