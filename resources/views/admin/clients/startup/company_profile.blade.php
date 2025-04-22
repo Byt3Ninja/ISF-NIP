@@ -245,7 +245,7 @@
                     @endforeach
                     @if (is_array($countryIds) && count($countryIds) > 1)
                       <span
-                        class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
+                        class="cursor-pointer text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
                         style="width: fit-content;"
                         data-bs-toggle="modal" 
                         data-bs-target="#targetedMarketModal"
