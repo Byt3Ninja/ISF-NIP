@@ -4,16 +4,20 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 
   <style>
     .daterangepicker {
       margin-top: 10rem !important;
+    }
+    #modal-content { background-color: var(--bs-white); }
+    @media (min-width: 768px) {
+      #modal-content { background-color: #ebebed; }
+    }
+    @media (max-width: 767.98px) {
+      .modal-dialog { max-width: 100%; margin: 0; }
+      .modal-content { min-height: 100vh; border-radius: 0; }
     }
   </style>
 @stop
@@ -499,14 +503,11 @@
   <!-- END: Content-->
   <div class="modal fade" id="addsession" tabindex="-1" role="dialog" aria-labelledby="addsession"
     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content rounded p-0 p-md-4" id="modal-content">
+        @include('partials.modal.modal-header', ['title' => __('cycles.Add new training session' )])
         <form id="addSessionForm" method="post" action="/dashboard/training/addsession" enctype="multipart/form-data" autocomplete="off">
-          <div class="modal-header">
-            <h4 class="modal-title">{{ __('cycles.Add new training session') }} </h4>
-
-          </div>
-          <div class="modal-body">
+          <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
             @csrf
             <input type="hidden" name="step_id" value="{{ $id }}" id="id">
             <div class="form-group mb-4" id="ctype">
@@ -590,12 +591,14 @@
                 class="form-control">
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-              <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
+          <div class="d-flex align-items-center gap-3 mt-4 p-4 p-md-0">
+            <button type="button" class="btn btn-outline-secondary w-px-100" data-bs-dismiss="modal">
+              {{ __('cycles.Cancel') }}
+              <i class="ti ti-circle-x ms-2"></i>
             </button>
-            <button type="submit" class="btn btn-primary ml-1">
-              <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+            <button type="submit" class="btn btn-primary w-px-100">
+              {{ __('cycles.Submit') }}
+              <i class="ti ti-circle-check ms-2"></i>
             </button>
           </div>
         </form>
@@ -605,15 +608,12 @@
 
   <div class="modal fade text-left" id="editsession" tabindex="-1" role="dialog" aria-labelledby="editsession"
     aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content rounded p-0 p-md-4" id="modal-content">
         <form id="editSessionForm" method="post" action="/dashboard/training/editsession" enctype="multipart/form-data"
           autocomplete="off">
-          <div class="modal-header">
-            <h4 class="modal-title">{{ __('cycles.Edit training session') }} </h4>
-
-          </div>
-          <div class="modal-body">
+          @include('partials.modal.modal-header', ['title' => __('cycles.Edit training session')])
+          <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
             @csrf
             <input type="hidden" name="step_id" value="{{ $id }}" id="id">
             <div class="form-group mb-4" id="ctype">
@@ -696,11 +696,15 @@
               <input name="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}"
                 class="form-control">
             </div>
-           
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary ml-1">
-              <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+          <div class="d-flex align-items-center gap-3 mt-4 p-4 p-md-0">
+            <button type="button" class="btn btn-outline-secondary w-px-100" data-bs-dismiss="modal">
+              {{ __('cycles.Cancel') }}
+              <i class="ti ti-circle-x ms-2"></i>
+            </button>
+            <button type="submit" class="btn btn-primary w-px-100">
+              {{ __('cycles.Save') }}
+              <i class="ti ti-circle-check ms-2"></i>
             </button>
           </div>
         </form>
@@ -747,9 +751,6 @@
 @stop
 
 @section('scripts')
-  <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
-  <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-  <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
@@ -987,7 +988,7 @@
       enableTime: true,
       noCalendar: true
     });
-    $('#editSessionForm flatpickr-time-to').flatpickr({
+    $('#editSessionForm #flatpickr-time-to').flatpickr({
       enableTime: true,
       noCalendar: true
     });
@@ -1153,79 +1154,107 @@
           "id": training,
         },
         success: function(response) {
+          console.log('response', response);
           let type = response.type;
           let startDate = response.datetime.split(' ')[0];
-
           let startTime = response.datetime.split(' ')[1].substring(0, 5);
 
-          $('#ctype').hide();
-          $('#etitle').val(response.title);
-          $('#edsc').val(response.dsc);
-          $('#edatetime').val(startDate);
-          $('#estartTime').val(startTime);
-          $('#sid').val(training);
-          $('#stype').val(type);
+          $('#editSessionForm #select-type').val(type).trigger('change').prop('disabled', true);
 
-          // // Time & Date
-          // if (editBsRangePickerTime.length) {
-          //   editBsRangePickerTime.daterangepicker({
-          //     timePicker: true,
-          //     timePickerIncrement: 30,
-          //     locale: {
-          //       format: 'MM/DD/YYYY h:mm A'
-          //     },
-          //     opens: isRtl ? 'left' : 'right'
-          //   });
-          // }
+          $('#editSessionForm #title').val(response.title);
+          $('#editSessionForm #dsc').val(response.dsc);
 
           if (type === 'offline') {
-            let endDate = response.enddatetime.split(' ')[0];
-            let endTime = response.enddatetime.split(' ')[1].substring(0, 5);
-            $('#sonline').hide();
-            // $('#senddatetime').show();
-            $('#estarttime').show();
-            $('#eendtime').show();
-            $('#ssessions').hide();
-            $('#strainer').show();
-            $('#strainer_email').show();
-            $('#slocation').show();
-            $('#saddress').show();
-            // $('#eenddate').val(response.enddatetime);
-            $('#edatetime').val(startDate);
-            $('#estartTime').val(startTime);
-            $('#eendTime').val(endTime);
-            $('#elocation').val(response.training_location);
-            $('#eaddress').val(response.training_Address);
-            $('#etrainer').val(response.trainer_name);
-            $('#etrainer_email').val(response.trainer_email);
+            $('#editSessionForm #date-only').hide();
+            $('#editSessionForm #date-time').show();
+            $('#editSessionForm #trainer').show().val(response.trainer_name);
+            $('#editSessionForm #trainer_email').show().val(response.trainer_email);
+            $('#editSessionForm #location').show().val(response.training_location);
+            $('#editSessionForm #address').show().val(response.training_Address);
           } else if (type === 'sessions') {
-            $('#sonline').hide();
-            // $('#senddatetime').hide();
-            $('#estarttime').show();
-            $('#eendtime').hide();
-            $('#ssessions').show();
-            $('#strainer').show();
-            $('#strainer_email').show();
-            $('#slocation').hide();
-            $('#saddress').hide();
-            $('#etrainer').val(response.trainer_name);
-            $('#etrainer_email').val(response.trainer_email);
-            $('#eduration').val(response.duration);
-            $('#elocation').val('');
-            $('#eaddress').val('');
+            $('#editSessionForm #date-only').hide();
+            $('#editSessionForm #date-time').show();
+            $('#editSessionForm #trainer').show().val(response.trainer_name);
+            $('#editSessionForm #trainer_email').show().val(response.trainer_email);
+            $('#editSessionForm #location').hide();
+            $('#editSessionForm #address').hide();
           } else {
-            $('#sonline').show();
-            // $('#senddatetime').hide();
-            $('#estarttime').show();
-            $('#eendtime').hide();
-            $('#ssessions').hide();
-            $('#strainer').hide();
-            $('#strainer_email').hide();
-            $('#slocation').hide();
-            $('#saddress').hide();
-            $('#eonline').val(response.training_Address);
-            $('#etrainer').val('');
+            $('#editSessionForm #date-only').show();
+            $('#editSessionForm #date-time').hide();
+            $('#editSessionForm #trainer').hide();
+            $('#editSessionForm #trainer_email').hide();
+            $('#editSessionForm #location').hide();
+            $('#editSessionForm #address').hide();
           }
+
+          // $('#ctype').hide();
+          // $('#etitle').val(response.title);
+          // $('#edsc').val(response.dsc);
+          // $('#edatetime').val(startDate);
+          // $('#estartTime').val(startTime);
+          // $('#sid').val(training);
+          // $('#stype').val(type);
+
+          // // // Time & Date
+          // // if (editBsRangePickerTime.length) {
+          // //   editBsRangePickerTime.daterangepicker({
+          // //     timePicker: true,
+          // //     timePickerIncrement: 30,
+          // //     locale: {
+          // //       format: 'MM/DD/YYYY h:mm A'
+          // //     },
+          // //     opens: isRtl ? 'left' : 'right'
+          // //   });
+          // // }
+
+          // if (type === 'offline') {
+          //   let endDate = response.enddatetime.split(' ')[0];
+          //   let endTime = response.enddatetime.split(' ')[1].substring(0, 5);
+          //   $('#sonline').hide();
+          //   // $('#senddatetime').show();
+          //   $('#estarttime').show();
+          //   $('#eendtime').show();
+          //   $('#ssessions').hide();
+          //   $('#strainer').show();
+          //   $('#strainer_email').show();
+          //   $('#slocation').show();
+          //   $('#saddress').show();
+          //   // $('#eenddate').val(response.enddatetime);
+          //   $('#edatetime').val(startDate);
+          //   $('#estartTime').val(startTime);
+          //   $('#eendTime').val(endTime);
+          //   $('#elocation').val(response.training_location);
+          //   $('#eaddress').val(response.training_Address);
+          //   $('#etrainer').val(response.trainer_name);
+          //   $('#etrainer_email').val(response.trainer_email);
+          // } else if (type === 'sessions') {
+          //   $('#sonline').hide();
+          //   // $('#senddatetime').hide();
+          //   $('#estarttime').show();
+          //   $('#eendtime').hide();
+          //   $('#ssessions').show();
+          //   $('#strainer').show();
+          //   $('#strainer_email').show();
+          //   $('#slocation').hide();
+          //   $('#saddress').hide();
+          //   $('#etrainer').val(response.trainer_name);
+          //   $('#etrainer_email').val(response.trainer_email);
+          //   $('#eduration').val(response.duration);
+          //   $('#elocation').val('');
+          //   $('#eaddress').val('');
+          // } else {
+          //   $('#sonline').show();
+          //   // $('#senddatetime').hide();
+          //   $('#estarttime').show();
+          //   $('#eendtime').hide();
+          //   $('#ssessions').hide();
+          //   $('#strainer').hide();
+          //   $('#strainer_email').hide();
+          //   $('#slocation').hide();
+          //   $('#saddress').hide();
+          //   $('#eonline').val(response.training_Address);
+          //   $('#etrainer').val('');
+          // }
           $('#editsession').modal('show');
         },
         error: function(error) {
