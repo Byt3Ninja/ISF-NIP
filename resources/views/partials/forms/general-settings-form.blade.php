@@ -1,4 +1,4 @@
-<form class="form" action= "{{ route('updateone') }}" method="POST" enctype="multipart/form-data">
+<form class="form" action= "{{ route('settings.system_section_one_update') }}" method="POST" enctype="multipart/form-data">
   {!! csrf_field() !!}
   @method('PUT')
   <input type="hidden" name="id" value="{{ $Title->id }}">

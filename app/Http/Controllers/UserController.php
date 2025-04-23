@@ -237,7 +237,7 @@ class UserController extends Controller
 
 		if( Auth::user()->hasRole('Registered') )
 		{
-			// return redirect()->route('dashboard')->with(['error' => 'cantAccessAllCompanies']);
+			// return redirect()->route('core.dashboard_view')->with(['error' => 'cantAccessAllCompanies']);
 			$organization_id = auth()->user()->organization_id;
 			$company = auth()->user()->company;
 			if( $company && $company->cycle != null )

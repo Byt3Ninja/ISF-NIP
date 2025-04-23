@@ -133,7 +133,7 @@
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <h4 class="fw-bold mb-0">{{ __('admin.My company') }}</h4>
         <div class="d-flex align-items-center gap-3">
-          @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('my_company', $permissions) )
+          @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('company.profile_view_mine', $permissions) )
             <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-primary"
               style="border-radius: 15px;">
               {{ __('admin.Edit') }} <i class="ti ti-edit ms-2"></i>
@@ -400,7 +400,7 @@
                       {{ $l == 'en' ? 'To get analysis for your pitch deck please' : 'للحصول على تحليل لعرضك التقديمي، يرجى' }}
                     </span>
                     <a role="button"
-                      onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                      onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                       {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
@@ -416,7 +416,7 @@
                       {{ $l == 'en' ? 'To get analysis for your pitch deck please upload your pitch deck' : 'للحصول على تحليل لعرضك التقديمي، يرجى تحميل عرضك التقديمي' }}
                     </span>
                     <a role="button"
-                      onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                      onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                       {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
@@ -477,7 +477,7 @@
                     {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
                   </span>
                   <a role="button"
-                    onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
+                    onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
                     class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                     {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                   </a>

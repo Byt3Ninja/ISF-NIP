@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\File;
 class FilemanagerController extends Controller
 {
     public function index() {
-        if (Auth::user()->ableTo('myFiles.index')){
+        if (Auth::user()->ableTo('my_files.list')){
             return view('admin.filemanager');}
             else {return redirect('dashboard');}
     }
     public function showfile($id,$filename) {
-        if (Auth::id() == $id || Auth::user()->ableTo('myFiles.showFile')) {
+        if (Auth::id() == $id || Auth::user()->ableTo('my_files.view_file')) {
             
         $storagePath = storage_path('app/uploads/files/' . $id . '/' . $filename);
         if (!File::exists($storagePath)) {
@@ -26,13 +26,13 @@ class FilemanagerController extends Controller
         }
     }
     public function showimage($id,$filename) {
-        if (Auth::id() == $id || Auth::user()->ableTo('myFiles.showImage')) {
+        if (Auth::id() == $id || Auth::user()->ableTo('my_files.view_image')) {
             $storagePath = storage_path('app/uploads/photos/' . $id . '/' . $filename);
             return response()->file($storagePath);
         } else {abort(401);}
     }
     public function allfiles() {
-        if (Auth::user()->ableTo('myFiles.index')){
+        if (Auth::user()->ableTo('my_files.list')){
             return view('admin.filemanager');}
         else {return redirect('dashboard');}
     }
@@ -45,7 +45,7 @@ class FilemanagerController extends Controller
             return response()->file($storagePath);
     }
     public function showprivate($id,$filename) {
-        if (Auth::user()->ableTo('myFiles.index')) {
+        if (Auth::user()->ableTo('my_files.list')) {
             $storagePath = storage_path('app/users/' . $id . '/' . $filename);
             return response()->file($storagePath);
         } else {

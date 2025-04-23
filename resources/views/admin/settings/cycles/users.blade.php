@@ -287,7 +287,7 @@
             <i class="ti ti-x ti-16px"></i>
           </button>
         </div>
-        <form class="bg-label-secondary" method="GET" action="{{ route('cycles.users', $id) }}">
+        <form class="bg-label-secondary" method="GET" action="{{ route('cycles.users_manage', $id) }}">
           <div class="card">
             <div class="card-body">
               <div class="form-group mb-4">

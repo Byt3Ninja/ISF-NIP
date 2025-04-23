@@ -1,4 +1,4 @@
-<form class="form d-flex flex-column h-100" action="{{ route('updateSMWhatsApp') }}" method="POST"
+<form class="form d-flex flex-column h-100" action="{{ route('settings.system_social_whatsapp_update') }}" method="POST"
   enctype="multipart/form-data">
   {!! csrf_field() !!}
   @method('PUT')

@@ -381,20 +381,20 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
 			if (empty($cycleData)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 			if (empty($cycleData->organization_id)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 
 			$organization_id = $cycleData->organization_id;
@@ -469,20 +469,20 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
 			if (empty($cycleData)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 			if (empty($cycleData->organization_id)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 
 			$organization_id = $cycleData->organization_id;
@@ -520,7 +520,7 @@ class TrainingController extends Controller
 						$result->status = true;
 						$result->ended_at = $time_limit->format('Y-m-d H:i:s');
 						$result->save();
-						return redirect()->route('quiz.overview', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
+						return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
 					}
 				}
 			}
@@ -543,7 +543,7 @@ class TrainingController extends Controller
 			$failures = $attempts->where('score', '<', $quiz->passing_criteria);
 			$success = $attempts->where('score', '>=', $quiz->passing_criteria);
 			if ($success->count() > 0 || $failures->where('status', true)->count() >= $quiz->attempts) {
-				return redirect()->route('quiz.overview', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizAlreadyCompleted'), 'class' => 'danger']);
+				return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizAlreadyCompleted'), 'class' => 'danger']);
 			}
 
 			$result = $attempts->where('status', false)->first();
@@ -585,7 +585,7 @@ class TrainingController extends Controller
 					$result->status = true;
 					$result->ended_at = now()->format('Y-m-d H:i:s');
 					$result->save();
-					return redirect()->route('quiz.overview', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizCompleted'), 'class' => 'success']);
+					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizCompleted'), 'class' => 'success']);
 				}
 				$question = $response->question;
 
@@ -596,7 +596,7 @@ class TrainingController extends Controller
 				$result->status = true;
 				$result->ended_at = $time_limit->format('Y-m-d H:i:s');
 				$result->save();
-				return redirect()->route('quiz.overview', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
+				return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
 			}
 		} else {
 			return abort(401);
@@ -608,20 +608,20 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
 			if (empty($cycleData)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 			if (empty($cycleData->organization_id)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 
 			$organization_id = $cycleData->organization_id;
@@ -1496,7 +1496,7 @@ Thanks from " . env('APP_NAME');
 		$scope->trigger_by_quiz = $request->has('trigger_by_quiz') ? true : false;
 		$scope->save();
 
-		return redirect()->route('training.surveys', ['id' => $id])->with('success', 'StoredSuccessfully');
+		return redirect()->route('trainings.surveys_list', ['id' => $id])->with('success', 'StoredSuccessfully');
 	}
 
 	public function edit_survey($id, $survey, Request $request)

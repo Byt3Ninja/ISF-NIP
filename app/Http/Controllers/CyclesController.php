@@ -23,6 +23,7 @@ use App\Jobs\ExportCycleCompData;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -519,10 +520,10 @@ class CyclesController extends Controller
       $user = User::where('id', Auth::user()->id)->first();
         // Check Company ---> forward to profile
         if (!$user->HaveCompany) {
-            return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
         if (!$user->company) {
-            return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+            return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
         }
         // Check enrolled in Cycle
         if ($user->company->cycle && $user->company->cycle != $c) {
@@ -678,4 +679,57 @@ Thanks from " . env('APP_NAME');
             
         return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
     }
+
+    public function testSend(Request $request)
+{
+    
+    $phone = $request->query('phone');
+    $message = $request->query('message', 'رسالة تجريبية من API');
+   
+    if (!$phone) {
+        return response()->json(['error' => 'يرجى إدخال رقم الهاتف'], 400);
+    }
+
+    $result = $this->sendMessage($phone, $message);
+
+    return response()->json($result);
+}
+
+public function sendMessage($phoneNumber, $message)
+{
+    try {
+        $sessionId = 'ehabwhats'; // اسم الجلسة في GrowthLabs
+        $apiKey = env('WAPI_KEY'); // مفتاح API من .env
+
+        // Step 1: Get chat ID
+        $response = Http::withHeaders([
+            'x-api-key' => $apiKey
+        ])->post("https://wapi.growthlabs.app/client/getNumberId/{$sessionId}", [
+            'number' => $phoneNumber
+        ]);
+        
+        $chatId = $response->json('result._serialized');
+        
+        if (!$chatId) {
+            Log::error("Failed to get chatId for number: {$phoneNumber}");
+            return false;
+        }
+
+        // Step 2: Send message
+        $sendResponse = Http::withHeaders([
+            'x-api-key' => $apiKey
+        ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
+            'chatId' => $chatId,
+            'contentType' => 'string',
+            'content' => $message
+        ]);
+
+        return $sendResponse->json();
+
+    } catch (\Exception $e) {
+        Log::error('Failed to send message via GrowthLabs WhatsApp API: ' . $e->getMessage());
+        return false;
+    }
+}
+
 }

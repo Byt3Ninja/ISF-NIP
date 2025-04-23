@@ -226,7 +226,7 @@ class SettingsController extends Controller
 					->orwhereDate('timerdate',   '<=', $request->end);
 			})->get(['id', 'title_en AS title', 'timerdate AS start',DB::raw('"#607d8b" AS color, "e" AS calendarId')]);
 
-			if (Auth::user()->can('calendar.edit'))
+			if (Auth::user()->can('calendar.events_edit'))
 			{
 				$public = Calendar::whereNull('isPrivate')->where(function($query) use($request) {
 					$query->orwhereDate('start', '>=', $request->start)
@@ -263,7 +263,7 @@ class SettingsController extends Controller
 
 	public function editcal($id)
 	{
-		if (Auth::user()->can('calendar.edit')) { $cal = Calendar::findOrFail($id); }
+		if (Auth::user()->can('calendar.events_edit')) { $cal = Calendar::findOrFail($id); }
 		else { $cal = Calendar::where('user_id',Auth::user()->id)->findOrFail($id); }
 		return view('admin.calendaredit', compact( 'cal'));
 	}
@@ -271,7 +271,7 @@ class SettingsController extends Controller
 	public function updatecal(Request $request, $id)
 	{
 		$private = 1;
-		if (Auth::user()->can('calendar.edit')) { $private = $request->isPrivate ? 1: null; }
+		if (Auth::user()->can('calendar.events_edit')) { $private = $request->isPrivate ? 1: null; }
 		Calendar::find($id)->update([
 			'title' => $request->title,
 			'start' => $request->start,
@@ -282,17 +282,17 @@ class SettingsController extends Controller
 			'isPrivate' => $private,
 			'user_id' => Auth::user()->id,
 		]);
-		return redirect()->route('calendar');
+		return redirect()->route('calendar.events_list');
 	}
 
 	public function delcal($id)
 	{
-		if (Auth::user()->can('calendar.edit'))
+		if (Auth::user()->can('calendar.events_edit'))
 		{
 			Calendar::find($id)->delete(); } else {
 			Calendar::where('user_id',Auth::user()->id)->find($id)->delete();
 		}
-		return redirect()->route('calendar');
+		return redirect()->route('calendar.events_list');
 	}
 
 	public function ajax(Request $request)
@@ -1008,7 +1008,7 @@ class SettingsController extends Controller
 			'status' => 'accepted',
 		]);
 
-		return redirect()->route('dashboard')->with('message', __('admin.accountCreated'));
+		return redirect()->route('core.dashboard_view')->with('message', __('admin.accountCreated'));
 	}
 
 	public function resendInvitation($invitationId)

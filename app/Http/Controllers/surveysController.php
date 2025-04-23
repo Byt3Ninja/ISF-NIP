@@ -172,7 +172,7 @@ class surveysController extends Controller
 				return ['row_no' => $key + 1, 'question_id' => $id];
 			}, $questions_ids, array_keys($questions_ids)));
 
-			return redirect()->route('surveys.questions', ['survey' => $id])->with('success', 'StoredSuccessfully');
+			return redirect()->route('surveys.questions_manage', ['survey' => $id])->with('success', 'StoredSuccessfully');
 		}
 	}
 
@@ -283,12 +283,12 @@ class surveysController extends Controller
 				$responses->responses = $answers;
 				$responses->save();
 
-				$previousUrl = session('previous_url', route('dashboard'));
+				$previousUrl = session('previous_url', route('core.dashboard_view'));
 				// Redirect based on the previous URL
 				if (str_contains($previousUrl, 'dashboard/mentor/mentorshipSessions')) {
-					return redirect()->route('mentorshipSessions.index')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
+					return redirect()->route('mentorships.sessions_list_detailed')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
 				} elseif (str_contains($previousUrl, 'dashboard')) {
-					return redirect()->route('dashboard')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
+					return redirect()->route('core.dashboard_view')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
 				}
 			}
 		}

@@ -63,7 +63,7 @@
 									@endif
 									<div class="row pb-1">
 										<div class="col-12 col-sm-3 col-lg-3 col-mg-3 offset-sm-9 offset-lg-9 offset-md-9 d-flex align-items-center">
-											<a href="{{ route('mentorship.create_survey', ['id' => $cycle->id]) }}" class="btn btn-block btn-primary"> <i class="ti ti-plus me-1"></i> {{ __('admin.AddNewSurvey')}} </a>
+											<a href="{{ route('mentorships.surveys_create', ['id' => $cycle->id]) }}" class="btn btn-block btn-primary"> <i class="ti ti-plus me-1"></i> {{ __('admin.AddNewSurvey')}} </a>
 										</div>
 									</div>
 									<div class="table-responsive surveys-list">
@@ -109,10 +109,10 @@
 															<div class="btn-group w-100">
 																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																<div class="dropdown-menu">
-																	<a href="{{ route('surveys.questions', ['survey' => $survey->id]) }}" target="_blank" class="dropdown-item"> <i class="ti ti-list-check"></i> {{ __('admin.manageQuestions') }} </a>
-																	<a href="{{ route('surveys.results', ['survey' => $survey->id]) }}?target=mentorship" target="_blank" class="dropdown-item"> <i class="ti ti-checklist"></i> {{ __('admin.surveyResults') }} </a>
-																	<a href="{{ route('mentorship.edit_survey', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" class="dropdown-item"> <i class="ti ti-edit"></i> {{ __('admin.Edit') }}</a>
-																	<a id='deleteAction' data-id='{{ $survey_scope->id }}' data-url="{{ route('mentorship.destroy_survey', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" href="{{ route('mentorship.destroy_survey', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" class="dropdown-item bg-danger text-white"> <i class="ti ti-trash text-white"></i> {{ __('admin.Delete') }} </a>
+																	<a href="{{ route('surveys.questions_manage', ['survey' => $survey->id]) }}" target="_blank" class="dropdown-item"> <i class="ti ti-list-check"></i> {{ __('admin.manageQuestions') }} </a>
+																	<a href="{{ route('surveys.results_view', ['survey' => $survey->id]) }}?target=mentorship" target="_blank" class="dropdown-item"> <i class="ti ti-checklist"></i> {{ __('admin.surveyResults') }} </a>
+																	<a href="{{ route('mentorships.surveys_edit', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" class="dropdown-item"> <i class="ti ti-edit"></i> {{ __('admin.Edit') }}</a>
+																	<a id='deleteAction' data-id='{{ $survey_scope->id }}' data-url="{{ route('mentorships.surveys_delete', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" href="{{ route('mentorships.surveys_delete', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}" class="dropdown-item bg-danger text-white"> <i class="ti ti-trash text-white"></i> {{ __('admin.Delete') }} </a>
 																</div>
 															</div>
 														</td>

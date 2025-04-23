@@ -36,7 +36,7 @@
 								<div class="float-right"> <h4>Time Remaining : <span id="timeRemain" data-value="{{ $time_remaining }}"> {{ $time_remaining }} </span> </h4> </div>
 							</div>
 							<div class="col-lg-12 col-md-12 col-sm-12 pt-2">
-								<form id="submitQuestion" method="post" action="{{ route('quiz.start', ['id' => $training->id, 'quiz_id' => $quiz->id]) }}">
+								<form id="submitQuestion" method="post" action="{{ route('quizzes.take_start', ['id' => $training->id, 'quiz_id' => $quiz->id]) }}">
 									{!! csrf_field() !!}
 									<div class="container-fluid w-75">
 										<div class="row">

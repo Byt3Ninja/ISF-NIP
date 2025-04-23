@@ -1,5 +1,5 @@
 @php
-$action = Auth::user()->hasanyRole('Admin|organizationManager') ? route('update_my_company', $client->company->id) : route('update_my_company');
+$action = Auth::user()->hasanyRole('Admin|organizationManager') ? route('company.profile_update_mine', $client->company->id) : route('company.profile_update_mine');
 @endphp
 
 <div class="card">

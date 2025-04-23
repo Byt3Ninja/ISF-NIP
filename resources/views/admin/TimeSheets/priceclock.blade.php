@@ -64,7 +64,7 @@
                           @hasanyrole('Admin|organizationManager|manager')
                           <td>{{$user->{'first_name_'.$l} ." ". $user->{'last_name_'.$l} }}</td>
                           @endhasanyrole
-                          <form method="post" action="{{ route('UserClockUpdate', $user->id) }}" >
+                          <form method="post" action="{{ route('time_sheets.clock.update.mine', $user->id) }}" >
                           <td><div class="input-group" style="width: 20%;">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">{{ $setting->Currency }}</span>

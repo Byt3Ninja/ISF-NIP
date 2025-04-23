@@ -94,7 +94,7 @@
                 </div>
               </div>
               <div class="col-12 col-lg-8">
-                <form method="GET" action="{{ route('users.companies') }}" class="row h-100 align-items-center">
+                <form method="GET" action="{{ route('users.view_companies') }}" class="row h-100 align-items-center">
                   <div class="col-2">
                     <div class="d-flex align-items-center justify-content-end gap-3">
                       @if(request()->query())

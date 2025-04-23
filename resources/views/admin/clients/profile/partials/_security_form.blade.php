@@ -13,7 +13,7 @@ $passwordRules = [
     <form
       id="changePasswordForm"
       method="post"
-      action="{{ route('update_my_profile_password') }}"
+      action="{{ route('user.profile_update_password') }}"
       enctype="multipart/form-data"
     >
       {!! csrf_field() !!}

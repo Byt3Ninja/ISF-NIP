@@ -75,7 +75,7 @@
                     </li>
                   </ul>
                 </div>
-                @if( $_user->ableTo('my_profile', $permissions) )
+                @if( $_user->ableTo('user.profile_view', $permissions) )
                 <a href="/dashboard/myProfile" class="btn btn-primary mb-1">
                   <i class="ti ti-settings me-3 ti-md"></i>
                   <span class="align-middle">
@@ -338,30 +338,30 @@
                         <tr @if(is_null($task->title)) class="btn-light-warning" @endif id="row_{{ $task->id }}">
                           <td class="text-center">
                             <div class="d-flex align-items-center gap-1">
-                              @if( $_user->ableTo('show_mentor_profile', $permissions) ) <a class="media-left mr-50" href="{{ route('show_mentor_profile', $task->user_id) }}">@endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) ) <a class="media-left mr-50" href="{{ route('mentors.profile_view', $task->user_id) }}">@endif
                                 <img src="{{$task->user->image_url}}" alt="avatar" class="rounded-circle" height="40"
                                   width="40">
-                              @if( $_user->ableTo('show_mentor_profile', $permissions) )</a> @endif
-                              @if( $_user->ableTo('show_mentor_profile', $permissions) )<a href="{{ route('show_mentor_profile', $task->user_id) }}"> @endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )</a> @endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )<a href="{{ route('mentors.profile_view', $task->user_id) }}"> @endif
                                 <div class="media-body">
                                   <h6 class="media-heading mb-0">{{$task->user->name }} </h6>
                                   <span class="font-small-2">{{$task->user->title}}</span>
                                 </div>
-                              @if( $_user->ableTo('show_mentor_profile', $permissions) )</a>@endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )</a>@endif
                             </div>
                           </td>
 
                           <td class="text-center">
                             <div class="d-flex align-items-center gap-1">
-                              @if( $_user->ableTo('company_profile', $permissions) ) <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">@endif
+                              @if( $_user->ableTo('company.profile_view', $permissions) ) <a class="media-left mr-50" href="/dashboard/companyProfile/{{$task->company_id}}">@endif
                                 <img src="{{$task->company->logo_url}}" alt="avatar" class="rounded-circle" height="40"
                                   width="40">
-                              @if( $_user->ableTo('company_profile', $permissions) )</a> @endif
-                              @if( $_user->ableTo('company_profile', $permissions) ) <a href="/dashboard/companyProfile/{{$task->company->id}}"> @endif
+                              @if( $_user->ableTo('company.profile_view', $permissions) )</a> @endif
+                              @if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{$task->company->id}}"> @endif
                                 <div class="d-flex align-items-center gap-1">
                                   {{$task->company->name }}
                                 </div>
-                              @if( $_user->ableTo('company_profile', $permissions) ) </a> @endif
+                              @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                             </div>
                           </td>
 
@@ -505,7 +505,7 @@
       var currentState = '{{ $client->state_id }}';
       var selected = '';
       $.ajax({
-        url: "{{ route('get_states_by_country') }}",
+        url: "{{ route('utils.locations_list_states_by_country') }}",
         data: {
           country_id: country_id
         },
@@ -586,7 +586,7 @@
         media_live_embeds: true,
         relative_urls: false,
         remove_script_host: false,
-        images_upload_url: "{{ route('training.upload', ['_token' => csrf_token()]) }}",
+        images_upload_url: "{{ route('trainings.files_upload', ['_token' => csrf_token()]) }}",
         file_picker_types: 'image',
         convert_urls: true,
         file_picker_callback: function(cb, value, meta) {

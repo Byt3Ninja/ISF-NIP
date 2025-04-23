@@ -194,7 +194,7 @@ class quizzesController extends Controller
 			QuizQuestions::where('quiz_id', $id)->delete();
 			$quiz->questions()->sync( array_map(function($id, $key) { return ['row_no' => $key + 1, 'question_id' => $id]; }, $questions_ids, array_keys($questions_ids)) );
 
-			return redirect()->route('quizzes.questions', ['quiz' => $id])->with('success', 'StoredSuccessfully');
+			return redirect()->route('quizzes.questions_manage', ['quiz' => $id])->with('success', 'StoredSuccessfully');
 		}
 	}
 
@@ -203,14 +203,14 @@ class quizzesController extends Controller
 		$user = auth()->user();
 		if( $user->hasAnyRole(['Registered']) )
 		{
-			if( !$user->HaveCompany ) { return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']); }
-			if( !$user->company ) { return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']); }
+			if( !$user->HaveCompany ) { return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']); }
+			if( !$user->company ) { return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']); }
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
-			// if( empty( $cycleData ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
-			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
+			// if( empty( $cycleData ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
+			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 			if( !empty( $cycleData->organization_id ) ) {
 			$organization_id = $cycleData->organization_id;
 			

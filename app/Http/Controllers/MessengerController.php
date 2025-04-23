@@ -932,6 +932,7 @@ class MessengerController extends Controller
             'message' => $request->message_message,
             'receiver' => $request->message_receiver,
             'sender' => auth()->id(),
+            'sender_name' => auth()->user()->first_name_.$l. ' ' . auth()->user()->last_name_.$l,
             'reply_id' => $request->message_id,
         ]);
         $reply_id = $message->id;

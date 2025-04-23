@@ -2,7 +2,7 @@
   <form 
     id="jobInfoForm"
     method="post" 
-    action="{{ route('updatebio_my_profile') }}" 
+    action="{{ route('user.profile_update_bio') }}" 
     enctype="multipart/form-data"
   >
     {!! csrf_field() !!}

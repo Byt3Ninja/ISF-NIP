@@ -32,7 +32,7 @@
               <div class="card-body">
 
 
-                <form method="GET" action="{{ route('show_finance_time_sheet') }}">
+                <form method="GET" action="{{ route('time_sheets.reports.finance.view') }}">
 
 
                   <div class="mb-6 width20">

@@ -28,7 +28,7 @@
         </ul>
      
             <div class="mt-3">
-                <a href="{{ $success ? route('dashboard') : route('license.activate-form') }}" class="btn {{ $success ? 'btn-success' : 'btn-primary' }}">
+                <a href="{{ $success ? route('core.dashboard_view') : route('license.activate_view_form') }}" class="btn {{ $success ? 'btn-success' : 'btn-primary' }}">
                     {{ $success ? __('admin.Go To Dashboard') : __('admin.Try Again') }}
                 </a>
             </div>

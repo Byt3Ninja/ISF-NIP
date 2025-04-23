@@ -242,7 +242,7 @@
                             @endif
     
                             @if($data['user'] == null)
-                                <form class="form-horizontal" method="POST" action="{{ route('2fa.generate2faSecret') }}">
+                                <form class="form-horizontal" method="POST" action="{{ route('security.2fa_generate_secret') }}">
                                     {{ csrf_field() }}
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-primary">
@@ -255,7 +255,7 @@
                                 <img src="{{$data['google2fa_url'] }}" alt="">
                                 <br/><br/>
                                 2. Enter the pin from Google Authenticator app:<br/><br/>
-                                <form class="form-horizontal" method="POST" action="{{ route('2fa.enable2fa') }}">
+                                <form class="form-horizontal" method="POST" action="{{ route('security.2fa_enable') }}">
                                     {{ csrf_field() }}
                                     <div class="form-group{{ $errors->has('verify-code') ? ' has-error' : '' }}">
                                         <label for="secret" class="control-label">Authenticator Code</label>
@@ -275,7 +275,7 @@
                                     2FA is currently <strong>enabled</strong> on your account.
                                 </div>
                                 <p>If you are looking to disable Two Factor Authentication. Please confirm your password and Click Disable 2FA Button.</p>
-                                <form class="form-horizontal" method="POST" action="{{ route('2fa.disable2fa') }}">
+                                <form class="form-horizontal" method="POST" action="{{ route('security.2fa_disable') }}">
                                     {{ csrf_field() }}
                                     <div class="form-group{{ $errors->has('current-password') ? ' has-error' : '' }}">
                                         <label for="change-password" class="control-label">Current Password</label>
@@ -307,7 +307,7 @@
           </div>
 
           <div class="d-flex justify-content-center">
-            <a href="{{ route('linkedin.login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
+            <a href="{{ route('integrations.auth_linkedin_login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
               <i class="fa-brands fa-linkedin-in text-white"></i> 
             </a>
             <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
