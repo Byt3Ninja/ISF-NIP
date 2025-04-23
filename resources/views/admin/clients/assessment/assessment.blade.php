@@ -106,7 +106,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
                 <h4 class="text-center mb-0">{{ __('admin.No_Assessment') }}</h4>
                 <h6 class="text-center text-secondary">{{ __('admin.No_Assessment_right_now') }}</h6>
                 <a 
-                  href="{{ route('make_new_assessment_to_user') }}"
+                  href="{{ route('assessments.assign') }}"
                   class="btn btn-lg btn-primary">
                   {{ __('admin.Make_a_new_assessment') }}
                 </a>

@@ -6,7 +6,7 @@
       <form
         id="shareholder-form"
         method="post"
-        action="{{ route('AddTeams_Comp') }}"
+        action="{{ route('company.profile_teams_add') }}"
         enctype="multipart/form-data"
         onsubmit="resetForm(this); return validateForm();"
       >
@@ -152,9 +152,9 @@
                         <span style="font-size: 11px;" class="fw-bold">{{ __('admin.Edit') }}</span>
                       </div>
                       @if(Auth::user()->hasanyRole('Admin|organizationManager'))
-                      <form action="{{ route('DeleteTeams_Comp', $client->company->id) }}" method="POST" style="display: inline-block;">
+                      <form action="{{ route('company.profile_teams_delete', $client->company->id) }}" method="POST" style="display: inline-block;">
                         @else
-                        <form action="{{ route('DeleteTeams_Comp') }}" method="POST" style="display: inline-block;">
+                        <form action="{{ route('company.profile_teams_delete') }}" method="POST" style="display: inline-block;">
                           @endif
                           @csrf
                           <input type="hidden" value="{{ $Shareholder->id }}" name="id">

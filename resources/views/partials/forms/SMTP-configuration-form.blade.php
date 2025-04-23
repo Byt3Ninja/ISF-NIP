@@ -1,4 +1,4 @@
-<form class="form d-flex flex-column h-100" action="{{ route('updateMail') }}" method="POST" enctype="multipart/form-data">
+<form class="form d-flex flex-column h-100" action="{{ route('settings.system_mail_update') }}" method="POST" enctype="multipart/form-data">
   {!! csrf_field() !!}
   @method('PUT')
   <input type="hidden" name="id" value="{{ $Title->id }}">

@@ -120,7 +120,7 @@
                                                 <tr>
                                                     <td></td>
                                                     <td>
-                                                        <form class="form-horizontal form-bordered" id="basicForm" action= "{{ route('mentorshipTasks.sendComment') }}" method="POST" enctype="multipart/form-data">
+                                                        <form class="form-horizontal form-bordered" id="basicForm" action= "{{ route('mentorship_tasks.comment') }}" method="POST" enctype="multipart/form-data">
                                                             {!! csrf_field() !!}
                                                             <input type="hidden" name="mentorship_task_id" value="{{ $task['id'] }}">
                                                             <div class="form-label-group">

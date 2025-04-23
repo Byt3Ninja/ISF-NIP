@@ -254,7 +254,7 @@
           text: 'Sync With Microsoft Calender',
           click: function () {
               /// add
-              window.open('{{ route('calender.login.microsoft') }}','_Self')
+              window.open('{{ route('integrations.calendar_microsoft_login') }}','_Self')
               //// end
           }
       },

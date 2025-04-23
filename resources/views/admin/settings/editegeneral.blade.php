@@ -170,7 +170,7 @@
       var currentState = '{{ $Title->State }}';
       var selected = '';
       $.ajax({
-        url: "{{ route('get_states_by_country') }}",
+        url: "{{ route('utils.locations_list_states_by_country') }}",
         data: {
           country_id: country_id
         },

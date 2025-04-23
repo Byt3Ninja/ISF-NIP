@@ -73,8 +73,8 @@
 												@foreach( $quizzes ?? collect([]) as $quiz )
 													<tr>
 														<td>
-															@if( $_user->ableTo('quiz.overview', $permissions) )
-															<a href="{{ route('quiz.overview', ['id' => $quiz->training_id, 'quiz_id' => $quiz->id]) }}"> {{ $quiz->title }} </a>
+															@if( $_user->ableTo('quizzes.view_overview_mine', $permissions) )
+															<a href="{{ route('quizzes.view_overview_mine', ['id' => $quiz->training_id, 'quiz_id' => $quiz->id]) }}"> {{ $quiz->title }} </a>
 															@else
 															{{ $quiz->title }}
 															@endif

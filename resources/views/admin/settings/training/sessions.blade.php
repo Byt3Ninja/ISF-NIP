@@ -103,7 +103,7 @@
                   <div class="card-text">
                     <br>
                     <!-- Filter -->
-                    <form method="GET" action="{{ route('training.sessions', $id) }}"
+                    <form method="GET" action="{{ route('trainings.sessions_list', $id) }}"
                       class="row g-3 align-items-center">
                       <div class="col-auto">
                         <button class="btn btn-primary d-flex justify-content-center align-items-center"
@@ -302,7 +302,7 @@
             @if ($session->reports->count() > 0)
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <h5>{{ __('admin.session_reports') }}</h5>
-                <a href="{{ route('training.session-report', $session->id) }}" class="btn btn-info">
+                <a href="{{ route('trainings.reports_session', $session->id) }}" class="btn btn-info">
                   {{ __('admin.update_reports') }}
                 </a>
               </div>
@@ -335,7 +335,7 @@
               <!-- No Reports: Display Update Button -->
               <div class="d-flex justify-content-between align-items-center mt-3">
                 <h5>{{ __('admin.session_reports') }}</h5>
-                <a href="{{ route('training.session-report', $session->id) }}" class="btn btn-info">
+                <a href="{{ route('trainings.reports_session', $session->id) }}" class="btn btn-info">
                   {{ __('admin.update_reports') }}
                 </a>
               </div>
@@ -345,7 +345,7 @@
             @if ($session->recordings->count() > 0)
               <div class="d-flex justify-content-between align-items-center mt-4">
                 <h5>{{ __('admin.session_recordings') }}</h5>
-                <a href="{{ route('training.session-record', $session->id) }}" class="btn btn-warning">
+                <a href="{{ route('trainings.reports_recording', $session->id) }}" class="btn btn-warning">
                   {{ __('admin.update_recordings') }}
                 </a>
               </div>
@@ -387,7 +387,7 @@
               <!-- No Recordings: Display Update Button -->
               <div class="d-flex justify-content-between align-items-center mt-4">
                 <h5>{{ __('admin.session_recordings') }}</h5>
-                <a href="{{ route('training.session-record', $session->id) }}" class="btn btn-warning">
+                <a href="{{ route('trainings.reports_recording', $session->id) }}" class="btn btn-warning">
                   {{ __('admin.update_recordings') }}
                 </a>
               </div>

@@ -266,7 +266,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
       var currentState = '{{ $client->state_id }}';
       var selected = '';
       $.ajax({
-        url: "{{ route('get_states_by_country') }}",
+        url: "{{ route('utils.locations_list_states_by_country') }}",
         data: {
           country_id: country_id
         },
@@ -347,7 +347,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
     media_live_embeds: true,
     relative_urls: false,
     remove_script_host: false,
-    images_upload_url: "{{ route('training.upload', ['_token' => csrf_token()]) }}",
+    images_upload_url: "{{ route('trainings.files_upload', ['_token' => csrf_token()]) }}",
     file_picker_types: 'image',
     convert_urls: true,
     file_picker_callback: function(cb, value, meta) {
@@ -518,7 +518,7 @@ function sendCode(type) {
 
     console.log(countryCode, number);
     $.ajax({
-      url: '{{ route('send.code') }}',
+      url: '{{ route('security.2fa_code_send') }}',
       type: 'POST',
       data: {
         countryCode: countryCode,
@@ -575,7 +575,7 @@ function verifyWhatsappCode() {
   console.log('code', code)
 
   $.ajax({
-    url: '{{ route('verify.code') }}',
+    url: '{{ route('security.2fa_code_verify') }}',
     type: 'POST',
     data: {
         code: code,

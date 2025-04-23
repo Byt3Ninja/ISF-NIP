@@ -303,7 +303,7 @@
                                 <div class="d-flex flex-wrap gap-2 align-items-center" style="width: 90%">
                                   @foreach ($mentors as $mentor)
                                     <a class="btn btn-sm btn-outline-primary rounded-pill" target="_blank"
-                                      href="{{ route('show_mentor_profile', $mentor->id) }}">
+                                      href="{{ route('mentors.profile_view', $mentor->id) }}">
                                       @if (!empty($mentor->image_url))
                                         <img src="{{ $mentor->image_url }}" width="20" height="20"
                                           class="rounded-circle" />

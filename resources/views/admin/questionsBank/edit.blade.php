@@ -463,7 +463,7 @@ $('.ascategory_id').change(function() {
 	var category_id = $(this).val();
 	var $state = $('.subcategory_id');
 	$.ajax({
-		url: "{{ route('get_subcategory_by_category') }}",
+		url: "{{ route('subcategories.list_by_category') }}",
 		method: 'GET', // إضافة طريقة الطلب
 		data: {
 			category_id: category_id

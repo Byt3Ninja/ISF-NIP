@@ -29,7 +29,7 @@
 
                 @if ($_user->hasAnyRole('organizationManager|Mentor|Admin'))
                   <a class="btn btn-primary"
-                    href="{{ route('training.create') }}">
+                    href="{{ route('trainings.create') }}">
                     <i class="ti ti-plus me-1"></i>
                     {{ __('cycles.Add new Training') }}
                   </a>

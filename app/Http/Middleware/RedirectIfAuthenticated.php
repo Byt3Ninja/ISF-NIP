@@ -26,7 +26,7 @@ class RedirectIfAuthenticated
 //                    session(['error'=>'برجاء مراجعة الادارة']);
 //                    return redirect(route('login'));
 //                }
-                return redirect(route('admin'));
+                return redirect(route('core.admin_access'));
             }
         }
 

@@ -67,9 +67,9 @@ class Permission extends Model
 			$startups = Role::where('default_for', 'registered')->get();
 		}
 		$startup_permissions = [
-			'show_my_profile', 'my_profile', 'update_my_profile', 'company_profile', 'my_company', 'update_my_company', 'analysis-assessment', 'calendar', 'sendmessage', 'inbox', 'outbox', 'directory', 'users.companies', 
-			'mentors.list', 'myrequests', 'my.mentorships', 'training.my', 'quizzes.dashboard', 'mentorshipSessions.index', 'myFiles.index', 'surveys.taking', 'surveys.submit', 'cycles.my', 'screening',
-			'quiz.overview', 'mentorshipTasks.index', 'swot.view'
+			'user.profile_view', 'user.profile_view', 'user.profile_update_basic', 'company.profile_view', 'company.profile_view_mine', 'company.profile_update_mine', 'assessments.results_analysis_view', 'calendar.events_list', 'messages.send', 'messages.folders_inbox', 'messages.folders_outbox', 'users.directory_view', 'users.view_companies', 
+			'mentors.list', 'service_requests.list_mine', 'mentorships.list_mine', 'trainings.list_mine', 'quizzes.dashboard_view', 'mentorships.sessions_list_detailed', 'my_files.list', 'surveys.take', 'surveys.submit', 'cycles.list_mine', 'screening.access',
+			'quizzes.view_overview_mine', 'mentorshipTasks.index', 'swot.view'
 		];
 		$startup_ids = $_permission->whereIn('name', $startup_permissions)->pluck('id')->toArray();
 		foreach( $startups as $startup )
@@ -86,7 +86,7 @@ class Permission extends Model
 			$mentors = Role::where('default_for', 'mentor')->get();
 		}
 		$mentor_permissions = [
-			'show_my_profile', 'my_profile', 'update_my_profile', 'calendar', 'sendmessage', 'inbox', 'outbox', 'users.companies', 'mentorshipSessions.index', 'mentorshipTasks.index', 'myFiles.index'
+			'user.profile_view', 'user.profile_view', 'user.profile_update_basic', 'calendar.events_list', 'messages.send', 'messages.folders_inbox', 'messages.folders_outbox', 'users.view_companies', 'mentorships.sessions_list_detailed', 'mentorshipTasks.index', 'my_files.list'
 		];
 		$mentor_ids = $_permission->whereIn('name', $mentor_permissions)->pluck('id')->toArray();
 		foreach( $mentors as $mentor )
@@ -103,7 +103,7 @@ class Permission extends Model
 			$judgers = Role::where('default_for', 'judger')->get();
 		}
 		$judger_permissions = [
-			'show_my_profile', 'my_profile', 'update_my_profile', 'calendar', 'sendmessage', 'inbox', 'outbox', 'myFiles.index', 'screening', 'screening.view', 'screening.openForm'
+			'user.profile_view', 'user.profile_view', 'user.profile_update_basic', 'calendar.events_list', 'messages.send', 'messages.folders_inbox', 'messages.folders_outbox', 'my_files.list', 'screening.access', 'screening.view', 'screening.form_view'
 		];
 		$judger_ids = $_permission->whereIn('name', $judger_permissions)->pluck('id')->toArray();
 		foreach( $judgers as $judger )

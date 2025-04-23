@@ -335,7 +335,7 @@
 				var $state = $('.subcategory_id');
 
 				$.ajax({
-					url: "{{ route('get_subcategory_by_category') }}",
+					url: "{{ route('subcategories.list_by_category') }}",
 					method: 'GET',
 					data: {
 						category_id: category_id

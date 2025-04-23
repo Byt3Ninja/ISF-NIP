@@ -78,7 +78,7 @@
                           <td class="text-center">{{ $loop->iteration }}</td>
                           <td class="text-center">
                             <div class="d-flex align-items-center gap-1">
-                              @if( $_user->ableTo('company_profile', $permissions) )<a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">@endif
+                              @if( $_user->ableTo('company.profile_view', $permissions) )<a class="media-left mr-50" href="/dashboard/companyProfile/{{$session->user->company->id}}">@endif
                                 <img 
                                   src="{{
                                     $session->user->company->logo_url ?? '/images/logo-placeholder.png'
@@ -87,7 +87,7 @@
                                   class="rounded-circle w-px-40 h-px-40 border border-light"
                                   onerror="this.src='/images/logo-placeholder.png';"
                                 >
-                                @if( $_user->ableTo('company_profile', $permissions) )</a>@endif
+                                @if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
                               <a href="/dashboard/companyProfile/{{$session->user->company->id}}">
                                 <div class="d-flex align-items-center gap-1 text-nowrap">
                                   {{$session->user->company->name }}
@@ -125,7 +125,7 @@
                                     @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
                                         <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
                                     @elseif(isset($available_surv))
-                                        <a href="{{ route('surveys.taking', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
+                                        <a href="{{ route('surveys.take', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
                                     @endif
                                 @elseif( Auth::user()->hasRole('Registered') )
                                     @php
@@ -137,7 +137,7 @@
                                     @if(isset($available_surv) && $available_surv->responses && count($available_surv->responses) > 0)
                                         <button data-id="{{ $available_surv->id }}" class="btn btn-sm btn-label-success open-responses"> {{ __('admin.answered') }} </button>
                                     @elseif(isset($available_surv))
-                                        <a href="{{ route('surveys.taking', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
+                                        <a href="{{ route('surveys.take', ['id' => $available_surv->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
                                     @endif
                                 @endif
                             </small>

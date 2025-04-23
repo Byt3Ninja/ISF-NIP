@@ -143,7 +143,7 @@
           </div>
           <br>
                   <!-- Filter -->
-              <form method="GET" action="{{ route('mentorship.view', $id) }}">
+              <form method="GET" action="{{ route('mentorships.requests_view', $id) }}">
                 <div class="d-flex align-items-center mx-2">
                   <div style="display: flex; align-items: center;">
                   <button

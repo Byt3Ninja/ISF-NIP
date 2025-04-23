@@ -63,7 +63,7 @@
 @section('content')
 @if (!Auth::user()->first_name_ar)
 <div class="d-none">
-  {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+  {!! redirect()->route('user.profile_view')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
 </div>
 @endif
 
@@ -161,7 +161,7 @@
               <div
                 class="bg-white custom-shadow border radius-15 px-2 py-1 d-flex justify-content-between align-items-center mb-2"
                 style="height: 55px;">
-                <a target="_blank" href="{{ route('show_mentor_profile', $mentor->id) }}" class="d-flex flex-column">
+                <a target="_blank" href="{{ route('mentors.profile_view', $mentor->id) }}" class="d-flex flex-column">
                   <span class="text-black fw-bold fs-6">{{ $mentor->name }}</span>
                   <small class="text-secondary">{{ $mentor->title }}</small>
                 </a>

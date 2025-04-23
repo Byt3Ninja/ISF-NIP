@@ -35,7 +35,7 @@ class MicrosoftCalendarController extends Controller
             $reason = $request->error;
             if( $request->has('error_description') && !empty( $request->error_description ) ) { $reason = $request->error_description; }
             Session::flash('error', trans('auth.auth_error', ['reason' => $reason]));
-            return redirect( route('calendar') );
+            return redirect( route('calendar.events_list') );
         }
         else
         {
@@ -45,15 +45,15 @@ class MicrosoftCalendarController extends Controller
                 if (empty($request->input('state')) || ($request->input('state') !== $state)) {
                     // abort(403, 'Invalid state');
                     Session::flash('error', trans('auth.auth_error', ['reason' => 'Invalid state']));
-                    return redirect( route('calendar') );
+                    return redirect( route('calendar.events_list') );
                 }
                 $code = $request->input('code');
                 $this->microsoftService->authenticate($code, auth()->id());
-                return redirect(route('calender.MicrosoftsyncEvents'));
+                return redirect(route('integrations.calendar_microsoft_sync'));
 
             } catch (\Exception $e) {
                 Session::flash('error', trans('auth.auth_error', ['reason' => $e->getMessage()]));
-                return redirect( route('calendar') );
+                return redirect( route('calendar.events_list') );
             }
         }
     }
@@ -70,7 +70,7 @@ class MicrosoftCalendarController extends Controller
         if( $data ) { Session::flash('success', trans('admin.events_sync_success')); } else { Session::flash('error', trans('admin.events_sync_failed')); }
         /* if( $data ) { return redirect(route('calendar'))->with('msg','Events synced successfully!'); }
         else { return redirect(route('calendar'))->with('message2','Events synced Failed!'); } */
-        return redirect( route('calendar') );
+        return redirect( route('calendar.events_list') );
     }
 
     protected function AdminCalender($user,$organization_id){

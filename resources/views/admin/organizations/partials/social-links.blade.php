@@ -1,4 +1,4 @@
-<form class="form d-flex flex-column h-100" action="{{ route('social-settings') }}" method="POST">
+<form class="form d-flex flex-column h-100" action="{{ route('settings.organization_social_manage') }}" method="POST">
     @csrf
     @method('PUT')
     <input type="hidden" name="id" value="{{ $organization->id }}">

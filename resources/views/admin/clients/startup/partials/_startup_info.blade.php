@@ -132,7 +132,7 @@
       </div>
       <!-- Action Button -->
       {{-- <div class="col-md-2 d-flex flex-column align-items-center justify-content-center gap-2">
-        @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('my_company', $permissions) )
+        @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('company.profile_view_mine', $permissions) )
         <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-label-primary shadow-sm text-primary fw-bold"
           style="border-radius: 15px;">
           {{ __('admin.Edit') }} <i class="ti ti-edit mx-2"></i>

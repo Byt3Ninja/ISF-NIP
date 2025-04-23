@@ -96,7 +96,7 @@ class HomeController extends Controller
         $has_org = !empty( $user->organization_id ) && !is_null( $user->organization_id ) && trim( $user->organization_id ) ? true : false;
         if( auth()->check() ) { $permissions = $user->myPermissions(); }
 
-        if( array_intersect(['dashboard_cards.managers', 'dashboard_cards.mentors', 'dashboard_cards.judgers', 'dashboard_tables.mentors'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_managers_view', 'dashboard.widgets_cards_mentors_view', 'dashboard.widgets_cards_judgers_view', 'dashboard.widgets_tables_mentors_view'], $permissions) )
         {
             $users_q = "SELECT 
                     u.id,
@@ -155,7 +155,7 @@ class HomeController extends Controller
             })->values();
         } else { $users = collect([]); }
 
-        if( array_intersect(['dashboard_cards.contact_us'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_contact_us_view'], $permissions) )
         {
             $messages_q = "SELECT 
                     m.id,
@@ -169,7 +169,7 @@ class HomeController extends Controller
             $messages = collect( DB::select( $messages_q ) );
         } else { $messages = collect([]); }
 
-        if( array_intersect(['dashboard_cards.new_messages'], $permissions) )
+        if( array_intersect(['dashboard.widgets.cards.new_messages.view'], $permissions) )
         {
             $messenger_q = "SELECT 
                     m.id,
@@ -184,7 +184,7 @@ class HomeController extends Controller
             $messenger = collect( DB::select( $messenger_q ) );
         } else { $messenger = collect([]); }
 
-        if( array_intersect(['dashboard_cards.service_requests'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_service_requests_view'], $permissions) )
         {
             $services_requests_q = "SELECT 
                     sr.id,
@@ -205,7 +205,7 @@ class HomeController extends Controller
             $services_requests = collect( DB::select( $services_requests_q ) );
         } else { $services_requests = collect([]); }
 
-        if( array_intersect(['dashboard_cards.organizations'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_organizations_view'], $permissions) )
         {
             $organizations_q = "SELECT 
                     o.id
@@ -221,7 +221,7 @@ class HomeController extends Controller
             $organizations = collect( DB::select( $organizations_q ) );
         } else { $organizations = collect([]); }
 
-        if( array_intersect(['dashboard_cards.programs'], $permissions) ) // remember to add more permissions here
+        if( array_intersect(['dashboard.widgets_cards_programs_view'], $permissions) ) // remember to add more permissions here
         {
             $cycles_q = "SELECT 
                     c.id,
@@ -258,7 +258,7 @@ class HomeController extends Controller
             })->values();
         } else { $cycles = collect([]); }
 
-        if( array_intersect(['dashboard_cards.startups'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_startups_view'], $permissions) )
         {
             $companies_q = "SELECT 
                     s.id,
@@ -277,7 +277,7 @@ class HomeController extends Controller
             $companies = collect( DB::select( $companies_q ) );
         } else { $companies = collect([]); }
 
-        if( array_intersect(['dashboard_cards.mentorship_requests', 'dashboard_cards.mentorship_sessions_durations'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_mentorship_requests_view', 'dashboard.widgets_cards_mentorship_sessions_durations_view'], $permissions) )
         {
             $mentorship_requests_q = "SELECT
                     mr.id,
@@ -296,7 +296,7 @@ class HomeController extends Controller
             $mentorship_requests = collect( DB::select( $mentorship_requests_q ) );
         } else { $mentorship_requests = collect([]); }
 
-        if( array_intersect(['dashboard_cards.training_sessions', 'dashboard_cards.training_sessions_durations'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_training_sessions_view', 'dashboard.widgets_cards_training_sessions_durations_view'], $permissions) )
         {
             $training_sessions_q = "SELECT
                     ts.id,
@@ -321,7 +321,7 @@ class HomeController extends Controller
             });
         } else { $training_sessions = collect([]); }
 
-        if( array_intersect(['dashboard_cards.services'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_services_view'], $permissions) )
         {
             $services_q = "SELECT
                     s.id,
@@ -370,7 +370,7 @@ class HomeController extends Controller
             $my_requests = collect( DB::select( $my_requests_q ) );
         } else { $my_requests = collect([]); }
 
-        if( array_intersect(['dashboard_cards.my_mentors'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_my_mentors_view'], $permissions) )
         {
             $my_mentors_q = "SELECT 
                     u.id,
@@ -404,7 +404,7 @@ class HomeController extends Controller
             })->values();
         } else { $my_mentors = collect([]); }
 
-        if( array_intersect(['dashboard_cards.filtration'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_filtration_view'], $permissions) )
         {
             $today = date("Y-m-d");
             $inputs = [$today];
@@ -437,7 +437,7 @@ class HomeController extends Controller
             $filtration = collect( DB::select($filtration_q, $inputs) );
         } else { $filtration = collect([]); }
 
-        if( array_intersect(['dashboard_cards.evaluation'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_evaluation_view'], $permissions) )
         {
             $evaluation_q = "SELECT
                     fs.id,
@@ -471,7 +471,7 @@ class HomeController extends Controller
             });
         } else { $evaluation = collect([]); }
 
-        if( array_intersect(['dashboard_cards.coming_sessions', 'my_next_mentorship_sessions'], $permissions) )
+        if( array_intersect(['dashboard.widgets_cards_coming_sessions_view', 'my_next_mentorship_sessions'], $permissions) )
         {
             $upcoming_sessions_q = "SELECT
                     mr.id AS `id`,
@@ -557,7 +557,7 @@ class HomeController extends Controller
             $my_cycles = collect( DB::select( $my_cycles_q, $params ) );
         } else { $my_cycles = collect([]); }
 
-        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard_cards.startup_attendance_rate'], $permissions) )
+        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_startup_attendance_rate_view'], $permissions) )
         {
             $completed_sessions_q = "SELECT 
                     mr.id AS `id`,
@@ -582,7 +582,7 @@ class HomeController extends Controller
         $sessionWithoutTasks = collect([]);
         $completedTasks = collect([]);
         $nonCompletedTasks = collect([]);
-        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard_cards.sessions_without_tasks', 'dashboard_cards.completed_tasks', 'dashboard_cards.non_completed_tasks'], $permissions) )
+        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_sessions_without_tasks_view', 'dashboard.widgets_cards_completed_tasks_view', 'dashboard.widgets_cards_non_completed_tasks_view'], $permissions) )
         {
             $tasks_q = "SELECT 
                     mr.id,
@@ -601,12 +601,12 @@ class HomeController extends Controller
             $params = [];
             $params[] = $user->id;
             $tasks = collect( DB::select( $tasks_q, $params ) );
-            if( array_intersect(['dashboard_cards.sessions_without_tasks'], $permissions) ) { $sessionWithoutTasks = $tasks->whereNull('task_id')->values(); }
-            if( array_intersect(['dashboard_cards.completed_tasks'], $permissions) ) { $completedTasks = $tasks->whereNotNull('task_id')->where('task_status', 'completed')->values(); }
-            if( array_intersect(['dashboard_cards.non_completed_tasks'], $permissions) ) { $nonCompletedTasks = $tasks->whereNotNull('task_id')->where('task_status', 'pending')->values(); }
+            if( array_intersect(['dashboard.widgets_cards_sessions_without_tasks_view'], $permissions) ) { $sessionWithoutTasks = $tasks->whereNull('task_id')->values(); }
+            if( array_intersect(['dashboard.widgets_cards_completed_tasks_view'], $permissions) ) { $completedTasks = $tasks->whereNotNull('task_id')->where('task_status', 'completed')->values(); }
+            if( array_intersect(['dashboard.widgets_cards_non_completed_tasks_view'], $permissions) ) { $nonCompletedTasks = $tasks->whereNotNull('task_id')->where('task_status', 'pending')->values(); }
         }
         
-        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard_cards.rate'], $permissions) )
+        if( $user->hasAnyRole(['mentor']) && array_intersect(['dashboard.widgets_cards_rate_view'], $permissions) )
         {
             $sessions_q = "SELECT 
                     mr.id AS `id`,
@@ -1259,7 +1259,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/users#search=Manager',
                 'icon' => 'ti ti-user-share',
                 'text' => __('admin.Managers'),
-                'permissions' => ['users.index', 'dashboard_cards.managers'],
+                'permissions' => ['users.index', 'dashboard.widgets_cards_managers_view'],
                 'count' => $managers->count(),
                 'isRating' => false,
             ],
@@ -1268,7 +1268,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/organizations',
                 'icon' => 'ti-businessplan',
                 'text' => __('admin.Organizations'),
-                'permissions' => ['organizations.index', 'dashboard_cards.organizations'],
+                'permissions' => ['organizations.index', 'dashboard.widgets_cards_organizations_view'],
                 'count' => $organizations->count(),
                 'isRating' => false,
             ],
@@ -1277,7 +1277,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/requests/all',
                 'icon' => 'ti-speakerphone',
                 'text' => __('admin.Services Requests'),
-                'permissions' => ['requests', 'dashboard_cards.service_requests'],
+                'permissions' => ['service_requests.list_all', 'dashboard.widgets_cards_service_requests_view'],
                 'count' => $services_requests->count(),
                 'isRating' => false,
             ],
@@ -1286,7 +1286,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/inbox',
                 'icon' => 'ti-message',
                 'text' => __('admin.New messages'),
-                'permissions' => ['inbox', 'dashboard_cards.new_messages'],
+                'permissions' => ['inbox', 'dashboard.widgets.cards.new_messages.view'],
                 'count' => $messenger->count(),
                 'isRating' => false,
             ],
@@ -1295,7 +1295,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/mymsg',
                 'icon' => 'ti-network',
                 'text' => __('admin.Contact us'),
-                'permissions' => ['messages.view', 'dashboard_cards.contact_us'],
+                'permissions' => ['messages.view', 'dashboard.widgets_cards_contact_us_view'],
                 'count' => $messages->count(),
                 'isRating' => false,
             ],
@@ -1304,7 +1304,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/cycles',
                 'icon' => 'ti-circles',
                 'text' => __('admin.Cycles'),
-                'permissions' => ['index.cycle', 'dashboard_cards.programs'],
+                'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
                 'count' => $cycles->count(),
                 'isRating' => false,
             ],
@@ -1313,7 +1313,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/companies',
                 'icon' => 'ti-building',
                 'text' => __('admin.Startups'),
-                'permissions' => ['users.companies', 'dashboard_cards.startups'],
+                'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
                 'count' => $companies->count(),
                 'isRating' => false,
             ],
@@ -1322,7 +1322,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/users#search=Mentor',
                 'icon' => 'ti-school',
                 'text' => __('admin.Mentors'),
-                'permissions' => ['users.index', 'dashboard_cards.mentors'],
+                'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
                 'count' => $mentors->count(),
                 'isRating' => false,
             ],
@@ -1331,7 +1331,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/mentorship/sessions',
                 'icon' => 'ti-brand-my-oppo',
                 'text' => __('admin.Mentorship requests'),
-                'permissions' => ['mentorship.sessions', 'dashboard_cards.mentorship_requests'],
+                'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_requests_view'],
                 'count' => $mentorship_requests->count(),
                 'isRating' => false,
             ],
@@ -1340,7 +1340,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/mentorship/sessions',
                 'icon' => 'ti-calendar-event',
                 'text' => __('admin.Mentorship requests Duration'),
-                'permissions' => ['mentorship.sessions', 'dashboard_cards.mentorship_sessions_durations'],
+                'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_sessions_durations_view'],
                 'count' => $mentorship_requests->sum('period') / 60,
                 'isRating' => false,
             ],
@@ -1349,7 +1349,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/users#search=Judger',
                 'icon' => 'ti-certificate',
                 'text' => __('admin.Judgers'),
-                'permissions' => ['users.index', 'dashboard_cards.judgers'],
+                'permissions' => ['users.index', 'dashboard.widgets_cards_judgers_view'],
                 'count' => $judgers->count(),
                 'isRating' => false,
             ],
@@ -1358,7 +1358,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/training/sessions',
                 'icon' => 'ti-camera-question',
                 'text' => __('admin.Training sessions'),
-                'permissions' => ['training.sessions', 'dashboard_cards.training_sessions'],
+                'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_view'],
                 'count' => $training_sessions->count(),
                 'isRating' => false,
             ],
@@ -1367,7 +1367,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/training/sessions',
                 'icon' => 'ti-alarm',
                 'text' => __('admin.Training sessions Duration'),
-                'permissions' => ['training.sessions', 'dashboard_cards.training_sessions_durations'],
+                'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_durations_view'],
                 'count' => $training_sessions->sum('duration') / 60,
                 'isRating' => false,
             ],
@@ -1376,7 +1376,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/directory',
                 'icon' => 'ti ti-briefcase',
                 'text' => __('dashboard.Services'),
-                'permissions' => ['directory', 'dashboard_cards.services'],
+                'permissions' => ['users.directory_view', 'dashboard.widgets_cards_services_view'],
                 'count' => $services->count(),
                 'isRating' => false,
             ],
@@ -1385,7 +1385,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/requests/mine',
                 'icon' => 'ti ti-speakerphone',
                 'text' => __('dashboard.My Requests'),
-                'permissions' => ['myrequests', 'dashboard_cards.my_requests'],
+                'permissions' => ['service_requests.list_mine', 'dashboard.widgets_cards_my_requests_view'],
                 'count' => $my_requests->count(),
                 'isRating' => false,
             ],
@@ -1394,7 +1394,7 @@ class HomeController extends Controller
                 'href' => '/dashboard/show/Mentors',
                 'icon' => 'ti ti-school',
                 'text' => __('dashboard.Mentors'),
-                'permissions' => ['mentors.list', 'dashboard_cards.my_mentors'],
+                'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
                 'count' => $my_mentors->count(),
                 'isRating' => false,
             ],
@@ -1403,7 +1403,7 @@ class HomeController extends Controller
                 'href' => '#',
                 'icon' => 'ti ti-chalkboard',
                 'text' => __('dashboard.First screening'),
-                'permissions' => ['dashboard_cards.filtration'],
+                'permissions' => ['dashboard.widgets_cards_filtration_view'],
                 'count' => $filtration->count(),
                 'isRating' => false,
             ],
@@ -1412,7 +1412,7 @@ class HomeController extends Controller
                 'href' => '#',
                 'icon' => 'ti ti-calendar',
                 'text' => __('dashboard.Final screening'),
-                'permissions' => ['dashboard_cards.evaluation'],
+                'permissions' => ['dashboard.widgets_cards_evaluation_view'],
                 'count' => $evaluation->count(),
                 'isRating' => false,
             ],
@@ -1421,7 +1421,7 @@ class HomeController extends Controller
                 'href' => '#',
                 'icon' => 'ti ti-chalkboard',
                 'text' => __('dashboard.Coming sessions'),
-                'permissions' => ['dashboard_cards.coming_sessions'],
+                'permissions' => ['dashboard.widgets_cards_coming_sessions_view'],
                 'count' => $upcoming_sessions->count(),
                 'isRating' => false,
             ],
@@ -1439,7 +1439,7 @@ class HomeController extends Controller
                 'href' => '#',
                 'icon' => 'ti ti-server',
                 'text' => __('admin.Company Attendance Rate'),
-                'permissions' => ['dashboard_cards.startup_attendance_rate'],
+                'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
                 'count' => $attends_rate,
                 'isRating' => false,
             ],
@@ -1448,7 +1448,7 @@ class HomeController extends Controller
                 'href' => '#',
                 'icon' => 'ti ti-star',
                 'text' => __('cycles.Rate'),
-                'permissions' => ['dashboard_cards.rate'],
+                'permissions' => ['dashboard.widgets_cards_rate_view'],
                 'count' => $my_rating,
                 'isRating' => true, // Only this card has the isRating key
             ],
@@ -1457,7 +1457,7 @@ class HomeController extends Controller
                 'href' => '#',
                 'icon' => 'ti ti-select',
                 'text' => __('mentor.mentorshipRequests.withoutTasks'),
-                'permissions' => ['dashboard_cards.sessions_without_tasks'],
+                'permissions' => ['dashboard.widgets_cards_sessions_without_tasks_view'],
                 'count' => $sessionWithoutTasks->count(),
                 'isRating' => false,
             ],
@@ -1466,7 +1466,7 @@ class HomeController extends Controller
                 'href' => '#',
                 'icon' => 'ti ti-check',
                 'text' => __('mentor.mentorshipTasks.completedTasks'),
-                'permissions' => ['dashboard_cards.completed_tasks'],
+                'permissions' => ['dashboard.widgets_cards_completed_tasks_view'],
                 'count' => $completedTasks->count(),
                 'isRating' => false,
             ],
@@ -1475,7 +1475,7 @@ class HomeController extends Controller
                 'href' => '#',
                 'icon' => 'ti ti-archive',
                 'text' => __('mentor.mentorshipTasks.nonCompletedTasks'),
-                'permissions' => ['dashboard_cards.non_completed_tasks'],
+                'permissions' => ['dashboard.widgets_cards_non_completed_tasks_view'],
                 'count' => $nonCompletedTasks->count(),
                 'isRating' => false,
             ],
@@ -1800,77 +1800,77 @@ class HomeController extends Controller
                 'card-title' => __('admin.Cycle Startups Statistics'),
                 'type' => 'div',
                 'id' => 'horizontalBarChart',
-                'permissions' => ['dashboard_graphs.startup_by_program']
+                'permissions' => ['dashboard.widgets_graphs_startup_by_program_view']
             ],
             [
                 'div-class' => 'col-12 mt-6',
                 'card-title' => __('admin.Total_company_by_SDG'),
                 'type' => 'canvas',
                 'id' => 'sdgCompaniesChart',
-                'permissions' => ['dashboard_graphs.startups_by_sdgs']
+                'permissions' => ['dashboard.widgets_graphs_startups_by_sdgs_view']
             ],
             [
                 'div-class' => 'col-12 mt-6',
                 'card-title' => __('admin.usersdetails') ,
                 'type' => 'canvas',
                 'id' => 'verticalBarChart',
-                'permissions' => ['dashboard_graphs.demographics']
+                'permissions' => ['dashboard.widgets_graphs_demographics_view']
             ],
             [
                 'div-class' => 'col-12 mt-6',
                 'card-title' => __('admin.Total_companies_by_sector'),
                 'type' => 'canvas',
                 'id' => 'companyBySectorChart',
-                'permissions' => ['dashboard_graphs.top_startups_sectors']
+                'permissions' => ['dashboard.widgets_graphs_top_startups_sectors_view']
             ],
             [
                 'div-class' => 'col-md-6 col-12 mt-6',
                 'card-title' => __('admin.totalusersmf') ,
                 'type' => 'div',
                 'id' => 'pieChart',
-                'permissions' => ['dashboard_graphs.male_female_ratio']
+                'permissions' => ['dashboard.widgets_graphs_male_female_ratio_view']
             ],
             [
                 'div-class' => 'col-md-6 col-12 mt-6',
                 'card-title' => __('admin.company_business_model'),
                 'type' => 'div',
                 'id' => 'projectsPieChart',
-                'permissions' => ['dashboard_graphs.company_by_business_model']
+                'permissions' => ['dashboard.widgets_graphs_company_by_business_model_view']
             ],
             [
                 'div-class' => 'col-md-6 col-12 mt-6',
                 'card-title' => __('admin.Development_Stage'),
                 'type' => 'canvas',
                 'id' => 'devStageStackedBarChart',
-                'permissions' => ['dashboard_graphs.startups_development_stage']
+                'permissions' => ['dashboard.widgets_graphs_startups_development_stage_view']
             ],
             [
                 'div-class' => 'col-md-6 mt-6',
                 'card-title' => __('admin.Sector_Breakdown'),
                 'type' => 'div',
                 'id' => 'sectorBreakdownChart',
-                'permissions' => ['dashboard_graphs.sector_breakdown']
+                'permissions' => ['dashboard.widgets_graphs_sector_breakdown_view']
             ],
             [
                 'div-class' => 'col-md-6 mt-6',
                 'card-title' => __('admin.User_distribution_by_country'),
                 'type' => 'canvas',
                 'id' => 'userDistributionChart',
-                'permissions' => ['dashboard_graphs.startups_hq']
+                'permissions' => ['dashboard.widgets_graphs_startups_hq_view']
             ],
             [
                 'div-class' => 'col-md-6 mt-6',
                 'card-title' => __('admin.Target_Market_Analysis'),
                 'type' => 'canvas',
                 'id' => 'targetMarketChart',
-                'permissions' => ['dashboard_graphs.startups_target_markets']
+                'permissions' => ['dashboard.widgets_graphs_startups_target_markets_view']
             ],
             [
                 'div-class' => 'col-12 col-md-6 mt-6',
                 'card-title' => __('admin.Project_Status_Over_Time'),
                 'type' => 'div',
                 'id' => 'projectStatusOverTimeChart',
-                'permissions' => ['dashboard_graphs.program_progress']
+                'permissions' => ['dashboard.widgets_graphs_program_progress_view']
             ],
         ];
         return view('includes.dashboard', $data);
