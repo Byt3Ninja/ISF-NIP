@@ -16,7 +16,7 @@ class CountryStateCitySeeder extends Seeder
     public function run(): void
     {
         ini_set('memory_limit', '-1');
-        $json = File::get(base_path('database/dbFiles/countries+states+cities.json'));
+        $json = File::get(base_path('database/dbFiles/countries_states_cities.json'));
         $data = json_decode($json);
 
         $iso3Codes = ['EGY', 'SAU', 'ARE', 'KWT', 'QAT', 'BHR', 'NGA', 'TCD', 'SDN', 'LBY', 'ZMB', 'TGO', 'NER', 'ZWE', 'MLI', 'TUN'];
