@@ -84,7 +84,7 @@
           <li class="{{ Request::is('dashboard/companyProfile') ? 'active' : '' }} menu-item">
             <a href="{{ route('company.profile_view_mine') }}" class="menu-link">
               <span class="menu-item">
-                {{ $l == 'en' ? 'Company Profile' :  'عرض شركتي' }}
+                {{ $l == 'en' ? 'Startup Profile' :  'عرض شركتي' }}
               </span>
             </a>
           </li>
@@ -125,7 +125,7 @@
         <li class="{{ Request::is('dashboard/companyProfile') ? 'active' : '' }} menu-item">
           <a href="{{ route('company.profile_view', $_user->company->id) }}" class="menu-link">
             <span class="menu-item">
-              {{ $l == 'en' ? 'Company Profile' : ' عرض شركتي' }}
+              {{ $l == 'en' ? 'Startup Profile' : ' عرض شركتي' }}
             </span>
           </a>
         </li>
