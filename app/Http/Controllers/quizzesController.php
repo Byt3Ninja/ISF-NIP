@@ -170,12 +170,17 @@ class quizzesController extends Controller
 	{
 		$user = auth()->user();
 		$quiz = Quizzes::with(['questions', 'organization']);
+		
 		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $quiz = $quiz->where('organization_id', $user->organization_id); }
 		$quiz = $quiz->find( $id );
+		
 		if( empty( $quiz ) ) { return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']); }
 		else
 		{
-			$questions = QuestionsBank::where('organization_id', $quiz->organization_id)->where('group', 'quiz')->with(['category'])->get();
+			
+			$questions = QuestionsBank::where('group', 'quiz')->with(['category']);
+			if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $questions = $questions->where('organization_id', $quiz->organization_id); }
+			$questions = $questions->get();
 			$tags = array_unique(array_reduce($questions->pluck('tags')->toArray(), 'array_merge', []));
 			return view('admin.quizzes.questions', compact('quiz', 'questions', 'tags'));
 		}

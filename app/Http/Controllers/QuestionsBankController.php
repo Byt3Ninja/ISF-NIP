@@ -22,7 +22,7 @@ class QuestionsBankController extends Controller
 		$this->middleware('auth');
 	}
 
-	public function index()
+	public function index(Request $request)
 	{
 		$user = auth()->user();
 		$organization_id = $user->organization_id;
@@ -33,6 +33,10 @@ class QuestionsBankController extends Controller
 			} else {
 				$questions = $questions->where('organization_id', $organization_id);
 			}
+		}
+		
+		if($request->has('search')) {
+			$questions = $questions->where('group',$request->search);
 		}
 		$questions = $questions->get();
 
@@ -58,6 +62,7 @@ class QuestionsBankController extends Controller
 
 	public function store(Request $request)
 	{
+		
 		if ($request->question_group != 'assessment') {
 			if ($request->has('quiz_answer_status')) {
 				$quiz_answer_status = [];
@@ -78,6 +83,7 @@ class QuestionsBankController extends Controller
 				'explanation' => 'nullable|sometimes',
 			];
 			if ($request->question_group == 'quiz') {
+				
 				$rules = array_merge($rules, [
 					'quiz_answer_text' => 'required_if:type,mcq|array',
 					"quiz_answer_text.*" => "required_if:type,mcq|nullable|string",
@@ -114,7 +120,7 @@ class QuestionsBankController extends Controller
 			$type = null;
 			$surveyType = null;
 			$category_id = null;
-
+			
 			$question = new QuestionsBank;
 			$question->organization_id = auth()->user()->organization_id;
 			$question->group = $request->question_group;

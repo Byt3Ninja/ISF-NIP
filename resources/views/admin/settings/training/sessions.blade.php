@@ -540,11 +540,11 @@
                 <div class="row">
                   <div class="col-md-6 col-12 mb-6">
                     <label for="flatpickr-time-from" class="form-label">{{ __('cycles.Time From') }}</label>
-                    <input type="text" class="form-control" placeholder="HH:MM" id="flatpickr-time-from" />
+                    <input type="text" class="form-control" name="starttime" placeholder="HH:MM" id="flatpickr-time-from" />
                   </div>
                   <div class="col-md-6 col-12 mb-6">
                     <label for="flatpickr-time-to" class="form-label">{{ __('cycles.Time To') }}</label>
-                    <input type="text" class="form-control" placeholder="HH:MM" id="flatpickr-time-to" />
+                    <input type="text" class="form-control" name="endtime" placeholder="HH:MM" id="flatpickr-time-to" />
                   </div>
                 </div>
               </div>
@@ -632,7 +632,7 @@
                 <label for="date-range-picker" class="form-label fs-6 fw-semibold">{{ __('cycles.Valid_from_to') }}:</label>
                 <input type="hidden" name="start" id="start" />
                 <input type="hidden" name="end" id="end" />
-                <input type="text" name="date_range" id="date-range-picker" class="form-control" />
+                <input type="text" name="date_range" id="date-range-picker" class="form-control date-range-picker" />
               </div>
             </div>
 
@@ -646,11 +646,11 @@
                 <div class="row">
                   <div class="col-md-6 col-12 mb-6">
                     <label for="flatpickr-time-from" class="form-label">{{ __('cycles.Time From') }}</label>
-                    <input type="text" class="form-control" placeholder="HH:MM" id="flatpickr-time-from" />
+                    <input type="text" class="form-control" name="starttime" placeholder="HH:MM" id="flatpickr-time-from" />
                   </div>
                   <div class="col-md-6 col-12 mb-6">
                     <label for="flatpickr-time-to" class="form-label">{{ __('cycles.Time To') }}</label>
-                    <input type="text" class="form-control" placeholder="HH:MM" id="flatpickr-time-to" />
+                    <input type="text" class="form-control" name="endtime" placeholder="HH:MM" id="flatpickr-time-to" />
                   </div>
                 </div>
               </div>
@@ -885,9 +885,13 @@
         $('#addSessionForm #trainer_email').show();
         $('#addSessionForm #location').hide();
         $('#addSessionForm #address').hide();
-      } else {
+      } else if (value === 'online') {
         $('#addSessionForm #date-only').show();
         $('#addSessionForm #date-time').hide();
+        $('#addSessionForm #trainer').hide();
+        $('#addSessionForm #trainer_email').hide();
+        $('#addSessionForm #location').hide();
+        $('#addSessionForm #address').hide();
       }
     });
 
@@ -1185,6 +1189,13 @@
 
           $('#editSessionForm #title').val(response.title);
           $('#editSessionForm #dsc').val(response.dsc);
+          $('#editSessionForm #select-type').val(response.type).trigger('change');
+          if(response.type != 'online'){
+          $('#editSessionForm .date-range-picker').val(response.datetime + ' - ' + response.enddatetime);
+          }else{
+            $('#editSessionForm .date-range-picker').val(response.datetime);
+          }
+         
 
           if (type === 'offline') {
             $('#editSessionForm #date-only').hide();
