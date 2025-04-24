@@ -712,22 +712,35 @@ class TrainingController extends Controller
 	public function addsession(Request $request)
 	{
 		$this->meetingService =  OnlineMeetingFactory::create();
-
 		
+		$dateRange = $request->date_range; 
 		$type = $request->type;
-		$startDate = $request->datetime; // التاريخ
+
+if ($type == 'sessions' || $type == 'offline') {
+		$startDate = $request->datetime;
 		$startTime = $request->starttime;   // وقت البداية
-		$endTime = $request->endtime;     // وقت النهاية
+		$endTime = $request->endtime;   // وقت النهاية
 		$start_datetime = $startDate.' '. $startTime;
 		$end_datetime = $startDate.' '.$endTime;
+} else if ($type == 'online') {
+    [$startDate, $endDate] = explode(' - ', $dateRange);
+    $start_datetime = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y-m-d');
+    $end_datetime = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y-m-d');
+}
+		
+	
 		if($start_datetime == null || $end_datetime == null){
 			return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 		}
+
 		$step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
 		$datetime = $start_datetime;
-		
+		$start = Carbon::parse($datetime);
+		$end = Carbon::parse($end_datetime);
+		$duration = $start->diffInMinutes($end);
+
 		if ($type == 'sessions') {
 			// Add Zoom
 			$topic = "Training (" . $title . ')';
@@ -749,7 +762,8 @@ class TrainingController extends Controller
 				'dsc' => $dsc,
 				'zoom_id' => $zoomid,
 				'datetime' => $datetime,
-				'duration' => $request->duration,
+				'enddatetime' => $end_datetime,
+				'duration' => $duration,
 				'user_id' => Auth::id(),
 				'start_url' => $start,
 				'join_url' => $join,
@@ -807,7 +821,6 @@ Thanks from " . env('APP_NAME');
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
-			
 			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
 
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
@@ -942,22 +955,40 @@ Thanks from " . env('APP_NAME');
 
 	public function editsession(Request $request)
 	{
-		$startDate = $request->datetime; // التاريخ
+		
+		$dateRange = $request->date_range; 
+		$type = $request->type;
+dd($request->all());
+if ($type == 'sessions' || $type == 'offline') {
+		$startDate = $request->datetime;
 		$startTime = $request->starttime;   // وقت البداية
-		$endTime = $request->endtime;     // وقت النهاية
-		$start_datetime = "$startDate $startTime";
-		$end_datetime = "$startDate $endTime";
+		$endTime = $request->endtime;   // وقت النهاية
+		$start_datetime = $startDate.' '. $startTime;
+		$end_datetime = $startDate.' '.$endTime;
+} else if ($type == 'online') {
+    [$startDate, $endDate] = explode(' - ', $dateRange);
+    $start_datetime = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y-m-d');
+    $end_datetime = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y-m-d');
+}
+if($start_datetime == null || $end_datetime == null){
+	return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
+}
 
+$step = $request->step_id;
+$title = $request->title;
+$dsc = $request->dsc;
+$datetime = $start_datetime;
+$start = Carbon::parse($datetime);
+$end = Carbon::parse($end_datetime);
+$duration = $start->diffInMinutes($end);
 		// $step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
-		$datetime = $start_datetime;
-		$type = $request->stype;
 		$id = $request->sid;
 		if ($type == 'sessions') {
 			// Add Zoom
 			$topic = "Training (" . $title . ')';
-			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $request->duration, 'host_video' => 1, 'participant_video' => 1];
+			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $duration, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
 
 			if (!$onlineMeeting['success']) {
@@ -1033,7 +1064,7 @@ Thanks from " . env('APP_NAME');
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
-			TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
+			TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $start_datetime,  'enddatetime' => $end_datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
 			$traning = TrainingSession::where('id', $id)->first();
