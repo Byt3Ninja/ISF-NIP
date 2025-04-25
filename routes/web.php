@@ -550,6 +550,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         // ======> Ajax Route
         Route::get('view/{type?}', 'ReportController@View')->name('reports.view.ajax');
     });
+    Route::get('reports/show-survey/{id}', 'ReportController@surveyReport');
     //================> End Reports <============
 });
 
