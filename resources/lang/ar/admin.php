@@ -1542,5 +1542,9 @@ return [
 	'Max Machines' => 'الحد الاقصى للماشين',
 	'Uses Left' => 'الاستخدامات المتبقية',
 	'Show more' => 'عرض المزيد',
+	'Report_status' => 'حالة التقرير',
+	'Program_Report' => 'تقرير البرنامج',
+	'View_Report' => 'عرض التقرير',
+	'Survey_Report' => 'تقرير الاستبيان',
 ]; 
 

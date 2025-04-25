@@ -1521,4 +1521,8 @@ return [
 	'Max Machines' => 'Max Machines',
 	'Uses Left' => 'Uses Left',
 	'Show more' => 'Show more',
+	'Report_status' => 'Report Status',
+	'Program_Report' => 'Program Report',
+	'View_Report' => 'View Report',
+	'Survey_Report' => 'Survey Report',
 ];

@@ -78,6 +78,13 @@ class ReportController extends Controller
     // =============> ajax report functions <=============
 
     // =============> ajax report StartupSurveys <=============
+    public function surveyReport(Request $request){
+        $surveyId = $request->id;
+        $available_surveys = SurveyResponses::where('id', $surveyId)->first();
+
+        return view('admin.reports.show-survey', compact('available_surveys'));
+    }
+
     protected function startupSurveysReport(){
         $data['mentorRequests'] =  MentorshipRequest::all();
         $data['mentorRequests'] = $data['mentorRequests']->filter(function ($request) {
