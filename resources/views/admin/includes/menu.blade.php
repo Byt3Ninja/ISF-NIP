@@ -352,6 +352,14 @@
     </li>
     @endif
 
+    {{-- @if($_user->hasRole('Mentor')) --}}
+      <li class="{{ Request::is('dashboard/program/show') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/program/show" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-device-desktop-code"></i>
+          <div>{{ __('admin.Program') }}</div>
+        </a>
+      </li>
+    {{-- @endif --}}
     @if($_user->hasRole('Judger'))
       <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/judger/screening" class="menu-link">

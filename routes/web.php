@@ -6,6 +6,7 @@ use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\Mentor\MentorshipTaskController;
+use App\Http\Controllers\Mentor\MentorProgramController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
@@ -357,6 +358,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
     //Mentors
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
+    Route::get('program/show', 'Mentor\MentorProgramController@show');
+
+    Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.modify');
     Route::post('mentorship/add', 'MentorsController@add')->name('mentors.add');
     Route::get('mentorship/assign/{id?}', 'MentorsController@list')->name('mentorships.requests_list');
     Route::post('mentorship/assign/{id}', 'MentorsController@assign')->name('mentorships.requests_assign');
