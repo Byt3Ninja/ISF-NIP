@@ -16,13 +16,30 @@ class PermissionsTableSeeder extends Seeder
     public function run(): void
     {
         $toAdd = [];
-        $getPermissions = collect( DB::select("SELECT id, name, is_core FROM permissions") );
+        $getgroup = collect(DB::select("SELECT id, name FROM permission_groups"))->keyBy('name');
+        $getPermissions = collect( DB::select("SELECT id, name, is_core FROM permissions") )->keyBy('name');
         $json = File::get(base_path('database/dbFiles/_permissions.json'));
         $permissions = json_decode($json, true);
+
         foreach( $permissions as $permission )
         {
-            $found = $getPermissions->where('name', $permission['name'])->first();
-            if( empty( $found ) ) { $toAdd[] = ['name' => $permission['name'], 'guard_name' => 'web', 'is_core' => 0]; }
+            $groupName = $permission['permission_group_id'];
+            $group = $getgroup->get($groupName);
+            if (!$group) {
+                // الجروب غير موجود، نضيفه
+                $newGroupId = DB::table('permission_groups')->insertGetId([
+                    'name' => $groupName,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $group = (object)['id' => $newGroupId, 'name' => $groupName];
+                $getgroup->put($groupName, $group);
+                $groupId = $group->id;
+            } else {
+                $groupId = $group->id;
+            }
+            $found = $getPermissions->get($permission['name']);
+            if( empty( $found ) ) { $toAdd[] = ['name' => $permission['name'], 'description' => $permission['description'], 'permission_group_id' => $groupId,  'guard_name' => 'web', 'is_core' => 0]; }
         }
         Permission::insert( $toAdd );
 
