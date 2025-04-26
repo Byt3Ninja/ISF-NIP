@@ -1546,5 +1546,7 @@ return [
 	'Program_Report' => 'تقرير البرنامج',
 	'View_Report' => 'عرض التقرير',
 	'Survey_Report' => 'تقرير الاستبيان',
+	'Search groups...' => 'البحث في المجموعات...',
+	'Select' => 'اختر',
 ]; 
 

@@ -1525,4 +1525,6 @@ return [
 	'Program_Report' => 'Program Report',
 	'View_Report' => 'View Report',
 	'Survey_Report' => 'Survey Report',
+	'Search groups...' => 'Search groups...',
+	'Select' => 'Select',
 ];
