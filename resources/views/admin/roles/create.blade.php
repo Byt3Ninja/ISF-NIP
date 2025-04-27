@@ -17,7 +17,18 @@
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    
+    <div class="container-xxl flex-grow-1 container-p-y">
+    @if(session()->has('success'))
+      <x-alert type="success" message=" {{ __('admin.' . session()->get('success')) }} {{ Session::forget('success') }}" />
+    @elseif(session()->has('msg'))
+      <x-alert type="danger" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
+    @endif
+    <!-- Validation messages -->
+    @if($errors->any())
+      @foreach($errors->all() as $error)
+        <x-alert type="danger" message="{{ $error }}" />
+      @endforeach
+    @endif
     <div class="card">
       <div class="card-header border-bottom mb-6">
         <div class="row d-flex justify-content-between align-items-center ps-0 ps-md-6">
@@ -50,43 +61,10 @@
           </ul>
         </div>
         <!-- / Tabs (mobile) -->
-        @if(session()->has('success'))
-        <div class="alert alert-success mb-2" role="alert">
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          <div class="d-flex align-items-center">
-            <i class="ti ti-error"></i>
-            <span>
-              {{ __('admin.' . session()->get('success')) }}
-              {{ Session::forget('success') }}
-            </span>
-          </div>
-        </div>
-        @elseif(session()->has('msg'))
-        <div class="alert alert-danger mb-2" role="alert">
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          <div class="d-flex align-items-center">
-            <i class="ti ti-error"></i>
-            <span>
-              {{ __('admin.' . session()->get('msg')) }}
-              {{ Session::forget('msg') }}
-            </span>
-          </div>
-        </div>
-        @endif
-        <!-- Validation messages -->
-        @if($errors->any())
-        <div class="alert alert-danger">
-          <ul>
-            @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-        @endif
 
         <form class="p-0 w-100" method="POST" action="{{ route('roles.store') }}" enctype="multipart/form-data">
           @csrf
-          <div class="row mb-6 border-bottom pb-3">
+          <div class="row mb-6 border-bottom pb-3 px-5">
             <div class="col-md-6 mb-3">
               <label for="name" class="form-label fs-6 mb-1 fw-semibold">{{ __('admin.Title') }}</label>
               <input type="text" class="form-control" id="name" name="name" required value="">
@@ -142,7 +120,7 @@
                     <div class="card shadow-none">
                       <div class="card-header ms-2 p-0 p-md-auto">
                         <div class="row pb-3 border-bottom mb-4">
-                          <div class="col-12 col-md-8">
+                          <div class="col-12 col-md-6">
                             <h5 class="card-title mb-0 fw-semibold pt-2 mb-3 mb-md-0">{{ $tab['label'] }}</h5>
                           </div>
                           <div class="col-12 col-md-4">
@@ -155,6 +133,19 @@
                                 </span>
                               </div>
                             <!-- / Search Input -->
+                          </div>
+                          <div class="col-12 col-md-2 d-flex justify-content-end align-items-center">
+                            <!-- Select All -->
+                            <div class="form-check">
+                              <input type="checkbox" class="form-check-input select-all-row"
+                                id="select-all-{{ strtolower($tab['target']) }}">
+                              <label class="form-check-label" for="select-all-{{ strtolower($tab['target']) }}">{{
+                                __('admin.Select_All') }}</label>
+                            </div>
+                            <span class="position-absolute end-0 top-50 translate-middle-y search-icon mx-2">
+                              <i class="ti ti-check text-muted"></i>
+                            </span>
+                            <!-- / Select All -->
                           </div>
                         </div>
                       </div>
@@ -198,39 +189,39 @@
 
 @section('pagescripts')
 <script>
-  document.getElementById('search-permissions').addEventListener('input', function() {
-    var searchValue = this.value.toLowerCase();
-    document.querySelectorAll('.permission-group').forEach(function(group) {
-      var moduleName = group.getAttribute('data-module');
-      if (moduleName.includes(searchValue)) {
-        group.style.display = '';
+  // Activate navigation tabs based on selected group
+  const groupSelect = $('#group-select');
+  groupSelect.on('change', function () {
+    const selectedGroup = $(this).val().toLowerCase().trim();
+    console.log('selectedGroup', selectedGroup);
+    $('.group-tab').each(function () {
+      const groupLabel = $(this).data('label').toLowerCase().trim();
+      console.log('groupLabel', groupLabel);
+      if (groupLabel === selectedGroup) {
+        $(this).addClass('active');
+        $(`#navs-left-${groupLabel}`).addClass('show active');
+        $(this).find('a').addClass('active'); // Activate the nav item
       } else {
-        group.style.display = 'none';
+        $(this).removeClass('active');
+        $(`#navs-left-${groupLabel}`).removeClass('show active');
+        $(this).find('a').removeClass('active'); // Deactivate the nav item
       }
     });
   });
 
-  document.querySelectorAll('.select-all-row').forEach(function(selectAllCheckbox) {
-    selectAllCheckbox.addEventListener('change', function() {
-      var isChecked = this.checked;
-      var module = this.id.replace('select-all-', '').replace(/_/g, '\\_');
-      var checkboxes = document.querySelectorAll('.permission-group[data-module="' + module + '"] .permission-checkbox');
-      checkboxes.forEach(function(checkbox) {
-        checkbox.checked = isChecked;
-      });
+  $('#permission-search').on('input', function () {
+    const query = $(this).val().toLowerCase();
+    $('.permission-list li').each(function () {
+      const text = $(this).text().toLowerCase();
+      $(this).parent().toggle(text.includes(query));
     });
   });
 
-  // Ensure the "Select All" checkbox in each row updates correctly when individual checkboxes are changed
-  document.querySelectorAll('.permission-checkbox').forEach(function(permissionCheckbox) {
-    permissionCheckbox.addEventListener('change', function() {
-      var module = this.closest('.permission-group').getAttribute('data-module');
-      var allCheckboxes = document.querySelectorAll('.permission-group[data-module="' + module + '"] .permission-checkbox');
-      var allChecked = Array.from(allCheckboxes).every(function(checkbox) {
-        return checkbox.checked;
-      });
-      document.getElementById('select-all-' + module).checked = allChecked;
-    });
+  // Select all checkboxes in a group
+  $('.select-all-row').on('change', function () {
+    const groupId = $(this).attr('id').replace('select-all-', '');
+    const isChecked = $(this).is(':checked');
+    $(`#navs-left-${groupId} .permission-list input[type="checkbox"]`).prop('checked', isChecked);
   });
 </script>
 @stop
