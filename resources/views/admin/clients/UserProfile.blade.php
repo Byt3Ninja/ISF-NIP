@@ -10,7 +10,27 @@
   <!-- Content wrapper -->
   <div class="content-wrapper">
     <!-- Content -->
-
+    @if( session()->has('error') )
+    <div class="row">
+      <div class="col-md-12">
+        <div role="alert" class="alert alert-danger alert-dismissible fade show mb-2">
+          {{ __('dashboard.'.session()->get('error')) }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+  @endif
+  @if( session()->has('msg') )
+    <div class="row">
+      <div class="col-md-12">
+        <div role="alert" class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2">
+          {{ __('admin.' . session()->get('msg')) }}
+          {{ Session::forget('msg') }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+  @endif
     <div class="container-xxl flex-grow-1 container-p-y">
       <!-- Header -->
       <div class="row">
@@ -305,7 +325,7 @@
                 
                 <li class="d-flex flex-wrap mb-4">
 
-                  - <span class="fw-medium me-2">{{$mentor->cycle->title}}</span>
+                  - <span class="fw-medium me-2">{{$mentor->cycle->title ?? ''}}</span>
 
                 </li>
              
@@ -435,10 +455,10 @@
                 @foreach ($mentors as $n=>$mentor) 
                 <tr>
                   <td>{{$n+1}}</td>
-                  <td>{{$mentor->cycle->title}}</td>
-                  <td>{{$mentor->cycle->description}}</td>
-                  <td>{{$mentor->cycle->start}}</td>
-                  <td>{{$mentor->cycle->end}}</td>
+                  <td>{{$mentor->cycle->title ?? ''}}</td>
+                  <td>{{$mentor->cycle->description ?? ''}}</td>
+                  <td>{{$mentor->cycle->start ?? ''}}</td>
+                  <td>{{$mentor->cycle->end ?? ''}}</td>
                 </tr>
   
             @endforeach
@@ -471,7 +491,7 @@
                     <h4 class="mb-2">{{__('dashboard.Add mentorship session with')}} <span class="primary" id="rname"></span></h4>
                 </div>
                 <form method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data" autocomplete="off">
-  
+ 
                   <div class="modal-body">
                     @csrf
                     <input type="hidden" name="mentorid" value="0" id="mentorid">
@@ -484,7 +504,7 @@
                     <hr>
                     <div class="form-group" id="showdates">
                       <label>{{__('dashboard.Start meeting Date/ Time')}}:</label>
-                      <input class="date width-250 form-control" type="text" id="date" name="date" value="" required onkeydown="return false">
+                      <input class="date width-250 form-control" type="text" id="datepp" name="date" value="">
                     </div>
                     <div class="form-group">
                       <label>{{__('dashboard.Meeting duration')}}:</label>
@@ -531,6 +551,12 @@
   <script src="/vuexy/assets/js/pages-profile.js"></script>
 
   <script>
+    $( function() {
+      flatpickr("#datepp", {
+    dateFormat: "Y-m-d", // سنة-شهر-يوم
+    allowInput: true
+});
+});
 function request(id,mentor,organization_id=null,cycle_id=null) {
 		$('#mentorid').val(id);
 		$('#rname').html(mentor);

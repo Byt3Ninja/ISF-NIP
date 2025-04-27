@@ -315,9 +315,14 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
+		
 		$datefrom = $request->date .' '. $request->timeFrom;
 		$dateto = $request->date .' '. $request->timeTo;
-		$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
+		if($request->period == ''){
+			$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
+		}else{
+			$period = $request->period;
+		}
 
 		if ($request->mentorid) {
 			if ($request->date < date("Y-m-d 00:00:00")) {

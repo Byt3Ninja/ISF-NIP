@@ -173,11 +173,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Press Manger routes
     Route::resource('press', 'PressController');
     //Client's Profile
-    Route::get('/myProfile', 'ClientProfileController@edit')->name('user.profile_view');
+    Route::get('/myProfile', 'ClientProfileController@edit')->name('user.profile_Edit');
     Route::get('/show/myProfile', 'ClientProfileController@show')->name('user.profile_view');
     Route::post('/myProfile', 'ClientProfileController@update')->name('user.profile_update_basic');
     Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('user.profile_update_bio');
-    Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('user.profile_update_password');
+    Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('user.account_update_password');
     Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
     Route::get('/show/Mentors', 'ClientProfileController@showMintors')->name('mentors.list');
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
@@ -282,7 +282,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //ShowMessages
     Route::get('/messages', 'MessengerController@index')->name('messages.list');
-    Route::get('/messages/{id}', 'MessengerController@show')->name('messages.view');
+    // Route::get('/messages/{id}', 'MessengerController@show')->name('messages.view');
     Route::post('/draftMessage', 'MessengerController@draftmessage')->name('messages.drafts_save');
     Route::post('/deleteDraft', 'MessengerController@deleteDraft')->name('messages.drafts_delete');
     Route::get('/getAllDraft', 'MessengerController@getAllDrafts')->name('messages.drafts_list');
@@ -295,9 +295,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/messages/getAllStarred', 'MessengerController@getAllStarred')->name('messages.folders_starred');
     Route::post('/messages/toggleMarkReadStatus', 'MessengerController@toggleMarkReadStatus')->name('messages.read_status_toggle');
     //Contact US Messages
-    Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
-    Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
-    Route::get('deletemsg/{id}', 'SettingsController@deletemsg')->name('messages.delete');
+    // Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
+    // Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
+    // Route::get('deletemsg/{id}', 'SettingsController@deletemsg')->name('messages.delete');
     Route::post('makeread/{id}', 'SettingsController@makeread')->name('messages.read_status_mark_read');
     Route::post('makeunread/{id}', 'SettingsController@makeunread')->name('messages.read_status_mark_unread');
     Route::get('openonemsg/{id}', 'SettingsController@openonemsg')->name('messages.view');
@@ -328,7 +328,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('submit-form', 'FormBuilderController@handleFormRequest')->name('forms.submissions_create');
     Route::get('builder/organization/{id?}', 'FormBuilderController@builderByOrganization');
     //Cycles
-    Route::get('cycles/{id?}', 'CyclesController@index')->name('forms.submissions_create');
+    Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view');
@@ -357,10 +357,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('zoom/{id}/delete', 'MeetingController@destroy');
     Route::get('zoom/{id}/registrants', 'MeetingController@registrants');
     //Mentors
-    Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
+    // Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
-    Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.modify');
+    Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
     Route::post('mentorship/add', 'MentorsController@add')->name('mentors.add');
     Route::get('mentorship/assign/{id?}', 'MentorsController@list')->name('mentorships.requests_list');
     Route::post('mentorship/assign/{id}', 'MentorsController@assign')->name('mentorships.requests_assign');
@@ -394,7 +394,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('training/viewcontent/{id}', 'TrainingController@viewcontent')->name('trainings.content_view');
     Route::post('training/upload', 'TrainingController@upload')->name('trainings.files_upload');
     Route::post('training/storecontent', 'TrainingController@storecontent')->name('trainings.content_store');
-    Route::get('training/my', 'TrainingController@mysessions')->name('trainings.list_mine');
+    Route::get('training/my', 'TrainingController@mysessions')->name('trainings.my_sessions_mine');
     Route::get('training/my/{id}', 'TrainingController@my')->name('trainings.list_mine');
     Route::get('training/my/{id}/quiz/{quiz_id}', 'TrainingController@myQuiz')->name('quizzes.view_overview_mine');
     Route::get('training/my/{id}/quiz/{quiz_id}/responses/{response_id}', 'TrainingController@myQuizResponses')->name('quizzes.view_response_mine');
@@ -467,7 +467,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
    
     //Program List
     Route::resource('programlist', 'ProgramController');
-    Route::get('programlist/show/{id}', 'ProgramController@show')->name('programlist.show');
+    Route::get('programlist/show/{id}', 'ProgramController@show')->name('programs.view');
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
 
