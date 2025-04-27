@@ -45,4 +45,14 @@ class Cycle extends Model
     {
         return $this->belongsToMany(Project::class, 'cycle_project')->withPivot(['status','created_at'])->withTimestamps(); 
     }
+
+    public function mentorshipRequests()
+    {
+        return $this->hasMany(MentorshipRequest::class, 'cycle_id', 'id');
+    }
+
+    public function steps()
+    {
+        return $this->hasMany(Step::class);
+    }
 }
