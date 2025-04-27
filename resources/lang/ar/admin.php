@@ -1548,5 +1548,19 @@ return [
 	'Survey_Report' => 'تقرير الاستبيان',
 	'Search groups...' => 'البحث في المجموعات...',
 	'Select' => 'اختر',
+	'Mentorship Sessions' => 'جلسات الإرشاد القادمة',
+    'User' => 'مستخدم',
+	'Date / Time' => 'التاريخ / الوقت',
+	'Admin Notes' => 'ملاحظات المسؤول',
+	'Meeting Link' => 'رابط الاجتماع',
+	'Mentorship Sessions' => 'جلسات الإرشاد',
+	'Program Details' => 'تفاصيل البرنامج',
+	'Upcoming Sessions' => 'الجلسات القادمة',
+	'Join Meeting' => 'انضم إلى الاجتماع',
+	'Financial Policy' => 'السياسة المالية',
+	'Program Guideline' => 'إرشادات البرنامج',
+	'Hour' => 'ساعة',
+	'Minute' => 'دقيقة',
+	'Sessions Without Tasks' => 'الجلسات بدون مهام'
 ]; 
 
