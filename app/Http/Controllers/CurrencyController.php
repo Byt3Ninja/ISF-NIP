@@ -40,7 +40,7 @@ class CurrencyController extends Controller
         $currency->currency_name = $request->currency_name;
         $currency->exchange_rate_to_usd = $request->exchange_rate_to_usd;
         $currency->enabled = $request->enabled ? 1 : 0;
-        $json = File::get(base_path('database/dbFiles/countries+states+cities.json'));
+        $json = File::get(base_path('database/dbFiles/countries_states_cities.json'));
         $data = json_decode($json);
         $iso3Codes =[$request->currency_code];
         $counties = array_filter($data, function ($q) use ($iso3Codes) {

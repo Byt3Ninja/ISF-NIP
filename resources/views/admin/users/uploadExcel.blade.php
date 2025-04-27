@@ -26,7 +26,7 @@
         </div>
     @endif
 
-    <form action="{{ route('import.users') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('import.execute_users') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div>
             <label for="file">اختر ملف Excel:</label>

@@ -315,6 +315,10 @@ class MentorsController extends Controller
 
 	public function addWait(Request $request)
 	{
+		$datefrom = $request->date .' '. $request->timeFrom;
+		$dateto = $request->date .' '. $request->timeTo;
+		$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
+
 		if ($request->mentorid) {
 			if ($request->date < date("Y-m-d 00:00:00")) {
 				return back()->with(['msg' => "Error, can't add late date.", 'class' => 'danger']);
@@ -328,8 +332,8 @@ class MentorsController extends Controller
 				'mentor_id' => $request->mentorid,
 				'user_id' => Auth::id(),
 				'comment' => $request->notes,
-				'zoom_date' => $request->date,
-				'period' => $request->period,
+				'zoom_date' => $datefrom,
+				'period' => $period,
 				'fileurl' => $fileName,
 				'organization_id' => $request->organization_id,
 				'cycle_id' => $request->cycle_id
@@ -371,12 +375,12 @@ Thanks from " . env('APP_NAME');
 	{
 		if ($request->userid) {
 			$dates = explode(',', $request->date);
-			foreach ($dates as $key) {
-				
-				$dateDatabase = MentorshipRequest::where('zoom_date', $key)->where('mentor_id', $request->mentorid)->get();
-				if(count($dateDatabase) > 0) {
+			
+			$dateDatabase = MentorshipRequest::whereIn('zoom_date', $dates)->where('mentor_id', $request->mentorid)->where('user_id', $request->userid)->get();
+			if(count($dateDatabase) > 0) {
 					return back()->with(['message2' => "Cant_add_request_date_is_Exist", 'notAdd' => 2]);
 				}
+			foreach ($dates as $key) {
 				$date = ltrim($key);
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
@@ -534,6 +538,10 @@ Thanks from " . env('APP_NAME');
 				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id', 'DESC')->get();
 		}
+		$sessions = $sessions->map( function( $session ) {
+			$session->date = Carbon::parse($session->zoom_date);
+			return $session;
+		});
 		return view('admin.settings.mentorship.sessions', compact('sessions'));
 	}
 
@@ -836,12 +844,13 @@ Thanks from " . env('APP_NAME');
 		}
 	}
 
-	public function MentorDates(Request $request)
-	{
-			$mentor_id = $request->mentor_id;
-			$dates  = "Select mentor_id, zoom_date from mentorship_requests where mentor_id = $mentor_id AND approved = 'Yes' ";
-			$dates = DB::select($dates);
-			return response()->json(['dates' => $dates]);
+	// public function MentorDates(Request $request)
+	// {
+	// 		$mentor_id = $request->mentor_id;
+
+	// 		$dates  = "Select mentor_id, zoom_date, user_id from mentorship_requests where mentor_id = $mentor_id AND approved = 'Yes' ";
+	// 		$dates = DB::select($dates);
+	// 		return response()->json(['dates' => $dates]);
 		
-	}
+	// }
 }

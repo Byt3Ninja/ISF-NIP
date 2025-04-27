@@ -19,7 +19,7 @@
       </div>
 
       <div class="card card-body">
-        <form id="filter-form" method="GET" action="{{ route('requests') }}">
+        <form id="filter-form" method="GET" action="{{ route('service_requests.list_all') }}">
           <div class="row border-bottom mb-4 pb-3">
             <div class="col-10">
               <div class="row">

@@ -1,4 +1,4 @@
-<form class="form d-flex flex-column h-100" action="{{ route('updateMeeting') }}" method="POST"
+<form class="form d-flex flex-column h-100" action="{{ route('settings.system_meeting_integration_update') }}" method="POST"
   enctype="multipart/form-data">
   {!! csrf_field() !!}
   @method('PUT')

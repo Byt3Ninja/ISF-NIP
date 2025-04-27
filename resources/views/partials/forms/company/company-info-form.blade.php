@@ -17,9 +17,9 @@
       <h5 class="card-title fw-semibold">{{ $tab['label'] }}</h5>
     </div>
       @if ($_user->hasAnyRole('Admin|organizationManager'))
-        <form id="edit-info-form" method="post" action="{{ route('update_my_company', $client->company->id) }}" enctype="multipart/form-data">
+        <form id="edit-info-form" method="post" action="{{ route('company.profile_update_mine', $client->company->id) }}" enctype="multipart/form-data">
       @else
-        <form id="edit-info-form" method="post" action="{{ route('update_my_company') }}" enctype="multipart/form-data">
+        <form id="edit-info-form" method="post" action="{{ route('company.profile_update_mine') }}" enctype="multipart/form-data">
       @endif
       {!! csrf_field() !!}
       <input name="CompanyN" type="hidden" value="1">

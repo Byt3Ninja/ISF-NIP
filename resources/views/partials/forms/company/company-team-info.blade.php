@@ -34,8 +34,8 @@
           enctype="multipart/form-data"
           action="{{ 
             Auth::user()->hasanyRole('Admin|organizationManager') 
-            ? route('update_my_company', $client->company->id) 
-            : route('update_my_company') }}" 
+            ? route('company.profile_update_mine', $client->company->id) 
+            : route('company.profile_update_mine') }}" 
         >
           @csrf
           <input type="hidden" value="5" name="CompanyN">

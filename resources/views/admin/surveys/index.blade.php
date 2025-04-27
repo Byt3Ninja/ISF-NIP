@@ -102,7 +102,7 @@
                               <i class="ti ti-dots-vertical"></i>
                             </button>
                             <div class="dropdown-menu">
-                              <a href="{{ route('surveys.questions', ['survey' => $survey->id]) }}"
+                              <a href="{{ route('surveys.questions_manage', ['survey' => $survey->id]) }}"
                                 class="dropdown-item"> <i class="ti ti-list-check"></i>
                                 {{ __('admin.manageQuestions') }} </a>
                               <a href="{{ route('surveys.edit', ['survey' => $survey->id]) }}" class="dropdown-item"> <i

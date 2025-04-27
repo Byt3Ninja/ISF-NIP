@@ -28,9 +28,9 @@ class StoreServiceRequest extends FormRequest
             'description_en' => 'required',
             'img_url' => 'nullable',
             'service_category_id' => 'required|exists:service_categories,id',
-            'vendor_name' => 'required|string|max:50',
-            'vendor_email' => 'required|string|max:50|unique:services,vendor_email,except,id',
-            'vendor_phone' => 'required|string|max:11',
+            'vendor_name' => 'nullable|string|max:50',
+            'vendor_email' => 'nullable|string|max:50|unique:services,vendor_email,except,id',
+            'vendor_phone' => 'nullable|string|max:11',
             'organization_ids' => 'nullable|array',
             'organization_ids.*' => 'exists:organizations,id',
         ];

@@ -224,6 +224,23 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Session will start at: {{ $date }}</p>
                                                     <p style="margin: 0;"> </p>
+                                                        @if($type == 'sessions')
+                                                    <p style="margin: 0;">
+                                                        🔗 **Link:** {{ $join_url }} 
+                                                    </p>
+                                                    @elseif($type == 'online')
+                                                    <p style="margin: 0;">
+                                                        🔗 **Link:** {{ $join_url }} 
+                                                    </p>
+                                                    @elseif($type == 'offline')
+                                                    <p style="margin: 0;">
+                                                        🔗 **Google Map Link:** {{ $join_url }} 
+                                                    </p>
+                                                    <p style="margin: 0;">
+                                                        🔗 **Address:** {{ $Address }}
+                                                    </p>
+                                                    @endif
+                                                    <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">Best regards,</p>
                                                     <p style="margin: 0;">{{ $organization_name_en }}</p>
                                                 </div>
@@ -245,6 +262,23 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">سيبدأ التدريب في الميعاد:<br/>{{ $date }}
                                                     </p>
+                                                    <p style="margin: 0;"> </p>
+                                                        @if($type == 'sessions')
+                                                    <p style="margin: 0;">
+                                                        🔗 **لينك:** {{ $join_url }} 
+                                                    </p>
+                                                    @elseif($type == 'online')
+                                                    <p style="margin: 0;">
+                                                        🔗 **لينك:** {{ $join_url }} 
+                                                    </p>
+                                                    @elseif($type == 'offline')
+                                                    <p style="margin: 0;">
+                                                        🔗 **لينك خرائط جوجل:** {{ $join_url }} 
+                                                    </p>
+                                                    <p style="margin: 0;">
+                                                        🔗 **عنوان:** {{ $Address }}
+                                                    </p>
+                                                    @endif
                                                     <p style="margin: 0;"> </p>
                                                     <p style="margin: 0;">أطيب التحيات،</p>
                                                     <p style="margin: 0;">{{ $organization_name_ar }}</p>

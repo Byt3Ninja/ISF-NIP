@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use App\Settings;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 
 class ZoomService implements OnlineMeetingServiceInterface
@@ -23,11 +24,15 @@ class ZoomService implements OnlineMeetingServiceInterface
     {
         $this->client = new Client();
         $this->jwt = $this->generateZoomToken();
-        $this->headers = [
-            'Authorization' => 'Bearer ' . $this->jwt,
-            'Content-Type'  => 'application/json',
-            'Accept'        => 'application/json',
-        ];
+
+        if($this->jwt['status'] ) {
+            
+            $this->headers = [
+                'Authorization' => 'Bearer ' . $this->jwt['data'],
+                'Content-Type'  => 'application/json',
+                'Accept'        => 'application/json',
+            ];
+        }
     }
 
 
@@ -36,37 +41,62 @@ class ZoomService implements OnlineMeetingServiceInterface
      */
     protected function generateZoomToken()
     {
-        if (Schema::hasTable('settings')) {
-            $Setting = Settings::where('id', 1)->first();
+        $ZOOM_CLIENT_ID = '';
+        $ZOOM_CLIENT_SECRET = '';
+        $ZOOM_ACCOUNT_ID = '';
 
-            if ($Setting) {
-                $ZOOM_CLIENT_ID = $Setting->ZOOM_CLIENT_ID;
-                $ZOOM_CLIENT_SECRET = $Setting->ZOOM_CLIENT_SECRET;
-                $ZOOM_ACCOUNT_ID = $Setting->ZOOM_ACCOUNT_ID;
-            } else {
-                $ZOOM_CLIENT_ID = '';
-                $ZOOM_CLIENT_SECRET = '';
-                $ZOOM_ACCOUNT_ID = '';
-            }
-            if(empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) return '';
-            $client = new Client([
-                'headers' => [
-                    'Authorization' => 'Basic ' . base64_encode($ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
-                    'Host' => 'zoom.us',
-                ],
-            ]);
+      $user = Auth::user();
 
-            $response = $client->request('POST', "https://zoom.us/oauth/token", [
-                'form_params' => [
-                    'grant_type' => 'account_credentials',
-                    'account_id' => $ZOOM_ACCOUNT_ID,
-                ],
-            ]);
+      if ($user && $user->hasRole('Admin') && Schema::hasTable('settings')) {
+        $setting = Settings::where('id', 1)->first();
 
-            $responseBody = json_decode($response->getBody(), true);
-            return $responseBody['access_token'];
+        if ($setting) {
+            $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
+            $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
+            $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
         }
     }
+
+    elseif ($user && $user->hasRole('organizationManager')) {
+        $org = $user->organization;
+        $ZOOM_CLIENT_ID = $org->zoom_client_id;
+        $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
+        $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
+    }
+
+    if (empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) {
+        return [
+            'status' => false, 
+            'data' => __('admin.zoom_error')
+        ];
+    }
+    
+    try {
+        $client = new Client([
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode($ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
+                'Host' => 'zoom.us',
+            ],
+        ]);
+
+        $response = $client->request('POST', "https://zoom.us/oauth/token", [
+            'form_params' => [
+                'grant_type' => 'account_credentials',
+                'account_id' => $ZOOM_ACCOUNT_ID,
+            ],
+        ]);
+
+        $responseBody = json_decode($response->getBody(), true);
+
+        if (isset($responseBody['access_token'])) {
+            return ['status' => true, 'data' => $responseBody['access_token']];
+        }
+
+    } catch (\Exception $e) {
+        return ['status' => false, 'data' => $e->getMessage()];
+    }
+    }
+
 
     private function retrieveZoomUrl()
     {
@@ -102,6 +132,20 @@ class ZoomService implements OnlineMeetingServiceInterface
      */
     public function createMeeting($data)
     {
+        $user = Auth::user();
+
+      if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
+        $setting = Settings::where('id', 1)->first();
+
+        if ($setting) {
+            $timeZone = $setting->timezone;
+        }
+    }
+
+    elseif ($user->hasRole('organizationManager')) {
+        $org = $user->organization;
+        $timeZone = $org->time_zone;
+    }
         $path = 'users/me/meetings';
         $url = $this->retrieveZoomUrl();
 
@@ -113,7 +157,7 @@ class ZoomService implements OnlineMeetingServiceInterface
                 'start_time' => $this->toZoomTimeFormat($data['start_time']),
                 'duration'   => $data['duration'],
                 'agenda'     => (! empty($data['agenda'])) ? $data['agenda'] : null,
-                'timezone'     => 'Africa/Cairo',
+                'timezone'     => $timeZone ??'Africa/Cairo', 
                 'settings'   => [
                     'host_video'        => ($data['host_video'] == "1") ? true : false,
                     'participant_video' => ($data['participant_video'] == "1") ? true : false,
@@ -125,6 +169,12 @@ class ZoomService implements OnlineMeetingServiceInterface
             ]),
         ];
 
+        if(!$this->jwt['status'] ) {
+            return [
+                'success' => false,
+                'data'    => $this->jwt['data'],
+            ];
+        }
         $response =  $this->client->post($url . $path, $body);
 
         if ($response && $response->getStatusCode() === 201) {

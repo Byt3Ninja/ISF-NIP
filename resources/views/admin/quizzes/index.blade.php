@@ -111,7 +111,7 @@
 												<th class="text-center">{{__('admin.quizDuration')}}</th>
 												<th class="text-center">{{__('admin.quizParticipants')}}</th>
 												<th class="text-center">{{__('admin.quizPassPercentage')}}</th>
-												@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))<th class="text-center">{{__('admin.Actions')}}</th>@endif
+												@if($_user->ableToAny(['quizzes.questions_manage', 'quizzes.questions_update', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))<th class="text-center">{{__('admin.Actions')}}</th>@endif
 											</tr>
 											</thead>
 											<tbody>
@@ -154,13 +154,13 @@
 																-
 															@endif
 														</td>
-														@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))
+														@if($_user->ableToAny(['quizzes.questions_manage', 'quizzes.questions_update', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))
 														<td class="text-center">
 															<div class="btn-group w-100">
 																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																<div class="dropdown-menu">
-																	@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions'], $permissions))
-																	<a href="{{ route('quizzes.questions', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-list-ul"></i> {{ __('admin.manageQuestions') }} </a>
+																	@if($_user->ableToAny(['quizzes.questions_manage', 'quizzes.questions_update'], $permissions))
+																	<a href="{{ route('quizzes.questions_manage', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-list-ul"></i> {{ __('admin.manageQuestions') }} </a>
 																	@endif
 																	@if($_user->ableToAny(['quizzes.edit', 'quizzes.update'], $permissions))
 																	<a href="{{ route('quizzes.edit', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-edit"></i> {{ __('admin.Edit') }}</a>

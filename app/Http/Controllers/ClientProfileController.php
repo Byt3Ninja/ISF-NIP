@@ -153,7 +153,7 @@ class ClientProfileController extends Controller
                 $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
                 $user->mentorExpertises()->sync($request->expertises);
             }
-            return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+            return redirect()->route('user.profile_view')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
     }
     public function update(UpdateClientProfileRequest $request)
     {           
@@ -215,10 +215,10 @@ class ClientProfileController extends Controller
                   
                     $user->save();
                      // إرسال رابط التحقق
-                    $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
+                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
                     Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
-                    return redirect()->route('my_profile')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
+                    return redirect()->route('user.profile_view')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
                 }
 
                 
@@ -242,17 +242,17 @@ class ClientProfileController extends Controller
                     $user->new_email = $request->email;
                     $user->save();
                      // إرسال رابط التحقق
-                    $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
+                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
                     Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
-                    return redirect()->route('my_profile')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
+                    return redirect()->route('user.profile_view')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
                 }
             
                 
             }
             
             if($result)
-                return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+                return redirect()->route('user.profile_view')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
             else
                 return back()->withInput()->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
         }catch (Exception $e) {
@@ -270,7 +270,7 @@ class ClientProfileController extends Controller
           
         } catch (\Exception $e) {
            
-            return redirect()->route('my_profile')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
 
         }
 
@@ -278,7 +278,7 @@ class ClientProfileController extends Controller
 
         // تحقق من وجود البريد الجديد
         if ($user->new_email != $newEmail) {
-            return redirect()->route('my_profile')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
         }
 
         // تحديث البريد الإلكتروني
@@ -286,7 +286,7 @@ class ClientProfileController extends Controller
         $user->new_email = null;
         $user->save();
 
-        return redirect()->route('my_profile')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
+        return redirect()->route('user.profile_view')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
     }
     /**
      * Update the specified resource in storage.
@@ -303,7 +303,7 @@ class ClientProfileController extends Controller
             $result = $user->where('id', $user->id)
                             ->update(['password' => $password]);
             if($result)
-                return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+                return redirect()->route('user.profile_view')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
             else
                 return back()->withInput()->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
         }catch (Exception $e){
@@ -360,7 +360,7 @@ class ClientProfileController extends Controller
             'average_rating'));
 
     }else{
-        return redirect()->route('my_profile')->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
+        return redirect()->route('user.profile_view')->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
     }
     }
 
@@ -456,7 +456,7 @@ class ClientProfileController extends Controller
                     
                         return view('admin/clients/Mentors', compact('mentors'));
             }else{
-                return redirect()->route('dashboard');
+                return redirect()->route('core.dashboard_view');
             }
 
         }

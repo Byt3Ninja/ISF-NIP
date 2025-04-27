@@ -199,7 +199,7 @@ class organizationsController extends Controller
 			$result = $user->where('id', $user->id)
 				->update(['password' => $password]);
 			if ($result)
-				return redirect()->route('my_profile')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+				return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
 			else
 				return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
 		} catch (Exception $e) {

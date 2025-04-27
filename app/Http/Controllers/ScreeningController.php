@@ -158,7 +158,7 @@ we need your experiences to judge New Incubation Cycle registered users, the jud
 			Formdata::where('field_id', $answer->field_id)->where('company_id', $request->company_id)
 				->update(['screening->' . $user => $request->{'w' . $answer->field_id}, 'comments->' . $user => $request->{'c' . $answer->field_id}]);
 		}
-		return Redirect::route('admin')->with('msg', 'Saved');
+		return Redirect::route('core.admin_access')->with('msg', 'Saved');
 	}
 
 	public function add(Request $request)

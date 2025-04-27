@@ -74,7 +74,7 @@
                       <td class="text-center">{{ $program->end ? $program->end->format('Y-m-d') : '' }}</td>
                       <td class="text-center">
                         <button class="btn btn-label-danger btn-sm btn-icon rounded-circle unlink-btn"
-                          data-url="{{ route('projects.unlinkProgram', [$project, $program]) }}">
+                          data-url="{{ route('projects.programs_unlink', [$project, $program]) }}">
                           <i class="ti ti-trash"></i>
                         </button>
                       </td>
@@ -118,7 +118,7 @@
                   <td class="text-center">{{ $member->pivot->created_at->format('Y-m-d') }}</td>
                   <td class="text-center">
                     <button class="btn btn-label-danger btn-sm btn-icon rounded-circle remove-member-btn"
-                      data-url="{{ route('projects.removeTeamMember', [$project, $member]) }}">
+                      data-url="{{ route('projects.team_remove_member', [$project, $member]) }}">
                       <i class="ti ti-trash"></i>
                     </button>
                   </td>
@@ -149,7 +149,7 @@
           <i class="ti ti-x ti-16px"></i>
         </button>
       </div>
-      <form id="linkProgramsForm" action="{{ route('projects.linkPrograms', $project) }}" method="POST" class="bg-label-secondary">
+      <form id="linkProgramsForm" action="{{ route('projects.programs_link', $project) }}" method="POST" class="bg-label-secondary">
         @csrf
         <div class="card">
           <div class="card-body">
@@ -201,7 +201,7 @@
           <i class="ti ti-x ti-16px"></i>
         </button>
       </div>
-      <form id="addTeamMemberForm" action="{{ route('projects.addTeamMembers', $project) }}" method="POST" class="bg-label-secondary">
+      <form id="addTeamMemberForm" action="{{ route('projects.team_add_member', $project) }}" method="POST" class="bg-label-secondary">
         <div class="card">
           <div class="card-body">
             <!-- Search Bar -->

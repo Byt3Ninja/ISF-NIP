@@ -7,15 +7,17 @@ use App\Step;
 use App\User;
 use App\Cycle;
 use App\Company;
+use App\Message;
 use App\Formdata;
 use App\FinalData;
 use App\Formfield;
+use App\Messenger;
 use App\Screening;
 use Carbon\Carbon;
 use App\BuilderForm;
+
 use App\BuilderField;
 use http\Env\Response;
-
 use App\Finalscreening;
 use App\TrainingSession;
 use Illuminate\Http\Request;
@@ -23,7 +25,10 @@ use App\Jobs\ExportCycleCompData;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
+use App\Mail\ProgramCreatedNotification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\StartupJoiningNotification;
@@ -478,6 +483,33 @@ class CyclesController extends Controller
             $cycle->legal_guideline_file = $legalPolicyPath;
             $cycle->delegation_file = $delegationPdfPath;
             $cycle->save();
+
+            if (auth()->user()->hasRole('OrganizationManager')) {
+
+                $admin = User::role('Admin')->orderBy('id')->first();
+            
+                if ($admin) {
+                    Mail::to($admin->email)->send(new ProgramCreatedNotification($cycle, $admin));
+            
+                    $message = new Message();
+                    $message->name = auth()->user()->first_name_en . ' ' . auth()->user()->last_name_en;
+                    $message->internal_id = $admin->id;
+                    $message->email = auth()->user()->email; 
+                    $message->subject = 'New Program Created';
+                    $message->message = "A new program titled \"{$cycle->title}\" has been created by " . auth()->user()->name . ".";
+                    $message->user_id = auth()->id(); 
+                    $message->save();
+            
+                    $messenger = new Messenger();
+                    $messenger->sender = auth()->id(); 
+                    $messenger->receiver = $admin->id; 
+                    $messenger->subject = 'New Program Created';
+                    $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
+                    $messenger->read = 0; 
+                    $messenger->messgeId = $message->id; 
+                    $messenger->save();
+                }
+            }
             return redirect()->back()->with('message', 'Saved');
         } else {
             // Show Cycle
@@ -519,10 +551,10 @@ class CyclesController extends Controller
       $user = User::where('id', Auth::user()->id)->first();
         // Check Company ---> forward to profile
         if (!$user->HaveCompany) {
-            return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
         if (!$user->company) {
-            return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+            return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
         }
         // Check enrolled in Cycle
         if ($user->company->cycle && $user->company->cycle != $c) {
@@ -678,4 +710,57 @@ Thanks from " . env('APP_NAME');
             
         return redirect(url('/dashboard'))->with(['msg' => 'CycleStoredSuccessfully', 'class' => 'success']);
     }
+
+    public function testSend(Request $request)
+{
+    
+    $phone = $request->query('phone');
+    $message = $request->query('message', 'رسالة تجريبية من API');
+   
+    if (!$phone) {
+        return response()->json(['error' => 'يرجى إدخال رقم الهاتف'], 400);
+    }
+
+    $result = $this->sendMessage($phone, $message);
+
+    return response()->json($result);
+}
+
+public function sendMessage($phoneNumber, $message)
+{
+    try {
+        $sessionId = 'ehabwhats'; // اسم الجلسة في GrowthLabs
+        $apiKey = env('WAPI_KEY'); // مفتاح API من .env
+
+        // Step 1: Get chat ID
+        $response = Http::withHeaders([
+            'x-api-key' => $apiKey
+        ])->post("https://wapi.growthlabs.app/client/getNumberId/{$sessionId}", [
+            'number' => $phoneNumber
+        ]);
+        
+        $chatId = $response->json('result._serialized');
+        
+        if (!$chatId) {
+            Log::error("Failed to get chatId for number: {$phoneNumber}");
+            return false;
+        }
+
+        // Step 2: Send message
+        $sendResponse = Http::withHeaders([
+            'x-api-key' => $apiKey
+        ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
+            'chatId' => $chatId,
+            'contentType' => 'string',
+            'content' => $message
+        ]);
+
+        return $sendResponse->json();
+
+    } catch (\Exception $e) {
+        Log::error('Failed to send message via GrowthLabs WhatsApp API: ' . $e->getMessage());
+        return false;
+    }
+}
+
 }

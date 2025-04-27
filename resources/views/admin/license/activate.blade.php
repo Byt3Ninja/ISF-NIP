@@ -9,7 +9,7 @@
             <h5>{{ __('admin.Activate License') }}</h5>
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ route('license.activate') }}">
+            <form method="POST" action="{{ route('license.activate_execute') }}">
                 @csrf
                 <div class="mb-3">
                     <label for="license_key" class="form-label">{{ __('admin.License Key') }}</label>

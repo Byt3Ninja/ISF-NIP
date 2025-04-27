@@ -106,7 +106,7 @@ class ClientCompanyController extends Controller
                     ->find(Auth::id());
                    
                     if (empty($client)) {
-                    return redirect()->route('my_profile')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                    return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
                 
                 $countries = Country::all();
@@ -192,7 +192,7 @@ class ClientCompanyController extends Controller
                     ->first();
 
                 if (empty($client)) {
-                    return redirect()->route('my_profile')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
+                    return redirect()->route('user.profile_view')->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
                 }
                 $countries = Country::all();
                 $states = State::all();
@@ -746,7 +746,7 @@ class ClientCompanyController extends Controller
 
             if( $result ) {
                 if( !in_array(env('APP_ENV', 'local'), ['local']) ) { event(new WebMessage($msgtype, $user->first_name_en)); } 
-                return redirect()->route('my_company', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+                return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
             } else { return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']); }
         } catch (ValidationException $e) {
             // عند وجود خطأ في التحقق، إرجاع رسائل الأخطاء للمستخدم
@@ -1103,7 +1103,7 @@ class ClientCompanyController extends Controller
         $teamMember->delete();
 
         // استجابة بعد الحفظ
-        return redirect()->route('my_company', $companyId)->with(['msg' => 'DeletedSuccessfully', 'class' => 'success']);
+        return redirect()->route('company.profile_view_mine', $companyId)->with(['msg' => 'DeletedSuccessfully', 'class' => 'success']);
     }
 
 
@@ -1302,7 +1302,7 @@ class ClientCompanyController extends Controller
         $Milestone->delete();
 
         // استجابة بعد الحفظ
-        return redirect()->route('my_company', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
+        return redirect()->route('company.profile_view_mine', $id)->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
     }
 
 

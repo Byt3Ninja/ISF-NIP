@@ -151,7 +151,7 @@ class AssessmentController extends Controller
                 $categories = Category::where('category_type', 'Assesment')->with('subcategory')->get();
                 return view('admin/clients/assessment/analysis-assessment', compact('user_scores','categories'));
             }
-        } else { return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
+        } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 
     /**
@@ -228,9 +228,9 @@ class AssessmentController extends Controller
                 $totalQuestions = $countanswered + $countNotanswered;
 
                 $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
-            } else { return redirect()->route('analysis-assessment'); }
+            } else { return redirect()->route('assessments.results_analysis_view'); }
             return view('admin/clients/assessment/assessment',compact('user_scores','answers', 'assessment_user'));
-        } else { return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
+        } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 
     public function MakeAssessment()
@@ -250,7 +250,7 @@ class AssessmentController extends Controller
                 {
                     $companyid = $user->company_id;
                     $company = Company::find($companyid);
-                    if( $company == null ) { return redirect()->route('my_company')->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]); }
+                    if( $company == null ) { return redirect()->route('company.profile_view_mine')->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]); }
                     $title = $company->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
 
                     $assessment = Assessment::create([
@@ -267,7 +267,7 @@ class AssessmentController extends Controller
                     {
                         $assessment = Assessment::find($assessmentId);
                         $assessment->delete();
-                        return redirect()->route('my_company')->with(['class'=>'danger', 'msg'=>__('ChooseYourStageFirst')]);
+                        return redirect()->route('company.profile_view_mine')->with(['class'=>'danger', 'msg'=>__('ChooseYourStageFirst')]);
                     }
 
                     foreach( $questions as $question ) 
@@ -293,13 +293,13 @@ class AssessmentController extends Controller
                         {
                             $assessment = Assessment::find($assessmentId);
                             $assessment->delete();
-                            return redirect()->route('my_company')->with(['class'=>'danger', 'msg'=>__('ChooseYourStageFirst')]);
+                            return redirect()->route('company.profile_view_mine')->with(['class'=>'danger', 'msg'=>__('ChooseYourStageFirst')]);
                         }
                     }
-                    return redirect()->route('question-assessment')->with(['class'=>'success', 'message'=>__('AssessmentCreated')]);
+                    return redirect()->route('assessments.take')->with(['class'=>'success', 'message'=>__('AssessmentCreated')]);
                 } else { return redirect()->back()->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]); }
-            } else { return redirect()->route('question-assessment')->with(['class'=>'danger', 'message'=>__('AlreadyHaveAssessment')]); }
-        } else { return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
+            } else { return redirect()->route('assessments.take')->with(['class'=>'danger', 'message'=>__('AlreadyHaveAssessment')]); }
+        } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 
     public function analysisAssessment()
@@ -372,7 +372,7 @@ class AssessmentController extends Controller
                 return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories'));
             }
         } else {
-            return redirect()->route('dashboard')->with(['class' => 'danger', 'success' => __('YouHaveNotCompany')]);
+            return redirect()->route('core.dashboard_view')->with(['class' => 'danger', 'success' => __('YouHaveNotCompany')]);
         }
     }
 
@@ -385,7 +385,7 @@ class AssessmentController extends Controller
             $assessmentsopen = Assessment::where('user_id', $userid)->whereNull('end_date')->get();
             $assessments = Assessment::where('user_id', $userid)->whereNotNull('end_date')->get();
             return view('admin/clients/assessment/assessment-history', compact('assessmentsopen', 'assessments'));
-        } else { return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
+        } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 
     public function AnswerAssessment(Request $request)
@@ -456,7 +456,7 @@ class AssessmentController extends Controller
                     $totalQuestions = $countanswered + $countNotanswered;
 
                     $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
-                } else { return redirect()->route('analysis-assessment'); }
+                } else { return redirect()->route('assessments.results_analysis_view'); }
 
                 $countanswered = UserScore::where('assessment_id', $user_score->assessment_id)->where('score', '!=', '0')->count();
                 $countNotanswered = UserScore::where('assessment_id', $user_score->assessment_id)->where('score', '=', '0')->count();
@@ -475,7 +475,7 @@ class AssessmentController extends Controller
                     'assessment_user' => $assessment_user,
                 ]);
             } catch (\Exception $e) { return response()->json(['success' => false, 'message' => 'حدث خطأ أثناء تحديث الإجابة']); }
-        } else { return redirect()->route('analysis-assessment'); }
+        } else { return redirect()->route('assessments.results_analysis_view'); }
     }
     
     public function assessmentAdmin($id)
@@ -508,9 +508,9 @@ class AssessmentController extends Controller
                 $totalQuestions = $countanswered + $countNotanswered;
 
                 $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
-            } else { return redirect()->route('analysis-assessment'); }
+            } else { return redirect()->route('assessments.results_analysis_view'); }
             return view('admin/Assessment/assessment-history',compact('user_scores','answers', 'assessment_user'));
-        } else { return redirect()->route('dashboard')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
+        } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 
 //     public function generatePDF()
@@ -601,14 +601,32 @@ public function generatePDF()
         return json_decode($answer, true);
     })->filter()->toArray();
 
+     // Get total weighted score
+    $scoresTotal = UserScore::where('user_id', $userid)
+    ->where('assessment_id', $assessment_user->id)
+    ->get();
+    $scoresTotals = $scoresTotal->sum('weighted_score');
+
+    $start_date = $assessment_user->start_date;
+    $end_date = $assessment_user->end_date;
+
+    $user = auth()->user();
+    $companyName = $user->company->name_en;
+
     // Generate PDF
     $pdf = Pdf::loadView('admin.clients.assessment.assessment_pdf', [
         'user_scores' => $user_scores,
         'answers' => $answers,
-        'assessment_user' => $assessment_user
+        'assessment_user' => $assessment_user,
+        'scoresTotals' => $scoresTotals,
+        'start_date' => $start_date,
+        'end_date' => $end_date,
+        'companyName' => $companyName
     ]);
 
     return $pdf->download('completed_assessment.pdf');
 }
+
+
 
 }

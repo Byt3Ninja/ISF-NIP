@@ -62,10 +62,10 @@
                   </div>
                   
                     @if($_user->hasAnyRole('Admin|organizationManager'))
-                    <form action="{{ route('DeleteMileStone_Comp', $client->company->id) }}"
+                    <form action="{{ route('company.profile_milestones_delete', $client->company->id) }}"
                       method="POST" style="display: inline-block;">
                     @else
-                    <form action="{{ route('DeleteMileStone_Comp') }}"
+                    <form action="{{ route('company.profile_milestones_delete') }}"
                       method="POST" style="display: inline-block;">
                     @endif
                     @csrf
@@ -207,10 +207,10 @@
                     {{ __('admin.Edit') }}
                   </div>
                   @if($_user->hasAnyRole('Admin|organizationManager'))
-                    <form action="{{ route('DeleteMileStone_Comp', $client->company->id) }}"
+                    <form action="{{ route('company.profile_milestones_delete', $client->company->id) }}"
                       method="POST" style="display: inline-block;">
                     @else
-                    <form action="{{ route('DeleteMileStone_Comp') }}"
+                    <form action="{{ route('company.profile_milestones_delete') }}"
                       method="POST" style="display: inline-block;">
                     @endif
                     @csrf
@@ -368,10 +368,10 @@
                     {{ __('admin.Edit') }}
                   </div>
                   @if($_user->hasAnyRole('Admin|organizationManager'))
-                    <form action="{{ route('DeleteMileStone_Comp', $client->company->id) }}"
+                    <form action="{{ route('company.profile_milestones_delete', $client->company->id) }}"
                       method="POST" style="display: inline-block;">
                     @else
-                    <form action="{{ route('DeleteMileStone_Comp') }}"
+                    <form action="{{ route('company.profile_milestones_delete') }}"
                       method="POST" style="display: inline-block;">
                     @endif
                     @csrf

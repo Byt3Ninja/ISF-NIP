@@ -94,7 +94,7 @@
                 </div>
               </div>
               <div class="col-12 col-lg-8">
-                <form method="GET" action="{{ route('users.companies') }}" class="row h-100 align-items-center">
+                <form method="GET" action="{{ route('users.view_companies') }}" class="row h-100 align-items-center">
                   <div class="col-2">
                     <div class="d-flex align-items-center justify-content-end gap-3">
                       @if(request()->query())
@@ -201,57 +201,59 @@
             @foreach ($companies as $company)
               <!-- Company Card -->
               <div class="col-md-4">
-                <div class="bg-white border shadow-sm p-4 mb-3 radius-15 card-container" style="height: 400px;"
+                <div class="bg-white d-flex flex-column flex-fill justify-content-between border shadow-sm p-4 mb-3 radius-15 card-container" style="min-height: 420px;"
                   {{-- onclick="window.location.href='/dashboard/companyProfile/{{ $company->id }}'" --}}>
                   @php
                     $client = App\User::where('company_id', $company->id)->first();
                   @endphp
-                  <div class="w-100 d-flex justify-content-between align-items-center">
-                    <a style="width: 80%" href="/dashboard/companyProfile/{{ $company->id }}">
-                      <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">{{ $company->{'name_' . $l} }}
-                      </h5>
-                    </a>
-                    <div class="d-flex algin-items-center gap-3">
-                      @if ($company->facebook)
-                        <a class="d-flex align-items-center"
-                          href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
-                          target='_blank'>
-                          <i class="fa-brands fa-facebook-f fs-4 text-primary"></i>
-                        </a>
-                      @endif
-                      @if ($company->linkedin)
-                        <a class="d-flex align-items-center"
-                          href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
-                          target='_blank'>
-                          <img src="/icons/linkedin.svg" width="22" height="22" />
-                        </a>
-                      @endif
-                      @if ($company->country_code_w_a && $company->whatsapp)
-                        <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}"
-                          target="_blank" class="d-flex align-items-center">
-                          <i class="fa-brands fa-whatsapp fs-4 text-success"></i>
-                        </a>
-                      @endif
+                  <div class="w-100">
+                    <div class="w-100 d-flex justify-content-between align-items-center">
+                      <a style="width: 80%" href="/dashboard/companyProfile/{{ $company->id }}">
+                        <h5 class="text-dark mb-0 fw-bold line-clamp-1 text-truncate">{{ $company->{'name_' . $l} }}
+                        </h5>
+                      </a>
+                      <div class="d-flex algin-items-center gap-3">
+                        @if ($company->facebook)
+                          <a class="d-flex align-items-center"
+                            href="{{ strpos($company->facebook, 'http') === 0 ? $company->facebook : 'http://' . $company->facebook }}"
+                            target='_blank'>
+                            <i class="fa-brands fa-facebook-f fs-4 text-primary"></i>
+                          </a>
+                        @endif
+                        @if ($company->linkedin)
+                          <a class="d-flex align-items-center"
+                            href="{{ strpos($company->linkedin, 'http') === 0 ? $company->linkedin : 'http://' . $company->linkedin }}"
+                            target='_blank'>
+                            <img src="/icons/linkedin.svg" width="22" height="22" />
+                          </a>
+                        @endif
+                        @if ($company->country_code_w_a && $company->whatsapp)
+                          <a href="{{ 'https://wa.me/' . $company->country_code_w_a . $company->whatsapp }}"
+                            target="_blank" class="d-flex align-items-center">
+                            <i class="fa-brands fa-whatsapp fs-4 text-success"></i>
+                          </a>
+                        @endif
+                      </div>
+                      {{-- <span class="text-muted text-sm fw-semibold">
+                        {{ $l == 'en' ? 'Startup' : 'الشركة' }}
+  
+                        <a href="{{ route('users.edit', ['user' => $client->id]) }}"
+                          class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"><i
+                            class="ti ti-user-circle"></i></a>
+                      </span> --}}
+                      {{-- <a href="/dashboard/companyProfile/{{ $company->id }}"
+                        class="bg-white px-2 py-1 radius-15 custom-shadow border text-info">
+                        <i class="ti ti-world me-2 fs-5"></i>
+                        <span class="text-xs fw-bold">
+                          {{ $l == 'en' ? 'More Info' : 'المزيد' }}
+                        </span>
+                      </a> --}}
                     </div>
-                    {{-- <span class="text-muted text-sm fw-semibold">
-                      {{ $l == 'en' ? 'Startup' : 'الشركة' }}
-
-                      <a href="{{ route('users.edit', ['user' => $client->id]) }}"
-                        class="bg-white px-2 py-1 radius-15 custom-shadow border text-info"><i
-                          class="ti ti-user-circle"></i></a>
-                    </span> --}}
-                    {{-- <a href="/dashboard/companyProfile/{{ $company->id }}"
-                      class="bg-white px-2 py-1 radius-15 custom-shadow border text-info">
-                      <i class="ti ti-world me-2 fs-5"></i>
-                      <span class="text-xs fw-bold">
-                        {{ $l == 'en' ? 'More Info' : 'المزيد' }}
-                      </span>
-                    </a> --}}
-                  </div>
-                  <div class="mt-2 border custom-shadow radius-15 text-center p-4 w-100">
-                    <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
-                      onerror="this.src='/images/logo-placeholder.png'" class="rounded"
-                      style="height: 120px; width: 100%; object-fit: contain;" alt="logo" />
+                    <div class="mt-2 border custom-shadow radius-15 text-center p-4 w-100">
+                      <img src="{{ $company->logo ? $company->logo : '/images/logo-placeholder.png' }}"
+                        onerror="this.src='/images/logo-placeholder.png'" class="rounded"
+                        style="height: 120px; width: 100%; object-fit: contain;" alt="logo" />
+                    </div>
                   </div>
                   <div class="w-100 d-flex align-items-center justify-content-between mt-2">
                     <h6 class="fw-semibold mt-2 text-capitalize line-clamp-1" style="width: 45%;">
@@ -395,7 +397,7 @@
                                   <img src="{{ $founder->image ? $founder->image : '/icons/account.svg' }}"
                                     onerror="this.src='/icons/account.svg'" class="rounded-circle" width="24"
                                     height="24" />
-                                  <div class="text-xs">
+                                  <div class="text-xs text-nowrap">
                                     {{ $founder->Name }}
                                   </div>
                                 </div>

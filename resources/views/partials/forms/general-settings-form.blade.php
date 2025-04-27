@@ -1,4 +1,4 @@
-<form class="form" action= "{{ route('updateone') }}" method="POST" enctype="multipart/form-data">
+<form class="form" action= "{{ route('settings.system_section_one_update') }}" method="POST" enctype="multipart/form-data">
   {!! csrf_field() !!}
   @method('PUT')
   <input type="hidden" name="id" value="{{ $Title->id }}">
@@ -41,10 +41,10 @@
   </div>
   <div class="col-md-12 col-12">
     <div class="form-group mb-3">
-      <label class="form-label" for="state_id">{{ __('admin.Country') }}</label>
+      <label class="form-label" for="country_id">{{ __('admin.Country') }}</label>
 
       <select class="form-control" id="country_id" name='Country'>
-        <option value="">{{ __('admin.Country') }}</option>
+        <option value="" disabled>{{ __('admin.Country') }}</option>
         @foreach ($countries as $country)
           <option value="{{ $country->id }}" {{ $country->id == $Title->Country ? 'selected' : '' }}>
             {{ $country->emoji . ' ' . $country->{'name_' . $l} }}</option>
@@ -57,7 +57,7 @@
     <div class="form-group mb-3">
       <label class="form-label" for="state_id">{{ __('admin.State') }} *</label>
       <select class="form-control" id="state_id" name='State'>
-        <option value="">{{ __('admin.State') }}</option>
+        <option value="" disabled>{{ __('admin.State') }}</option>
         @foreach ($states as $state)
           <option value="{{ $state->id }}" {{ $state->id == $Title->State ? 'selected' : '' }}>
             {{ $state->{'name_' . $l} }}</option>
@@ -82,24 +82,7 @@
     </div>
   </div>
 
-  {{-- <div class="col-md-12 col-12">
-    <div class="form-label-group">
-      <label class="form-label" for="timezone">{{ __('settings.timezone') }} *</label>
-      <select class="select form-control" id="timezone" name='timezone'>
-        <option value="">{{ __('settings.timezone') }}</option>
-        @foreach ($timezones as $timezone)
-          @php
-            // حساب فرق التوقيت للمنطقة الزمنية
-            $time = new DateTime('now', new DateTimeZone($timezone));
-            $offset = $time->format('P'); // عرض فرق التوقيت مثل +02:00 أو -05:00
-          @endphp
-          <option value="{{ $timezone }}" {{ $Title->timezone == $timezone ? 'selected' : '' }}>
-            {{ $timezone }} ({{ $offset }}) </option>
-        @endforeach
-      </select>
-    </div>
-  </div> --}}
-  
+
   <div class="col-md-12 col-12">
     <div class="form-group mb-3">
       <label class="form-label" for="Currency">{{ __('settings.Currency') }} *</label>
@@ -126,6 +109,18 @@
         <label class="form-label" for="privacy_url">{{ __('admin.Privacy Policy URL') }}</label>
         <input type="url" class="form-control" name="privacy_url" value="{{ $Title->privacy_url }}">
     </div>
+</div>
+
+<div class="mb-4 col-md-12">
+  <label for="timeZones" class="form-label">{{ __('admin.Timezone') }}</label>
+  <select id="timeZones" name="timezone" class="select2 form-select">
+    <option value="">{{ __('admin.Select Timezone') }}</option>
+    @foreach (timezone_identifiers_list() as $timezone)
+    <option value="{{ $timezone }}" {{ $Title->timezone == $timezone ? 'selected' : '' }}>
+      {{ '(GMT' . \Carbon\Carbon::now($timezone)->format('P') . ') ' . $timezone }}
+    </option>
+    @endforeach
+  </select>
 </div>
 
   <br>

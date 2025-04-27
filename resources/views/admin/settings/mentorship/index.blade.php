@@ -143,7 +143,7 @@
           </div>
           <br>
                   <!-- Filter -->
-              <form method="GET" action="{{ route('mentorship.view', $id) }}">
+              <form method="GET" action="{{ route('mentorships.requests_view', $id) }}">
                 <div class="d-flex align-items-center mx-2">
                   <div style="display: flex; align-items: center;">
                   <button
@@ -536,23 +536,23 @@
       });
     }
 
-    $(document).on('click', '.mentor_radio', function() {
-    var mentor_id = $(this).val();
-    $.ajax({
-        url: '/dashboard/mentorship/getDates', // الرoutes المناسب
-        type: 'POST',
-        data: {
-          mentor_id: mentor_id,
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-          console.log(response.dates);
+//     $(document).on('click', '.mentor_radio', function() {
+//     var mentor_id = $(this).val();
+//     $.ajax({
+//         url: '/dashboard/mentorship/getDates', // الرoutes المناسب
+//         type: 'POST',
+//         data: {
+//           mentor_id: mentor_id,
+//             _token: '{{ csrf_token() }}'
+//         },
+//         success: function(response) {
+//           console.log(response.dates);
             
-        },
-        error: function(xhr) {
-        console.error('Error:', xhr.responseText);
-    }
-    });
-});
+//         },
+//         error: function(xhr) {
+//         console.error('Error:', xhr.responseText);
+//     }
+//     });
+// });
 </script>
 @stop

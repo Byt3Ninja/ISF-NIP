@@ -122,7 +122,7 @@
 
         // جلب العملات من API
         $.ajax({
-          url: "{{ route('currencies.UpdateAllCurrency') }}",
+          url: "{{ route('currencies.rates_update_all') }}",
           type: "PATCH",
           headers: {
            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

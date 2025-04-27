@@ -56,7 +56,7 @@
 									<span class="card-title"> {{ __('admin.quizDetails') }} </span>
 									@if( $available || !is_null( $active_now ) )
 										<span class="float-end">
-											<form id="startQuizForm" method="post" action="{{ route('quiz.start', ['id' => $training->id, 'quiz_id' => $quiz->id]) }}">
+											<form id="startQuizForm" method="post" action="{{ route('quizzes.take_start', ['id' => $training->id, 'quiz_id' => $quiz->id]) }}">
 												{!! csrf_field() !!}
 												<button type="submit" id="quizStartBtn" class="btn btn-primary"> @if( !is_null( $active_now ) ) {{ __('admin.quizResume') }} @else {{ __('admin.quizStart') }} @endif </button>
 											</form>
@@ -171,7 +171,7 @@
 																	@endif
 																</td>
 																@if( $allowActions == true )
-																<td> <a href="{{ route('quiz.response', ['id' => $training->id, 'quiz_id' => $quiz->id, 'response_id' => $attempt->id]) }}" class="btn btn-primary btn-sm"> {{ __('admin.quizViewResults') }} </a> </td>
+																<td> <a href="{{ route('quizzes.view_response_mine', ['id' => $training->id, 'quiz_id' => $quiz->id, 'response_id' => $attempt->id]) }}" class="btn btn-primary btn-sm"> {{ __('admin.quizViewResults') }} </a> </td>
 																@endif
 															</tr>
 														@endforeach

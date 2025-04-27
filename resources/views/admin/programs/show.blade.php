@@ -321,7 +321,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($mentors as $mentor)
                         <a class="btn btn-sm btn-outline-primary rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $mentor->id)}}">
+                          href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
@@ -718,7 +718,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($scoped_judges as $judge)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $judge->id)}}">
+                          href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
@@ -993,7 +993,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($mentors as $mentor)
                         <a class="btn btn-outline-info rounded-pill" style="height: 40px;" target="_blank"
-                          href="{{route('show_mentor_profile', $mentor->id)}}">
+                          href="{{route('mentors.profile_view', $mentor->id)}}">
                           @if(!empty($mentor->image_url))
                           <img src="{{$mentor->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="30" height="30" class="rounded-circle" />
@@ -1369,7 +1369,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                       <div class="d-flex flex-wrap gap-1">
                         @foreach($judgesDetails as $judge)
                         <a class="btn btn-sm btn-outline-warning rounded-pill" style="height: 30px;" target="_blank"
-                          href="{{route('show_mentor_profile', $judge->id)}}">
+                          href="{{route('mentors.profile_view', $judge->id)}}">
                           @if(!empty($judge->image_url))
                           <img src="{{$judge->image_url ?? '/icons/account.svg'}}"
                             onerror="this.src='/icons/account.svg'" width="20" height="20" class="rounded-circle" />
