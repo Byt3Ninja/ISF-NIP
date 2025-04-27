@@ -44,7 +44,7 @@ class LicenseController extends Controller
            if ($valid) {
     
             return view('admin.license.result', [
-                'message' => __('admin.licenseActivated'),
+                'message' => __('admin.licenseAlreadyActivated'),
                 'success' => true,
                 'license' => $licenseData,
                 'status' => $licenseData['attributes']['status'],
