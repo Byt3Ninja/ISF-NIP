@@ -19,7 +19,20 @@ class RolesController extends Controller
 
 	public function create()
 	{
-		$_permissions = Permission::pluck('name', 'id');
+		$permissions = DB::select("SELECT
+				p.id,
+				p.name,
+				p.description,
+				pg.name AS `group`,
+				pg.description AS group_description
+			FROM
+				permissions p
+			LEFT JOIN
+				permission_groups pg ON pg.id = p.permission_group_id
+			WHERE
+				p.deleted_at IS NULL
+		");
+		$_permissions = collect( $permissions )->filter(function($permission) { return !is_null( $permission->group ); })->values();
 		return view('admin.roles.create', compact('_permissions'));
 	}
 
