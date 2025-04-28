@@ -366,25 +366,16 @@ class ClientProfileController extends Controller
 
     public function showMintors(Request $request){
         $setting = Settings::where('id', 1)->first();
-
-        
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
         $ExpertiesSearch = $request->input('expertises');
-
-     
         if($setting->mentor_list == 1){
             if (Auth::user()->hasanyRole('Mentor|Registered|Admin')){
     $l = app()->getLocale();
-    
-    // إعداد الأعمدة الصحيحة بناءً على اللغة
-    $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
+        $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
     $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
-
-    // البحث في الموجهين
     $mentors = User::role('mentor')
         ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
-
     if ($rateSearch > 0) {
         $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
             $q->where(function ($q2) {
@@ -393,40 +384,34 @@ class ClientProfileController extends Controller
             })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
         });
     }
-    
     if (!empty($ExpertiesSearch)) {
-        // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
         $expertiesMentor = Expertise::where('id', '=', $ExpertiesSearch)->first();
-
-        if ($expertiesMentor) { // تأكد من وجود الخبرة
+        if ($expertiesMentor) { 
             $expid = $expertiesMentor->id;
-
-            // تصفية الموجهين بناءً على الخبرة
             $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
                 $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
             });
         }
     }
-
-    // جلب النتائج
+    if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
+        $cycleId = Auth::user()->company->cycle;
+        $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
+            ->pluck('user_id')
+            ->toArray();
+        $mentors = $mentors->whereIn('id', $mentorIds);
+    }
     $mentors = $mentors->get();
         // $mentors = User::role('mentor')->get();
-        
             return view('admin/clients/Mentors', compact('mentors'));
 }
         }else{
 
             if (Auth::user()->hasanyRole('Admin')){
                 $l = app()->getLocale();
-                
-                // إعداد الأعمدة الصحيحة بناءً على اللغة
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
-            
-                // البحث في الموجهين
                 $mentors = User::role('mentor')
                     ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
-            
                 if ($rateSearch > 0) {
                     $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
                         $q->where(function ($q2) {
@@ -435,25 +420,17 @@ class ClientProfileController extends Controller
                         })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
                     });
                 }
-                
                 if (!empty($ExpertiesSearch)) {
-                    // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
                     $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
-            
-                    if ($expertiesMentor) { // تأكد من وجود الخبرة
+                    if ($expertiesMentor) { 
                         $expid = $expertiesMentor->id;
-            
-                        // تصفية الموجهين بناءً على الخبرة
                         $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
                             $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
                         });
                     }
                 }
-            
-                // جلب النتائج
                 $mentors = $mentors->get();
                     // $mentors = User::role('mentor')->get();
-                    
                         return view('admin/clients/Mentors', compact('mentors'));
             }else{
                 return redirect()->route('core.dashboard_view');

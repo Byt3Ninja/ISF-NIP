@@ -586,7 +586,7 @@
           },
           success: function(response) {
             // alert(response.ddddd);
-            // console.log(response);
+            console.log(response);
             location.href = '/dashboard/cycles/{{ $id }}/registered';
           },
           error: function(error) {
