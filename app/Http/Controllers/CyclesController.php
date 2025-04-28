@@ -234,6 +234,8 @@ class CyclesController extends Controller
             $cycle->legal_guideline = $request->legal_policy;
             $cycle->legal_guideline_file = $legalPolicyPath;
             $cycle->delegation_file = $delegationPdfPath;
+            $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
+
 
             $cycle->save();
             return redirect()->back()->with('message', 'Saved');
@@ -448,6 +450,7 @@ class CyclesController extends Controller
             $cycle->end = Carbon::parse($request->end);
             $cycle->private = $private;
             $cycle->allow_non_company = $request->has('allow_non_company') ? 1 : 0;
+            $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
             // Check if file is uploaded
             $programGuidelineFile = null;
             if ($request->hasFile('program-guideline-pdf')) {

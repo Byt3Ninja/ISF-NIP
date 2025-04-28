@@ -99,9 +99,6 @@
 
               window.addEventListener("chatwoot:ready", function () {
                 @if (auth()->check())
-                  console.log(
-                    "{{ auth()->user()->country_code . auth()->user()->phone ?? '' }}"
-                  );
                   window.$chatwoot.setUser("{{ auth()->user()->id }}", {
                     email: "{{ auth()->user()->email }}",
                     name: "{{ auth()->user()->name }}",
@@ -125,7 +122,7 @@
         // console.log("pusherConfig", pusherConfig);
         const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
         const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
-        Pusher.logToConsole = true;
+        // Pusher.logToConsole = true;
 
         const pusher = new Pusher(pusherAppKey, {
           cluster: pusherCluster,

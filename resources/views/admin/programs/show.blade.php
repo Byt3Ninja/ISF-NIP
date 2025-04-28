@@ -2082,6 +2082,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
             // $('#edit-program-modal #end').val(response.end ?? '');
             $('#edit-program-modal #organization').val(response.organization_id ?? '');
             $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
+            $('#edit-program-modal #auto-approve-mentorship-requests').prop('checked', response.auto_approve_mentorship_requests == 1 ? true : false);
+
             if (response.private) {
               $('#edit-program-modal #private').prop('checked', true);
               $('#cyclelink').html('{{ __('cycles.Join URL') }}');

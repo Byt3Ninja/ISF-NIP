@@ -4,6 +4,7 @@
     ['id' => 'program_guideline', 'label' => 'Program Guideline', 'active' => false],
     ['id' => 'financial_policy', 'label' => 'Financial Policy', 'active' => false],
     ['id' => 'legal_policy', 'label' => 'Legal Policy', 'active' => false],
+    ['id' => 'mentorship_request', 'label' => 'Mentorship Request', 'active' => false],
   ];
 @endphp
 
