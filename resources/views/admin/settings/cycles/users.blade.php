@@ -170,7 +170,7 @@
                           <td>
                             <div class="d-flex align-items-center">
                               <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
-                                <img src="{{ $company->user->img_url ?? '/images/placeholder.jpg' }}"
+                                <img src="/191014/{{ $company->user->img_url ?? '/images/placeholder.jpg' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
                               <a href="/dashboard/users/{{ $company->user->id }}/edit">
