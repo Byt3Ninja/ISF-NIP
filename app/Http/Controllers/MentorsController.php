@@ -333,6 +333,19 @@ class MentorsController extends Controller
 				$fileName = $request->file('file_url');
 				$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
 			}
+
+			$cycle = Cycle::find($request->cycle_id);
+			$autoApprove = $cycle->auto_approve_mentorship_requests;
+	
+			 $approved = null; 
+
+			 if ($autoApprove == 1) {
+				 $approved = 'Yes'; 
+			 }
+	
+			if ($autoApprove == 1) {
+				$mentor = User::find($request->mentorid);
+			}
 			MentorshipRequest::create([
 				'mentor_id' => $request->mentorid,
 				'user_id' => Auth::id(),
@@ -341,7 +354,8 @@ class MentorsController extends Controller
 				'period' => $period,
 				'fileurl' => $fileName,
 				'organization_id' => $request->organization_id,
-				'cycle_id' => $request->cycle_id
+				'cycle_id' => $request->cycle_id,
+				'approved' => $approved,
 			]);
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
