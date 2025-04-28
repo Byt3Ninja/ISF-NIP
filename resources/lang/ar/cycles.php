@@ -311,5 +311,9 @@ return [
     'Select Startup' => 'اختر الشركة',
     'Time From' => 'الوقت من',
     'Time To' => 'الوقت إلى',
+    'Auto_Approve_Mentorship_Requests' => 'الموافقة التلقائية على طلبات الإرشاد',
+    'Enable_Auto_Approval' => 'تفعيل الموافقة التلقائية',
+    'Auto_Approve_Helper_Text' => 'إذا تم تفعيلها، سيتم الموافقة تلقائيًا على طلبات الإرشاد بناءً على توافر المرشد.',
+
   ];
 
