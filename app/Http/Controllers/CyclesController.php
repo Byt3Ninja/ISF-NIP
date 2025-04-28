@@ -738,12 +738,12 @@ public function sendMessage($phoneNumber, $message)
         // Step 1: Get chat ID
         $response = Http::withHeaders([
             'x-api-key' => $apiKey
-        ])->post("https://wapi.growthlabs.app/client/getNumberId/{$sessionId}", [
+        ])->post("https://wapi.growthlabs.app/client/getNumberId/$sessionId", [
             'number' => $phoneNumber
         ]);
         
         $chatId = $response->json('result._serialized');
-        
+      
         if (!$chatId) {
             Log::error("Failed to get chatId for number: {$phoneNumber}");
             return false;
@@ -752,7 +752,7 @@ public function sendMessage($phoneNumber, $message)
         // Step 2: Send message
         $sendResponse = Http::withHeaders([
             'x-api-key' => $apiKey
-        ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
+        ])->post("https://wapi.growthlabs.app/client/sendMessage/$sessionId", [
             'chatId' => $chatId,
             'contentType' => 'string',
             'content' => $message
