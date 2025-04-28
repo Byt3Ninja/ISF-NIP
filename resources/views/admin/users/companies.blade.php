@@ -486,7 +486,7 @@
                           <td>
                             <div class="d-flex align-items-center">
                               <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
-                                <img src="/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}"
+                                <img src="/191014/{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
                               <a href="/dashboard/companyProfile/{{ $company->id }}">

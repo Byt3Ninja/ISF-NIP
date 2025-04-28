@@ -346,7 +346,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('{id?}/screening', 'ScreeningController@index');
     Route::get('screening/{fid}/{cid}', 'ScreeningController@view')->name('screening.view');
     Route::get('screening/get/{fid}/{sid}/{pid}', 'ScreeningController@getusers');
-    Route::post('screening/changestep', 'ScreeningController@changestep');
+    Route::post('screening/changestep', 'ScreeningController@changestep')->name('screening.change_step');
     Route::get('/export-Result', 'ScreeningController@exportresultScreen');
 
     //ZOOM

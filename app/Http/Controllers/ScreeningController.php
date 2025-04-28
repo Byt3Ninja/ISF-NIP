@@ -231,7 +231,6 @@ we need your experiences to judge New Incubation Cycle registered users, the jud
 
 	public function changestep(Request $request)
 	{
-		
 		$approved = $by = null;
 		$company = Company::where('id', $request->company)->first();
 		$data['last_step'] = Step::findOrFail($company->step)->title;
