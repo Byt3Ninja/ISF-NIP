@@ -369,7 +369,7 @@
       </li>
     @endif
 
-    @if( $_user->ableToAny(['view_user', 'view_log', 'view_forms', 'view_report'], $permissions) )
+    @if( $_user->ableToAny(['users.list', 'audit_logs.list', 'screening.form_view', 'reports.list'], $permissions) )
       <li class="menu-header small">
         <span>{{ __('admin.Portal Settings') }}</span>
       </li>
