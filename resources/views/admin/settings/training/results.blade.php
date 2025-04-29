@@ -65,6 +65,7 @@
           </div>
           <hr style="margin:-10px 0 5px 0;">
           <div class="card-body">
+            
             <div class="table-responsive">
               <!-- we get value from Select box Ely fo2 class name stepsExcel -->
               <input type="hidden" class="step_id" value="{{ $csession->step_id }}">
@@ -87,6 +88,31 @@
                     </div>
                   </div>
                 </div>
+                <div class="row">
+                  <form id="status-form" method="GET" action="{{ route('trainings.results_view', $csession->id) }}">
+                  <div class="col-12 col-md-6">
+                    <select class="form-select" id="company_id" name="company_id">
+                      <option value="0">Select</option>
+                      @php
+                      $companiesselect = \App\Company::where('step', $csession->step_id)->get();
+                      @endphp
+                      @foreach ($companiesselect as $company)
+                      <option value="{{ $company->id }}" {{ $company->id  == request('company_id') ? 'selected' : '' }} >{{ $company->{'name_' . $l} }}</option>
+                      @endforeach
+                    </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <select class="form-select" id="status" name="status">
+                        <option value="0">{{ __('admin.Status') }}</option>
+                        <option value="completed" {{ 'completed'  == request('status') ? 'selected' : '' }}>{{ __('admin.Completed') }}</option>
+                        <option value="Notcompleted" {{ 'Notcompleted'  == request('status') ? 'selected' : '' }}>{{ __('admin.NotStarted') }}</option>
+                        
+                      </select>
+                      </div>
+                    <button class="btn btn-success" type="submit">search</button>
+                    
+                  </form>
+                </div>
                 <thead class="bg-label-light">
                   <tr>
                     <th><input type="checkbox" class="checkAllTR"></th>
@@ -97,10 +123,32 @@
                   </tr>
                 </thead>
                 <tbody>
+                 
                   @php
-                  $companies = \App\Company::where('step', $csession->step_id)->get();
+                  
+                  $companies = \App\Company::where('step', $csession->step_id);
+                  if(!empty(request('company_id'))){
+                    $companies = $companies->where('id', request('company_id'));
+                  }
+                  $companies = $companies->get();
+                  $status = request('status');
+                   
                   @endphp
+                  
                   @foreach ($companies as $company)
+                  @php
+                  $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
+                  ->where('course_id', $csession->id)
+                  ->count();
+                  $per = $contents ? ($cc / $contents) * 100 : '0';
+                  $show = true;
+                  if ($status == 'completed' && (int)$per != 100) {
+                      $show = false;
+                  } elseif ($status == 'notcompleted' && (int)$per == 100) {
+                      $show = false;
+                  }
+                  @endphp
+                   @if ($show)
                   <tr>
                     <td>
                       <div class="d-flex align-items-center gap-1">
@@ -160,18 +208,21 @@
                         </a>
                       </div>
                     </td>
-                    <input type="hidden" class="location" value="{{ $csession->location }}">
-                    @php
-                    $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
-                    ->where('course_id', $csession->location)
-                    ->count();
-                    $per = $contents ? ($cc / $contents) * 100 : '0';
-                    @endphp
+                    
+                    <input type="hidden" class="location" value="{{ $csession->id }}">
+                   
+                   
                     <td>
-                      <span class="badge bg-label-{{ $per > 50 ? 'success' : 'danger' }}">
-                        {{ (int) $per }}
-                        %</span>
-                    </td>
+                      <span class="badge bg-label-{{ $per >= 50 ? 'success' : 'danger' }}">
+                        {{ (int) $per }}%
+                      </span>
+                 
+                  {{-- <td>
+                    <span class="badge bg-label-{{ $per > 50 ? 'success' : 'danger' }}">
+                      {{ (int) $per }}
+                      %</span>
+                  </td> --}}
+                 
                     <td>
                       <div class="d-flex align-items-center gap-1">
                         <select id="cstep" class="form-select"
@@ -185,6 +236,7 @@
                       </div>
                     </td>
                   </tr>
+                  @endif
                   @endforeach
                 </tbody>
               </table>
@@ -215,6 +267,9 @@
 
 @section('pagescripts')
 <script>
+  $(document).on("change", "#status-select", function(e) {
+      $("#status-form").submit();
+    });
   $(document).ready(function() {
       $('.table').DataTable({
         "responsive": true,
