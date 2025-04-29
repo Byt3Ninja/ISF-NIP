@@ -1542,5 +1542,6 @@ return [
 	'Hour' => 'Hour',
 	'Minute' => 'Minute',
 	'Sessions Without Tasks' => 'Sessions Without Tasks',
+	'NotStarted' => 'Not Started',
 
 ];

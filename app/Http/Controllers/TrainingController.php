@@ -656,16 +656,15 @@ class TrainingController extends Controller
 		}
 		$contents = 0;
 		if ($csession) {
-			$contents = TrainingContent::where('training_id', $csession->location)->count();
+			$contents = TrainingContent::where('training_id', $csession->id)->count();
 		}
-
 		$steps11 = Step::where('id', $csession->step_id)->orderBy('arr')->get();
 		foreach ($steps11 as $steps1) {
 			$companies = Company::where('cycle', $steps1->cycle_id)->get();
 		}
 		$uniqueCycleIds = $companies->pluck('cycle')->unique();
 		$steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-
+		
 
 		return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
 	}
