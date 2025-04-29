@@ -1181,7 +1181,7 @@
           "id": training,
         },
         success: function(response) {
-          // console.log('response', response);
+          console.log('response', response);
           let type = response.type;
           let dateRange = response.daterange;
 

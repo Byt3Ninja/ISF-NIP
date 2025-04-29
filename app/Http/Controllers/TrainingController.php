@@ -727,7 +727,7 @@ if ($type == 'sessions' || $type == 'offline') {
     $end_datetime = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y-m-d');
 }
 		
-	
+
 		if($start_datetime == null || $end_datetime == null){
 			return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 		}
@@ -820,7 +820,7 @@ Thanks from " . env('APP_NAME');
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
-			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
+			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'enddatetime' => $end_datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
 
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
@@ -957,7 +957,7 @@ Thanks from " . env('APP_NAME');
 		
 		$dateRange = $request->date_range; 
 		$type = $request->type;
-dd($request->all());
+
 if ($type == 'sessions' || $type == 'offline') {
 		$startDate = $request->datetime;
 		$startTime = $request->starttime;   // وقت البداية
