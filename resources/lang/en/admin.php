@@ -1527,6 +1527,7 @@ return [
 	'Survey_Report' => 'Survey Report',
 	'Search groups...' => 'Search groups...',
 	'Select' => 'Select',
+	'Selected' => 'Selected',
 	'Mentorship Sessions' => 'My Next Mentorship Sessions',
 	'User' => 'User',
 	'Date / Time' => 'Date / Time',

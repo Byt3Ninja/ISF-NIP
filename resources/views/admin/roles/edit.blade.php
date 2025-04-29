@@ -65,7 +65,7 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
           <div class="row mb-6 border-bottom pb-3 px-5">
             <div class="col-md-6 mb-3">
               <label for="name" class="form-label fs-6 mb-1 fw-semibold">{{ __('admin.Title') }}</label>
-              <input type="text" class="form-control" id="name" name="name" required value="{{ $role->name }}">
+              <input type="text" class="form-control" id="name" name="name" required value="{{ $role->name }}" placeholder="{{ __('admin.Title') }}" />
             </div>
 
             <div class="col-12 col-md-6 form-group mb-6">
@@ -145,10 +145,15 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
                         <div class="col-12 col-md-2 d-flex justify-content-end align-items-center">
                           <!-- Select All -->
                           <div class="form-check">
-                            <input type="checkbox" class="form-check-input select-all-row"
-                              id="select-all-{{ strtolower($tab['target']) }}">
+                            <input 
+                              type="checkbox" 
+                              class="form-check-input select-all-row"
+                              id="select-all-{{ strtolower($tab['target']) }}"
+                              onchange="this.checked ? this.nextElementSibling.innerText = '{{ __('admin.Selected') }}' : this.nextElementSibling.innerText = '{{ __('admin.Select') }}'"
+                            >
                             <label class="form-check-label" for="select-all-{{ strtolower($tab['target']) }}">{{
-                              __('admin.Select_All') }}</label>
+                              __('admin.Select_All') }}
+                            </label>
                           </div>
                           <span class="position-absolute end-0 top-50 translate-middle-y search-icon mx-2">
                             <i class="ti ti-check text-muted"></i>
@@ -166,13 +171,26 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
                               <h5 class="mb-0">{{ $permission->description }}</h5>
                               <span>{{ $permission->name }}</span>
                             </div>
-                            <div class="form-check">
-                              <input class="form-check-input" type="checkbox" name="permissions[]" {{
-                                $permission->checked ? 'checked' : '' }} value="{{ $permission->id }}" id="permission-{{
-                              $permission->name }}">
-                              <label class="form-check-label" for="permission-{{ $permission->name }}">
-                                {{ __('admin.Select') }}
-                              </label>
+                            <div class="d-flex align-items-center gap-3">
+                              <div class="form-check m-auto w-px-100">
+                                <input 
+                                  class="form-check-input" 
+                                  type="checkbox" 
+                                  name="permissions[]" 
+                                  value="{{ $permission->id }}" 
+                                  id="permission-{{ $permission->name }}"
+                                  {{ $permission->checked ? 'checked' : '' }} 
+                                  onchange="this.checked ? this.nextElementSibling.innerText = '{{ __('admin.Selected') }}' : this.nextElementSibling.innerText = '{{ __('admin.Select') }}'"
+                                />
+                                <label class="form-check-label" for="permission-{{ $permission->name }}">
+                                  {{ $permission->checked ? __('admin.Selected') : __('admin.Select') }}
+                                </label>
+                              </div>
+                              <a 
+                                href="/dashboard/permissions/{{ $permission->id }}/edit"
+                                class="btn btn-sm btn-icon rounded-circle btn-label-secondary">
+                                <i class="ti ti-edit"></i>
+                              </a>
                             </div>
                           </li>
                         </div>

@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
 @php
-  $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group) {
-    return [
-      'target' => Str::slug($group),
-      'label' => $group,
-    ];
-  })->values()->toArray();
+$tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group) {
+return [
+'target' => Str::slug($group),
+'label' => $group,
+];
+})->values()->toArray();
 @endphp
 
 
@@ -17,17 +17,17 @@
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="container-xxl flex-grow-1 container-p-y">
     @if(session()->has('success'))
-      <x-alert type="success" message=" {{ __('admin.' . session()->get('success')) }} {{ Session::forget('success') }}" />
+    <x-alert type="success"
+      message=" {{ __('admin.' . session()->get('success')) }} {{ Session::forget('success') }}" />
     @elseif(session()->has('msg'))
-      <x-alert type="danger" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
+    <x-alert type="danger" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
     @endif
     <!-- Validation messages -->
     @if($errors->any())
-      @foreach($errors->all() as $error)
-        <x-alert type="danger" message="{{ $error }}" />
-      @endforeach
+    @foreach($errors->all() as $error)
+    <x-alert type="danger" message="{{ $error }}" />
+    @endforeach
     @endif
     <div class="card">
       <div class="card-header border-bottom mb-6">
@@ -35,14 +35,14 @@
           <div class="col-12 col-md-8">
             <h4 class="fw-bold mb-3 mb-md-0">{{ __('admin.CreateRole') }}</h4>
           </div>
-            <div class="col-12 col-md-4">
+          <div class="col-12 col-md-4">
             <select class="form-select select2" id="group-select" data-placeholder="{{ __('admin.Search groups...') }}">
               <option value="" disabled selected>{{ __('admin.Search groups...') }}</option>
               @foreach ($tabs as $tab)
               <option value="{{ Str::slug($tab['label'], '-') }}">{{ $tab['label'] }}</option>
               @endforeach
             </select>
-            </div>
+          </div>
         </div>
       </div>
       <div class="card-body">
@@ -67,9 +67,9 @@
           <div class="row mb-6 border-bottom pb-3 px-5">
             <div class="col-md-6 mb-3">
               <label for="name" class="form-label fs-6 mb-1 fw-semibold">{{ __('admin.Title') }}</label>
-              <input type="text" class="form-control" id="name" name="name" required value="">
+              <input type="text" class="form-control" id="name" name="name" required value="" placeholder="{{ __('admin.Title') }}" />
             </div>
-            
+
             <div class="col-12 col-md-6 form-group mb-6">
               <label class="form-label fs-6 mb-1 fw-semibold" for="default_for">{{ __('admin.roleType') }}</label>
               <select name="default_for" id="default_for" class="form-select border-light light-shadow">
@@ -94,10 +94,9 @@
                   <!-- Tabs -->
                   <ul class="nav nav-tabs nav-fill border-none m-auto w-100" role="tablist" id="group-tabs">
                     @foreach ($tabs as $key => $tab)
-                    <li 
+                    <li
                       class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center group-tab"
-                      data-label="{{ Str::slug($tab['label'], '-') }}"
-                    >
+                      data-label="{{ Str::slug($tab['label'], '-') }}">
                       <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
                         data-bs-toggle="tab" role="tab">
                         {{-- <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i> --}}
@@ -113,66 +112,74 @@
 
             <div class="col-12 col-md-9">
               <!-- Tab Content On Tab Click -->
-                <div class="tab-content p-0" id="tab-content">
-                  @foreach ($tabs as $index => $tab)
-                  <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6"
-                    id="navs-left-{{ strtolower($tab['target']) }}">
-                    <div class="card shadow-none">
-                      <div class="card-header ms-2 p-0 p-md-auto">
-                        <div class="row pb-3 border-bottom mb-4">
-                          <div class="col-12 col-md-6">
-                            <h5 class="card-title mb-0 fw-semibold pt-2 mb-3 mb-md-0">{{ $tab['label'] }}</h5>
-                          </div>
-                          <div class="col-12 col-md-4">
-                            <!-- Search Input -->
-                            <div class="position-relative">
-                              <input type="text" id="permission-search" class="form-control"
-                                placeholder="{{ __('admin.Search_Permissions') }}..." />
-                                <span class="position-absolute end-0 top-50 translate-middle-y search-icon mx-2">
-                                  <i class="ti ti-search text-muted"></i>
-                                </span>
-                              </div>
-                            <!-- / Search Input -->
-                          </div>
-                          <div class="col-12 col-md-2 d-flex justify-content-end align-items-center">
-                            <!-- Select All -->
-                            <div class="form-check">
-                              <input type="checkbox" class="form-check-input select-all-row"
-                                id="select-all-{{ strtolower($tab['target']) }}">
-                              <label class="form-check-label" for="select-all-{{ strtolower($tab['target']) }}">{{
-                                __('admin.Select_All') }}</label>
-                            </div>
+              <div class="tab-content p-0" id="tab-content">
+                @foreach ($tabs as $index => $tab)
+                <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6"
+                  id="navs-left-{{ strtolower($tab['target']) }}">
+                  <div class="card shadow-none">
+                    <div class="card-header ms-2 p-0 p-md-auto">
+                      <div class="row pb-3 border-bottom mb-4">
+                        <div class="col-12 col-md-6">
+                          <h5 class="card-title mb-0 fw-semibold pt-2 mb-3 mb-md-0">{{ $tab['label'] }}</h5>
+                        </div>
+                        <div class="col-12 col-md-4">
+                          <!-- Search Input -->
+                          <div class="position-relative">
+                            <input type="text" id="permission-search" class="form-control"
+                              placeholder="{{ __('admin.Search_Permissions') }}..." />
                             <span class="position-absolute end-0 top-50 translate-middle-y search-icon mx-2">
-                              <i class="ti ti-check text-muted"></i>
+                              <i class="ti ti-search text-muted"></i>
                             </span>
-                            <!-- / Select All -->
                           </div>
+                          <!-- / Search Input -->
+                        </div>
+                        <div class="col-12 col-md-2 d-flex justify-content-end align-items-center">
+                          <!-- Select All -->
+                          <div class="form-check">
+                            <input type="checkbox" class="form-check-input select-all-row"
+                              id="select-all-{{ strtolower($tab['target']) }}">
+                            <label class="form-check-label" for="select-all-{{ strtolower($tab['target']) }}">{{
+                              __('admin.Select_All') }}</label>
+                          </div>
+                          <span class="position-absolute end-0 top-50 translate-middle-y search-icon mx-2">
+                            <i class="ti ti-check text-muted"></i>
+                          </span>
+                          <!-- / Select All -->
                         </div>
                       </div>
-                      <div class="p-0 w-100">
-                        <div class="permission-list w-100" >
-                          @foreach( $_permissions->where('group', $tab['label']) as $permission )
-                          <div class="card card-body border mb-3">
-                            <li class="d-flex justify-content-between align-items-center">
-                              <div class="d-flex flex-column">
-                                <h5 class="mb-0">{{ $permission->description }}</h5>
-                                <span>{{ $permission->name }}</span>
-                              </div>
-                              <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $permission->id }}" id="permission-{{ $permission->name }}">
+                    </div>
+                    <div class="p-0 w-100">
+                      <div class="permission-list w-100">
+                        @foreach( $_permissions->where('group', $tab['label']) as $permission )
+                        <div class="card card-body border mb-3">
+                          <li class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex flex-column">
+                              <h5 class="mb-0">{{ $permission->description }}</h5>
+                              <span>{{ $permission->name }}</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                              <div class="form-check m-auto w-px-100">
+                                <input class="form-check-input" type="checkbox" name="permissions[]"
+                                  value="{{ $permission->id }}" id="permission-{{ $permission->name }}"
+                                  onchange="this.checked ? this.nextElementSibling.innerText = '{{ __('admin.Selected') }}' : this.nextElementSibling.innerText = '{{ __('admin.Select') }}'" />
                                 <label class="form-check-label" for="permission-{{ $permission->name }}">
                                   {{ __('admin.Select') }}
                                 </label>
                               </div>
-                            </li>
-                          </div>
-                          @endforeach
+                              <a href="/dashboard/permissions/{{ $permission->id }}/edit"
+                                class="btn btn-sm btn-icon rounded-circle btn-label-secondary">
+                                <i class="ti ti-edit"></i>
+                              </a>
+                            </div>
+                          </li>
                         </div>
+                        @endforeach
                       </div>
                     </div>
                   </div>
-                  @endforeach
                 </div>
+                @endforeach
+              </div>
               <!-- / Tab Content On Tab Click -->
             </div>
           </div>
@@ -184,12 +191,11 @@
       </div>
     </div>
   </div>
-</div>
-@stop
+  @stop
 
-@section('pagescripts')
-<script>
-  // Activate navigation tabs based on selected group
+  @section('pagescripts')
+  <script>
+    // Activate navigation tabs based on selected group
   const groupSelect = $('#group-select');
   groupSelect.on('change', function () {
     const selectedGroup = $(this).val().toLowerCase().trim();
@@ -223,5 +229,5 @@
     const isChecked = $(this).is(':checked');
     $(`#navs-left-${groupId} .permission-list input[type="checkbox"]`).prop('checked', isChecked);
   });
-</script>
-@stop
+  </script>
+  @stop
