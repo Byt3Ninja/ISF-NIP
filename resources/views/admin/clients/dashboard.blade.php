@@ -1262,7 +1262,7 @@
 
         </div>
 
-
+        @if( $ctype != 1 && $ctype != 2 )
 		<div class="card mt-10">
 		<section>
 			<div class="row">
@@ -1330,8 +1330,8 @@
 				</div>
 			</div>
 		</section>
-	</div>
-
+	  </div>
+      @endif
 	
       @endif
       <!-- / My Mentors -->

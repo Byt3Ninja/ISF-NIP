@@ -1,8 +1,8 @@
 <div class="row mb-12">
   <div class="form-group mb-6">
-    <label for="auto-approve-mentorship-requests" class="form-label fs-6 fw-semibold">
+    <h5>
       {{ __('cycles.Auto_Approve_Mentorship_Requests') }}
-    </label>
+    </h5>
     <div class="form-check form-switch">
       <input 
         class="form-check-input" 

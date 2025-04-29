@@ -1,6 +1,6 @@
 
 <div class="row mb-12">
-  <div class="col-8 mb-4">
+  <div class="col-8 mb-6">
     <div class="form-group">
       <label for="budget_allocation" class="form-label fs-6 fw-semibold">{{ __('cycles.Budget_Allocation') }}</label>
       <input 
@@ -15,7 +15,7 @@
       <input type="hidden" name="organization_id" value="@if(isset($cycle)) {{ optional($cycle)->organization_id }} @else 0 @endif">
     </div>
   </div>
-  <div class="col-4 mb-4">
+  <div class="col-4 mb-6">
     <div class="form-group">
       <label for="currency_type" class="form-label fs-6 fw-semibold">{{ __('cycles.Currency_Type') }}</label>
       <select 
@@ -30,7 +30,7 @@
       </select>
     </div>
   </div>
-  <div class="form-group mb-4">
+  <div class="form-group mb-6">
     <label for="financial_policy" class="form-label fs-6 fw-semibold">{{ __('cycles.Financial_Policy') }}</label>
     <div style="height: 150px; overflow-y: hidden;" class="border border-light rounded">
       <div id="financial-editor" class="form-control border-none"></div>
@@ -48,17 +48,17 @@
     <label for="financial_policy_pdf" class="form-label fs-6 fw-semibold">
       {{ __('cycles.Attach_Document') }} ({{__('cycles.PDF_Only')}})
     </label>
-    <div class="d-flex justify-content-end align-items-center border rounded p-4">
+    <div class="mb-3">
       <input 
         type="file" 
         name="financial_policy_pdf" 
         id="financial_policy_pdf" 
-        class="form-control-file"
+        class="form-control" 
         accept="application/pdf" 
       />
     </div>
   </div>
-  <div id="financial-file-container" class="mb-4"></div>
+  <div id="financial-file-container" class="mb-6"></div>
 </div>
 {{-- 
 <script>

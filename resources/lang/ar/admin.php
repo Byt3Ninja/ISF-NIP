@@ -1548,6 +1548,7 @@ return [
 	'Survey_Report' => 'تقرير الاستبيان',
 	'Search groups...' => 'البحث في المجموعات...',
 	'Select' => 'اختر',
+	'Selected' => 'محدد',
 	'Mentorship Sessions' => 'جلسات الإرشاد القادمة',
     'User' => 'مستخدم',
 	'Date / Time' => 'التاريخ / الوقت',

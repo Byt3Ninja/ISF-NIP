@@ -4,12 +4,9 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/tagify/tagify.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
+
   <style>
     input[type="file"]::file-selector-button {
       background-color: #FFFF;
@@ -88,16 +85,19 @@
             </div>
             <div class="d-flex align-items-center">
               <!-- Add New Program Button -->
-              <button class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;"
-                onclick="onCreateProgramClick()">
+              <a 
+                class="btn btn-primary btn-sm d-sm-inline-block d-md-none" style="border-radius: 15px;"
+                href="/dashboard/programlist/create"
+              >
                 <span class="mx-2">{{ __('admin.New Program') }}</span>
                 <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
-              </button>
-              <button class="btn btn-primary d-none d-md-inline-block" style="border-radius: 15px; text-wrap: nowrap;"
-                onclick="onCreateProgramClick()">
+              </a>
+              <a class="btn btn-primary d-none d-md-inline-block" style="border-radius: 15px; text-wrap: nowrap;"
+                href="/dashboard/programlist/create"
+              >
                 <span class="mx-2">{{ __('admin.New Program') }}</span>
                 <i class="menu-icon tf-icons ti ti-plus ti-24px"></i>
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -113,11 +113,12 @@
               <h3 class="text-center mt-4">{{ __('admin.No_Cycles') }}</h3>
               <h6 class="text-center text-secondary">{{ __('admin.No_Cycles_Description') }}</h6>
               <!-- Add New Program Button -->
-              <button id="add-btn-none" class="btn btn-primary" style="border-radius: 15px; width: 180px;"
-                onclick="onCreateProgramClick()">
+              <a id="add-btn-none" class="btn btn-primary" style="border-radius: 15px; width: 180px;"
+                href="/dashboard/programlist/create">
                 <span class="mx-2">{{ __('admin.New Program') }}</span>
                 <i class="ti ti-plus"></i>
-              </button>
+              </a>
+
               @if (request()->has('organization_id'))
                 <button id="add-btn-none" class="btn btn-light ms-4" style="border-radius: 15px; width: 150px;" onclick="window.location.href='/dashboard/programlist'">
                   <span class="mx-2">{{ __('admin.Reset') }}</span>
@@ -373,11 +374,18 @@
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                               <li>
-                                <button class="dropdown-item ccycle" set="1" do="{{ $cycle->id }}"
+                                <a 
+                                  class="dropdown-item ccycle" 
+                                  href="/dashboard/programlist/edit/{{ $cycle->id }}"
+                                  >
+                                  <i class="ti ti-edit me-2 text-info"></i>
+                                  {{ __('cycles.Edit') }}
+                                </a>
+                                {{-- <button class="dropdown-item ccycle" set="1" do="{{ $cycle->id }}"
                                   onclick="onEditProgramClick({{ $cycle->id }})">
                                   <i class="ti ti-edit me-2 text-info"></i>
                                   {{ __('cycles.Edit') }}
-                                </button>
+                                </button> --}}
                               </li>
                               <li>
                                 @if ($_user->ableTo('delete_user', $permissions))
@@ -581,17 +589,17 @@
     </div>
   </div> --}}
 
-  @include('admin.programs.partials._edit_program_modal', ['mode' => 'create'])
-  @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit'])
+  {{-- @include('admin.programs.partials._edit_program_modal', ['mode' => 'create'])
+  @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit']) --}}
 @stop
 
-@section('scripts')
+{{-- @section('scripts')
   <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
-@stop
+@stop --}}
 
-@section('pagescripts')
+{{-- @section('pagescripts')
   @php($ccycle = \App\Cycle::find(0))
   <script>
     // Set Language
@@ -1093,4 +1101,4 @@
       $('#filter-programs-form').submit();
     });
   </script>
-@stop
+@stop --}}
