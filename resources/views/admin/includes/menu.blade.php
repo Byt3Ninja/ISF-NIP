@@ -369,11 +369,11 @@
       </li>
     @endif
 
-    @if( $_user->ableToAny(['view_user', 'view_log', 'view_forms', 'view_report'], $permissions) )
+    {{-- @if( $_user->ableToAny(['view_user', 'view_log', 'view_forms', 'view_report'], $permissions) )
       <li class="menu-header small">
         <span>{{ __('admin.Portal Settings') }}</span>
       </li>
-    @endif
+    @endif --}}
 
     @if ($_user->hasAnyRole('Admin'))
       <li class="{{ Request::is('*organizations') ? 'active' : '' }} menu-item">
