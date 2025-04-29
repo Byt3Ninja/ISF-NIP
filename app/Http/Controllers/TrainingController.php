@@ -1182,8 +1182,31 @@ Thanks from " . env('APP_NAME');
 
 	public function session(Request $request)
 	{
+		
 		if ($request->id) {
-			$session = TrainingSession::findOrFail($request->id);
+			$sessionData = TrainingSession::findOrFail($request->id);
+			$session = [];
+			$session['id'] = $sessionData->id;
+			$session['title'] = $sessionData->title;
+			$session['dsc'] = $sessionData->dsc;
+			$session['type'] = $sessionData->type;
+			if($sessionData->type == 'online'){
+				$session['daterange'] = date('Y-m-d', strtotime($sessionData->datetime)) . ' - ' . date('Y-m-d', strtotime($sessionData->enddatetime));
+			}else{
+				$session['daterange'] = date('Y-m-d', strtotime($sessionData->datetime));
+				$session['fromtime'] = date('h:i A', strtotime($sessionData->datetime));
+				$session['endtime'] = date('h:i A', strtotime($sessionData->enddatetime));
+			}
+			$session['training_Address'] = $sessionData->training_Address;
+			$session['training_location'] = $sessionData->training_location;
+			$session['trainer_name'] = $sessionData->trainer_name;
+			$session['trainer_email'] = $sessionData->trainer_email;
+			$session['QrCode'] = $sessionData->QrCode;
+			$session['duration'] = $sessionData->duration;
+			$session['start_url'] = $sessionData->start_url;
+			$session['join_url'] = $sessionData->join_url;
+			$session['created_at'] = $sessionData->created_at;
+
 			return response()->json($session);
 		} else {
 			return response()->json(['state' => 'failed'], 500);
