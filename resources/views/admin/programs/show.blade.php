@@ -401,14 +401,15 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                             </button>
                           </li> -->
                           <li>
-                            <button 
+                            <a 
                               id="editButton" 
                               class="dropdown-item ccycle text-dark" 
-                              onclick="onEditProgramClick({{ $cycle->id }})"
+                              {{-- onclick="onEditProgramClick({{ $cycle->id }})" --}}
+                              href="/dashboard/programlist/edit/{{ $cycle->id }}"
                             >
                               <i class="ti ti-edit me-2 text-info"></i>
                               {{ __('cycles.Edit_Program') }}
-                            </button>
+                            </a>
                           </li>
                           <li>
                             @if( $_user->ableTo('delete_user', $permissions) )
@@ -1954,7 +1955,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
   </div> --}}
 <!-- / Final Screening Step Modal -->
 
-  @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit'])
+  {{-- @include('admin.programs.partials._edit_program_modal', ['mode' => 'edit']) --}}
 @stop
 
 @section('scripts')
@@ -1973,7 +1974,6 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
 @section('pagescripts')
   @php($ccycle = \App\Cycle::find($cycle->id))
-  <script src="/vuexy/assets/js/forms-selects.js"></script>
 
   <script>
     // Set Language
@@ -1989,8 +1989,8 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     //   }
     // });
 
-    const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
-    const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
+    // const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
+    // const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
   
     // const editFpTo = flatpickr(editValidalidTo, {
     //   monthSelectorType: 'static',
@@ -2005,130 +2005,130 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
     // });
 
     // Handle Append File
-    const appendFile = (mode, file, conainerId) => {
-      console.log('file', file)
-      if (file) {
-        const fileName = file.split('/').pop();
-        const content = (`
-          <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
-            <div class="d-flex align-items-center gap-2">
-              <i class="ti ti-file fs-4 text-warning"></i>
-              <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
-            </div> 
-            <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
-              <i class="ti ti-download fs-5"></i>
-            </a>
-          </div>`
-        );
-        $(`#${mode}-program-modal ${conainerId}`).append(content);
-      }
-    };
+    // const appendFile = (mode, file, conainerId) => {
+    //   console.log('file', file)
+    //   if (file) {
+    //     const fileName = file.split('/').pop();
+    //     const content = (`
+    //       <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
+    //         <div class="d-flex align-items-center gap-2">
+    //           <i class="ti ti-file fs-4 text-warning"></i>
+    //           <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
+    //         </div> 
+    //         <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
+    //           <i class="ti ti-download fs-5"></i>
+    //         </a>
+    //       </div>`
+    //     );
+    //     $(`#${mode}-program-modal ${conainerId}`).append(content);
+    //   }
+    // };
 
     // Initialize Quill Editor
-    const editorConfig = { theme: 'snow' };
-    const editGuidelineEditor = new Quill('#edit-program-modal #guideline-editor', editorConfig);
-    const editFinancialEditor = new Quill('#edit-program-modal #financial-editor', editorConfig);
-    const editLegalEditor = new Quill('#edit-program-modal #legal-editor', editorConfig);
+    // const editorConfig = { theme: 'snow' };
+    // const editGuidelineEditor = new Quill('#edit-program-modal #guideline-editor', editorConfig);
+    // const editFinancialEditor = new Quill('#edit-program-modal #financial-editor', editorConfig);
+    // const editLegalEditor = new Quill('#edit-program-modal #legal-editor', editorConfig);
 
     // Clear Editor
-    editGuidelineEditor.root.innerHTML = '';
-    editFinancialEditor.root.innerHTML = '';
-    editLegalEditor.root.innerHTML = '';
+    // editGuidelineEditor.root.innerHTML = '';
+    // editFinancialEditor.root.innerHTML = '';
+    // editLegalEditor.root.innerHTML = '';
 
     // Handle Editor Change
-    const handleEditorChange = (editor, input) => {
-      editor.on('text-change', function() {
-        $(input).val(editor.root.innerHTML);
-      });
-    };
+    // const handleEditorChange = (editor, input) => {
+    //   editor.on('text-change', function() {
+    //     $(input).val(editor.root.innerHTML);
+    //   });
+    // };
 
-    handleEditorChange(editGuidelineEditor, '#edit-program-modal #program_guideline');
-    handleEditorChange(editFinancialEditor, '#edit-program-modal #financial_policy');
-    handleEditorChange(editLegalEditor, '#edit-program-modal #legal_policy');
+    // handleEditorChange(editGuidelineEditor, '#edit-program-modal #program_guideline');
+    // handleEditorChange(editFinancialEditor, '#edit-program-modal #financial_policy');
+    // handleEditorChange(editLegalEditor, '#edit-program-modal #legal_policy');
 
     // Handle Edit Program
-    const onEditProgramClick = (cycleId) => {
-      if(cycleId){
-        $('#edit-program-modal').modal('show');
+    // const onEditProgramClick = (cycleId) => {
+    //   if(cycleId){
+    //     $('#edit-program-modal').modal('show');
       
-        $.ajaxSetup({
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          }
-        });
+    //     $.ajaxSetup({
+    //       headers: {
+    //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //       }
+    //     });
 
-        $.ajax({
-          type: "POST",
-          url: "/dashboard/cycles/modify",
-          data: {"cycleid": cycleId },
-          success: function(response) {
-            console.log(response); 
+    //     $.ajax({
+    //       type: "POST",
+    //       url: "/dashboard/cycles/modify",
+    //       data: {"cycleid": cycleId },
+    //       success: function(response) {
+    //         console.log(response); 
 
-            $('#edit-program-modal #date-range-picker').daterangepicker({
-              opens: isRtl ? 'left' : 'right',
-              drops: 'up',
-              startDate: response?.start ? moment(response?.start) : '',
-              endDate: response?.end ? moment(response?.end) : '',
-            }).on('apply.daterangepicker', function(ev, picker) {
-              $('#edit-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
-              $('#edit-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
-            });
+    //         $('#edit-program-modal #date-range-picker').daterangepicker({
+    //           opens: isRtl ? 'left' : 'right',
+    //           drops: 'up',
+    //           startDate: response?.start ? moment(response?.start) : '',
+    //           endDate: response?.end ? moment(response?.end) : '',
+    //         }).on('apply.daterangepicker', function(ev, picker) {
+    //           $('#edit-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
+    //           $('#edit-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
+    //         });
 
-            $('#edit-program-modal #title').val(response.title ?? '');
-            $('#edit-program-modal #description').val(response.description ?? '');
-            $('#edit-program-modal #cycleid').val(cycleId); 
-            $('#edit-program-modal #type').val(1);
-            // $('#edit-program-modal #start').val(response.start ?? '');
-            // $('#edit-program-modal #end').val(response.end ?? '');
-            $('#edit-program-modal #organization').val(response.organization_id ?? '');
-            $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
-            $('#edit-program-modal #auto-approve-mentorship-requests').prop('checked', response.auto_approve_mentorship_requests == 1 ? true : false);
+    //         $('#edit-program-modal #title').val(response.title ?? '');
+    //         $('#edit-program-modal #description').val(response.description ?? '');
+    //         $('#edit-program-modal #cycleid').val(cycleId); 
+    //         $('#edit-program-modal #type').val(1);
+    //         // $('#edit-program-modal #start').val(response.start ?? '');
+    //         // $('#edit-program-modal #end').val(response.end ?? '');
+    //         $('#edit-program-modal #organization').val(response.organization_id ?? '');
+    //         $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
+    //         $('#edit-program-modal #auto-approve-mentorship-requests').prop('checked', response.auto_approve_mentorship_requests == 1 ? true : false);
 
-            if (response.private) {
-              $('#edit-program-modal #private').prop('checked', true);
-              $('#cyclelink').html('{{ __('cycles.Join URL') }}');
-              $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
-            }
+    //         if (response.private) {
+    //           $('#edit-program-modal #private').prop('checked', true);
+    //           $('#cyclelink').html('{{ __('cycles.Join URL') }}');
+    //           $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
+    //         }
 
-            if (editGuidelineEditor) {
-              editGuidelineEditor.root.innerHTML = response.program_guideline ?? '';
-            }
+    //         if (editGuidelineEditor) {
+    //           editGuidelineEditor.root.innerHTML = response.program_guideline ?? '';
+    //         }
 
-            $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
+    //         $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
 
-            if (editFinancialEditor) {
-              editFinancialEditor.root.innerHTML = response.financial_guideline ?? '';
-            }
-            $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
-            $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
-            $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
+    //         if (editFinancialEditor) {
+    //           editFinancialEditor.root.innerHTML = response.financial_guideline ?? '';
+    //         }
+    //         $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
+    //         $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
+    //         $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
 
-            if (editLegalEditor) {
-              editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
-            }
-            $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
-            const guidelineFile = response?.program_guideline_file;
-            const financialFile = response.financial_guideline_file;
-            const legalFile = response?.legal_guideline_file;
-            const delegationFile = response.delegation_file;
+    //         if (editLegalEditor) {
+    //           editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
+    //         }
+    //         $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
+    //         const guidelineFile = response?.program_guideline_file;
+    //         const financialFile = response.financial_guideline_file;
+    //         const legalFile = response?.legal_guideline_file;
+    //         const delegationFile = response.delegation_file;
             
-            appendFile('edit', guidelineFile, '#guideline-file-container');
-            appendFile('edit', financialFile, '#financial-file-container');
-            appendFile('edit', legalFile, '#legal-file-container');
+    //         appendFile('edit', guidelineFile, '#guideline-file-container');
+    //         appendFile('edit', financialFile, '#financial-file-container');
+    //         appendFile('edit', legalFile, '#legal-file-container');
 
-            if (delegationFile) {
-              appendFile('edit', delegationFile, '#delegation-file-container');
-              $('#edit-program-modal delegation_option').prop('checked', true);
-            }
-          },
-          error: function(error) {
-            console.log(error);
-            resetValues();
-            alert("Error Occurred, Try again!");
-          }
-        });
-      }
-    }; 
+    //         if (delegationFile) {
+    //           appendFile('edit', delegationFile, '#delegation-file-container');
+    //           $('#edit-program-modal delegation_option').prop('checked', true);
+    //         }
+    //       },
+    //       error: function(error) {
+    //         console.log(error);
+    //         resetValues();
+    //         alert("Error Occurred, Try again!");
+    //       }
+    //     });
+    //   }
+    // }; 
   
     // Initialize Quill editors
     const quillEditors = document.querySelectorAll('#text-editor');

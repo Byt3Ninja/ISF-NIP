@@ -317,5 +317,6 @@ return [
     'Auto_Approve_Mentorship_Requests' => 'Auto-approve Mentorship Requests',
     'Enable_Auto_Approval' => 'Enable Auto-Approval',
     'Auto_Approve_Helper_Text' => 'If enabled, mentorship requests will be automatically approved based on mentor availability.',
+    'Create' => 'Create',
 ];
 

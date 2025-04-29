@@ -41,13 +41,11 @@ class ProgramController extends Controller
             $cycles = Cycle::when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             });
-        }
-        else if (Auth()->user()->hasRole('organizationManager')) {
+        } else if (Auth()->user()->hasRole('organizationManager')) {
             $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
                 return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
             });
-        }
-        else {
+        } else {
             // إذا كان المستخدم ليس Admin
             $Organization = Organization::where('user_id', auth()->user()->id)->first();
 
@@ -60,31 +58,72 @@ class ProgramController extends Controller
                 $cycles = Cycle::where('id', 0); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
             }
         }
-if($request->organization_id != 0) {
-        $cycles = $cycles->where('organization_id', $request->organization_id);
-}
-if($request->start_date != null) {
-    $cycles = $cycles->where('start', '>=', $request->start_date);
-}
-if($request->end_date != null) {
-    $cycles = $cycles->where('end', '<=', $request->end_date);
-}
-if($request->private == 'Yes') {
-$cycles = $cycles->whereNotNull('private');
-}
-if($request->private == 'No') {
-    $cycles = $cycles->whereNull('private');
-}
-    $cycles = $cycles->get();
+        if ($request->organization_id != 0) {
+            $cycles = $cycles->where('organization_id', $request->organization_id);
+        }
+        if ($request->start_date != null) {
+            $cycles = $cycles->where('start', '>=', $request->start_date);
+        }
+        if ($request->end_date != null) {
+            $cycles = $cycles->where('end', '<=', $request->end_date);
+        }
+        if ($request->private == 'Yes') {
+            $cycles = $cycles->whereNotNull('private');
+        }
+        if ($request->private == 'No') {
+            $cycles = $cycles->whereNull('private');
+        }
+        $cycles = $cycles->get();
         return view('admin.programs.index', compact('cycles'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $user = auth()->user();
+        $search = $request->input('search'); // التحقق من وجود البحث في الطلب
+
+        if (Auth()->user()->hasRole('Admin')) {
+            // إذا كان المستخدم Admin
+            $cycles = Cycle::when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+            });
+        } else if (Auth()->user()->hasRole('organizationManager')) {
+            $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+            });
+        } else {
+            // إذا كان المستخدم ليس Admin
+            $Organization = Organization::where('user_id', auth()->user()->id)->first();
+
+            if (!empty($Organization)) {
+                $cycles = Cycle::where('organization_id', $Organization->id)
+                    ->when($search, function ($query, $search) {
+                        return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+                    });
+            } else {
+                $cycles = Cycle::where('id', 0); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
+            }
+        }
+        if ($request->organization_id != 0) {
+            $cycles = $cycles->where('organization_id', $request->organization_id);
+        }
+        if ($request->start_date != null) {
+            $cycles = $cycles->where('start', '>=', $request->start_date);
+        }
+        if ($request->end_date != null) {
+            $cycles = $cycles->where('end', '<=', $request->end_date);
+        }
+        if ($request->private == 'Yes') {
+            $cycles = $cycles->whereNotNull('private');
+        }
+        if ($request->private == 'No') {
+            $cycles = $cycles->whereNull('private');
+        }
+        $cycles = $cycles->get();
+        return view('admin.programs.create', compact('cycles'));
     }
 
     /**
@@ -102,12 +141,11 @@ if($request->private == 'No') {
     {
         $user = Auth()->user();
         $cycle = Cycle::where('id', $id);
-        if( $user->hasRole('organizationManager') )
-        {
+        if ($user->hasRole('organizationManager')) {
             $cycle = $cycle->where('organization_id', $user->organization_id);
         }
         $cycle = $cycle->first();
-        if(empty($cycle)) return redirect()->route('programlist.index')->with(['message2' => 'program_not_found', 'class' => 'danger']);
+        if (empty($cycle)) return redirect()->route('programlist.index')->with(['message2' => 'program_not_found', 'class' => 'danger']);
         $steps = Step::where('cycle_id', $cycle->id)->orderBy('arr', 'ASC')->get();
 
         // $id = $program->pluck('id')[0];
@@ -115,7 +153,7 @@ if($request->private == 'No') {
 
         $judges = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 7)->get();
 
-        
+
         $stepsData = [];
         foreach ($steps as $step) {
             $stepsData[] = [
@@ -133,9 +171,50 @@ if($request->private == 'No') {
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Request $request)
     {
-        //
+        $user = auth()->user();
+        $search = $request->input('search'); // التحقق من وجود البحث في الطلب
+
+        if (Auth()->user()->hasRole('Admin')) {
+            // إذا كان المستخدم Admin
+            $cycles = Cycle::when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+            });
+        } else if (Auth()->user()->hasRole('organizationManager')) {
+            $cycles = Cycle::where('organization_id', $user->organization_id)->when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+            });
+        } else {
+            // إذا كان المستخدم ليس Admin
+            $Organization = Organization::where('user_id', auth()->user()->id)->first();
+
+            if (!empty($Organization)) {
+                $cycles = Cycle::where('organization_id', $Organization->id)
+                    ->when($search, function ($query, $search) {
+                        return $query->where('title', 'like', '%' . $search . '%'); // بحث بناءً على title
+                    });
+            } else {
+                $cycles = Cycle::where('id', 0); // لا توجد دورات إذا لم يكن لدى المستخدم منظمة
+            }
+        }
+        if ($request->organization_id != 0) {
+            $cycles = $cycles->where('organization_id', $request->organization_id);
+        }
+        if ($request->start_date != null) {
+            $cycles = $cycles->where('start', '>=', $request->start_date);
+        }
+        if ($request->end_date != null) {
+            $cycles = $cycles->where('end', '<=', $request->end_date);
+        }
+        if ($request->private == 'Yes') {
+            $cycles = $cycles->whereNotNull('private');
+        }
+        if ($request->private == 'No') {
+            $cycles = $cycles->whereNull('private');
+        }
+        $cycles = $cycles->get();
+        return view('admin.programs.edit', compact('cycles'));
     }
 
     /**
@@ -187,8 +266,7 @@ if($request->private == 'No') {
                 $MSG = new TemplateEmail;
                 $MSG->Message = ["New judging - VI portal", "Dear " . $rfullname . ",", "Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') .
                     " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details.", "/dashboard"];
-                if( !in_array(env('APP_ENV', 'local'), ['local']) )
-                {
+                if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                     try {
                         $user->notify($MSG);
                     } catch (\Throwable $th) {

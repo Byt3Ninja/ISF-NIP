@@ -23,12 +23,12 @@
     <label for="program-guideline-pdf" class="form-label fs-6 fw-semibold">
       {{ __('cycles.Attach_Document') }} ({{__('cycles.PDF_Only')}})
     </label>
-    <div class="d-flex justify-content-end align-items-center border rounded p-4">
+    <div class="mb-3">
       <input 
         type="file" 
         name="program-guideline-pdf" 
         id="program-guideline-pdf" 
-        class="form-control-file" 
+        class="form-control" 
         accept="application/pdf"  
       />
     </div>
