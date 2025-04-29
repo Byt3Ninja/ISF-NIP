@@ -688,12 +688,12 @@
             </div>
             <div class="form-group mb-3" id="trainer" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.trainer name') }}</label>
-              <input name="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}"
+              <input name="trainer_name" id="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}"
                 class="form-control">
             </div>
-            <div class="form-group mb-3" id="trainer_email" style="display: none;">
+            <div class="form-group mb-3" id="trainer" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.trainer email') }}</label>
-              <input name="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}"
+              <input name="trainer_email" id="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}"
                 class="form-control">
             </div>
           </div>
@@ -1200,14 +1200,16 @@
           if (type === 'offline') {
             $('#editSessionForm #date-only').hide();
             $('#editSessionForm #date-time').show();
-            $('#editSessionForm #trainer').show().val(response.trainer_name);
+            $('#editSessionForm #trainer').show()
+            $('#editSessionForm #trainer_name').val(response.trainer_name);
             $('#editSessionForm #trainer_email').show().val(response.trainer_email);
             $('#editSessionForm #location').show().val(response.training_location);
             $('#editSessionForm #address').show().val(response.training_Address);
           } else if (type === 'sessions') {
             $('#editSessionForm #date-only').hide();
             $('#editSessionForm #date-time').show();
-            $('#editSessionForm #trainer').show().val(response.trainer_name);
+            $('#editSessionForm #trainer').show()
+            $('#editSessionForm #trainer_name').val(response.trainer_name); 
             $('#editSessionForm #trainer_email').show().val(response.trainer_email);
             $('#editSessionForm #location').hide();
             $('#editSessionForm #address').hide();
