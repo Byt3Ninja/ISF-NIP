@@ -679,12 +679,12 @@
             </div>
             <div class="form-group mb-3" id="location" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
-              <input name="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
+              <input name="training_Address" id="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
                 class="form-control">
             </div>
             <div class="form-group mb-3" id="address" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input name="training_location" type="text" placeholder="{{ __('cycles.training location') }}" class="form-control">
+              <input name="training_location" id="training_location" type="text" placeholder="{{ __('cycles.training location') }}" class="form-control">
             </div>
             <div class="form-group mb-3" id="trainer" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.trainer name') }}</label>
@@ -1190,21 +1190,24 @@
           $('#editSessionForm #title').val(response.title);
           $('#editSessionForm #dsc').val(response.dsc);
           $('#editSessionForm #select-type').val(response.type).trigger('change');
+          
           if(response.type != 'online'){
           $('#editSessionForm .date-range-picker').val(response.datetime + ' - ' + response.enddatetime);
           }else{
             $('#editSessionForm .date-range-picker').val(response.datetime);
           }
          
-
           if (type === 'offline') {
             $('#editSessionForm #date-only').hide();
             $('#editSessionForm #date-time').show();
             $('#editSessionForm #trainer').show()
             $('#editSessionForm #trainer_name').val(response.trainer_name);
             $('#editSessionForm #trainer_email').show().val(response.trainer_email);
-            $('#editSessionForm #location').show().val(response.training_location);
-            $('#editSessionForm #address').show().val(response.training_Address);
+            $('#editSessionForm #location').show();
+            $('#editSessionForm #training_location').val(response.training_location);
+
+            $('#editSessionForm #address').show()
+            $('#editSessionForm #training_Address').val(response.training_Address);
           } else if (type === 'sessions') {
             $('#editSessionForm #date-only').hide();
             $('#editSessionForm #date-time').show();
