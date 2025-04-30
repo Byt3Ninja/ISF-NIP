@@ -2,10 +2,10 @@
 
 @php
 $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group) {
-return [
-'target' => Str::slug($group),
-'label' => $group,
-];
+  return [
+    'target' => Str::slug($group),
+    'label' => $group,
+  ];
 })->values()->toArray();
 @endphp
 
@@ -122,10 +122,10 @@ return [
                         <div class="col-12 col-md-6">
                           <h5 class="card-title mb-0 fw-semibold pt-2 mb-3 mb-md-0">{{ $tab['label'] }}</h5>
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-4 mb-3 mb-md-0">
                           <!-- Search Input -->
                           <div class="position-relative">
-                            <input type="text" id="permission-search" class="form-control"
+                            <input type="text" class="form-control permission-search" 
                               placeholder="{{ __('admin.Search_Permissions') }}..." />
                             <span class="position-absolute end-0 top-50 translate-middle-y search-icon mx-2">
                               <i class="ti ti-search text-muted"></i>
@@ -133,7 +133,7 @@ return [
                           </div>
                           <!-- / Search Input -->
                         </div>
-                        <div class="col-12 col-md-2 d-flex justify-content-end align-items-center">
+                        <div class="col-12 col-md-2 d-flex justify-content-md-end align-items-center">
                           <!-- Select All -->
                           <div class="form-check">
                             <input type="checkbox" class="form-check-input select-all-row"
@@ -151,14 +151,14 @@ return [
                     <div class="p-0 w-100">
                       <div class="permission-list w-100">
                         @foreach( $_permissions->where('group', $tab['label']) as $permission )
-                        <div class="card card-body border mb-3">
-                          <li class="d-flex justify-content-between align-items-center">
+                        <div class="card permission-card card-body border mb-3">
+                          <li class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                             <div class="d-flex flex-column">
                               <h5 class="mb-0">{{ $permission->description }}</h5>
                               <span>{{ $permission->name }}</span>
                             </div>
-                            <div class="d-flex align-items-center gap-3">
-                              <div class="form-check m-auto w-px-100">
+                            <div class="d-flex justify-content-between align-items-center gap-3">
+                              <div class="form-check d-flex align-items-center gap-2 w-px-100 h-px-40 mt-4 mt-md-0">
                                 <input class="form-check-input" type="checkbox" name="permissions[]"
                                   value="{{ $permission->id }}" id="permission-{{ $permission->name }}"
                                   onchange="this.checked ? this.nextElementSibling.innerText = '{{ __('admin.Selected') }}' : this.nextElementSibling.innerText = '{{ __('admin.Select') }}'" />
@@ -215,11 +215,12 @@ return [
     });
   });
 
-  $('#permission-search').on('input', function () {
+  // Search across all permission cards in all tabs
+  $('.permission-search').on('keyup', function () {
     const query = $(this).val().toLowerCase();
-    $('.permission-list li').each(function () {
-      const text = $(this).text().toLowerCase();
-      $(this).parent().toggle(text.includes(query));
+    const tabPane = $(this).closest('.tab-pane');
+    tabPane.find(".permission-card").each(function () {
+      $(this).toggle($(this).text().toLowerCase().indexOf(query) > -1);
     });
   });
 

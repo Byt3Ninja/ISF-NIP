@@ -1,6 +1,6 @@
 
 <div class="row mb-12">
-  <div class="col-8 mb-6">
+  <div class="col-12 col-md-8 mb-6">
     <div class="form-group">
       <label for="budget_allocation" class="form-label fs-6 fw-semibold">{{ __('cycles.Budget_Allocation') }}</label>
       <input 
@@ -15,7 +15,7 @@
       <input type="hidden" name="organization_id" value="@if(isset($cycle)) {{ optional($cycle)->organization_id }} @else 0 @endif">
     </div>
   </div>
-  <div class="col-4 mb-6">
+  <div class="col-12 col-md-4 mb-6">
     <div class="form-group">
       <label for="currency_type" class="form-label fs-6 fw-semibold">{{ __('cycles.Currency_Type') }}</label>
       <select 

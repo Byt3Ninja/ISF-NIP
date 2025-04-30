@@ -82,7 +82,7 @@
       <div class="d-flex justify-content-start w-100 mb-6">
         <nav 
           class="nav-align-left nav-tabs-shadow mb-6 p-4 bg-white position-fixed d-none d-md-block" 
-          style="height: 500px; min-width: 18%; max-width: 18%;">
+          style="min-height: 500px; min-width: 18%; max-width: 18%;">
           <!-- Tabs -->
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)

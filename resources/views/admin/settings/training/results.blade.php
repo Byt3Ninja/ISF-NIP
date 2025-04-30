@@ -55,7 +55,7 @@
         <div class="card">
           <div class="card-header">
             <h4 class="card-title">
-              {{ $step->title }} - {{ $csession->step->title }} 
+              {{ $step->title }} - {{ $csession->step->title }}
               <small class="text-muted">
                 {{ __('cycles.from') }} {{ $csession->step->from->format('d-m-Y') }}
                 {{ __('cycles.to') }} {{ $csession->step->to->format('d-m-Y') }}
@@ -65,53 +65,73 @@
           </div>
           <hr style="margin:-10px 0 5px 0;">
           <div class="card-body">
-            
+
             <div class="table-responsive">
               <!-- we get value from Select box Ely fo2 class name stepsExcel -->
               <input type="hidden" class="step_id" value="{{ $csession->step_id }}">
               <table class="table">
-                <div class="row">
+                <div class="row border-bottom pb-3">
                   <div class="col-12 col-md-6">
-                    <div class="d-flex align-items-center gap-6">
-                      <select class="form-select ChangeAllBoxTR">
-                        <option value="0">Disapprove</option>
-                        @foreach ($steps as $step)
+                    <div class="row">
+                      <div class="col-12 col-md-8">
+                        <select class="form-select select2 ChangeAllBoxTR">
+                          <option value="0">Disapprove</option>
+                          @foreach ($steps as $step)
                           <option value="{{ $step->id }}">{{ $step->title }}</option>
-                        @endforeach
-                      </select>
-                      <a 
-                        href="javascript:void(0)" 
-                        class="btn btn-primary ExportExcelTresult">
-                        <i class="ti ti-brand-abstract me-2"></i>
-                        {{ __('cycles.Export') }}
-                      </a>
+                          @endforeach
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <a href="javascript:void(0)" class="btn btn-primary ExportExcelTresult">
+                          <i class="ti ti-brand-abstract me-2"></i>
+                          {{ __('cycles.Export') }}
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="row">
-                  <form id="status-form" method="GET" action="{{ route('trainings.results_view', $csession->id) }}">
-                  <div class="col-12 col-md-6">
-                    <select class="form-select" id="company_id" name="company_id">
-                      <option value="0">Select</option>
-                      @php
-                      $companiesselect = \App\Company::where('step', $csession->step_id)->get();
-                      @endphp
-                      @foreach ($companiesselect as $company)
-                      <option value="{{ $company->id }}" {{ $company->id  == request('company_id') ? 'selected' : '' }} >{{ $company->{'name_' . $l} }}</option>
-                      @endforeach
-                    </select>
-                    </div>
-                    <div class="col-12 col-md-6">
-                      <select class="form-select" id="status" name="status">
-                        <option value="0">{{ __('admin.Status') }}</option>
-                        <option value="completed" {{ 'completed'  == request('status') ? 'selected' : '' }}>{{ __('admin.Completed') }}</option>
-                        <option value="Notcompleted" {{ 'Notcompleted'  == request('status') ? 'selected' : '' }}>{{ __('admin.NotStarted') }}</option>
-                        
+                <div class="row align-items-center my-6 border-bottom pb-3">
+                  <form id="status-form" method="GET" action="{{ route('trainings.results_view', $csession->id) }}"
+                    class="d-flex flex-wrap gap-3">
+                    <div class="col-md-4">
+                      <label for="company_id" class="form-label">{{ __('admin.Select Company') }}</label>
+                      <select class="form-select select2" id="company_id" name="company_id" onchange="updateUrl()" data-placeholder="Select Company">
+                        <option value="">{{ __('admin.Select Company') }}</option>
+                        @php
+                        $companiesselect = \App\Company::where('step', $csession->step_id)->get();
+                        @endphp
+                        @foreach ($companiesselect as $company)
+                        <option value="{{ $company->id }}" {{ $company->id == request('company_id') ? 'selected' : ''
+                          }}>
+                          {{ $company->{'name_' . $l} }}
+                        </option>
+                        @endforeach
                       </select>
-                      </div>
-                    <button class="btn btn-success" type="submit">search</button>
-                    
+                    </div>
+                    <div class="col-md-4">
+                      <label for="status" class="form-label">{{ __('admin.Status') }}</label>
+                      <select class="form-select select2" id="status" name="status" onchange="updateUrl()" data-placeholder="{{ __('admin.Status') }}">
+                        <option value="">{{ __('admin.Status') }}</option>
+                        <option value="completed" {{ 'completed'==request('status') ? 'selected' : '' }}>
+                          {{ __('admin.Completed') }}
+                        </option>
+                        <option value="Notcompleted" {{ 'Notcompleted'==request('status') ? 'selected' : '' }}>
+                          {{ __('admin.NotStarted') }}
+                        </option>
+                      </select>
+                    </div>
                   </form>
+
+                  <script>
+                    function updateUrl() {
+                      const companyId = document.getElementById('company_id').value;
+                      const status = document.getElementById('status').value;
+                      const url = new URL(window.location.href);
+                      url.searchParams.set('company_id', companyId);
+                      url.searchParams.set('status', status);
+                      window.location.href = url.toString();
+                    }
+                  </script>
                 </div>
                 <thead class="bg-label-light">
                   <tr>
@@ -123,18 +143,18 @@
                   </tr>
                 </thead>
                 <tbody>
-                 
+
                   @php
-                  
+
                   $companies = \App\Company::where('step', $csession->step_id);
                   if(!empty(request('company_id'))){
-                    $companies = $companies->where('id', request('company_id'));
+                  $companies = $companies->where('id', request('company_id'));
                   }
                   $companies = $companies->get();
                   $status = request('status');
-                   
+
                   @endphp
-                  
+
                   @foreach ($companies as $company)
                   @php
                   $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
@@ -143,12 +163,12 @@
                   $per = $contents ? ($cc / $contents) * 100 : '0';
                   $show = true;
                   if ($status == 'completed' && (int)$per != 100) {
-                      $show = false;
+                  $show = false;
                   } elseif ($status == 'notcompleted' && (int)$per == 100) {
-                      $show = false;
+                  $show = false;
                   }
                   @endphp
-                   @if ($show)
+                  @if ($show)
                   <tr>
                     <td>
                       <div class="d-flex align-items-center gap-1">
@@ -158,19 +178,14 @@
                     </td>
                     <td>
                       <div class="d-flex align-items-center gap-2">
-                        <a 
-                          href="/dashboard/companyProfile/{{ $company->id }}"
-                          class="w-px-40 h-px-40 rounded-circle bg-label-light border d-flex align-items-center justify-content-center overflow-hidden"
-                        >
+                        <a href="/dashboard/companyProfile/{{ $company->id }}"
+                          class="w-px-40 h-px-40 rounded-circle bg-label-light border d-flex align-items-center justify-content-center overflow-hidden">
                           @if ($company->logo)
-                            <img 
-                              src="/191014/{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}" 
-                              onerror="this.src='/app-assets/images/logo_placeholder.png'"
-                              class="img-fluid w-100 h-100" 
-                              alt="logo" 
-                            />
+                          <img src="/191014/{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
+                            onerror="this.src='/app-assets/images/logo_placeholder.png'" class="img-fluid w-100 h-100"
+                            alt="logo" />
                           @else
-                            <i class="ti ti-building text-secondary"></i>
+                          <i class="ti ti-building text-secondary"></i>
                           @endif
                         </a>
                         <a href="/dashboard/companyProfile/{{ $company->id }}">
@@ -182,19 +197,13 @@
                     </td>
                     <td>
                       <div class="d-flex align-items-center gap-2">
-                        <a 
-                          class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center overflow-hidden" 
-                          href="/dashboard/users/{{ $company->user->id }}/edit"
-                        >
+                        <a class="w-px-40 h-px-40 rounded-circle border d-flex align-items-center justify-content-center overflow-hidden"
+                          href="/dashboard/users/{{ $company->user->id }}/edit">
                           @if ($company->user->img_url)
-                            <img 
-                              src="/191014/{{ $company->user->img_url }}" 
-                              onerror="this.src='/icons/account.svg'"
-                              alt="avatar"
-                              class="img-fluid w-100 h-100"
-                            >
+                          <img src="/191014/{{ $company->user->img_url }}" onerror="this.src='/icons/account.svg'"
+                            alt="avatar" class="img-fluid w-100 h-100">
                           @else
-                            <img src="/icons/account.svg" class="img-fluid" />
+                          <img src="/icons/account.svg" class="img-fluid" />
                           @endif
                         </a>
                         <a href="/dashboard/users/{{ $company->user->id }}/edit">
@@ -208,21 +217,22 @@
                         </a>
                       </div>
                     </td>
-                    
+
                     <input type="hidden" class="location" value="{{ $csession->id }}">
-                   
-                   
+
+
                     <td>
                       <span class="badge bg-label-{{ $per >= 50 ? 'success' : 'danger' }}">
                         {{ (int) $per }}%
                       </span>
-                 
-                  {{-- <td>
-                    <span class="badge bg-label-{{ $per > 50 ? 'success' : 'danger' }}">
-                      {{ (int) $per }}
-                      %</span>
-                  </td> --}}
-                 
+
+                      {{--
+                    <td>
+                      <span class="badge bg-label-{{ $per > 50 ? 'success' : 'danger' }}">
+                        {{ (int) $per }}
+                        %</span>
+                    </td> --}}
+
                     <td>
                       <div class="d-flex align-items-center gap-1">
                         <select id="cstep" class="form-select"

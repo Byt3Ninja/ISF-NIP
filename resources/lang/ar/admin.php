@@ -1564,5 +1564,6 @@ return [
 	'Minute' => 'دقيقة',
 	'Sessions Without Tasks' => 'الجلسات بدون مهام',
 	'NotStarted' => 'لم يبدأ',
+	'Select Company' => 'اختر الشركة',
 ]; 
 
