@@ -1562,6 +1562,7 @@ return [
 	'Program Guideline' => 'إرشادات البرنامج',
 	'Hour' => 'ساعة',
 	'Minute' => 'دقيقة',
-	'Sessions Without Tasks' => 'الجلسات بدون مهام'
+	'Sessions Without Tasks' => 'الجلسات بدون مهام',
+	'NotStarted' => 'لم يبدأ',
 ]; 
 

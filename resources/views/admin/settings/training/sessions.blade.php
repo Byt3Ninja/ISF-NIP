@@ -552,7 +552,7 @@
 
             <div class="form-group mb-3" id="online">
               <label class="form-label fs-6 mb-1">{{ __('cycles.select online') }}:</label>
-              <select name="online" class="select2 form-select" id="conline">
+              <select name="online" id="select-course" class="select2 form-select" id="conline">
                 @if (!$online)
                   <option>{{ __('cycles.No saved training courses') }}</option>
                 @endif
@@ -658,7 +658,7 @@
 
             <div class="form-group mb-3" id="online">
               <label class="form-label fs-6 mb-1">{{ __('cycles.select online') }}:</label>
-              <select name="online" class="select2 form-select" id="conline">
+              <select name="online" id="select-course" class="select2 form-select" id="conline">
                 @if (!$online)
                   <option>{{ __('cycles.No saved training courses') }}</option>
                 @endif
@@ -679,21 +679,21 @@
             </div>
             <div class="form-group mb-3" id="location" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
-              <input name="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
+              <input name="training_Address" id="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
                 class="form-control">
             </div>
             <div class="form-group mb-3" id="address" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input name="training_location" type="text" placeholder="{{ __('cycles.training location') }}" class="form-control">
+              <input name="training_location" id="training_location" type="text" placeholder="{{ __('cycles.training location') }}" class="form-control">
             </div>
             <div class="form-group mb-3" id="trainer" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.trainer name') }}</label>
-              <input name="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}"
+              <input name="trainer_name" id="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}"
                 class="form-control">
             </div>
-            <div class="form-group mb-3" id="trainer_email" style="display: none;">
+            <div class="form-group mb-3" id="trainer" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.trainer email') }}</label>
-              <input name="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}"
+              <input name="trainer_email" id="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}"
                 class="form-control">
             </div>
           </div>
@@ -898,7 +898,8 @@
     $('#addSessionForm #date-range-picker').daterangepicker({
       opens: isRtl ? 'left' : 'right',
       drops: 'up',
-      autoUpdateInput: false
+      autoUpdateInput: false,
+      minDate: moment().format('MM/DD/YYYY'),
       }).on('apply.daterangepicker', function(ev, picker) {
         $('#addSessionForm #start').val(picker.startDate.format('YYYY-MM-DD'));
         $('#addSessionForm #end').val(picker.endDate.format('YYYY-MM-DD'));
@@ -994,21 +995,21 @@
       }
     });
 
-    $('#editSessionForm #date-range-picker').daterangepicker({
-      opens: isRtl ? 'left' : 'right',
-      drops: 'up',
-      autoUpdateInput: false
-      }).on('apply.daterangepicker', function(ev, picker) {
-        $('#editSessionForm #start').val(picker.startDate.format('YYYY-MM-DD'));
-        $('#editSessionForm #end').val(picker.endDate.format('YYYY-MM-DD'));
-        $('#editSessionForm #date-range-picker').val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-        $('#editSessionForm #date-range-picker').removeClass('is-invalid');
-        $('#editSessionForm #date-range-picker').next('.invalid-feedback').remove();
-      }).on('cancel.daterangepicker', function(ev, picker) {
-        $('#editSessionForm #date-range-picker').val('');
-        $('#editSessionForm #start').val('');
-        $('#editSessionForm #end').val('');
-      });
+    // $('#editSessionForm #date-range-picker').daterangepicker({
+    //   opens: isRtl ? 'left' : 'right',
+    //   drops: 'up',
+    //   autoUpdateInput: false
+    //   }).on('apply.daterangepicker', function(ev, picker) {
+    //     $('#editSessionForm #start').val(picker.startDate.format('YYYY-MM-DD'));
+    //     $('#editSessionForm #end').val(picker.endDate.format('YYYY-MM-DD'));
+    //     $('#editSessionForm #date-range-picker').val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+    //     $('#editSessionForm #date-range-picker').removeClass('is-invalid');
+    //     $('#editSessionForm #date-range-picker').next('.invalid-feedback').remove();
+    //   }).on('cancel.daterangepicker', function(ev, picker) {
+    //     $('#editSessionForm #date-range-picker').val('');
+    //     $('#editSessionForm #start').val('');
+    //     $('#editSessionForm #end').val('');
+    //   });
 
     $('#editSessionForm #flatpickr-time-from').flatpickr({
       enableTime: true,
@@ -1182,32 +1183,61 @@
         success: function(response) {
           console.log('response', response);
           let type = response.type;
-          let startDate = response.datetime.split(' ')[0];
-          let startTime = response.datetime.split(' ')[1].substring(0, 5);
+          let dateRange = response.daterange;
+
+          // console.log('dateRange', dateRange)
+
+          const startDate = dateRange.split(' - ')[0];
+          const endDate = dateRange.split(' - ')[1];
 
           $('#editSessionForm #select-type').val(type).trigger('change').prop('disabled', true);
+          $('#editSessionForm #select-course').val(response?.courseId || '').trigger('change');
 
           $('#editSessionForm #title').val(response.title);
           $('#editSessionForm #dsc').val(response.dsc);
           $('#editSessionForm #select-type').val(response.type).trigger('change');
+          
           if(response.type != 'online'){
-          $('#editSessionForm .date-range-picker').val(response.datetime + ' - ' + response.enddatetime);
-          }else{
-            $('#editSessionForm .date-range-picker').val(response.datetime);
-          }
+            $('#editSessionForm .flatpickr-date').val(dateRange  || '');
+            $('#editSessionForm #flatpickr-time-from').val(response.fromtime  || '');
+            $('#editSessionForm #flatpickr-time-to').val(response.endtime  || '');
+          } else{
+            $('#editSessionForm #date-range-picker').daterangepicker({
+              opens: isRtl ? 'left' : 'right',
+              drops: 'up',
+              autoUpdateInput: false,
+              minDate: moment().format('MM/DD/YYYY'),
+              startDate: startDate ? moment(startDate) : null,
+              endDate: endDate ? moment(endDate) : null,
+              }).on('apply.daterangepicker', function(ev, picker) {
+                $('#editSessionForm #start').val(picker.startDate.format('YYYY-MM-DD'));
+                $('#editSessionForm #end').val(picker.endDate.format('YYYY-MM-DD'));
+                $('#editSessionForm #date-range-picker').val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                $('#editSessionForm #date-range-picker').removeClass('is-invalid');
+                $('#editSessionForm #date-range-picker').next('.invalid-feedback').remove();
+              }).on('cancel.daterangepicker', function(ev, picker) {
+                // $('#editSessionForm #date-range-picker').val('');
+                // $('#editSessionForm #start').val('');
+                // $('#editSessionForm #end').val('');
+              });      
+            }
          
-
           if (type === 'offline') {
             $('#editSessionForm #date-only').hide();
             $('#editSessionForm #date-time').show();
-            $('#editSessionForm #trainer').show().val(response.trainer_name);
+            $('#editSessionForm #trainer').show()
+            $('#editSessionForm #trainer_name').val(response.trainer_name);
             $('#editSessionForm #trainer_email').show().val(response.trainer_email);
-            $('#editSessionForm #location').show().val(response.training_location);
-            $('#editSessionForm #address').show().val(response.training_Address);
+            $('#editSessionForm #location').show();
+            $('#editSessionForm #training_location').val(response.training_location);
+
+            $('#editSessionForm #address').show()
+            $('#editSessionForm #training_Address').val(response.training_Address);
           } else if (type === 'sessions') {
             $('#editSessionForm #date-only').hide();
             $('#editSessionForm #date-time').show();
-            $('#editSessionForm #trainer').show().val(response.trainer_name);
+            $('#editSessionForm #trainer').show()
+            $('#editSessionForm #trainer_name').val(response.trainer_name); 
             $('#editSessionForm #trainer_email').show().val(response.trainer_email);
             $('#editSessionForm #location').hide();
             $('#editSessionForm #address').hide();

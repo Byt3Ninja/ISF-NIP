@@ -656,16 +656,15 @@ class TrainingController extends Controller
 		}
 		$contents = 0;
 		if ($csession) {
-			$contents = TrainingContent::where('training_id', $csession->location)->count();
+			$contents = TrainingContent::where('training_id', $csession->id)->count();
 		}
-
 		$steps11 = Step::where('id', $csession->step_id)->orderBy('arr')->get();
 		foreach ($steps11 as $steps1) {
 			$companies = Company::where('cycle', $steps1->cycle_id)->get();
 		}
 		$uniqueCycleIds = $companies->pluck('cycle')->unique();
 		$steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-
+		
 
 		return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
 	}
@@ -728,7 +727,7 @@ if ($type == 'sessions' || $type == 'offline') {
     $end_datetime = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y-m-d');
 }
 		
-	
+
 		if($start_datetime == null || $end_datetime == null){
 			return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 		}
@@ -821,7 +820,7 @@ Thanks from " . env('APP_NAME');
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
-			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
+			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'enddatetime' => $end_datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
 
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
@@ -958,7 +957,7 @@ Thanks from " . env('APP_NAME');
 		
 		$dateRange = $request->date_range; 
 		$type = $request->type;
-dd($request->all());
+
 if ($type == 'sessions' || $type == 'offline') {
 		$startDate = $request->datetime;
 		$startTime = $request->starttime;   // وقت البداية
@@ -1183,8 +1182,31 @@ Thanks from " . env('APP_NAME');
 
 	public function session(Request $request)
 	{
+		
 		if ($request->id) {
-			$session = TrainingSession::findOrFail($request->id);
+			$sessionData = TrainingSession::findOrFail($request->id);
+			$session = [];
+			$session['id'] = $sessionData->id;
+			$session['title'] = $sessionData->title;
+			$session['dsc'] = $sessionData->dsc;
+			$session['type'] = $sessionData->type;
+			if($sessionData->type == 'online'){
+				$session['daterange'] = date('Y-m-d', strtotime($sessionData->datetime)) . ' - ' . date('Y-m-d', strtotime($sessionData->enddatetime));
+			}else{
+				$session['daterange'] = date('Y-m-d', strtotime($sessionData->datetime));
+				$session['fromtime'] = date('h:i A', strtotime($sessionData->datetime));
+				$session['endtime'] = date('h:i A', strtotime($sessionData->enddatetime));
+			}
+			$session['training_Address'] = $sessionData->training_Address;
+			$session['training_location'] = $sessionData->training_location;
+			$session['trainer_name'] = $sessionData->trainer_name;
+			$session['trainer_email'] = $sessionData->trainer_email;
+			$session['QrCode'] = $sessionData->QrCode;
+			$session['duration'] = $sessionData->duration;
+			$session['start_url'] = $sessionData->start_url;
+			$session['join_url'] = $sessionData->join_url;
+			$session['created_at'] = $sessionData->created_at;
+
 			return response()->json($session);
 		} else {
 			return response()->json(['state' => 'failed'], 500);
