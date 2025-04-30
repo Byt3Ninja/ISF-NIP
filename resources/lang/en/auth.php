@@ -26,7 +26,7 @@ return [
 	'First English Name' => 'First English Name',
 	'Phone' => 'Phone',
 	'AccountType' => 'Account Type',
-	'DoYouHaveCompany' => 'Do you have a company?',
+	'DoYouHaveCompany' => 'Do you have a Team / Idea / Startup?',
 	'Registration Disabled' => 'Registration Disabled Temporary',
 	'auth_error' => 'Unable to complete authentication because ":reason"',
 	'password_reset_success' => 'Password reset successfully',
