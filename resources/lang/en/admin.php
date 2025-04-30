@@ -1543,5 +1543,5 @@ return [
 	'Minute' => 'Minute',
 	'Sessions Without Tasks' => 'Sessions Without Tasks',
 	'NotStarted' => 'Not Started',
-
+	'Select Company' => 'Select Company',
 ];
