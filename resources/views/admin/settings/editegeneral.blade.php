@@ -27,7 +27,7 @@
     ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
     ['SocialMediaLogin', 'ti-brand-facebook', __('settings.SocialMediaLogin')],
     ['HomePage', 'ti-home', __('admin.HomePageSetting')],
-    ['WhatsApp', 'ti-home', __('admin.WhatsApp')],
+    ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
   ])->map(function ($tab) {
     return ['target' => $tab[0], 'icon' => $tab[1], 'label' => $tab[2]];
   })->toArray();
