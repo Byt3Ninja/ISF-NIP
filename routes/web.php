@@ -320,6 +320,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('roles', 'RolesController');
     //Faqs
     Route::resource('faqs', 'FaqsController');
+    
+    // Forms
+    Route::get('forms-list', 'FormController@index')->name('forms.index');
+    
     //BuilderForm Builder
     Route::get('show-builder/{id?}', 'FormBuilderController@showBuilder')->name('forms.builder_view');
     Route::get('show-form/{id}', 'FormBuilderController@showForm')->name('forms.render_view');

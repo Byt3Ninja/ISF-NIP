@@ -1565,5 +1565,12 @@ return [
 	'Sessions Without Tasks' => 'الجلسات بدون مهام',
 	'NotStarted' => 'لم يبدأ',
 	'Select Company' => 'اختر الشركة',
+	'Forms List' => 'قائمة النماذج',
+	'Total Forms' => 'إجمالي النماذج',
+	'Total Submissions' => 'إجمالي التقديمات',
+	'New Form' => 'نموذج جديد',
+	'Form Name' => 'اسم النموذج',
+	'Enter Form Name' => 'أدخل اسم النموذج',
+	'Assigned to Organizations' => 'اختر المؤسسات لتعيينها',
 ]; 
 
