@@ -154,11 +154,11 @@
                   $status = request('status');
 
                   @endphp
-
+{{ $csession->id }}
                   @foreach ($companies as $company)
                   @php
                   $cc = \App\TrainingCompleted::where('user_id', $company->user->id)
-                  ->where('course_id', $csession->id)
+                  ->where('course_id', $csession->training_Address)
                   ->count();
                   $per = $contents ? ($cc / $contents) * 100 : '0';
                   $show = true;
@@ -218,7 +218,7 @@
                       </div>
                     </td>
 
-                    <input type="hidden" class="location" value="{{ $csession->id }}">
+                    <input type="hidden" class="location" value="{{ $csession->training_Address }}">
 
 
                     <td>
