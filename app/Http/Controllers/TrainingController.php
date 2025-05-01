@@ -123,9 +123,24 @@ class TrainingController extends Controller
 		return response()->json(['state' => 'success'], 200);
 	}
 
-	public function all($id = 0)
+	public function all(Request $request, $id = 0)
 	{
-		$courses = Training::orderBy('created_at', 'DESC')->where('status', 1)->get();
+		$courses = Training::orderBy('created_at', 'DESC');
+		if ($request->catTr_id) {
+			$courses = $courses->whereHas('categories', function ($query) use ($request) {
+				$query->whereIn('categories_id', (array) $request->catTr_id);
+			})
+			->where('status', 1)
+			->orderBy('created_at', 'DESC');
+		}
+		if ($request->status) {
+			if($request->status == "draft"){
+				$courses = $courses->where('Status', 0);
+			}else{
+				$courses = $courses->where('Status', 1);
+			}
+		}
+		$courses = $courses->get();
 		if ($id == 0 && count($courses)) { $id = $courses->pluck('id')[0]; }
 		$contents = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get();
 

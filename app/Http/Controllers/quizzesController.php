@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Cycle;
 use App\Quizzes;
 use App\Training;
 use App\Organization;
@@ -34,9 +35,12 @@ class quizzesController extends Controller
 		if($request->status != 0){
 			$quizzes = $quizzes->where('status', $request->status);
 		}
-
-
+		if($request->Program_id != 0){
+			$cycle = Cycle::where('id',$request->Program_id)->first();
+			$quizzes = $quizzes->where('organization_id', $cycle->organization_id);
+		}
 		$quizzes = $quizzes->get();
+
 		return view('admin.quizzes.index', compact('quizzes'));
 	}
 
