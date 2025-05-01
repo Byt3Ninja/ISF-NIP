@@ -21,7 +21,9 @@ class PermissionsTableSeeder extends Seeder
         $getPermissions = collect( DB::select("SELECT id, name, is_core, permission_group_id FROM permissions") )->keyBy('name');
         $json = File::get(base_path('database/dbFiles/_permissions.json'));
         $permissions = json_decode($json, true);
-
+        if (empty($permissions)) {
+            dd('فشل التحويل من JSON، أو الملف فارغ أو غير صالح', $json);
+        }
         foreach( $permissions as $permission )
         {
             $groupName = $permission['permission_group_id'];

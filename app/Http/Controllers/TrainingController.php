@@ -670,8 +670,9 @@ class TrainingController extends Controller
 			$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
 		}
 		$contents = 0;
+		
 		if ($csession) {
-			$contents = TrainingContent::where('training_id', $csession->id)->count();
+			$contents = TrainingContent::where('training_id', $csession->training_Address)->count();
 		}
 		$steps11 = Step::where('id', $csession->step_id)->orderBy('arr')->get();
 		foreach ($steps11 as $steps1) {
