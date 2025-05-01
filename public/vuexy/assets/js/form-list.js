@@ -244,6 +244,27 @@ document.addEventListener('DOMContentLoaded', function (e) {
         },
         initComplete: function (settings, json) {
           $('.card-header').after('<hr class="my-0">');
+
+          // Add custom filters for Status and Organization
+          const statusFilter = $('<select class="form-select form-select-sm ms-12 me-3 w-px-100"><option value="">All Status</option><option value="' + t.active + '">' + t.active + '</option><option value="' + t.inactive + '">' + t.inactive + '</option></select>')
+            .appendTo('.dataTables_length')
+            .on('change', function () {
+              const val = $.fn.dataTable.util.escapeRegex($(this).val());
+              dt_basic.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+          const orgFilter = $('<select class="form-select form-select-sm w-px-200"><option value="">All Organizations</option></select>')
+            .appendTo('.dataTables_length')
+            .on('change', function () {
+              const val = $.fn.dataTable.util.escapeRegex($(this).val());
+              dt_basic.column(2).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+          // Populate organization filter dynamically
+          const organizations = [...new Set(data.map(item => item.assigned_organization))];
+          organizations.forEach(org => {
+            orgFilter.append('<option value="' + org + '">' + org + '</option>');
+          });
         }
       });
 
@@ -291,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         newRecord.addEventListener('click', function () {
           offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
           // Empty fields on offCanvas open
-            (offCanvasElement.querySelector('.dt-form-name').value = ''),
+          (offCanvasElement.querySelector('.dt-form-name').value = ''),
             (offCanvasElement.querySelector('.dt-org-select').value = '');
           // Open offCanvas with form
           offCanvasEl.show();

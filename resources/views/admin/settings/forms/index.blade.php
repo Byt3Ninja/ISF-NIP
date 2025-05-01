@@ -78,7 +78,7 @@
     <div class="card">
       <div class="card-datatable table-responsive pt-0">
         <table class="datatables-basic table">
-          <thead>
+          <thead class="table-light">
             <tr>
               <th></th>
               <th>Form id</th>
