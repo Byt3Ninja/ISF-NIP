@@ -1544,4 +1544,11 @@ return [
 	'Sessions Without Tasks' => 'Sessions Without Tasks',
 	'NotStarted' => 'Not Started',
 	'Select Company' => 'Select Company',
+	'Forms List' => 'Forms List',
+	'Total Forms' => 'Total Forms',
+	'Total Submissions' => 'Total Submissions',
+	'New Form' => 'New Form',
+	'Form Name' => 'Form Name',
+	'Enter Form Name' => 'Enter Form Name',	
+	'Assigned to Organizations' => 'Select organizations to assign',	
 ];

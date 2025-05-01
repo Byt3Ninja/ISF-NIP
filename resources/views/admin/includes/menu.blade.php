@@ -394,14 +394,27 @@
      </li>
     @endif
 
-    @if( $_user->ableToAny(['forms.builder_view', 'forms.render_view'], $permissions) )
-      <li class="{{ Request::is('dashboard/show-builder*', 'dashboard/show-form*') ? 'active' : '' }} menu-item">
-        <a href="/dashboard/show-builder" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-forms"></i>
-          <div>{{ __('admin.Forms builder') }}</div>
-        </a>
-      </li>
-    @endif
+    <li class="menu-item">
+      <a class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons ti ti-forms"></i>
+        <div>{{ __('admin.Forms') }}</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="{{ Request::is('dashboard/forms-list*') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/forms-list" class="menu-link">
+            <div>{{ __('admin.Forms List') }}</div>
+          </a>
+        </li>
+        @if( $_user->ableToAny(['forms.builder_view', 'forms.render_view'], $permissions) )
+          <li class="{{ Request::is('dashboard/show-builder*', 'dashboard/show-form*') ? 'active' : '' }} menu-item">
+            <a href="/dashboard/show-builder" class="menu-link">
+              <div>{{ __('admin.Forms builder') }}</div>
+            </a>
+          </li>
+        @endif
+      </ul>
+    </li>
+
 
     @if( $_user->ableToAny(['cycles.list', 'programlist.index'], $permissions) )
       <li
