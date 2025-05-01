@@ -831,6 +831,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
       </div>
       <div class="modal-body d-flex flex-wrap gap-2">
+        @if(!empty($countryIds))
         @if (is_array($countryIds) && count($countryIds) > 0)
           @foreach ($countryIds as $countryId)
             <span class="text-xs badge bg-label-light text-dark rounded-pill px-3">
@@ -839,6 +840,7 @@
           @endforeach
         @else
           <span class="text-xs">{{ __('admin.N/A') }}</span>
+        @endif
         @endif
       </div>
     </div>

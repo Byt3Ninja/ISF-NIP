@@ -349,6 +349,7 @@
   {"name": "trainings.content_edit", "description": "Edit Training Content Form", "permission_group_id": "Training Management", "guard_name": "web"},
   {"name": "trainings.content_view", "description": "View Training Content", "permission_group_id": "Training Management", "guard_name": "web"},
   {"name": "trainings.content_store", "description": "Save New Training Content", "permission_group_id": "Training Management", "guard_name": "web"},
+  {"name": "trainings.my_sessions_mine", "description": "show My Training Sessions", "permission_group_id": "Training Management", "guard_name": "web"},
   {"name": "trainings.files_upload", "description": "Upload Training Files", "permission_group_id": "Training Management", "guard_name": "web"},
   {"name": "trainings.list_mine", "description": "View My Trainings (User)", "permission_group_id": "Training Management", "guard_name": "web"},
   {"name": "trainings.my_sessions_mine", "description": "View My Trainings sessions", "permission_group_id": "Training Management", "guard_name": "web"},
@@ -543,6 +544,6 @@
   {"name": "permission-groups.show", "description": "", "permission_group_id": "", "guard_name": "web"},
   {"name": "permission-groups.edit", "description": "", "permission_group_id": "", "guard_name": "web"},
   {"name": "permission-groups.update", "description": "", "permission_group_id": "", "guard_name": "web"},
-  {"name": "permission-groups.destroy", "description": "", "permission_group_id": "", "guard_name": "web"}
+  {"name": "permission-groups.destroy", "description": "", "permission_group_id": "", "guard_name": "web"},
   {"name": "screening.change_step", "description": "Change Step Screening", "permission_group_id": "Screening", "guard_name": "web"}
 ]
