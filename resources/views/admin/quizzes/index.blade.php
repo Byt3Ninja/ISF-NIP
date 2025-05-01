@@ -65,7 +65,7 @@
 							
 										  <div class="position-relative me-3 d-none d-md-flex">
 											<select name="org_id" class="form-control">
-											  <option value="0">All</option>
+											  <option value="0">{{ __('admin.All') }}</option>
 											  @php
 											  $organizations = App\Organization::all();
 											  
@@ -91,12 +91,28 @@
 							
 										  <div class="position-relative me-3 d-none d-md-flex">
 											<select name="status" class="form-control">
-											  <option value="0">All</option>
-											  <option value="draft" {{ 'draft' == request('status') ? 'selected' : '' }}>Draft</option>
-											  <option value="published" {{ 'published' == request('status') ? 'selected' : '' }}>Published</option>
+											  <option value="0">{{ __('admin.All') }}</option>
+											  <option value="draft" {{ 'draft' == request('status') ? 'selected' : '' }}>{{ __('admin.Draft') }}</option>
+											  <option value="published" {{ 'published' == request('status') ? 'selected' : '' }}>{{ __('admin.Published') }}</option>
 											</select>
 										  </div>
-							
+
+										  <div class="position-relative me-3 d-none d-md-flex">
+											<select name="Program_id" class="form-control">
+											  <option value="0">{{ __('admin.All') }}</option>
+											  @php
+											  if(!empty(request('org_id'))){
+											  	$cycles = App\Cycle::where('organization_id',request('org_id'))->get();
+											  }else{
+												$cycles = App\Cycle::all();
+											  }
+											  @endphp
+											  @foreach ($cycles as $cycle)
+											  <option value="{{ $cycle->id }}" {{  $cycle->id == request('Program_id') ? 'selected' : '' }}>{{ $cycle->title }}</option>
+											  @endforeach
+											</select>
+										  </div>
+										  
 										</div>
 										</form>
 										<hr>
