@@ -394,7 +394,7 @@
      </li>
     @endif
 
-    <li class="menu-item">
+    <li class="{{ Request::is('dashboard/forms-list*', 'dashboard/show-builder*', 'dashboard/forms-submissions*', 'dashboard/submission-details*') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-forms"></i>
         <div>{{ __('admin.Forms') }}</div>
@@ -412,6 +412,11 @@
             </a>
           </li>
         @endif
+        <li class="{{ Request::is('dashboard/forms-submissions*', 'dashboard/submission-details*') ? 'active' : '' }} menu-item">
+          <a href="/dashboard/forms-submissions" class="menu-link">
+            <div>{{ __('admin.Forms Submissions') }}</div>
+          </a>
+        </li>
       </ul>
     </li>
 

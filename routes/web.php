@@ -324,6 +324,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Forms
     Route::get('forms-list', 'FormController@index')->name('forms.index');
     
+    Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
+    Route::get('submission-details', 'FormController@submissionDetails')->name('form_submission_details.index');
+    
     //BuilderForm Builder
     Route::get('show-builder/{id?}', 'FormBuilderController@showBuilder')->name('forms.builder_view');
     Route::get('show-form/{id}', 'FormBuilderController@showForm')->name('forms.render_view');

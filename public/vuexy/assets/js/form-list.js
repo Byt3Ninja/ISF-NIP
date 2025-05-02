@@ -41,6 +41,10 @@ const translations = {
     cancel: 'Cancel',
     deleted: 'Deleted!',
     deleteConfirmation: 'Record has been deleted successfully.',
+    allStatuss: 'All Statuses',
+    allOrganizations: 'All Organizations',
+    active: 'Active',
+    inactive: 'Inactive',
   },
   ar: {
     addNewForm: 'اضافة نموذج جديد',
@@ -75,6 +79,10 @@ const translations = {
     cancel: 'إلغاء',
     deleted: 'تم الحذف!',
     deleteConfirmation: 'تم حذف السجل بنجاح.',
+    allStatuss: 'جميع الحالات',
+    allOrganizations: 'جميع المنظمات',
+    active: 'نشط',
+    inactive: 'غير نشط',
   }
 };
 
@@ -174,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 `<li><a href="javascript:;" class="dropdown-item text-danger delete-record">${t.delete}</a></li>` +
                 '</ul>' +
                 '</div>' +
-                '<a href="javascript:;" class="btn btn-sm btn-text-secondary rounded-pill btn-icon item-edit"><i class="ti ti-list-tree ti-md"></i></a>'
+                '<a href="/dashboard/forms-submissions" class="btn btn-sm btn-text-secondary rounded-pill btn-icon item-edit"><i class="ti ti-list-tree ti-md"></i></a>'
               );
             }
           }
@@ -246,14 +254,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
           $('.card-header').after('<hr class="my-0">');
 
           // Add custom filters for Status and Organization
-          const statusFilter = $('<select class="form-select form-select-sm ms-12 me-3 w-px-100"><option value="">All Status</option><option value="' + t.active + '">' + t.active + '</option><option value="' + t.inactive + '">' + t.inactive + '</option></select>')
+          const statusFilter = $(`<select class="form-select form-select-sm ms-12 me-3 w-px-100"><option value="">${t.allStatuss}</option><option value="${t.active}">${t.active}</option><option value="${t.inactive}">${t.inactive}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
               dt_basic.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
             });
 
-          const orgFilter = $('<select class="form-select form-select-sm w-px-200"><option value="">All Organizations</option></select>')
+          const orgFilter = $(`<select class="form-select form-select-sm w-px-200"><option value="">${t.allOrganizations}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
