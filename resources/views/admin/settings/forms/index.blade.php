@@ -162,7 +162,7 @@
       new Chart(statusCtx, {
         type: "doughnut",
         data: {
-          labels: ["Active", "Inactive"],
+          labels: ['{{ __('admin.Active') }}', '{{ __('admin.NotActive') }}'],
           datasets: [
             {
               label: "Forms by Status",
@@ -224,8 +224,8 @@
                 'rgba(255, 193, 7, 1)',
                 'rgba(108, 117, 125, 1)',
               ],
-              borderWidth: 1,
-              barThickness: 10, // Reduce bar width to make it thinner
+              borderWidth: 0,
+              barThickness: 3, // Reduce bar width to make it thinner
             },
           ],
         },
