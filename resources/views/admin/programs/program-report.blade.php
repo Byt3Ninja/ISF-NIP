@@ -218,7 +218,7 @@
 
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold">Startup Program Dashboard</h4>
+    <h4 class="fw-bold">Startup Program Dashboard (Demo only)</h4>
 
     <div class="card card-body">
       <!-- Tab Navigation -->
@@ -475,7 +475,7 @@
                         <td class="company-name">Gamma Education</td>
                         <td>Education</td>
                         <td>Idea</td>
-                        <td><span class="badge bg-warning text-dark rating-badge">3.5/5</span></td>
+                        <td><span class="badge bg-label-warning text-dark rating-badge">3.5/5</span></td>
                         <td>
                           <div class="progress" role="progressbar" aria-valuenow="40">
                             <div class="progress-bar bg-warning text-dark" style="width: 40%">40%</div>
@@ -488,7 +488,7 @@
                         <td class="company-name">Delta Commerce</td>
                         <td>E-commerce</td>
                         <td>Growth</td>
-                        <td><span class="badge bg-info rating-badge">4.5/5</span></td>
+                        <td><span class="badge bg-label-info rating-badge">4.5/5</span></td>
                         <td>
                           <div class="progress" role="progressbar" aria-valuenow="85">
                             <div class="progress-bar bg-info" style="width: 85%">85%</div>
@@ -514,7 +514,7 @@
                         <td class="company-name">Zeta AI</td>
                         <td>Artificial Intelligence</td>
                         <td>Idea</td>
-                        <td><span class="badge bg-danger rating-badge">2.5/5</span></td>
+                        <td><span class="badge bg-label-danger rating-badge">2.5/5</span></td>
                         <td>
                           <div class="progress" role="progressbar" aria-valuenow="20">
                             <div class="progress-bar bg-danger" style="width: 20%">20%</div>
@@ -793,7 +793,7 @@
                         <td class="trainer-name">Dr. Sarah Ibrahim</td>
                         <td>25</td>
                         <td><span class="badge bg-label-primary rating-badge">4.7/5</span></td>
-                        <td><span class="badge bg-warning text-dark">In-Person</span></td>
+                        <td><span class="badge bg-label-warning text-dark">In-Person</span></td>
                       </tr>
                       <tr>
                         <td class="ws-name">Digital Marketing</td>
@@ -833,7 +833,7 @@
                       </tr>
                       <tr>
                         <td class="text-right-align">Gamma Education</td>
-                        <td><span class="badge bg-warning text-dark">75%</span></td>
+                        <td><span class="badge bg-label-warning text-dark">75%</span></td>
                         <td><i class="fas fa-times-circle text-danger pass-fail-icon"></i></td>
                       </tr>
                       <!-- ... more rows -->
