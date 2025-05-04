@@ -1581,5 +1581,9 @@ return [
 	'Delete Submission' => 'حذف التقديم',
 	'Delete Submission Confirmation' => 'هل أنت متأكد أنك تريد حذف هذا التقديم؟',
 	'Deleted Successfully' => 'تم الحذف بنجاح',
+	'Session report updated' => 'تم تحديث التقرير بنجاح',
+	'session report is not available yet' => 'التقرير غير متوفر حتى الان',
+	'Session Record updated' => 'تم تحديث تسجيل الجلسة بنجاح',
+	'Session Recording is not available yet' => 'تسجيل الجلسة غير متوفر حتى الان',
 ]; 
 

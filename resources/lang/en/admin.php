@@ -1561,4 +1561,8 @@ return [
 	'Delete Submission Confirmation' => 'Are you sure you want to delete this submission?',
 	'Deleted' => 'Deleted!',
 	'Deleted Successfully' => 'Deleted Successfully',
+	'Session report updated' => 'Session Report Updated Successfully',
+	'session report is not available yet' => 'Session Report not Available Yet',
+	'Session Record updated' => 'Session Record Updated Successfully',
+	'Session Recording is not available yet' => 'Session Recording is not Available Yet',
 ];
