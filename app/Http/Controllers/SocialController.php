@@ -114,8 +114,15 @@ use Illuminate\Support\Facades\Http;
     }
 
     // ===========> LinkedIn <==========
-    public function redirectToLinkedIn()
+    public function redirectToLinkedIn($data)
     {
+        
+        if($data == '2520'){
+            session(['role' => 'Mentor']);
+        }else{
+            session(['role' => 'Registered']);
+        }
+    
         // dd(config('services.linkedin.client_id'), config('services.linkedin.client_secret'), config('services.linkedin.redirect'));
         $LINKEDIN_CLIENT_ID = config('services.linkedin.client_id');
         $LINKEDIN_CLIENT_SECRET = config('services.linkedin.client_secret');
@@ -130,12 +137,13 @@ use Illuminate\Support\Facades\Http;
             . '&client_id=' . $clientId
             . '&redirect_uri=' . urlencode($redirectUri)
             . '&scope=' . urlencode($scope);
-    
+            
         return redirect($url);
     }
     
     public function handleLinkedInCallback(Request $request)
     {
+        
         if (!$request->has('code')) {
             return redirect()->route('login')->with('error', 'Authorization code is missing');
         }
@@ -192,13 +200,14 @@ use Illuminate\Support\Facades\Http;
                           $user->email_verified_at = now();
                       }
                       $user->save();
+                      $user->allotRole(session('role'));
                   } else {
                       // تحديث linkedin_id إذا تم العثور على المستخدم
                       $user->linkedin_id = $userInfo['sub'] ?? '';
                       $user->save();
                   }
                     auth()->login($user);
-    
+                    session()->forget('role');
                     return redirect('/dashboard');
                 }
             }
