@@ -98,53 +98,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
       dt_basic;
 
     if (dt_basic_table.length) {
-      const data = [
-        {
-          form_id: 1,
-          form_name: "Employee Feedback",
-          assigned_organization: "HR Department",
-          submissions: 120,
-          last_modified: "2023-01-15",
-          created_date: "2022-12-01",
-          status: t.active
-        },
-        {
-          form_id: 2,
-          form_name: "Customer Survey",
-          assigned_organization: "Marketing Team",
-          submissions: 85,
-          last_modified: "2023-02-10",
-          created_date: "2023-01-05",
-          status: t.active
-        },
-        {
-          form_id: 3,
-          form_name: "Incident Report",
-          assigned_organization: "Safety Department",
-          submissions: 45,
-          last_modified: "2023-03-20",
-          created_date: "2023-02-15",
-          status: t.inactive
-        },
-        {
-          form_id: 4,
-          form_name: "Training Feedback",
-          assigned_organization: "Training Team",
-          submissions: 200,
-          last_modified: "2023-04-05",
-          created_date: "2023-03-01",
-          status: t.active
-        },
-        {
-          form_id: 5,
-          form_name: "Project Evaluation",
-          assigned_organization: "Project Management",
-          submissions: 60,
-          last_modified: "2023-05-12",
-          created_date: "2023-04-10",
-          status: t.active
-        }
-      ];
+      
+      const data = formListData ? formListData : [];
 
       dt_basic = dt_basic_table.DataTable({
         data: data,

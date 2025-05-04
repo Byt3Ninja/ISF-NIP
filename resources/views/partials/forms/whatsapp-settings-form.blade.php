@@ -21,6 +21,40 @@
         id="whatsApp_ACCESS_TOKEN">
     </div>
 
+    <h1>WhatsApp Session Manager</h1>
+
+        <div class="action-group">
+            <h2>Manage Specific Session</h2>
+            <label for="sessionIdInput">Session ID:</label>
+            <input type="text" id="sessionIdInput" placeholder="e.g., my-session-name">
+
+            {{-- Button to trigger the primary workflow --}}
+            <button id="monitorButton">Start & Monitor Session</button>
+            <hr style="margin: 15px 0; border: none; border-top: 1px dashed #eee;">
+
+            {{-- Add other direct action buttons if needed --}}
+            {{-- <button id="restartButton" class="secondary">Restart</button> --}}
+            {{-- <button id="terminateButton" class="danger">Terminate</button> --}}
+        </div>
+
+        {{-- Feedback Area --}}
+        <div id="feedbackArea" class="feedback" style="display: none;"></div>
+
+        {{-- QR Code Display Area --}}
+         <div id="qrCodeImageArea" class="output-area" style="display: none;">
+             <strong>Scan QR Code:</strong>
+              <p style="font-size: 0.9em; color: #666; text-align: center;">Scan this QR code with WhatsApp on your phone.</p>
+             <img id="qrImageElement" src="" alt="WhatsApp QR Code">
+         </div>
+
+        {{-- Polling Feedback Area --}}
+        <div id="pollingFeedbackArea" class="output-area" style="display: none;">
+             <strong>Monitoring Status:</strong>
+             <span id="pollingStatusContent">Waiting to start...</span>
+         </div>
+
+    </div>
+
 
 
 

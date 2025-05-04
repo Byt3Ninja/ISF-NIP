@@ -429,7 +429,7 @@
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
-          url: '{{ route("delete.document") }}',
+          url: '{{ route("company.profile_documents_delete") }}',
           type: 'POST',
           data: {
               _token: '{{ csrf_token() }}',
