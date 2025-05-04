@@ -502,7 +502,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('mentorshipTasks/edit-task', 'MentorshipTaskController@updateTask');
         Route::post('mentorshipTasks/remove-task', 'MentorshipTaskController@removeTask');
         Route::post('mentorshipTasks/post-comment', 'MentorshipTaskController@addComment');
-        Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display');
+        Route::get('mentorshipTasks/display/{id}', 'MentorshipTaskController@display')->name('mentorshipTasks.show');
         Route::post('mentorshipTasks/upload-attachments', 'MentorshipTaskController@attach');
         Route::post('mentorshipTasks/delete-attachments', 'MentorshipTaskController@deAttach');
 
@@ -516,8 +516,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::group(['prefix' => 'startup', 'as' => 'startup.', 'namespace' => 'Startup'], function () {
         Route::get('mentorshipTasks', 'MentorshipTaskController@home')->name('mentorship_tasks.dashboard.view');
-        Route::get('mentorshipTasks/{mentorship_id}', 'MentorshipTaskController@index')->name('mentorshipTasks.index');
-        Route::get('mentorshipTasks/show/{mentorshipTask}', 'MentorshipTaskController@show')->name('mentorshipTasks.show');
+        Route::get('mentorshipTasks/{mentorship_id}', 'MentorshipTaskController@index')->name('startup.mentorshipTasks.index');
+        Route::get('mentorshipTasks/show/{mentorshipTask}', 'MentorshipTaskController@show')->name('startup.mentorshipTasks.show');
         Route::post('mentorshipTasks/complete/{mentorshipTask}', 'MentorshipTaskController@complete')->name('mentorship_tasks.complete_mine');
         Route::post('mentorshipTasks/send/comment', 'MentorshipTaskController@sendComment')->name('mentorship_tasks.comment_mine');
 
