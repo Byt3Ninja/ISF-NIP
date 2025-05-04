@@ -303,6 +303,7 @@
   {"name": "users.view_companies", "description": "View User's Associated Companies", "permission_group_id": "User Management", "guard_name": "web"},
   {"name": "utils.locations_list_states_by_country", "description": "Get States by Country", "permission_group_id": "Utilities", "guard_name": "web"},
   {"name": "messages.send", "description": "Send New Message", "permission_group_id": "Messaging", "guard_name": "web"},
+  {"name": "messages.save", "description": "Save New Message", "permission_group_id": "Messaging", "guard_name": "web"},
   {"name": "messages.reply", "description": "Send Reply to Message", "permission_group_id": "Messaging", "guard_name": "web"},
   {"name": "messages.recipients_list_by_program", "description": "Get Users List by Program (for composing)", "permission_group_id": "Messaging", "guard_name": "web"},
   {"name": "messages.list", "description": "List Messages (Inbox/Outbox Entry Point)", "permission_group_id": "Messaging", "guard_name": "web"},
