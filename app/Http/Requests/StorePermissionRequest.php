@@ -27,6 +27,7 @@ class StorePermissionRequest extends FormRequest
             'name' => [
                 'string',
                 'required',
+                'unique:permissions,name',
             ],
             'permission_group_id' => [
                 'nullable',
