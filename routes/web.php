@@ -479,7 +479,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('programlist/show/{id}', 'ProgramController@show')->name('programs.view');
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
-
+    Route::get('programlist/report/{id}', 'ProgramController@programReport')->name('programs.report');
+    
     /* Start of Currencies Routes */
     Route::patch('currencies/UpdateCurrency', 'CurrencyController@UpdateAllCurrency')->name('currencies.rates_update_all');
     Route::resource('currencies', 'CurrencyController')->except(['show']);
