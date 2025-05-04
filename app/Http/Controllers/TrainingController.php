@@ -1301,6 +1301,10 @@ Thanks from " . env('APP_NAME');
 			return response()->json(['success' => false, 'message' => 'Session not found'], 404);
 		}
 
+		if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionReport')) {
+			return redirect()->back()->with('message', __('admin.session report is not available yet'));
+		}
+
 		$response = $this->meetingService->getSessionReport($session->zoom_id);
 		if ($response['success'])
 		{
@@ -1328,52 +1332,15 @@ Thanks from " . env('APP_NAME');
 					]
 				);
 			}
-			return redirect()->back();
+			return redirect()->back()->with('message', __('admin.Session report updated.'));
+
+		}
+		else {
+			return redirect()->back()->with('message', __('session report is not available yet'));
 		}
 	}
 
-	/* public function sessionRecord($id)
-	{
-		 $session = TrainingSession::find($id);
 
-		 if (!$session || !$session->zoom_id) {
-			 return redirect()->back()->withErrors([
-				 'error' => 'Session Not Found',
-			 ]);
-		 }
-
-		 $response = $this->meetingService->getSessionRecord($session->zoom_id);
-		 dd($response);
-
-		 if (!$response['success']) {
-			 return redirect()->back()->withErrors([
-				 'error' => 'Session Recording Not Found',
-			 ]);
-		 }
-
-		 $recordingFiles = $response['data']['recording_files'] ?? [];
-
-		 foreach ($recordingFiles as $file) {
-			 $recordingTime = isset($file['recording_start'])
-				 ? Carbon::parse($file['recording_start'])->toDateTimeString()
-				 : null;
-
-			 SessionRecording::updateOrCreate(
-				 [
-					 'recording_id' => $file['id'],
-				 ],
-				 [
-					 'session_id' => $session->id,
-					 'recording_type' => $file['recording_type'] ?? null,
-					 'recording_view_url' => $file['play_url'] ?? null,
-					 'recording_download_url' => $file['download_url'] ?? null,
-					 'recording_time' => $recordingTime,
-				 ]
-			 );
-		 }
-
-		 return redirect()->back();
-	} */
 
 	public function sessionRecord($id)
 	{
@@ -1382,10 +1349,11 @@ Thanks from " . env('APP_NAME');
 			return redirect()->back()->withErrors(['error' => 'Session Not Found',]);
 		}
 
-		$response = $this->meetingService->getSessionRecord($session->zoom_id);
-		if (!$response['success']) {
-			return redirect()->back()->withErrors(['error' => 'Session Recording Not Found',]);
+		if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionRecord')) {
+			return redirect()->back()->with('message', __('admin.Session Recording is not available yet'));
 		}
+
+		$response = $this->meetingService->getSessionRecord($session->zoom_id);
 
 		$recordingFiles = $response['data']['recording_files'] ?? [];
 		$password = $response['data']['password'] ?? null;
@@ -1412,7 +1380,8 @@ Thanks from " . env('APP_NAME');
 			);
 		}
 
-		return redirect()->back();
+		return redirect()->back()->with('message', __('admin.Session Record updated'));
+
 	}
 
 	public function attendanceReport(Request $request, $id)
