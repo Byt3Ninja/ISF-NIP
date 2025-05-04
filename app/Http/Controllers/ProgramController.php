@@ -285,4 +285,9 @@ class ProgramController extends Controller
         return redirect()->back(); // استبدل `your_desired_route` بالمسار المطلوب.
 
     }
+
+    public function programReport(string $id)
+    {
+        return view('admin.programs.program-report');
+    }
 }

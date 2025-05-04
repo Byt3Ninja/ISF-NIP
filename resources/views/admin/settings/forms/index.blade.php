@@ -134,6 +134,11 @@
 @stop
 
 @section('pagescripts')
+<script>
+  let formListData = @json($data);
+  console.log(formListData);
+   
+  </script>
 <script src="/vuexy/assets/js/form-list.js"></script>
 
 <!-- JS Chart Init -->

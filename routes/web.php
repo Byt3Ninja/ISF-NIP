@@ -141,6 +141,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('settings/UpdateimgHome', 'SettingsController@update_settingsImgHome')->name('settings.system_social_home_image_update');
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('settings.system_social_achievements_update');
     Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('settings.system_social_whatsapp_update');
+    Route::get('whatsapp/session/{sessionId}/start', 'WhatsAppSessionController@start')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.start');
+    Route::get('whatsapp/session/{sessionId}/status', 'WhatsAppSessionController@status')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.status');
+    Route::get('whatsapp/session/{sessionId}/qr-data', 'WhatsAppSessionController@getQrData')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.qr.data');
+    Route::get('whatsapp/session/{sessionId}/qr-image', 'WhatsAppSessionController@getQrImage')->where('sessionId', '[a-zA-Z0-9\-]+')->name('whatsapp.session.qr.image');
+
+    
 
 
     Route::get('organizations/settings', 'SettingsController@showSettings')->name('settings.organization_manage');
@@ -479,7 +485,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('programlist/show/{id}', 'ProgramController@show')->name('programs.view');
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
-
+    Route::get('programlist/report/{id}', 'ProgramController@programReport')->name('programs.report');
+    
     /* Start of Currencies Routes */
     Route::patch('currencies/UpdateCurrency', 'CurrencyController@UpdateAllCurrency')->name('currencies.rates_update_all');
     Route::resource('currencies', 'CurrencyController')->except(['show']);
@@ -584,7 +591,7 @@ Route::get('/auth/microsoft/redirect/{mentorship_id}',  'MicrosoftController@red
 Route::get('/auth/microsoft/callback',  'MicrosoftController@callback')->name('integrations.auth_microsoft_callback');
 
 // --------------------> Linked In <-------------------
-Route::get('/auth/linkedin', 'SocialController@redirectToLinkedIn')->name('integrations.auth_linkedin_login');
+Route::get('/auth/linkedin/{data?}', 'SocialController@redirectToLinkedIn')->name('integrations.auth_linkedin_login');
 Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCallback')->name('integrations.auth_linkedin_callback');
 
 if (request()->secure()) {
