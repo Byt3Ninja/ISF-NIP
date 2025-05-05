@@ -345,7 +345,7 @@
         '{{ $client->company ? optional($client->company)->state_id : 0 }}';
       var selected = '';
       $.ajax({
-        url: "{{ route('get_states_by_country') }}",
+        url: "{{ route('utils.locations_list_states_by_country') }}",
         data: {
           country_id: country_id
         },
@@ -478,19 +478,19 @@
     // Upload for Pitch Deck
     $('#pitch_deck').on('change', function() {
       uploadFile('pitch_deck', 'progress-bar-pitch_deck',
-        '{{ route('update_my_company') }}');
+        '{{ route('company.profile_update_mine') }}');
     });
 
     // Upload for Pitch Deck Video
     $('#pitch_deck_video').on('change', function() {
       uploadFile('pitch_deck_video', 'progress-bar-pitch_deck_video',
-        '{{ route('update_my_company') }}');
+        '{{ route('company.profile_update_mine') }}');
     });
 
     // Upload for Pitch Deck Video
     $('#img_url').on('change', function() {
       uploadFile('img_url', 'progress-bar-Logo',
-        '{{ route('update_my_company') }}');
+        '{{ route('company.profile_update_mine') }}');
     });
   </script>
 

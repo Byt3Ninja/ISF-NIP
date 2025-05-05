@@ -15,7 +15,7 @@ class FormBuilderController extends Controller
     /**
      * show the builder
      */
-    public function showBuilder($id=1)
+    public function showBuilder(Request $request, $id=1)
     {
         $organization_id=auth()->user()->organization_id;
 
@@ -120,6 +120,10 @@ class FormBuilderController extends Controller
             $builderForms = BuilderForm::where('organization_id',auth()->user()->organization_id)->get();
         }else{
             $builderForms = BuilderForm::all();
+        }
+
+        if($request->org_id){
+            $builderForms = BuilderForm::where('organization_id',$request->org_id)->get();
         }
 
         $data = [

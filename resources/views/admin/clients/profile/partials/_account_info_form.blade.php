@@ -2,7 +2,7 @@
   <form 
     id="account-info-form" 
     method="post" 
-    action="{{ route('update_my_profile') }}" 
+    action="{{ route('user.profile_update_basic') }}" 
     enctype="multipart/form-data"
   >
     {!! csrf_field() !!}

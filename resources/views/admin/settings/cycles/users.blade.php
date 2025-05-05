@@ -157,7 +157,7 @@
                           <td>
                             <div class="d-flex align-items-center">
                               <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
-                                <img src="/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}"
+                                <img src="{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
                               <a href="/dashboard/companyProfile/{{ $company->id }}">
@@ -287,7 +287,7 @@
             <i class="ti ti-x ti-16px"></i>
           </button>
         </div>
-        <form class="bg-label-secondary" method="GET" action="{{ route('cycles.users', $id) }}">
+        <form class="bg-label-secondary" method="GET" action="{{ route('cycles.users_manage', $id) }}">
           <div class="card">
             <div class="card-body">
               <div class="form-group mb-4">
@@ -586,7 +586,7 @@
           },
           success: function(response) {
             // alert(response.ddddd);
-            // console.log(response);
+            console.log(response);
             location.href = '/dashboard/cycles/{{ $id }}/registered';
           },
           error: function(error) {

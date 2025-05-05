@@ -183,33 +183,35 @@
                               <i class="ti ti-trash text-danger"></i></span>
                           </a>&nbsp;
                           @php
-                          if ($step->stype == '1') {
-                          $link = 'cycles/view/' . $step->cycle_id;
-                          $set = 'show-builder';
-                          } elseif ($step->stype == '2') {
-                          $link = $step->id . '/screening';
-                          $set = $step->id . '/screening';
-                          } elseif ($step->stype == '3') {
-                          $link = 'mentorship/sessions';
-                          $set = 'mentorship/assign/' . $step->cycle_id;
-                          } elseif ($step->stype == '4') {
-                          $link = $set = 'training/sessions/' . $step->id;
-                          } else {
-                          $link = 'final/results/' . $step->id;
-                          $set = $step->id . '/final/';
-                          }
-                          @endphp
-                          <a href="/dashboard/{{ $set }}" id="{{ $step->id }}">
+                            if ($step->stype == 1) {
+                               $link = 'show-form/' . $step->id; 
+                               $set = 'show-builder';            
+                                 } elseif ($step->stype == 2) {
+                                  $link = $step->id . '/screening';
+                                  $set = $step->id . '/screening';
+                                  } elseif ($step->stype == 3) {
+                                     $link = 'mentorship/sessions';
+                                     $set = 'mentorship/assign/' . $step->cycle_id;
+                                      } elseif ($step->stype == 4) {
+                                          $link = 'training/sessions/' . $step->id;
+                                          $set = 'training/sessions/' . $step->id;
+                                    } else {
+                                          $link = 'final/results/' . $step->id;
+                                          $set = $step->id . '/final/';
+                                      }
+                                    @endphp
+                           <a href="/dashboard/{{ $set }}" id="{{ $step->id }}">
                             <span class="btn btn-icon btn-label-warning rounded-circle">
-                              <i class="ti ti-settings" title="{{ __('cycles.Step settings') }}"></i>
+                                <i class="ti ti-settings" title="{{ __('cycles.Step settings') }}"></i>
                             </span>
-                          </a>&nbsp;
-                          <a href="/dashboard/{{ $link }}" id="{{ $step->id }}">
-                            <span class="btn btn-icon btn-label-primary rounded-circle">
-                              <i class="ti ti-eye" title="{{ __('cycles.view step results') }}">
-                              </i>
-                            </span>
-                          </a>
+                        </a>
+                        @if($step->stype == 1 && $step->form)
+                        <a href="{{ route('forms.render_view', $step->form->id) }}" id="{{ $step->id }}">
+                          <span class="btn btn-icon btn-label-primary rounded-circle">
+                            <i class="ti ti-eye" title="{{ __('cycles.view step results') }}"></i>
+                          </span>
+                        </a>
+                      @endif
                         </div>
                       </div>
                     </li>

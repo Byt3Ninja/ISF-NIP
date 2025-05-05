@@ -287,7 +287,7 @@
             </div>
 
             <div class="d-flex justify-content-center">
-              <a href="{{ route('linkedin.login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
+              <a href="{{ route('integrations.auth_linkedin_login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
                 <i class="fa-brands fa-linkedin-in text-white"></i> 
               </a>
               <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">

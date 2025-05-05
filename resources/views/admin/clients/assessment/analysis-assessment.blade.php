@@ -151,7 +151,7 @@
                 <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
 
                   @if (!$assessment_user)
-                    <a href="{{ route('make_new_assessment_to_user') }}"
+                    <a href="{{ route('assessments.assign') }}"
                       class="btn btn-sm btn-primary light-shadow radius-10">
                       {{ __('admin.Make_a_new_assessment') }}
                     </a>
@@ -162,7 +162,7 @@
                   @endif
 
                   @if ($assessment && $assessment->end_date != null)
-                    <a href="{{ route('assessment.pdf') }}" class="btn btn-sm btn-danger light-shadow radius-10 ms-2">
+                    <a href="{{ route('assessments.results_export_pdf') }}" class="btn btn-sm btn-primary light-shadow radius-10 ms-2">
                       {{ __('admin.Export_assessment_pdf') }}
                     </a>
                   @else

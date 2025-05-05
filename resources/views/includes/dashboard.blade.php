@@ -23,7 +23,7 @@
 @stop
 @section('content')
 	@if (!$_user->first_name_ar)
-		<div class="d-none">{!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}</div>
+		<div class="d-none">{!! redirect()->route('user.profile_view')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}</div>
 	@endif
 	<!-- Content wrapper -->
 	<div class="content-wrapper">
@@ -107,7 +107,7 @@
 				@endforeach
 			</div>
 			<div class="row mt-6">
-				@if( array_intersect(['dashboard_tables.latest_services'], $permissions) )
+				@if( array_intersect(['dashboard.widgets_tables_latest_services_view'], $permissions) )
 					<div class="col-sm-6 col-12 mb-6">
 						<div class="card">
 							<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -147,7 +147,7 @@
 						</div>
 					</div>
 				@endif
-				@if( array_intersect(['dashboard_tables.available_surveys'], $permissions) )
+				@if( array_intersect(['dashboard.widgets_tables_available_surveys_view'], $permissions) )
 					<div class="col-sm-6 col-12 mb-6" style="height: 300px; overflow-y: auto; border-radius: 1rem;">
 						<div class="card">
 							<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -192,7 +192,7 @@
 												@endif
 											</div>
 											<div class="col-3 text-end">
-												<a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{ __('dashboard.startSurvey') }}</a>
+												<a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{ __('dashboard.startSurvey') }}</a>
 											</div>
 									  </div>
 									@endforeach
@@ -201,7 +201,7 @@
 						</div>
 					</div>
 				@endif
-				@if( array_intersect(['dashboard_tables.latest_events'], $permissions) )
+				@if( array_intersect(['dashboard.widgets_tables_latest_events_view'], $permissions) )
 					<div class="col-12">
 						<section>
 							<div class="row">
@@ -245,7 +245,7 @@
 						</section>
 					</div>
 				@endif
-				@if( array_intersect(['dashboard_tables.current_enrolled_program'], $permissions) )
+				@if( array_intersect(['dashboard.widgets_tables_current_enrolled_program_view'], $permissions) )
 					<div class="col-12">
 						<section>
 							<div class="row">
@@ -284,7 +284,7 @@
 																<td>
 																	@if( $step->stype == 1 )
 																		@if( $step->arr == 'Completed' || $step->arr == 'انتهت' )
-																			@if( $company->approved && $_user->ableTo('cycles.my', $permissions) )
+																			@if( $company->approved && $_user->ableTo('cycles.list_mine', $permissions) )
 																				<a href="/dashboard/cycles/{{ $step->fLink }}"> {{ $step->title }} </a>
 																			@else 
 																				{{ $step->title }}
@@ -359,7 +359,7 @@
 					</div>
 				@endif
 				
-				@if( $cType == 5 && array_intersect(['dashboard_tables.my_final_session'], $permissions) )
+				@if( $cType == 5 && array_intersect(['dashboard.widgets_tables_my_final_session_view'], $permissions) )
 					<div class="col-12">
 						<section>
 							<div class="row">
@@ -431,7 +431,7 @@
 						</section>
 					</div>
 				@endif
-				@if( $cType != 5 && array_intersect(['dashboard_tables.my_last_training'], $permissions) && $sessions->count() > 0 )
+				@if( $cType != 5 && array_intersect(['dashboard.widgets_tables_my_last_training_view'], $permissions) && $sessions->count() > 0 )
 					<div class="col-12">
 						<section>
 							<div class="row">
@@ -470,7 +470,7 @@
 																	@if( $session->type == 'sessions' )
 																		{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
 																		<a href="{{ $session->join_url }}" target="_blank">
-																			<button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary"> <i class="bx bx-desktop"></i> </button>
+																			<button title="Join only" type="button" class="btn btn-icon rounded-circle btn-light-primary"> <i class="ti ti-brand-zoom"></i> </button>
 																		</a>
 																	@elseif ($session->type == 'offline')
 																		<b>{{ __('cycles.trainer name') }}:</b> {{ $session->trainer_name }}<br>
@@ -492,7 +492,7 @@
 						</section>
 					</div>
 				@endif
-				@if( array_intersect(['dashboard_tables.mentors_sessions'], $permissions) )
+				@if( array_intersect(['dashboard.widgets_tables_mentors_sessions_view'], $permissions) )
 					<div class="col-12">
 						<section>
 							<div class="row">
@@ -573,7 +573,7 @@
 						</section>
 					</div>
 				@endif
-				@if( array_intersect(['dashboard_tables.mentors'], $permissions) && !is_null($cycle_id) )
+				@if( array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null($cycle_id) )
 					<div class="col-12">
 						<div class="card mt-10">
 							<section>
@@ -596,7 +596,7 @@
 																<th>{{__('dashboard.Bio')}}</th>
 																<th>{{__('dashboard.Specialization')}}</th>
 																<th>{{__('dashboard.Linkedin')}}</th>
-																@if( $_user->ableTo('mentors.modify', $permissions) )<th>{{__('dashboard.Request')}}</th>@endif
+																@if( $_user->ableTo('mentors.settings_modify', $permissions) )<th>{{__('dashboard.Request')}}</th>@endif
 															</tr>
 														</thead>
 														<tbody>
@@ -606,12 +606,12 @@
 																	<td>
 																		<div class="d-flex align-items-center gap-1">
 																			<a class="media-left"> <img src="{{ $mentor->image_url }}" alt="avatar" class="rounded-circle me-3" height="40" width="40"> </a>
-																			@if( $_user->ableTo('show_mentor_profile', $permissions) )<a target="_blank" href="{{route('show_mentor_profile', $mentor->id)}}">@endif
+																			@if( $_user->ableTo('mentors.profile_view', $permissions) )<a target="_blank" href="{{route('mentors.profile_view', $mentor->id)}}">@endif
 																				<div class="media-body">
 																					<h6 class="media-heading mb-0 text-nowrap">{{ $mentor->name ?? '-' }}</h6>
 																					<span class="font-small-2 text-nowrap">{{ $mentor->title ?? '-' }}</span>
 																				</div>
-																			@if( $_user->ableTo('show_mentor_profile', $permissions) )</a>@endif
+																			@if( $_user->ableTo('mentors.profile_view', $permissions) )</a>@endif
 																		</div>
 																	</td>
 																	<td> {{ $mentor->bio ?? '-' }} </td>
@@ -621,7 +621,7 @@
 																			<a title="Linkedin URL" target="_blank" href="{{ $mentor->linkedin }}" class="btn btn-icon rounded-circle btn-label-primary"> <i class="fa-brands fa-linkedin-in"></i></a>
 																		@endif
 																	</td>
-																	@if( $_user->ableTo('mentors.modify', $permissions) )
+																	@if( $_user->ableTo('mentors.settings_modify', $permissions) )
 																	<td>
 																		<button onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" title="Add new request" type="button" class="btn btn-icon rounded-circle btn-label-success">
 																			<i class="fa fa-plus"></i>
@@ -642,7 +642,7 @@
 					</div>
 				@endif
 
-				@if( array_intersect(['dashboard_tables.my_current_schedule'], $permissions) )
+				@if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 					<div class="col-12">
 						<div class="card mt-10">
 							<section>
@@ -653,7 +653,7 @@
 												<h5 class="card-title align-items-center">
 													<i class="ti ti-calendar-plus ti-24px"></i>
 													<span class="mx-2">{{ __("dashboard.My current schedule") }}</span>
-													@if( $_user->ableTo('mentors.modify', $permissions) )
+													@if( $_user->ableTo('mentors.settings_modify', $permissions) )
 													<button id="addSchedule"  onclick="this.querySelector('.spinner-border').classList.remove('d-none'); modify(1, undefined, 0)" type="button" class="btn btn-sm btn-label-primary">
 														{{ __('dashboard.Schedule') }}
 														<i class="ti ti-calendar ms-2"></i>
@@ -711,7 +711,7 @@
 					</div>
 				@endif
 
-				@if( array_intersect(['dashboard_tables.my_next_mentorship_sessions'], $permissions) )
+				@if( array_intersect(['dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )
 					<div class="col-12">
 						<div class="card mt-10">
 							<section>
@@ -740,10 +740,10 @@
 															<tr>
 																<td> {{ $loop->iteration }} </td>
 																<td>
-																	@if( $_user->ableTo('company_profile', $permissions) )<a class="text-dark" href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
+																	@if( $_user->ableTo('company.profile_view', $permissions) )<a class="text-dark" href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
 																		<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle" height="40" width="40">
 																		<span class="fw-medium"> {{ $session->user->company->name }}</span>
-																	@if( $_user->ableTo('company_profile', $permissions) )</a>@endif
+																	@if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
 																</td>
 																<td>
 																	@if( $_user->ableTo('users.edit', $permissions) )<a class="text-dark d-flex align-items-center gap-2" href="/dashboard/users/{{ $session->user->id }}/edit">@endif
@@ -784,31 +784,11 @@
 							</section>
 						</div>
 					</div>
-				@else
-					<div class="col-12">
-						<section>
-							<div class="row">
-								<div class="col-md-12">
-									<div class="card mt-10">
-										<div class="card-header border-bottom mb-4">
-											<h5 class="card-title align-items-center">
-												<i class="ti ti-calendar-stats ti-24px"></i>
-												<span class="mx-2">{{ __("dashboard.My next mentorship sessions") }}</span>
-											</h5>
-										</div>
-										<div class="card-body">
-											<h3>{{__('dashboard.No sessions added yet')}}.</h3>
-										</div>
-									</div>
-								</div>
-							</div>
-						</section>
-					</div>
 				@endif
 			</div>
 		</div>
 	</div>
-	@if( $_user->ableTo('mentors.modify', $permissions) && array_intersect(['dashboard_tables.mentors'], $permissions) && !is_null( $cycle_id ) )
+	@if( $_user->ableTo('mentors.settings_modify', $permissions) && array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null( $cycle_id ) )
 	<!--  Edit SP Modal -->
   		@include('admin.clients.startup.partials._session_modal')
   	<!--/ Edit SP Modal -->

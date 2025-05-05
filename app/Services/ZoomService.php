@@ -47,7 +47,7 @@ class ZoomService implements OnlineMeetingServiceInterface
 
       $user = Auth::user();
 
-      if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
+      if ($user && $user->hasRole('Admin') && Schema::hasTable('settings')) {
         $setting = Settings::where('id', 1)->first();
 
         if ($setting) {
@@ -57,7 +57,7 @@ class ZoomService implements OnlineMeetingServiceInterface
         }
     }
 
-    elseif ($user->hasRole('organizationManager')) {
+    elseif ($user && $user->hasRole('organizationManager')) {
         $org = $user->organization;
         $ZOOM_CLIENT_ID = $org->zoom_client_id;
         $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;

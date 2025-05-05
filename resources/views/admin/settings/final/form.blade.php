@@ -40,7 +40,7 @@
                                                     <div class="col-md-12">
                                                         <div class="d-flex align-items-center gap-1">
                                                             <a class="media-left mr-50">
-                                                                <img src="/191014/{{$company->logo??'../app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
+                                                                <img src="/191014/{{$company->logo??'/app-assets/images/logo_placeholder.png'}}" alt="avatar" class="rounded-circle" height="40" width="40">
                                                             </a>
                                                             <a href="/dashboard/companyProfile/{{$company->id}}">
                                                                 <div class="d-flex align-items-center gap-1">

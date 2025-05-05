@@ -1,7 +1,7 @@
 @php
   $formAction = $_user->hasAnyRole('Admin|organizationManager')
-    ? route('update_my_company', $client->company->id)
-    : route('update_my_company');
+    ? route('company.profile_update_mine', $client->company->id)
+    : route('company.profile_update_mine');
 @endphp
 
 <div class="row">
@@ -429,7 +429,7 @@
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
-          url: '{{ route("delete.document") }}',
+          url: '{{ route("company.profile_documents_delete") }}',
           type: 'POST',
           data: {
               _token: '{{ csrf_token() }}',

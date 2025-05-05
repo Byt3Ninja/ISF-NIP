@@ -13,7 +13,7 @@
 @section('content')
 
 @if( !Auth::user()->first_name_ar )
-	{!!redirect()->route('my_profile')->with( ['msg' => 'FailedStore', 'class' => 'danger'] )!!}
+	{!!redirect()->route('user.profile_view')->with( ['msg' => 'FailedStore', 'class' => 'danger'] )!!}
 @endif
 
 @php

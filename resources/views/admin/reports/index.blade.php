@@ -308,5 +308,5 @@ var responses = @json($available_surveys)
 
   </script>
 
-  <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script>
+  {{-- <script src="/vuexy/assets/js/app-logistics-dashboard.js"></script> --}}
 @stop

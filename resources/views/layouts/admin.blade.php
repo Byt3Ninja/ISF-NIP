@@ -61,11 +61,14 @@
     <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
     <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+
+    <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
     <!-- endbuild -->
 
     <!-- Vendors JS -->
     <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+
     <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
     @yield('scripts')
     <!-- End Vendor JS-->
@@ -74,7 +77,7 @@
     <script src="/vuexy/assets/js/main.js"></script>
 
     <!-- Custom JS -->
-    <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script>
+    {{-- <script src="/app-assets/plugins/sweatalert/sweetalert2.all.min.js"></script> --}}
     <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
     <!-- For Searchable Select -->
     <script src="/vuexy/assets/js/forms-selects.js"></script>
@@ -99,9 +102,6 @@
 
               window.addEventListener("chatwoot:ready", function () {
                 @if (auth()->check())
-                  console.log(
-                    "{{ auth()->user()->country_code . auth()->user()->phone ?? '' }}"
-                  );
                   window.$chatwoot.setUser("{{ auth()->user()->id }}", {
                     email: "{{ auth()->user()->email }}",
                     name: "{{ auth()->user()->name }}",
@@ -125,7 +125,7 @@
         // console.log("pusherConfig", pusherConfig);
         const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
         const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
-        Pusher.logToConsole = true;
+        // Pusher.logToConsole = true;
 
         const pusher = new Pusher(pusherAppKey, {
           cluster: pusherCluster,

@@ -123,9 +123,24 @@ class TrainingController extends Controller
 		return response()->json(['state' => 'success'], 200);
 	}
 
-	public function all($id = 0)
+	public function all(Request $request, $id = 0)
 	{
-		$courses = Training::orderBy('created_at', 'DESC')->where('status', 1)->get();
+		$courses = Training::orderBy('created_at', 'DESC');
+		if ($request->catTr_id) {
+			$courses = $courses->whereHas('categories', function ($query) use ($request) {
+				$query->whereIn('categories_id', (array) $request->catTr_id);
+			})
+			->where('status', 1)
+			->orderBy('created_at', 'DESC');
+		}
+		if ($request->status) {
+			if($request->status == "draft"){
+				$courses = $courses->where('Status', 0);
+			}else{
+				$courses = $courses->where('Status', 1);
+			}
+		}
+		$courses = $courses->get();
 		if ($id == 0 && count($courses)) { $id = $courses->pluck('id')[0]; }
 		$contents = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get();
 
@@ -381,20 +396,20 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
 			if (empty($cycleData)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 			if (empty($cycleData->organization_id)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 
 			$organization_id = $cycleData->organization_id;
@@ -469,20 +484,20 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
 			if (empty($cycleData)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 			if (empty($cycleData->organization_id)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 
 			$organization_id = $cycleData->organization_id;
@@ -520,7 +535,7 @@ class TrainingController extends Controller
 						$result->status = true;
 						$result->ended_at = $time_limit->format('Y-m-d H:i:s');
 						$result->save();
-						return redirect()->route('quiz.overview', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
+						return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
 					}
 				}
 			}
@@ -543,7 +558,7 @@ class TrainingController extends Controller
 			$failures = $attempts->where('score', '<', $quiz->passing_criteria);
 			$success = $attempts->where('score', '>=', $quiz->passing_criteria);
 			if ($success->count() > 0 || $failures->where('status', true)->count() >= $quiz->attempts) {
-				return redirect()->route('quiz.overview', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizAlreadyCompleted'), 'class' => 'danger']);
+				return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizAlreadyCompleted'), 'class' => 'danger']);
 			}
 
 			$result = $attempts->where('status', false)->first();
@@ -585,7 +600,7 @@ class TrainingController extends Controller
 					$result->status = true;
 					$result->ended_at = now()->format('Y-m-d H:i:s');
 					$result->save();
-					return redirect()->route('quiz.overview', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizCompleted'), 'class' => 'success']);
+					return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizCompleted'), 'class' => 'success']);
 				}
 				$question = $response->question;
 
@@ -596,7 +611,7 @@ class TrainingController extends Controller
 				$result->status = true;
 				$result->ended_at = $time_limit->format('Y-m-d H:i:s');
 				$result->save();
-				return redirect()->route('quiz.overview', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
+				return redirect()->route('quizzes.view_overview_mine', ['id' => $id, 'quiz_id' => $quizId])->with(['msg' => __('admin.quizTimesUp'), 'class' => 'danger']);
 			}
 		} else {
 			return abort(401);
@@ -608,20 +623,20 @@ class TrainingController extends Controller
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
 			if (!$user->HaveCompany) {
-				return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
 			}
 			if (!$user->company) {
-				return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			}
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
 			if (empty($cycleData)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 			if (empty($cycleData->organization_id)) {
-				return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
+				return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']);
 			}
 
 			$organization_id = $cycleData->organization_id;
@@ -655,17 +670,17 @@ class TrainingController extends Controller
 			$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
 		}
 		$contents = 0;
+		
 		if ($csession) {
-			$contents = TrainingContent::where('training_id', $csession->location)->count();
+			$contents = TrainingContent::where('training_id', $csession->training_Address)->count();
 		}
-
 		$steps11 = Step::where('id', $csession->step_id)->orderBy('arr')->get();
 		foreach ($steps11 as $steps1) {
 			$companies = Company::where('cycle', $steps1->cycle_id)->get();
 		}
 		$uniqueCycleIds = $companies->pluck('cycle')->unique();
 		$steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-
+		
 
 		return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
 	}
@@ -712,22 +727,35 @@ class TrainingController extends Controller
 	public function addsession(Request $request)
 	{
 		$this->meetingService =  OnlineMeetingFactory::create();
-
 		
+		$dateRange = $request->date_range; 
 		$type = $request->type;
-		$startDate = $request->datetime; // التاريخ
+
+if ($type == 'sessions' || $type == 'offline') {
+		$startDate = $request->datetime;
 		$startTime = $request->starttime;   // وقت البداية
-		$endTime = $request->endtime;     // وقت النهاية
+		$endTime = $request->endtime;   // وقت النهاية
 		$start_datetime = $startDate.' '. $startTime;
 		$end_datetime = $startDate.' '.$endTime;
+} else if ($type == 'online') {
+    [$startDate, $endDate] = explode(' - ', $dateRange);
+    $start_datetime = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y-m-d');
+    $end_datetime = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y-m-d');
+}
+		
+
 		if($start_datetime == null || $end_datetime == null){
 			return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 		}
+
 		$step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
 		$datetime = $start_datetime;
-		
+		$start = Carbon::parse($datetime);
+		$end = Carbon::parse($end_datetime);
+		$duration = $start->diffInMinutes($end);
+
 		if ($type == 'sessions') {
 			// Add Zoom
 			$topic = "Training (" . $title . ')';
@@ -749,7 +777,8 @@ class TrainingController extends Controller
 				'dsc' => $dsc,
 				'zoom_id' => $zoomid,
 				'datetime' => $datetime,
-				'duration' => $request->duration,
+				'enddatetime' => $end_datetime,
+				'duration' => $duration,
 				'user_id' => Auth::id(),
 				'start_url' => $start,
 				'join_url' => $join,
@@ -807,8 +836,7 @@ Thanks from " . env('APP_NAME');
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
-			
-			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
+			TrainingSession::insert(['type' => $type, 'step_id' => $step, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'enddatetime' => $end_datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
 
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
@@ -942,22 +970,40 @@ Thanks from " . env('APP_NAME');
 
 	public function editsession(Request $request)
 	{
-		$startDate = $request->datetime; // التاريخ
-		$startTime = $request->starttime;   // وقت البداية
-		$endTime = $request->endtime;     // وقت النهاية
-		$start_datetime = "$startDate $startTime";
-		$end_datetime = "$startDate $endTime";
+		
+		$dateRange = $request->date_range; 
+		$type = $request->type;
 
+if ($type == 'sessions' || $type == 'offline') {
+		$startDate = $request->datetime;
+		$startTime = $request->starttime;   // وقت البداية
+		$endTime = $request->endtime;   // وقت النهاية
+		$start_datetime = $startDate.' '. $startTime;
+		$end_datetime = $startDate.' '.$endTime;
+} else if ($type == 'online') {
+    [$startDate, $endDate] = explode(' - ', $dateRange);
+    $start_datetime = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y-m-d');
+    $end_datetime = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y-m-d');
+}
+if($start_datetime == null || $end_datetime == null){
+	return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
+}
+
+$step = $request->step_id;
+$title = $request->title;
+$dsc = $request->dsc;
+$datetime = $start_datetime;
+$start = Carbon::parse($datetime);
+$end = Carbon::parse($end_datetime);
+$duration = $start->diffInMinutes($end);
 		// $step = $request->step_id;
 		$title = $request->title;
 		$dsc = $request->dsc;
-		$datetime = $start_datetime;
-		$type = $request->stype;
 		$id = $request->sid;
 		if ($type == 'sessions') {
 			// Add Zoom
 			$topic = "Training (" . $title . ')';
-			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $request->duration, 'host_video' => 1, 'participant_video' => 1];
+			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $duration, 'host_video' => 1, 'participant_video' => 1];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
 
 			if (!$onlineMeeting['success']) {
@@ -1033,7 +1079,7 @@ Thanks from " . env('APP_NAME');
 			if (!$request->online) {
 				return back()->with(['message2', 'Can\'t add training you must add new training course first']);
 			}
-			TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
+			TrainingSession::where('id', $id)->update(['type' => $type, 'title' => $title, 'dsc' => $dsc, 'datetime' => $start_datetime,  'enddatetime' => $end_datetime, 'user_id' => Auth::id(), 'training_Address' => $request->online]);
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
 			$traning = TrainingSession::where('id', $id)->first();
@@ -1152,8 +1198,31 @@ Thanks from " . env('APP_NAME');
 
 	public function session(Request $request)
 	{
+		
 		if ($request->id) {
-			$session = TrainingSession::findOrFail($request->id);
+			$sessionData = TrainingSession::findOrFail($request->id);
+			$session = [];
+			$session['id'] = $sessionData->id;
+			$session['title'] = $sessionData->title;
+			$session['dsc'] = $sessionData->dsc;
+			$session['type'] = $sessionData->type;
+			if($sessionData->type == 'online'){
+				$session['daterange'] = date('Y-m-d', strtotime($sessionData->datetime)) . ' - ' . date('Y-m-d', strtotime($sessionData->enddatetime));
+			}else{
+				$session['daterange'] = date('Y-m-d', strtotime($sessionData->datetime));
+				$session['fromtime'] = date('h:i A', strtotime($sessionData->datetime));
+				$session['endtime'] = date('h:i A', strtotime($sessionData->enddatetime));
+			}
+			$session['training_Address'] = $sessionData->training_Address;
+			$session['training_location'] = $sessionData->training_location;
+			$session['trainer_name'] = $sessionData->trainer_name;
+			$session['trainer_email'] = $sessionData->trainer_email;
+			$session['QrCode'] = $sessionData->QrCode;
+			$session['duration'] = $sessionData->duration;
+			$session['start_url'] = $sessionData->start_url;
+			$session['join_url'] = $sessionData->join_url;
+			$session['created_at'] = $sessionData->created_at;
+
 			return response()->json($session);
 		} else {
 			return response()->json(['state' => 'failed'], 500);
@@ -1232,6 +1301,10 @@ Thanks from " . env('APP_NAME');
 			return response()->json(['success' => false, 'message' => 'Session not found'], 404);
 		}
 
+		if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionReport')) {
+			return redirect()->back()->with('message', __('admin.session report is not available yet'));
+		}
+
 		$response = $this->meetingService->getSessionReport($session->zoom_id);
 		if ($response['success'])
 		{
@@ -1259,52 +1332,15 @@ Thanks from " . env('APP_NAME');
 					]
 				);
 			}
-			return redirect()->back();
+			return redirect()->back()->with('message', __('admin.Session report updated.'));
+
+		}
+		else {
+			return redirect()->back()->with('message', __('session report is not available yet'));
 		}
 	}
 
-	/* public function sessionRecord($id)
-	{
-		 $session = TrainingSession::find($id);
 
-		 if (!$session || !$session->zoom_id) {
-			 return redirect()->back()->withErrors([
-				 'error' => 'Session Not Found',
-			 ]);
-		 }
-
-		 $response = $this->meetingService->getSessionRecord($session->zoom_id);
-		 dd($response);
-
-		 if (!$response['success']) {
-			 return redirect()->back()->withErrors([
-				 'error' => 'Session Recording Not Found',
-			 ]);
-		 }
-
-		 $recordingFiles = $response['data']['recording_files'] ?? [];
-
-		 foreach ($recordingFiles as $file) {
-			 $recordingTime = isset($file['recording_start'])
-				 ? Carbon::parse($file['recording_start'])->toDateTimeString()
-				 : null;
-
-			 SessionRecording::updateOrCreate(
-				 [
-					 'recording_id' => $file['id'],
-				 ],
-				 [
-					 'session_id' => $session->id,
-					 'recording_type' => $file['recording_type'] ?? null,
-					 'recording_view_url' => $file['play_url'] ?? null,
-					 'recording_download_url' => $file['download_url'] ?? null,
-					 'recording_time' => $recordingTime,
-				 ]
-			 );
-		 }
-
-		 return redirect()->back();
-	} */
 
 	public function sessionRecord($id)
 	{
@@ -1313,10 +1349,11 @@ Thanks from " . env('APP_NAME');
 			return redirect()->back()->withErrors(['error' => 'Session Not Found',]);
 		}
 
-		$response = $this->meetingService->getSessionRecord($session->zoom_id);
-		if (!$response['success']) {
-			return redirect()->back()->withErrors(['error' => 'Session Recording Not Found',]);
+		if (!$this->meetingService || !method_exists($this->meetingService, 'getSessionRecord')) {
+			return redirect()->back()->with('message', __('admin.Session Recording is not available yet'));
 		}
+
+		$response = $this->meetingService->getSessionRecord($session->zoom_id);
 
 		$recordingFiles = $response['data']['recording_files'] ?? [];
 		$password = $response['data']['password'] ?? null;
@@ -1343,7 +1380,8 @@ Thanks from " . env('APP_NAME');
 			);
 		}
 
-		return redirect()->back();
+		return redirect()->back()->with('message', __('admin.Session Record updated'));
+
 	}
 
 	public function attendanceReport(Request $request, $id)
@@ -1496,7 +1534,7 @@ Thanks from " . env('APP_NAME');
 		$scope->trigger_by_quiz = $request->has('trigger_by_quiz') ? true : false;
 		$scope->save();
 
-		return redirect()->route('training.surveys', ['id' => $id])->with('success', 'StoredSuccessfully');
+		return redirect()->route('trainings.surveys_list', ['id' => $id])->with('success', 'StoredSuccessfully');
 	}
 
 	public function edit_survey($id, $survey, Request $request)

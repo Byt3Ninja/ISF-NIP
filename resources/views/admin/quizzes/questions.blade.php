@@ -81,7 +81,7 @@
 										</div>
 									</div>
 									@endif
-									<form method="post" action="{{ route('quizzes.saveQuestions', ['quiz' => $quiz->id]) }}">
+									<form method="post" action="{{ route('quizzes.questions_update', ['quiz' => $quiz->id]) }}">
 										{!! csrf_field() !!}
 										<div class="row">
 											<div class="col-lg-8 col-md-8 col-sm-12">

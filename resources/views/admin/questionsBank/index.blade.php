@@ -169,18 +169,15 @@
 
 		$(document).ready(function() {
 			$('.Type').change(function () {
-        var selectedGroup = $(this).val(); // القيمة المختارة من القائمة
-		
-        $('#organizations-list-datatable tbody tr').each(function () {
-            var group = $(this).data('group'); // قراءة قيمة data-group من الصف
-			
-            if (selectedGroup === 'all' || group === selectedGroup) {
-                $(this).show(); // عرض الصف
-            } else {
-                $(this).hide(); // إخفاء الصف
-            }
-        });
-    });
+			var selectedGroup = $(this).val(); // القيمة المختارة من القائمة
+			// تكوين الرابط مع الباراميتر الجديد
+			const url = new URL(window.location.origin + window.location.pathname);
+			if (selectedGroup !== 'all') {
+				url.searchParams.set('search', selectedGroup);
+			}
+			// إعادة تحميل الصفحة بالرابط الجديد
+			window.location.href = url.toString();
+			});
 
 		});
 		

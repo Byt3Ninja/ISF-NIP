@@ -41,7 +41,7 @@ class IndexController extends Controller
         if($this->Settings->HomePage == false){
 
         if (auth()->check()){
-            return redirect(route('dashboard'));
+            return redirect(route('core.dashboard_view'));
         }
         return view('auth.login')->with('t', $this->t);
         

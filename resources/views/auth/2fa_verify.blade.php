@@ -241,7 +241,7 @@
                             @endif
     
                             Enter the pin from Google Authenticator app:<br/><br/>
-                            <form class="form-horizontal" action="{{ route('2fa.2faVerify') }}" method="POST">
+                            <form class="form-horizontal" action="{{ route('security.2fa_verify_login') }}" method="POST">
                                 {{ csrf_field() }}
                                 <div class="form-group{{ $errors->has('one_time_password-code') ? ' has-error' : '' }}">
                                     <label for="one_time_password" class="control-label">One Time Password</label>
@@ -267,7 +267,7 @@
           </div>
 
           <div class="d-flex justify-content-center">
-            <a href="{{ route('linkedin.login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
+            <a href="{{ route('integrations.auth_linkedin_login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
               <i class="fa-brands fa-linkedin-in text-white"></i> 
             </a>
             <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">

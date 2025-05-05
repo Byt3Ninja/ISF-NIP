@@ -1,0 +1,263 @@
+@extends('layouts.admin')
+
+@section('style')
+<style>
+  .chart-card {
+    height: 140px !important;
+  }
+</style>
+@stop
+
+
+@section('content')
+<!-- Content wrapper -->
+<div class="content-wrapper">
+  <!-- Content -->
+  <div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Summary Section -->
+    <div class="row">
+      <!-- KPI Card: Total Forms -->
+      <div class="col-lg-3 col-md-6 mb-6">
+        <div class="card chart-card">
+          <div class="card-body d-flex align-items-center justify-content-between">
+            <div>
+              <h4 class="metric-value text-primary mb-1">8</h4>
+              <p class="metric-label text-muted mb-0">{{ __('admin.Total Forms') }}</p>
+            </div>
+            <div class="icon text-primary fs-2">
+              <i class="fas fa-file-alt"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Card: Total Submissions -->
+      <div class="col-lg-3 col-md-6 mb-6">
+        <div class="card chart-card">
+          <div class="card-body d-flex align-items-center justify-content-between">
+            <div>
+              <h4 class="metric-value text-primary mb-1">720</h4>
+              <p class="metric-label text-muted mb-0">{{ __('admin.Total Submissions') }}</p>
+            </div>
+            <div class="icon text-success fs-2">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Card: Forms by Status -->
+      <div class="col-lg-3 col-md-6 mb-6">
+        <div class="card chart-card">
+          {{-- <div class="card-header bg-transparent border-0 pt-3 pb-0">
+            <h6 class="mb-0 text-muted">Forms by Status</h6>
+          </div> --}}
+          <div class="card-body">
+            <canvas id="statusChart"></canvas>
+            <!-- Chart will be rendered here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Card: Forms by Organization -->
+      <div class="col-lg-3 col-md-6 mb-6">
+        <div class="card chart-card">
+          {{-- <div class="card-header bg-transparent border-0 pt-3 pb-0">
+            <h6 class="mb-0 text-muted">Forms by Organization</h6>
+          </div> --}}
+          <div class="card-body">
+            <canvas id="orgChart" style="max-height: 140px; padding-bottom: 2.5rem;"></canvas>
+            <!-- Chart will be rendered here -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/ Summary Section -->
+
+    <!-- Forms List Table -->
+    <div class="card">
+      <div class="card-datatable table-responsive pt-0">
+        <table class="datatables-basic table">
+          <thead class="table-light">
+            <tr>
+              <th></th>
+              <th>Form id</th>
+              <th>Form Name</th>
+              <th>Assigned Organization</th>
+              <th>Submissions</th>
+              <th>Last Modified</th>
+              <th>Create At</th>
+              <th>status</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+    <!-- Modal to add new record -->
+    <div class="offcanvas offcanvas-end" id="add-new-record">
+      <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title" id="exampleModalLabel">{{ __('admin.New Form') }}</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="{{ __('admin.Close') }}"></button>
+      </div>
+      <div class="offcanvas-body flex-grow-1">
+      <form class="add-new-record pt-0 row g-2 mt-12" id="form-add-new-record" onsubmit="return false">
+        <div class="col-sm-12 mb-6">
+        <label class="form-label" for="formTitle">{{ __('admin.Form Name') }}</label>
+        <input type="text" id="formTitle" class="form-control dt-form-name" name="formTitle"
+          placeholder="{{ __('admin.Enter Form Name') }}" aria-label="{{ __('admin.Enter Form Name') }}" />
+        </div>
+        <div class="col-sm-12 mb-6">
+        <label class="form-label" for="assignedOrg">{{ __('admin.Assigned to Organizations') }}</label>
+        <select id="assignedOrg" name="assignedOrg" class="form-select select2 dt-org-select">
+          <option value="" selected disabled>{{ __('admin.Select Organization') }}</option>
+          <option value="TIEC">TIEC</option>
+          <option value="Growthlabs">Growthlabs</option>
+          <option value="Arab Academy">Arab Academy</option>
+        </select>
+        </div>
+        <div class="col-sm-12 mt-12">
+        <button type="submit" class="btn btn-primary data-submit me-sm-4 me-1">{{ __('admin.Submit') }}</button>
+        <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
+        </div>
+      </form>
+      </div>
+    </div>
+    <!--/ Forms List Table -->
+  </div>
+  <!--/ Content -->
+</div>
+<!-- / Content wrapper -->
+@stop
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+@stop
+
+@section('pagescripts')
+<script>
+  let formListData = @json($data);
+  console.log(formListData);
+   
+  </script>
+<script src="/vuexy/assets/js/form-list.js"></script>
+
+<!-- JS Chart Init -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Action Button Clicks
+    const tableBody = document.getElementById('formsTable')?.querySelector('tbody');
+    if (tableBody) {
+      tableBody.addEventListener('click', function (event) {
+        const button = event.target.closest('.action-btn');
+        if (button && !button.classList.contains('disabled')) {
+          const formId = button.getAttribute('data-id');
+          const action = button.getAttribute('title');
+          alert(`Action: ${action} clicked for Form ID: ${formId}`);
+          event.preventDefault();
+        }
+      });
+    }
+
+    // --- Placeholder Chart Initialization ---
+    // In a real app, data would come from an API based on table/filtered data
+
+    // Forms by Status Chart (Donut)
+    const statusCtx = document.getElementById('statusChart')?.getContext('2d');
+    if (statusCtx) {
+      new Chart(statusCtx, {
+        type: "doughnut",
+        data: {
+          labels: ['{{ __('admin.Active') }}', '{{ __('admin.NotActive') }}'],
+          datasets: [
+            {
+              label: "Forms by Status",
+              data: [6, 1], // Data based on your sample: 6 Active, 1 Inactive
+              backgroundColor: [config.colors.success, config.colors.secondary],
+              borderColor: [config.colors.success, config.colors.secondary],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "70%", // Adjust the cutout percentage to reduce the size of the circle
+          plugins: {
+            legend: {
+              position: "left",
+              labels: {
+                boxWidth: 12,
+              },
+            },
+          },
+          layout: {
+            padding: {
+              top: 10,
+              bottom: 10,
+              left: 30,
+              right: 10,
+            },
+          },
+        },
+      });
+
+      // Reduce chart width and height
+      statusCtx.canvas.style.width = "63px";
+      statusCtx.canvas.style.height = "63px";
+    }
+
+    // Forms by Organization Chart (Vertical Bar)
+    const orgCtx = document.getElementById('orgChart')?.getContext('2d');
+    if (orgCtx) {
+      new Chart(orgCtx, {
+        type: 'bar',
+        data: {
+          labels: ['TIEC', 'Growthlabs', 'Arab Academy', 'BIAC BIAC', 'BIAC', 'Genz'],
+          datasets: [
+            {
+              label: 'Count of Forms',
+              data: [1, 4, 1, 2, 3, 2], // Data based on your sample: 1 TIEC, 4 Growthlabs, 1 AA, 2 BIAC
+              backgroundColor: [
+                'rgba(13, 110, 253, 0.7)', // Primary
+                'rgba(25, 135, 84, 0.7)', // Success
+                'rgba(255, 193, 7, 0.7)', // Warning
+                'rgba(108, 117, 125, 0.7)', // Secondary
+              ],
+              borderColor: [
+                'rgba(13, 110, 253, 1)',
+                'rgba(25, 135, 84, 1)',
+                'rgba(255, 193, 7, 1)',
+                'rgba(108, 117, 125, 1)',
+              ],
+              borderWidth: 0,
+              barThickness: 3, // Reduce bar width to make it thinner
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false, // Hide legend for bar chart with single dataset
+            },
+            tooltip: {
+              enabled: true, // Enable tooltips
+            },
+          },
+          scales: {
+            x: {
+              display: false, // Hide X-axis labels
+            },
+            y: {
+              display: true, // Show Y-axis labels
+              beginAtZero: true,
+              ticks: { precision: 0 }, // Ensure Y axis starts at 0 and shows whole numbers
+            },
+          },
+        },
+      });
+    }
+  });
+</script>
+@stop

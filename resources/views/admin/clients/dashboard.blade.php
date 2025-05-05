@@ -24,7 +24,7 @@
 @section('content')
   @if (!$_user->first_name_ar)
   <div class="d-none">
-    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+    {!! redirect()->route(route: 'user.profile_view')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
   </div>
   @endif
   @php $setting = \App\Settings::where('id', 1)->first(); @endphp
@@ -321,7 +321,7 @@
 @section('content')
   @if (!$_user->first_name_ar)
   <div class="d-none">
-    {!! redirect()->route('my_profile')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
+    {!! redirect()->route('user.profile_view')->with(['msg' => 'WaitingYourRedirect', 'class' => 'danger']) !!}
   </div>
   @endif
 
@@ -584,7 +584,7 @@
 
       @if( !empty( $available_surveys ) && $available_surveys->count() > 0 )
     @if( $_user->hasRole('Registered') )
-    @if( $_user->ableToAll(['surveys.taking', 'surveys.submit'], $permissions) )
+    @if( $_user->ableToAll(['surveys.take', 'surveys.submit'], $permissions) )
     <div class="col-sm-6 col-12 mb-6" style="height: 300px; overflow-y: auto; border-radius: 1rem;">
       <div class="card">
         <div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
@@ -645,7 +645,7 @@
                 @endif
               </div>
               <div class="col-3 text-end">
-                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{ __('dashboard.startSurvey') }}</a>
+                <a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{ __('dashboard.startSurvey') }}</a>
               </div>
             </div>
             @endforeach
@@ -713,7 +713,7 @@
                 @endif
               </div>
               <div class="col-3 text-end">
-                <a href="{{ route('surveys.taking', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
+                <a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-dark rounded w-100">{{ __('dashboard.startSurvey') }}</a>
               </div>
             </div>
             @endforeach
@@ -860,7 +860,7 @@
                     <td>
                       @if($step->stype == 1)
                       @if($step->arr == 'Completed' || $step->arr == 'انتهت')
-                        @if( $_user->company->approved && $_user->ableTo('cycles.my', $permissions) )
+                        @if( $_user->company->approved && $_user->ableTo('cycles.list_mine', $permissions) )
                           <a href="/dashboard/cycles/{{ $flink }}"> {{ $step->title }} </a>
                         @else 
                           {{ $step->title }}
@@ -1262,7 +1262,7 @@
 
         </div>
 
-
+        @if( $ctype != 1 && $ctype != 2 )
 		<div class="card mt-10">
 		<section>
 			<div class="row">
@@ -1298,12 +1298,12 @@
 															<a class="media-left">
 																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
 															</a>
-                              @if( $_user->ableTo('show_mentor_profile', $permissions) )<a target="_blank" href="{{route('show_mentor_profile', ($mentor->user)->id)}}">@endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )<a target="_blank" href="{{route('mentors.profile_view', ($mentor->user)->id)}}">@endif
 															<div class="media-body">
 																<h6 class="media-heading mb-0 text-nowrap">{{optional($mentor->user)->name }}</h6>
 																<span class="font-small-2 text-nowrap">{{optional($mentor->user)->title }}</span>
 															</div>
-                              @if( $_user->ableTo('show_mentor_profile', $permissions) )</a>@endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )</a>@endif
 														</div>
                           
 													</td>
@@ -1330,8 +1330,8 @@
 				</div>
 			</div>
 		</section>
-	</div>
-
+	  </div>
+      @endif
 	
       @endif
       <!-- / My Mentors -->

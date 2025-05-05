@@ -234,7 +234,7 @@
                 <div class="col-6 mb-4">
                   <label for="{{$role}}Role" style="display: grid; place-items: center;" class="form-check custom-option custom-option-icon cursor-pointer">
                     <div class="d-flex align-items-center">
-                      <input name="role" class="form-check-input" type="radio" value="{{$key == 0 ? $role : 'Registered'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
+                      <input name="role" class="form-check-input role-input" type="radio" value="{{$key == 0 ? $role : 'Registered'}}" id="{{$role}}Role" checked={{ $key==0 ? 'true' : '' }} required />
                       <div class="form-check-label custom-option-content d-flex align-items-center">
                         <i class="ti ti-{{ $key==0 ? 'user' : 'businessplan' }} me-2"></i>
                         <span class="custom-option-title">{{ __('admin.'. $role) }}</span>
@@ -364,9 +364,11 @@
             <div class="divider my-6 mx-auto" style="width: 80%;">
               <div class="divider-text">or</div>
             </div>
-
+            @php
+            $data = request('data') ?? '2521';
+        @endphp
             <div class="d-flex justify-content-center">
-              <a href="{{ route('linkedin.login') }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
+              <a href="{{ route('integrations.auth_linkedin_login', $data) }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
                 <i class="fa-brands fa-linkedin-in text-white"></i>
               </a>
               <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
@@ -443,6 +445,23 @@
         phoneError.style.display = 'none';
         // console.error("Invalid number");
       }
+    });
+  </script>
+  <script>
+    document.querySelectorAll('.role-input').forEach(input => {
+      input.addEventListener('change', function () {
+        const selectedRole = this.value;
+        if(selectedRole === 'Mentor') {
+          selectedRolehash = "2520";
+        }else{
+          selectedRolehash = "2521";
+        }
+  
+        // تعديل رابط الصفحة بدون تحميل
+        const url = new URL(window.location);
+        url.searchParams.set('data', selectedRolehash);
+        window.history.pushState({}, '', url);
+      });
     });
   </script>
 </body>

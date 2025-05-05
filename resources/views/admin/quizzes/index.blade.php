@@ -65,7 +65,7 @@
 							
 										  <div class="position-relative me-3 d-none d-md-flex">
 											<select name="org_id" class="form-control">
-											  <option value="0">All</option>
+											  <option value="0">{{ __('admin.All') }}</option>
 											  @php
 											  $organizations = App\Organization::all();
 											  
@@ -91,12 +91,28 @@
 							
 										  <div class="position-relative me-3 d-none d-md-flex">
 											<select name="status" class="form-control">
-											  <option value="0">All</option>
-											  <option value="draft" {{ 'draft' == request('status') ? 'selected' : '' }}>Draft</option>
-											  <option value="published" {{ 'published' == request('status') ? 'selected' : '' }}>Published</option>
+											  <option value="0">{{ __('admin.All') }}</option>
+											  <option value="draft" {{ 'draft' == request('status') ? 'selected' : '' }}>{{ __('admin.Draft') }}</option>
+											  <option value="published" {{ 'published' == request('status') ? 'selected' : '' }}>{{ __('admin.Published') }}</option>
 											</select>
 										  </div>
-							
+
+										  <div class="position-relative me-3 d-none d-md-flex">
+											<select name="Program_id" class="form-control">
+											  <option value="0">{{ __('admin.All') }}</option>
+											  @php
+											  if(!empty(request('org_id'))){
+											  	$cycles = App\Cycle::where('organization_id',request('org_id'))->get();
+											  }else{
+												$cycles = App\Cycle::all();
+											  }
+											  @endphp
+											  @foreach ($cycles as $cycle)
+											  <option value="{{ $cycle->id }}" {{  $cycle->id == request('Program_id') ? 'selected' : '' }}>{{ $cycle->title }}</option>
+											  @endforeach
+											</select>
+										  </div>
+										  
 										</div>
 										</form>
 										<hr>
@@ -111,7 +127,7 @@
 												<th class="text-center">{{__('admin.quizDuration')}}</th>
 												<th class="text-center">{{__('admin.quizParticipants')}}</th>
 												<th class="text-center">{{__('admin.quizPassPercentage')}}</th>
-												@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))<th class="text-center">{{__('admin.Actions')}}</th>@endif
+												@if($_user->ableToAny(['quizzes.questions_manage', 'quizzes.questions_update', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))<th class="text-center">{{__('admin.Actions')}}</th>@endif
 											</tr>
 											</thead>
 											<tbody>
@@ -154,13 +170,13 @@
 																-
 															@endif
 														</td>
-														@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))
+														@if($_user->ableToAny(['quizzes.questions_manage', 'quizzes.questions_update', 'quizzes.edit', 'quizzes.update', 'quizzes.destroy'], $permissions))
 														<td class="text-center">
 															<div class="btn-group w-100">
 																<button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {{ __('admin.Actions') }} </button>
 																<div class="dropdown-menu">
-																	@if($_user->ableToAny(['quizzes.questions', 'quizzes.saveQuestions'], $permissions))
-																	<a href="{{ route('quizzes.questions', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-list-ul"></i> {{ __('admin.manageQuestions') }} </a>
+																	@if($_user->ableToAny(['quizzes.questions_manage', 'quizzes.questions_update'], $permissions))
+																	<a href="{{ route('quizzes.questions_manage', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-list-ul"></i> {{ __('admin.manageQuestions') }} </a>
 																	@endif
 																	@if($_user->ableToAny(['quizzes.edit', 'quizzes.update'], $permissions))
 																	<a href="{{ route('quizzes.edit', ['quiz' => $quiz->id]) }}" class="dropdown-item"> <i class="bx bx-edit"></i> {{ __('admin.Edit') }}</a>

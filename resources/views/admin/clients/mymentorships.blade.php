@@ -47,7 +47,7 @@
                                     </a>
                                     <div class="media-body">
 
-                                      <a href="{{ route('show_mentor_profile', $session->mentor->id) }}">
+                                      <a href="{{ route('mentors.profile_view', $session->mentor->id) }}">
 
                                         <h6 class="media-heading mb-0 text-nowrap">{{ $session->mentor->{'first_name_' . $l} }}
                                           {{ $session->mentor->{'last_name_' . $l} }}</h6>

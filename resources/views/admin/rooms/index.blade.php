@@ -93,7 +93,7 @@
                                                 <td style="font-size: small;">{{$room->User->{'first_name_'.$l}.' '.$room->User->{'last_name_'.$l} }}</td>
                                                 <td style="font-size: small;">
                                                     @if( $_user->ableTo('delete_user', $permissions) )
-                                                        <a  href="{{route('roomImages', ['id' => $room->id])}}" type="submit" class="btn btn-outline-warning btn-sm"><i class="bx bx-image"> </i></a>
+                                                        <a  href="{{route('rooms.images_manage', ['id' => $room->id])}}" type="submit" class="btn btn-outline-warning btn-sm"><i class="bx bx-image"> </i></a>
                                                     @endif
                                                 </td>
                                                 <?php $cont++;?>

@@ -191,7 +191,7 @@
                 </div>
             @endif
            
-            <form action="{{ route('accept-invitation', $invitation->id) }}" method="POST">
+            <form action="{{ route('invitations.accept', $invitation->id) }}" method="POST">
                 @csrf
               <div class="mb-6 form-password-toggle">
                 <label class="form-label" for="password">{{__('admin.Password')}}</label>

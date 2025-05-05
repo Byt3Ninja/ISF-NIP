@@ -65,7 +65,7 @@
 										</div>
 									</div>
 									@endif
-									<form method="post" action="{{ route('mentorship.store_survey', ['id' => $cycle->id]) }}">
+									<form method="post" action="{{ route('mentorships.surveys_store', ['id' => $cycle->id]) }}">
 										{!! csrf_field() !!}
 										<div class="row">
 											<div class="col-lg-9 col-md-9 col-sm-9">
@@ -111,7 +111,7 @@
 											<div class="col-12 d-flex justify-content-end">
 												<input type="hidden" name="organization_id" value="{{ $cycle->organization_id }}">
 												<button type="submit" class="btn btn-primary mr-1 mb-1">{{__('admin.Save')}}</button>
-												<a href="{{ route('mentorship.surveys', ['id' => $cycle->id]) }}" class="btn btn-secondary mb-1 mx-2">{{__('admin.Cancel')}}</a>
+												<a href="{{ route('mentorships.surveys_list', ['id' => $cycle->id]) }}" class="btn btn-secondary mb-1 mx-2">{{__('admin.Cancel')}}</a>
 											</div>
 										</div>
 									</form>

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Cycle;
 use App\Quizzes;
 use App\Training;
 use App\Organization;
@@ -34,9 +35,12 @@ class quizzesController extends Controller
 		if($request->status != 0){
 			$quizzes = $quizzes->where('status', $request->status);
 		}
-
-
+		if($request->Program_id != 0){
+			$cycle = Cycle::where('id',$request->Program_id)->first();
+			$quizzes = $quizzes->where('organization_id', $cycle->organization_id);
+		}
 		$quizzes = $quizzes->get();
+
 		return view('admin.quizzes.index', compact('quizzes'));
 	}
 
@@ -170,12 +174,17 @@ class quizzesController extends Controller
 	{
 		$user = auth()->user();
 		$quiz = Quizzes::with(['questions', 'organization']);
+		
 		if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $quiz = $quiz->where('organization_id', $user->organization_id); }
 		$quiz = $quiz->find( $id );
+		
 		if( empty( $quiz ) ) { return redirect()->route('quizzes.index')->with(['error' => 'quizNotFound']); }
 		else
 		{
-			$questions = QuestionsBank::where('organization_id', $quiz->organization_id)->where('group', 'quiz')->with(['category'])->get();
+			
+			$questions = QuestionsBank::where('group', 'quiz')->with(['category']);
+			if( isset( $user->organization_id ) && !empty( $user->organization_id ) ) { $questions = $questions->where('organization_id', $quiz->organization_id); }
+			$questions = $questions->get();
 			$tags = array_unique(array_reduce($questions->pluck('tags')->toArray(), 'array_merge', []));
 			return view('admin.quizzes.questions', compact('quiz', 'questions', 'tags'));
 		}
@@ -194,7 +203,7 @@ class quizzesController extends Controller
 			QuizQuestions::where('quiz_id', $id)->delete();
 			$quiz->questions()->sync( array_map(function($id, $key) { return ['row_no' => $key + 1, 'question_id' => $id]; }, $questions_ids, array_keys($questions_ids)) );
 
-			return redirect()->route('quizzes.questions', ['quiz' => $id])->with('success', 'StoredSuccessfully');
+			return redirect()->route('quizzes.questions_manage', ['quiz' => $id])->with('success', 'StoredSuccessfully');
 		}
 	}
 
@@ -203,14 +212,14 @@ class quizzesController extends Controller
 		$user = auth()->user();
 		if( $user->hasAnyRole(['Registered']) )
 		{
-			if( !$user->HaveCompany ) { return redirect()->route('my_profile')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']); }
-			if( !$user->company ) { return redirect()->route('my_company')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']); }
+			if( !$user->HaveCompany ) { return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']); }
+			if( !$user->company ) { return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']); }
 
 			$company = $user->company;
 			$cycleData = $company->cycledata;
 
-			// if( empty( $cycleData ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
-			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('dashboard')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
+			// if( empty( $cycleData ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
+			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 			if( !empty( $cycleData->organization_id ) ) {
 			$organization_id = $cycleData->organization_id;
 			

@@ -133,7 +133,7 @@
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <h4 class="fw-bold mb-0">{{ __('admin.My company') }}</h4>
         <div class="d-flex align-items-center gap-3">
-          @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('my_company', $permissions) )
+          @if( $_user->hasAnyRole('Admin|organizationManager') || $_user->ableTo('company.profile_view_mine', $permissions) )
             <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-primary"
               style="border-radius: 15px;">
               {{ __('admin.Edit') }} <i class="ti ti-edit ms-2"></i>
@@ -244,14 +244,16 @@
                       </div>
                     @endforeach
                     @if (is_array($countryIds) && count($countryIds) > 1)
+                    <button type="button" class="btn p-0" data-bs-toggle="modal" data-bs-target="#targetedMarketModal">
                       <span
                         class="text-xs badge bg-label-light text-dark rounded-pill d-flex justify-content-center align-items-center gap-2 px-3 py-1"
                         style="width: fit-content;"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#targetedMarketModal"
-                        >
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-title="{{ __('admin.Show more') }}">
                         <i class="ti ti-dots ti-16px"></i>
                       </span>
+                    </button>
                     @endif
                   @else
                   <span
@@ -398,7 +400,7 @@
                       {{ $l == 'en' ? 'To get analysis for your pitch deck please' : 'للحصول على تحليل لعرضك التقديمي، يرجى' }}
                     </span>
                     <a role="button"
-                      onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                      onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                       {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
@@ -414,7 +416,7 @@
                       {{ $l == 'en' ? 'To get analysis for your pitch deck please upload your pitch deck' : 'للحصول على تحليل لعرضك التقديمي، يرجى تحميل عرضك التقديمي' }}
                     </span>
                     <a role="button"
-                      onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
+                      onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 0)"
                       class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                       {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                     </a>
@@ -475,7 +477,7 @@
                     {{ __('admin.To get analysis for your pitch deck please upload your pitch deck video') }}
                   </span>
                   <a role="button"
-                    onclick="window.location.href='{{ route('my_company') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
+                    onclick="window.location.href='{{ route('company.profile_view_mine') }}'; localStorage.setItem('activeCompanyTab', 5); localStorage.setItem('activePitchTab', 1)"
                     class="cursor-pointer text-primary fw-medium text-decoration-underline mt-1">
                     {{ $l == 'en' ? 'Click here' : 'اضغط هنا' }}
                   </a>
@@ -829,6 +831,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
       </div>
       <div class="modal-body d-flex flex-wrap gap-2">
+        @if(!empty($countryIds))
         @if (is_array($countryIds) && count($countryIds) > 0)
           @foreach ($countryIds as $countryId)
             <span class="text-xs badge bg-label-light text-dark rounded-pill px-3">
@@ -837,6 +840,7 @@
           @endforeach
         @else
           <span class="text-xs">{{ __('admin.N/A') }}</span>
+        @endif
         @endif
       </div>
     </div>

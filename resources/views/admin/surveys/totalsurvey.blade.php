@@ -120,7 +120,7 @@
 														<td class="text-center">
 															
 																
-																	<a href="{{ route('surveys.results', ['survey' => $survey->id]) }}?target=mentorship" target="_blank" class="btn btn-xs btn-outline-info"> <i class="ti ti-checklist"></i> {{ __('admin.surveyResults') }} </a>
+																	<a href="{{ route('surveys.results_view', ['survey' => $survey->id]) }}?target=mentorship" target="_blank" class="btn btn-xs btn-outline-info"> <i class="ti ti-checklist"></i> {{ __('admin.surveyResults') }} </a>
 																
 															
 														</td>

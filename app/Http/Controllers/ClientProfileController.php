@@ -153,7 +153,7 @@ class ClientProfileController extends Controller
                 $user->bio()->updateOrCreate(['user_id'=>$user->id],$data);
                 $user->mentorExpertises()->sync($request->expertises);
             }
-            return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+            return redirect()->route('user.profile_view')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
     }
     public function update(UpdateClientProfileRequest $request)
     {           
@@ -215,10 +215,10 @@ class ClientProfileController extends Controller
                   
                     $user->save();
                      // إرسال رابط التحقق
-                    $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
+                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
                     Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
-                    return redirect()->route('my_profile')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
+                    return redirect()->route('user.profile_view')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
                 }
 
                 
@@ -242,17 +242,17 @@ class ClientProfileController extends Controller
                     $user->new_email = $request->email;
                     $user->save();
                      // إرسال رابط التحقق
-                    $verificationUrl = route('email.confirm', ['token' => encrypt($user->new_email)]);
+                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
 
                     Mail::to($user->new_email)->send(new ConfirmEmailUpdate($verificationUrl));
-                    return redirect()->route('my_profile')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
+                    return redirect()->route('user.profile_view')->with( ['msg' => 'UpdateEmailSent', 'class' => 'success'] );
                 }
             
                 
             }
             
             if($result)
-                return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+                return redirect()->route('user.profile_view')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
             else
                 return back()->withInput()->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
         }catch (Exception $e) {
@@ -270,7 +270,7 @@ class ClientProfileController extends Controller
           
         } catch (\Exception $e) {
            
-            return redirect()->route('my_profile')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
 
         }
 
@@ -278,7 +278,7 @@ class ClientProfileController extends Controller
 
         // تحقق من وجود البريد الجديد
         if ($user->new_email != $newEmail) {
-            return redirect()->route('my_profile')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
         }
 
         // تحديث البريد الإلكتروني
@@ -286,7 +286,7 @@ class ClientProfileController extends Controller
         $user->new_email = null;
         $user->save();
 
-        return redirect()->route('my_profile')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
+        return redirect()->route('user.profile_view')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
     }
     /**
      * Update the specified resource in storage.
@@ -303,7 +303,7 @@ class ClientProfileController extends Controller
             $result = $user->where('id', $user->id)
                             ->update(['password' => $password]);
             if($result)
-                return redirect()->route('my_profile')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
+                return redirect()->route('user.profile_view')->with( ['msg' => 'StoredSuccessfully', 'class' => 'success'] );
             else
                 return back()->withInput()->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
         }catch (Exception $e){
@@ -360,31 +360,22 @@ class ClientProfileController extends Controller
             'average_rating'));
 
     }else{
-        return redirect()->route('my_profile')->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
+        return redirect()->route('user.profile_view')->with( ['msg' => 'FailedStore', 'class' => 'danger'] );
     }
     }
 
     public function showMintors(Request $request){
         $setting = Settings::where('id', 1)->first();
-
-        
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
         $ExpertiesSearch = $request->input('expertises');
-
-     
         if($setting->mentor_list == 1){
             if (Auth::user()->hasanyRole('Mentor|Registered|Admin')){
     $l = app()->getLocale();
-    
-    // إعداد الأعمدة الصحيحة بناءً على اللغة
-    $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
+        $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
     $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
-
-    // البحث في الموجهين
     $mentors = User::role('mentor')
         ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
-
     if ($rateSearch > 0) {
         $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
             $q->where(function ($q2) {
@@ -393,40 +384,34 @@ class ClientProfileController extends Controller
             })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
         });
     }
-    
     if (!empty($ExpertiesSearch)) {
-        // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
         $expertiesMentor = Expertise::where('id', '=', $ExpertiesSearch)->first();
-
-        if ($expertiesMentor) { // تأكد من وجود الخبرة
+        if ($expertiesMentor) { 
             $expid = $expertiesMentor->id;
-
-            // تصفية الموجهين بناءً على الخبرة
             $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
                 $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
             });
         }
     }
-
-    // جلب النتائج
+    if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
+        $cycleId = Auth::user()->company->cycle;
+        $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
+            ->pluck('user_id')
+            ->toArray();
+        $mentors = $mentors->whereIn('id', $mentorIds);
+    }
     $mentors = $mentors->get();
         // $mentors = User::role('mentor')->get();
-        
             return view('admin/clients/Mentors', compact('mentors'));
 }
         }else{
 
             if (Auth::user()->hasanyRole('Admin')){
                 $l = app()->getLocale();
-                
-                // إعداد الأعمدة الصحيحة بناءً على اللغة
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
-            
-                // البحث في الموجهين
                 $mentors = User::role('mentor')
                     ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
-            
                 if ($rateSearch > 0) {
                     $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
                         $q->where(function ($q2) {
@@ -435,28 +420,20 @@ class ClientProfileController extends Controller
                         })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
                     });
                 }
-                
                 if (!empty($ExpertiesSearch)) {
-                    // جلب الخبرة المرتبطة بعنوان الخبرة المدخل
                     $expertiesMentor = Expertise::where('title', '=', $ExpertiesSearch)->first();
-            
-                    if ($expertiesMentor) { // تأكد من وجود الخبرة
+                    if ($expertiesMentor) { 
                         $expid = $expertiesMentor->id;
-            
-                        // تصفية الموجهين بناءً على الخبرة
                         $mentors = $mentors->whereHas('mentorExpertises', function ($query) use ($expid) {
                             $query->where('expertise_id', $expid); // استخدم where بدلاً من whereIn لأنه لدينا id واحد
                         });
                     }
                 }
-            
-                // جلب النتائج
                 $mentors = $mentors->get();
                     // $mentors = User::role('mentor')->get();
-                    
                         return view('admin/clients/Mentors', compact('mentors'));
             }else{
-                return redirect()->route('dashboard');
+                return redirect()->route('core.dashboard_view');
             }
 
         }
@@ -515,6 +492,7 @@ class ClientProfileController extends Controller
         $otpsave->save();
         
         $result = $this->whatsAppService->sendOTP($phoneNumber, $otp);
+        dd($result);
         if ($result) {
             $otpsave->otp_sent = true;
             $otpsave->save();

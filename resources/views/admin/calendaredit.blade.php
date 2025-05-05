@@ -78,7 +78,7 @@
                                                         </label>
                                                     </div>
                                                 </fieldset>
-                                                @if( $_user->ableTo('calendar.edit', $permissions) )
+                                                @if( $_user->ableTo('calendar.events_edit', $permissions) )
                                                 <fieldset class="form-group">
                                                     <div class="custom-control custom-switch custom-control-inline mb-1">
                                                         <span>{{__('admin.Private')}}</span>&nbsp;

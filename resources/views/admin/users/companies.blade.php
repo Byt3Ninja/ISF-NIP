@@ -94,7 +94,7 @@
                 </div>
               </div>
               <div class="col-12 col-lg-8">
-                <form method="GET" action="{{ route('users.companies') }}" class="row h-100 align-items-center">
+                <form method="GET" action="{{ route('users.view_companies') }}" class="row h-100 align-items-center">
                   <div class="col-2">
                     <div class="d-flex align-items-center justify-content-end gap-3">
                       @if(request()->query())
@@ -486,7 +486,7 @@
                           <td>
                             <div class="d-flex align-items-center">
                               <a class="media-left mr-50" href="/dashboard/companyProfile/{{ $company->id }}">
-                                <img src="/191014/{{ $company->logo ?? '../app-assets/images/logo_placeholder.png' }}"
+                                <img src="/191014/{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
                               <a href="/dashboard/companyProfile/{{ $company->id }}">
