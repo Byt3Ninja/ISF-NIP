@@ -112,6 +112,24 @@
         <p id="dsc">
 
         </p>
+
+        <p id="location">
+
+        </p>
+
+        <p id="address">
+
+        </p>
+
+        <p id="trainer">
+
+        </p>
+
+        <p id="datetime">
+
+        </p>
+
+       
       </div>
     </div>
   </div>
@@ -168,6 +186,17 @@
         success: function(response) {
           $('#dsctitle').html(response.title);
           $('#dsc').html(response.dsc);
+          if (response.type === 'offline') {
+              $('#location').html(response.training_location);
+              $('#address').html(response.training_Address);
+              $('#trainer').html(response.trainer_name);
+              $('#datetime').html(response.datetime);
+      } else {
+        $('#location').html('');
+        $('#address').html('');
+        $('#trainer').html('');
+        $('#datetime').html('');
+      }
           $('#dscModal').modal('show');
         },
         error: function(error) {
