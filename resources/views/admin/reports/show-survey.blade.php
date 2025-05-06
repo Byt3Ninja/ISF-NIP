@@ -4,6 +4,37 @@
 <div class="content-wrapper">
   <div class="container-xxl flex-grow-1 container-p-y">
     <h3 class="fw-bold mb-4">{{ __('admin.Survey_Report') }}</h3>
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered mb-0">
+            <tbody>
+              <tr>
+                <th>{{ __('admin.Organization Name') }}</th>
+                <td>{{ $organizationName }}</td>
+              </tr>
+              <tr>
+                <th>{{ __('admin.Program Name') }}</th>
+                <td>{{ $programName }}</td>
+              </tr>
+              <tr>
+                <th>{{ __('admin.Startup Name') }}</th>
+                <td>{{ $startupName }}</td>
+              </tr>
+              <tr>
+                <th>{{ __('admin.Survey Submitter Name') }}</th>
+                <td>{{ $submitterName }}</td>
+              </tr>
+              <tr>
+                <th>{{ __('admin.Submit Date') }}</th>
+                <td>{{ $submitDate }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
     <div id="survey-questions">
       @if(isset($available_surveys['responses']) && !empty($available_surveys['responses']))
         @foreach($available_surveys['responses'] as $key => $question)
