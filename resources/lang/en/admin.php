@@ -1565,4 +1565,9 @@ return [
 	'session report is not available yet' => 'Session Report not Available Yet',
 	'Session Record updated' => 'Session Record Updated Successfully',
 	'Session Recording is not available yet' => 'Session Recording is not Available Yet',
+	'Organization Name' => 'Organization Name',
+	'Program Name' => 'Program Name',
+	'Startup Name' => 'Startup Name',
+	'Survey Submitter Name' => 'Survey Submitter Name',
+	'Submit Date' => 'Submit Date',
 ];
