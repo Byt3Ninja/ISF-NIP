@@ -831,7 +831,7 @@ Thanks from " . env('APP_NAME');
 
 	public function mine()
 	{
-		$sessions = MentorshipRequest::where('user_id', Auth::id())->get();
+		$sessions = MentorshipRequest::where('user_id', Auth::id())->orderby('created_at', 'DESC')->get();
 		return view('admin.clients.mymentorships', compact('sessions'));
 	}
 
