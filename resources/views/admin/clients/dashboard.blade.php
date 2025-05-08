@@ -310,6 +310,11 @@
         }
       }
       if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
+      $attendance = \App\AttendanceTrainingOffline::where('user_id', $user_id)->where('cycle_id', $circle_id)->where('attendance', 0)->get();
+      if($attendance->count()>0){
+      
+      $deleted_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->where('responses', null)->where('triggered_on', 'training')->whereIn('triggered_at', $attendance->pluck('training_session_id'))->delete();
+      }
       $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
     }
   }
