@@ -19,7 +19,10 @@
           <div class="form-group mb-4">
             <label class="form-label">{{ __('messages.SelectUsers') }}:</label>
             <select id="select-type" class="form-select typedraft" name="type">
+              <option value="10" selected >{{ __('admin.Select') }}</option>
+              @if (Auth::user()->hasAnyRole('Registered|OrganizationManager'))
               <option value="0">{{ __('messages.PortalManagers') }}</option>
+              @endif
               <option value="1">{{ __('messages.CycleUsers') }}</option>
               <option value="2">{{ __('messages.Mentors') }}</option>
               @if (Auth::user()->hasAnyRole('Admin|OrganizationManager') && $cycles->count())
