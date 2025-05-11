@@ -278,8 +278,11 @@
     </div>
   </div>
 </div>
+
+@include('admin.clients.startup.partials._session_modal')
+
 <!--  Edit SP Modal -->
-<div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
+{{-- <div class="modal fade text-left" id="SendRequest" tabindex="-1" role="dialog" aria-labelledby="sendrequest"
   aria-hidden="true">
   <div class="modal-dialog modal-lg modal-simple modal-edit-user">
     <div class="modal-content">
@@ -343,7 +346,7 @@
       </div>
     </div>
   </div>
-</div>
+</div> --}}
 <!--/ Edit SP Modal -->
 
 <!-- Filter Modal -->
@@ -465,7 +468,6 @@
 <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
 <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
 <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
@@ -479,6 +481,8 @@
 <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 <script src="/vuexy/assets/js/forms-pickers.js"></script>
 <script src="/vuexy/assets/js/forms-selects.js"></script>
+	<script src="/vuexy/assets/js/mentorship-session.js"></script>
+
 
 <script>
   const sortContainer = document.getElementById('sortContainer');
@@ -658,37 +662,37 @@
 	});
 });
 
-function request(id,mentor,organization_id=null,cycle_id=null) {
-		$('#mentorid').val(id);
-		$('#rname').html(mentor);
-		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
-		$.ajax({
-			type: "POST", url: "/dashboard/mentors/modify",
-			data: {"id": id, "rtype": 5,},
-			success: function (response) {
-				$('#SendRequest li').remove();
-				$('#name').html(name);
-				if (response.length>0) {
-					$.each(response, function(i, item) {
-						let note = '';
-						let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
-						if (item.notes) {note = item.notes;}
-						switch (item.type)
-						{
-							case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
-							case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
-							case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
-							case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
-							default:
-						}
-					});
-				} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
-				$('#addOrganizationID').val(organization_id);
-				$('#addCycleID').val(cycle_id);
-				$('#SendRequest').modal('show');
-			}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
-		});
-	}
+// function request(id,mentor,organization_id=null,cycle_id=null) {
+// 		$('#mentorid').val(id);
+// 		$('#rname').html(mentor);
+// 		$.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+// 		$.ajax({
+// 			type: "POST", url: "/dashboard/mentors/modify",
+// 			data: {"id": id, "rtype": 5,},
+// 			success: function (response) {
+// 				$('#SendRequest li').remove();
+// 				$('#name').html(name);
+// 				if (response.length>0) {
+// 					$.each(response, function(i, item) {
+// 						let note = '';
+// 						let time = item.tfrom + " {{__('dashboard.to')}} " + item.tto;
+// 						if (item.notes) {note = item.notes;}
+// 						switch (item.type)
+// 						{
+// 							case 'OneDay': $('<li>').html("<b>" + item.dfrom + "</b> ("+ time +").").appendTo('#schedule'); break;
+// 							case 'Weekly': $('<li>').html("<b> {{__('dashboard.Weekly')}} </b>(" + item.days + ") - ("+ time +").").appendTo('#schedule'); break;
+// 							case 'WorkingDays': $('<li>').html("<b>{{__('dashboard.All working days')}} </b>("+ time +").").appendTo('#schedule'); break;
+// 							case 'Period': $('<li>').html("<b> {{__('dashboard.from')}} " + item.dfrom + " {{__('dashboard.to')}} " + item.dto +" </b> ("+ time +").").appendTo('#schedule'); break;
+// 							default:
+// 						}
+// 					});
+// 				} else { $('<li>').html("{{__('dashboard.No records saved')}}.</li>").appendTo('#schedule'); }
+// 				$('#addOrganizationID').val(organization_id);
+// 				$('#addCycleID').val(cycle_id);
+// 				$('#SendRequest').modal('show');
+// 			}, error: function (error) { console.log(error); alert("Error Occurred, Try again!"); }
+// 		});
+// 	}
 </script>
 <script>
   function modify(type, id, stat) {

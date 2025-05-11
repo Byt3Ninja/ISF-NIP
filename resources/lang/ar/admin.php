@@ -1585,5 +1585,10 @@ return [
 	'session report is not available yet' => 'التقرير غير متوفر حتى الان',
 	'Session Record updated' => 'تم تحديث تسجيل الجلسة بنجاح',
 	'Session Recording is not available yet' => 'تسجيل الجلسة غير متوفر حتى الان',
+	'Organization Name' => 'اسم المؤسسة',
+	'Program Name' => 'اسم البرنامج',
+	'Startup Name' => 'اسم الشركة',
+	'Survey Submitter Name' => 'اسم مستخدم الاستبيان',
+	'Submit Date' => 'تاريخ الإرسال',
 ]; 
 

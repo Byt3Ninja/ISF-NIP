@@ -132,55 +132,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
   $(function () {
     var dt_basic_table = $('.datatables-basic'),
       dt_basic;
-
+  
     if (dt_basic_table.length) {
-      const data = [
-        {
-          submission_id: 101,
-          submitted_by: "Alice Smith",
-          startup_name: "Tech Innovators",
-          organization_name: "Org Alpha",
-          program_name: "Accelerator 2023",
-          created_at: "2023-06-01",
-          step_name: "Screening"
-        },
-        {
-          submission_id: 102,
-          submitted_by: "Bob Johnson",
-          startup_name: "Green Solutions",
-          organization_name: "Org Beta",
-          program_name: "Incubation 2023",
-          created_at: "2023-06-03",
-          step_name: "Interview"
-        },
-        {
-          submission_id: 103,
-          submitted_by: "Carol Lee",
-          startup_name: "Health First",
-          organization_name: "Org Alpha",
-          program_name: "Accelerator 2023",
-          created_at: "2023-06-05",
-          step_name: "Selection"
-        },
-        {
-          submission_id: 104,
-          submitted_by: "David Kim",
-          startup_name: "EduNext",
-          organization_name: "Org Gamma",
-          program_name: "Pre-Seed 2023",
-          created_at: "2023-06-07",
-          step_name: "Screening"
-        },
-        {
-          submission_id: 105,
-          submitted_by: "Eva Brown",
-          startup_name: "AgroFuture",
-          organization_name: "Org Beta",
-          program_name: "Incubation 2023",
-          created_at: "2023-06-09",
-          step_name: "Final"
-        }
-      ];
+      const data = {!! json_encode($data) !!};
 
       dt_basic = dt_basic_table.DataTable({
         data: data,
@@ -200,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             targets: 7,
             render: function (data, type, full, meta) {
               return (
-                `<a href="/dashboard/submission-details" class="btn btn-sm btn-label-primary item-view"><i class="ti ti-eye ti-md me-1"></i>${t.view}</a>`
+                `<a href="/dashboard/submission-details/${data.step_id}" class="btn btn-sm btn-label-primary item-view"><i class="ti ti-eye ti-md me-1"></i>${t.view}</a>`
               );
             }
           }
