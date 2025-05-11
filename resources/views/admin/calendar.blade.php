@@ -246,7 +246,7 @@
           text: 'Sync With Google Calender',
           click: function () {
               /// add
-              window.open('{{ route('calender.login.google') }}','_Self')
+              window.open('{{ route('calendar.events_list') }}','_Self')
               //// end
           }
       },
