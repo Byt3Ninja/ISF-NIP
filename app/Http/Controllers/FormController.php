@@ -33,47 +33,22 @@ class FormController extends Controller
 
       $data = $forms->map(function ($form) use ($l, $steps) {
         $data = new stdClass;
-        $data->form_id = $form->BF_id;
-        $data->form_name = $form->BF_form_name;
-        $data->assigned_organization = $form->{'o_name_'.$l};
-        $data->last_modified = $form->BF_updated_at;
-        $data->created_date = $form->BF_created_at;
-          $filteredSteps = $steps->whereIn('data', $form->BF_id);
+        $data->form_id = $form->BF_id ?? 'null';
+        $data->form_name = $form->BF_form_name ?? 'null';
+        $data->assigned_organization = $form->{'o_name_'.$l} ?? 'null';
+        $data->last_modified = $form->BF_updated_at ?? 'null';
+        $data->created_date = $form->BF_created_at ?? 'null';
+          $filteredSteps = $steps->whereIn('data', $form->BF_id) ?? 'null';
           $data->submissions = $filteredSteps->count();
-          $data->status = 'active';
-
-          // $step = $steps->map(function ($formstep) use ($l, $steps) {
-          //   $data = new stdClass;
-          //   $data->step_data = $formstep->data;
-          //   return $data;
-          // });
-          // $data->steps = $step;
-
-          // if($filteredSteps->count() > 0) {
-          //   $data->last_submission = $filteredSteps->last()->created_at;
-          // } else {
-          //   $data->last_submission = null;
-          // }
-          
-      
-
-
-        // $activeornot = "SELECT * FROM steps as S
-        // LEFT JOIN form_data as FD ON FD.step_id = S.id
-        // WHERE S.deleted_at IS NULL";
-        // $activeornot = DB::select($activeornot);
-        // $activeornot = collect($activeornot);
-        
-        // if($activeornot->data == $form->BF_id) {
-        //   $data->active = true;
-        // } else {
-        //   $data->active = false;
-        // }
-       
+          $data->status = 'active' ?? 'null';
         return $data;
     });
-    
-     
+
+   
+
+
+
+    // return response()->json($data);
       return view('admin.settings.forms.index', compact('data'));
     }
     
