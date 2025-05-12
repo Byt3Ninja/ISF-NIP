@@ -799,17 +799,11 @@
 @section('scripts')
 	<script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
 	<script src="/vuexy/assets/vendor/libs/chartjs/chartjs.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
-	<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 	<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 	<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 	<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 	<script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
 	<script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-	<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-	<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-	<script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 	<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 	<script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 	<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
