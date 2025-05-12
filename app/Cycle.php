@@ -55,4 +55,14 @@ class Cycle extends Model
     {
         return $this->hasMany(Step::class);
     }
+
+    public function trainingSessions()
+   {
+      return $this->hasManyThrough(TrainingSession::class, Step::class);
+   }
+
+    public function surveyResponses()
+    {
+        return $this->hasMany(SurveyResponses::class);
+    }
 }
