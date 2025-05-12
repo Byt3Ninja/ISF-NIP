@@ -549,5 +549,7 @@
   {"name": "permission-groups.edit", "description": "", "permission_group_id": "", "guard_name": "web"},
   {"name": "permission-groups.update", "description": "", "permission_group_id": "", "guard_name": "web"},
   {"name": "permission-groups.destroy", "description": "", "permission_group_id": "", "guard_name": "web"},
-  {"name": "screening.change_step", "description": "Change Step Screening", "permission_group_id": "Screening", "guard_name": "web"}
+  {"name": "screening.change_step", "description": "Change Step Screening", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "programs.report", "description": "View Program Report", "permission_group_id": "Programs", "guard_name": "web"}
+
 ]

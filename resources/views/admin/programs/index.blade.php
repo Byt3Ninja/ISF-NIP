@@ -200,7 +200,7 @@
                           <i class="ti ti-rosette-discount-check text-success"></i>
                         </div>
                       @endif
-                      <a href="/dashboard/programlist/report/{{ $cycle->id }}" class="btn btn-sm btn-light">
+                      <a href="{{ route('programs.report',$cycle->id) }}" class="btn btn-sm btn-light">
                         {{ __('cycles.View Report') }}
                         <i class="ti ti-clipboard-data ti-sm ms-2"></i>
                       </a>
