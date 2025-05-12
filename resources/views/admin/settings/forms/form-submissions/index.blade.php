@@ -11,14 +11,14 @@
         <table class="datatables-basic table">
           <thead class="table-light">
             <tr>
-              <th></th>
-              <th>Submission Id</th>
-              <th>Submitted By</th>
-              <th>Startup Name</th>
-              <th>Organization Name</th>
-              <th>Program Name</th>
-              <th>Created At</th>
-              <th>Step Name</th>
+              <th class="text-nowrap"></th>
+              <th class="text-nowrap">Submission Id</th>
+              <th class="text-nowrap">Submitted By</th>
+              <th class="text-nowrap">Startup Name</th>
+              <th class="text-nowrap">Organization Name</th>
+              <th class="text-nowrap">Program Name</th>
+              <th class="text-nowrap">Created At</th>
+              <th class="text-nowrap">Step Name</th>
             </tr>
           </thead>
         </table>
@@ -78,6 +78,7 @@ const translations = {
     stepName: 'Step Name',
     allOrganizations: 'All Organizations',
     allPrograms: 'All Programs',
+    allSteps: 'All Steps',
   },
   ar: {
     submissionsList: 'قائمة الإرسالات',
@@ -120,6 +121,7 @@ const translations = {
     stepName: 'اسم المرحلة',
     allOrganizations: 'جميع المنظمات',
     allPrograms: 'جميع البرامج',
+    allSteps: 'جميع الخطوات',
   }
 };
 
@@ -160,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         ],
         order: [[0, 'asc']],
-        dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end mt-n6 mt-md-0"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+        dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-12 col-md-8"l><"col-12 col-md-4 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-4"i><"col-sm-12 col-md-4"p>>',
         displayLength: 7,
         lengthMenu: [7, 10, 25, 50, 75, 100],
         language: {
@@ -230,11 +232,20 @@ document.addEventListener('DOMContentLoaded', function (e) {
               dt_basic.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
             });
 
+          // Program filter
           const programFilter = $(`<select class="form-select form-select-sm w-px-150"><option value="">${t.allPrograms}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
               dt_basic.column(4).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+          // Step filter
+          const stepFilter = $(`<select class="form-select form-select-sm w-px-150"><option value="">${t.allSteps}</option></select>`)
+            .appendTo('.dataTables_length')
+            .on('change', function () {
+              const val = $.fn.dataTable.util.escapeRegex($(this).val());
+              dt_basic.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
             });
 
           // Populate organization filter dynamically
@@ -247,6 +258,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
           const programs = [...new Set(data.map(item => item.program_name))];
           programs.forEach(prog => {
             programFilter.append('<option value="' + prog + '">' + prog + '</option>');
+          });
+
+          // Populate step filter dynamically
+          const steps = [...new Set(data.map(item => item.step_name))];
+          steps.forEach(step => {
+            stepFilter.append('<option value="' + step + '">' + step + '</option>');
           });
         }
       });
