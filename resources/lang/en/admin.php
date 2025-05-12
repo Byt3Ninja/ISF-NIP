@@ -1623,5 +1623,6 @@ return [
 	'Final Evaluation' => 'Final Evaluation',
 	'Startup Program Dashboard'  => 'Startup Program Dashboard',
 	'average_rating' => 'Average Rating',
-	'company_counts' => 'Company Counts'
+	'company_counts' => 'Company Counts',
+	'Count of Forms' => 'Count of Forms',
 ];  

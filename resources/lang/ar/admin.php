@@ -1646,6 +1646,6 @@ return [
     'Startup Program Dashboard' => 'لوحة تحكم برنامج الشركات الناشئة',
     'average_rating' => 'متوسط التقييم',
     'company_counts' => 'عدد الشركات',
-	
+		'Count of Forms' => 'عدد النماذج',
 ]; 
 

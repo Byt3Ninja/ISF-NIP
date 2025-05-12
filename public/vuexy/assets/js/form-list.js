@@ -23,9 +23,6 @@ const translations = {
     submissions: 'Submissions',
     lastModified: 'Last Modified',
     createdDate: 'Created Date',
-    status: 'Status',
-    active: 'Active',
-    inactive: 'Inactive',
     detailsOf: 'Details of',
     show: 'Show',
     entries: 'entries',
@@ -41,10 +38,7 @@ const translations = {
     cancel: 'Cancel',
     deleted: 'Deleted!',
     deleteConfirmation: 'Record has been deleted successfully.',
-    allStatuss: 'All Statuses',
     allOrganizations: 'All Organizations',
-    active: 'Active',
-    inactive: 'Inactive',
   },
   ar: {
     addNewForm: 'اضافة نموذج جديد',
@@ -61,9 +55,6 @@ const translations = {
     submissions: 'الإرسالات',
     lastModified: 'آخر تعديل',
     createdDate: 'تاريخ الإنشاء',
-    status: 'الحالة',
-    active: 'نشط',
-    inactive: 'غير نشط',
     detailsOf: 'تفاصيل',
     show: 'عرض',
     entries: 'المدخلات',
@@ -79,10 +70,7 @@ const translations = {
     cancel: 'إلغاء',
     deleted: 'تم الحذف!',
     deleteConfirmation: 'تم حذف السجل بنجاح.',
-    allStatuss: 'جميع الحالات',
     allOrganizations: 'جميع المنظمات',
-    active: 'نشط',
-    inactive: 'غير نشط',
   }
 };
 
@@ -110,21 +98,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
           { data: 'submissions', title: t.submissions },
           { data: 'last_modified', title: t.lastModified },
           { data: 'created_date', title: t.createdDate },
-          { data: 'status', title: t.status },
           { data: null, title: t.actions, orderable: false, searchable: false }
         ],
         columnDefs: [
           {
-            // Status Badge
-            targets: 6,
-            render: function (data, type, full, meta) {
-              const statusClass = full.status === t.active ? 'bg-label-success' : 'bg-label-danger';
-              return `<span class="badge ${statusClass}">${full.status}</span>`;
-            }
-          },
-          {
             // Actions
-            targets: 7,
+            targets: 6,
             render: function (data, type, full, meta) {
               return (
                 '<div class="d-inline-block">' +
@@ -208,14 +187,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         initComplete: function (settings, json) {
           $('.card-header').after('<hr class="my-0">');
 
-          // Add custom filters for Status and Organization
-          const statusFilter = $(`<select class="form-select form-select-sm ms-12 me-3 w-px-100"><option value="">${t.allStatuss}</option><option value="${t.active}">${t.active}</option><option value="${t.inactive}">${t.inactive}</option></select>`)
-            .appendTo('.dataTables_length')
-            .on('change', function () {
-              const val = $.fn.dataTable.util.escapeRegex($(this).val());
-              dt_basic.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
-            });
-
+          // Add custom filter for Organization only (status filter removed)
           const orgFilter = $(`<select class="form-select form-select-sm w-px-200"><option value="">${t.allOrganizations}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
