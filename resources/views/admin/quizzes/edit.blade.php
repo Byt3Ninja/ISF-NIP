@@ -94,7 +94,7 @@
 													<label for="training_id">{{ __('admin.Training')}}</label>
 													<select class="form-control form-select" name="training_id" id="training_id" required>
 														@foreach( $trainings as $training )
-															<option value="{{ $training->id }}">{{ $training->title }}</option>
+															<option value="{{ $training->id }}" {{ $quiz->training_id == $training->id ? 'selected' : '' }} >{{ $training->title }}</option>
 														@endforeach
 													</select>
 												</fieldset>
