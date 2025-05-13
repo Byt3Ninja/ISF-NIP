@@ -846,9 +846,17 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           <div>{{ __('admin.settings') }}</div>
         </a>
       </li>
+      @if ($_user->ableTo('importer.index'))
+            <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
+                <a href="{{ route('importer.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-upload"></i>
+                    <div>{{ __('admin.Importer Tool') }}</div>
+                </a>
+            </li>
       @endif
       @endif
-    @endif
+      @endif
+      @endif
 
     @if( $_user->ableTo('documentation.index', $permissions) )
     <li class="{{ Request::is('dashboard/documentation*') ? 'active' : '' }} menu-item">
@@ -891,6 +899,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <i class="menu-livicon" data-icon="globe"></i>
               <div>{{ __('admin.settings') }}</div>
             </a>
+          </li>
+          <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
+             <a href="{{ route('importer.index') }}" class="menu-link">
+               <i class="menu-icon tf-icons ti ti-upload"></i>
+                 <div>{{ __('admin.Importer Tool') }}</div>
+             </a>
           </li>
           <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
             <a href="{{ route('currencies.index') }}" class="menu-link">

@@ -1649,4 +1649,10 @@ return [
 	'Count of Forms' => 'عدد النماذج',
 	'Edit Form' => 'تعديل النموذج',
 	'Select Organization' => 'اختر المنظمة',
+	'Please select an organization' => 'يرجى اختيار المنظمة',
+	'Advanced Startup & Founder Importer' => 'مستعرض متقدم لشركات الناشئة والمؤسسين',
+	'Upload CSV, map columns to Cycle, Company, and Founder details, and import.' => 'تحميل CSV، تخصيص الاعمدة للسيكل، الشركة، وتفاصيل المؤسس، والتحميل.',
+	'Drag & drop your CSV file here' => 'اسحب وأسقط ملف CSV الخاص بك هنا',
+	'Browse Files' => 'تصفح الملفات',
+	'Importer Tool' => 'اداة التحميل',
 ];

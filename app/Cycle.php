@@ -10,7 +10,9 @@ class Cycle extends Model
     use Auditable;
     public static $module = 'Program';
     protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d',];
-    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $fillable = [
+       'title', 'description', 'start', 'end', 'organization_id',
+    ];
 
     // =============> Attributes <======================
 

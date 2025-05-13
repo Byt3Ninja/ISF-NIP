@@ -5,8 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\Mentor\MentorshipTaskController;
+use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\Mentor\MentorProgramController;
+use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
@@ -568,6 +569,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     });
     Route::get('reports/show-survey/{id}', 'ReportController@surveyReport');
     //================> End Reports <============
+
+    Route::get('/importer', [ImporterController::class, 'index'])->name('importer.index');
+    Route::post('/importer/upload', [ImporterController::class, 'upload'])->name('importer.upload');
+    Route::post('/importer/import', [ImporterController::class, 'import'])->name('importer.import');
+    Route::get('/importer/organizations', [ImporterController::class, 'getOrganizations'])->name('importer.organizations');
+
+
 });
 
 
