@@ -1627,4 +1627,10 @@ return [
 	'Count of Forms' => 'Count of Forms',
 	'Edit Form' => 'Edit Form',
 	'Select Organization' => 'Select Organization',
+	'Please select an organization' => 'Please select an Organization',
+	'Advanced Startup & Founder Importer' => 'Advanced Startup & Founder Importer',
+	'Upload CSV, map columns to Cycle, Company, and Founder details, and import.' => 'Upload CSV, map columns to Cycle, Company, and Founder details, and import.',
+	'Drag & drop your CSV file here' => 'Drag & drop your CSV file here',
+	'Browse Files' => 'Browse Files',
+	'Importer Tool' => 'Importer Tool',
 ];  
