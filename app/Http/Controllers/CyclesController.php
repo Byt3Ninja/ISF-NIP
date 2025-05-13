@@ -154,9 +154,14 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
-
-        $id = $request->cycleid;
-        $type = $request->type;
+        if($request->cycleid == null){
+            $id = $request->id;
+        $type = $request->typeedit;
+        }else{
+            $id = $request->cycleid;
+            $type = $request->type;
+        }
+        
         
         if ($request->has('date_range')) {
             
