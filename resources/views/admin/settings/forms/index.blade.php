@@ -93,39 +93,83 @@
     <!-- Modal to add new record -->
     <div class="offcanvas offcanvas-end" id="add-new-record">
       <div class="offcanvas-header border-bottom">
-      <h5 class="offcanvas-title" id="exampleModalLabel">{{ __('admin.New Form') }}</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="{{ __('admin.Close') }}"></button>
+        <h5 class="offcanvas-title" id="exampleModalLabel">{{ __('admin.New Form') }}</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+          aria-label="{{ __('admin.Close') }}"></button>
       </div>
       <div class="offcanvas-body flex-grow-1">
-      <form class="add-new-record pt-0 row g-2 mt-12" id="form-add-new-record" action="/dashboard/builder/2" method="POST">
-        @csrf
-        <div class="col-sm-12 mb-6">
-        <label class="form-label" for="mtitle">{{ __('admin.Form Name') }}</label>
-        <input type="text" id="mtitle" class="form-control dt-form-name" name="title"
-          placeholder="{{ __('admin.Enter Form Name') }}" aria-label="{{ __('admin.Enter Form Name') }}" />
-        </div>
-        <div class="col-sm-12 mb-6">
-        <label class="form-label" for="organization_id">{{ __('admin.Assigned to Organizations') }}</label>
-        <select id="organization_id" name="organization_id" class="form-select select2 dt-org-select">
-          <option value="" selected disabled>{{ __('admin.Select Organization') }}</option>
-          @php
-            $organizations = App\Organization::all();
-          @endphp
-          @foreach ($organizations as $organization)
-            <option value="{{ $organization->id }}">{{ $organization->name }}</option>
-          @endforeach
-      
-          
-        </select>
-        </div>
-        <div class="col-sm-12 mt-12">
-        <button type="submit" id="submit_btn_add_form"  class="btn btn-primary data-submit me-sm-4 me-1">{{ __('admin.Submit') }}</button>
-        <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel') }}</button>
-        </div>
-      </form>
+        <form class="add-new-record pt-0 row g-2 mt-12 manageForm" id="form-add-new-record"
+          action="/dashboard/builder/2" method="POST">
+          @csrf
+          <div class="col-sm-12 mb-6">
+            <label class="form-label" for="mtitle">{{ __('admin.Form Name') }}</label>
+            <input type="text" id="mtitle" class="form-control dt-form-name" name="title"
+              placeholder="{{ __('admin.Enter Form Name') }}" aria-label="{{ __('admin.Enter Form Name') }}"  required/>
+          </div>
+          <div class="col-sm-12 mb-6">
+            <label class="form-label" for="organization_id">{{ __('admin.Assigned to Organizations') }}</label>
+            <select id="organization_id" name="organization_id" class="form-select select2 dt-org-select" data-placeholder="{{ __('admin.Select Organization') }}" data-required="true" required="true">
+              <option value="" selected disabled>{{ __('admin.Select Organization') }}</option>
+              @php
+              $organizations = App\Organization::all();
+              @endphp
+              @foreach ($organizations as $organization)
+              <option value="{{ $organization->id }}">{{ $organization->name }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="col-sm-12 mt-12">
+            <button type="submit" id="submit_btn_add_form" class="btn btn-primary data-submit me-sm-4 me-1">{{
+              __('admin.Submit') }}</button>
+            <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel')
+              }}</button>
+          </div>
+        </form>
       </div>
     </div>
     <!--/ Forms List Table -->
+
+    <!-- Modal to edit record -->
+    <div class="offcanvas offcanvas-end" id="edit-record">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="exampleModalLabel">{{ __('admin.Edit Form') }}</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+          aria-label="{{ __('admin.Close') }}"></button>
+      </div>
+      <div class="offcanvas-body flex-grow-1">
+        <form class="edit-record pt-0 row g-2 mt-12 manageForm" id="form-edit-record" action="/dashboard/builder/2"
+          method="POST">
+          @csrf
+          <input type="hidden" name="_method" value="PUT">
+          <input type="hidden" name="_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="id" id="id">
+          <div class="col-sm-12 mb-6">
+            <label class="form-label" for="mtitle">{{ __('admin.Form Name') }}</label>
+            <input type="text" id="mtitle" class="form-control dt-form-name" name="title"
+              placeholder="{{ __('admin.Enter Form Name') }}" aria-label="{{ __('admin.Enter Form Name') }}" required />
+          </div>
+          <div class="col-sm-12 mb-6">
+            <label class="form-label" for="organization_id">{{ __('admin.Assigned to Organizations') }}</label>
+            <select id="organization_id" name="organization_id" class="form-select select2 dt-org-select" data-placeholder="{{ __('admin.Select Organization') }}" data-required="true" required="true">
+              <option value="" selected disabled>{{ __('admin.Select Organization') }}</option>
+              @php
+              $organizations = App\Organization::all();
+              @endphp
+              @foreach ($organizations as $organization)
+              <option value="{{ $organization->id }}" data-value="{{ $organization->name }}">{{ $organization->name }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="col-sm-12 mt-12">
+            <button type="submit" id="submit_btn_edit_form" class="btn btn-primary data-submit me-sm-4 me-1">{{
+              __('admin.Submit') }}</button>
+            <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">{{ __('admin.Cancel')
+              }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!--/ Modal to edit record -->
   </div>
   <!--/ Content -->
 </div>
@@ -139,34 +183,64 @@
 @section('pagescripts')
 <script src="/vuexy/assets/js/form-list.js"></script>
 
+<script>
+  $('.manageForm').on('submit', function (e) {
+    e.preventDefault();
+    const form = $(this);
+    const formData = form.serialize();
+
+    const set = form.attr('id') === 'form-add-new-record' ? 2 : 0;
+
+    const id = form.find('#id').val();
+    const title = form.find('#mtitle').val();
+    const organization_id = form.find('#organization_id').val();
+
+    $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      $.ajax({
+        type: "POST",
+        url: "/dashboard/builder/" + set,
+        data: {
+          "id": id,
+          "title": title,
+          "organization_id": organization_id
+        },
+        success: function(response) {
+          console.log(response);
+          location.href = 'show-builder/' + (response || '');        
+        },
+        error: function(error) {
+          // console.log(error);
+          alert("Error Occurred, Try again!");
+        }
+      });
+  });
+</script>
+
 
 <script>
   let formListData = @json($data);
-  console.log(formListData);
+  // console.log(formListData);
 
+  // Sample data for demonstration
   const totalForms = formListData ? formListData.length : 0;
-  const totalSubmissions = formListData.reduce((acc, form) => acc + (form.submissions || 0), 0);
-  const submissionsByOrg = formListData.reduce((acc, form) => {
+  const totalSubmissions = formListData ? formListData.reduce((acc, form) => acc + (form.submissions || 0), 0) : 0;
+  const submissionsByOrg = formListData ? formListData.reduce((acc, form) => {
     const org = form.assigned_organization || 'Unknown';
     acc[org] = (acc[org] || 0) + (form.submissions || 0);
     return acc;
-  }, {});
-  const orgLabels = Object.keys(submissionsByOrg);
-  const orgData = Object.values(submissionsByOrg);
+  }, {}) : {};
 
-  console.log('orgLabels:', orgLabels);
-  console.log('orgData:', orgData);
+  // Convert the object to arrays for charting
+  const orgLabels = submissionsByOrg ? Object.keys(submissionsByOrg) : [];
+  const orgData = submissionsByOrg ? Object.values(submissionsByOrg) : [];
 
   document.getElementById('total-forms').innerText = totalForms;
   document.getElementById('total-submissions').innerText = totalSubmissions;
 
-  // const orgColors = orgLabels.map((_, index) => {
-  //   return `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.7)`;
-  // });
-  // const orgBorderColors = orgLabels.map((_, index) => {
-  //   return `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`;
-  // });  
-  
   document.addEventListener('DOMContentLoaded', function () {
     // Action Button Clicks
     const tableBody = document.getElementById('formsTable')?.querySelector('tbody');

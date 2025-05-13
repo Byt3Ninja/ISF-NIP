@@ -1625,4 +1625,6 @@ return [
 	'average_rating' => 'Average Rating',
 	'company_counts' => 'Company Counts',
 	'Count of Forms' => 'Count of Forms',
+	'Edit Form' => 'Edit Form',
+	'Select Organization' => 'Select Organization',
 ];  
