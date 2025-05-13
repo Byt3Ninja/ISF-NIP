@@ -209,8 +209,10 @@
           "organization_id": organization_id
         },
         success: function(response) {
-          console.log(response);
-          location.href = 'show-builder/' + (response || '');        
+          if (response) {
+            // console.log(response);
+            location.href = 'show-builder/' + (response || '');        
+          }
         },
         error: function(error) {
           // console.log(error);
