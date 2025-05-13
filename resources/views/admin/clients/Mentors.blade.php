@@ -365,13 +365,13 @@
               <div class="position-absolute top-50 translate-middle-y search-icon" style="left: 1rem;">
                 <i class="ti ti-search text-primary ti-24px"></i>
               </div>
-              <div @if (request('ExpertiesSearch') != '') style="display: none;" @endif class="Search">
+              <div class="Search">
                 <input
                   class="form-control custom-shadow search border rounded bg-transparent text-primary px-10 py-2"
                   id="search-table" placeholder="{{ __('admin.Search') }}" name="search"
                   value="{{ request('search') }}" />
               </div>
-              <div @if (request('rateSearch') == '') style="display: none;" @endif class="RateSelect">
+              <div @if (request('rateSearch') == '') @endif class="RateSelect">
                 <select name="rateSearch"
                   class="form-control custom-shadow search border rounded bg-transparent text-primary px-10 py-2">
                   <option value="" {{ request('rateSearch') == '' ? 'selected' : '' }}>{{ __('admin.empty') }}</option>
@@ -382,18 +382,14 @@
                   <option value="5" {{ request('rateSearch') == '5' ? 'selected' : '' }}>5</option>
                 </select>
               </div>
-              <div @if (request('ExpertiesSearch') == '') style="display: none;" @endif class="ExpertiesInput">
-                <input type="text" value="{{ request('ExpertiesSearch') }}" placeholder="{{ __('admin.Experties_Search') }}"
-                  name="ExpertiesSearch"
-                  class="form-control custom-shadow search border rounded bg-transparent text-primary px-10 py-2">
-              </div>
+              
             </div>
 
             <!-- Sorting -->
             <div id="sortContainer" class="d-flex align-items-center mb-6">
               <div class="row d-flex align-items-center me-4" style="gap: 10px;">
                 <div class="col-md-3 d-flex flex-nowrap align-items-center">
-                  <span class="fw-bold mx-1 text-black" style="font-size:13px;">{{ __('admin.Rate') }}</span>
+                  {{-- <span class="fw-bold mx-1 text-black" style="font-size:13px;">{{ __('admin.Rate') }}</span> --}}
                   <div class="btn btn-sm btn-label-primary rounded-pill"
                     style="height:25px; min-width:95px; font-size:13px;">
                     <i class="ti ti-star me-2 text-warning"></i>
@@ -403,12 +399,12 @@
               </div>
               <div class="row d-flex align-items-center" style="gap: 10px;">
                 <div class="col-md-3 d-flex flex-nowrap align-items-center">
-                  <span class="fw-bold mx-1 text-black" style="font-size:13px;">{{ __('admin.Expertises') }}</span>
+                  {{-- <span class="fw-bold mx-1 text-black" style="font-size:13px;">{{ __('admin.LinkedIn') }}</span> --}}
                   <div class="btn btn-sm btn-label-primary rounded-pill"
                     style="height:25px; min-width:95px; font-size:13px;">
                     <i class="ti-24px ti ti-brand-linkedin me-2 text-info"></i>
-                    <input type="checkbox" {{ request('ExpertiesSearch') != '' ? 'checked' : '' }}
-                      class="ExpertiesShowOrNot">
+                    <input type="checkbox" {{ request('linkedin') != '' ? 'checked' : '' }}
+                      class="linkedin" name="linkedin">
                   </div>
                 </div>
               </div>
@@ -695,6 +691,19 @@
 // 	}
 </script>
 <script>
+  $(document).ready(function() {
+    $('.RateShowOrNot').click(function() {
+      if ($(this).is(':checked')) {
+        $('.RateSelect').show();
+        $('.Search').hide();
+        $('.ExpertiesInput').hide();
+      } else {
+        $('.RateSelect').hide();
+        $('.Search').show();
+        $('.ExpertiesInput').hide();
+      }
+    });
+  }); 
   function modify(type, id, stat) {
       $.ajaxSetup({
         headers: {

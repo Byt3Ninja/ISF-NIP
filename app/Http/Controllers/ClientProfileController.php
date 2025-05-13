@@ -369,6 +369,7 @@ class ClientProfileController extends Controller
         $search = $request->input('search');
         $rateSearch = $request->input('rateSearch');
         $ExpertiesSearch = $request->input('expertises');
+        $linkedin = $request->input('linkedin');
         if($setting->mentor_list == 1){
             if (Auth::user()->hasanyRole('Mentor|Registered|Admin')){
     $l = app()->getLocale();
@@ -393,6 +394,11 @@ class ClientProfileController extends Controller
             });
         }
     }
+    if (!empty($linkedin)) {
+        $mentors = $mentors->whereHas('bio', function($query) use ($linkedin) {
+            $query->whereNotNull('linkedin');
+        });
+    }
     if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
         $cycleId = Auth::user()->company->cycle;
         $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
@@ -400,6 +406,7 @@ class ClientProfileController extends Controller
             ->toArray();
         $mentors = $mentors->whereIn('id', $mentorIds);
     }
+    
     $mentors = $mentors->get();
         // $mentors = User::role('mentor')->get();
             return view('admin/clients/Mentors', compact('mentors'));
