@@ -12,7 +12,6 @@ class Company extends Model
     // use Auditable;
     public static $module = 'Company';
     protected $fillable = [
-        'organization_id',
         'country_id',
         'state_id',
         'city_id',
@@ -85,7 +84,9 @@ class Company extends Model
         'CreatedTax',
         'Commercial_Register',
         'Tax_Card',
-        'Country_Register_id'
+        'Country_Register_id',
+        'targeted_market',
+        'industries'
     ];
 
 
