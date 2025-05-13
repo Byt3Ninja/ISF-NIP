@@ -393,6 +393,7 @@
   {"name": "bookings.review_upcoming_busy", "description": "Review Upcoming Busy Slots", "permission_group_id": "Bookings", "guard_name": "web"},
   {"name": "bookings.review_past", "description": "Review Old/Past Bookings", "permission_group_id": "Bookings", "guard_name": "web"},
   {"name": "programs.export", "description": "Export Program Data", "permission_group_id": "Programs", "guard_name": "web"},
+  {"name": "programs.edit", "description": "Edit Program Data", "permission_group_id": "Programs", "guard_name": "web"},
   {"name": "programs.send_email", "description": "Send Email related to Program", "permission_group_id": "Programs", "guard_name": "web"},
   {"name": "mentorships.list_mine", "description": "View My Mentorships (User)", "permission_group_id": "Mentorship Management", "guard_name": "web"},
   {"name": "mentorships.sessions_rate", "description": "Rate Mentorship Session", "permission_group_id": "Mentorship Management", "guard_name": "web"},
