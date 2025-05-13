@@ -8,11 +8,14 @@ use App\BuilderForm;
 use App\BuilderField;
 use App\Organization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\{Validator, DB, Mail};
 
 class FormController extends Controller
 {
     public function index() {
+      $user = Auth::user();
+  
       $data = [];
       $l = app()->getLocale();
       $forms = "SELECT 
@@ -27,7 +30,12 @@ class FormController extends Controller
       FROM builder_forms as BF
       LEFT JOIN organizations as O ON O.id = BF.organization_id
       WHERE BF.deleted_at IS NULL";
-      $forms = DB::select($forms);
+      if($user->organization_id != null){
+        $forms .= " AND BF.organization_id = ? ";
+        $forms = DB::select($forms, [$user->organization_id]);
+      }else{
+        $forms = DB::select($forms);
+      }
       $forms = collect($forms);
       $steps = DB::table('steps')->whereNull('deleted_at')->get();
 
@@ -53,6 +61,7 @@ class FormController extends Controller
     }
     
     public function submissions() {
+      $user = Auth::user();
       $data = [];
       $l = app()->getLocale();
       $forms = "SELECT 
@@ -84,7 +93,12 @@ class FormController extends Controller
       LEFT JOIN cycles as CYC ON CYC.id = S.cycle_id
       LEFT JOIN organizations as O ON O.id = CYC.organization_id
       WHERE FD.deleted_at IS NULL";
-      $forms = DB::select($forms);
+      if($user->organization_id != null){
+        $forms .= " AND CYC.organization_id = ? ";
+        $forms = DB::select($forms, [$user->organization_id]);
+      }else{
+        $forms = DB::select($forms);
+      }
       $forms = collect($forms);
       $C = 1;
       $data = $forms->map(function ($form)use ($l, &$C) {
@@ -104,7 +118,7 @@ class FormController extends Controller
   
     public function submissionDetails(Request $request) {
 
-
+      $user = Auth::user();
       $data = [];
       $l = app()->getLocale();
       $forms = "SELECT 
@@ -142,7 +156,14 @@ class FormController extends Controller
       LEFT JOIN cycles as CYC ON CYC.id = S.cycle_id
       LEFT JOIN organizations as O ON O.id = CYC.organization_id
       WHERE FD.deleted_at IS NULL AND FD.step_id = ? ";
-      $forms = DB::select($forms, [$request->id]);
+      $params = [];
+     
+      if($user->organization_id != null){
+        $forms .= " AND CYC.organization_id = ? ";
+        $forms = DB::select($forms, [$user->organization_id]);
+      }else{
+        $forms = DB::select($forms);
+      }
       $forms = collect($forms);
       $C = 1;
       // نبدأ بتجميع كل الأسئلة حسب step_id

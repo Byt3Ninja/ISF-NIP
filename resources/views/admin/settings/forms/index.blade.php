@@ -137,12 +137,12 @@
           aria-label="{{ __('admin.Close') }}"></button>
       </div>
       <div class="offcanvas-body flex-grow-1">
-        <form class="edit-record pt-0 row g-2 mt-12 manageForm" id="form-edit-record" action="/dashboard/builder/2"
+        <form class="edit-record pt-0 row g-2 mt-12 manageForm" id="form-edit-record" action="/dashboard/builder/0"
           method="POST">
           @csrf
           <input type="hidden" name="_method" value="PUT">
           <input type="hidden" name="_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="id" id="id">
+          <input type="hidden" name="id" class="form_id" id="id">
           <div class="col-sm-12 mb-6">
             <label class="form-label" for="mtitle">{{ __('admin.Form Name') }}</label>
             <input type="text" id="mtitle" class="form-control dt-form-name" name="title"
