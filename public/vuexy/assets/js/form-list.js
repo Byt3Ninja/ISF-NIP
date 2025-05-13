@@ -255,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         
         if (editOffCanvasElement) {
           // Populate form with existing data
+          editOffCanvasElement.querySelector('.form_id').value = rowData.form_id;
           editOffCanvasElement.querySelector('.dt-form-name').value = rowData.form_name;
           editOffCanvasElement.querySelector('.dt-org-select').value = rowData.assigned_organization;
           
