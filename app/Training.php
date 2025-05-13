@@ -39,6 +39,7 @@ class Training extends Model
         $completed = $this->done->where('user_id', auth()->id());
         $_completed = $completed->pluck('training_id')->toArray();
         $pending = array_diff($ids, $_completed);
-        return collect(['completed' => $_completed, 'pending' => $pending, 'percentage' => count($_completed) / count($ids) * 100 ]);
+        $percentage = count($ids) > 0 ? ( ( count($_completed) / count($ids) ) * 100 ) : 0;
+        return collect(['completed' => $_completed, 'pending' => $pending, 'percentage' => $percentage * 100 ]);
     }
 }
