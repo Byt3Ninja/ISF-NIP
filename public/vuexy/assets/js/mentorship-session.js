@@ -36,8 +36,14 @@ function normalizeResponseDays(response) {
 }
 
 function request(id, mentor, organization_id = null, cycle_id = null) {
+  
   $('#mentorid').val(id);
   $('#rname').html(mentor);
+  
+    const url = new URL(window.location);
+    url.searchParams.set('id', cycle_id);
+    history.pushState({}, '', url); // This updates the URL without reload
+
   let _token = $('meta[name="csrf-token"]').attr('content');
   $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': _token } });
   $.ajax({

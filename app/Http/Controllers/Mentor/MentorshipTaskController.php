@@ -73,10 +73,42 @@ class MentorshipTaskController extends Controller
 				];
 			}
 
+			$startup = "SELECT MT.id,
+			MT.mentor_id as MT_mentor_id,
+			MT.user_id as MT_user_id,
+			MT.mentorship_request_id as MT_mentorship_request_id,
+			MT.company_id as MT_company_id,
+			C.name_en as C_name_en,
+			C.logo as C_logo,
+			C.step as C_step,
+			C.cycle as C_cycle,
+			U.id as U_id,
+			Cy.title as CY_title,
+			Cy.id as CY_id,
+			S.title as S_title,
+			S.id as S_id
+			FROM 
+			mentorship_tasks as MT
+			LEFT JOIN companies as C ON C.id = MT.company_id
+			LEFT JOIN users as U ON U.id = MT.user_id
+			LEFT JOIN mentorship_requests as MR ON MR.id = MT.mentorship_request_id
+			LEFT JOIN steps as S ON S.id = C.step
+			LEFT JOIN cycles as Cy ON Cy.id = C.cycle
+			WHERE MT.mentorship_request_id = ? ";
+			$startup = DB::select($startup, [$request->mentorship_id]);
+			$startup = collect($startup);
+			$startup = $startup->map(function ($item) {
+				return [
+					'id' => $item->id,
+					'company_name' => $item->C_name_en,
+					'start_up_logo' => $item->C_logo,
+					'program_name' => $item->CY_title,
+					'step_name' => $item->S_title
+				];
+			});
 
 
-
-
+dd($startup);
 
 
 

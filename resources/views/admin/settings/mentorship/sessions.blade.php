@@ -114,13 +114,13 @@
                         <tr>
                           <td>
                             <div class="d-flex align-items-center">
-                              <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
+                              <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
                                 <img 
                                   onerror="this.src='/images/logo-placeholder.png'"
-                                  src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle me-2 border bg-label-light" height="40" width="40">
+                                  src="{{ $session->user->company->logo_url ?? '' }}" alt="avatar" class="rounded-circle me-2 border bg-label-light" height="40" width="40">
                               </a>
-                              <a href="/dashboard/companyProfile/{{ $session->user->company->id }}">
-                                {{ $session->user->company->{'name_' . $l} }}
+                              <a href="/dashboard/companyProfile/{{ $session->user->company->id ?? '' }}">
+                                {{ $session->user->company->{'name_' . $l} ?? '' }}
                               </a>
                             </div>
                           </td>
@@ -146,7 +146,7 @@
                                 onerror="this.src='/icons/account.svg'"
                                 src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
                                 @endif
-                              {{ $session->mentor->name }}
+                              {{ $session->mentor->name ?? '' }}
                             </div>
                           </td>
                           <td>

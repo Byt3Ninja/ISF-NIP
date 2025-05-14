@@ -104,13 +104,15 @@
                 @foreach ($mentors as $mentor)
                 <label class="btn btn-outline-primary mentor-label" id="label-mentor{{ $mentor->user_id }}">
                   <div class="d-flex align-items-center">
-                    <img class="rounded-circle me-2" src="{{ $mentor->user->image_url }}" alt="click to view"
+                    <img class="rounded-circle me-2" src="{{ $mentor->user->image_url ?? '' }}" alt="click to view"
                       height="20" width="20" />
                     <div class="d-flex align-items-center">
                       <span class="mx-2">
+                        @if($mentor->user != null)
                         {{ $mentor->user->id }}-
                         {{ $thementor = $mentor->user->{'first_name_' . $l} . ' ' . $mentor->user->{'last_name_' . $l}
                         }}
+                        @endif
                       </span>
                       <input type="radio" value="{{ $mentor->user_id }}" id="mentor{{ $mentor->user_id }}" name="mentor" class="mentor_radio"
                         onclick="mentor({{ $mentor->user_id }},'{{ $thementor }}','{{ $mentor->mrating() }}')">
