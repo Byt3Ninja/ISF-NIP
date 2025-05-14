@@ -131,13 +131,13 @@
                     </h5>
                     <div class="d-flex align-items-center gap-2">
                       <!-- Mail Icon -->
-                      @if ($organization->user->email)
+                      @if (optional($organization->user)->email)
                         <a href="mailto:{{ $organization->user->email }}" class="text-decoration-none">
                           <i class="ti ti-mail fs-4 text-primary"></i>
                         </a>
                       @endif
                       <!-- Phone Icon -->
-                      @if ($organization->user->phone)
+                      @if (optional($organization->user)->phone)
                         <a href="tel:{{ $organization->user->phone }}" class="text-decoration-none">
                           <i class="ti ti-phone fs-4 text-primary"></i>
                         </a>
@@ -167,7 +167,7 @@
                       <img src="{{ $organization->user->img_url ?? '/images/placeholder.png' }}"
                         onerror="this.src='/images/user-placeholder.jpeg'" alt="Manager Image"
                         class="rounded-circle img-fluid border" style="height: 35px; width: 35px; object-fit: cover;" />
-                      <span class="ms-3">{{ $organization->user->name }}</span>
+                      <span class="ms-3">{{ $organization->user->name ?? '' }}</span>
                     </div>
                   </div>
                   <div class="d-flex justify-content-between mt-3">

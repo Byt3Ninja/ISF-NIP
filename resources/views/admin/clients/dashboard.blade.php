@@ -631,7 +631,7 @@
                   @if( $survey->triggered_by == 'session' )
                   {{ __('dashboard.with') }} 
                     @php $mentor = $middleware->mentor; @endphp
-                    {{ $mentor->name }}
+                    {{ $mentor->name ?? '' }}
                   @elseif( $survey->triggered_by == 'due' )
                     - {{ $middleware->title }}
                   @else
@@ -1303,7 +1303,12 @@
 															<a class="media-left">
 																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
 															</a>
-                              @if( $_user->ableTo('mentors.profile_view', $permissions) )<a target="_blank" href="{{route('mentors.profile_view', ($mentor->user)->id)}}">@endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )
+                              @if ($mentor->user != null)
+                              <a target="_blank" href="{{route('mentors.profile_view', ($mentor->user)->id)}}">
+                              @endif
+                              
+                                @endif
 															<div class="media-body">
 																<h6 class="media-heading mb-0 text-nowrap">{{optional($mentor->user)->name }}</h6>
 																<span class="font-small-2 text-nowrap">{{optional($mentor->user)->title }}</span>

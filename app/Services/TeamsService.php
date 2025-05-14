@@ -181,6 +181,10 @@ class TeamsService implements OnlineMeetingServiceInterface
     public function createMeeting($data)
     {
         $user = Auth::user();
+         return [ 
+                'success' => false,
+                'data' => $user,
+            ];
         if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
             $setting = Settings::where('id', 1)->first();
     

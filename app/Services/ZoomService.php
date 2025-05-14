@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\User; // تأكد من أن هذا هو مسار موديل المستخدم الصحيح
 use App\Settings;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+// Illuminate\Support\Facades\Http; // لم نعد بحاجة إليه إذا استخدمنا Guzzle فقط
 
 class ZoomService implements OnlineMeetingServiceInterface
 {
@@ -16,372 +18,505 @@ class ZoomService implements OnlineMeetingServiceInterface
     const MEETING_TYPE_RECURRING = 3;
     const MEETING_TYPE_FIXED_RECURRING_FIXED = 8;
 
-    public $client;
-    public $jwt;
-    public $headers;
+    public Client $client;
+    protected ?array $jwt = null; // Nullable and type hinted
+    protected ?array $headers = null; // Nullable and type hinted
+    protected ?string $zoomApiUrl = null; // For caching the API URL
 
     public function __construct()
     {
         $this->client = new Client();
-        $this->jwt = $this->generateZoomToken();
+        // لا تقم بإنشاء التوكن هنا لتجنب مشكلة Auth::user() == null
+    }
 
-        if($this->jwt['status'] ) {
-            
+    /**
+     * Ensures that Zoom credentials (JWT and headers) are initialized.
+     * This method should be called before any API request.
+     *
+     * @param User|null $user The user context for fetching credentials. Defaults to Auth::user().
+     * @return bool True if initialization was successful, false otherwise.
+     */
+    protected function ensureCredentialsInitialized(?User $user = null): bool
+    {
+        if ($this->jwt !== null && $this->jwt['status']) {
+            return true; // Already initialized and valid
+        }
+
+        $currentUser = $user ?? Auth::user();
+
+        if (!$currentUser) {
+            Log::warning('ZoomService: Attempted to initialize credentials without an authenticated user.');
+            $this->jwt = ['status' => false, 'data' => __('admin.zoom_error_no_user_auth')]; // رسالة خطأ أوضح
+            return false;
+        }
+
+        $this->jwt = $this->generateZoomToken($currentUser);
+
+        if ($this->jwt['status']) {
             $this->headers = [
                 'Authorization' => 'Bearer ' . $this->jwt['data'],
                 'Content-Type'  => 'application/json',
                 'Accept'        => 'application/json',
             ];
+            return true;
+        } else {
+            Log::error('ZoomService: Failed to generate Zoom token.', ['error' => $this->jwt['data']]);
+            $this->headers = null; // Ensure headers are null on failure
+            return false;
         }
     }
 
-
     /**
      * Generate Zoom Access Token.
+     * Now accepts a User object.
      */
-    protected function generateZoomToken()
+    protected function generateZoomToken(User $user): array // User parameter is now required and type-hinted
     {
         $ZOOM_CLIENT_ID = '';
         $ZOOM_CLIENT_SECRET = '';
         $ZOOM_ACCOUNT_ID = '';
 
-      $user = Auth::user();
-
-      if ($user && $user->hasRole('Admin') && Schema::hasTable('settings')) {
-        $setting = Settings::where('id', 1)->first();
-
-        if ($setting) {
-            $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
-            $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
-            $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
-        }
-    }
-
-    elseif ($user && $user->hasRole('organizationManager')) {
-        $org = $user->organization;
-        $ZOOM_CLIENT_ID = $org->zoom_client_id;
-        $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
-        $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
-    }
-
-    if (empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) {
-        return [
-            'status' => false, 
-            'data' => __('admin.zoom_error')
-        ];
-    }
-    
-    try {
-        $client = new Client([
-            'headers' => [
-                'Authorization' => 'Basic ' . base64_encode($ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
-                'Host' => 'zoom.us',
-            ],
-        ]);
-
-        $response = $client->request('POST', "https://zoom.us/oauth/token", [
-            'form_params' => [
-                'grant_type' => 'account_credentials',
-                'account_id' => $ZOOM_ACCOUNT_ID,
-            ],
-        ]);
-
-        $responseBody = json_decode($response->getBody(), true);
-
-        if (isset($responseBody['access_token'])) {
-            return ['status' => true, 'data' => $responseBody['access_token']];
-        }
-
-    } catch (\Exception $e) {
-        return ['status' => false, 'data' => $e->getMessage()];
-    }
-    }
-
-
-    private function retrieveZoomUrl()
-    {
-        if (Schema::hasTable('settings')) {
-            $Setting = Settings::where('id', 1)->first();
-            $zoom_api_url = $Setting->ZOOM_API_URL;
-            if (!empty($Setting) && !empty($zoom_api_url)) {
-                $ZOOM_API_URL = $Setting->ZOOM_API_URL;
-            } else {
-                $ZOOM_API_URL = 'https://api.zoom.us/v2/';
+        // تم تبسيط هذا الجزء بما أننا نمرر كائن المستخدم مباشرة
+        if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
+            $setting = Settings::where('id', 1)->first();
+            if ($setting) {
+                $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
+                $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
+                $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
             }
+        } elseif ($user->hasRole('organizationManager')) {
+            $org = $user->organization; // افترض أن العلاقة 'organization' موجودة في موديل User
+            if ($org) {
+                $ZOOM_CLIENT_ID = $org->zoom_client_id;
+                $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
+                $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
+            }
+        } else{
+            $setting = Settings::where('id', 1)->first();
+            if ($setting) {
+                $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
+                $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
+                $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
+            }
+        }
+        
 
-            return $ZOOM_API_URL;
+        if (empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) {
+            Log::error('ZoomService: Zoom API credentials not configured for user.', ['user_id' => $user->id]);
+            return [
+                'status' => false,
+                'data' => __('admin.zoom_credentials_not_configured') // رسالة خطأ أكثر تحديدًا
+            ];
+        }
+
+        try {
+            $client = new Client([ // Guzzle client for token generation
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode($ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
+                    'Host' => 'zoom.us', // هذا الهيدر قد لا يكون ضرورياً مع Guzzle الأحدث
+                ],
+            ]);
+
+            $response = $client->request('POST', "https://zoom.us/oauth/token", [
+                'form_params' => [
+                    'grant_type' => 'account_credentials',
+                    'account_id' => $ZOOM_ACCOUNT_ID,
+                ],
+            ]);
+
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+
+            if (isset($responseBody['access_token'])) {
+                return ['status' => true, 'data' => $responseBody['access_token']];
+            }
+            Log::error('ZoomService: Access token not found in Zoom OAuth response.', ['response_body' => $responseBody]);
+            return ['status' => false, 'data' => __('admin.zoom_token_error_retrieval')];
+
+        } catch (RequestException $e) {
+            $errorMessage = $e->getMessage();
+            if ($e->hasResponse()) {
+                $errorMessage .= ' | Response: ' . $e->getResponse()->getBody()->getContents();
+            }
+            Log::error('ZoomService: Exception during Zoom token generation.', ['error' => $errorMessage]);
+            return ['status' => false, 'data' => $errorMessage];
+        } catch (\Exception $e) {
+            Log::error('ZoomService: General exception during Zoom token generation.', ['error' => $e->getMessage()]);
+            return ['status' => false, 'data' => $e->getMessage()];
         }
     }
 
-    /**
-     * Zoom Time Format.
-     */
-    public function toZoomTimeFormat(string $dateTime)
+
+    private function retrieveZoomUrl(): string
+    {
+        if ($this->zoomApiUrl !== null) {
+            return $this->zoomApiUrl;
+        }
+
+        $defaultUrl = 'https://api.zoom.us/v2/';
+        if (Schema::hasTable('settings')) {
+            $setting = Settings::where('id', 1)->first();
+            if ($setting && !empty($setting->ZOOM_API_URL)) {
+                $this->zoomApiUrl = rtrim($setting->ZOOM_API_URL, '/') . '/'; // Ensure trailing slash
+                return $this->zoomApiUrl;
+            }
+        }
+        $this->zoomApiUrl = $defaultUrl;
+        return $this->zoomApiUrl;
+    }
+
+    public function toZoomTimeFormat(string $dateTime): string
     {
         try {
             $date = new \DateTime($dateTime);
             return $date->format('Y-m-d\TH:i:s');
         } catch (\Exception $e) {
             Log::error('ZoomService->toZoomTimeFormat: ' . $e->getMessage());
-            return '';
+            return ''; // أو throw exception
         }
     }
 
-    /**
-     * Create Zoom Meeting.
-     */
-    public function createMeeting($data)
+    public function createMeeting($data): array
     {
         $user = Auth::user();
-
-      if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
-        $setting = Settings::where('id', 1)->first();
-
-        if ($setting) {
-            $timeZone = $setting->timezone;
+        if (!$this->ensureCredentialsInitialized($user)) { // تمرير المستخدم الحالي
+            return [
+                'success' => false,
+                'data'    => $this->jwt['data'] ?? __('admin.zoom_auth_failed'),
+            ];
         }
-    }
 
-    elseif ($user->hasRole('organizationManager')) {
-        $org = $user->organization;
-        $timeZone = $org->time_zone;
-    }
+        $timeZone = 'Africa/Cairo'; // Default
+        if ($user) { // $user should be available if ensureCredentialsInitialized passed
+            if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
+                $setting = Settings::where('id', 1)->first();
+                if ($setting && $setting->timezone) {
+                    $timeZone = $setting->timezone;
+                }
+            } elseif ($user->hasRole('organizationManager')) {
+                $org = $user->organization;
+                if ($org && $org->time_zone) {
+                    $timeZone = $org->time_zone;
+                }
+            }
+        }
+
+
         $path = 'users/me/meetings';
         $url = $this->retrieveZoomUrl();
 
-        $body = [
-            'headers' => $this->headers,
-            'body'    => json_encode([
-                'topic'      => $data['topic'],
-                'type'       => self::MEETING_TYPE_SCHEDULE,
-                'start_time' => $this->toZoomTimeFormat($data['start_time']),
-                'duration'   => $data['duration'],
-                'agenda'     => (! empty($data['agenda'])) ? $data['agenda'] : null,
-                'timezone'     => $timeZone ??'Africa/Cairo', 
-                'settings'   => [
-                    'host_video'        => ($data['host_video'] == "1") ? true : false,
-                    'participant_video' => ($data['participant_video'] == "1") ? true : false,
-                    'waiting_room'      => false,
-                    'auto_recording' => 'cloud',
-                    "share_recording" => "publicly",
-                    "viewer_download" => true
-                ],
-            ]),
+        $payload = [
+            'topic'      => $data['topic'],
+            'type'       => self::MEETING_TYPE_SCHEDULE,
+            'start_time' => $this->toZoomTimeFormat($data['start_time']),
+            'duration'   => $data['duration'],
+            'agenda'     => $data['agenda'] ?? null,
+            'timezone'   => $timeZone,
+            'settings'   => [
+                'host_video'        => ($data['host_video'] == "1"),
+                'participant_video' => ($data['participant_video'] == "1"),
+                'waiting_room'      => false, // Consider making this configurable
+                'auto_recording'    => 'cloud',
+                "share_recording"   => "publicly",
+                "viewer_download"   => true
+            ],
         ];
 
-        if(!$this->jwt['status'] ) {
+        try {
+            $response = $this->client->post($url . $path, [
+                'headers' => $this->headers,
+                'json'    => $payload, // Use 'json' for Guzzle to auto-encode and set Content-Type
+            ]);
+
+            if ($response->getStatusCode() === 201) {
+                $responseData = json_decode($response->getBody()->getContents(), true);
+                return [
+                    'success' => true,
+                    'data'    => [
+                        'id'        => $responseData['id'],
+                        'start_url' => $responseData['start_url'],
+                        'join_url'  => $responseData['join_url'],
+                    ],
+                ];
+            } else {
+                Log::error('ZoomService::createMeeting - Unexpected status code.', [
+                    'status' => $response->getStatusCode(),
+                    'body' => $response->getBody()->getContents()
+                ]);
+                return ['success' => false, 'data' => json_decode($response->getBody()->getContents(), true) ?? 'Unknown error'];
+            }
+        } catch (RequestException $e) {
+            $errorMessage = $e->getMessage();
+            if ($e->hasResponse()) {
+                $errorMessage .= ' | Response: ' . $e->getResponse()->getBody()->getContents();
+            }
+            Log::error('ZoomService::createMeeting - RequestException', ['error' => $errorMessage]);
+            return ['success' => false, 'data' => $errorMessage];
+        } catch (\Exception $e) {
+            Log::error('ZoomService::createMeeting - General Exception', ['error' => $e->getMessage()]);
+            return ['success' => false, 'data' => $e->getMessage()];
+        }
+    }
+
+    public function update($id, $data): array
+    {
+        $user = Auth::user();
+        if (!$this->ensureCredentialsInitialized($user)) {
             return [
                 'success' => false,
-                'data'    => $this->jwt['data'],
+                'data'    => $this->jwt['data'] ?? __('admin.zoom_auth_failed'),
             ];
         }
-        $response =  $this->client->post($url . $path, $body);
 
-        if ($response && $response->getStatusCode() === 201) {
-            $responseData = json_decode($response->getBody(), true);
+        $timeZone = 'Africa/Cairo'; // Default, same logic as createMeeting for dynamic timezone
+         if ($user) {
+            if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
+                $setting = Settings::where('id', 1)->first();
+                if ($setting && $setting->timezone) {
+                    $timeZone = $setting->timezone;
+                }
+            } elseif ($user->hasRole('organizationManager')) {
+                $org = $user->organization;
+                if ($org && $org->time_zone) {
+                    $timeZone = $org->time_zone;
+                }
+            }
+        }
+
+        $path = 'meetings/' . $id;
+        $url = $this->retrieveZoomUrl();
+
+        $payload = [
+            'topic'      => $data['topic'],
+            'type'       => self::MEETING_TYPE_SCHEDULE, // Or make it dynamic if needed
+            'start_time' => $this->toZoomTimeFormat($data['start_time']),
+            'duration'   => $data['duration'],
+            'agenda'     => $data['agenda'] ?? null,
+            'timezone'   => $timeZone,
+            'settings'   => [
+                'host_video'        => ($data['host_video'] == "1"),
+                'participant_video' => ($data['participant_video'] == "1"),
+                'waiting_room'      => false,
+            ],
+        ];
+
+        try {
+            $response = $this->client->patch($url . $path, [
+                'headers' => $this->headers,
+                'json'    => $payload,
+            ]);
+
+            // Zoom API returns 204 No Content on successful PATCH
             return [
-                'success' => true,
-                'data'    => [
-                    'id'        => $responseData['id'],
-                    'start_url' => $responseData['start_url'],
-                    'join_url'  => $responseData['join_url'],
-                ],
+                'success' => $response->getStatusCode() === 204,
+                'data'    => $response->getStatusCode() === 204 ? null : json_decode($response->getBody()->getContents(), true),
             ];
-        } else {
+        } catch (RequestException $e) {
+            $errorMessage = $e->getMessage();
+            if ($e->hasResponse()) {
+                $errorMessage .= ' | Response: ' . $e->getResponse()->getBody()->getContents();
+            }
+            Log::error('ZoomService::update - RequestException', ['meeting_id' => $id, 'error' => $errorMessage]);
+            return ['success' => false, 'data' => $errorMessage];
+        }
+    }
+
+    // Helper for GET requests
+    private function makeGetRequest(string $path, array $queryParams = []): array
+    {
+        if (!$this->ensureCredentialsInitialized()) {
             return [
                 'success' => false,
-                'data'    => null,
+                'data'    => $this->jwt['data'] ?? __('admin.zoom_auth_failed'),
             ];
         }
+        $url = $this->retrieveZoomUrl();
+
+        try {
+            $response = $this->client->get($url . $path, [
+                'headers' => $this->headers,
+                'query'   => $queryParams // For GET request query parameters
+            ]);
+            // GET requests usually return 200 OK with data.
+            // If Zoom truly returns 204 for some GETs, the original logic might be needed for specific endpoints.
+            // For now, assuming 200 OK for successful GETs with data.
+            if ($response->getStatusCode() === 200) {
+                 return [
+                    'success' => true,
+                    'data'    => json_decode($response->getBody()->getContents(), true),
+                ];
+            } elseif ($response->getStatusCode() === 204) { // Handle specific 204 if Zoom API behaves this way for GET
+                 return [
+                    'success' => true, // Technically success, but no content
+                    'data'    => null,
+                ];
+            } else {
+                Log::error('ZoomService::makeGetRequest - Unexpected status code.', [
+                    'path' => $path,
+                    'status' => $response->getStatusCode(),
+                    'body' => $response->getBody()->getContents()
+                ]);
+                return ['success' => false, 'data' => json_decode($response->getBody()->getContents(), true) ?? 'Unknown error'];
+            }
+
+        } catch (RequestException $e) {
+            $errorMessage = $e->getMessage();
+            if ($e->hasResponse()) {
+                $errorMessage .= ' | Response: ' . $e->getResponse()->getBody()->getContents();
+            }
+            Log::error('ZoomService::makeGetRequest - RequestException', ['path' => $path, 'error' => $errorMessage]);
+            return ['success' => false, 'data' => $errorMessage];
+        }
     }
-    public function update($id, $data)
+
+    public function get($id): array
     {
+        return $this->makeGetRequest('meetings/' . $id);
+    }
+
+    public function getregistrants($id): array
+    {
+        // Zoom API might require pagination parameters like page_size, next_page_token
+        return $this->makeGetRequest('meetings/' . $id . '/registrants', ['page_size' => 300]); // Example: get up to 300
+    }
+
+    public function getall(): array
+    {
+        // Zoom API might require pagination parameters
+        return $this->makeGetRequest('users/me/meetings', ['page_size' => 100]); // Example: get up to 100
+    }
+
+    public function delete($id): array
+    {
+        if (!$this->ensureCredentialsInitialized()) {
+            return [
+                'success' => false,
+                'data'    => $this->jwt['data'] ?? __('admin.zoom_auth_failed'),
+            ];
+        }
         $path = 'meetings/' . $id;
         $url = $this->retrieveZoomUrl();
 
-        $body = [
-            'headers' => $this->headers,
-            'body'    => json_encode([
-                'topic'      => $data['topic'],
-                'type'       => self::MEETING_TYPE_SCHEDULE,
-                'start_time' => $this->toZoomTimeFormat($data['start_time']),
-                'duration'   => $data['duration'],
-                'agenda'     => (! empty($data['agenda'])) ? $data['agenda'] : null,
-                'timezone'     => 'Africa/Cairo',
-                'settings'   => [
-                    'host_video'        => ($data['host_video'] == "1") ? true : false,
-                    'participant_video' => ($data['participant_video'] == "1") ? true : false,
-                    'waiting_room'      => false,
-                ],
-            ]),
-        ];
-        $response =  $this->client->patch($url . $path, $body);
-
-        return [
-            'success' => $response->getStatusCode() === 204,
-            'data'    => json_decode($response->getBody(), true),
-        ];
+        try {
+            $response = $this->client->delete($url . $path, [
+                'headers' => $this->headers,
+            ]);
+            // Zoom API returns 204 No Content on successful DELETE
+            return [
+                'success' => $response->getStatusCode() === 204,
+            ];
+        } catch (RequestException $e) {
+            $errorMessage = $e->getMessage();
+             if ($e->hasResponse()) {
+                $errorMessage .= ' | Response: ' . $e->getResponse()->getBody()->getContents();
+            }
+            Log::error('ZoomService::delete - RequestException', ['meeting_id' => $id, 'error' => $errorMessage]);
+            return ['success' => false, 'data' => $errorMessage];
+        }
     }
 
-    public function get($id)
+    // For methods using specific token generation like reports/recordings,
+    // it's better to use the instance's initialized token if possible.
+    // If they truly need a separate token flow, that needs to be justified.
+    // For consistency, let's try to use the instance's token.
+
+    public function getSessionReport(string $meetingId, ?string $userId = null): array // userId is not used currently
     {
-        $path = 'meetings/' . $id;
-        $url = $this->retrieveZoomUrl();
-        $this->jwt = $this->generateZoomToken();
-        $body = [
-            'headers' => $this->headers,
-            'body'    => json_encode([]),
-        ];
-        $response =  $this->client->get($url . $path, $body);
-        return [
-            'success' => $response->getStatusCode() === 204,
-            'data'    => json_decode($response->getBody(), true),
-        ];
-    }
-
-    public function getregistrants($id)
-    {
-        $path = 'meetings/' . $id . '/registrants';
-        $url = $this->retrieveZoomUrl();
-        $this->jwt = $this->generateZoomToken();
-        $body = [
-            'headers' => $this->headers,
-            'body'    => json_encode([]),
-        ];
-        $response =  $this->client->get($url . $path, $body);
-        return [
-            'success' => $response->getStatusCode() === 204,
-            'data'    => json_decode($response->getBody(), true),
-        ];
-    }
-
-    public function getall()
-    {
-        $path = '/users/me/meetings';
-        $url = $this->retrieveZoomUrl();
-        $this->jwt = $this->generateZoomToken();
-        $body = [
-            'headers' => $this->headers,
-            'body'    => json_encode([]),
-        ];
-        $response =  $this->client->get($url . $path, $body);
-        return [
-            'success' => $response->getStatusCode() === 204,
-            'data'    => json_decode($response->getBody(), true),
-        ];
-    }
-
-    /**
-     * @param string $id
-     *
-     * @return bool[]
-     */
-    public function delete($id)
-    {
-        $path = 'meetings/' . $id;
-        $url = $this->retrieveZoomUrl();
-        $body = [
-            'headers' => $this->headers,
-            'body'    => json_encode([]),
-        ];
-        $response =  $this->client->delete($url . $path, $body);
-        return [
-            'success' => $response->getStatusCode() === 204,
-        ];
-    }
-
-
-    /**
-     * Get Zoom Meeting Report.
-     */
-
-    public function getSessionReport(string $meetingId, ?string $userId = null)
-    {
-        $accessToken = $this->generateZoomToken();
-        if (!$accessToken) {
-            return ['success' => false, 'message' => 'Failed to Generate Access Token.'];
+        // Use ensureCredentialsInitialized which now can take a user if needed
+        // If $userId is important for selecting different credentials, then pass it:
+        // $targetUser = $userId ? User::find($userId) : Auth::user();
+        // if (!$this->ensureCredentialsInitialized($targetUser)) { ... }
+        if (!$this->ensureCredentialsInitialized()) { // Uses Auth::user() by default
+            return [
+                'success' => false,
+                'message' => $this->jwt['data'] ?? __('admin.zoom_auth_failed'), // Use message key as per original
+            ];
         }
 
+        // Zoom API might require pagination for participants
+        // The path for report is different (uses /report/meetings/)
         $url = "https://api.zoom.us/v2/report/meetings/{$meetingId}/participants";
+        try {
+            $response = $this->client->get($url, [
+                'headers' => $this->headers,
+                'query'   => ['page_size' => 300] // Example pagination
+            ]);
 
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer $accessToken",
-            'Content-Type'  => 'application/json',
-        ])->get($url);
-
-        $responseData = $response->json();
-
-        if ($response->successful()) {
-            return [
-                'success' => true,
-                'data'    => $responseData,
-            ];
-        } else {
+            if ($response->getStatusCode() === 200) {
+                return [
+                    'success' => true,
+                    'data'    => json_decode($response->getBody()->getContents(), true),
+                ];
+            }
             return [
                 'success' => false,
-                'message' => $responseData['message'],
+                'message' => json_decode($response->getBody()->getContents(), true)['message'] ?? 'Failed to fetch report',
             ];
+
+        } catch (RequestException $e) {
+            $errorMessage = $e->getMessage();
+            if ($e->hasResponse()) {
+                $responseBody = $e->getResponse()->getBody()->getContents();
+                $decodedBody = json_decode($responseBody, true);
+                $errorMessage = $decodedBody['message'] ?? $responseBody;
+            }
+            Log::error('ZoomService::getSessionReport - RequestException', ['meeting_id' => $meetingId, 'error' => $errorMessage]);
+            return ['success' => false, 'message' => $errorMessage];
         }
     }
 
-
-    /**
-     * Get Zoom Meeting Recording.
-     */
-
-    public function getSessionRecord($meetingId, ?string $userId = null)
+    public function getSessionRecord(string $meetingId, ?string $userId = null): array // userId is not used
     {
-        $accessToken = $this->generateZoomToken();
-        if (!$accessToken) {
-            return ['success' => false, 'message' => 'Failed to generate access token.'];
-        }
-
-        $url = "https://api.zoom.us/v2/meetings/{$meetingId}/recordings";
-
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer $accessToken",
-            'Content-Type'  => 'application/json',
-        ])->get($url);
-
-        if ($response->successful()) {
-            return [
-                'success' => true,
-                'data'    => $response->json(),
-            ];
-        } else {
+        if (!$this->ensureCredentialsInitialized()) {
             return [
                 'success' => false,
-                'message' => $response->json()['message'] ?? 'Failed to Fetch Recorded Sessions',
+                'message' => $this->jwt['data'] ?? __('admin.zoom_auth_failed'),
             ];
+        }
+
+        $url = $this->retrieveZoomUrl() . "meetings/{$meetingId}/recordings"; // Using retrieved API URL
+
+        try {
+            $response = $this->client->get($url, [
+                'headers' => $this->headers,
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                return [
+                    'success' => true,
+                    'data'    => json_decode($response->getBody()->getContents(), true),
+                ];
+            }
+            return [
+                'success' => false,
+                'message' => json_decode($response->getBody()->getContents(), true)['message'] ?? 'Failed to fetch recordings',
+            ];
+        } catch (RequestException $e) {
+            $errorMessage = $e->getMessage();
+            if ($e->hasResponse()) {
+                $responseBody = $e->getResponse()->getBody()->getContents();
+                $decodedBody = json_decode($responseBody, true);
+                $errorMessage = $decodedBody['message'] ?? $responseBody;
+            }
+             Log::error('ZoomService::getSessionRecord - RequestException', ['meeting_id' => $meetingId, 'error' => $errorMessage]);
+            return ['success' => false, 'message' => $errorMessage];
         }
     }
 
-    public function getUserIdFromMeeting(string $meetingId)
+    public function getUserIdFromMeeting(string $meetingId): array
     {
-        $accessToken = $this->generateZoomToken();
-        if (!$accessToken) {
-            return ['success' => false, 'message' => 'Failed to Generate Access Token.'];
-        }
+        // This essentially gets meeting details
+        $result = $this->get($meetingId); // Reuse the existing get method
 
-        $url = "https://api.zoom.us/v2/meetings/{$meetingId}";
-
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer $accessToken",
-            'Content-Type'  => 'application/json',
-        ])->get($url);
-
-        $responseData = $response->json();
-
-        if ($response->successful()) {
+        if ($result['success'] && isset($result['data']['host_id'])) {
             return [
                 'success' => true,
-                'user_id' => $responseData['host_id'],
-                'data'    => $responseData,
+                'user_id' => $result['data']['host_id'], // Zoom user ID, not your app's user ID
+                'data'    => $result['data'],
             ];
         } else {
             return [
                 'success' => false,
-                'message' => $responseData['message'] ?? 'Failed to fetch meeting details.',
+                'message' => $result['data']['message'] ?? $result['data'] ?? 'Failed to fetch meeting details or host_id.',
             ];
         }
     }
