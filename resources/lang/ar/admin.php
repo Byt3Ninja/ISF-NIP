@@ -1672,4 +1672,5 @@ return [
 	'Founder Details' => 'تفاصيل المؤسس',
 	'Application Field (Destination)' => 'حقل التطبيق (الوجهة)',
 	'Your CSV Column (Source)' => 'اعمدة CSV الخاصة بك (المصدر)',
+	'URLNotWorking' => 'الرابط غير صالح',
 ];
