@@ -19,13 +19,14 @@ class ImporterController extends Controller
 {
     public function index()
     {
-        return view('admin.importer');
+        $templateUrl = asset('csv/Growthlabs Import Startup Sheet.csv');
+        return view('admin.importer', ['templateUrl' => $templateUrl]);
     }
 
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt|max:10240', // 10MB max
+            'file' => 'required|mimes:csv,txt|max:10240', 
         ]);
 
         try {

@@ -550,17 +550,17 @@
               </div>
             </div>
 
-            <div class="form-group mb-3" id="online">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.select online') }}:</label>
-              <select name="online" id="select-course" class="select2 form-select" id="conline">
-                @if (!$online)
-                  <option>{{ __('cycles.No saved training courses') }}</option>
-                @endif
-                @foreach ($online as $tr)
-                  <option value="{{ $tr->id }}">{{ $tr->title }}</option>
-                @endforeach
-              </select>
-            </div>
+                <div class="form-group mb-3" id="online-dropdown">
+                   <label class="form-label fs-6 mb-1">{{ __('cycles.select online') }}:</label>
+                      <select name="online" id="select-course" class="select2 form-select">
+                      @if (!$online)
+                           <option>{{ __('cycles.No saved training courses') }}</option>
+                      @endif
+                      @foreach ($online as $tr)
+                         <option value="{{ $tr->id }}">{{ $tr->title }}</option>
+                      @endforeach
+                   </select>
+                </div>
             <label class="form-label fs-6 mb-1">{{ __('cycles.Session Title') }}</label>
             <div class="form-group mb-3">
               <input id="title" name="title" type="text" placeholder="{{ __('cycles.Session Title') }}"
@@ -618,13 +618,11 @@
             <input type="hidden" name="step_id" value="{{ $id }}" id="id">
             <div class="form-group mb-4" id="ctype">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
-              <select id="select-type" name="type" class="select2 form-control" required
-                {{-- onchange="tchange(this.options[this.selectedIndex].value)" --}}
-                >
-                <option value="online">{{ __('cycles.online') }}</option>
-                <option value="sessions">{{ __('cycles.sessions') }}</option>
-                <option value="offline">{{ __('cycles.offline') }}</option>
-              </select>
+              <select id="select-type" name="type" class="select2 form-control" required>
+              <option value="online" {{ old('type', $session->type) == 'online' ? 'selected' : '' }}>{{ __('cycles.online') }}</option>
+              <option value="sessions" {{ old('type', $session->type) == 'sessions' ? 'selected' : '' }}>{{ __('cycles.sessions') }}</option>
+              <option value="offline" {{ old('type', $session->type) == 'offline' ? 'selected' : '' }}>{{ __('cycles.offline') }}</option>
+            </select>
             </div>
 
             <div class="row mb-4" id="date-only">
@@ -656,7 +654,7 @@
               </div>
             </div>
 
-            <div class="form-group mb-3" id="online">
+         <div class="form-group mb-3" id="online">
               <label class="form-label fs-6 mb-1">{{ __('cycles.select online') }}:</label>
               <select name="online" id="select-course" class="select2 form-select" id="conline">
                 @if (!$online)
@@ -667,36 +665,7 @@
                 @endforeach
               </select>
             </div>
-            <label class="form-label fs-6 mb-1">{{ __('cycles.Session Title') }}</label>
-            <div class="form-group mb-3">
-              <input id="title" name="title" type="text" placeholder="{{ __('cycles.Session Title') }}"
-                class="form-control">
-            </div>
-            <label class="form-label fs-6 mb-1">{{ __('cycles.Add a description') }}:</label>
-            <div class="form-group mb-3">
-              <textarea class="form-control" id="dsc" name='dsc' rows="2"
-                placeholder="{{ __('cycles.Write your description here') }}."></textarea>
-            </div>
-            <div class="form-group mb-3" id="location" style="display: none;">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
-              <input name="training_Address" id="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
-                class="form-control">
-            </div>
-            <div class="form-group mb-3" id="address" style="display: none;">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-              <input name="training_location" id="training_location" type="text" placeholder="{{ __('cycles.training location') }}" class="form-control">
-            </div>
-            <div class="form-group mb-3" id="trainer" style="display: none;">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.trainer name') }}</label>
-              <input name="trainer_name" id="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}"
-                class="form-control">
-            </div>
-            <div class="form-group mb-3" id="trainer" style="display: none;">
-              <label class="form-label fs-6 mb-1">{{ __('cycles.trainer email') }}</label>
-              <input name="trainer_email" id="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}"
-                class="form-control">
-            </div>
-          </div>
+
           <div class="d-flex align-items-center gap-3 mt-4 p-4 p-md-0">
             <button type="button" class="btn btn-outline-secondary w-px-100" data-bs-dismiss="modal">
               {{ __('cycles.Cancel') }}
@@ -761,6 +730,26 @@
   <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
 
   <script>
+
+
+  $(document).ready(function () {
+     function toggleOnlineDropdown() {
+        var selected = $('#select-type').val();
+     if (selected === 'online') {
+          $('#online-dropdown').show();
+     } else {
+       $('#online-dropdown').hide();
+     }
+   }
+
+    $('.select2').select2();
+
+    toggleOnlineDropdown();
+
+    $('#select-type').on('change', function () {
+      toggleOnlineDropdown();
+    });
+  });
 
      $(`#addSessionForm .flatpickr-date`).on('change', function() {
       const dateValue = $(this).val();

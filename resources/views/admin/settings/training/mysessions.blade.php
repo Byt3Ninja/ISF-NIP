@@ -108,29 +108,14 @@
       <div class="modal-header">
         <h4 class="modal-title" id="dsctitle"> </h4>
       </div>
-      <div class="modal-body">
-        <p id="dsc">
-
-        </p>
-
-        <p id="location">
-
-        </p>
-
-        <p id="address">
-
-        </p>
-
-        <p id="trainer">
-
-        </p>
-
-        <p id="datetime">
-
-        </p>
-
-       
-      </div>
+       <div class="modal-body">
+          <p><strong>{{ __('admin.Description') }}:</strong> <span id="dsc"></span></p>
+          <p><strong>{{ __('admin.Location') }}:</strong> <span id="location"></span></p>
+          <p><strong>{{ __('admin.Address') }}:</strong> <span id="address"></span></p>
+          <p><strong>{{ __('admin.Trainer Name') }}:</strong> <span id="trainerName"></span></p>
+          <p><strong>{{ __('admin.Trainer Email') }}:</strong> <span id="trainerEmail"></span></p>
+          <p><strong>{{ __('admin.Date & Time') }}:</strong> <span id="datetime"></span></p>
+    </div>
     </div>
   </div>
 </div>
@@ -189,7 +174,8 @@
           if (response.type === 'offline') {
               $('#location').html(response.training_location);
               $('#address').html(response.training_Address);
-              $('#trainer').html(response.trainer_name);
+              $('#trainerName').html(response.trainer_name);
+              $('#trainerEmail').html(response.trainer_email);
               $('#datetime').html(response.datetime);
       } else {
         $('#location').html('');

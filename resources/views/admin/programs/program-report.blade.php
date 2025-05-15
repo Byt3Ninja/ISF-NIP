@@ -292,8 +292,8 @@
             <div class="col-lg col-md-4 col-sm-6">
               <div class="kpi-card">
                 <i class="fas fa-star kpi-icon text-warning"></i>
-                <div class="kpi-value" id="summaryAvgFinalScore"> {{ $averageFinalScore !== null ? number_format($averageFinalScore, 2) : '--' }}</div>
-                <div class="kpi-label">{{ __('admin.Average Final Score') }}</div>
+                 <div class="kpi-value">{{ number_format($averageFinalScore, 0) }}</div>
+                 <div class="kpi-label">{{ __('admin.Average Final Score') }}</div>
               </div>
             </div>
             <div class="col-lg col-md-4 col-sm-6">
@@ -519,13 +519,13 @@
 
             <div class="col-lg-3 col-md-6">
               <div class="kpi-card-sm"> <i class="fas fa-clock kpi-icon text-success"></i>
-                <div class="kpi-value-sm"> {{ number_format($totalHours, 1) }} </div>
+                <div class="kpi-value-sm"> +{{ number_format($totalHours, 1) }} </div>
                 <div class="kpi-label-sm">{{ __('admin.Total Hours') }}</div>
               </div>
             </div>
             <div class="col-lg-3 col-md-6">
               <div class="kpi-card-sm"> <i class="fas fa-star kpi-icon text-warning"></i>
-                <div class="kpi-value-sm">{{ $mentorshipRequests->avg('rating') }}</div>
+                <div class="kpi-value-sm">{{ number_format($mentorshipRequests->avg('rating')) }}</div>
                 <div class="kpi-label-sm">{{ __('admin.Average Rating') }}</div>
               </div>
             </div>
@@ -649,7 +649,7 @@
             <h5 class="fw-semibold"><i class="fas fa-filter"></i>
               {{ __('admin.Filter Options (Workshops)') }}</h5>
             <form class="row g-3 align-items-end workshops-filter-form" method="GET" action="{{ route('programs.report',$cycle->id) }}">
-              <div class="col-md-3"><label for="wsFilterTrainer" class="form-label">Trainer</label><select
+              <div class="col-md-3"><label for="wsFilterTrainer" class="form-label">{{ __('admin.Trainer') }}</label><select
                   class="form-select select2" id="wsFilterTrainer" name="trainer">
                   <option selected value="">{{ __('admin.All') }}</option>
                     @foreach ($trainerNames as $trainer)
@@ -661,8 +661,9 @@
               <div class="col-md-3"><label for="wsFilterType" class="form-label">{{ __('admin.Workshop Type') }}</label>
                 <select class="form-select select2" id="wsFilterType"name="type">
                   <option selected value="">{{ __('admin.All') }}</option>
-                    <option value="online" {{ request('type') == 'online' ? 'selected' : '' }}>{{ __('admin.Zoom') }}</option>
+                    <option value="online" {{ request('type') == 'online' ? 'selected' : '' }}>{{ __('admin.Live Training') }}</option>
                     <option value="offline" {{ request('type') == 'offline' ? 'selected' : '' }}>{{ __('admin.In-Person') }}</option>
+                    <option value="sessions" {{ request('type') == 'sessions' ? 'selected' : '' }}>{{ __('admin.Online') }}</option>
                 </select></div>
               <div class="col-md-3 text-start"><button type="submit" class="btn btn-primary w-50"><i
                     class="fas fa-search me-2"></i> {{ __('admin.Search') }}</button></div>
@@ -679,14 +680,14 @@
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
               <div class="kpi-card-sm"><i class="fas fa-clock kpi-icon text-success"></i>
-                <div class="kpi-value-sm">+{{ $totalHours }}</div>
+                <div class="kpi-value-sm">+{{ $totalSessionHours }}</div>
                 <div class="kpi-label-sm">{{ __('admin.Total Hours') }}</div>
               </div>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
               <div class="kpi-card-sm"><i class="fas fa-video kpi-icon text-warning"></i>
                 <div class="kpi-value-sm">{{ $zoomWorkshops }}</div>
-                <div class="kpi-label-sm">{{ __('admin.Zoom Workshops') }}</div>
+                <div class="kpi-label-sm">{{ __('admin.Live Workshops') }}</div>
               </div>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
@@ -695,6 +696,14 @@
                 <div class="kpi-label-sm">{{ __('admin.In-Person Workshops') }}</div>
               </div>
             </div>
+
+            <div class="col-lg-2 col-md-4 col-sm-6">
+              <div class="kpi-card-sm"><i class="fas fa-file-upload kpi-icon text-success"></i>
+                <div class="kpi-value-sm">{{ $uploadedMaterials }}</div>
+                  <div class="kpi-label-sm">{{ __('admin.Uploaded Materials') }}</div>
+            </div>
+      </div>
+              
           </div>
           <div class="row mt-2">
             <div class="col-lg-7">
@@ -709,29 +718,37 @@
 
                     <thead>
                       <tr>
-                        <th scope="col">{{ __('admin.Workshop Name') }}</th>
-                        <th scope="col">{{ __('admin.Trainer') }}</th>
-                        <th scope="col">{{ __('admin.Participants') }}</th>
-                        <th scope="col">{{ __('admin.rating') }}</th>
-                        <th scope="col">{{ __('admin.type') }}</th>
+                        <th class="text-center">{{ __('admin.Workshop Name') }}</th>
+                        <th class="text-center">{{ __('admin.Trainer') }}</th>
+                        <th class="text-center">{{ __('admin.Participants') }}</th>
+                        <th class="text-center">{{ __('admin.rating') }}</th>
+                        <th class="text-center">{{ __('admin.type') }}</th>
                       </tr>
                     </thead>
                     <tbody>
                      @foreach ($workshops as $ws)
                        <tr>
-                         <td class="ws-name">{{ $ws->title }}</td>
-                         <td class="trainer-name">{{ $ws->trainer_name ?? '-' }}</td>
-                         <td>{{ $ws->reports->count() ?? '-' }}</td>
+                         <td class="text-center">{{ $ws->title }}</td>
+                         <td class="text-center">{{ $ws->trainer_name ?? '-' }}</td>
+                         <td>@if($ws->type == 'sessions' &&  $ws->reports->count() > 0)
+                                 {{ $ws->reports->count() ?? '-' }}
+                              @else
+                                 {{  '-' }}
+                            @endif
+                         </td>
                          <td>
                              <span class="badge bg-label-primary rating-badge">
                                   {{ '-' }}
                               </span>
                          </td>
-                          <td>
-                            <span class="badge {{ $ws->type === 'online' ? 'bg-secondary' : 'bg-label-warning text-dark' }}">
-                                  {{ $ws->type === 'online' ? 'Zoom' : 'In-Person' }}
-                             </span>
-                          </td>
+                          <td class="text-center"> <span class="badge {{ $ws->type === 'sessions' ? 'bg-secondary' : ($ws->type === 'online' ? 'bg-info' : 
+                              'bg-label-warning text-dark') }}">
+                             {{ $ws->type === 'sessions' ? 'Live Training' : 
+                              ($ws->type === 'sessions' ? 'Online' : 
+                               'In-Person') }}
+                        </span>
+                        </td>
+          
                         </tr>
                  
                     @endforeach
@@ -997,11 +1014,38 @@
   @section('scripts')
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   @stop
 
 
   @section('pagescripts')
   <!-- Combined & Organized JavaScript -->
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById('summaryStatusDistributionChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'doughnut', 
+      data: {
+        labels: ['Good', 'Needs Improvement', 'Excellent'],
+        datasets: [{
+          label: 'Status Distribution',
+          data: [10, 5, 15],
+          backgroundColor: ['#28a745', '#dc3545', '#007bff'],
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          },
+        },
+      }
+    });
+  });
+</script>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
 
@@ -1064,75 +1108,107 @@
             // ==============================================
             // 2. Mentorship Report Logic
             // ==============================================
-          function setupMentorshipReport() {
-          const mentorNames = @json($mentorNames); 
-          const mentorSessions = @json($mentorSessions); 
-          const mentorAvgRatings = @json($mentorAvgRatings);
+      function setupMentorshipReport() {
+              const mentorNames = @json($mentorNamesChart1);
+              const mentorSessions = @json($mentorSessions); 
+              const mentorAvgRatings = @json($mentorAvgRatings);
 
-        const mentorSessionsArray = Object.values(mentorSessions); 
+              const mentorSessionsArray = Object.values(mentorSessions);
+              const mentorAvgRatingsArray = Object.values(mentorAvgRatings);
+              const mentorRatingLabels = Object.keys(mentorAvgRatings);
 
-    // Chart 1: Mentor Session Distribution (Pie Chart)
-    const ctxMentorSessions = document.getElementById('mentorSessionsChart')?.getContext('2d');
-    if (ctxMentorSessions) {
-        new Chart(ctxMentorSessions, {
-            type: 'pie',
-            data: {
-                labels: mentorNames,
-                datasets: [{
-                    label: '{{ __('admin.session_count') }}',
-                    data: mentorSessionsArray, 
-                    backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A6', '#F5E050'],
-                    borderColor: '#FFFFFF',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top', labels: { font: { size: 14 } } },
-                    tooltip: { bodyFont: { size: 14 } }
-                }
-            }
-        });
-    }
+       const chartColors = [
+           '#FF5733', '#33FF57', '#3357FF', '#FF33A6', '#F5E050',
+           '#50F5E0', '#E050F5', '#A6FF33', '#33FFF5', '#F55033'
+        ].slice(0, mentorNames.length);
 
-    // Chart 2: Mentor Average Rating (Bar Chart)
-    const ctxMentorRatings = document.getElementById('mentorRatingChart')?.getContext('2d');
-    if (ctxMentorRatings) {
-        new Chart(ctxMentorRatings, {
-            type: 'bar',
-            data: {
-                labels: mentorNames,
-                datasets: [{
-                    label: '{{ __('admin.average_rating') }}',
-                    data: mentorAvgRatings,
-                    backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A6', '#F5E050'],
-                    borderColor: '#FFFFFF',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        min: 3.5,
-                        max: 5,
-                        ticks: { font: { size: 14 } }
-                    },
-                    x: {
-                        ticks: { font: { size: 14 } }
+    // Chart 1: Top 5 Mentors
+    const ctx1 = document.getElementById('mentorSessionsChart');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: mentorNames,
+            datasets: [{
+                label: '{{ __('admin.Number_of_sessions') }}',
+                data: mentorSessionsArray,
+                backgroundColor: chartColors,
+                borderColor: chartColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
                     }
                 },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { bodyFont: { size: 14 } }
+                x: {
+                    title: {
+                        display: true,
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    display: false
                 }
             }
-        });
-    }
+        }
+    });
+
+    // Chart 2: Average Ratings Per Mentor
+    const ctx2 = document.getElementById('mentorRatingChart');
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: mentorRatingLabels,
+            datasets: [{
+                data: mentorAvgRatingsArray,
+                backgroundColor: chartColors,
+                borderColor: chartColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5,
+                    title: {
+                        display: true,
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
 }
           // ==============================================
             // 3. Workshops Report Logic
@@ -1140,17 +1216,51 @@
              function setupWorkshopsReport() {
                const zoomWorkshops = @json($zoomWorkshops);
                const inPersonWorkshops = @json($inPersonWorkshops);
-                 // Chart 1: Workshop Type Distribution
-                const workshopTypeCounts = { 'online': zoomWorkshops, 'offline': inPersonWorkshops };
-                 const ctxWsType = document.getElementById('workshopTypeChart')?.getContext('2d');
-                 if(ctxWsType) {
-                     new Chart(ctxWsType, {
-                        type: 'pie', data: { labels: ['Zoom', 'in-Person'], datasets: [{ label: '{{ __('admin.workshop_count') }}', data: [workshopTypeCounts.online, workshopTypeCounts.offline], backgroundColor: [chartColors[6], chartColors[2]], borderColor: [chartBorderColors[6], chartBorderColors[2]], borderWidth: 1 }] },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: chartFont } }, tooltip: { bodyFont: chartFont, titleFont: chartFont } } }
-                    });
-                 }
+               const uploadedMaterials = @json($uploadedMaterials); 
 
-                 // Chart 2: Average Rating per Trainer (Example Data)
+            // Chart 1: Workshop Type Distribution
+              const workshopTypeCounts = {
+                'sessions': zoomWorkshops,
+                'offline': inPersonWorkshops,
+                'online': uploadedMaterials
+            };
+
+      const ctxWsType = document.getElementById('workshopTypeChart')?.getContext('2d');
+       if (ctxWsType) {
+        new Chart(ctxWsType, {
+            type: 'pie',
+            data: {
+                labels: ['Live Training', 'In-Person', 'Online'],
+                datasets: [{
+                    label: '{{ __('admin.workshop_count') }}',
+                    data: [
+                        workshopTypeCounts.sessions,
+                        workshopTypeCounts.offline,
+                        workshopTypeCounts.online
+                    ],
+                    backgroundColor: [chartColors[6], chartColors[2], chartColors[4]],
+                    borderColor: [chartBorderColors[6], chartBorderColors[2], chartBorderColors[4]],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: chartFont }
+                    },
+                    tooltip: {
+                        bodyFont: chartFont,
+                        titleFont: chartFont
+                    }
+                }
+            }
+        });
+    }
+
+        // Chart 2: Average Rating per Trainer (Example Data)
                   const trainerData = getDataFromTable('#workshops-tab-pane .workshop-details-table', row => {
                         const cells = row.querySelectorAll('td');
                         if (cells.length < 4) return null;
@@ -1353,7 +1463,7 @@ $(document).ready(function () {
         buttons: [
             {
                 extend: 'pdfHtml5',
-                text: '<i class="fas fa-file-pdf me-1"></i> {{ __("admin.PDF") }}',
+                text: '<i class="fas fa-file-pdf me-1"></i> PDF',
                 className: 'btn btn-label-danger btn-sm',
                 exportOptions: {
                     columns: ':visible'
@@ -1361,7 +1471,7 @@ $(document).ready(function () {
             },
             {
                 extend: 'excelHtml5',
-                text: '<i class="fas fa-file-excel me-1"></i> {{ __("admin.Excel") }}',
+                text: '<i class="fas fa-file-excel me-1"></i> Excel',
                 className: 'btn btn-label-success btn-sm',
                 exportOptions: {
                     columns: ':visible'
@@ -1375,4 +1485,4 @@ $(document).ready(function () {
 
 
 
-  @stop
+@stop

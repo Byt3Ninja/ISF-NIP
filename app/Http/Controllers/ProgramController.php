@@ -317,6 +317,8 @@ class ProgramController extends Controller
 
         $stages = Stage::all();
 
+            
+        // Mentorship Requests Filtering
         $mentorshipRequests = $cycle->mentorshipRequests()
          ->with(['user.company', 'mentor'])
         ->when($request->filled('mentor'), fn($q) => $q->where('mentor_id', $request->mentor))
@@ -324,11 +326,44 @@ class ProgramController extends Controller
         ->when($request->filled('zoom_date'), fn($q) => $q->whereDate('zoom_date', '>=', $request->zoom_date))
         ->get();
 
-       $mentors = $cycle->mentors;
+      $mentors = $cycle->mentors;
 
-       $mentorNames = $mentorshipRequests->pluck('mentor.name')->toArray();
-       $mentorSessions = $mentorshipRequests->groupBy('mentor_id')->map(fn($group) => $group->count())->toArray();
-       $mentorAvgRatings = $mentorshipRequests->groupBy('mentor_id')->map(fn($group) => $group->avg('rating'))->toArray();
+      $mentorNames = $mentorshipRequests->pluck('mentor.name')->toArray();
+
+      $mentorSessions = $mentorshipRequests
+        ->groupBy('mentor_id')
+        ->map(fn($group) => $group->count())
+        ->toArray();
+
+    $mentorAvgRatings = $mentorshipRequests
+        ->groupBy('mentor_id')
+        ->map(fn($group) => $group->avg('rating'))
+        ->toArray();
+
+    // Top Mentors
+    $topMentors = collect($mentorSessions)
+        ->sortDesc()
+        ->take(5)
+        ->keys()
+        ->all();
+
+    $topMentorNames = [];
+    $topMentorSessionsArray = [];
+    foreach ($topMentors as $mentorId) {
+        $mentorName = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor?->name;
+        if ($mentorName) {
+            $topMentorNames[] = $mentorName;
+            $topMentorSessionsArray[] = $mentorSessions[$mentorId] ?? 0;
+        }
+    }
+
+    $mentorAvgRatingsArray = [];
+    foreach ($mentorAvgRatings as $mentorId => $avgRating) {
+        $mentor = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor;
+        if ($mentor) {
+            $mentorAvgRatingsArray[$mentor->name] = round($avgRating, 2);
+        }
+    }
 
 
     $workshopsQuery = $cycle->trainingSessions();
@@ -338,7 +373,7 @@ class ProgramController extends Controller
     }
 
     if ($request->filled('workshop_name')) {
-        $workshopsQuery->where('title', 'like', '%' . $request->workshop_name . '%');
+       $workshopsQuery->where('training_sessions.title', 'like', '%' . $request->workshop_name . '%');
     }
 
     if ($request->filled('type')) {
@@ -347,23 +382,25 @@ class ProgramController extends Controller
 
     $workshops = $workshopsQuery->where(function($query) {
     $query->where('type', 'offline')
-          ->orWhere('type', 'online');
+          ->orWhere('type', 'online')
+          ->orWhere('type', 'sessions');
     })->get();
 
     $trainerNames = $cycle->trainingSessions()->pluck('trainer_name')->unique()->values();
 
     $totalWorkshops = $workshops->count();
-    $totalHours = $workshops->sum('duration');
-    $zoomWorkshops = $workshops->where('type', 'online')->count();
+    $totalMinutes = $workshops->sum('duration');
+    $totalSessionHours = round($totalMinutes / 60, 2);
+    $zoomWorkshops = $workshops->where('type', 'sessions')->count();
     $inPersonWorkshops = $workshops->where('type', 'offline')->count();
+    $uploadedMaterials = $workshops->where('type', 'online')->count();
 
     $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
 
-    $userIds = $cycle->companies()->with('user')->get()->pluck('user.id')->filter();
+    $averageFinalScore = $cycle->mentorshipRequests()->avg('rating');
 
-   $averageFinalScore = UserScore::whereIn('user_id', $userIds)->avg('score');
      
-     return view('admin.programs.program-report', [
+    return view('admin.programs.program-report', [
            'cycle' => $cycle,
            'totalStartups' => $cycle->companies_count,
            'totalMentors' => $cycle->mentors_count,
@@ -378,12 +415,16 @@ class ProgramController extends Controller
            'mentorSessions' => $mentorSessions,
            'mentorAvgRatings' => $mentorAvgRatings,
            'trainerNames' => $trainerNames,
-           'totalHours' => $totalHours,
+           'totalSessionHours' => $totalSessionHours,
            'zoomWorkshops' => $zoomWorkshops,
            'inPersonWorkshops' => $inPersonWorkshops,
+           'uploadedMaterials' => $uploadedMaterials,
            'workshops' => $workshops,
            'surveyResponses' => $surveyResponses,
            'averageFinalScore' => $averageFinalScore,
+           'mentorNamesChart1' => $topMentorNames,
+           'mentorSessionsArray' => $topMentorSessionsArray,
+           'mentorAvgRatings' => $mentorAvgRatingsArray,
         ]);
    
     }
