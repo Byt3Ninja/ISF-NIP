@@ -1633,4 +1633,9 @@ return [
 	'Drag & drop your CSV file here' => 'Drag & drop your CSV file here',
 	'Browse Files' => 'Browse Files',
 	'Importer Tool' => 'Importer Tool',
+	'Location' => 'Location',
+	'Address' => 'Address',
+	'Trainer Name' => 'Trainer Name',
+	'Trainer Email' => 'Trainer Email',
+	'Date & Time' => 'Date & Time'
 ];  
