@@ -730,7 +730,7 @@
                        <tr>
                          <td class="text-center">{{ $ws->title }}</td>
                          <td class="text-center">{{ $ws->trainer_name ?? '-' }}</td>
-                         <td>@if($ws->type == 'online' &&  $ws->reports->count() > 0)
+                         <td>@if($ws->type == 'sessions' &&  $ws->reports->count() > 0)
                                  {{ $ws->reports->count() ?? '-' }}
                               @else
                                  {{  '-' }}
@@ -741,9 +741,9 @@
                                   {{ '-' }}
                               </span>
                          </td>
-                          <td class="text-center"> <span class="badge {{ $ws->type === 'online' ? 'bg-secondary' : ($ws->type === 'sessions' ? 'bg-info' : 
+                          <td class="text-center"> <span class="badge {{ $ws->type === 'sessions' ? 'bg-secondary' : ($ws->type === 'online' ? 'bg-info' : 
                               'bg-label-warning text-dark') }}">
-                             {{ $ws->type === 'online' ? 'Live Training' : 
+                             {{ $ws->type === 'sessions' ? 'Live Training' : 
                               ($ws->type === 'sessions' ? 'Online' : 
                                'In-Person') }}
                         </span>
@@ -1014,11 +1014,38 @@
   @section('scripts')
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   @stop
 
 
   @section('pagescripts')
   <!-- Combined & Organized JavaScript -->
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById('summaryStatusDistributionChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'doughnut', 
+      data: {
+        labels: ['Good', 'Needs Improvement', 'Excellent'],
+        datasets: [{
+          label: 'Status Distribution',
+          data: [10, 5, 15],
+          backgroundColor: ['#28a745', '#dc3545', '#007bff'],
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          },
+        },
+      }
+    });
+  });
+</script>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
 
@@ -1183,9 +1210,6 @@
         }
     });
 }
-            
-         
-
           // ==============================================
             // 3. Workshops Report Logic
           // ==============================================
@@ -1196,9 +1220,9 @@
 
             // Chart 1: Workshop Type Distribution
               const workshopTypeCounts = {
-                'online': zoomWorkshops,
+                'sessions': zoomWorkshops,
                 'offline': inPersonWorkshops,
-                'sessions': uploadedMaterials
+                'online': uploadedMaterials
             };
 
       const ctxWsType = document.getElementById('workshopTypeChart')?.getContext('2d');
@@ -1210,9 +1234,9 @@
                 datasets: [{
                     label: '{{ __('admin.workshop_count') }}',
                     data: [
-                        workshopTypeCounts.online,
+                        workshopTypeCounts.sessions,
                         workshopTypeCounts.offline,
-                        workshopTypeCounts.sessions
+                        workshopTypeCounts.online
                     ],
                     backgroundColor: [chartColors[6], chartColors[2], chartColors[4]],
                     borderColor: [chartBorderColors[6], chartBorderColors[2], chartBorderColors[4]],
