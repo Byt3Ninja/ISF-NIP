@@ -589,10 +589,12 @@ Thanks from " . env('APP_NAME');
 				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id', 'DESC')->get();
 		}
+		
 		$sessions = $sessions->map( function( $session ) {
 			$session->date = Carbon::parse($session->zoom_date);
 			return $session;
 		});
+		
 		return view('admin.settings.mentorship.sessions', compact('sessions'));
 	}
 

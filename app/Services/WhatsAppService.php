@@ -6,7 +6,7 @@ use App\Settings;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-
+use GuzzleHttp\Exception\RequestException;
 class WhatsAppService
 {
 //     protected $client;
@@ -34,7 +34,11 @@ class WhatsAppService
             Log::error("Failed to get chatId for number: {$phoneNumber}");
             return ['success' => false, 'message' => 'Failed to get chatId'];
         }
-
+$client = new Client();
+       $response = $client->request('GET', 'https://wapi.growthlabs.app');
+        // تحقق من حالة السيرفر
+        // إذا كان السيرفر يعمل، أرسل الرسالة
+f ($response->getStatusCode() == 200) {
         $sendResponse = Http::withHeaders([
             'x-api-key' => env('WAPI_KEY')
         ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
@@ -49,6 +53,10 @@ class WhatsAppService
             Log::error("Failed to send message to {$phoneNumber}: " . $sendResponse->body());
             return ['success' => false, 'message' => 'Failed to send OTP'];
         }
+    } else {
+    // السيرفر لا يعمل
+    return __("admin.URLNotWorking");
+    }
     } catch (\Exception $e) {
         Log::error('Failed to send OTP via WhatsApp: ' . $e->getMessage());
         return ['success' => false, 'message' => $e->getMessage()];
@@ -65,7 +73,11 @@ public function sendMessage($phoneNumber, $message)
             Log::error("Failed to get chatId for number: {$phoneNumber}");
             return ['success' => false, 'message' => 'Failed to get chatId'];
         }
-
+        $client = new Client();
+       $response = $client->request('GET', 'https://wapi.growthlabs.app');
+        // تحقق من حالة السيرفر
+        // إذا كان السيرفر يعمل، أرسل الرسالة
+f ($response->getStatusCode() == 200) {
         $sendResponse = Http::withHeaders([
             'x-api-key' => env('WAPI_KEY')
         ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
@@ -80,6 +92,10 @@ public function sendMessage($phoneNumber, $message)
             Log::error("Failed to send message to {$phoneNumber}: " . $sendResponse->body());
             return ['success' => false, 'message' => 'Failed to send message'];
         }
+        } else {
+    // السيرفر لا يعمل
+    return  ['success' => false, 'message' => __("admin.URLNotWorking")];
+}
     } catch (\Exception $e) {
         Log::error('Failed to send message via WhatsApp: ' . $e->getMessage());
         return ['success' => false, 'message' => $e->getMessage()];
