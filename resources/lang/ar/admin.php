@@ -1625,7 +1625,7 @@ return [
 	'Workshop Name' => 'اسم ورشة العمل',
 	'Participants' => 'المشاركون',
 	'Workshop Details' => 'تفاصيل ورشة العمل',
-	'Zoom Workshops' => 'ورش العمل عبر زووم',
+	'Live Workshops' => 'ورش العمل عبر الانترنت',
 	'In-Person Workshops' => 'ورش العمل الحضورية',
 	'Workshop Type' => 'نوع ورشة العمل',
 	'Filter Options (Workshops)' => 'خيارات التصفية (ورش العمل)',
@@ -1660,4 +1660,8 @@ return [
 	'Trainer Name' => 'اسم المدرب',
 	'Trainer Email' => 'البريد الالكتروني للمدرب',
 	'Date & Time' => 'التاريخ والوقت',
+	'Number_of_sessions' => 'عدد الجلسات',
+	'Uploaded Materials' => 'المواد المرفقة',
+	'Live Training' => 'تدريب عبر الانترنت',
+	'Online' => 'Online',
 ];

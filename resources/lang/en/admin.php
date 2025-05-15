@@ -1602,7 +1602,7 @@ return [
 	'Workshop Name' => 'Workshop Name',
 	'Participants' => 'Participants',
 	'Workshop Details' => 'Workshop Details',
-	'Zoom Workshops' => 'Zoom Workshops',
+	'Live Workshops' => 'Live Workshops',
 	'In-Person Workshops' => 'In-Person Workshops',
 	'Workshop Name' => 'Workshop Name',
 	'Workshop Type' => 'Workshop Type',
@@ -1637,5 +1637,9 @@ return [
 	'Address' => 'Address',
 	'Trainer Name' => 'Trainer Name',
 	'Trainer Email' => 'Trainer Email',
-	'Date & Time' => 'Date & Time'
-];  
+	'Date & Time' => 'Date & Time',
+	'Number_of_sessions' => 'Number of sessions',
+	'Uploaded Materials' => 'Uploaded Materials',
+	'Live Training' => 'Live Training',
+	'Online' => 'Online',
+];   
