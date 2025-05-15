@@ -317,7 +317,7 @@
       @if( $_user->ableTo('trainings.list_mine', $permissions) )
       <li class="{{ Request::is('dashboard/training/my*') ? 'active' : '' }} menu-item"><a href="/dashboard/training/my"
           class="menu-link">
-          <i class="menu-icon tf-icons ti ti-forms"></i>
+          <i class="menu-icon tf-icons ti ti-certificate-2"></i>
           <div>{{ __('admin.My courses') }}</div>
         </a>
       </li>
