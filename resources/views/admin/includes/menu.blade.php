@@ -849,7 +849,7 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
       @if ($_user->ableTo('importer.index'))
             <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
                 <a href="{{ route('importer.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-upload"></i>
+                    <i class="menu-icon tf-icons ti ti-file-import"></i>
                     <div>{{ __('admin.Importer Tool') }}</div>
                 </a>
             </li>

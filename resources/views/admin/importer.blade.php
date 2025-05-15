@@ -1,179 +1,195 @@
 @extends('layouts.admin')
 
-@section('style')
-<style>
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #555; }
-    .drag-enter { border-style: dashed; border-color: #3b82f6; background-color: #eff6ff; }
-    .table-section-header th {
-        background-color: #eef2ff;
-        color: #3730a3;
-        font-weight: 600;
-        padding-top: 0.75rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid #c7d2fe;
-    }
-</style>
-@endsection
-
 @section('content')
-<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans">
+<div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="card card-body">
+            <div class="mb-4">
+                <h4 class="fw-bold mb-2">{{ __('admin.Advanced Startup & Founder Importer') }}</h4>
+                <p class="text-secondary">
+                    {{ __('admin.Upload CSV, map columns to Cycle, Company, and Founder details, and import.') }}
+                </p>
+            </div>
 
-<div class="w-full max-w-6xl bg-white shadow-2xl rounded-xl p-6 sm:p-10 space-y-8">
-    <header class="text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-2">{{ __('admin.Advanced Startup & Founder Importer') }}</h1>
-        <p class="text-slate-600 text-sm sm:text-base">{{ __('admin.Upload CSV, map columns to Cycle, Company, and Founder details, and import.') }}</p>
-    </header>
+            <div class="small text-secondary mb-4">
+                <p>
+                    {{ __('admin.Download') }}
+                    <a 
+                        href="{{ $templateUrl }}" 
+                        download
+                        class="text-primary fw-medium text-decoration-none"
+                    >
+                        {{ __('admin.CSV template') }}
+                    </a>
+                    {{ __('admin.text') }}
+                </p>
+            </div>
+            
+            <!-- Step 1: File Upload -->
+            <section id="upload-section" class="mb-4">
+                <h5 class="fw-semibold border-bottom pb-3 mb-4 d-flex align-items-center">
+                    <span 
+                        class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                        style="width: 32px; height: 32px;"
+                    >1</span>
+                    {{ __('admin.Upload CSV File') }}
+                </h5>
+                <div 
+                    id="drop-zone"
+                    class="border border-2 border-dashed rounded p-4 p-md-5 text-center mb-3 cursor-pointer bg-label-secondary"
+                >
+                    <input type="file" id="csv-file-input" class="d-none" accept=".csv">
+                    <div class="d-flex flex-column align-items-center justify-content-center gap-3">
+                        <i class="ti ti-cloud-upload text-primary fs-1"></i>
+                        <p class="fw-medium mb-0">{{ __('admin.Drag & drop your CSV file here') }}</p>
+                        <h6 class="mb-0 text-muted">{{ __('admin.OR') }}</h6>
+                        <button type="button" id="browse-button" class="btn btn-primary btn-sm shadow-sm">
+                            {{ __('admin.Browse Files') }}
+                        </button>
+                    </div>
+                </div>
+                <div id="file-info" class="d-none mt-3 p-3 bg-info bg-opacity-10 border border-info rounded text-info">
+                    <p><strong class="fw-semibold">{{ __('admin.File selected') }}:</strong> <span id="file-name"></span></p>
+                    <p class="mb-0"><strong class="fw-semibold">{{ __('admin.Size') }}:</strong> <span id="file-size"></span></p>
+                </div>
+            </section>
 
-     <div class="text-sm text-slate-600">
-        <p>{{ __('admin.Download') }} <a href="{{ $templateUrl }}" download class="text-indigo-600 font-medium hover:underline">{{ __('admin.CSV template') }}</a> {{ __('admin.text') }}</p>
-    </div>
-    <!-- Step 1: File Upload -->
-    <section id="upload-section" class="space-y-6">
-        <h2 class="text-2xl font-semibold text-slate-700 border-b pb-3 mb-5 flex items-center">
-            <span class="bg-indigo-600 text-white rounded-full h-8 w-8 text-sm flex items-center justify-center mr-3">1</span>
-            {{ __('admin.Upload CSV File') }}
-        </h2>
-        <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-lg p-8 sm:p-12 text-center cursor-pointer hover:border-indigo-500 transition-colors duration-300 bg-slate-50">
-            <input type="file" id="csv-file-input" class="hidden" accept=".csv">
-            <div class="flex flex-col items-center justify-center space-y-4">
-                <svg class="w-12 h-12 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338 0 4.5 4.5 0 01-1.41 8.775H6.75z" />
-                </svg>
-                <p class="text-slate-700 font-medium">{{ __('admin.Drag & drop your CSV file here') }}</p>
-                <p class="text-slate-500 text-sm">or</p>
-                <button type="button" id="browse-button" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300 text-sm font-medium shadow-sm">
-                    {{ __('admin.Browse Files') }}
+            <!-- Step 2: Column Mapping -->
+            <section id="mapping-section" class="mb-4 d-none">
+                <h5 class="fw-semibold border-bottom pb-3 mb-4 d-flex align-items-center">
+                    <span 
+                        class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                        style="width: 32px; height: 32px;"
+                    >2</span>
+                    {{ __('admin.Map Columns') }}
+                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <p class="text-secondary small">
+                        {{ __('admin.Importer match fields') }}
+                        {{ __('admin.Importer required fields') }}
+                    </p>
+                    <button id="auto-map-button" class="btn btn-label-primary btn-sm shadow-sm" >
+                        {{ __('admin.Auto map') }}
+                    </button>
+                </div>
+
+                <div id="uploaded-headers-preview" class="mb-4 p-3 bg-light border rounded text-sm">
+                    <p class="fw-semibold text-secondary mb-1">{{ __('admin.Detected Headers from your file') }}:</p>
+                    <div id="detected-headers-list" class="text-secondary d-flex flex-wrap gap-2"></div>
+                </div>
+
+                <div class="table-responsive mb-3">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="w-50">{{ __('admin.Application Field (Destination)') }}</th>
+                                <th scope="col" class="w-50">{{ __('admin.Your CSV Column (Source)') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mapping-table-body-cycle">
+                            <tr class="table-light">
+                                <th colspan="2">{{ __('admin.Cycle Details') }}</th>
+                            </tr>
+                        </tbody>
+                        <tbody id="mapping-table-body-company">
+                            <tr class="table-light">
+                                <th colspan="2">{{ __('admin.Company Details') }}</th>
+                            </tr>
+                        </tbody>
+                        <tbody id="mapping-table-body-founder">
+                            <tr class="table-light">
+                                <th colspan="2">{{ __('admin.Founder Details') }}</th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="small text-muted mt-2">
+                    {{ __('admin.Importer note') }}:
+                </div>
+            </section>
+
+            <!-- Step 3: Review & Import -->
+            <section id="review-section" class="mb-4 d-none">
+                <h5 class="fw-semibold border-bottom pb-3 mb-4 d-flex align-items-center">
+                    <span 
+                        class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                        style="width: 32px; height: 32px;"
+                    >3</span>
+                    {{ __('admin.Review and Import') }}
+                </h5>
+                <p class="text-secondary small">
+                    {{ __('admin.Importer review note') }}:
+                </p>
+
+                <!-- Organization Selection -->
+                <div class="mb-4">
+                    <label for="organization-select" class="form-label fw-medium">
+                        {{ __('admin.Select Organization') }}
+                    </label>
+                    <select id="organization-select" class="form-select">
+                        <option value="">{{ __('admin.Select') }}</option>
+                    </select>
+                    <p id="organization-error" class="d-none text-danger small mt-1">
+                        {{ __('admin.Please select an organization') }}
+                    </p>
+                </div>
+
+                <div id="mapping-summary" class="p-3 bg-light border rounded mb-4"></div>
+
+                <h3 class="h5 fw-medium mb-3">{{ __('admin.Sample Data Preview (First 3 Rows)') }}</h3>
+                <div id="data-preview-table-container" class="table-responsive mb-3" style="max-height: 300px;">
+                    <table class="table">
+                        <thead id="data-preview-thead"></thead>
+                        <tbody id="data-preview-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <div id="action-buttons" class="pt-4 border-top d-flex flex-column flex-sm-row justify-content-end gap-2">
+                <button id="back-button" type="button" class="btn btn-outline-secondary d-none">
+                    {{ __('admin.Back') }}
+                </button>
+                <button id="next-button" type="button" class="btn btn-primary disabled">
+                    {{ __('admin.Next') }}
+                </button>
+                <button id="import-button" type="button" class="btn btn-success d-none">
+                    {{ __('admin.Start Import') }}
                 </button>
             </div>
         </div>
-        <div id="file-info" class="hidden mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-md text-sm text-indigo-700">
-            <p><strong class="font-semibold">File selected:</strong> <span id="file-name"></span></p>
-            <p><strong class="font-semibold">Size:</strong> <span id="file-size"></span></p>
-        </div>
-    </section>
 
-    <!-- Step 2: Column Mapping -->
-    <section id="mapping-section" class="space-y-6 hidden">
-        <h2 class="text-2xl font-semibold text-slate-700 border-b pb-3 mb-5 flex items-center">
-            <span class="bg-indigo-600 text-white rounded-full h-8 w-8 text-sm flex items-center justify-center mr-3">2</span>
-            Map Columns
-        </h2>
-        <div class="flex justify-between items-center mb-4">
-            <p class="text-slate-600 text-sm">Match your CSV columns to Cycle, Company, and Founder fields. Required fields: Company Name (English), Address (English). Note: Governorate maps to State ID.</p>
-            <button id="auto-map-button" class="px-4 py-2 bg-sky-500 text-white text-sm rounded-md hover:bg-sky-600 transition-colors duration-300 font-medium shadow-sm disabled:opacity-50" disabled>
-                Auto-map
-            </button>
-        </div>
-
-        <div id="uploaded-headers-preview" class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-md text-sm">
-            <p class="font-semibold text-slate-700 mb-1">Detected Headers from your file:</p>
-            <div id="detected-headers-list" class="text-slate-600 flex flex-wrap gap-2"></div>
-        </div>
-
-        <div class="overflow-x-auto max-h-[500px] rounded-md border border-slate-200 shadow-sm">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-100">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/2">{{ __('admin.Application Field (Destination)') }}</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/2">{{ __('admin.Your CSV Column (Source)') }}</th>
-                    </tr>
-                </thead>
-                <tbody id="mapping-table-body-cycle" class="bg-white divide-y divide-slate-200">
-                    <tr class="table-section-header">
-                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">{{ __('admin.Program Details') }}</th>
-                    </tr>
-                </tbody>
-                <tbody id="mapping-table-body-company" class="bg-white divide-y divide-slate-200">
-                    <tr class="table-section-header">
-                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">{{ __('admin.Company Details') }}</th>
-                    </tr>
-                </tbody>
-                <tbody id="mapping-table-body-founder" class="bg-white divide-y divide-slate-200">
-                    <tr class="table-section-header">
-                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">{{ __('admin.Founder Details') }}</th>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="text-xs text-slate-500 mt-2">
-            * If a source column is not applicable, select "--- Do not import ---".
-        </div>
-    </section>
-
-    <!-- Step 3: Review & Import -->
-    <section id="review-section" class="space-y-6 hidden">
-        <h2 class="text-2xl font-semibold text-slate-700 border-b pb-3 mb-5 flex items-center">
-            <span class="bg-indigo-600 text-white rounded-full h-8 w-8 text-sm flex items-center justify-center mr-3">3</span>
-            Review & Import
-        </h2>
-        <p class="text-slate-600 text-sm">Please review the mappings and select an organization before starting the import.</p>
-
-        <!-- Organization Selection -->
-        <div class="mb-4">
-            <label for="organization-select" class="block text-sm font-medium text-slate-700 mb-2">{{ __('admin.Select Organization') }}</label>
-            <select id="organization-select" class="w-full p-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm">
-                <option value="">{{ __('admin.Select') }}</option>
-            </select>
-            <p id="organization-error" class="hidden text-red-600 text-sm mt-1">{{ __('Please select an organization') }}</p>
-        </div>
-
-        <div id="mapping-summary" class="p-4 bg-slate-50 border border-slate-200 rounded-md space-y-3 text-sm"></div>
-
-        <h3 class="text-lg font-medium text-slate-700 pt-4">Sample Data Preview (First 3 Rows)</h3>
-        <div id="data-preview-table-container" class="overflow-x-auto max-h-[300px] rounded-md border border-slate-200 shadow-sm">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead id="data-preview-thead" class="bg-slate-100"></thead>
-                <tbody id="data-preview-tbody" class="bg-white divide-y divide-slate-200 text-xs"></tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- Action Buttons -->
-    <div id="action-buttons" class="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
-        <button id="back-button" type="button" class="px-6 py-2.5 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-100 transition-colors duration-300 font-medium shadow-sm hidden">
-            Back
-        </button>
-        <button id="next-button" type="button" class="px-6 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300 font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-            Next
-        </button>
-        <button id="import-button" type="button" class="hidden px-6 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300 font-medium shadow-sm">
-            Start Import
-        </button>
+         <!-- Progress/Status Message -->
+        <div id="status-message" class="d-none mt-4 p-3 rounded"></div>
     </div>
-
-    <!-- Progress/Status Message -->
-    <div id="status-message" class="hidden mt-6 p-4 rounded-md text-sm"></div>
 </div>
+@stop
 
-<footer class="text-center text-sm text-slate-500 mt-8 pb-4">
-    © 2023 Growthlabs Inc. All rights reserved.
-</footer>
-
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@section('pagescripts')
 <script>
-    const DESTINATION_FIELDS_STRUCTURED = [
-        { entity: "Cycle", field: "title", label: "Cycle Title" },
-        { entity: "Cycle", field: "start", label: "Cycle Start Date" },
-        { entity: "Cycle", field: "end", label: "Cycle End Date" },
-        { entity: "Company", field: "name_en", label: "Company Name (EN) *" },
-        { entity: "Company", field: "country_id", label: "Country" },
-        { entity: "Company", field: "state_id", label: "State/Governorate" },
-        { entity: "Company", field: "industries", label: "Industries" },
-        { entity: "Company", field: "sector", label: "Sector" },
-        { entity: "Company", field: "address_en", label: "Address (EN) *" },
-        { entity: "Company", field: "years_of_operations", label: "Years of Operations" },
-        { entity: "Company", field: "product_or_service", label: "Product or Service" },
-        { entity: "Company", field: "targeted_market", label: "Targeted Market" },
-        { entity: "Company", field: "est_date", label: "Establishment Date" },
-        { entity: "Founder", field: "first_name_en", label: "First Name (EN)" },
-        { entity: "Founder", field: "last_name_en", label: "Last Name (EN)" },
-        { entity: "Founder", field: "gender", label: "Gender" },
-        { entity: "Founder", field: "phone", label: "Phone" },
-        { entity: "Founder", field: "email", label: "Email" },
+  const DESTINATION_FIELDS_STRUCTURED = [
+        { entity: "Cycle", field: "title", label: "{{ __('admin.Cycle Name') }}" },
+        { entity: "Cycle", field: "start", label: "{{ __('admin.Cycle Start Date') }}" },
+        { entity: "Cycle", field: "end", label: "{{ __('admin.Cycle End Date') }}" },
+        { entity: "Company", field: "name_en", label: "{{ __('admin.Company Name (EN) *') }}" },
+        { entity: "Company", field: "country_id", label: "{{ __('admin.Country') }}" },
+        { entity: "Company", field: "state_id", label: "{{ __('admin.State/Governorate') }}" },
+        { entity: "Company", field: "industries", label: "{{ __('admin.Industries') }}" },
+        { entity: "Company", field: "sector", label: "{{ __('admin.Sector') }}" },
+        { entity: "Company", field: "address_en", label: "{{ __('admin.Address (EN) *') }}" },
+        { entity: "Company", field: "years_of_operations", label: "{{ __('admin.Years of Operations')}}" },
+        { entity: "Company", field: "product_or_service", label: "{{ __('admin.Product or Service') }}" },
+        { entity: "Company", field: "targeted_market", label: "{{ __('admin.Targeted Market') }}" },
+        { entity: "Company", field: "est_date", label: "{{ __('admin.Establishment Date') }}" },
+        { entity: "Founder", field: "first_name_ar", label: "{{ __('admin.First Name (AR)') }}" },
+        { entity: "Founder", field: "last_name_ar", label: "{{ __('admin.Last Name (AR)') }}" },
+        { entity: "Founder", field: "first_name_en", label: "{{ __('admin.First Name (EN)') }}" },
+        { entity: "Founder", field: "last_name_en", label: "{{ __('admin.Last Name (EN)') }}" },
+        { entity: "Founder", field: "first_name_en", label: "{{ __('admin.First Name (EN)') }}" },
+        { entity: "Founder", field: "last_name_en", label: "{{ __('admin.Last Name (EN)') }}" },
+        { entity: "Founder", field: "gender", label: "{{ __('admin.Gender') }}" },
+        { entity: "Founder", field: "phone", label: "{{ __('admin.Phone') }}" },
+        { entity: "Founder", field: "email", label: "{{ __('admin.Email') }}" },
     ];
 
     const dropZone = document.getElementById('drop-zone');
@@ -200,13 +216,20 @@
     const organizationSelect = document.getElementById('organization-select');
     const organizationError = document.getElementById('organization-error');
 
+    organizationSelect.addEventListener('change', function() {
+        organizationError.classList.add('d-none');
+    });
+
     let currentStep = 1;
     let uploadedFile = null;
     let uploadedHeaders = [];
     let uploadedData = [];
     let columnMappings = {};
 
-    browseButton.addEventListener('click', () => fileInput.click());
+    browseButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling to dropZone
+        fileInput.click();
+    });
     dropZone.addEventListener('click', () => fileInput.click());
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-enter'); });
     dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('drag-enter'); });
@@ -218,7 +241,15 @@
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) handleFile(e.target.files[0]);
     });
-    autoMapButton.addEventListener('click', autoMapColumns);
+    autoMapButton.addEventListener('click', function() {
+        console.log("Auto map button clicked!");
+        try {
+            autoMapColumns();
+        } catch (err) {
+            console.error("Error in autoMapColumns:", err);
+            alert("Error during auto-mapping: " + err.message);
+        }
+    });
     nextButton.addEventListener('click', handleNextStep);
     backButton.addEventListener('click', handlePreviousStep);
     importButton.addEventListener('click', handleImport);
@@ -237,7 +268,7 @@
             return response.json();
         })
         .then(data => {
-            organizationSelect.innerHTML = '<option value="">-- Select an Organization --</option>';
+            organizationSelect.innerHTML = '<option value="">-- {{ __('admin.Select Organization') }} --</option>';
             data.organizations.forEach(org => {
                 const option = document.createElement('option');
                 option.value = org.id;
@@ -248,7 +279,7 @@
         .catch(error => {
             alert('Fetch organizations error:', error);
             updateStatusMessage('Failed to load organizations: ' + error.message, 'error');
-            organizationSelect.innerHTML = '<option value="">Error loading organizations</option>';
+            organizationSelect.innerHTML = '<option value="">-- {{ __('admin.Error loading organizations') }} --</option>';
         });
     }
 
@@ -257,8 +288,9 @@
             uploadedFile = file;
             fileNameSpan.textContent = file.name;
             fileSizeSpan.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-            fileInfoDiv.classList.remove('hidden');
+            fileInfoDiv.classList.remove('d-none');
             nextButton.disabled = false;
+            nextButton.classList.remove('disabled');
 
             const formData = new FormData();
             formData.append('file', file);
@@ -284,19 +316,19 @@
                     displayDetectedHeaders();
                     populateMappingTable();
                     autoMapButton.disabled = false;
-                    updateStatusMessage('File uploaded successfully.', 'success', 3000);
+                    updateStatusMessage('{{ __('admin.File uploaded successfully') }}', 'success', 3000);
                 } else {
-                    updateStatusMessage(data.message || 'Error uploading file.', 'error');
+                    updateStatusMessage(data.message || '{{ __('admin.Error uploading file') }}', 'error');
                     resetUploadState();
                 }
             })
             .catch(error => {
                 console.error('Upload fetch error:', error.message);
-                updateStatusMessage('Error uploading file: ' + error.message, 'error');
+                updateStatusMessage('{{ __('admin.Error uploading file') }}' + error.message, 'error');
                 resetUploadState();
             });
         } else {
-            alert("Please upload a valid CSV file.");
+            alert("{{ __('admin.Please upload a valid CSV file') }}");
             resetUploadState();
         }
     }
@@ -307,14 +339,15 @@
         uploadedData = [];
         columnMappings = {};
         fileInput.value = '';
-        fileInfoDiv.classList.add('hidden');
+        fileInfoDiv.classList.add('d-none');
         fileNameSpan.textContent = '';
         fileSizeSpan.textContent = '';
         nextButton.disabled = true;
+        nextButton.classList.add('disabled');
         autoMapButton.disabled = true;
-        mappingTableBodyCycle.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Program Details</th></tr>';
-        mappingTableBodyCompany.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Company Details</th></tr>';
-        mappingTableBodyFounder.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Founder Details</th></tr>';
+        mappingTableBodyCycle.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">Program Details</th></tr>';
+        mappingTableBodyCompany.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">Company Details</th></tr>';
+        mappingTableBodyFounder.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">Founder Details</th></tr>';
         detectedHeadersList.innerHTML = '';
         updateStatusMessage('', 'info', 1);
         organizationSelect.innerHTML = '<option value="">-- Select an Organization --</option>';
@@ -325,7 +358,7 @@
         if (uploadedHeaders.length > 0) {
             uploadedHeaders.forEach(header => {
                 const span = document.createElement('span');
-                span.className = 'px-2 py-1 bg-slate-200 text-slate-700 rounded text-xs';
+                span.className = 'badge bg-secondary me-1 mb-1';
                 span.textContent = header;
                 detectedHeadersList.appendChild(span);
             });
@@ -335,21 +368,21 @@
     }
 
     function populateMappingTable() {
-        mappingTableBodyCycle.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Cycle Details</th></tr>';
-        mappingTableBodyCompany.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Company Details</th></tr>';
-        mappingTableBodyFounder.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Founder Details</th></tr>';
+        mappingTableBodyCycle.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Cycle Details") }}</th></tr>';
+        mappingTableBodyCompany.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Company Details") }}</th></tr>';
+        mappingTableBodyFounder.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Founder Details") }}</th></tr>';
 
-        const doNotImportOption = "<option value=''>--- Do not import ---</option>";
-        const sourceHeaderOptions = uploadedHeaders.map((header, index) => 
+        const doNotImportOption = "<option value=''>--- {{ __('admin.Do not import') }} ---</option>";
+        const sourceHeaderOptions = uploadedHeaders.map((header, index) =>
             `<option value="${index}">${header}</option>`
         ).join('');
 
         DESTINATION_FIELDS_STRUCTURED.forEach(dest => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${dest.label} <span class="text-xs text-slate-400">(${dest.entity})</span></td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                    <select data-destination-key="${dest.field}" data-destination-label="${dest.label}" data-entity="${dest.entity}" class="mapping-select w-full p-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm">
+                <td class="align-middle fw-medium">${dest.label} <span class="text-muted small">(${dest.entity})</span></td>
+                <td class="align-middle">
+                    <select data-destination-key="${dest.field}" data-destination-label="${dest.label}" data-entity="${dest.entity}" class="mapping-select form-select form-select-sm">
                         ${doNotImportOption}
                         ${sourceHeaderOptions}
                     </select>
@@ -407,16 +440,21 @@
     }
 
     function updateButtonStates() {
-        backButton.classList.toggle('hidden', currentStep === 1);
-        nextButton.classList.toggle('hidden', currentStep === 3);
-        importButton.classList.toggle('hidden', currentStep !== 3);
+        backButton.classList.toggle('d-none', currentStep === 1);
+        nextButton.classList.toggle('d-none', currentStep === 3);
+        importButton.classList.toggle('d-none', currentStep !== 3);
         nextButton.disabled = (currentStep === 1 && !uploadedFile);
+        if (nextButton.disabled) {
+            nextButton.classList.add('disabled');
+        } else {
+            nextButton.classList.remove('disabled');
+        }
     }
 
     function updateSectionVisibility() {
-        uploadSection.classList.toggle('hidden', currentStep !== 1);
-        mappingSection.classList.toggle('hidden', currentStep !== 2);
-        reviewSection.classList.toggle('hidden', currentStep !== 3);
+        uploadSection.classList.toggle('d-none', currentStep !== 1);
+        mappingSection.classList.toggle('d-none', currentStep !== 2);
+        reviewSection.classList.toggle('d-none', currentStep !== 3);
         if (currentStep === 3) {
             fetchOrganizations();
         }
@@ -432,12 +470,12 @@
             populateMappingSummary();
             populateDataPreview();
             if (Object.keys(columnMappings).length === 0) {
-                if (!confirm("No columns are mapped. Proceed to review anyway? You won't be able to import data.")) return;
+                if (!confirm("{{ __('admin.No columns are mapped') }}")) return;
             }
-            const requiredFields = ['name_en', 'address_en'];
-            const missingRequired = requiredFields.filter(field => !columnMappings.hasOwnProperty(field));
+            const requiredFields = [{label: '{{ __('admin.name_en') }}', value: 'name_en'}, {label: '{{ __('admin.address_en') }}', value: 'address_en'}];
+            const missingRequired = requiredFields.filter(field => !columnMappings.hasOwnProperty(field.value));
             if (missingRequired.length > 0) {
-                updateStatusMessage(`Please map the following required fields: ${missingRequired.join(', ')}`, 'error', 5000);
+                updateStatusMessage(`{{ __('admin.Please map the following required fields: ') }}${missingRequired.map(field => field.label).join(', ')}`, 'error', 5000);
                 return;
             }
         }
@@ -453,7 +491,7 @@
             currentStep--;
             updateSectionVisibility();
             updateButtonStates();
-            organizationError.classList.add('hidden');
+            organizationError.classList.add('d-none');
         }
     }
 
@@ -470,9 +508,9 @@
 
     function populateMappingSummary() {
         mappingSummaryDiv.innerHTML = '';
-        let cycleHtml = '<h4 class="text-md font-semibold text-indigo-700 mb-2">Cycle Mappings:</h4><ul class="list-disc list-inside space-y-1 text-slate-600 pl-4">';
-        let companyHtml = '<h4 class="text-md font-semibold text-indigo-700 mt-4 mb-2">Company Mappings:</h4><ul class="list-disc list-inside space-y-1 text-slate-600 pl-4">';
-        let founderHtml = '<h4 class="text-md font-semibold text-indigo-700 mt-4 mb-2">Founder Mappings:</h4><ul class="list-disc list-inside space-y-1 text-slate-600 pl-4">';
+        let cycleHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Cycle Mappings') }}</h4><ul class="list-disc ps-4 mb-3 small">';
+        let companyHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Company Mappings') }}</h4><ul class="list-disc ps-4 mb-3 small">';
+        let founderHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Founder Mappings') }}</h4><ul class="list-disc ps-4 mb-3 small">';
         let cycleMappingsExist = false;
         let companyMappingsExist = false;
         let founderMappingsExist = false;
@@ -481,7 +519,7 @@
             if (columnMappings.hasOwnProperty(dest.field)) {
                 const srcIndex = columnMappings[dest.field];
                 const sourceColumn = uploadedHeaders[srcIndex] || 'Unknown';
-                const listItem = `<li><span class="font-semibold text-slate-800">${dest.label}</span> → <span class="text-indigo-600 font-medium">${sourceColumn}</span></li>`;
+                const listItem = `<li><span class="fw-semibold">${dest.label}</span> → <span class="text-primary">${sourceColumn}</span></li>`;
                 if (dest.entity === "Cycle") {
                     cycleHtml += listItem;
                     cycleMappingsExist = true;
@@ -500,19 +538,19 @@
         founderHtml += '</ul>';
 
         if (!cycleMappingsExist) {
-            cycleHtml = '<h4 class="text-md font-semibold text-indigo-700 mb-2">Cycle Mappings:</h4><p class="text-slate-500 pl-4">No cycle fields mapped.</p>';
+            cycleHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Cycle Mappings') }}:</h4><p class="text-muted ms-2 small">{{ __('admin.No cycle fields mapped.') }}</p>';
         }
         if (!companyMappingsExist) {
-            companyHtml = '<h4 class="text-md font-semibold text-indigo-700 mt-4 mb-2">Company Mappings:</h4><p class="text-slate-500 pl-4">No company fields mapped.</p>';
+            companyHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Company Mappings') }}:</h4><p class="text-muted ms-2 small">{{ __('admin.No company fields mapped.') }}</p>';
         }
         if (!founderMappingsExist) {
-            founderHtml = '<h4 class="text-md font-semibold text-indigo-700 mt-4 mb-2">Founder Mappings:</h4><p class="text-slate-500 pl-4">No founder fields mapped.</p>';
+            founderHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Founder Mappings') }}:</h4><p class="text-muted ms-2 small">{{ __('admin.No founder fields mapped.') }}</p>';
         }
 
         mappingSummaryDiv.innerHTML = cycleHtml + companyHtml + founderHtml;
 
         if (Object.keys(columnMappings).length === 0) {
-            mappingSummaryDiv.innerHTML = '<p class="text-slate-500">No columns are currently mapped for import.</p>';
+            mappingSummaryDiv.innerHTML = '<p class="text-muted">{{ __('admin.admin.No columns are currently mapped for import.') }}</p>';
         }
     }
 
@@ -524,20 +562,20 @@
             const placeholderRow = dataPreviewTbody.insertRow();
             const cell = placeholderRow.insertCell();
             cell.colSpan = DESTINATION_FIELDS_STRUCTURED.length;
-            cell.className = 'px-6 py-4 text-center text-slate-500';
-            cell.textContent = 'No data to preview (no mappings or no data).';
+            cell.className = 'text-center text-muted';
+            cell.textContent = '{{ __('admin.No data to preview') }}';
             return;
         }
 
         const headerRow = dataPreviewThead.insertRow();
-        headerRow.className = "bg-slate-100";
+        // headerRow.className = "table-light";
 
         DESTINATION_FIELDS_STRUCTURED.forEach(dest => {
             if (columnMappings.hasOwnProperty(dest.field)) {
                 const th = document.createElement('th');
-                th.className = "px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider";
+                th.className = "text-start small";
                 const srcIndex = columnMappings[dest.field];
-                th.innerHTML = `${dest.label}<br><span class="text-indigo-500 normal-case text-[10px]">(Mapped to: ${uploadedHeaders[srcIndex]})</span>`;
+                th.innerHTML = `${dest.label}<br><span class="text-primary small">({{ __('admin.Mapped to') }}: ${uploadedHeaders[srcIndex]})</span>`;
                 headerRow.appendChild(th);
             }
         });
@@ -549,7 +587,7 @@
             DESTINATION_FIELDS_STRUCTURED.forEach(dest => {
                 if (columnMappings.hasOwnProperty(dest.field)) {
                     const td = tr.insertCell();
-                    td.className = "px-4 py-3 whitespace-nowrap text-slate-700";
+                    td.className = "align-middle";
                     const sourceHeaderIndex = columnMappings[dest.field];
                     const sourceHeader = uploadedHeaders[sourceHeaderIndex];
                     td.textContent = csvRowData[sourceHeader] || '';
@@ -560,21 +598,21 @@
 
     function handleImport() {
         if (Object.keys(columnMappings).length === 0) {
-            updateStatusMessage("Cannot import: No columns are mapped.", 'error');
+            updateStatusMessage("{{ __('admin.Cannot import: No columns are mapped.')}}", 'error');
             return;
         }
 
         const organizationId = organizationSelect.value;
         if (!organizationId) {
-            organizationError.classList.remove('hidden');
-            updateStatusMessage("Please select an organization before importing.", 'error', 5000);
+            organizationError.classList.remove('d-none');
+            updateStatusMessage("{{ __('admin.Please select an organization before importing.') }}", 'error', 5000);
             return;
         }
 
-        updateStatusMessage("Importing data... Please wait.", 'info');
-        nextButton.classList.add('hidden');
-        backButton.classList.add('hidden');
-        importButton.classList.add('hidden');
+        updateStatusMessage("{{ __('admin.Importing data... Please wait.') }}", 'info');
+        nextButton.classList.add('d-none');
+        backButton.classList.add('d-none');
+        importButton.classList.add('d-none');
 
         // console.log('Initiating import with mappings:', columnMappings);
         // console.log('Selected organization_id:', organizationId);
@@ -603,11 +641,34 @@
                         updateButtonStates();
                         resetUploadState();
                     }, 3000);
+
+                    // Display sweet alert
+                    Swal.fire({
+                        title: '{{ __('admin.Import Completed') }}',
+                        text: '',
+                        icon: 'success',
+                        confirmButtonText: '{{ __('admin.OK') }}',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                 } else {
                     updateStatusMessage(result.message || 'Error during import.', 'error');
-                    nextButton.classList.remove('hidden');
-                    backButton.classList.remove('hidden');
-                    importButton.classList.remove('hidden');
+                    nextButton.classList.remove('d-none');
+                    backButton.classList.remove('d-none');
+                    importButton.classList.remove('d-none');
+                    // Display sweet alert
+                    Swal.fire({
+                        title: '{{ __('admin.Import Failed') }}',
+                        text: '',
+                        icon: 'error',
+                        confirmButtonText: '{{ __('admin.OK') }}',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                 }
             },
             error: function(xhr, status, error) {
@@ -620,28 +681,44 @@
                     errorMessage = `HTTP error! Status: ${xhr.status} (Non-JSON response)`;
                 }
                 updateStatusMessage(errorMessage, 'error');
-                nextButton.classList.remove('hidden');
-                backButton.classList.remove('hidden');
-                importButton.classList.remove('hidden');
+                nextButton.classList.remove('d-none');
+                backButton.classList.remove('d-none');
+                importButton.classList.remove('d-none');
+
+                 // Display sweet alert
+                Swal.fire({
+                    title: '{{ __('admin.Import Failed') }}',
+                    text: '',
+                    icon: 'error',
+                    confirmButtonText: '{{ __('admin.OK') }}',
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                });
             }
         });
     }
 
     function updateStatusMessage(message, type = 'info', duration = 0) {
         statusMessageDiv.innerHTML = message.replace(/\n/g, '<br>');
-        statusMessageDiv.className = 'mt-6 p-4 rounded-md text-sm';
-        if (type === 'success') statusMessageDiv.classList.add('bg-green-100', 'text-green-700');
-        else if (type === 'error') statusMessageDiv.classList.add('bg-red-100', 'text-red-700');
-        else statusMessageDiv.classList.add('bg-indigo-100', 'text-indigo-700');
-        statusMessageDiv.classList.toggle('hidden', !message);
+        statusMessageDiv.className = 'mt-4 p-3 rounded';
+        
+        if (type === 'success') {
+            statusMessageDiv.classList.add('alert', 'alert-success');
+        } else if (type === 'error') {
+            statusMessageDiv.classList.add('alert', 'alert-danger');
+        } else {
+            statusMessageDiv.classList.add('alert', 'alert-info');
+        }
+        
+        statusMessageDiv.classList.toggle('d-none', !message);
         if (duration > 0) {
-            setTimeout(() => { statusMessageDiv.classList.add('hidden'); }, duration);
+            setTimeout(() => { statusMessageDiv.classList.add('d-none'); }, duration);
         }
     }
 
     updateSectionVisibility();
     updateButtonStates();
 </script>
-
-</body>
-@endsection
+@stop
