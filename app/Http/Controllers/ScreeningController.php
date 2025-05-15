@@ -348,8 +348,8 @@ class ScreeningController extends Controller
 			
 		}
 		$evaluationForm = $this->getEvaluationData( $id );
-		$status = strtolower( $evaluationForm->status );
-		if( $status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
+		$current_status = strtolower( $evaluationForm->status );
+		if( $current_status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
 		else
 		{
 			$toCreate = ['criteria' => [], 'subCriteria' => []];
@@ -473,6 +473,12 @@ class ScreeningController extends Controller
 			{
 				$criteria = ScreeningEvaluationCriteria::find ( $value->id );
 				if( $criteria ) { $criteria->delete(); }
+			}
+
+			if( $status == 'publish' )
+			{
+				$evaluation->status = true;
+				$evaluation->save();
 			}
 
 			$evaluationForm = $this->getEvaluationData( $id );
