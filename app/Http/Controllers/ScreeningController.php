@@ -8,6 +8,11 @@ use App\Company;
 use App\Formdata;
 use App\Formfield;
 use App\Screening;
+use App\ScreeningEvaluation;
+use App\ScreeningEvaluationCriteria;
+use App\ScreeningEvaluationResults;
+use App\ScreeningEvaluationCustomFields;
+use App\ScreeningEvaluationFieldsValues;
 use App\Events\ChangeStep;
 use Illuminate\Http\Request;
 use App\Jobs\ExportScreeneData;
@@ -21,7 +26,7 @@ use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
-
+use stdClass;
 
 class ScreeningController extends Controller
 {
@@ -64,7 +69,16 @@ class ScreeningController extends Controller
 		}
 		$cstep->judgers = count(json_decode($cstep->list, true)??[]) ?? 0 ;
 		$svgs = ['notebook', 'search', 'idea', 'comments', 'trophy'];
-		return view('admin.settings.screening.index', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs'));
+
+		$check = ScreeningEvaluation::where('step_id', $id)->first();
+		if( empty( $check ) )
+		{
+			$evaluation = new ScreeningEvaluation();
+			$evaluation->step_id = $id;
+			$evaluation->save();
+		}
+		$evaluationForm = $this->getEvaluationData( $id );
+		return view('admin.settings.screening.index', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
 	public function update(Request $request)
@@ -117,12 +131,12 @@ class ScreeningController extends Controller
 							}
 
 							$phoneNumber = $rname->country_code_w_a . $rname->whatsapp;
-							$Massage = "Dear " . $rfullname . ",
-we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') .
-" to " . $cstep->to->format('d-m-Y') . ", Check your account for more details,
-		Thanks from " . env('APP_NAME');
+							$Massage = "Dear " . $rfullname . ",\n";
+							$Massage .= "we need your experiences to judge New Incubation Cycle registered users, the judging period starting from " . $cstep->from->format('d-m-Y') . "\n";
+							$Massage .= " to " . $cstep->to->format('d-m-Y') . ", Check your account for more details, \n";
+							$Massage .= "Thanks from " . env('APP_NAME');
 							$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-					Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+							Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 
 						}
 					}
@@ -282,7 +296,6 @@ we need your experiences to judge New Incubation Cycle registered users, the jud
 		}
 	}
 
-
 	public function exportresultScreen(Request $request)
 	{
 		// تحقق من أن البريد الإلكتروني موجود
@@ -298,5 +311,228 @@ we need your experiences to judge New Incubation Cycle registered users, the jud
 		ExportResScreenData::dispatch($data1);
 
 		return response()->json(['message' => __('cycles.export_success')]);
+	}
+
+	public function save_evaluation_draft(Request $request)
+	{
+		return self::storeEvaluationCriteria( $request, 'draft' );
+	}
+
+	public function publish_evaluation(Request $request)
+	{
+		return self::storeEvaluationCriteria( $request, 'publish' );
+	}
+
+	private function storeEvaluationCriteria( $request, $status )
+	{
+		$request->validate([
+			'action' => "required|in:{$status}",
+			'stepId' => 'required|integer|exists:steps,id',
+			'criteria' => 'required|array',
+			'criteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
+			'criteria.*.name' => 'required|string|max:255',
+			'criteria.*.weight' => 'required|numeric|between:0,1',
+			'criteria.*.subCriteria' => 'required|array|min:1',
+			'criteria.*.subCriteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
+			'criteria.*.subCriteria.*.name' => 'required|string|max:255',
+			'criteria.*.subCriteria.*.weight' => 'required|numeric|between:0,1',
+		]);
+
+		$id = $request->stepId;
+		$evaluation = ScreeningEvaluation::where('step_id', $id)->first();
+		if( !$evaluation )
+		{
+			$evaluation = new ScreeningEvaluation;
+			$evaluation->step_id = $id;
+			$evaluation->save();
+			
+		}
+		$evaluationForm = $this->getEvaluationData( $id );
+		$status = strtolower( $evaluationForm->status );
+		if( $status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
+		else
+		{
+			$toCreate = ['criteria' => [], 'subCriteria' => []];
+			$toUpdate = ['criteria' => [], 'subCriteria' => []];
+			$toRemove = ['criteria' => [], 'subCriteria' => []];
+
+			$savedData = $evaluationForm->categories;
+			$savedCriteriaById = collect($savedData)->keyBy('id');
+
+			$allSeenCriteriaIds = [];
+			$allSeenSubCriteriaIds = [];
+			// Compare request criteria
+			foreach ($request->criteria as $reqCriterion)
+			{
+				$reqId = $reqCriterion['id'];
+				if (!$reqId)
+				{
+					// New main criterion to be created
+					$toCreate['criteria'][] = $reqCriterion;
+				}
+				else
+				{
+					$allSeenCriteriaIds[] = $reqId;
+					$savedCriterion = $savedCriteriaById[$reqId] ?? null;
+
+					if( $savedCriterion )
+					{
+						// Check for updates in name or weight
+						if (
+							$savedCriterion->name !== $reqCriterion['name'] ||
+							(float)$savedCriterion->weight !== (float)$reqCriterion['weight']
+						) {
+							$toUpdate['criteria'][] = $reqCriterion;
+						}
+			
+						// --- SUBCRITERIA HANDLING ---
+						$savedSubById = collect($savedCriterion->subCriteria)->keyBy('id');
+						foreach ($reqCriterion['subCriteria'] as $reqSub)
+						{
+							$subId = $reqSub['id'];
+							if (!$subId) {
+								$toCreate['subCriteria'][] = $reqSub + ['parent_id' => $reqId];
+							} else {
+								$allSeenSubCriteriaIds[] = $subId;
+								$savedSub = $savedSubById[$subId] ?? null;
+								if ($savedSub) {
+									if (
+										$savedSub->name !== $reqSub['name'] ||
+										(float)$savedSub->weight !== (float)$reqSub['weight']
+									) {
+										$toUpdate['subCriteria'][] = $reqSub;
+									}
+								}
+							}
+						}
+			
+						// Detect removed subCriteria
+						foreach ($savedSubById as $savedSubId => $savedSub) {
+							if (!in_array($savedSubId, array_column($reqCriterion['subCriteria'], 'id'))) {
+								$toRemove['subCriteria'][] = $savedSub;
+							}
+						}
+					}
+				}
+			}
+			
+			// Detect removed criteria
+			foreach ($savedCriteriaById as $savedCriterionId => $savedCriterion) {
+				if (!in_array($savedCriterionId, $allSeenCriteriaIds)) {
+					$toRemove['criteria'][] = $savedCriterion;
+				}
+			}
+			foreach( $toCreate['criteria'] as $value )
+			{
+				$criteria = new ScreeningEvaluationCriteria;
+				$criteria->title = $value['name'];
+				$criteria->weight = $value['weight'] * 100;
+				$criteria->evaluation_id = $evaluation->id;
+				$criteria->save();
+				foreach( $value['subCriteria'] as $sub )
+				{
+					$subCriteria = new ScreeningEvaluationCriteria;
+					$subCriteria->title = $sub['name'];
+					$subCriteria->weight = $sub['weight'] * 100;
+					$subCriteria->parent_id = $criteria->id;
+					$subCriteria->evaluation_id = null;
+					$subCriteria->save();
+				}
+			}
+			foreach( $toCreate['subCriteria'] as $sub )
+			{
+				$subCriteria = new ScreeningEvaluationCriteria;
+				$subCriteria->title = $sub['name'];
+				$subCriteria->weight = $sub['weight'] * 100;
+				$subCriteria->parent_id = $sub['parent_id'];
+				$subCriteria->evaluation_id = null;
+				$subCriteria->save();
+			}
+			foreach( $toUpdate['criteria'] as $value )
+			{
+				$criteria = ScreeningEvaluationCriteria::find ( $value['id'] );
+				$criteria->title = $value['name'];
+				$criteria->weight = $value['weight'] * 100;
+				$criteria->save();
+			}
+			foreach( $toUpdate['subCriteria'] as $sub )
+			{
+				$subCriteria = ScreeningEvaluationCriteria::find ( $sub['id'] );
+				$subCriteria->title = $sub['name'];
+				$subCriteria->weight = $sub['weight'] * 100;
+				$subCriteria->save();
+			}
+
+			foreach( $toRemove['subCriteria'] as $sub )
+			{
+				$subCriteria = ScreeningEvaluationCriteria::find ( $sub->id );
+				if( $subCriteria ) { $subCriteria->delete(); }
+			}
+
+			foreach( $toRemove['criteria'] as $value )
+			{
+				$criteria = ScreeningEvaluationCriteria::find ( $value->id );
+				if( $criteria ) { $criteria->delete(); }
+			}
+
+			$evaluationForm = $this->getEvaluationData( $id );
+			return response()->json([
+				'status' => true,
+				'title' => 'saved',
+				'message' => 'Evaluation saved successfully',
+				'data' => $evaluationForm->categories
+			]);
+
+		}
+	}
+
+	private function getEvaluationData( $id )
+	{
+		$evaluationForm_q = "SELECT
+				se.id AS evaluation_id,
+				se.step_id,
+				se.status,
+				sec.id AS criteria_id,
+				sec.title AS criteria_name,
+				sec.weight AS criteria_weight,
+				sec.parent_id AS criteria_parent_id,
+				sec_child.id AS criteria_child_id,
+				sec_child.title AS criteria_child_name,
+				sec_child.weight AS criteria_child_weight
+			FROM
+				screening_evaluation se
+			LEFT JOIN
+				screening_evaluation_criteria sec ON se.id = sec.evaluation_id AND sec.parent_id IS NULL
+			LEFT JOIN
+				screening_evaluation_criteria sec_child ON sec.id = sec_child.parent_id AND sec_child.evaluation_id IS NULL
+			WHERE
+				se.step_id = ?
+		";
+		$evaluationForm = collect(DB::select($evaluationForm_q, [$id]));
+
+		$evaluationForm = $evaluationForm->groupBy('evaluation_id')->map(function ( $e ) {
+			$_e = $e->first();
+			$evaluation = new stdClass;
+			$evaluation->status = $_e->status == 0 ? 'Draft' : 'Published';
+			$categories = $e->whereNull('criteria_parent_id')->groupBy('criteria_id')->map(function ( $criteria ) {
+				$c = $criteria->first();
+				$category = new stdClass;
+				$category->id = $c->criteria_id;
+				$category->name = $c->criteria_name;
+				$category->weight = $c->criteria_weight / 100;
+				$category->subCriteria = $criteria->map( function ( $subCriteria ) {
+					$sub_category = new stdClass;
+					$sub_category->id = $subCriteria->criteria_child_id;
+					$sub_category->name = $subCriteria->criteria_child_name;
+					$sub_category->weight = $subCriteria->criteria_child_weight / 100;
+					return $sub_category;
+				})->filter( function ( $subCategory ) { return !is_null( $subCategory->id ); })->values();
+				return $category;
+			})->filter(function( $category ) { return !is_null( $category->id ); })->values();
+			$evaluation->categories = $categories;
+			return $evaluation;
+		})->values()->first();
+
+		return $evaluationForm;
 	}
 }
