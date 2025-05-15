@@ -36,9 +36,8 @@ class WhatsAppService
         }
 $client = new Client();
        $response = $client->request('GET', 'https://wapi.growthlabs.app');
-        // تحقق من حالة السيرفر
-        // إذا كان السيرفر يعمل، أرسل الرسالة
-f ($response->getStatusCode() == 200) {
+        if($response->getStatusCode() == 200) {
+
         $sendResponse = Http::withHeaders([
             'x-api-key' => env('WAPI_KEY')
         ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
@@ -54,8 +53,8 @@ f ($response->getStatusCode() == 200) {
             return ['success' => false, 'message' => 'Failed to send OTP'];
         }
     } else {
-    // السيرفر لا يعمل
-    return __("admin.URLNotWorking");
+
+    return ['success' => false, 'message' => __("admin.URLNotWorking")];
     }
     } catch (\Exception $e) {
         Log::error('Failed to send OTP via WhatsApp: ' . $e->getMessage());
@@ -77,7 +76,7 @@ public function sendMessage($phoneNumber, $message)
        $response = $client->request('GET', 'https://wapi.growthlabs.app');
         // تحقق من حالة السيرفر
         // إذا كان السيرفر يعمل، أرسل الرسالة
-f ($response->getStatusCode() == 200) {
+    if($response->getStatusCode() == 200) {
         $sendResponse = Http::withHeaders([
             'x-api-key' => env('WAPI_KEY')
         ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
@@ -93,7 +92,6 @@ f ($response->getStatusCode() == 200) {
             return ['success' => false, 'message' => 'Failed to send message'];
         }
         } else {
-    // السيرفر لا يعمل
     return  ['success' => false, 'message' => __("admin.URLNotWorking")];
 }
     } catch (\Exception $e) {
