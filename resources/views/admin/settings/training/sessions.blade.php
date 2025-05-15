@@ -67,7 +67,7 @@
                             @endphp
                             <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>
                               {{ $step->title }}
-                              ({{ $step->cycle->title }}-{{ __('cycles.Start') . ' ' . $step->cycle->start->format('d-m-Y') }})
+                              ({{ $step->cycle->title }}-{{ __('cycles.Start') . ' ' . $step->cycle->start->format('d-m-Y') ?? '-' }})
                               - {{ optional(optional($step->cycle)->organization)->name }}</option>
                           @endforeach
                         </select>

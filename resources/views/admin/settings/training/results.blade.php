@@ -33,7 +33,7 @@
               @foreach ($sessions as $step)
               <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }} -
                 {{ $step->step->title }} ({{ __('cycles.Cycle') }} "{{ $step->step->cycle->title }}" -
-                {{ __('cycles.Start') }} {{ $step->step->from->format('d-m-Y') }}) -
+                {{ __('cycles.Start') }} {{ $step->step->from->format('d-m-Y') ?? '-' }}) -
                 {{ optional(optional(optional($step->step)->cycle)->organization)->name }}</option>
               @endforeach
             </select>
@@ -57,8 +57,8 @@
             <h4 class="card-title">
               {{ $step->title }} - {{ $csession->step->title }}
               <small class="text-muted">
-                {{ __('cycles.from') }} {{ $csession->step->from->format('d-m-Y') }}
-                {{ __('cycles.to') }} {{ $csession->step->to->format('d-m-Y') }}
+                {{ __('cycles.from') }} {{ $csession->step->from->format('d-m-Y') ?? '-' }}
+                {{ __('cycles.to') }} {{ $csession->step->to->format('d-m-Y') ?? '-' }}
               </small>
             </h4>
             <p>{{ $csession->step->description }}</p>

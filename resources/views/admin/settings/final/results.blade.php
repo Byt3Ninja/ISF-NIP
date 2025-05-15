@@ -40,7 +40,7 @@
                         @foreach ($steps as $step)
                           <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
                             ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" - {{ __('cycles.Start') }}
-                            {{ $step->from->format('d-m-Y') }})
+                            {{ $step->from->format('d-m-Y') ?? '-' }})
                             - {{ optional(optional($step->cycle)->organization)->name }}
                           </option>
                         @endforeach
@@ -97,8 +97,8 @@
               <div class="card">
                 <div class="card-header">
                   <h4 class="card-title secondary">{{ $cstep->title }} <small class="text-muted">
-                      {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') }} {{ __('cycles.to') }}
-                      {{ $cstep->to->format('d-m-Y') }}</small>
+                      {{ __('cycles.from') }} {{ $cstep->from->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                      {{ $cstep->to->format('d-m-Y') ?? '-' }}</small>
                     {{ __('cycles.for') }} :
                     <a href="/dashboard/companyProfile/{{ $c->id }}">
                       <img src="{{ $company->logo_url }}" alt="avatar" class="rounded-circle" height="40"
