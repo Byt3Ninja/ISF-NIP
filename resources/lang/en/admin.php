@@ -1650,4 +1650,5 @@ return [
 	'Founder Details' => 'Founder Details',
 	'Application Field (Destination)' => 'Application Field (Destination)',
 	'Your CSV Column (Source)' => 'Your CSV Column (Source)',
+	'URLNotWorking' => 'URL Not Working',
 ];   
