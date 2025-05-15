@@ -111,6 +111,13 @@ class TeamsService implements OnlineMeetingServiceInterface
     $MICROSOFT_CLIENT_SECRET_VALUE = '';
 
     $user = Auth::user();
+    if( !Auth::check() )
+    {
+        return [
+            'status' => false, 
+            'data' => __('admin.teams_error')
+        ];
+    }
 
     if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
         $setting = Settings::where('id', 1)->first();

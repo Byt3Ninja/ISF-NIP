@@ -362,6 +362,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('screening/get/{fid}/{sid}/{pid}', 'ScreeningController@getusers');
     Route::post('screening/changestep', 'ScreeningController@changestep')->name('screening.change_step');
     Route::get('/export-Result', 'ScreeningController@exportresultScreen');
+    Route::post('screening/evaluation/save_draft', 'ScreeningController@save_evaluation_draft')->name('screening.evaluation_save_draft');
+    Route::post('screening/evaluation/publish', 'ScreeningController@publish_evaluation')->name('screening.evaluation_publish');
 
     //ZOOM
     Route::get('zoom/all', 'MeetingController@showall');

@@ -64,6 +64,8 @@
 					</div>
 				@endif
 			</div>
+		
+			
 			<div class="row g-6">
 				<!-- Count cards -->
 				@foreach( $countCards as $card )
@@ -173,7 +175,7 @@
 													@if( $survey->triggered_by == 'session' )
 														{{ __('dashboard.with') }} 
 														@php $mentor = $survey->middleware->mentor; @endphp
-														{{ $mentor->name }}
+														{{ $mentor->name ?? '' }}
 													@elseif( $survey->triggered_by == 'due' )
 														- {{ $survey->middleware->title }}
 													@else
@@ -793,6 +795,42 @@
   		@include('admin.clients.startup.partials._session_modal')
   	<!--/ Edit SP Modal -->
 	@endif
+
+	@if( $_user->ableTo('mentorship.sessions_Rate', $permissions))
+	 @if( $notrated_mens )
+		<div class="col-sm-12 col-12">	
+      <div class="card">
+				<div class="card-header border-bottom">
+				
+					<h5 class="card-title"><i class="bx bx-calendar mr-1"></i>{{__('dashboard.Rate mentorship session with')}} : {{$notrated_men->{'first_name_'.$l} ?? '' }} {{$notrated_men->{'last_name_'.$l} ?? '' }}<span class="primary" id="rname"></span></h5>
+				
+					<div class="heading-elements">
+						<ul class="list-inline mb-0">
+							<li> <a data-action="close">  </a> </li>
+						</ul>
+					</div>
+				</div>
+				<div class="card-body">
+        <table id="ratingsTable" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th style="font-size: 0.7rem">{{__('dashboard.Your session was in')}}</th>
+                    <th style="font-size: 0.7rem">{{__('dashboard.Did you attend this session?')}}</th>
+                    <th style="font-size: 0.7rem">{{ __('dashboard.Rate from 1 star "bad" to 5 stars "best"') }}</th>
+                    <th style="font-size: 0.7rem">{{ __('dashboard.Your opinion important kindly write any notes about this session') }}</th>
+                    <th style="font-size: 0.7rem">{{__('dashboard.Submit')}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- سيتم ملء الصفوف بواسطة DataTables -->
+            </tbody>
+        </table>
+    </div>
+			</div>
+		</div>
+		@endif
+	@endif
+
 	@include('mentor.partials._availability_slots')
 	<!-- / Content Wrapper -->
 @stop
@@ -1080,6 +1118,169 @@
 			}
 		  });
 		});
+		$(document).ready(function() {
+        // إعداد AJAX لإرسال رمز CSRF تلقائيًا
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // تمرير البيانات من PHP إلى JavaScript
+        var notRatedMentorshipsData = @json($notrated_mens);
+
+        var table = $('#ratingsTable').DataTable({
+            data: notRatedMentorshipsData,
+            responsive: true, // لجعل الجدول متجاوبًا
+            columns: [
+                { data: 'zoom_date' },
+                {
+                    data: null, // لا توجد بيانات مباشرة، سيتم إنشاؤها
+                    orderable: false,
+                    render: function(data, type, row, meta) {
+                        // استخدام row.id لإنشاء معرفات فريدة
+                        let uniqueIdPrefix = 'row_' + row.id;
+                        return `
+                            <ul class="list-unstyled mb-0">
+                                <li class="d-inline-block mr-2">
+                                    <fieldset>
+                                        <div class="radio">
+                                            <input type="radio" name="done_${uniqueIdPrefix}" id="doneyes_${uniqueIdPrefix}" value="1" checked>
+                                            <label for="doneyes_${uniqueIdPrefix}">{{__('Yes')}}</label>
+                                        </div>
+                                    </fieldset>
+                                </li>
+                                <li class="d-inline-block">
+                                    <fieldset>
+                                        <div class="radio">
+                                            <input type="radio" name="done_${uniqueIdPrefix}" id="doneno_${uniqueIdPrefix}" value="0">
+                                            <label for="doneno_${uniqueIdPrefix}">{{__('No')}}</label>
+                                        </div>
+                                    </fieldset>
+                                </li>
+                            </ul>`;
+                    }
+                },
+                {
+                    data: null, // لا توجد بيانات مباشرة
+                    orderable: false,
+                    render: function(data, type, row, meta) {
+                        // سيتم تهيئة RateYo في drawCallback
+                        // نضيف input مخفي لحفظ قيمة التقييم
+                        return `
+                            <div class="full-star-ratings" data-rateyo-full-star="true" id="rateyo_${row.id}"></div>
+                            <input type="hidden" class="rate-value-input" name="rate_val_${row.id}" value="0">
+                        `;
+                    }
+                },
+                {
+                    data: null, // لا توجد بيانات مباشرة
+                    orderable: false,
+                    render: function(data, type, row, meta) {
+                        return `<textarea class="form-control comment-input" id="comment_${row.id}" name='comment_${row.id}' rows="3" required placeholder="{{ __('dashboard.Write your notes here') }}"></textarea>`;
+                    }
+                },
+                {
+                    data: null, // لا توجد بيانات مباشرة
+                    orderable: false,
+                    render: function(data, type, row, meta) {
+                        // زر الإرسال مع data-id للاحتفاظ بمعرف الصف
+                        return `<button type="button" class="btn btn-primary btn-sm submit-rating-btn" data-id="${row.id}">
+                                    <span class="d-none d-sm-block">{{__('dashboard.Submit')}}</span>
+                                    <span class="d-block d-sm-none"><i class="fas fa-paper-plane"></i></span>
+                                </button>`;
+                    }
+                }
+            ],
+            // يتم استدعاؤه بعد كل مرة يتم فيها رسم الجدول (بما في ذلك عند التهيئة)
+            drawCallback: function(settings) {
+                // تهيئة RateYo لجميع عناصر التقييم الجديدة
+                $('.full-star-ratings').each(function() {
+                    var $this = $(this);
+                    if (!$this.data('rateYoInstance')) { // تحقق مما إذا كان قد تم تهيئته بالفعل
+                        var ratingInput = $this.next('.rate-value-input');
+                        $this.rateYo({
+                            fullStar: true,
+                            starWidth: "20px", // يمكنك تعديل حجم النجوم
+                            onSet: function (rating, rateYoInstance) {
+                                $(rateYoInstance.node).next('.rate-value-input').val(rating);
+                            },
+                            // إذا كنت تريد تعيين قيمة أولية من البيانات (إذا كانت موجودة)
+                            // rating: $this.data('initial-rating') || 0
+                        });
+                    }
+                });
+            },
+            // يمكنك إضافة خيارات أخرى لـ DataTables هنا (مثل الترجمة، ترتيب افتراضي، إلخ)
+            language: { // مثال للترجمة إذا لزم الأمر
+                // "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json" // إذا أردت ترجمة كاملة
+                "search": "{{__('dashboard.Search')}}:",
+                "lengthMenu": "{{__('dashboard.Show')}} _MENU_ {{__('dashboard.entries')}}",
+                "info": "{{__('dashboard.Showing')}} _START_ {{__('dashboard.to')}} _END_ {{__('dashboard.of')}} _TOTAL_ {{__('dashboard.entries')}}",
+                "paginate": {
+                    "first": "{{__('dashboard.First')}}",
+                    "last": "{{__('dashboard.Last')}}",
+                    "next": "{{__('dashboard.Next')}}",
+                    "previous": "{{__('dashboard.Previous')}}"
+                }
+            }
+        });
+
+        // معالج حدث النقر لزر الإرسال
+        $('#ratingsTable tbody').on('click', '.submit-rating-btn', function() {
+            var button = $(this);
+            var rowId = button.data('id');
+            var rowNode = button.closest('tr'); // الحصول على عنصر الصف <tr>
+
+            // جمع البيانات من الصف الحالي
+            //  var attended = $(`input[name="done_row_${rowId}"]:checked`).val(); // الطريقة القديمة قد لا تعمل بشكل صحيح مع إعادة رسم الجدول
+            // طريقة أكثر موثوقية للوصول إلى العناصر داخل الصف
+            var attended = rowNode.find(`input[name="done_row_${rowId}"]:checked`).val();
+            var rating = rowNode.find(`.rate-value-input`).val(); // تم تحديثه بواسطة RateYo
+            var comment = rowNode.find(`.comment-input`).val();
+
+            // التحقق من أن التقييم قد تم (0 يعني لم يتم التقييم)
+            if (attended === "1" && (rating === "0" || rating === 0)) {
+                 alert("{{ __('dashboard.Please select a rating.') }}"); // أو استخدم مكتبة إشعارات أجمل
+                 return;
+            }
+             // التحقق من أن التعليق قد تم كتابته إذا حضر
+            if (attended === "1" && !comment.trim()) {
+                alert("{{ __('dashboard.Your opinion important kindly write any notes about this session') }}");
+                rowNode.find(`.comment-input`).focus();
+                return;
+            }
+
+
+            button.prop('disabled', true).html('{{__("dashboard.Submitting...")}}'); // تعطيل الزر وإظهار التحميل
+
+            $.ajax({
+                url: '/dashboard/mentorship/rate',
+                method: 'POST',
+                data: {
+                    id: rowId,         // هذا هو معرف الجلسة (mentorship_id)
+                    rate: rating,
+                    done: attended,     // 1 لـ "نعم", 0 لـ "لا"
+                    comment: comment,
+                    // _token: $('meta[name="csrf-token"]').attr('content') //  يتم إرساله بالفعل بواسطة $.ajaxSetup
+                },
+                success: function(response) {
+                    // نجاح!
+                    // يمكنك إزالة الصف من DataTable إذا أردت
+                    table.row(rowNode).remove().draw(false); // false لعدم إعادة ترقيم الصفحات
+                    // أو تحديث الصف إذا كان هناك شيء لعرضه
+                    // أو عرض رسالة نجاح
+                    alert(response.message || '{{__("dashboard.Rating submitted successfully!")}}'); // استخدم رسالة من الخادم إذا توفرت
+                },
+                error: function(xhr) {
+                    // خطأ
+                    console.error("Error submitting rating:", xhr.responseText);
+                    alert('{{__("dashboard.An error occurred. Please try again.")}}');
+                    button.prop('disabled', false).html('<span class="d-none d-sm-block">{{__("dashboard.Submit")}}</span><span class="d-block d-sm-none"><i class="fas fa-paper-plane"></i></span>'); // إعادة تمكين الزر
+                }
+            });
+        });
+    });
 	  </script>
 	</script>
 @stop

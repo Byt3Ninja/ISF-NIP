@@ -337,6 +337,15 @@
   {"name": "screening.results_view", "description": "View Screening Results", "permission_group_id": "Screening", "guard_name": "web"}, 
   {"name": "screening.users_view_details", "description": "Get User Details for Screening", "permission_group_id": "Screening", "guard_name": "web"}, 
   {"name": "screening.sessions_delete", "description": "Delete Screening Session", "permission_group_id": "Screening", "guard_name": "web"}, 
+  {"name": "screening.evaluation_show", "description": "View Screening Evaluation Model", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluation_save_draft", "description": "Save Screening Evaluation AS Draft", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluation_publish", "description": "Publish Screening Evaluation", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluation_add_criteria", "description": "Add Screening Evaluation Criteria", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluation_edit_criteria", "description": "Edit Screening Evaluation Criteria", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluation_delete_criteria", "description": "Delete Screening Evaluation Criteria", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluation_add_sub_criteria", "description": "Add Screening Evaluation Sub Criteria", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluation_edit_sub_criteria", "description": "Edit Screening Evaluation Sub Criteria", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluation_delete_sub_criteria", "description": "Delete Screening Evaluation Sub Criteria", "permission_group_id": "Screening", "guard_name": "web"},
   {"name": "mentorships.surveys_list", "description": "List Mentorship Surveys", "permission_group_id": "Mentorship Management", "guard_name": "web"},
   {"name": "mentorships.surveys_create", "description": "Create Mentorship Survey Form", "permission_group_id": "Mentorship Management", "guard_name": "web"},
   {"name": "mentorships.surveys_store", "description": "Save New Mentorship Survey", "permission_group_id": "Mentorship Management", "guard_name": "web"},
@@ -555,6 +564,7 @@
   {"name": "importer.index", "description": "View Importer Page", "permission_group_id": "Importer Tool", "guard_name": "web"},
   {"name": "importer.upload", "description": "Upload Importer File", "permission_group_id": "Importer Tool", "guard_name": "web"},
   {"name": "importer.import", "description": "Importer Parsing", "permission_group_id": "Importer Tool", "guard_name": "web"},
-  {"name": "importer.organizations", "description": "Fetch Organizations", "permission_group_id": "Importer Tool", "guard_name": "web"}
+  {"name": "importer.organizations", "description": "Fetch Organizations", "permission_group_id": "Importer Tool", "guard_name": "web"},
+  {"name": "mentorship.sessions_Rate", "description": "Rate mentorship session", "permission_group_id": "Dashboard (Startup)", "guard_name": "web"}
 
 ]

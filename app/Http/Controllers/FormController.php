@@ -116,8 +116,8 @@ class FormController extends Controller
       return view('admin.settings.forms.form-submissions.index', compact('data'));
     }
   
-    public function submissionDetails(Request $request) {
-
+    public function submissionDetails(Request $request, $id) {
+      
       $user = Auth::user();
       $data = [];
       $l = app()->getLocale();
@@ -160,9 +160,9 @@ class FormController extends Controller
      
       if($user->organization_id != null){
         $forms .= " AND CYC.organization_id = ? ";
-        $forms = DB::select($forms, [$user->organization_id]);
+        $forms = DB::select($forms, [$id, $user->organization_id]);
       }else{
-        $forms = DB::select($forms);
+        $forms = DB::select($forms, [$id]);
       }
       $forms = collect($forms);
       $C = 1;
