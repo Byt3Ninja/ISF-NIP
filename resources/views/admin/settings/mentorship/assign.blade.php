@@ -38,8 +38,8 @@
                       onchange="window.open('/dashboard/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
                       @foreach ($cycles as $cycle)
                         <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                          {{ __('cycles.from') }} {{ $cycle->start->format('d-m-Y') }} {{ __('cycles.to') }}
-                          {{ $cycle->end->format('d-m-Y') }} - {{ optional($cycle->organization)->name }}</option>
+                          {{ __('cycles.from') }} {{ $cycle->start->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                          {{ $cycle->end->format('d-m-Y') ?? '-' }} - {{ optional($cycle->organization)->name }}</option>
                       @endforeach
                       @if (!$id)
                         <option> {{ __('cycles.No records saved') }} - ({{ __('cycles.Manage Cycle') }}).</option>

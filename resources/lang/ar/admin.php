@@ -1726,4 +1726,5 @@ return [
 	'Import Completed' => 'تم استيراد البيانات بنجاح',
 	'Import Failed' => 'فشل استيراد البيانات',
 	'URLNotWorking' => 'الرابط غير صالح',
+	'Trainer Details' => 'تفاصيل المدرب',
 ];

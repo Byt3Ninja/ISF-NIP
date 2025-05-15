@@ -59,8 +59,8 @@
                     onchange="window.open('/dashboard/mentorship/view/'+this.options[this.selectedIndex].value,'_self');">
                   @foreach ($cycles as $cycle)
                   <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                    ({{ __('cycles.from') }} {{ $cycle->start->format('d-m-Y') }} {{ __('cycles.to') }}
-                    {{ $cycle->end->format('d-M-Y') }})
+                    ({{ __('cycles.from') }} {{ $cycle->start->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                    {{ $cycle->end->format('d-M-Y') ?? '-' }})
                     - {{ optional($cycle->organization)->name }}</option>
                   @endforeach
                   @if (!$id)

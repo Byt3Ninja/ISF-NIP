@@ -880,8 +880,8 @@
                       
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span></td>
-                    <td>{{ Carbon\Carbon::parse($step->from)->format('d-m-Y') }}</td>
-                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m-Y') }}</td>
+                    <td>{{ Carbon\Carbon::parse($step->from)->format('d-m-Y') ?? '-' }}</td>
+                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m-Y') ?? '-' }}</td>
                     <td style="height: 50px;">
                       <span style="width: 350px; height: 100%; display: inline-block; white-space: normal;">
                         {{ $step->description ? $step->description : '...' }}
