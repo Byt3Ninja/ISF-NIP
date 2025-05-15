@@ -27,11 +27,14 @@
         <p class="text-slate-600 text-sm sm:text-base">{{ __('admin.Upload CSV, map columns to Cycle, Company, and Founder details, and import.') }}</p>
     </header>
 
+     <div class="text-sm text-slate-600">
+        <p>{{ __('admin.Download') }} <a href="{{ $templateUrl }}" download class="text-indigo-600 font-medium hover:underline">{{ __('admin.CSV template') }}</a> {{ __('admin.text') }}</p>
+    </div>
     <!-- Step 1: File Upload -->
     <section id="upload-section" class="space-y-6">
         <h2 class="text-2xl font-semibold text-slate-700 border-b pb-3 mb-5 flex items-center">
             <span class="bg-indigo-600 text-white rounded-full h-8 w-8 text-sm flex items-center justify-center mr-3">1</span>
-            Upload CSV File
+            {{ __('admin.Upload CSV File') }}
         </h2>
         <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-lg p-8 sm:p-12 text-center cursor-pointer hover:border-indigo-500 transition-colors duration-300 bg-slate-50">
             <input type="file" id="csv-file-input" class="hidden" accept=".csv">
@@ -74,23 +77,23 @@
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-100">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/2">Application Field (Destination)</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/2">Your CSV Column (Source)</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/2">{{ __('admin.Application Field (Destination)') }}</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-1/2">{{ __('admin.Your CSV Column (Source)') }}</th>
                     </tr>
                 </thead>
                 <tbody id="mapping-table-body-cycle" class="bg-white divide-y divide-slate-200">
                     <tr class="table-section-header">
-                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Cycle Details</th>
+                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">{{ __('admin.Program Details') }}</th>
                     </tr>
                 </tbody>
                 <tbody id="mapping-table-body-company" class="bg-white divide-y divide-slate-200">
                     <tr class="table-section-header">
-                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Company Details</th>
+                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">{{ __('admin.Company Details') }}</th>
                     </tr>
                 </tbody>
                 <tbody id="mapping-table-body-founder" class="bg-white divide-y divide-slate-200">
                     <tr class="table-section-header">
-                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Founder Details</th>
+                        <th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">{{ __('admin.Founder Details') }}</th>
                     </tr>
                 </tbody>
             </table>
@@ -243,7 +246,7 @@
             });
         })
         .catch(error => {
-            console.error('Fetch organizations error:', error);
+            alert('Fetch organizations error:', error);
             updateStatusMessage('Failed to load organizations: ' + error.message, 'error');
             organizationSelect.innerHTML = '<option value="">Error loading organizations</option>';
         });
@@ -309,7 +312,7 @@
         fileSizeSpan.textContent = '';
         nextButton.disabled = true;
         autoMapButton.disabled = true;
-        mappingTableBodyCycle.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Cycle Details</th></tr>';
+        mappingTableBodyCycle.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Program Details</th></tr>';
         mappingTableBodyCompany.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Company Details</th></tr>';
         mappingTableBodyFounder.innerHTML = '<tr class="table-section-header"><th colspan="2" class="px-6 py-3 text-left text-sm font-semibold text-indigo-700 bg-indigo-50">Founder Details</th></tr>';
         detectedHeadersList.innerHTML = '';
@@ -573,10 +576,10 @@
         backButton.classList.add('hidden');
         importButton.classList.add('hidden');
 
-        console.log('Initiating import with mappings:', columnMappings);
-        console.log('Selected organization_id:', organizationId);
-        console.log('Data (first 3 rows):', uploadedData.slice(0, 3));
-        console.log('Total data rows:', uploadedData.length);
+        // console.log('Initiating import with mappings:', columnMappings);
+        // console.log('Selected organization_id:', organizationId);
+        // console.log('Data (first 3 rows):', uploadedData.slice(0, 3));
+        // console.log('Total data rows:', uploadedData.length);
 
         $.ajax({
             url: '{{ route('importer.import') }}',
@@ -593,9 +596,6 @@
             success: function(result) {
                 if (result.success) {
                     let message = `Successfully imported ${result.imported} records!`;
-                    if (result.warnings && result.warnings.length > 0) {
-                        message += `\nWarnings:\n${result.warnings.join('\n')}`;
-                    }
                     updateStatusMessage(message, 'success', 10000);
                     setTimeout(() => {
                         currentStep = 1;
