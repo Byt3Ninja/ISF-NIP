@@ -99,20 +99,21 @@ class FormController extends Controller
       }else{
         $forms = DB::select($forms);
       }
-      $forms = collect($forms);
-      $C = 1;
-      $data = $forms->map(function ($form)use ($l, &$C) {
-        $data = new stdClass;
-        $data->submission_id = $C++;
-        $data->step_id = $form->S_id;
-        $data->startup_name = $form->{'C_name_'.$l};
-        $data->submitted_by = $form->{'user_name_'.$l};
-        $data->step_name = $form->S_title;
-        $data->program_name = $form->CYC_title;
-        $data->organization_name = $form->O_name_en;
-        $data->created_at = $form->FD_created_at;
-        return $data;
-      });
+     $forms = collect($forms)->unique('FD_step_id')->values();
+
+$C = 1;
+$data = $forms->map(function ($form) use ($l, &$C) {
+    $item = new stdClass;
+    $item->submission_id = $C++;
+    $item->step_id = $form->FD_step_id;
+    $item->startup_name = $form->{'C_name_' . $l};
+    $item->submitted_by = $form->{'user_name_' . $l};
+    $item->step_name = $form->S_title;
+    $item->program_name = $form->CYC_title;
+    $item->organization_name = $form->O_name_en;
+    $item->created_at = $form->FD_created_at;
+    return $item;
+});
       return view('admin.settings.forms.form-submissions.index', compact('data'));
     }
   
