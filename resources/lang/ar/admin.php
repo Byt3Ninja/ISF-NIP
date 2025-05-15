@@ -1664,4 +1664,12 @@ return [
 	'Uploaded Materials' => 'المواد المرفقة',
 	'Live Training' => 'تدريب عبر الانترنت',
 	'Online' => 'Online',
+	'Upload CSV File' => 'تحميل ملف CSV',
+	'CSV template' => 'نموذج CSV',
+	'text' => 'للتأكد من أن ملفك يطابق التنسيق المطلوب',
+	'Program Details' => 'تفاصيل البرنامج',
+	'Company Details' => 'تفاصيل الشركة',
+	'Founder Details' => 'تفاصيل المؤسس',
+	'Application Field (Destination)' => 'حقل التطبيق (الوجهة)',
+	'Your CSV Column (Source)' => 'اعمدة CSV الخاصة بك (المصدر)',
 ];

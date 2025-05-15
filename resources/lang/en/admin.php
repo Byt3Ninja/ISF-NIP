@@ -1642,4 +1642,12 @@ return [
 	'Uploaded Materials' => 'Uploaded Materials',
 	'Live Training' => 'Live Training',
 	'Online' => 'Online',
+	'Upload CSV File' => 'Upload CSV File',
+	'CSV template' => 'CSV template',
+	'text' => 'to ensure your file matches the required format',
+	'Program Details' => 'Program Details',
+	'Company Details' => 'Company Details',
+	'Founder Details' => 'Founder Details',
+	'Application Field (Destination)' => 'Application Field (Destination)',
+	'Your CSV Column (Source)' => 'Your CSV Column (Source)',
 ];   
