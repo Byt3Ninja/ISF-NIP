@@ -391,10 +391,9 @@ class ProgramController extends Controller
     $totalWorkshops = $workshops->count();
     $totalMinutes = $workshops->sum('duration');
     $totalSessionHours = round($totalMinutes / 60, 2);
-    // dd($totalHours);
-    $zoomWorkshops = $workshops->where('type', 'online')->count();
+    $zoomWorkshops = $workshops->where('type', 'sessions')->count();
     $inPersonWorkshops = $workshops->where('type', 'offline')->count();
-    $uploadedMaterials = $workshops->where('type', 'sessions')->count();
+    $uploadedMaterials = $workshops->where('type', 'online')->count();
 
     $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
 
