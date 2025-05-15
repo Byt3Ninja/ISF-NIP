@@ -602,8 +602,33 @@
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 @stop --}}
 
-{{-- @section('pagescripts')
-@php($ccycle = \App\Cycle::find(0))
+@section('pagescripts')
+<script>
+  // Initialize Date Picker
+  flatpickr(".datepicker", {
+    dateFormat: "Y-m-d", // تنسيق التاريخ المطلوب
+    allowInput: true, // السماح للمستخدم بكتابة التاريخ يدويًا
+    // locale: "ar", // دعم اللغة العربية (يمكنك تغييره)
+  });
+
+  $('#search-programs').on('keyup', function() {
+    var value = $(this).val().toLowerCase();
+    console.log('value', value)
+    $('#program-list .card').filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+
+  $('#filter-programs-form .form-select').on('change', function() {
+    $('#filter-programs-form').submit();
+  });
+
+  $('#filter-programs-form .form-control').on('change', function() {
+    $('#filter-programs-form').submit();
+  });
+</script>
+
+{{-- @php($ccycle = \App\Cycle::find(0))
 <script>
   // Set Language
     const lang = '{{ $l }}';
@@ -1087,21 +1112,5 @@
         });
       }
     }
-</script>
-<script>
-  $('#search-programs').on('keyup', function() {
-      var value = $(this).val().toLowerCase();
-      console.log('value', value)
-      $('#program-list .card').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
-    });
-
-    $('#filter-programs-form .form-select').on('change', function() {
-      $('#filter-programs-form').submit();
-    });
-    $('#filter-programs-form .form-control').on('change', function() {
-      $('#filter-programs-form').submit();
-    });
-</script>
-@stop --}}
+</script> --}}
+@stop
