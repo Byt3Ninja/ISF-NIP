@@ -1704,4 +1704,5 @@ return [
 	'Import Completed' => 'Import Completed Successfully',
 	'Import Failed' => 'Import Failed',
 	'URLNotWorking' => 'URL Not Working',
+	'Trainer Details' => 'Trainer Details',
 ];
