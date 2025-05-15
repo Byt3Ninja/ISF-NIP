@@ -1655,4 +1655,9 @@ return [
 	'Drag & drop your CSV file here' => 'اسحب وأسقط ملف CSV الخاص بك هنا',
 	'Browse Files' => 'تصفح الملفات',
 	'Importer Tool' => 'اداة التحميل',
+	'Location' => 'الموقع',
+	'Address' => 'العنوان',
+	'Trainer Name' => 'اسم المدرب',
+	'Trainer Email' => 'البريد الالكتروني للمدرب',
+	'Date & Time' => 'التاريخ والوقت',
 ];
