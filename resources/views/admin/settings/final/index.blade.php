@@ -54,7 +54,7 @@
                         @foreach ($steps as $step)
                           <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
                             ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" - {{ __('cycles.Start') }}
-                            {{ $step->from->format('d-m-Y') }})
+                            {{ $step->from->format('d-m-Y') ?? '-' }})
                             - {{ optional(optional($step->cycle)->organization)->name }}
                           </option>
                         @endforeach
@@ -144,8 +144,8 @@
                     <h4>{{ $l == 'en' ? 'Startups final screening' : $cstep->title }} </h4>
                     <h5 class="card-title primary">{{ __('cycles.Select judges from the menu') }}.</h5>
                     <small class="text-muted"> {{ __('cycles.from') }}
-                      {{ $cstep->from->format('d-m-Y') }} {{ __('cycles.to') }}
-                      {{ $cstep->to->format('d-m-Y') }}
+                      {{ $cstep->from->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                      {{ $cstep->to->format('d-m-Y') ?? '-' }}
                     </small>
                   </div>
                   <div class="card-body">
