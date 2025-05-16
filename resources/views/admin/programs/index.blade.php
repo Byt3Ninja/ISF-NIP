@@ -614,7 +614,7 @@
   tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
   document.execCommand("copy");
   document.body.removeChild(tempInput);
-  alert("{{ __(admin.Copied) }}");
+  alert("{{ __('admin.Copied') }}");
 }
   // Initialize Date Picker
   flatpickr(".datepicker", {
