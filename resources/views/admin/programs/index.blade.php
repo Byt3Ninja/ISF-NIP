@@ -193,7 +193,8 @@
 
                     <div class="d-flex align-items-center gap-4">
                       @if (!empty($cycle->private))
-                        <div class="badge text-center text-dark cursor-pointer">
+                        <div class="badge text-center text-dark cursor-pointer" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
+
                           <span style="font-size: 12px;" class="fw-medium mx-1 menu-item">
                             {{  __('cycles.Private Link') }}:
                           </span>
@@ -604,6 +605,17 @@
 
 @section('pagescripts')
 <script>
+  function copyToClipboard(text) {
+  // إنشاء عنصر مؤقت
+  const tempInput = document.createElement("input");
+  tempInput.value = text;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
+  document.execCommand("copy");
+  document.body.removeChild(tempInput);
+  alert("{{ __(admin.Copied) }}");
+}
   // Initialize Date Picker
   flatpickr(".datepicker", {
     dateFormat: "Y-m-d", // تنسيق التاريخ المطلوب

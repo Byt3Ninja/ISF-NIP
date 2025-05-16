@@ -1738,4 +1738,5 @@ return [
 	'Completed on' => 'اكتمل في',
 	'Explanation' => 'تفسير',
 	'No explanation provided'	=> 'لا يوجد تفسير مقدم',
+	'Copied' => 'تم النسخ بنجاح',
 ];

@@ -1715,4 +1715,5 @@ return [
 	'Completed on' => 'Completed on',
 	'Explanation' => 'Explanation',
 	'No explanation provided'	=> 'No explanation provided',
+	'Copied' => 'Copied',
 ];
