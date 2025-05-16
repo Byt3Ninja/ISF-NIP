@@ -1726,5 +1726,10 @@ return [
 	'Import Completed' => 'تم استيراد البيانات بنجاح',
 	'Import Failed' => 'فشل استيراد البيانات',
 	'URLNotWorking' => 'الرابط غير صالح',
-	'Trainer Details' => 'تفاصيل المدرب',
+	'session_details_label' => 'تفاصيل الجلسة',
+	'location_address' => 'الموقع والعنوان',
+	'join_link' => 'رابط الانضمام',
+	'Join' => 'انضم',
+	'zoom_id' => 'معرف زووم',
+	'course' => 'دورة',
 ];

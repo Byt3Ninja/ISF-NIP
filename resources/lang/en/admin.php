@@ -1704,5 +1704,10 @@ return [
 	'Import Completed' => 'Import Completed Successfully',
 	'Import Failed' => 'Import Failed',
 	'URLNotWorking' => 'URL Not Working',
-	'Trainer Details' => 'Trainer Details',
+	'session_details_label' => 'Session Details',
+	'location_address' => 'Location & Address',
+	'join_link' => 'Join Link',
+	'Join' => 'Join',
+	'zoom_id' => 'Zoom ID',
+	'course' => 'Course',
 ];
