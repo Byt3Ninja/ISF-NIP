@@ -1,28 +1,14 @@
 @php
   // Show the canvas if the query parameter 'screening' is set to 'true'
   $showCanvas = request()->query('screening') === 'true';
-
-  $criterias = [
-    'market-fit' => 'Market Fit',
-    'team-strenth' => 'Team Strength',
-    'financial-viability' => 'Financial Viability',
-    'sustainability' => 'Sustainability',
-    'innovation' => 'Innovation',
-    'scalability' => 'Scalability',
-    'social-impact' => 'Social Impact',
-    'technology' => 'Technology',
-    'business-model' => 'Business Model',
-    'customer-acquisition' => 'Customer Acquisition',
-    'competition' => 'Competition',
-  ];
 @endphp
 
-<div class="screening-gavel">
-  <div data-bs-target="#rightModalCanvas" data-bs-toggle="offcanvas" aria-controls="rightModalCanvas"
-    onclick="document.querySelector('.template-customizer-open-btn').style.display = 'none';">
-    <img src="/icons/not-started.svg" />
-  </div>
+@if( !empty( $evaluationForm ) && $evaluationForm->status == 'Published' )
+<div class="screening-gavel" data-bs-target="#rightModalCanvas" data-bs-toggle="offcanvas" aria-controls="rightModalCanvas"
+  onclick="document.querySelector('.template-customizer-open-btn').style.display = 'none';">
+  <img src="/icons/not-started.svg" />
 </div>
+
 
 <div class="offcanvas offcanvas-end {{ $showCanvas ? 'show' : '' }}" tabindex="-1" id="rightModalCanvas"
   aria-labelledby="rightModalCanvasLabel" style="width: 50vw;">
@@ -81,12 +67,12 @@
                   <div class="col-12 mb-6">
                     <div class="bs-stepper wizard-numbered mt-2 shadow-none p-0">
                       <div class="bs-stepper-header px-0 overflow-auto d-flex flex-nowrap">
-                        @foreach ($criterias as $key => $label)
-                        <div class="step flex-shrink-0" data-target="#{{ $key }}">
+                        @foreach ($evaluationForm->categories as $key => $criteria)
+                        <div class="step flex-shrink-0" data-target="#_{{ $key }}">
                           <button type="button" class="step-trigger">
                             <span class="bs-stepper-circle">{{ $loop->iteration }}</span>
                             <span class="bs-stepper-label">
-                              <span class="bs-stepper-title">{{ $label }}</span>
+                              <span class="bs-stepper-title">{{ $criteria->name }}</span>
                               <span class="bs-stepper-subtitle">{{ __('admin.Evaluate') }}</span>
                             </span>
                           </button>
@@ -99,37 +85,52 @@
                         @endforeach
                       </div>
                       <div class="bs-stepper-content px-0">
-                        @foreach ($criterias as $key => $label)
-                        <div id="{{ $key }}" class="content">
-                          <div class="content-header mb-4">
-                            <h6 class="mb-0">{{ $label }}</h6>
-                            <small>{{ __('admin.Provide your evaluation for') }} {{ $label }}.</small>
+                        @foreach ($evaluationForm->categories as $key => $criteria)
+                          <div id="_{{ $key }}" class="content">
+                            <div class="content-header mb-4">
+                              <h6 class="mb-0">{{ $criteria->name }}</h6>
+                              <small>{{ __('admin.Provide your evaluation for') }} {{ $criteria->name }}.</small>
+                            </div>
+                            <div class="accordion" id="accordionExample">
+                              @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
+                              <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                  <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $key . '_' . $sub_key }}" aria-expanded="true" aria-controls="collapse{{ $key . '_' . $sub_key }}">
+                                    {{ $subCriteria->name }}
+                                  </button>
+                                </h2>
+                                <div id="collapse{{ $key . '_' . $sub_key }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#accordionExample">
+                                  <div class="accordion-body">
+                                    <div class="form-group mb-4">
+                                      <label for="{{ $key }}-score" class="form-label">{{ __('admin.Score') }}</label>
+                                      <select class="form-select" id="{{ $key }}-score" name="{{ $key }}_score">
+                                        <option value="">{{ __('admin.Select score') }}</option>
+                                        @for ($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }}</option> @endfor
+                                      </select>
+                                    </div>
+                                    <div class="form-group">
+                                      <label for="{{ $key }}-comment" class="form-label">{{ __('admin.Comment') }}</label>
+                                      <textarea class="form-control" id="{{ $key }}-comment" name="{{ $key }}_comment" rows="3"
+                                        placeholder="{{ __('admin.Enter your comment here...') }}"></textarea>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              @endforeach
+                            </div>
+
+
+                            <div class="col-12 d-flex justify-content-between mt-12">
+                              <button type="button" class="btn btn-label-secondary btn-prev" {{ $loop->first ? 'disabled' : '' }}>
+                                <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
+                              </button>
+                              <button type="button" class="btn btn-primary btn-next" {{ $loop->last ? 'disabled' : '' }}>
+                                <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Next') }}</span>
+                                <i class="ti ti-arrow-right ti-xs"></i>
+                              </button>
+                            </div>
                           </div>
-                          <div class="form-group mb-4">
-                            <label for="{{ $key }}-score" class="form-label">{{ __('admin.Score') }}</label>
-                            <select class="form-select" id="{{ $key }}-score" name="{{ $key }}_score">
-                              <option value="">{{ __('admin.Select score') }}</option>
-                              @for ($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }}</option>
-                                @endfor
-                            </select>
-                          </div>
-                          <div class="form-group">
-                            <label for="{{ $key }}-comment" class="form-label">{{ __('admin.Comment') }}</label>
-                            <textarea class="form-control" id="{{ $key }}-comment" name="{{ $key }}_comment" rows="3"
-                              placeholder="{{ __('admin.Enter your comment here...') }}"></textarea>
-                          </div>
-                          <div class="col-12 d-flex justify-content-between mt-12">
-                            <button type="button" class="btn btn-label-secondary btn-prev" {{ $loop->first ? 'disabled' : ''
-                              }}>
-                              <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
-                              <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
-                            </button>
-                            <button type="button" class="btn btn-primary btn-next" {{ $loop->last ? 'disabled' : '' }}>
-                              <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Next') }}</span>
-                              <i class="ti ti-arrow-right ti-xs"></i>
-                            </button>
-                          </div>
-                        </div>
                         @endforeach
                       </div>
                     </div>
@@ -255,3 +256,4 @@
     </form>
   </div>
 </div>
+@endif
