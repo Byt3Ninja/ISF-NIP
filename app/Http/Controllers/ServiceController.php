@@ -214,7 +214,7 @@ class ServiceController extends Controller
 		}
 
 
-		$received = $received->get();
+		$received = $received->orderBy('created_at', 'desc')->get();
 		
 		return view('admin.settings.services.requests', compact('received','countold') );
 	}
