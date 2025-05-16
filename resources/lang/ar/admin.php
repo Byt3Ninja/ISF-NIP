@@ -1732,4 +1732,10 @@ return [
 	'Join' => 'انضم',
 	'zoom_id' => 'معرف زووم',
 	'course' => 'دورة',
+	'trainingInfo' => 'معلومات التدريب',
+	'Start at' => 'يبدأ في',
+	'End at' => 'ينتهي في',
+	'Completed on' => 'اكتمل في',
+	'Explanation' => 'تفسير',
+	'No explanation provided'	=> 'لا يوجد تفسير مقدم',
 ];
