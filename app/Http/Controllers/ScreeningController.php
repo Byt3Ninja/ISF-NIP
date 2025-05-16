@@ -77,7 +77,7 @@ class ScreeningController extends Controller
 			$evaluation->step_id = $id;
 			$evaluation->save();
 		}
-		$evaluationForm = $this->getEvaluationData( $id );
+		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		return view('admin.settings.screening.index', compact('cstep', 'judges', 'form', 'steps', 'id', 'svgs', 'evaluationForm'));
 	}
 
@@ -347,7 +347,7 @@ class ScreeningController extends Controller
 			$evaluation->save();
 			
 		}
-		$evaluationForm = $this->getEvaluationData( $id );
+		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 		$current_status = strtolower( $evaluationForm->status );
 		if( $current_status == 'published' ) { return response()->json(['status' => false, 'message' => __('You can not make any changes on a published evaluation')], 200); }
 		else
@@ -481,7 +481,7 @@ class ScreeningController extends Controller
 				$evaluation->save();
 			}
 
-			$evaluationForm = $this->getEvaluationData( $id );
+			$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 			return response()->json([
 				'status' => true,
 				'title' => 'saved',
@@ -490,55 +490,5 @@ class ScreeningController extends Controller
 			]);
 
 		}
-	}
-
-	private function getEvaluationData( $id )
-	{
-		$evaluationForm_q = "SELECT
-				se.id AS evaluation_id,
-				se.step_id,
-				se.status,
-				sec.id AS criteria_id,
-				sec.title AS criteria_name,
-				sec.weight AS criteria_weight,
-				sec.parent_id AS criteria_parent_id,
-				sec_child.id AS criteria_child_id,
-				sec_child.title AS criteria_child_name,
-				sec_child.weight AS criteria_child_weight
-			FROM
-				screening_evaluation se
-			LEFT JOIN
-				screening_evaluation_criteria sec ON se.id = sec.evaluation_id AND sec.parent_id IS NULL
-			LEFT JOIN
-				screening_evaluation_criteria sec_child ON sec.id = sec_child.parent_id AND sec_child.evaluation_id IS NULL
-			WHERE
-				se.step_id = ?
-		";
-		$evaluationForm = collect(DB::select($evaluationForm_q, [$id]));
-
-		$evaluationForm = $evaluationForm->groupBy('evaluation_id')->map(function ( $e ) {
-			$_e = $e->first();
-			$evaluation = new stdClass;
-			$evaluation->status = $_e->status == 0 ? 'Draft' : 'Published';
-			$categories = $e->whereNull('criteria_parent_id')->groupBy('criteria_id')->map(function ( $criteria ) {
-				$c = $criteria->first();
-				$category = new stdClass;
-				$category->id = $c->criteria_id;
-				$category->name = $c->criteria_name;
-				$category->weight = $c->criteria_weight / 100;
-				$category->subCriteria = $criteria->map( function ( $subCriteria ) {
-					$sub_category = new stdClass;
-					$sub_category->id = $subCriteria->criteria_child_id;
-					$sub_category->name = $subCriteria->criteria_child_name;
-					$sub_category->weight = $subCriteria->criteria_child_weight / 100;
-					return $sub_category;
-				})->filter( function ( $subCategory ) { return !is_null( $subCategory->id ); })->values();
-				return $category;
-			})->filter(function( $category ) { return !is_null( $category->id ); })->values();
-			$evaluation->categories = $categories;
-			return $evaluation;
-		})->values()->first();
-
-		return $evaluationForm;
 	}
 }
