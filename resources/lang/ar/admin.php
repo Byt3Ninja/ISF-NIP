@@ -1576,7 +1576,6 @@ return [
 	'Form Submission Details' => 'تفاصيل تقديم النموذج',
 	'Print' => 'طباعة',
 	'Submitted Answers' => 'الإجابات المقدمة',
-	'Startup' => 'Startup',
 	'Submitted By' => 'تم الإرسال بواسطة',
 	'Delete Submission' => 'حذف التقديم',
 	'Delete Submission Confirmation' => 'هل أنت متأكد أنك تريد حذف هذا التقديم؟',

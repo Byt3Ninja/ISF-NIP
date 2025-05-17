@@ -1555,7 +1555,6 @@ return [
 	'Form Submission Details' => 'Form Submission Details',
 	'Print' => 'Print',
 	'Submitted Answers' => 'Submitted Answers',
-	'Startup' => 'Startup',
 	'Submitted By' => 'Submitted By',
 	'Delete Submission' => 'Delete Submission',
 	'Delete Submission Confirmation' => 'Are you sure you want to delete this submission?',

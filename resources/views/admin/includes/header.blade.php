@@ -207,10 +207,10 @@
               <img 
                 class="rounded-circle" 
                 src="{{ auth()->user()->image_url }}"
-                onerror="this.src='/icons/account.svg'"
+                onerror="this.src='/images/user-placeholder.jpeg'"
               />
             @else
-              <img class="rounded-circle" src="/icons/account.svg" alt="avatar" />
+              <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
             @endif
           </div>
         </a>
@@ -224,10 +224,10 @@
                       <img 
                         class="rounded-circle" 
                         src="{{ auth()->user()->image_url }}"
-                        onerror="this.src='/icons/account.svg'"
+                        onerror="this.src='/images/user-placeholder.jpeg'"
                       />
                     @else
-                      <img class="rounded-circle" src="/icons/account.svg" alt="avatar" />
+                      <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
                     @endif
                   </div>
                 </div>
