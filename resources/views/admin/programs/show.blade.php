@@ -283,15 +283,17 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <h5 class="mb-0">{{ $cycle->organization['name_' . $l] }}</h5>
                   
                   @if(!empty($cycle->private))
-                        <a 
+                        {{-- <a 
                           href="cycles/view/{{ $cycle->private }}"
                           class="btn btn-transparent"
                           target="_blank"
                           id="private-link"
-                        >
+                        > --}}
+                        <div class="btn btn-transparent" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
                         {{__('cycles.Private Link')}}
                           <i class="ti ti-circle-check ms-2 text-success ti-24px"></i>
-                        </a>
+                        </div>
+                        {{-- </a> --}}
                         @endif
                 </div>
                 <div class="row border radius-15 py-3 mb-3">
@@ -1976,6 +1978,17 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
   @php($ccycle = \App\Cycle::find($cycle->id))
 
   <script>
+    function copyToClipboard(text) {
+  // إنشاء عنصر مؤقت
+  const tempInput = document.createElement("input");
+  tempInput.value = text;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
+  document.execCommand("copy");
+  document.body.removeChild(tempInput);
+  alert("{{ __('admin.Copied') }}");
+}
     // Set Language
     const lang = '{{ $l }}';
 

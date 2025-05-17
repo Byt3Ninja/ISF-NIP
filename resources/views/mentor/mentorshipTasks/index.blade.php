@@ -677,6 +677,8 @@
 	{{-- <script src="/vuexy/assets/js/forms-tagify.js"></script> --}}
 	<script src="/vuexy/assets/js/forms-typeahead.js"></script>
 	<script>
+		let data = @json($data);
+		console.log('startup', data);
 		var kanban;
 		var boards = @json($kanban);
 		var lang = '{{ $l }}';

@@ -67,7 +67,8 @@
                           {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
                           {{ $session->location }} <br>
                           @else
-                          <a title="Show course contents" href="/dashboard/training/my/{{ $session->training_Address }}">{{
+                          <a title="Show course contents"
+                            href="/dashboard/training/my/{{ $session->training_Address }}">{{
                             __('cycles.Display course contents') }}
                           </a>
                           @endif
@@ -102,13 +103,143 @@
 </div>
 <!-- END: Content-->
 
+<!-- Training Session Modal -->
+<div class="modal fade" id="sessionDetails" tabindex="-1" aria-labelledby="sessionDetailsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header pb-4 px-12 bg-light">
+        <h5 class="modal-title" id="sessionDetailsLabel">{{ __('admin.session_details_label') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row px-4 pb-4">
+          <div class="col-md-8">
+            <div class="session-main-info mb-4">
+              <h4 class="mb-2 text-truncate" id="session-title"></h4>
+              <p class="text-muted text-truncate" id="session-desc"></p>
+              <div class="d-flex align-items-center mt-3">
+                <span class="badge bg-success text-white me-2">
+                  <i class="fas fa-video me-1"></i>
+                  <span id="session-type"></span> 
+                </span>
+                <span class="badge bg-label-info me-2">
+                  <i class="far fa-clock me-1"></i> 
+                  <span id="session-duration"></span>
+                </span>
+                {{-- <span class="badge bg-light text-dark">
+                  ID: #33
+                </span> --}}
+              </div>
+            </div>
+
+            <div class="session-details">
+              <div class="d-flex align-items-center py-3 border-bottom border-top">
+                <div class="rounded-circle me-2 w-px-40 h-px-40 d-flex justify-content-center align-items-center bg-label-light border">
+                  <i class="ti ti-school ti-lg text-dark"></i>
+                </div>
+                <div class="trainer-details">
+                  <h6 class="mb-1" id="session-trainer-name"></h6>
+                  <small><i class="fas fa-envelope me-1"></i> <a href="#" class="cursor-pointer" id="session-trainer-email"></a></small>
+                </div>
+              </div>
+
+              <div class="row border-bottom">
+                <div class="col-md-6">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-calendar-alt me-2"></i>{{ __('admin.StartDate') }}</div>
+                    <div id="session-start-date"></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="py-3">
+                    <div class="info-label"><i class="fas fa-calendar-check me-2"></i>{{ __('admin.EndDate') }}</div>
+                    <div id="session-end-date"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="py-3 border-bottom">
+                <div class="info-label"><i class="fas fa-map-marker-alt me-2"></i>{{ __('admin.location_address') }}</div>
+                <div id="session-location"></div>
+                <div id="session-address" class="text-muted"></div>
+              </div>
+
+              <div class="py-3 border-bottom">
+                <div class="info-label"><i class="fas fa-link me-2"></i>{{ __('admin.join_link') }}</div>
+                <div class="d-flex align-items-center">
+                  <a id="join-link" href="#" class="text-primary text-decoration-none"
+                    target="_blank">
+                  </a>
+                  <div id="copy-link" style="display: none">
+                    <button class="btn btn-sm btn-outline-primary ms-2"
+                      onclick="copyToClipboard('#join-link')">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="py-3 border-bottom">
+                <div class="info-label"><i class="fas fa-id-card me-2"></i>{{ __('admin.zoom_id') }}</div>
+                <div id="zoom-id" class="text-truncate"></div>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 py-3 mt-4">
+              <div id="join-button" style="display: none;">
+                <button class="btn btn-primary">
+                  <i class="fas fa-video me-2"></i>
+                  {{ __('admin.Join') }}
+                </button>
+              </div>
+              <button id="cancel-button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-close me-2"></i>
+                {{ __('admin.Close') }}
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            {{-- <div class="qr-code-container">
+              <h6 class="mb-3">امسح الرمز للانضمام</h6>
+              <img src="/api/placeholder/180/180" alt="QR Code" class="img-fluid mb-3"
+                style="border: 1px solid #ddd; padding: 5px;">
+              <div class="text-muted small">رمز الجلسة: https://qr.example.com/t/33-141-177</div>
+            </div> --}}
+
+            {{-- <div class="mt-4">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-3">
+                  <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>معلومات إضافية</h6>
+                  <div class="small text-muted mb-2">
+                    <i class="fas fa-code me-1"></i> معرف التدريب: #141
+                  </div>
+                  <div class="small text-muted mb-2">
+                    <i class="fas fa-user me-1"></i> معرف المستخدم: #177
+                  </div>
+                  <div class="small text-muted mb-2">
+                    <i class="fas fa-check me-1"></i> آخر تحديث: ٤ أغسطس ٢٠٢٤
+                  </div>
+                </div>
+              </div>
+            </div> --}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Training Details Modal -->
-<<div class="modal fade" id="dscModal" tabindex="-1" aria-labelledby="dscModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Consider modal-lg if content can be wide -->
+{{-- <div class="modal fade" id="sessionDetails" tabindex="-1" aria-labelledby="sessionDetailsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <!-- Consider modal-lg if content can be wide -->
     <div class="modal-content shadow border-0">
       <!-- Modal Header -->
-      <div class="modal-header"> <!-- Lighter header, no bottom border if body has cards -->
-        <h5 class="modal-title fw-bold d-flex align-items-center" id="dscModalLabel">
+      <div class="modal-header">
+        <!-- Lighter header, no bottom border if body has cards -->
+        <h5 class="modal-title fw-bold d-flex align-items-center" id="sessionDetailsLabel">
           <i class="ti ti-info-circle ti-md me-2 text-primary"></i>
           <span id="dsctitle"></span> <!-- To be populated by JS -->
         </h5>
@@ -116,12 +247,14 @@
       </div>
 
       <!-- Modal Body -->
-      <div class="modal-body p-4"> <!-- Adjusted padding -->
+      <div class="modal-body p-4">
+        <!-- Adjusted padding -->
 
         <!-- Description Card: Use d-none for JS toggling -->
         <div class="card border mb-3 shadow-sm description-card d-none">
           <div class="card-body">
-            <h6 class="card-subtitle mb-3 text-primary fw-bold"> <!-- Use card-subtitle for semantics if appropriate -->
+            <h6 class="card-subtitle mb-3 text-primary fw-bold">
+              <!-- Use card-subtitle for semantics if appropriate -->
               <i class="ti ti-file-description me-2"></i>{{ __('admin.Description') }}
             </h6>
             <p class="card-text text-muted" id="dsc"></p>
@@ -130,7 +263,7 @@
 
         <div class="row g-3">
           <!-- Location Card: Use d-none -->
-          <div class="col-md-12 location-card d-none">
+          <div class="col-md-12 location-card">
             <div class="card h-100 border shadow-sm">
               <div class="card-body">
                 <h6 class="card-subtitle mb-3 text-primary fw-bold">
@@ -148,7 +281,7 @@
           </div>
 
           <!-- Trainer Details Card: Use d-none -->
-          <div class="col-12 trainer-details-card d-none">
+          <div class="col-12 trainer-details-card">
             <div class="card border shadow-sm">
               <div class="card-body">
                 <h6 class="card-subtitle mb-3 text-primary fw-bold">
@@ -156,10 +289,13 @@
                 </h6>
                 <dl class="mb-0">
                   <!-- Trainer Name -->
-                  <div class="trainer-name-section"> <!-- Wrapper for JS show/hide if name itself is optional -->
+                  <div class="trainer-name-section">
+                    <!-- Wrapper for JS show/hide if name itself is optional -->
                     <dt class="small text-muted mb-2">{{ __('admin.Trainer Name') }}</dt>
                     <dd class="d-flex align-items-center mb-2">
-                      <span class="bg-light rounded-circle p-1 me-2 d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                      <span
+                        class="bg-light rounded-circle p-1 me-2 d-inline-flex align-items-center justify-content-center"
+                        style="width: 24px; height: 24px;">
                         <i class="ti ti-user-circle text-primary fs-5"></i> <!-- Adjust icon size if needed -->
                       </span>
                       <span id="trainerName" class="fw-medium"></span>
@@ -167,10 +303,13 @@
                   </div>
 
                   <!-- Trainer Email: Conditionally shown by JS by populating or hiding this specific div -->
-                  <div class="trainer-email-section d-none"> <!-- Wrapper for JS show/hide -->
+                  <div class="trainer-email-section">
+                    <!-- Wrapper for JS show/hide -->
                     <dt class="small text-muted mb-2">{{ __('admin.Trainer Email') }}</dt>
                     <dd class="d-flex align-items-center text-truncate">
-                       <span class="bg-light rounded-circle p-1 me-2 d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                      <span
+                        class="bg-light rounded-circle p-1 me-2 d-inline-flex align-items-center justify-content-center"
+                        style="width: 24px; height: 24px;">
                         <i class="ti ti-mail text-primary fs-5"></i>
                       </span>
                       <a href="#" id="trainerEmailLink" class="text-decoration-none">
@@ -184,8 +323,9 @@
           </div>
 
           <!-- Date & Time Card: Use d-none -->
-          <div class="col-12 datetime-card d-none">
-            <div class="card border shadow-sm"> <!-- Added shadow-sm for consistency -->
+          <div class="col-12 datetime-card">
+            <div class="card border shadow-sm">
+              <!-- Added shadow-sm for consistency -->
               <div class="card-body">
                 <h6 class="card-subtitle mb-3 text-primary fw-bold">
                   <i class="ti ti-calendar-event me-2"></i>{{ __('admin.Date & Time') }}
@@ -196,19 +336,13 @@
           </div>
         </div>
 
-        <!-- Placeholder for when no details are available (Optional) -->
-        <div class="no-details-message text-center text-muted p-5 d-none">
-            <i class="ti ti-mood-empty" style="font-size: 3rem;"></i>
-            <p class="mt-2">{{ __('admin.NoDetailsAvailable') }}</p>
-        </div>
-
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Close')}}</button>
       </div>
     </div>
   </div>
-</div>
+</div> --}}
 <!-- Training Details Modal end -->
 @stop
 
@@ -255,35 +389,23 @@
     const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
     // Select modal elements once for efficiency and clarity
-    const $modal = $('#dscModal');
-    const $title = $('#dsctitle');
+    const $modal = $('#sessionDetails');
+    const $title = $('#session-title');
 
-    const $descriptionCard = $('.description-card');
-    const $dsc = $('#dsc');
+    const $dsc = $('#session-desc');
+    const $sessionType = $('#session-type');
 
-    const $locationCard = $('.location-card'); // Updated class name
-    const $location = $('#location');
-    const $address = $('#address');
+    const $location = $('#session-location');
+    const $address = $('#session-address');
 
-    const $trainerDetailsCard = $('.trainer-details-card'); // Updated class name
-    const $trainerName = $('#trainerName');
-    const $trainerEmailSection = $('.trainer-email-section'); // New wrapper
-    const $trainerEmailLink = $('#trainerEmailLink'); // Link element
-    const $trainerEmailSpan = $('#trainerEmail');    // Span inside link
+    const $trainerName = $('#session-trainer-name');
+    const $trainerEmailLink = $('#session-trainer-email');
 
-    const $datetimeCard = $('.datetime-card'); // Updated class name
-    const $datetime = $('#datetime');
-
-    const $noDetailsMessage = $('.no-details-message');
-
-    // --- Reset modal state before populating ---
-    // Hide all conditional sections
-    $descriptionCard.addClass('d-none');
-    $locationCard.addClass('d-none');
-    $trainerDetailsCard.addClass('d-none');
-    $trainerEmailSection.addClass('d-none'); // Specifically hide email section
-    $datetimeCard.addClass('d-none');
-    $noDetailsMessage.addClass('d-none');
+    const $datetime = $('#session-datetime');
+    const $sessionStartDate = $('#session-start-date');
+    const $sessionEndDate = $('#session-end-date');
+    const $sessionDuration = $('#session-duration');
+    const $zoomId = $('#zoom-id');
 
     // Clear previous content (important if modal is reused)
     $title.text('Training Details'); // Default title
@@ -291,9 +413,13 @@
     $location.empty();
     $address.empty();
     $trainerName.empty();
-    $trainerEmailSpan.empty();
+    $trainerEmailLink.empty();
     $trainerEmailLink.attr('href', '#'); // Reset link
     $datetime.empty();
+    $sessionDuration.empty();
+    $zoomId.empty();
+    $('#join-link').attr('href', '#'); // Reset link
+    $('#join-link').text(''); // Reset text
     // --- End Reset ---
 
     $.ajax({
@@ -304,68 +430,74 @@
         },
         // dataType: 'json', // Explicitly expect JSON if your backend always sends it
         success: function(response) {
-            // console.log('response', response);
-            let detailsExist = false; // Flag to track if any content section is shown
-
+          console.log(response);
             // 1. Modal Title
             if (response.title) {
-                $title.text(response.title);
+              $title.text(response.title);
             }
 
             // 2. Description
             if (response.dsc) {
-                $dsc.html(response.dsc); // Use .html() if description can contain HTML, otherwise .text()
-                $descriptionCard.removeClass('d-none');
-                detailsExist = true;
+              $dsc.html(response.dsc);
             }
 
-            // --- Sections specific to 'offline' type or generally applicable based on your data structure ---
-            // Assuming these details might not always be tied to 'offline' if the API can provide them for other types
-            // If strictly 'offline', wrap the following blocks in an `if (response.type === 'offline')`
+            // 3. Session Type
+            if (response.type) {
+              if (response.type === 'sessions') {
+                $sessionType.text('{{ __('cycles.sessions') }}');
+              } else if (response.type === 'offline') {
+                $sessionType.text('{{ __('cycles.offline') }}');
+              } else if (response.type === 'online') {
+                $sessionType.text('{{ __('cycles.online') }}');
+              } else {
+                $sessionType.text('{{ __('admin.course') }}');
+              }
+            }
 
-            // 3. Location
-            // Show location card if either location name or address is present
+            // 4. Location
             if (response.training_location || response.training_Address) {
-                $location.text(response.training_location || ''); // Display even if one is missing
-                $address.text(response.training_Address || '');
-                $locationCard.removeClass('d-none');
-                detailsExist = true;
+              $location.text(response.training_location || '');
+              $address.text(response.training_Address || '');
             }
 
-            // 4. Trainer Details
-            let trainerInfoExists = false;
+            // 5. Trainer Details
             if (response.trainer_name) {
-                $trainerName.text(response.trainer_name);
-                trainerInfoExists = true;
+              $trainerName.text(response.trainer_name);
             }
+
+            // 6. Trainer Email
             if (response.trainer_email) {
-                $trainerEmailSpan.text(response.trainer_email);
-                $trainerEmailLink.attr('href', `mailto:${response.trainer_email}`);
-                $trainerEmailSection.removeClass('d-none');
-                trainerInfoExists = true;
+              $trainerEmailLink.text(response.trainer_email);
+              $trainerEmailLink.attr('href', `mailto:${response.trainer_email}`);
             }
 
-            if (trainerInfoExists) {
-                $trainerDetailsCard.removeClass('d-none');
-                detailsExist = true;
+            // 7. Date
+            if (response.start_date) {
+              $sessionStartDate.text(response.start_date);
+            }
+            if (response.end_date) {
+              $sessionEndDate.text(response.end_date);
             }
 
-            // 5. Date & Time
-            if (response.datetime) {
-                // Consider formatting the date/time for better readability
-                // Example: new Date(response.datetime).toLocaleString() or using a library like Moment.js/Date-fns
-                $datetime.text(response.datetime); // Or formatted date
-                $datetimeCard.removeClass('d-none');
-                detailsExist = true;
+            // 8. Duration
+            if (response.duration) {
+              $sessionDuration.text(response.duration + ' ' + '{{ __('admin.minutes') }}');
             }
 
-            // If response.type !== 'offline' and you *want* to ensure these fields are empty
-            // The reset block at the start handles this more cleanly.
-            // The original 'else' block for clearing is now largely handled by the initial reset.
+            // 9. Join Link
+            if (response.join_url) {
+              $('#join-link').attr('href', response.join_url);
+              $('#join-link').text(response.join_url);
+              $('#join-button').show();
+              $('#copy-link').show();
+            } else {
+              $('#join-button').hide();
+              $('#copy-link').hide();
+            }
 
-            // 6. Show "No details" message if nothing was populated
-            if (!detailsExist) {
-                $noDetailsMessage.removeClass('d-none');
+            // 10. Zoom ID
+            if (response.zoom_id) {
+              $zoomId.text(response.zoom_id);
             }
 
             $modal.modal('show');
@@ -378,5 +510,21 @@
         }
     });
 }
+
+  function copyToClipboard(elemId) {
+    const text = $(elemId).attr('href');
+    navigator.clipboard.writeText(text).then(function() {
+        alert('تم نسخ الرابط بنجاح!');
+    }, function(err) {
+        console.error('فشل في نسخ النص: ', err);
+    });
+  }
+
+  const joinButton = document.getElementById('join-button');
+
+  joinButton.addEventListener('click', function() {
+    const joinUrl = document.getElementById('join-link').href;
+    window.open(joinUrl, '_blank');
+  });
 </script>
 @stop
