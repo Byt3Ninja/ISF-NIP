@@ -193,14 +193,15 @@
 
                     <div class="d-flex align-items-center gap-4">
                       @if (!empty($cycle->private))
-                        <div class="badge text-center text-dark cursor-pointer">
+                        <div class="badge text-center text-dark cursor-pointer" onclick="copyToClipboard('{{ url('dashboard/cycles/view/' . $cycle->private) }}')" >
+
                           <span style="font-size: 12px;" class="fw-medium mx-1 menu-item">
                             {{  __('cycles.Private Link') }}:
                           </span>
                           <i class="ti ti-rosette-discount-check text-success"></i>
                         </div>
                       @endif
-                      <a href="/dashboard/programlist/report/{{ $cycle->id }}" class="btn btn-sm btn-light">
+                      <a href="{{ route('programs.report',$cycle->id) }}" class="btn btn-sm btn-light">
                         {{ __('cycles.View Report') }}
                         <i class="ti ti-clipboard-data ti-sm ms-2"></i>
                       </a>
@@ -602,8 +603,44 @@
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 @stop --}}
 
-{{-- @section('pagescripts')
-@php($ccycle = \App\Cycle::find(0))
+@section('pagescripts')
+<script>
+  function copyToClipboard(text) {
+  // إنشاء عنصر مؤقت
+  const tempInput = document.createElement("input");
+  tempInput.value = text;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
+  document.execCommand("copy");
+  document.body.removeChild(tempInput);
+  alert("{{ __('admin.Copied') }}");
+}
+  // Initialize Date Picker
+  flatpickr(".datepicker", {
+    dateFormat: "Y-m-d", // تنسيق التاريخ المطلوب
+    allowInput: true, // السماح للمستخدم بكتابة التاريخ يدويًا
+    // locale: "ar", // دعم اللغة العربية (يمكنك تغييره)
+  });
+
+  $('#search-programs').on('keyup', function() {
+    var value = $(this).val().toLowerCase();
+    console.log('value', value)
+    $('#program-list .card').filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+
+  $('#filter-programs-form .form-select').on('change', function() {
+    $('#filter-programs-form').submit();
+  });
+
+  $('#filter-programs-form .form-control').on('change', function() {
+    $('#filter-programs-form').submit();
+  });
+</script>
+
+{{-- @php($ccycle = \App\Cycle::find(0))
 <script>
   // Set Language
     const lang = '{{ $l }}';
@@ -1087,21 +1124,5 @@
         });
       }
     }
-</script>
-<script>
-  $('#search-programs').on('keyup', function() {
-      var value = $(this).val().toLowerCase();
-      console.log('value', value)
-      $('#program-list .card').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
-    });
-
-    $('#filter-programs-form .form-select').on('change', function() {
-      $('#filter-programs-form').submit();
-    });
-    $('#filter-programs-form .form-control').on('change', function() {
-      $('#filter-programs-form').submit();
-    });
-</script>
-@stop --}}
+</script> --}}
+@stop

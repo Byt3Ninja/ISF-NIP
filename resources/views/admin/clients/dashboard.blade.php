@@ -235,6 +235,7 @@
     $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
     $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
     $available_surveys = collect([]);
+    dd($notrated_men);
     // load survey for startup
     if( $_user->company && $circle_id != 0 )
     {
@@ -310,6 +311,11 @@
         }
       }
       if( !empty($surveysToAdd) ) { \App\SurveyResponses::insert( $surveysToAdd ); }
+      $attendance = \App\AttendanceTrainingOffline::where('user_id', $user_id)->where('cycle_id', $circle_id)->where('attendance', 0)->get();
+      if($attendance->count()>0){
+      
+      $deleted_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->where('responses', null)->where('triggered_on', 'training')->whereIn('triggered_at', $attendance->pluck('training_session_id'))->delete();
+      }
       $available_surveys = \App\SurveyResponses::where('user_id', $user_id)->where('cycle_id', $circle_id)->whereNull('responses')->get();
     }
   }
@@ -626,7 +632,7 @@
                   @if( $survey->triggered_by == 'session' )
                   {{ __('dashboard.with') }} 
                     @php $mentor = $middleware->mentor; @endphp
-                    {{ $mentor->name }}
+                    {{ $mentor->name ?? '' }}
                   @elseif( $survey->triggered_by == 'due' )
                     - {{ $middleware->title }}
                   @else
@@ -874,8 +880,8 @@
                       
                     </td>
                     <td><span class="badge bg-{{ $color }} text-{{ $textColor }}">{{ $status }}</span></td>
-                    <td>{{ Carbon\Carbon::parse($step->from)->format('d-m-Y') }}</td>
-                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m-Y') }}</td>
+                    <td>{{ Carbon\Carbon::parse($step->from)->format('d-m-Y') ?? '-' }}</td>
+                    <td>{{ Carbon\Carbon::parse($step->to)->format('d-m-Y') ?? '-' }}</td>
                     <td style="height: 50px;">
                       <span style="width: 350px; height: 100%; display: inline-block; white-space: normal;">
                         {{ $step->description ? $step->description : '...' }}
@@ -1298,7 +1304,12 @@
 															<a class="media-left">
 																<img src="{{ optional($mentor->user)->image_url}}" alt="avatar" class="rounded-circle me-3" height="40" width="40">
 															</a>
-                              @if( $_user->ableTo('mentors.profile_view', $permissions) )<a target="_blank" href="{{route('mentors.profile_view', ($mentor->user)->id)}}">@endif
+                              @if( $_user->ableTo('mentors.profile_view', $permissions) )
+                              @if ($mentor->user != null)
+                              <a target="_blank" href="{{route('mentors.profile_view', ($mentor->user)->id)}}">
+                              @endif
+                              
+                                @endif
 															<div class="media-body">
 																<h6 class="media-heading mb-0 text-nowrap">{{optional($mentor->user)->name }}</h6>
 																<span class="font-small-2 text-nowrap">{{optional($mentor->user)->title }}</span>

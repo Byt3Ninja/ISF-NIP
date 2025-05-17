@@ -249,7 +249,7 @@
       </li>
       @endif
     @endif
-    @if ($_user->hasAnyRole('Registered|Mentor|organizationManager'))
+    @if ($_user->hasAnyRole('Registered|Mentor|organizationManager|Judger'))
       @if( $_user->ableTo('users.view_companies', $permissions) )
       <li class="{{ Request::is('dashboard/companies') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('users.view_companies') }}">
@@ -317,7 +317,7 @@
       @if( $_user->ableTo('trainings.list_mine', $permissions) )
       <li class="{{ Request::is('dashboard/training/my*') ? 'active' : '' }} menu-item"><a href="/dashboard/training/my"
           class="menu-link">
-          <i class="menu-icon tf-icons ti ti-forms"></i>
+          <i class="menu-icon tf-icons ti ti-certificate-2"></i>
           <div>{{ __('admin.My courses') }}</div>
         </a>
       </li>
@@ -393,7 +393,7 @@
         </a>
      </li>
     @endif
-
+@if( $_user->hasAnyrole('Admin|organizationManager') )
     <li class="{{ Request::is('dashboard/forms-list*', 'dashboard/show-builder*', 'dashboard/forms-submissions*', 'dashboard/submission-details*') ? 'sidebar-group-active open' : '' }} menu-item">
       <a class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ti ti-forms"></i>
@@ -419,7 +419,7 @@
         </li>
       </ul>
     </li>
-
+@endif
 
     @if( $_user->ableToAny(['cycles.list', 'programlist.index'], $permissions) )
       <li
@@ -846,9 +846,17 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
           <div>{{ __('admin.settings') }}</div>
         </a>
       </li>
+      @if ($_user->ableTo('importer.index'))
+            <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
+                <a href="{{ route('importer.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-file-import"></i>
+                    <div>{{ __('admin.Importer Tool') }}</div>
+                </a>
+            </li>
       @endif
       @endif
-    @endif
+      @endif
+      @endif
 
     @if( $_user->ableTo('documentation.index', $permissions) )
     <li class="{{ Request::is('dashboard/documentation*') ? 'active' : '' }} menu-item">
@@ -891,6 +899,12 @@ class="{{ Request::is('dashboard/question-assessment*', 'dashboard/questions*', 
               <i class="menu-livicon" data-icon="globe"></i>
               <div>{{ __('admin.settings') }}</div>
             </a>
+          </li>
+          <li class="{{ Request::is('dashboard/importer*') ? 'active' : '' }} menu-item">
+             <a href="{{ route('importer.index') }}" class="menu-link">
+               <i class="menu-icon tf-icons ti ti-upload"></i>
+                 <div>{{ __('admin.Importer Tool') }}</div>
+             </a>
           </li>
           <li class="{{ Request::is('*currencies') ? 'active' : '' }} menu-item">
             <a href="{{ route('currencies.index') }}" class="menu-link">

@@ -1,5 +1,8 @@
 @extends('layouts.admin')
-
+@php
+  $status = strtolower( $evaluationForm->status );
+  // $status = 'published';
+@endphp
 @section('style')
 <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 <style>
@@ -167,7 +170,7 @@ Group to group of users']
                     @foreach ($steps as $step)
                     <option value="{{ $step->id }}" {{ $step->id == $id ? 'selected' : '' }}>{{ $step->title }}
                       ({{ __('cycles.Cycle') }} "{{ $step->cycle->title }}" -
-                      {{ __('cycles.Start') }} {{ $step->from->format('d-m-Y') }}) -
+                      {{ __('cycles.Start') }} {{ $step->from->format('d-m-Y') ?? '-' }}) -
                       {{ optional(optional($step->cycle)->organization)->name }}</option>
                     @endforeach
                   </select>
@@ -203,7 +206,7 @@ Group to group of users']
               <p>{{ $cstep->description }}</p>
               <small class="text-muted">
                 {{ __('cycles.from') }}
-                {{ $cstep->from->format('d-m-Y') }} {{ __('cycles.to') }} {{ $cstep->to->format('d-m-Y') }}
+                {{ $cstep->from->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }} {{ $cstep->to->format('d-m-Y') ?? '-' }}
               </small>
             </div>
             <hr style="margin:-10px 0 5px 0;">
@@ -212,8 +215,8 @@ Group to group of users']
                 <dl class="row">
                   <dt class="col-sm-3 text-right">{{ __('cycles.Cycle') }}</dt>
                   <dd class="col-sm-9">{{ $cstep->cycle->title }} {{ __('cycles.from') }}
-                    {{ $cstep->cycle->start->format('d-m-Y') }} {{ __('cycles.to') }}
-                    {{ $cstep->cycle->end->format('d-m-Y') }}</dd>
+                    {{ $cstep->cycle->start->format('d-m-Y') ?? '-' }} {{ __('cycles.to') }}
+                    {{ $cstep->cycle->end->format('d-m-Y') ?? '-' }}</dd>
                 </dl>
                 <dl class="row">
                   <dt class="col-sm-3 text-right">{{ __('cycles.Form title') }}</dt>
@@ -337,6 +340,7 @@ Group to group of users']
           </div>
         </div>
       </section>
+      @if( $_user->ableTo('screening.evaluation_show', $permissions) )
       <section>
         <!-- Evaluation Model CRUD Tab -->
         <div id="evaluation-model" class="card card-body tab-content active mt-6">
@@ -346,12 +350,23 @@ Group to group of users']
 
           <div>
             <div class="d-flex align-items-center gap-4 mb-4">
+              @if( $_user->ableTo('screening.evaluation_save_draft', $permissions) && $status == 'draft' )
               <button id="draft-model-btn" class="btn btn-light">
                 <i class="fas fa-save me-2"></i> Save as Draft
               </button>
-              <button id="save-model-btn" class="btn btn-primary">
-                <i class="ti ti-world me-2"></i> Publish
-              </button>
+              @endif
+
+              @if( $_user->ableTo('screening.evaluation_publish', $permissions) )
+                @if( $status == 'draft' )
+                  <button id="save-model-btn" class="btn btn-primary">
+                    <i class="ti ti-world me-2"></i> Publish
+                  </button>
+                @else
+                  <button onclick="event.preventDefault();" class="btn btn-primary disabled" disabled>
+                    <i class="ti ti-check me-2"></i> Published
+                  </button>
+                @endif
+              @endif
             </div>
             <div id="model-validation-summary" style="display: none;"></div>
           </div>
@@ -361,11 +376,15 @@ Group to group of users']
             <!-- Categories and sub-criteria will be rendered here by JavaScript -->
           </div>
 
+          @if( $_user->ableTo('screening.evaluation_add_criteria') && $status == 'draft' )
           <button id="add-category-btn" class="btn btn-label-primary">
-            <i class="fas fa-plus me-2"></i> Add New Category
+            <i class="fas fa-plus me-2"></i> Add New Criteria
           </button>
+          @endif
         </div>
       </section>
+      @endif
+
       @else
       <div class="card">
         <div class="card-header border-bottom">
@@ -585,45 +604,23 @@ Group to group of users']
     // --- Evaluation Model CRUD Logic ---
 
     const modelEditorContainer = document.getElementById('model-editor');
-    const addCategoryBtn = document.getElementById('add-category-btn');
-    const saveModelBtn = document.getElementById('save-model-btn');
+    @if( $status == 'draft' )
+      @if( $_user->ableTo('screening.evaluation_add_criteria') )
+      const addCategoryBtn = document.getElementById('add-category-btn');
+      @endif
+      @if( $_user->ableTo('screening.evaluation_publish') )
+      const saveModelBtn = document.getElementById('save-model-btn');
+      @endif
+      
+      @if( $_user->ableTo('screening.evaluation_save_draft') )
+      const draftModelBtn = document.getElementById('draft-model-btn');
+      @endif
+    @endif
+
     const modelValidationSummary = document.getElementById('model-validation-summary');
 
     // In a real app, fetch this from a server
-    let evaluationModelData = {
-        // modelId: 'default_v1', // Example ID
-        // modelName: 'Standard Startup Model', // Example Name
-        categories: [
-            {
-                id: `cat_${Date.now()}_${Math.random()}`, // Simple unique ID
-                name: "Business Model",
-                weight: 0.3,
-                subCriteria: [
-                    { id: `sub_${Date.now()}_${Math.random()}`, name: "Customer Acquisition", weight: 0.5 },
-                    { id: `sub_${Date.now()}_${Math.random()}`, name: "Value Proposition", weight: 0.5 }
-                ]
-            },
-            {
-                id: `cat_${Date.now()}_${Math.random()}`,
-                name: "Team",
-                weight: 0.3,
-                subCriteria: [
-                    { id: `sub_${Date.now()}_${Math.random()}`, name: "Experience", weight: 0.75 },
-                    { id: `sub_${Date.now()}_${Math.random()}`, name: "Team Cohesion", weight: 0.25 } // Renamed for example
-                ]
-            },
-            {
-                id: `cat_${Date.now()}_${Math.random()}`,
-                name: "Market",
-                weight: 0.4,
-                subCriteria: [
-                    { id: `sub_${Date.now()}_${Math.random()}`, name: "Market Size (TAM/SAM)", weight: 0.6 },
-                    { id: `sub_${Date.now()}_${Math.random()}`, name: "Competition", weight: 0.4 }
-                ]
-            }
-        ]
-    };
-
+    let evaluationModelData = @json( $evaluationForm );
     // --- Render Function ---
     function renderModelEditor() {
         if (!modelEditorContainer) return;
@@ -638,11 +635,13 @@ Group to group of users']
             category.subCriteria.forEach((sub, subIndex) => {
                 subCriteriaHTML += `
                     <div class="sub-criterion-editor" data-subcriterion-id="${sub.id}">
-                        <input type="text" class="form-control subcriterion-name" placeholder="Sub-criterion Name" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
+                        <input type="text" class="form-control subcriterion-name" placeholder="Sub Criteria Name" value="${sub.name}" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
                         <input type="number" class="form-control weight-input subcriterion-weight" placeholder="Weight (%)" value="${sub.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}" data-sub-index="${subIndex}">
-                        <button class="btn btn-label-danger btn-sm btn-icon delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="Delete Sub-criterion">
+                        @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
+                        <button class="btn btn-label-danger btn-sm btn-icon delete-subcriterion-btn" data-category-index="${categoryIndex}" data-sub-index="${subIndex}" title="Delete Sub Criteria">
                             <i class="fas fa-trash-alt"></i>
                         </button>
+                        @endif
                     </div>
                 `;
             });
@@ -654,19 +653,23 @@ Group to group of users']
                     <input id="category-input" type="text" class="form-control category-name" placeholder="Category Name" value="${category.name}" data-category-index="${categoryIndex}" style="font-weight: bold; font-size: 1.1rem;">
                     <div class="d-flex align-items-center">
                         <input type="number" class="form-control weight-input category-weight" placeholder="Weight (%)" value="${category.weight * 100}" min="0" max="100" step="1" data-category-index="${categoryIndex}">
-                        <button class="btn btn-label-danger btn-sm delete-category-btn text-nowrap ms-6" data-category-index="${categoryIndex}" title="Delete Category">
-                            <i class="fas fa-trash-alt me-2"></i> Delete Category
+                        @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
+                        <button class="btn btn-label-danger btn-sm delete-category-btn text-nowrap ms-6" data-category-index="${categoryIndex}" title="Delete Criteria">
+                            <i class="fas fa-trash-alt me-2"></i> Delete Criteria
                         </button>
+                        @endif
                     </div>
                   </div>
                 </div>
                 <div class="validation-message category-validation" style="display: none;"></div> <!-- Placeholder for category weight validation -->
                 ${subCriteriaHTML}
+                @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
                 <div class="category-actions">
                     <button class="btn btn-label-secondary btn-sm add-subcriterion-btn" data-category-index="${categoryIndex}">
-                        <i class="fas fa-plus me-2"></i> Add Sub-criterion
+                        <i class="fas fa-plus me-2"></i> Add Sub-criteria
                     </button>
-                 </div>
+                </div>
+                @endif
             `;
             modelEditorContainer.appendChild(categoryDiv);
         });
@@ -678,7 +681,8 @@ Group to group of users']
 
     // --- Event Listeners ---
     function attachEventListeners() {
-        // Delete Category
+        @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
+        // Delete Criteria
         document.querySelectorAll('.delete-category-btn').forEach(btn => {
              // Remove previous listener to avoid duplicates if re-rendering
              btn.replaceWith(btn.cloneNode(true));
@@ -686,7 +690,9 @@ Group to group of users']
         document.querySelectorAll('.delete-category-btn').forEach(btn => {
             btn.addEventListener('click', handleDeleteCategory);
         });
+        @endif
 
+        @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
         // Delete Sub-criterion
         document.querySelectorAll('.delete-subcriterion-btn').forEach(btn => {
              btn.replaceWith(btn.cloneNode(true));
@@ -694,7 +700,9 @@ Group to group of users']
         document.querySelectorAll('.delete-subcriterion-btn').forEach(btn => {
             btn.addEventListener('click', handleDeleteSubCriterion);
         });
+        @endif
 
+        @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
         // Add Sub-criterion
         document.querySelectorAll('.add-subcriterion-btn').forEach(btn => {
              btn.replaceWith(btn.cloneNode(true));
@@ -702,6 +710,7 @@ Group to group of users']
         document.querySelectorAll('.add-subcriterion-btn').forEach(btn => {
             btn.addEventListener('click', handleAddSubCriterion);
         });
+        @endif
 
         // Input Changes (Name and Weight)
         document.querySelectorAll('.category-name, .category-weight, .subcriterion-name, .subcriterion-weight').forEach(input => {
@@ -716,26 +725,29 @@ Group to group of users']
     // --- Event Handlers ---
     function handleAddCategory() {
         evaluationModelData.categories.push({
-            id: `cat_${Date.now()}_${Math.random()}`,
-            name: "New Category",
+            id: null,
+            name: "",
             weight: 0, // Default weight
             subCriteria: []
         });
         renderModelEditor();
     }
 
+    @if( $_user->ableTo('screening.evaluation_add_sub_criteria') && $status == 'draft' )
     function handleAddSubCriterion(event) {
         const categoryIndex = parseInt(event.target.closest('button').dataset.categoryIndex);
         if (isNaN(categoryIndex) || !evaluationModelData.categories[categoryIndex]) return;
 
         evaluationModelData.categories[categoryIndex].subCriteria.push({
-            id: `sub_${Date.now()}_${Math.random()}`,
-            name: "New Sub-criterion",
+            id: null,
+            name: "",
             weight: 0
         });
         renderModelEditor(); // Re-render the whole editor for simplicity
     }
+    @endif
 
+    @if( $_user->ableTo('screening.evaluation_delete_criteria') && $status == 'draft' )
     function handleDeleteCategory(event) {
         const categoryIndex = parseInt(event.target.closest('button').dataset.categoryIndex);
         if (isNaN(categoryIndex)) return;
@@ -746,8 +758,10 @@ Group to group of users']
             renderModelEditor();
         }
     }
+    @endif
 
-     function handleDeleteSubCriterion(event) {
+    @if( $_user->ableTo('screening.evaluation_delete_sub_criteria') && $status == 'draft' )
+    function handleDeleteSubCriterion(event) {
         const btn = event.target.closest('button');
         const categoryIndex = parseInt(btn.dataset.categoryIndex);
         const subIndex = parseInt(btn.dataset.subIndex);
@@ -759,6 +773,7 @@ Group to group of users']
              renderModelEditor();
          }
     }
+    @endif
 
     function handleInputChange(event) {
         const input = event.target;
@@ -786,19 +801,93 @@ Group to group of users']
          // Note: No re-render here, direct data update. Validation will run on 'change'.
     }
 
-    function handleSaveModel() {
-         if (validateModel(true)) { // Run final validation and show summary
-            console.log("Saving Evaluation Model:", JSON.stringify(evaluationModelData, null, 2));
-            // In a real app, send `evaluationModelData` to the server via fetch/axios
-            alert("Evaluation model saved successfully! (Check console for data)");
-            modelValidationSummary.textContent = 'Model saved successfully!';
-            modelValidationSummary.className = 'alert alert-success alert-dismissible';
-            modelValidationSummary.style.display = 'block';
-         } else {
-             alert("Please fix the validation errors before saving.");
-             // Summary message updated by validateModel()
-         }
-    }
+    @if( $status == 'draft' )
+      @if( $_user->ableTo('screening.evaluation_publish') )
+      function handleSaveModel() {
+          if (validateModel(true)) { // Run final validation and show summary
+              $.ajaxSetup({
+                  headers: {
+                      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                  }
+              });
+              $.ajax({
+                  type: "POST",
+                  url: "{{ route('screening.evaluation_publish') }}",
+                  data: {
+                      "action": "publish",
+                      "criteria": evaluationModelData.categories,
+                      "stepId": {{ $cstep->id }},
+                  },
+                  success: function(response) {
+                      console.log(response);
+                      if (response.status) {
+                          evaluationModelData.categories = response.data;
+                          modelValidationSummary.textContent = 'Model saved successfully!';
+                          modelValidationSummary.className = 'alert alert-success alert-dismissible';
+                          modelValidationSummary.style.display = 'block';
+                      } else {
+                          modelValidationSummary.textContent = response.message;
+                          modelValidationSummary.className = 'alert alert-danger alert-dismissible';
+                          modelValidationSummary.style.display = 'block';
+                      }
+                  },
+                  error: function(error) {
+                      console.error("Error saving model:", error);
+                      modelValidationSummary.textContent = 'Error saving model. Please try again.';
+                      modelValidationSummary.className = 'alert alert-danger alert-dismissible';
+                      modelValidationSummary.style.display = 'block';
+                  }
+              });
+          } else {
+              alert("Please fix the validation errors before saving.");
+              // Summary message updated by validateModel()
+          }
+      }
+      @endif
+
+      @if( $_user->ableTo('screening.evaluation_save_draft') )
+      function handleDraftModel() {
+          if (validateModel(true)) { // Run final validation and show summary
+              $.ajaxSetup({
+                  headers: {
+                      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                  }
+              });
+              $.ajax({
+                  type: "POST",
+                  url: "{{ route('screening.evaluation_save_draft') }}",
+                  data: {
+                      "action": "draft",
+                      "criteria": evaluationModelData.categories,
+                      "stepId": {{ $cstep->id }},
+                  },
+                  success: function(response) {
+                      console.log(response);
+                      if (response.status) {
+                        evaluationModelData.categories = response.data;
+                          modelValidationSummary.textContent = 'Model saved successfully!';
+                          modelValidationSummary.className = 'alert alert-success alert-dismissible';
+                          modelValidationSummary.style.display = 'block';
+                      } else {
+                          modelValidationSummary.textContent = response.message;
+                          modelValidationSummary.className = 'alert alert-danger alert-dismissible';
+                          modelValidationSummary.style.display = 'block';
+                      }
+                  },
+                  error: function(error) {
+                      console.error("Error saving model:", error);
+                      modelValidationSummary.textContent = 'Error saving model. Please try again.';
+                      modelValidationSummary.className = 'alert alert-danger alert-dismissible';
+                      modelValidationSummary.style.display = 'block';
+                  }
+              });
+          } else {
+              alert("Please fix the validation errors before saving.");
+              // Summary message updated by validateModel()
+          }
+      }
+      @endif
+    @endif
 
     // --- Validation Logic ---
     function validateModel(showGlobalSummary) {
@@ -886,8 +975,17 @@ Group to group of users']
     }
 
     // --- Initial Setup ---
-    addCategoryBtn.addEventListener('click', handleAddCategory);
-    saveModelBtn.addEventListener('click', handleSaveModel);
+    @if( $status == 'draft' )
+      @if( $_user->ableTo('screening.evaluation_add_criteria') )
+      addCategoryBtn.addEventListener('click', handleAddCategory);
+      @endif
+      @if( $_user->ableTo('screening.evaluation_publish') )
+      saveModelBtn.addEventListener('click', handleSaveModel);
+      @endif
+      @if( $_user->ableTo('screening.evaluation_save_draft') )
+      draftModelBtn.addEventListener('click', handleDraftModel);
+      @endif
+    @endif
 
     // Render the editor on initial load if the tab is active
     if (document.getElementById('evaluation-model').classList.contains('active')) {

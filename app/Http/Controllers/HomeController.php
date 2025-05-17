@@ -1873,6 +1873,16 @@ class HomeController extends Controller
                 'permissions' => ['dashboard.widgets_graphs_program_progress_view']
             ],
         ];
+
+           $dateRate = date("Y-m-d 17:00:00");
+        $notRated_men = "SElECT * FROM mentorship_requests as mr
+        LEFT JOIN users as u ON u.id = mr.mentor_id 
+        
+        WHERE zoom_date < ? AND user_id = ? AND approved = 'Yes' AND rating IS NULL ORDER BY zoom_date ASC ";
+        $notRated_men = DB::select($notRated_men, [$dateRate, Auth::id()]);
+        $notRated_men = collect($notRated_men);
+        $data['notrated_mens'] = $notRated_men;
+      
         return view('includes.dashboard', $data);
     }
     protected function adminDashboard()
@@ -2515,7 +2525,8 @@ class HomeController extends Controller
                 ];
             }
         });
-       
+
+     
         return view('admin.organizations.dashboard', $data);
     }
 
@@ -2564,6 +2575,7 @@ class HomeController extends Controller
         $data['completedTasks'] = MentorshipTask::whereIn('mentorship_request_id', auth()->user()->mentorSessions()->pluck('id'))->where('status', 'completed')->whereNotNull('title')->count();
         $data['nonCompletedTasks'] = MentorshipTask::whereIn('mentorship_request_id', auth()->user()->mentorSessions()->pluck('id'))->where('status', 'pending')->whereNotNull('title')->count();
 
+        
         return view('mentor.dashboard', $data);
     }
 

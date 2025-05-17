@@ -78,11 +78,21 @@ class ReportController extends Controller
     // =============> ajax report functions <=============
 
     // =============> ajax report StartupSurveys <=============
-    public function surveyReport(Request $request){
+    public function surveyReport(Request $request)
+    {
         $surveyId = $request->id;
-        $available_surveys = SurveyResponses::where('id', $surveyId)->first();
+        $available_surveys = SurveyResponses::with(['user', 'cycle.companies', 'survey.organization'])
+        ->where('id', $surveyId)->first();
 
-        return view('admin.reports.show-survey', compact('available_surveys'));
+       return view('admin.reports.show-survey', [
+        'available_surveys' => $available_surveys,
+        'organizationName' => $available_surveys->survey->organization->{'name_' . app()->getLocale()} ?? '-',
+        'programName' => $available_surveys->cycle->title ?? '-',
+        'startupName' => $available_surveys->cycle->companies->first()?->{'name_' . app()->getLocale()} ?? '-',
+        'submitterName' => $available_surveys->user->first_name_en . ' ' . $available_surveys->user->last_name_en ?? '-',
+        'submitDate' => $available_surveys->created_at?->format('Y-m-d H:i:s') ?? '-',
+      ]);
+
     }
 
     protected function startupSurveysReport(){

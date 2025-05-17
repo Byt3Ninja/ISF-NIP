@@ -10,6 +10,8 @@ const lang = document.documentElement.lang;
 const translations = {
   en: {
     addNewForm: 'Add New Form',
+    editForm: 'Edit Form',
+    updateForm: 'Update Form',
     manageForms: 'Manage Forms',
     actions: 'Actions',
     search: 'Search',
@@ -23,9 +25,6 @@ const translations = {
     submissions: 'Submissions',
     lastModified: 'Last Modified',
     createdDate: 'Created Date',
-    status: 'Status',
-    active: 'Active',
-    inactive: 'Inactive',
     detailsOf: 'Details of',
     show: 'Show',
     entries: 'entries',
@@ -41,13 +40,12 @@ const translations = {
     cancel: 'Cancel',
     deleted: 'Deleted!',
     deleteConfirmation: 'Record has been deleted successfully.',
-    allStatuss: 'All Statuses',
     allOrganizations: 'All Organizations',
-    active: 'Active',
-    inactive: 'Inactive',
   },
   ar: {
     addNewForm: 'اضافة نموذج جديد',
+    editForm: 'تعديل النموذج',
+    updateForm: 'تحديث النموذج',
     manageForms: 'ادارة النماذج',
     actions: 'الإجراءات',
     search: 'بحث',
@@ -61,9 +59,6 @@ const translations = {
     submissions: 'الإرسالات',
     lastModified: 'آخر تعديل',
     createdDate: 'تاريخ الإنشاء',
-    status: 'الحالة',
-    active: 'نشط',
-    inactive: 'غير نشط',
     detailsOf: 'تفاصيل',
     show: 'عرض',
     entries: 'المدخلات',
@@ -79,15 +74,13 @@ const translations = {
     cancel: 'إلغاء',
     deleted: 'تم الحذف!',
     deleteConfirmation: 'تم حذف السجل بنجاح.',
-    allStatuss: 'جميع الحالات',
     allOrganizations: 'جميع المنظمات',
-    active: 'نشط',
-    inactive: 'غير نشط',
   }
 };
 
 const t = translations[lang] || translations.en;
-let fv, offCanvasEl;
+let fv, offCanvasEl, editOffCanvasEl;
+let currentEditingRow = null;
 
 document.addEventListener('DOMContentLoaded', function (e) {
   // Your existing code...
@@ -110,31 +103,22 @@ document.addEventListener('DOMContentLoaded', function (e) {
           { data: 'submissions', title: t.submissions },
           { data: 'last_modified', title: t.lastModified },
           { data: 'created_date', title: t.createdDate },
-          { data: 'status', title: t.status },
           { data: null, title: t.actions, orderable: false, searchable: false }
         ],
         columnDefs: [
           {
-            // Status Badge
-            targets: 6,
-            render: function (data, type, full, meta) {
-              const statusClass = full.status === t.active ? 'bg-label-success' : 'bg-label-danger';
-              return `<span class="badge ${statusClass}">${full.status}</span>`;
-            }
-          },
-          {
             // Actions
-            targets: 7,
+            targets: 6,
             render: function (data, type, full, meta) {
               return (
                 '<div class="d-inline-block">' +
                 '<a href="javascript:;" class="btn btn-sm btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ti ti-dots-vertical ti-md"></i></a>' +
                 '<ul class="dropdown-menu dropdown-menu-end m-0">' +
-                `<li><a href="javascript:;" class="dropdown-item">${t.view}</a></li>` +
-                `<li><a href="javascript:;" class="dropdown-item">${t.copy}</a></li>` +
-                `<li><a href="javascript:;" class="dropdown-item">${t.edit}</a></li>` +
-                '<div class="dropdown-divider"></div>' +
-                `<li><a href="javascript:;" class="dropdown-item text-danger delete-record">${t.delete}</a></li>` +
+                `<li><a href="/dashboard/show-form/${full.form_id}" class="dropdown-item">${t.view}</a></li>` +
+                // `<li><a href="javascript:;" class="dropdown-item">${t.copy}</a></li>` +
+                `<li><a href="javascript:;" class="dropdown-item edit-record">${t.edit}</a></li>` +
+                // '<div class="dropdown-divider"></div>' +
+                // `<li><a href="javascript:;" class="dropdown-item text-danger delete-record">${t.delete}</a></li>` +
                 '</ul>' +
                 '</div>' +
                 '<a href="/dashboard/forms-submissions" class="btn btn-sm btn-text-secondary rounded-pill btn-icon item-edit"><i class="ti ti-list-tree ti-md"></i></a>'
@@ -208,14 +192,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         initComplete: function (settings, json) {
           $('.card-header').after('<hr class="my-0">');
 
-          // Add custom filters for Status and Organization
-          const statusFilter = $(`<select class="form-select form-select-sm ms-12 me-3 w-px-100"><option value="">${t.allStatuss}</option><option value="${t.active}">${t.active}</option><option value="${t.inactive}">${t.inactive}</option></select>`)
-            .appendTo('.dataTables_length')
-            .on('change', function () {
-              const val = $.fn.dataTable.util.escapeRegex($(this).val());
-              dt_basic.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
-            });
-
+          // Add custom filter for Organization only (status filter removed)
           const orgFilter = $(`<select class="form-select form-select-sm w-px-200"><option value="">${t.allOrganizations}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
@@ -264,11 +241,35 @@ document.addEventListener('DOMContentLoaded', function (e) {
           }
         });
       });
+
+      // Edit Record
+      $('.datatables-basic tbody').on('click', '.edit-record', function () {
+        const row = $(this).closest('tr');
+        const rowData = dt_basic.row(row).data();
+
+        console.log('Editing row data:', rowData);
+        currentEditingRow = row;
+        
+        // Get the edit form element
+        const editOffCanvasElement = document.querySelector('#edit-record');
+        
+        if (editOffCanvasElement) {
+          // Populate form with existing data
+          editOffCanvasElement.querySelector('.form_id').value = rowData.form_id;
+          editOffCanvasElement.querySelector('.dt-form-name').value = rowData.form_name;
+          editOffCanvasElement.querySelector('.dt-org-select').value = rowData.assigned_organization;
+          
+          // Show the edit canvas
+          editOffCanvasEl = new bootstrap.Offcanvas(editOffCanvasElement);
+          editOffCanvasEl.show();
+        }
+      });
     }
 
     setTimeout(() => {
       const newRecord = document.querySelector('.create-new'),
-        offCanvasElement = document.querySelector('#add-new-record');
+        offCanvasElement = document.querySelector('#add-new-record'),
+        editCanvasElement = document.querySelector('#edit-record');
 
       // To open offCanvas, to add new record
       if (newRecord) {
@@ -280,6 +281,41 @@ document.addEventListener('DOMContentLoaded', function (e) {
           // Open offCanvas with form
           offCanvasEl.show();
         });
+      }
+      
+      // Handle edit form submission
+      if (editCanvasElement) {
+        const editForm = editCanvasElement.querySelector('form');
+        if (editForm) {
+          editForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            if (currentEditingRow) {
+              const formName = editCanvasElement.querySelector('.dt-form-name').value;
+              // const organization = editCanvasElement.querySelector('.dt-org-select').value;
+              const selectElement = editCanvasElement.querySelector('.dt-org-select');
+              const selectedOption = selectElement.options[selectElement.selectedIndex];
+              const organization = selectedOption.getAttribute('data-value');
+              
+              // Get the current data
+              const rowData = dt_basic.row(currentEditingRow).data();
+              
+              // Update with new values
+              rowData.form_name = formName;
+              rowData.assigned_organization = organization;
+              rowData.last_modified = new Date().toISOString().split('T')[0]; // Update modification date
+              
+              // Redraw the row with updated data
+              dt_basic.row(currentEditingRow).data(rowData).draw();
+              
+              // Close the offcanvas
+              editOffCanvasEl.hide();
+              
+              // Reset current editing row
+              currentEditingRow = null;
+            }
+          });
+        }
       }
     }, 200);
 

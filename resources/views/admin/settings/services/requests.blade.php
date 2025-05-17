@@ -76,7 +76,7 @@
               <tbody>
                 @foreach ($received as $n => $rec)
                   @php
-                    $user = $rec->user->{'first_name_' . $l} . ' ' . $rec->user->{'last_name_' . $l};
+                    $user = $rec->user?->{'first_name_' . $l} . ' ' . $rec->user?->{'last_name_' . $l};
                   @endphp
                   <tr>
                     <td>{{ $n + 1 }}</td>

@@ -337,15 +337,41 @@ class MentorsController extends Controller
 			$cycle = Cycle::find($request->cycle_id);
 			$autoApprove = $cycle->auto_approve_mentorship_requests;
 	
-			 $approved = null; 
-
+			 $approved = null;
+ 				$userid = Auth::id();
 			 if ($autoApprove == 1) {
-				 $approved = 'Yes'; 
-			 }
-	
-			if ($autoApprove == 1) {
+				
+				 $approved = 'Yes';
+				 $topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
+				 $data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
+				
+				$onlineMeeting = $this->meetingService->createMeeting($data);
+			
+				if (!$onlineMeeting['success']) {
+					return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
+				}
+				
+				// $date = substr($date1, 0, -2);
+				// $dateAM = substr($date1, -2);																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																		
+				$dateFormat = new \DateTime($request->date);
+				// dd($dateFormat->format('Y-m-d H:i'));
+				MentorshipRequest::create([
+					'mentor_id' => $request->mentorid,
+					'user_id' => $userid,
+					'comment' => $request->notes,
+					'approved' => 'Yes',
+					'start_url' => $onlineMeeting['data']['start_url'],
+					'join_url' => $onlineMeeting['data']['join_url'],
+					'zoom_date' => $dateFormat->format('Y-m-d H:i'),
+					'period' => $period,
+					'organization_id' => $request->organization_id,
+					'cycle_id' => $request->cycle_id,
+					'fileurl' => $fileName,
+				]);
+				
 				$mentor = User::find($request->mentorid);
-			}
+			}else{
+			
 			MentorshipRequest::create([
 				'mentor_id' => $request->mentorid,
 				'user_id' => Auth::id(),
@@ -357,6 +383,7 @@ class MentorsController extends Controller
 				'cycle_id' => $request->cycle_id,
 				'approved' => $approved,
 			]);
+		}
 			if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
 			$data = [];
@@ -392,6 +419,7 @@ Thanks from " . env('APP_NAME');
 
 	public function add(Request $request)
 	{
+
 		if ($request->userid) {
 			$dates = explode(',', $request->date);
 			
@@ -403,7 +431,9 @@ Thanks from " . env('APP_NAME');
 				$date = ltrim($key);
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
+				
 				$onlineMeeting = $this->meetingService->createMeeting($data);
+			
 				if (!$onlineMeeting['success']) {
 					return back()->with(['message2' => "meeting_error"]);
 				}
@@ -515,6 +545,7 @@ Thanks from " . env('APP_NAME');
 				// التحقق من وجود cycle_id
 				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id', 'DESC')->get();
+
 		} elseif ($request->show == 'approved') {
 			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
@@ -525,10 +556,11 @@ Thanks from " . env('APP_NAME');
 
 				// البحث باستخدام التاريخ من وإلى
 				return $q->whereDate('zoom_date', '>=', $startDate)->whereDate('zoom_date', '<=', $endDate);
-			})->when(!is_null($request->cycle_id), function ($q) use ($request) {
+			})->where('approved', 'Yes')->when(!is_null($request->cycle_id), function ($q) use ($request) {
 				// التحقق من وجود cycle_id
 				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id', 'DESC')->get();
+
 		} elseif ($request->show == 'disapproved') {
 			$sessions = MentorshipRequest::when(!is_null($organization_id), function ($q) use ($organization_id) {
 				return $q->where('organization_id', $organization_id);
@@ -557,10 +589,12 @@ Thanks from " . env('APP_NAME');
 				return $q->where('cycle_id', $request->cycle_id);
 			})->orderBy('id', 'DESC')->get();
 		}
+		
 		$sessions = $sessions->map( function( $session ) {
 			$session->date = Carbon::parse($session->zoom_date);
 			return $session;
 		});
+		
 		return view('admin.settings.mentorship.sessions', compact('sessions'));
 	}
 
@@ -831,7 +865,7 @@ Thanks from " . env('APP_NAME');
 
 	public function mine()
 	{
-		$sessions = MentorshipRequest::where('user_id', Auth::id())->get();
+		$sessions = MentorshipRequest::where('user_id', Auth::id())->orderby('created_at', 'DESC')->get();
 		return view('admin.clients.mymentorships', compact('sessions'));
 	}
 

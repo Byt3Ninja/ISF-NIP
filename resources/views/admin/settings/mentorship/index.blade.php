@@ -59,9 +59,10 @@
                     onchange="window.open('/dashboard/mentorship/view/'+this.options[this.selectedIndex].value,'_self');">
                   @foreach ($cycles as $cycle)
                   <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>{{ $cycle->title }}
-                    ({{ __('cycles.from') }} {{ $cycle->start->format('d-m-Y') }} {{ __('cycles.to') }}
-                    {{ $cycle->end->format('d-M-Y') }})
-                    - {{ optional($cycle->organization)->name }}</option>
+                    ({{ __('cycles.from') }} {{ $cycle->start ? $cycle->start->format('d-m-Y') : '-' }} {{ __('cycles.to') }}
+                    {{ $cycle->end ? $cycle->end->format('d-m-Y') : '-' }})
+                    - {{ optional($cycle->organization)->name }}
+                  </option>
                   @endforeach
                   @if (!$id)
                   <option> {{ __('cycles.No records saved') }} -
@@ -104,13 +105,15 @@
                 @foreach ($mentors as $mentor)
                 <label class="btn btn-outline-primary mentor-label" id="label-mentor{{ $mentor->user_id }}">
                   <div class="d-flex align-items-center">
-                    <img class="rounded-circle me-2" src="{{ $mentor->user->image_url }}" alt="click to view"
+                    <img class="rounded-circle me-2" src="{{ $mentor->user->image_url ?? '' }}" alt="click to view"
                       height="20" width="20" />
                     <div class="d-flex align-items-center">
                       <span class="mx-2">
+                        @if($mentor->user != null)
                         {{ $mentor->user->id }}-
                         {{ $thementor = $mentor->user->{'first_name_' . $l} . ' ' . $mentor->user->{'last_name_' . $l}
                         }}
+                        @endif
                       </span>
                       <input type="radio" value="{{ $mentor->user_id }}" id="mentor{{ $mentor->user_id }}" name="mentor" class="mentor_radio"
                         onclick="mentor({{ $mentor->user_id }},'{{ $thementor }}','{{ $mentor->mrating() }}')">
@@ -147,7 +150,7 @@
                 <div class="d-flex align-items-center mx-2">
                   <div style="display: flex; align-items: center;">
                   <button
-                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center" 
+                    class="btn bg-primary p-3 d-none d-md-flex justify-content-center align-items-center mx-3" 
                     style="border-radius: 17px; width: 40px; height: 40px;"
                      type="submit"
                   >

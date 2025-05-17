@@ -11,14 +11,14 @@
         <table class="datatables-basic table">
           <thead class="table-light">
             <tr>
-              <th></th>
-              <th>Submission Id</th>
-              <th>Submitted By</th>
-              <th>Startup Name</th>
-              <th>Organization Name</th>
-              <th>Program Name</th>
-              <th>Created At</th>
-              <th>Step Name</th>
+              <th class="text-nowrap"></th>
+              <th class="text-nowrap">Submission Id</th>
+              <th class="text-nowrap">Submitted By</th>
+              <th class="text-nowrap">Startup Name</th>
+              <th class="text-nowrap">Organization Name</th>
+              <th class="text-nowrap">Program Name</th>
+              <th class="text-nowrap">Created At</th>
+              <th class="text-nowrap">Step Name</th>
             </tr>
           </thead>
         </table>
@@ -78,6 +78,7 @@ const translations = {
     stepName: 'Step Name',
     allOrganizations: 'All Organizations',
     allPrograms: 'All Programs',
+    allSteps: 'All Steps',
   },
   ar: {
     submissionsList: 'قائمة الإرسالات',
@@ -120,6 +121,7 @@ const translations = {
     stepName: 'اسم المرحلة',
     allOrganizations: 'جميع المنظمات',
     allPrograms: 'جميع البرامج',
+    allSteps: 'جميع الخطوات',
   }
 };
 
@@ -132,55 +134,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
   $(function () {
     var dt_basic_table = $('.datatables-basic'),
       dt_basic;
-
+  
     if (dt_basic_table.length) {
-      const data = [
-        {
-          submission_id: 101,
-          submitted_by: "Alice Smith",
-          startup_name: "Tech Innovators",
-          organization_name: "Org Alpha",
-          program_name: "Accelerator 2023",
-          created_at: "2023-06-01",
-          step_name: "Screening"
-        },
-        {
-          submission_id: 102,
-          submitted_by: "Bob Johnson",
-          startup_name: "Green Solutions",
-          organization_name: "Org Beta",
-          program_name: "Incubation 2023",
-          created_at: "2023-06-03",
-          step_name: "Interview"
-        },
-        {
-          submission_id: 103,
-          submitted_by: "Carol Lee",
-          startup_name: "Health First",
-          organization_name: "Org Alpha",
-          program_name: "Accelerator 2023",
-          created_at: "2023-06-05",
-          step_name: "Selection"
-        },
-        {
-          submission_id: 104,
-          submitted_by: "David Kim",
-          startup_name: "EduNext",
-          organization_name: "Org Gamma",
-          program_name: "Pre-Seed 2023",
-          created_at: "2023-06-07",
-          step_name: "Screening"
-        },
-        {
-          submission_id: 105,
-          submitted_by: "Eva Brown",
-          startup_name: "AgroFuture",
-          organization_name: "Org Beta",
-          program_name: "Incubation 2023",
-          created_at: "2023-06-09",
-          step_name: "Final"
-        }
-      ];
+      const data = {!! json_encode($data) !!};
 
       dt_basic = dt_basic_table.DataTable({
         data: data,
@@ -200,13 +156,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
             targets: 7,
             render: function (data, type, full, meta) {
               return (
-                `<a href="/dashboard/submission-details" class="btn btn-sm btn-label-primary item-view"><i class="ti ti-eye ti-md me-1"></i>${t.view}</a>`
+                `<a href="/dashboard/submission-details/${data.step_id}" class="btn btn-sm btn-label-primary item-view"><i class="ti ti-eye ti-md me-1"></i>${t.view}</a>`
               );
             }
           }
         ],
         order: [[0, 'asc']],
-        dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end mt-n6 mt-md-0"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+        dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-6 pt-md-0"B>><"row"<"col-12 col-md-8"l><"col-12 col-md-4 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-4"i><"col-sm-12 col-md-4"p>>',
         displayLength: 7,
         lengthMenu: [7, 10, 25, 50, 75, 100],
         language: {
@@ -276,11 +232,20 @@ document.addEventListener('DOMContentLoaded', function (e) {
               dt_basic.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
             });
 
+          // Program filter
           const programFilter = $(`<select class="form-select form-select-sm w-px-150"><option value="">${t.allPrograms}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
               dt_basic.column(4).search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+          // Step filter
+          const stepFilter = $(`<select class="form-select form-select-sm w-px-150"><option value="">${t.allSteps}</option></select>`)
+            .appendTo('.dataTables_length')
+            .on('change', function () {
+              const val = $.fn.dataTable.util.escapeRegex($(this).val());
+              dt_basic.column(6).search(val ? '^' + val + '$' : '', true, false).draw();
             });
 
           // Populate organization filter dynamically
@@ -293,6 +258,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
           const programs = [...new Set(data.map(item => item.program_name))];
           programs.forEach(prog => {
             programFilter.append('<option value="' + prog + '">' + prog + '</option>');
+          });
+
+          // Populate step filter dynamically
+          const steps = [...new Set(data.map(item => item.step_name))];
+          steps.forEach(step => {
+            stepFilter.append('<option value="' + step + '">' + step + '</option>');
           });
         }
       });

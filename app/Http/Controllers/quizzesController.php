@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Step;
 use App\Cycle;
 use App\Quizzes;
 use App\Training;
+use App\TrainingSession;
 use App\Organization;
 use App\QuestionsBank;
 use App\QuizQuestions;
@@ -36,8 +38,12 @@ class quizzesController extends Controller
 			$quizzes = $quizzes->where('status', $request->status);
 		}
 		if($request->Program_id != 0){
-			$cycle = Cycle::where('id',$request->Program_id)->first();
-			$quizzes = $quizzes->where('organization_id', $cycle->organization_id);
+			// $cycle = Cycle::where('id',$request->Program_id)->first();
+			$get_step = Step::where('stype', 4)->where('cycle_id', $request->Program_id)->get();
+			$training_ids = TrainingSession::whereIn('step_id', $get_step->pluck('id')->toArray())->get()->filter(function($training) {
+				return $training->training_Address != null && is_numeric($training->training_Address);
+			})->pluck('training_Address')->unique()->values()->toArray();
+			$quizzes = $quizzes->whereIn('training_id', $training_ids);
 		}
 		$quizzes = $quizzes->get();
 
@@ -220,13 +226,24 @@ class quizzesController extends Controller
 
 			// if( empty( $cycleData ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
-			if( !empty( $cycleData->organization_id ) ) {
-			$organization_id = $cycleData->organization_id;
-			
-			$quizzes = Quizzes::where('status', 'published')->where('organization_id', $organization_id)->with(['training', 'myAttempts', 'questions'])->get();
-		}else{
-			$quizzes = '';
-		}
+			if( !empty( $cycleData->organization_id ) )
+			{
+				$organization_id = $cycleData->organization_id;
+				$get_step = Step::where('stype', 4)->where('cycle_id', $cycleData->id)->get();
+				$training_ids = TrainingSession::whereIn('step_id', $get_step->pluck('id')->toArray())->get()->filter(function($training) {
+					return $training->training_Address != null && is_numeric($training->training_Address);
+				})->pluck('training_Address')->unique()->values()->toArray();
+
+				$quizzes = Quizzes::where('status', 'published')
+					->where('organization_id', $organization_id)
+					->whereIn('training_id', $training_ids)
+					->with(['training', 'myAttempts', 'questions'])
+					->get();
+			}
+			else
+			{
+				$quizzes = collect([]);
+			}
 			return view('admin/clients/quiz/dashboard', compact('quizzes'));
 		} else { return abort(401); }
 	}

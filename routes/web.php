@@ -5,8 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\Mentor\MentorshipTaskController;
+use App\Http\Controllers\ImporterController;
 use App\Http\Controllers\Mentor\MentorProgramController;
+use App\Http\Controllers\Mentor\MentorshipTaskController;
 use App\Http\Controllers\Judger\JudgerScreeningController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 
@@ -331,7 +332,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('forms-list', 'FormController@index')->name('forms.index');
     
     Route::get('forms-submissions', 'FormController@submissions')->name('forms_submissions.index');
-    Route::get('submission-details', 'FormController@submissionDetails')->name('form_submission_details.index');
+    Route::get('submission-details/{id}', 'FormController@submissionDetails')->name('form_submission_details.index');
     
     //BuilderForm Builder
     Route::get('show-builder/{id?}', 'FormBuilderController@showBuilder')->name('forms.builder_view');
@@ -361,6 +362,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('screening/get/{fid}/{sid}/{pid}', 'ScreeningController@getusers');
     Route::post('screening/changestep', 'ScreeningController@changestep')->name('screening.change_step');
     Route::get('/export-Result', 'ScreeningController@exportresultScreen');
+    Route::post('screening/evaluation/save_draft', 'ScreeningController@save_evaluation_draft')->name('screening.evaluation_save_draft');
+    Route::post('screening/evaluation/publish', 'ScreeningController@publish_evaluation')->name('screening.evaluation_publish');
 
     //ZOOM
     Route::get('zoom/all', 'MeetingController@showall');
@@ -568,6 +571,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     });
     Route::get('reports/show-survey/{id}', 'ReportController@surveyReport');
     //================> End Reports <============
+
+    Route::get('/importer', [ImporterController::class, 'index'])->name('importer.index');
+    Route::post('/importer/upload', [ImporterController::class, 'upload'])->name('importer.upload');
+    Route::post('/importer/import', [ImporterController::class, 'import'])->name('importer.import');
+    Route::get('/importer/organizations', [ImporterController::class, 'getOrganizations'])->name('importer.organizations');
+
+
 });
 
 

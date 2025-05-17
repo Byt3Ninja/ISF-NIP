@@ -1,197 +1,234 @@
 @extends('layouts.admin')
+
 @section('style')
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.2/skins/ui/oxide/content.min.css">
-	<style type="text/css">
-		.training-image { border-radius: 50%; border: 3px solid #ccc; padding: 0.2rem; }
-		.w-15 { width: 15%; }
-		.custom-tag { padding-block: 0.125rem; padding-inline: 0.5rem; cursor: pointer; }
-	</style>
-@endsection
+<link rel="stylesheet" type="text/css"
+	href="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.2/skins/ui/oxide/content.min.css">
+@stop
+
 @section('content')
-	<div class="content-wrapper">
-		<div class="container-xxl flex-grow-1 container-p-y">
-			<div class="content-overlay"></div>
-			<div class="content-header row">
-				<div class="content-header-left col-12 mb-2 mt-1">
-					<div class="row breadcrumbs-top">
-						<div class="col-12">
-							<h5 class="content-header-title float-left pr-1 mb-0">{{__('settings.View training content')}}</h5>
-							<div class="breadcrumb-wrapper col-12">
-								<ol class="breadcrumb p-0 mb-0">
-									<li class="breadcrumb-item"><a href="/dashboard"><i class="ti ti-home"></i></a></li>
-									<li class="breadcrumb-item"> <a href="/dashboard/training/my"> {{__('admin.My courses')}} </a> </li>
-									<li class="breadcrumb-item"> <a href="/dashboard/training/my/{{ $training->id }}"> {{ $training->title }} </a> </li>
-									<li class="breadcrumb-item active"> {{ $quiz->title }} </li>
-								</ol>
-							</div>
+<div class="content-wrapper">
+	<div class="container-xxl flex-grow-1 container-p-y">
+
+		<div class="row mb-3">
+			<div class="col-12 col-md-8">
+				<h4 class="fw-bold">{{ $training->title }}</h4>
+				<p class="card-text text-muted line-clamp-2 text-truncate">{{ $training->dsc }}</p>
+			</div>
+		</div>
+
+		@if(session()->has('msg'))
+			<div class="row">
+				<div class="col-md-12">
+					<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-3 shadow-sm"
+						role="alert">
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						<div class="d-flex align-items-center">
+							<i class="ti ti-alert-triangle me-3 ti-md"></i>
+							<span> {{ session()->get('msg') }} {{ Session::forget('msg') }} </span>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="content-body">
-				@if( session()->has('msg') )
-				<div class="row">
-					<div class="col-md-12">
-						<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible fade show mb-2" role="alert">
-							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-							<div class="d-flex align-items-center"> <i class="ti ti-alert-triangle me-3 ti-md"></i> <span> {{ session()->get('msg') }} {{ Session::forget('msg') }} </span> </div>
-						</div>
+		@endif
+
+		<div class="card card-body mb-6">
+			<div class="row g-0">
+				<!-- Quiz Illustration (Left Side) -->
+				<div class="col-md-4">
+					<div class="quiz-image p-4">
+						<img class="img-fluid rounded" src="/images/quiz-illustration.svg" alt="Quiz Image" />
 					</div>
 				</div>
-				@endif
-				<section id="multiple-column-form">
-					<div class="row match-height">
-						<div class="col-md-3 col-sm-12">
-							<div class="card">
-								<div class="card-content">
-									<div class="text-center my-2"> <img class="training-image w-75" src="/191014/{{ $training->image }}" /> </div>
-									<h3 class="text-center"> {{ $training->title }} </h3>
-									<div class="card-body text-justify"> {{ $training->dsc }} </div>
+
+				<!-- Quiz Information (Right Side) -->
+				<div class="col-md-8">
+					<div class="p-10 h-100 d-flex flex-column justify-content-between">
+						<div class="d-flex justify-content-between align-items-center mb-2">
+							<h3 class="mb-0">{{ $quiz->title }}</h3>
+
+							@php $attempts = $quiz->myAttempts; @endphp
+							@if( $attempts->where('score', '>=', $quiz->passing_criteria)->count() >= 1 )
+								<span class="badge px-4 py-2 rounded-pill bg-label-success"> {{ __('admin.quizPassed') }} </span>
+							@elseif( $attempts->where('score', '<', $quiz->passing_criteria)->count() >= $quiz->attempts )
+								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizFailed') }} </span>
+							@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )
+								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizFailed') }} </span>
+							@elseif( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') )
+								<span class="badge px-4 py-2 rounded-pill bg-secondary"> {{ __('admin.quizNotStartedYet') }} </span>
+							@elseif( now()->format('Y-m-d H:i:s') > $quiz->end->format('Y-m-d H:i:s') )
+								<span class="badge px-4 py-2 rounded-pill bg-label-danger"> {{ __('admin.quizNotTaken') }} </span>
+							@else
+								<span class="badge px-4 py-2 rounded-pill bg-label-primary"> {{ __('admin.quizInProgress') }} </span>
+							@endif
+						</div>
+
+						<p class="text-muted mb-4">
+							{{ $quiz->description }}
+						</p>
+
+						<div class="row mb-4">
+							<div class="col-md-6">
+								<div class="p-2">
+									<i class="ti text-primary ti-list-check"></i>
+									<span class="text-dark fw-semibold">
+										{{ $questions->count() }}
+										{{ __('admin.Questions') }}
+									</span>
+								</div>
+								<div class="p-2">
+									<i class="ti text-primary ti-calendar"></i>
+									<span class="text-dark fw-semibold">
+										{{ __('admin.Start at') }}: {{ $quiz->start->format('jS M. Y h:i A') }}
+									</span>
+								</div>
+								<div class="p-2">
+									<i class="ti text-primary ti-calendar-event"></i>
+									<span class="text-dark fw-semibold">
+										{{ __('admin.End at') }}: {{ $quiz->end->format('jS M. Y h:i A') }}
+									</span>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="p-2">
+									<i class="ti text-primary ti-clock"></i>
+									<span class="text-dark fw-semibold">
+										{{ __('admin.TimeLimit') }}: 
+										{{ $quiz->time_limit > 60 ? intval($quiz->time_limit / 60) . ' ' . __('admin.hours') . ' ' .
+										($quiz->time_limit % 60 > 0 ? intval($quiz->time_limit % 60) . ' ' . __('admin.minutes') : '') :
+										$quiz->time_limit . ' ' . __('admin.minutes') }}
+									</span>
+								</div>
+								<div class="p-2">
+									<i class="ti text-primary ti-refresh"></i>
+									<span class="text-dark fw-semibold">{{ __('admin.quizAttempts') }}: {{ $quiz->attempts }}</span>
+								</div>
+								<div class="p-2">
+									<i class="ti text-primary ti-chart-pie"></i>
+									<span class="text-dark fw-semibold">{{ __('admin.Progress') }}: {{ $quiz->passing_criteria }}%</span>
 								</div>
 							</div>
 						</div>
-						<div class="col-md-9 col-sm-12">
-							<div class="card">
-								<div class="card-header">
-									<span class="card-title"> {{ __('admin.quizDetails') }} </span>
-									@if( $available || !is_null( $active_now ) )
-										<span class="float-end">
-											<form id="startQuizForm" method="post" action="{{ route('quizzes.take_start', ['id' => $training->id, 'quiz_id' => $quiz->id]) }}">
-												{!! csrf_field() !!}
-												<button type="submit" id="quizStartBtn" class="btn btn-primary"> @if( !is_null( $active_now ) ) {{ __('admin.quizResume') }} @else {{ __('admin.quizStart') }} @endif </button>
-											</form>
-										</span>
+
+						<div class="progress">
+							<div class="progress-bar bg-primary" role="progressbar" style="width: {{ $quiz->passing_criteria }}%" aria-valuenow="{{ $quiz->passing_criteria }}"
+								aria-valuemin="0" aria-valuemax="100"></div>
+						</div>
+
+						@if($available || !is_null($active_now))
+							<form 
+								id="startQuizForm" 
+								class="text-end mt-auto"
+								method="post"
+								action="{{ route('quizzes.take_start', ['id' => $training->id, 'quiz_id' => $quiz->id]) }}"
+							>
+								{!! csrf_field() !!}
+								<button type="submit" id="quizStartBtn" class="btn btn-primary btn-lg shadow-sm">
+									<i class="ti ti-player-play me-2"></i>
+									@if( now()->format('Y-m-d H:i:s') < $quiz->start->format('Y-m-d H:i:s') )
+									{{ __('admin.quizStart') }}
+									@else
+									{{ __('admin.quizResume') }}
 									@endif
-								</div>
-								<div class="card-content px-2">
-									<div class="container">
-										<div class="table-responsive">
-											<table class="table table-bordered table-hover table-striped">
-												<tbody>
-													<tr>
-														<td class="w-15"> {{ __('admin.quizTitle') }} </td>
-														<td>{{ $quiz->title }}</td>
-													</tr>
-													<tr>
-														<td class="w-15">  {{ __('admin.Description') }} </td>
-														<td>{{ $quiz->description }}</td>
-													</tr>
-													<tr>
-														<td class="w-15"> {{ __('admin.quizNumOfQuestions') }} </td>
-														<td>{{ $questions->count() }}</td>
-													</tr>
-													<tr>
-														<td class="w-15"> {{ __('admin.quizTopics') }} </td>
-														<td>
-															@foreach( $tags as $tag)
-																<span class="btn custom-tag btn-sm btn-outline-dark"> {{ $tag }} </span>
-															@endforeach
-														</td>
-													</tr>
-													<tr>
-														<td class="w-15"> {{ __('admin.quizStartsAt') }} </td>
-														<td>{{ $quiz->start->format('jS M. Y h:i A') }}</td>
-													</tr>
-													<tr>
-														<td class="w-15"> {{ __('admin.quizEndsAt') }} </td>
-														<td>{{ $quiz->end->format('jS M. Y h:i A') }}</td>
-													</tr>
-													<tr>
-														<td class="w-15"> {{ __('admin.quizAvailableAfter') }} </td>
-														<td>
-															@if( $available == true )
-																<span class="badge text-bg-success"> {{ __('admin.availableNow') }} </span>
-															@elseif( !is_null( $active_now )  )
-																{{ __('admin.quizInProgress') }}
-															@elseif( !empty( $time_remaining ) )
-																{{ __('admin.willAvailableAt') }} <span class="mx-2" id="timeRemain" data-value="{{ $time_remaining }}"> {{ $time_remaining }} </span>
-															@elseif( $completion_percentage < 100 )
-																{{ __('admin.quizAvailableAfter100') }}
-															@elseif( $quiz->start > now() )
-																{{ __('admin.willAvailableAt') }} <span class="mx-2" id="timeRemain" data-value="{{ $time_remaining }}"> {{ $time_remaining }} </span>
-															@else
-																<span class="badge text-bg-danger"> {{ __('admin.notAvailable') }} </span>
-															@endif
-														</td>
-													</tr>
-													<tr>
-														<td class="w-15"> {{ __('admin.TimeLimit') }} </td>
-														<td>{{ $quiz->time_limit > 60 ? intval($quiz->time_limit / 60) . ' ' . __('admin.hours') . ' ' . ($quiz->time_limit % 60 > 0 ? intval($quiz->time_limit % 60) . ' ' . __('admin.minutes') : '')  : $quiz->time_limit . ' ' . __('admin.minutes') }}</td>
-													</tr>
-													<tr>
-														<td class="w-15"> {{ __('admin.quizAttempts') }} </td>
-														<td>{{ $quiz->attempts }}</td>
-													</tr>
-													<tr>
-														<td class="w-15"> {{ __('admin.passingCriteria') }} </td>
-														<td>{{ $quiz->passing_criteria . '%' }}</td>
-													</tr>
-												</tbody>
-											</table>
-										</div>
-										<hr class="hr" />
-										<div class="table-responsive pb-10">
-											<div class="card-title my-1"> {{ __('admin.quizResults') }} </div>
-											<table class="table table-bordered table-hover">
-												<thead>
-													<th class="text-center" style="width: 6%;"> # </th>
-													<th class="text-center" style="width: 9%;"> {{ __('admin.quizScore') }} </th>
-													<th class="text-center" style="width: 11%;"> {{ __('admin.quizStatus') }} </th>
-													<th> {{ __('admin.quizStartedAt') }} </th>
-													<th class="text-center"> {{ __('admin.quizTimeTook') }} </th>
-													@if( $allowActions ) <th class="text-center" style="width: 18%;"> {{ __('admin.Actions') }} </th> @endif
-												</thead>
-												<tbody>
-													@if( empty( $attempts ) || ( !empty( $attempts ) && $attempts->count() <= 0 ) )
-														<tr>
-															<td colspan="{{ $allowActions == true ? 6 : 5 }}" class="text-center">
-																{{ __('admin.quizNoResults') }}
-															</td>
-														</tr>
-													@else
-														@foreach( $attempts as $index => $attempt)
-															<tr>
-																<td class="text-center"> {{ $index + 1 }} </td>
-																<td class="text-center"> {{ $attempt->score . '%' }} </td>
-																<td class="text-center">
-																	@if( $attempt->score >= $quiz->passing_criteria )
-																		<span class="badge text-bg-success"> {{ __('admin.quizPassed') }} </span>
-																	@elseif( $active_now == $attempt->id )
-																		<span class="badge text-bg-info"> {{ __('admin.quizInProgress') }} </span>
-																	@else
-																		<span class="badge text-bg-danger"> {{ __('admin.quizFailed') }} </span>
-																	@endif
-																</td>
-																<td> {{ $attempt->created_at->format('jS M. Y h:i A') }} </td>
-																<td class="text-center">
-																	@if( $attempt->status )
-																		{{ $attempt->started_at->diffInMinutes( $attempt->ended_at ) . ' ' . __('admin.minutes') }}
-																	@else
-																		{{ __('admin.quizInProgress') }}
-																	@endif
-																</td>
-																@if( $allowActions == true )
-																<td> <a href="{{ route('quizzes.view_response_mine', ['id' => $training->id, 'quiz_id' => $quiz->id, 'response_id' => $attempt->id]) }}" class="btn btn-primary btn-sm"> {{ __('admin.quizViewResults') }} </a> </td>
-																@endif
-															</tr>
-														@endforeach
-													@endif
-												</tbody>
-											</table>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+								</button>
+							</form>
+						@endif
 					</div>
-				</section>
+				</div>
+			</div>
+		</div>
+
+		<div class="card">
+			<div class="card-header">
+				<h5 class="card-title border-bottom pb-2">
+					<i class="ti text-primary ti-report-analytics ti-lg"></i>
+					{{ __('admin.quizResults') }}
+				</h5>
+			</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-striped table-hover align-middle">
+						<thead class="table-light">
+							<tr>
+								<th class="text-center" style="width: 5%;"> # </th>
+								<th class="text-center" style="width: 10%;"> {{ __('admin.quizScore') }} </th>
+								<th class="text-center" style="width: 12%;"> {{ __('admin.quizStatus') }} </th>
+								<th> {{ __('admin.quizStartedAt') }} </th>
+								<th class="text-center"> {{ __('admin.quizTimeTook') }} </th>
+								@if($allowActions)
+								<th class="text-center" style="width: 18%;"> {{ __('admin.Actions') }} </th>
+								@endif
+							</tr>
+						</thead>
+						<tbody>
+							@if(empty($attempts) || (!empty($attempts) && $attempts->count() <= 0)) <tr>
+								<td colspan="{{ $allowActions == true ? 6 : 5 }}" class="text-center py-4 text-muted">
+									<i class="ti text-primary ti-file-x fs-2 d-block mb-2"></i>
+									{{ __('admin.quizNoResults') }}
+								</td>
+								</tr>
+								@else
+								@foreach($attempts as $index => $attempt)
+								<tr>
+									<td class="text-center fw-bold"> {{ $index + 1 }} </td>
+									<td class="text-center">
+										<span
+											class="fw-bold fs-6 {{ $attempt->score >= $quiz->passing_criteria ? 'text-success' : 'text-danger' }}">
+											{{ $attempt->score }}%
+										</span>
+									</td>
+									<td class="text-center">
+										@if($attempt->score >= $quiz->passing_criteria)
+										<span class="badge bg-success rounded-pill">
+											<i class="ti ti-check me-1"></i>
+											{{ __('admin.quizPassed') }}
+										</span>
+										@elseif($active_now == $attempt->id)
+										<span class="badge bg-info rounded-pill">
+											<i class="ti ti-clock me-1"></i>
+											{{ __('admin.quizInProgress') }}
+										</span>
+										@else
+										<span class="badge bg-danger rounded-pill">
+											<i class="ti ti-x me-1"></i>
+											{{ __('admin.quizFailed') }}
+										</span>
+										@endif
+									</td>
+									<td>
+										<i class="ti text-primary ti-calendar-time me-1"></i>
+										{{ $attempt->created_at->format('jS M. Y h:i A') }}
+									</td>
+									<td class="text-center">
+										<i class="ti text-primary ti-hourglass me-1"></i>
+										@if($attempt->status)
+										{{ $attempt->started_at->diffInMinutes($attempt->ended_at) . ' ' . __('admin.minutes') }}
+										@else
+										{{ __('admin.quizInProgress') }}
+										@endif
+									</td>
+									@if($allowActions == true)
+									<td class="text-center">
+										<a href="{{ route('quizzes.view_response_mine', ['id' => $training->id, 'quiz_id' => $quiz->id, 'response_id' => $attempt->id]) }}"
+											class="btn btn-label-primary btn-sm rounded-pill shadow-sm">
+											<i class="ti ti-eye me-1"></i>
+											{{ __('admin.quizViewResults') }}
+										</a>
+									</td>
+									@endif
+								</tr>
+								@endforeach
+							@endif
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
-@endsection
+</div>
+@stop
 @section('pagescripts')
-	<script type="text/javascript">
-		@if( $available )
+<script type="text/javascript">
+	@if( $available )
 		$(document).on('click', '#quizStartBtn', function (e) {
 			e.preventDefault();
 			Swal.fire({
@@ -200,37 +237,89 @@
 				html: '{!! __("admin.startQuizMsg") !!}',
 				buttonsStyling: true,
 				showCancelButton: true,
-				confirmButtonText: "{!! __('admin.startQuizOk') !!}",
-				cancelButtonText: "{!! __('admin.startQuizCancel') !!}",
+				confirmButtonText: "<i class='ti ti-check me-1'></i> {!! __('admin.startQuizOk') !!}",
+				cancelButtonText: "<i class='ti ti-x me-1'></i> {!! __('admin.startQuizCancel') !!}",
 				confirmButtonClass: 'btn btn-primary',
-				cancelButtonClass: 'btn btn-danger ml-1',
-			}).then(function ( result ) {
-				if( result.value ) { $("#startQuizForm").submit(); }
+				cancelButtonClass: 'btn btn-danger ms-1',
+				customClass: {
+					confirmButton: 'btn btn-primary',
+					cancelButton: 'btn btn-label-danger'
+				},
+				reverseButtons: true,
+				// focusConfirm: false,
+				backdrop: true,
+				showClass: {
+					popup: 'animate__animated animate__fadeInDown'
+				},
+				hideClass: {
+					popup: 'animate__animated animate__fadeOutUp'
+				}
+			}).then(function (result) {
+				if (result.value) { 
+					// Add loading state to button
+					const btn = $('#quizStartBtn');
+					btn.html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> {{ __("admin.loading") }}');
+					btn.attr('disabled', true);
+					
+					// Submit form
+					$("#startQuizForm").submit(); 
+				}
 			});
 		});
 		@endif
 
 		$(document).ready(function(){
+			// Enhanced countdown timer
 			@if( !empty( $time_remaining ) )
-			var timeRemain = $('#timeRemain');
-			var time = timeRemain.data('value').split(':');
-			var countDownDate = new Date().getTime() + (parseInt(time[0]) * 60 * 60 * 1000) + (parseInt(time[1]) * 60 * 1000) + (parseInt(time[2]) * 1000);
-			var x = setInterval(function() {
-				var now = new Date().getTime();
-				var distance = countDownDate - now;
+			const timeRemain = $('#timeRemain');
+			const time = timeRemain.data('value').split(':');
+			const countDownDate = new Date().getTime() + 
+				(parseInt(time[0]) * 60 * 60 * 1000) + 
+				(parseInt(time[1]) * 60 * 1000) + 
+				(parseInt(time[2]) * 1000);
+				
+			const x = setInterval(function() {
+				const now = new Date().getTime();
+				const distance = countDownDate - now;
 
-				var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-				var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-				var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+				// Time calculations
+				const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+				const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+				const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
+				// Update countdown display
 				timeRemain.html(('0' + hours).slice(-2) + ":" + ('0' + minutes).slice(-2) + ":" + ('0' + seconds).slice(-2));
-				if( distance < 0 )
-				{
+				
+				// Apply visual effect for last minute
+				if (hours === 0 && minutes < 1) {
+					timeRemain.addClass('text-danger fw-bold');
+					if (seconds % 2 === 0) {
+						timeRemain.css('opacity', '0.7');
+					} else {
+						timeRemain.css('opacity', '1');
+					}
+				}
+
+				// When countdown is finished
+				if (distance < 0) {
 					clearInterval(x);
-					timeRemain.parent().html('<span class="badge text-bg-success"> {{ __('admin.availableNow') }} </span>');
+					timeRemain.parent().html('<span class="badge bg-success"> <i class="ti text-primary ti-check me-1"></i> {{ __("admin.availableNow") }} </span>');
+					
+					// Optional: Add notification or sound
+					if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+						new Notification('{{ __("admin.quizAvailable") }}', {
+							body: '{{ __("admin.quizAvailableMessage") }}',
+							icon: '/favicon.ico'
+						});
+					}
+					
+					// Optional: Reload page to show updated state
+					setTimeout(() => {
+						location.reload();
+					}, 1500);
 				}
 			}, 1000);
 			@endif
 		});
-	</script>
-@endsection
+</script>
+@stop

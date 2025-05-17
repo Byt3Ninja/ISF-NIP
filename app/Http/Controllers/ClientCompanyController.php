@@ -6,6 +6,7 @@ use App\Country;
 use App\Events\WebMessage;
 use App\FundingRound;
 use App\Organization;
+use App\ScreeningEvaluation;
 use App\Sector;
 use App\Team_member;
 use Illuminate\Http\Request;
@@ -75,11 +76,9 @@ class ClientCompanyController extends Controller
             $pathToFile = storage_path($company->pitch_deck);
             // تحقق من وجود الملف
             $fileExists = file_exists($pathToFile);
-
-
-
-
-            return view('admin/clients/startup/company_profile', compact('company', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
+            $company_current_step = $company->step;
+            $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
+            return view('admin/clients/startup/company_profile', compact('company', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
         } catch (Exception $e) {
             //log what happend
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);

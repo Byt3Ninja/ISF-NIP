@@ -1,3 +1,11 @@
+@php
+    $organization = null;
+    if( isset( $service->serviceCategory ) && $service->serviceCategory->organization )
+    {
+        $organization = $service->serviceCategory->organization;
+    }
+@endphp
+
 <!DOCTYPE html>
 
 <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
@@ -224,7 +232,7 @@ $setting = \App\settings::where('id', 1)->first();
                                                     <p style="margin: 0;">Request Details: -</p>
                                                     <p style="margin: 0;">Requested by: {{ $requester->first_name_en }} {{ $requester->last_name_en }}</p>
                                                     <p style="margin: 0;">Email: {{ $requester->email }}</p>
-                                                    <p style="margin: 0;">Organization: {{ $service->serviceCategory->organization->name_en }}</p>
+                                                    <p style="margin: 0;">Organization: {{ !is_null( $organization ) ? $organization->name_en : '-' }}</p>
                                                     <p style="margin: 0;">Requested Date: {{ $request->date_time }}</p>
                                                     <p style="margin: 0;"> Service Description: {{ $service->description_en }}</p>
                                                     <p style="margin: 0;">Additional Notes: {{ $request->comment }}</p>
@@ -365,8 +373,10 @@ $setting = \App\settings::where('id', 1)->first();
                                                 <p style="margin: 0; word-break: break-word;">
                                                     <span style="word-break: break-word; color: #95979c;">
                                                         Best Regards,  
+                                                        @if( !is_null( $organization ) )
                                                         <br>
                                                         {{ $service->serviceCategory->organization->name_en }}
+                                                        @endif
                                                         <br>
                                                         {{ $setting->Platform_Name }}
                                                     </span>

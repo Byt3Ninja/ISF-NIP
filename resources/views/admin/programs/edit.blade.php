@@ -42,6 +42,8 @@
       <form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
         @csrf 
         <input type="hidden" name="tab_id" value="1">
+        <input type="hidden" name="id" id="cycleid" value="{{ $id }}">
+        <input type="hidden" name="typeedit" id="type" value="1">
         <!-- Tabs (mobile) -->
         <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none pb-3">
           <ul class="nav nav-pills flex-nowrap" role="tablist">

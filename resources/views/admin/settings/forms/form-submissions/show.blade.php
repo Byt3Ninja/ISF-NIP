@@ -53,27 +53,12 @@
 @stop
 
 @section('pagescripts')
+
 <script>
+  let submissionData = {!! json_encode($data[0]) !!};
+  console.log(submissionData);
   document.addEventListener('DOMContentLoaded', function() {
-    const submissionData = {
-      form_name: 'Final evaluation',
-      submission_id: 'SFE-001',
-      submissionDate: '2024-03-05 10:15:30',
-      submitted_by: 'Evaluator A',
-      organization_name: 'Genz',
-      startup_name: 'Alpha Tech',
-      program_name: 'TIEC Incubation Cycle TIEC Incubation ',
-      answers: [
-        { label: 'Company Name', value: 'Alpha Tech' },
-        { label: 'Monthly Sales Growth Rate', value: '15%' },
-        { label: 'Evaluator Notes', value: 'Strong team, good traction. Monitor burn rate closely. Consider next steps.' },
-        { label: 'Evaluation Decision', value: 'Approved' },
-        { label: 'Needs Assistance?', value: 'No' },
-        { label: 'Pitch Deck', file_url: '/path/to/download/alpha_deck_v2.pdf', file_name: 'alpha_deck_v2.pdf' },
-        { label: 'Financials', file_url: '/path/to/download/financials.xlsx', file_name: 'financials.xlsx' },
-        { label: 'Optional Supporting Document', noFileSubmitted: true }
-      ]
-    };
+    const submissionData = {!! json_encode($data[0]) !!};
 
     // Render metadata
     const metadataSection = document.querySelector('.metadata-section');

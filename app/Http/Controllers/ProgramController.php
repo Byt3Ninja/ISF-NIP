@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Step;
 use App\User;
 use App\Cycle;
+use App\Stage;
+use App\Sector;
 use App\Company;
+use App\UserScore;
 use App\Organization;
 use App\Finalscreening;
+use App\SurveyResponses;
 use Illuminate\Http\Request;
 use App\Jobs\ExportCycleData;
 use App\Notifications\TemplateEmail;
@@ -286,8 +290,142 @@ class ProgramController extends Controller
 
     }
 
-    public function programReport(string $id)
+    public function programReport(string $id , Request $request)
     {
-        return view('admin.programs.program-report');
+        $cycle = Cycle::withCount(['companies', 'mentors'])->with(['steps'])->findOrFail($id);
+
+        $totalWorkshops = $cycle->trainingSessions()->count();
+        
+
+        $companyQuery = $cycle->companies()->with(['sectoR', 'stagE']);
+
+        if ($request->filled('sector')) {
+               $companyQuery->whereHas('sectoR', function ($q) use ($request) {
+                  $q->where('name_en', $request->sector);
+           });
+        }
+
+        if ($request->filled('stage')) {
+               $companyQuery->whereHas('stagE', function ($q) use ($request) {
+                  $q->where('name_en', $request->stage);
+         });
+        }
+
+        $companies = $companyQuery->get();
+
+        $sectors = Sector::all();
+
+        $stages = Stage::all();
+
+            
+        // Mentorship Requests Filtering
+        $mentorshipRequests = $cycle->mentorshipRequests()
+         ->with(['user.company', 'mentor'])
+        ->when($request->filled('mentor'), fn($q) => $q->where('mentor_id', $request->mentor))
+        ->when($request->filled('company'), fn($q) => $q->whereHas('user', fn($q2) => $q2->where('company_id', $request->company)))
+        ->when($request->filled('zoom_date'), fn($q) => $q->whereDate('zoom_date', '>=', $request->zoom_date))
+        ->get();
+
+      $mentors = $cycle->mentors;
+
+      $mentorNames = $mentorshipRequests->pluck('mentor.name')->toArray();
+
+      $mentorSessions = $mentorshipRequests
+        ->groupBy('mentor_id')
+        ->map(fn($group) => $group->count())
+        ->toArray();
+
+    $mentorAvgRatings = $mentorshipRequests
+        ->groupBy('mentor_id')
+        ->map(fn($group) => $group->avg('rating'))
+        ->toArray();
+
+    // Top Mentors
+    $topMentors = collect($mentorSessions)
+        ->sortDesc()
+        ->take(5)
+        ->keys()
+        ->all();
+
+    $topMentorNames = [];
+    $topMentorSessionsArray = [];
+    foreach ($topMentors as $mentorId) {
+        $mentorName = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor?->name;
+        if ($mentorName) {
+            $topMentorNames[] = $mentorName;
+            $topMentorSessionsArray[] = $mentorSessions[$mentorId] ?? 0;
+        }
+    }
+
+    $mentorAvgRatingsArray = [];
+    foreach ($mentorAvgRatings as $mentorId => $avgRating) {
+        $mentor = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor;
+        if ($mentor) {
+            $mentorAvgRatingsArray[$mentor->name] = round($avgRating, 2);
+        }
+    }
+
+
+    $workshopsQuery = $cycle->trainingSessions();
+
+    if ($request->filled('trainer')) {
+        $workshopsQuery->where('trainer_name', $request->trainer);
+    }
+
+    if ($request->filled('workshop_name')) {
+       $workshopsQuery->where('training_sessions.title', 'like', '%' . $request->workshop_name . '%');
+    }
+
+    if ($request->filled('type')) {
+        $workshopsQuery->where('type', $request->type);
+    }
+
+    $workshops = $workshopsQuery->where(function($query) {
+    $query->where('type', 'offline')
+          ->orWhere('type', 'online')
+          ->orWhere('type', 'sessions');
+    })->get();
+
+    $trainerNames = $cycle->trainingSessions()->pluck('trainer_name')->unique()->values();
+
+    $totalWorkshops = $workshops->count();
+    $totalMinutes = $workshops->sum('duration');
+    $totalSessionHours = round($totalMinutes / 60, 2);
+    $zoomWorkshops = $workshops->where('type', 'sessions')->count();
+    $inPersonWorkshops = $workshops->where('type', 'offline')->count();
+    $uploadedMaterials = $workshops->where('type', 'online')->count();
+
+    $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
+
+    $averageFinalScore = $cycle->mentorshipRequests()->avg('rating');
+
+     
+    return view('admin.programs.program-report', [
+           'cycle' => $cycle,
+           'totalStartups' => $cycle->companies_count,
+           'totalMentors' => $cycle->mentors_count,
+           'totalWorkshops'  => $totalWorkshops,
+           'steps' => $cycle->steps,
+           'companies' => $companies,
+           'sectors' => $sectors,
+           'stages' => $stages,
+           'mentors' => $mentors,
+           'mentorshipRequests' => $mentorshipRequests,
+           'mentorNames' => $mentorNames,
+           'mentorSessions' => $mentorSessions,
+           'mentorAvgRatings' => $mentorAvgRatings,
+           'trainerNames' => $trainerNames,
+           'totalSessionHours' => $totalSessionHours,
+           'zoomWorkshops' => $zoomWorkshops,
+           'inPersonWorkshops' => $inPersonWorkshops,
+           'uploadedMaterials' => $uploadedMaterials,
+           'workshops' => $workshops,
+           'surveyResponses' => $surveyResponses,
+           'averageFinalScore' => $averageFinalScore,
+           'mentorNamesChart1' => $topMentorNames,
+           'mentorSessionsArray' => $topMentorSessionsArray,
+           'mentorAvgRatings' => $mentorAvgRatingsArray,
+        ]);
+   
     }
 }
