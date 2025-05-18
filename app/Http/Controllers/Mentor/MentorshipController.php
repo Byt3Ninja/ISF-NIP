@@ -23,8 +23,12 @@ class MentorshipController extends Controller
         }
         if(auth()->user() && auth()->user()->hasRole('Registered')) {
             $company_id = auth()->user()->company_id;
-            $usersCompany = auth()->user()->company->users()->where('company_id', $company_id)->get();
-            $sessions = MentorshipRequest::whereIn('user_id', $usersCompany->pluck('id'))->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
+            if(auth()->user()->company) {
+                $usersCompany = auth()->user()->company->users()->where('company_id', $company_id)->get();
+                $sessions = MentorshipRequest::whereIn('user_id', $usersCompany->pluck('id'))->whereDate('zoom_date','<',now()->format('Y-m-d'))->where('approved','Yes')->orderBy('zoom_date','DESC')->get();
+            } else {
+                $sessions = collect(); // Empty collection if no company
+            }
         }
         if(auth()->user() && auth()->user()->hasRole('Admin')) {
             $company_id = Company::all();

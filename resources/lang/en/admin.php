@@ -1738,5 +1738,6 @@ return [
 	'imported' => 'Import Done Successfully',
 	'Total Rows in CSV' => 'Total Rows in CSV',
 	'records' => 'records',
-
+	'Step Name' => 'Step Name',
+	'Mentor Zoom Date' => 'Mentor Zoom Date',
 ];
