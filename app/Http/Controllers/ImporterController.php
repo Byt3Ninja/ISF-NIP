@@ -26,7 +26,7 @@ class ImporterController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt|max:10240', 
+            'file' => 'required|mimes:csv,txt|max:10240',
         ]);
 
         try {
@@ -56,10 +56,18 @@ class ImporterController extends Controller
 
             $headers = array_map('trim', $headers);
             $data = [];
+            $errors = [];
+
+            Log::info('CSV Headers', ['headers' => $headers, 'count' => count($headers)]);
 
             while (($row = fgetcsv($fileHandle, 0, ',')) !== false) {
                 $row = array_map('trim', $row);
-                $data[] = array_combine($headers, array_pad($row, count($headers), null));
+                if (count($row) < count($headers)) {
+                    $row = array_pad($row, count($headers), null);
+                } elseif (count($row) > count($headers)) {
+                    $row = array_slice($row, 0, count($headers));
+                }
+                $data[] = array_combine($headers, $row);
             }
 
             fclose($fileHandle);
@@ -70,14 +78,96 @@ class ImporterController extends Controller
                 return response()->json(['success' => false, 'message' => 'No data found in CSV file.'], 400);
             }
 
+            Log::info('Sample Row', ['row' => $data[0] ?? 'No data']);
+
+            foreach ($data as $index => $row) {
+                $rowErrors = [];
+
+                // Cycle validations
+                if (isset($row['Program Name']) && empty(trim($row['Program Name']))) {
+                    $rowErrors[] = "Missing program name";
+                } elseif (isset($row['Program Name']) && strlen(trim($row['Program Name'])) > 255) {
+                    $rowErrors[] = "Program name exceeds 255 characters";
+                }
+
+                $startDate = null;
+                $endDate = null;
+
+                if (isset($row['Program Start Date']) && !empty($row['Program Start Date'])) {
+                    try {
+                        $startDate = Carbon::createFromFormat('m/d/Y', $row['Program Start Date']);
+                        if (!$startDate) {
+                            $rowErrors[] = "Invalid program start date format (use MM/DD/YYYY)";
+                        }
+                    } catch (\Exception $e) {
+                        $rowErrors[] = "Invalid program start date format (use MM/DD/YYYY)";
+                    }
+                } else {
+                    $rowErrors[] = "Missing program start date";
+                }
+
+                if (isset($row['Program End Date']) && !empty($row['Program End Date'])) {
+                    try {
+                        $endDate = Carbon::createFromFormat('m/d/Y', $row['Program End Date']);
+                        if (!$endDate) {
+                            $rowErrors[] = "Invalid program end date format (use MM/DD/YYYY)";
+                        }
+                    } catch (\Exception $e) {
+                        $rowErrors[] = "Invalid program end date format (use MM/DD/YYYY)";
+                    }
+                } else {
+                    $rowErrors[] = "Missing program end date";
+                }
+
+                if ($startDate && $endDate && $startDate->gt($endDate)) {
+                    $rowErrors[] = "Program start date must be before end date";
+                }
+
+                // Founder validations
+                if (isset($row['Founder Name']) && empty(trim($row['Founder Name']))) {
+                    $rowErrors[] = "Missing founder first name";
+                } elseif (isset($row['Founder Name']) && strlen(trim($row['Founder Name'])) > 255) {
+                    $rowErrors[] = "Founder first name exceeds 255 characters";
+                }
+
+                if (isset($row['Founder Last Name']) && empty(trim($row['Founder Last Name']))) {
+                    $rowErrors[] = "Missing founder last name";
+                } elseif (isset($row['Founder Last Name']) && strlen(trim($row['Founder Last Name'])) > 255) {
+                    $rowErrors[] = "Founder last name exceeds 255 characters";
+                }
+
+                if (isset($row['E-Mail']) && empty(trim($row['E-Mail']))) {
+                    $rowErrors[] = "Missing founder email";
+                } elseif (isset($row['E-Mail']) && !filter_var($row['E-Mail'], FILTER_VALIDATE_EMAIL)) {
+                    $rowErrors[] = "Invalid founder email format";
+                }
+
+                if (isset($row['Phone']) && !empty($row['Phone'])) {
+                    $phone = trim($row['Phone']);
+                    Log::info('Phone validation', [
+                        'row_number' => $index + 2,
+                        'original_phone' => $row['Phone'],
+                        'trimmed_phone' => $phone
+                    ]);
+                    if (!preg_match('/^\d{10,}$/', $phone)) {
+                        $rowErrors[] = "Phone must contain only numbers (at least 11 digits, no hyphens or special characters)";
+                    }
+                }
+
+                if (!empty($rowErrors)) {
+                    $errors[] = "Row " . ($index + 2) . ": " . implode(', ', $rowErrors);
+                }
+            }
+
             session(['csv_file_path' => $path]);
 
-            Log::info('CSV uploaded successfully', ['headers' => $headers, 'row_count' => count($data)]);
+            Log::info('CSV uploaded successfully', ['headers' => $headers, 'row_count' => count($data), 'validation_errors' => $errors]);
 
             return response()->json([
                 'success' => true,
                 'headers' => $headers,
-                'data' => $data
+                'data' => $data,
+                'errors' => $errors
             ]);
         } catch (\Exception $e) {
             Log::error('Upload failed', [
@@ -89,220 +179,271 @@ class ImporterController extends Controller
         }
     }
 
-    public function import(Request $request)
+     public function import(Request $request)
     {
         try {
-            $request->validate([
-                'mappings' => 'required|array',
-                'data' => 'required|array',
-                'organization_id' => 'required|integer|exists:organizations,id'
-            ]);
+            $input = $request->all();
+            $mappings = $input['mappings'] ?? [];
+            $data = $input['data'] ?? [];
+            $organizationId = $input['organization_id'] ?? null;
 
-            $mappings = $request->input('mappings');
-            $data = $request->input('data');
-            $organizationId = $request->input('organization_id');
-            $filePath = session('csv_file_path');
-
-            if (!$filePath || !Storage::disk('public')->exists($filePath)) {
-                Log::error('Import failed: No uploaded file found', ['file_path' => $filePath]);
-                return response()->json(['success' => false, 'message' => 'No uploaded file found.'], 400);
+            if (empty($mappings) || empty($data) || !$organizationId) {
+                return response()->json(['success' => false, 'message' => 'Missing required parameters'], 400);
             }
 
-            $fieldEntities = [
-                'title' => 'Cycle',
-                'start' => 'Cycle',
-                'end' => 'Cycle',
-                'name_en' => 'Company',
-                'country_id' => 'Company',
-                'state_id' => 'Company',
-                'industries' => 'Company',
-                'sector' => 'Company',
-                'address_en' => 'Company',
-                'years_of_operations' => 'Company',
-                'product_or_service' => 'Company',
-                'targeted_market' => 'Company',
-                'est_date' => 'Company',
-                'first_name_en' => 'Founder',
-                'last_name_en' => 'Founder',
-                'gender' => 'Founder',
-                'phone' => 'Founder',
-                'email' => 'Founder',
+            $results = [
+                'total_rows' => count($data),
+                'attempted' => 0,
+                'imported' => 0,
+                'failed' => 0,
+                'skipped' => 0,
+                'duplicates' => 0,
+                'failed_rows' => [],
+                'skipped_rows' => [],
+                'duplicates_found' => []
             ];
 
             DB::beginTransaction();
-            $importedCount = 0;
-            $skippedRows = [];
 
+            $countryCache = [];
             foreach ($data as $index => $row) {
-                $companyData = [];
-                $founderData = [];
-                $cycleData = [];
+                $rowKeys = array_keys($row);
+                $results['attempted']++;
 
                 foreach ($mappings as $field => $srcIndex) {
-                    $entity = $fieldEntities[$field] ?? 'Unknown';
-                    $header = array_keys($row)[$srcIndex] ?? null;
-                    $value = $header ? ($row[$header] ?? null) : null;
-
-                    if ($entity === 'Cycle') {
-                        $cycleData[$field] = $value;
-                    } elseif ($entity === 'Company') {
-                        $companyData[$field] = $value;
-                    } elseif ($entity === 'Founder') {
-                        $founderData[$field] = $value;
-                    } else {
-                        Log::warning('Unknown field entity', ['field' => $field, 'row_number' => $index + 2]);
-                    }
-                }
-
-                $requiredFields = ['name_en', 'address_en'];
-                $missingFields = array_filter($requiredFields, fn($field) => !isset($companyData[$field]) || trim($companyData[$field]) === '');
-                if (!empty($missingFields)) {
-                    $skippedRows[] = "Row " . ($index + 2) . ": Missing required fields: " . implode(', ', $missingFields);
-                    Log::warning('Row skipped due to missing required fields', [
-                        'row_number' => $index + 2,
-                        'missing_fields' => $missingFields
-                    ]);
-                    continue;
-                }
-
-                $companyData['name_ar'] = $companyData['name_en'] ?? '';
-                $companyData['address_ar'] = $companyData['address_en'] ?? '';
-
-               if (isset($companyData['country_id']) && !empty($companyData['country_id']) && !is_numeric($companyData['country_id'])) {
-                    $countryName = trim($companyData['country_id']);
-                    $country = Country::where('name_en', $countryName)
-                    ->orWhere('name_ar', $countryName)
-                    ->first();
-                     if (!$country) {
-                        $country = Country::create([
-                            'name_en' => $countryName,
-                            'name_ar' => $countryName,
+                    if (!isset($rowKeys[$srcIndex])) {
+                        Log::error('Invalid mapping index', [
+                            'field' => $field,
+                            'srcIndex' => $srcIndex,
+                            'rowKeys' => $rowKeys,
+                            'row_number' => $index + 2
                         ]);
+                        $results['failed']++;
+                        $results['failed_rows'][] = "Row " . ($index + 2) . ": Missing column for field '$field' (mapped to index $srcIndex)";
+                        continue 2;
                     }
-                        $companyData['country_id'] = $country->id;
-                } else {
-                    $companyData['country_id'] = null;
-                }   
-
-                if (isset($companyData['state_id']) && !empty($companyData['state_id']) && !is_numeric($companyData['state_id'])) {
-                    $stateName = trim($companyData['state_id']);
-                    $query = State::where('name_en', $stateName)->orWhere('name_ar', $stateName);
-                    if (!empty($companyData['country_id'])) {
-                          $query->where('country_id', $companyData['country_id']);
-                        }
-                         $state = $query->first();
-                    if (!$state && !empty($companyData['country_id'])) {
-                         $state = State::create([
-                        'name_en' => $stateName,
-                        'name_ar' => $stateName,
-                        'country_id' => $companyData['country_id'],
-                    ]);
-                 }
-                     $companyData['state_id'] = $state ? $state->id : null;
-            } else {
-                    $companyData['state_id'] = null;
                 }
 
-
-                if (isset($companyData['est_date']) && !empty($companyData['est_date'])) {
-                    try {
-                        $companyData['est_date'] = Carbon::createFromFormat('m/d/Y', $companyData['est_date'])->format('Y-m-d');
-                    } catch (\Exception $e) {
-                        $skippedRows[] = "Row " . ($index + 2) . ": Invalid establishment date format.";
-                        Log::warning('Invalid est_date', ['row_number' => $index + 2, 'est_date' => $companyData['est_date']]);
-                        continue;
-                    }
-                } else {
-                    $companyData['est_date'] = null;
-                }
-
-                if (!empty($cycleData['title'])) {
-                    try {
-                        $cycleData['start'] = !empty($cycleData['start']) ? Carbon::createFromFormat('m/d/Y', $cycleData['start'])->format('Y-m-d') : null;
-                        $cycleData['end'] = !empty($cycleData['end']) ? Carbon::createFromFormat('m/d/Y', $cycleData['end'])->format('Y-m-d') : null;
-                    } catch (\Exception $e) {
-                        $skippedRows[] = "Row " . ($index + 2) . ": Invalid cycle date format.";
-                        Log::warning('Invalid cycle date', ['row_number' => $index + 2, 'start' => $cycleData['start'], 'end' => $cycleData['end']]);
-                        continue;
-                    }
-
-                    $cycle = Cycle::updateOrCreate(
-                        ['title' => $cycleData['title']],
-                        [
-                            'start' => $cycleData['start'],
-                            'end' => $cycleData['end'],
-                            'organization_id' => $organizationId,
-                        ]
-                    );
-                    $companyData['cycle'] = $cycle->id;
-                } else {
-                    $companyData['cycle'] = null;
-                }
-
-                $companyData = array_filter($companyData, fn($value) => !is_null($value));
-
-                try {
-                    $company = Company::create($companyData);
-                } catch (\Exception $e) {
-                    $skippedRows[] = "Row " . ($index + 2) . ": Failed to create company: " . $e->getMessage();
-                    Log::warning('Company creation failed', [
-                        'row_number' => $index + 2,
-                        'error' => $e->getMessage(),
-                        'companyData' => $companyData
-                    ]);
-                    continue;
-                }
-
-                if (!empty($founderData['email']) && filter_var($founderData['email'], FILTER_VALIDATE_EMAIL)) {
-                    $founderData['company_id'] = $company->id;
-                    try {
-                        $user = User::updateOrCreate(
-                            ['email' => $founderData['email']],
-                            array_merge($founderData, [
-                                'password' => bcrypt('password'),
-                            ])
+                if (isset($mappings['country_id']) && !empty($row[$rowKeys[$mappings['country_id']]])) {
+                    $countryName = trim($row[$rowKeys[$mappings['country_id']]]);
+                    if (!isset($countryCache[$countryName])) {
+                        $country = Country::firstOrCreate(
+                            ['name_en' => $countryName],
+                            [
+                                'name_ar' => $countryName,
+                                'created_at' => Carbon::now(),
+                                'updated_at' => Carbon::now()
+                            ]
                         );
-                    } catch (\Exception $e) {
-                        $skippedRows[] = "Row " . ($index + 2) . ": Failed to create/update founder: " . $e->getMessage();
-                        Log::warning('Founder creation failed', [
-                            'row_number' => $index + 2,
-                            'error' => $e->getMessage(),
-                            'founderData' => $founderData
-                        ]);
+                        $countryCache[$countryName] = $country->id;
                     }
-                } else {
-                    Log::warning('No valid founder email', [
-                        'row_number' => $index + 2,
-                        'founderData' => $founderData
-                    ]);
                 }
-
-                $importedCount++;
             }
 
-            Storage::disk('public')->delete($filePath);
-            session()->forget('csv_file_path');
+            $stateCache = [];
+            foreach ($data as $index => $row) {
+                $rowKeys = array_keys($row);
+
+                if (isset($mappings['country_id']) && isset($mappings['state_id']) &&
+                    !empty($row[$rowKeys[$mappings['country_id']]]) && !empty($row[$rowKeys[$mappings['state_id']]])) {
+                    $countryName = trim($row[$rowKeys[$mappings['country_id']]]);
+                    $stateName = trim($row[$rowKeys[$mappings['state_id']]]);
+                    $countryId = $countryCache[$countryName] ?? null;
+
+                    if ($countryId) {
+                        $stateKey = $countryId . ':' . $stateName;
+                        if (!isset($stateCache[$stateKey])) {
+                            $state = State::firstOrCreate(
+                                ['country_id' => $countryId, 'name_en' => $stateName],
+                                [
+                                    'name_ar' => $stateName,
+                                    'created_at' => Carbon::now(),
+                                    'updated_at' => Carbon::now()
+                                ]
+                            );
+                            $stateCache[$stateKey] = $state->id;
+                        }
+                    } else {
+                        $results['skipped']++;
+                        $results['skipped_rows'][] = "Row " . ($index + 2) . ": Missing country for state '$stateName'";
+                        continue;
+                    }
+                }
+            }
+
+            $cycleCache = [];
+            foreach ($data as $index => $row) {
+                $rowKeys = array_keys($row);
+
+                if (isset($mappings['title']) && isset($mappings['start']) && isset($mappings['end']) &&
+                    !empty($row[$rowKeys[$mappings['title']]]) &&
+                    !empty($row[$rowKeys[$mappings['start']]]) &&
+                    !empty($row[$rowKeys[$mappings['end']]])) {
+                    $cycleTitle = trim($row[$rowKeys[$mappings['title']]]);
+                    $startDate = Carbon::parse(trim($row[$rowKeys[$mappings['start']]]))->toDateString();
+                    $endDate = Carbon::parse(trim($row[$rowKeys[$mappings['end']]]))->toDateString();
+
+                    $cycleKey = $cycleTitle . ':' . $startDate . ':' . $endDate;
+                    if (!isset($cycleCache[$cycleKey])) {
+                        $cycle = Cycle::firstOrCreate(
+                            [
+                                'organization_id' => $organizationId,
+                                'title' => $cycleTitle,
+                                'start' => $startDate,
+                                'end' => $endDate
+                            ],
+                            [
+                                'created_at' => Carbon::now(),
+                                'updated_at' => Carbon::now()
+                            ]
+                        );
+                        $cycleCache[$cycleKey] = $cycle->id;
+                    }
+                } else {
+                    $results['skipped']++;
+                    $results['skipped_rows'][] = "Row " . ($index + 2) . ": Missing or invalid cycle data";
+                    continue;
+                }
+            }
+
+            foreach ($data as $index => $row) {
+                $rowKeys = array_keys($row);
+
+                $email = null;
+                if (isset($mappings['email']) && isset($rowKeys[$mappings['email']])) {
+                    $email = trim($row[$rowKeys[$mappings['email']]]);
+                }
+
+                if (empty($email)) {
+                    $results['skipped']++;
+                    $results['skipped_rows'][] = "Row " . ($index + 2) . ": Missing or invalid email";
+                    continue;
+                }
+
+                // Check for duplicate email 
+                $cycleId = null;
+                if (isset($mappings['title']) && isset($mappings['start']) && isset($mappings['end']) &&
+                    !empty($row[$rowKeys[$mappings['title']]]) &&
+                    !empty($row[$rowKeys[$mappings['start']]]) &&
+                    !empty($row[$rowKeys[$mappings['end']]])) {
+                    $cycleTitle = trim($row[$rowKeys[$mappings['title']]]);
+                    $startDate = Carbon::parse(trim($row[$rowKeys[$mappings['start']]]))->toDateString();
+                    $endDate = Carbon::parse(trim($row[$rowKeys[$mappings['end']]]))->toDateString();
+                    $cycleKey = $cycleTitle . ':' . $startDate . ':' . $endDate;
+                    $cycleId = $cycleCache[$cycleKey] ?? null;
+                }
+
+                if (!$cycleId) {
+                    $results['skipped']++;
+                    $results['skipped_rows'][] = "Row " . ($index + 2) . ": Unable to link cycle";
+                    continue;
+                }
+
+                $countryId = null;
+                $stateId = null;
+                if (isset($mappings['country_id']) && !empty($row[$rowKeys[$mappings['country_id']]])) {
+                    $countryName = trim($row[$rowKeys[$mappings['country_id']]]);
+                    $countryId = $countryCache[$countryName] ?? null;
+                }
+
+                if (isset($mappings['state_id']) && !empty($row[$rowKeys[$mappings['state_id']]]) && $countryId) {
+                    $stateName = trim($row[$rowKeys[$mappings['state_id']]]);
+                    $stateKey = $countryId . ':' . $stateName;
+                    $stateId = $stateCache[$stateKey] ?? null;
+                }
+
+                $estDate = null;
+                if (isset($mappings['est_date']) && !empty($row[$rowKeys[$mappings['est_date']]])) {
+                    try {
+                        $estDateRaw = trim($row[$rowKeys[$mappings['est_date']]]);
+                        $estDate = Carbon::createFromFormat('m/d/Y', $estDateRaw)->toDateString();
+                    } catch (\Exception $e) {
+                        $results['skipped']++;
+                        $results['skipped_rows'][] = "Row " . ($index + 2) . ": Invalid establishment date format for '$estDateRaw' (use MM/DD/YYYY)";
+                        continue;
+                    }
+                }
+
+                // Process Company
+                $nameEn = isset($mappings['name_en']) ? trim($row[$rowKeys[$mappings['name_en']]]) : null;
+                if (empty($nameEn)) {
+                    $results['skipped']++;
+                    $results['skipped_rows'][] = "Row " . ($index + 2) . ": Missing company name";
+                    continue;
+                }
+
+                $company = Company::firstOrCreate(
+                    [
+                        'cycle' => $cycleId,
+                        'name_en' => $nameEn
+                    ],
+                    [
+                        'country_id' => $countryId,
+                        'state_id' => $stateId,
+                        'name_ar' => $nameEn,
+                        'address_en' => isset($mappings['address_en']) ? trim($row[$rowKeys[$mappings['address_en']]]) : null,
+                        'address_ar' => isset($mappings['address_en']) ? trim($row[$rowKeys[$mappings['address_en']]]) : null,
+                        'industries' => isset($mappings['industries']) ? trim($row[$rowKeys[$mappings['industries']]]) : null,
+                        'sector' => isset($mappings['sector']) ? trim($row[$rowKeys[$mappings['sector']]]) : null,
+                        'years_of_operations' => isset($mappings['years_of_operations']) ? trim($row[$rowKeys[$mappings['years_of_operations']]]) : null,
+                        'product_or_service' => isset($mappings['product_or_service']) ? trim($row[$rowKeys[$mappings['product_or_service']]]) : null,
+                        'targeted_market' => isset($mappings['targeted_market']) ? trim($row[$rowKeys[$mappings['targeted_market']]]) : null,
+                        'est_date' => $estDate,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ]
+                );
+
+                // Process Founder
+                $userData = [
+                    'organization_id' => $organizationId,
+                    'company_id' => $company->id,
+                    'email' => $email,
+                    'password' => bcrypt('password'),
+                    'first_name_en' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
+                    'first_name_ar' => isset($mappings['first_name_en']) ? trim($row[$rowKeys[$mappings['first_name_en']]]) : null,
+                    'last_name_en' => isset($mappings['last_name_en']) ? trim($row[$rowKeys[$mappings['last_name_en']]]) : null,
+                    'last_name_ar' => isset($mappings['last_name_en']) ? trim($row[$rowKeys[$mappings['last_name_en']]]) : null,
+                    'gender' => isset($mappings['gender']) ? trim($row[$rowKeys[$mappings['gender']]]) : null,
+                    'phone' => isset($mappings['phone']) ? trim($row[$rowKeys[$mappings['phone']]]) : null,
+                    'country_code' => isset($mappings['country_code']) ? trim($row[$rowKeys[$mappings['country_code']]]) : null,
+                    'HaveCompany' => 1,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ];
+
+                User::firstOrCreate(
+                    ['email' => $email],
+                    $userData
+                );
+
+                $results['imported']++;
+            }
+
 
             DB::commit();
 
-            $response = ['success' => true, 'imported' => $importedCount];
-            if (!empty($skippedRows)) {
-                $response['warnings'] = $skippedRows;
-            }
-
-
-            return response()->json($response);
+            return response()->json([
+                'success' => true,
+                'message' => __('admin.imported'),
+                'imported' => $results['imported'],
+                'total_rows' => $results['total_rows'],
+                'attempted' => $results['attempted'],
+                'failed' => $results['failed'],
+                'skipped' => $results['skipped'],
+                'duplicates' => $results['duplicates'],
+                'failed_rows' => $results['failed_rows'],
+                'skipped_rows' => $results['skipped_rows'],
+                'duplicates_found' => $results['duplicates_found']
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Import failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'mappings' => $request->input('mappings'),
-                'data_sample' => array_slice($request->input('data', []), 0, 2)
-            ]);
+            Log::error('Import error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['success' => false, 'message' => 'Import failed: ' . $e->getMessage()], 500);
         }
     }
+
+   
 
      public function getOrganizations()
     {

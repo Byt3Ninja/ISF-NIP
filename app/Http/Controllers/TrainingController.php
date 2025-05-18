@@ -826,8 +826,8 @@ if ($type == 'sessions' || $type == 'offline') {
 New Training Session has been created: ". $data['title'] .",
 Join Link : ". $data['join_url'] ."
 Thanks from " . env('APP_NAME');
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+				// $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				// Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
             }
 			// ==========> End Notify <================

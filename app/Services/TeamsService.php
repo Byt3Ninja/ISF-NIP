@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\User;
 use App\Settings;
 use GuzzleHttp\Client;
 use Microsoft\Graph\Graph;
@@ -105,12 +106,13 @@ class TeamsService implements OnlineMeetingServiceInterface
      * Generate Microsoft Access Token.
      */
     protected function getAccessToken()
-{
+ {
+    $user = auth()->user();
+
     $MICROSOFT_TENANT_ID = '';
     $MICROSOFT_CLIENT_ID = '';
     $MICROSOFT_CLIENT_SECRET_VALUE = '';
 
-    $user = Auth::user();
     if( !Auth::check() )
     {
         return [
@@ -119,21 +121,21 @@ class TeamsService implements OnlineMeetingServiceInterface
         ];
     }
 
-    if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
-        $setting = Settings::where('id', 1)->first();
-
-        if ($setting) {
-            $MICROSOFT_TENANT_ID = $setting->MICROSOFT_TENANT_ID;
-            $MICROSOFT_CLIENT_ID = $setting->MICROSOFT_CLIENT_ID;
-            $MICROSOFT_CLIENT_SECRET_VALUE = $setting->MICROSOFT_CLIENT_SECRET_VALUE;
-        }
-    } elseif ($user->hasRole('organizationManager') && Schema::hasTable('organizations')) {
+    if (Schema::hasTable('settings')) {
         $org = $user->organization;
 
         if ($org) {
             $MICROSOFT_TENANT_ID = $org->microsoft_tenant_id;
             $MICROSOFT_CLIENT_ID = $org->microsoft_client_id;
             $MICROSOFT_CLIENT_SECRET_VALUE = $org->microsoft_client_secret_value;
+        }
+        else{
+            $setting = Settings::where('id', 1)->first();
+            if ($setting) {
+                $MICROSOFT_TENANT_ID = $setting->MICROSOFT_TENANT_ID;
+                $MICROSOFT_CLIENT_ID = $setting->MICROSOFT_CLIENT_ID;
+                $MICROSOFT_CLIENT_SECRET_VALUE = $setting->MICROSOFT_CLIENT_SECRET_VALUE;
+            }
         }
     }
 
@@ -188,23 +190,23 @@ class TeamsService implements OnlineMeetingServiceInterface
     public function createMeeting($data)
     {
         $user = Auth::user();
-         return [ 
-                'success' => false,
-                'data' => $user,
-            ];
-        if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
-            $setting = Settings::where('id', 1)->first();
-    
-            if ($setting) {
-                $userId = $this->getUserIdByEmail($setting->MICROSOFT_APP_EMAIL);
-            }
-        } elseif ($user->hasRole('organizationManager') && Schema::hasTable('organizations')) {
+
+        if (Schema::hasTable('settings')) {
             $org = $user->organization;
     
             if ($org) {
                 $userId = $this->getUserIdByEmail($org->microsoft_app_email);
             }
-        }
+            else{
+            $setting = Settings::where('id', 1)->first();
+
+              if ($setting) {
+                $userId = $this->getUserIdByEmail($setting->MICROSOFT_APP_EMAIL);
+              }
+            }
+            
+        } 
+    
         $meeting = [
             'subject' => $data['topic'],
             'startDateTime' => $this->toZoomTimeFormat($data['start_time']),
