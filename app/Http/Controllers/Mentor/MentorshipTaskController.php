@@ -99,13 +99,13 @@ class MentorshipTaskController extends Controller
 			$startup = DB::select($startup, [$request->mentorship_id]);
 			$startup = collect($startup)->first();
 			$data = [];
-			$data['id'] = $startup->id;
-			$data['company_name'] = $startup->C_name_en;
-			$data['start_up_logo'] = $startup->C_logo;
-			$data['program_name'] = $startup->CY_title;
-			$data['step_name'] = $startup->S_title;
-			$data['mentor_session_id'] = $startup->MT_mentorship_request_id;
-			$data['mentor_zoom_date'] = $startup->MR_zoom_date;
+			$data['id'] = $startup->id ?? '';
+			$data['company_name'] = $startup->C_name_en ?? '';
+			$data['start_up_logo'] = $startup->C_logo ?? '';
+			$data['program_name'] = $startup->CY_title ?? '';
+			$data['step_name'] = $startup->S_title ?? '';
+			$data['mentor_session_id'] = $startup->MT_mentorship_request_id ?? '';
+			$data['mentor_zoom_date'] = $startup->MR_zoom_date ?? '';
 
 			
 
