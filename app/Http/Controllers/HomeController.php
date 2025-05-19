@@ -1875,7 +1875,11 @@ class HomeController extends Controller
         ];
 
            $dateRate = date("Y-m-d 17:00:00");
-        $notRated_men = "SElECT * FROM mentorship_requests as mr
+        $notRated_men = "SElECT *, 
+        CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS MentorName_en,
+        CONCAT(TRIM(COALESCE(u.first_name_ar, '')), ' ', TRIM(COALESCE(u.last_name_ar, ''))) AS MentorName_ar,
+        mr.id as mr_id
+        FROM mentorship_requests as mr
         LEFT JOIN users as u ON u.id = mr.mentor_id 
         
         WHERE zoom_date < ? AND user_id = ? AND approved = 'Yes' AND rating IS NULL ORDER BY zoom_date ASC ";

@@ -76,30 +76,23 @@ class ZoomService implements OnlineMeetingServiceInterface
         $ZOOM_CLIENT_SECRET = '';
         $ZOOM_ACCOUNT_ID = '';
 
-        // تم تبسيط هذا الجزء بما أننا نمرر كائن المستخدم مباشرة
-        if ($user->hasRole('Admin') && Schema::hasTable('settings')) {
-            $setting = Settings::where('id', 1)->first();
-            if ($setting) {
-                $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
-                $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
-                $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
-            }
-        } elseif ($user->hasRole('organizationManager')) {
-            $org = $user->organization; // افترض أن العلاقة 'organization' موجودة في موديل User
+         
+        if (Schema::hasTable('settings')) {
+            $org = $user->organization; 
             if ($org) {
                 $ZOOM_CLIENT_ID = $org->zoom_client_id;
                 $ZOOM_CLIENT_SECRET = $org->zoom_client_secret;
                 $ZOOM_ACCOUNT_ID = $org->zoom_account_id;
-            }
-        } else{
-            $setting = Settings::where('id', 1)->first();
-            if ($setting) {
-                $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
-                $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
-                $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
-            }
+            }else{
+                $setting = Settings::where('id', 1)->first();
+                if ($setting) {
+                    $ZOOM_CLIENT_ID = $setting->ZOOM_CLIENT_ID;
+                    $ZOOM_CLIENT_SECRET = $setting->ZOOM_CLIENT_SECRET;
+                    $ZOOM_ACCOUNT_ID = $setting->ZOOM_ACCOUNT_ID;
+                }
+             }
         }
-        
+            
 
         if (empty($ZOOM_CLIENT_ID) || empty($ZOOM_CLIENT_SECRET) || empty($ZOOM_ACCOUNT_ID)) {
             Log::error('ZoomService: Zoom API credentials not configured for user.', ['user_id' => $user->id]);

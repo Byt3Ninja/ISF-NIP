@@ -1738,4 +1738,8 @@ return [
 	'Explanation' => 'تفسير',
 	'No explanation provided'	=> 'لا يوجد تفسير مقدم',
 	'Copied' => 'تم النسخ بنجاح',
+	'imported' => 'تم استيراد البيانات بنجاح',
+	'Total Rows in CSV' => 'عدد السطور في CSV',
+	'Step Name' => 'اسم المرحلة',
+	'Mentor Zoom Date' => 'تاريخ زووم للمرشد',
 ];

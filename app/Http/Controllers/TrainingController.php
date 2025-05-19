@@ -34,6 +34,7 @@ use App\Notifications\TrainerEmail;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Factories\OnlineMeetingFactory;
 use Illuminate\Support\Facades\Storage;
@@ -826,10 +827,17 @@ if ($type == 'sessions' || $type == 'offline') {
 New Training Session has been created: ". $data['title'] .",
 Join Link : ". $data['join_url'] ."
 Thanks from " . env('APP_NAME');
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-				}
+		// أو مع معالجة الخطأ بطريقة آمنة
+	// 	$response = Http::timeout(10)->get('https://wapi.growthlabs.app');
+	
+    //     // تحقق من حالة السيرفر
+    //     // إذا كان السيرفر يعمل، أرسل الرسالة
+    // if ($response->successful()) {
+	// 			$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+	// 			Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+	// 			}
             }
+		}
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Session added successfully', 'class' => 'success']);
 		} elseif ($type == 'online') {

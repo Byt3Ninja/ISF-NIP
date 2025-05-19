@@ -7,18 +7,14 @@
             <div class="mb-4">
                 <h4 class="fw-bold mb-2">{{ __('admin.Advanced Startup & Founder Importer') }}</h4>
                 <p class="text-secondary">
-                    {{ __('admin.Upload CSV, map columns to Cycle, Company, and Founder details, and import.') }}
+                    {{ __('admin.upload_Csv') }}
                 </p>
             </div>
 
             <div class="small text-secondary mb-4">
                 <p>
                     {{ __('admin.Download') }}
-                    <a 
-                        href="{{ $templateUrl }}" 
-                        download
-                        class="text-primary fw-medium text-decoration-none"
-                    >
+                    <a href="{{ $templateUrl }}" download class="text-primary fw-medium text-decoration-none">
                         {{ __('admin.CSV template') }}
                     </a>
                     {{ __('admin.text') }}
@@ -68,7 +64,7 @@
                         {{ __('admin.Importer match fields') }}
                         {{ __('admin.Importer required fields') }}
                     </p>
-                    <button id="auto-map-button" class="btn btn-label-primary btn-sm shadow-sm" >
+                    <button id="auto-map-button" class="btn btn-label-primary btn-sm shadow-sm">
                         {{ __('admin.Auto map') }}
                     </button>
                 </div>
@@ -76,6 +72,10 @@
                 <div id="uploaded-headers-preview" class="mb-4 p-3 bg-light border rounded text-sm">
                     <p class="fw-semibold text-secondary mb-1">{{ __('admin.Detected Headers from your file') }}:</p>
                     <div id="detected-headers-list" class="text-secondary d-flex flex-wrap gap-2"></div>
+                </div>
+
+                <div id="validation-errors" class="d-none mb-4 p-3 bg-danger bg-opacity-10 border border-danger rounded text-danger">
+                    <ul id="validation-errors-list" class="list-disc ps-4"></ul>
                 </div>
 
                 <div class="table-responsive mb-3">
@@ -88,7 +88,7 @@
                         </thead>
                         <tbody id="mapping-table-body-cycle">
                             <tr class="table-light">
-                                <th colspan="2">{{ __('admin.Cycle Details') }}</th>
+                                <th colspan="2">{{ __('admin.Program Details') }}</th>
                             </tr>
                         </tbody>
                         <tbody id="mapping-table-body-company">
@@ -145,6 +145,20 @@
                 </div>
             </section>
 
+            <!-- Import Result Summary -->
+            <section id="result-section" class="mb-4 d-none">
+                <h5 class="fw-semibold border-bottom pb-3 mb-4">{{ __('admin.Import Result Summary') }}</h5>
+                <div id="result-summary" class="p-3 bg-light border rounded">
+                    <p><strong>{{ __('admin.Total Rows in CSV') }}:</strong> <span id="total-rows"></span></p>
+                    <p><strong>{{ __('admin.Rows Attempted') }}:</strong> <span id="rows-attempted"></span></p>
+                    <p><strong>{{ __('admin.Successful Imports') }}:</strong> <span id="successful-imports"></span></p>
+                    <p><strong>{{ __('admin.Failed Rows') }}:</strong> <span id="failed-rows"></span></p>
+                    <p><strong>{{ __('admin.Skipped Rows') }}:</strong> <span id="skipped-rows"></span></p>
+                    <p><strong>{{ __('admin.Duplicates Found') }}:</strong> <span id="duplicates-found"></span></p>
+                    <div id="result-details" class="mt-3"></div>
+                </div>
+            </section>
+
             <!-- Action Buttons -->
             <div id="action-buttons" class="pt-4 border-top d-flex flex-column flex-sm-row justify-content-end gap-2">
                 <button id="back-button" type="button" class="btn btn-outline-secondary d-none">
@@ -157,39 +171,36 @@
                     {{ __('admin.Start Import') }}
                 </button>
             </div>
-        </div>
 
-         <!-- Progress/Status Message -->
-        <div id="status-message" class="d-none mt-4 p-3 rounded"></div>
+            <!-- Progress/Status Message -->
+            <div id="status-message" class="d-none mt-4 p-3 rounded"></div>
+        </div>
     </div>
 </div>
 @stop
 
 @section('pagescripts')
 <script>
-  const DESTINATION_FIELDS_STRUCTURED = [
-        { entity: "Cycle", field: "title", label: "{{ __('admin.Cycle Name') }}" },
-        { entity: "Cycle", field: "start", label: "{{ __('admin.Cycle Start Date') }}" },
-        { entity: "Cycle", field: "end", label: "{{ __('admin.Cycle End Date') }}" },
+    const DESTINATION_FIELDS_STRUCTURED = [
+        { entity: "Cycle", field: "title", label: "{{ __('admin.Program Name *') }}" },
+        { entity: "Cycle", field: "start", label: "{{ __('admin.Program Start Date *') }}" },
+        { entity: "Cycle", field: "end", label: "{{ __('admin.Program End Date *') }}" },
         { entity: "Company", field: "name_en", label: "{{ __('admin.Company Name (EN) *') }}" },
         { entity: "Company", field: "country_id", label: "{{ __('admin.Country') }}" },
         { entity: "Company", field: "state_id", label: "{{ __('admin.State/Governorate') }}" },
         { entity: "Company", field: "industries", label: "{{ __('admin.Industries') }}" },
         { entity: "Company", field: "sector", label: "{{ __('admin.Sector') }}" },
         { entity: "Company", field: "address_en", label: "{{ __('admin.Address (EN) *') }}" },
-        { entity: "Company", field: "years_of_operations", label: "{{ __('admin.Years of Operations')}}" },
+        { entity: "Company", field: "years_of_operations", label: "{{ __('admin.Years of Operations') }}" },
         { entity: "Company", field: "product_or_service", label: "{{ __('admin.Product or Service') }}" },
         { entity: "Company", field: "targeted_market", label: "{{ __('admin.Targeted Market') }}" },
         { entity: "Company", field: "est_date", label: "{{ __('admin.Establishment Date') }}" },
-        { entity: "Founder", field: "first_name_ar", label: "{{ __('admin.First Name (AR)') }}" },
-        { entity: "Founder", field: "last_name_ar", label: "{{ __('admin.Last Name (AR)') }}" },
-        { entity: "Founder", field: "first_name_en", label: "{{ __('admin.First Name (EN)') }}" },
-        { entity: "Founder", field: "last_name_en", label: "{{ __('admin.Last Name (EN)') }}" },
-        { entity: "Founder", field: "first_name_en", label: "{{ __('admin.First Name (EN)') }}" },
-        { entity: "Founder", field: "last_name_en", label: "{{ __('admin.Last Name (EN)') }}" },
+        { entity: "Founder", field: "first_name_en", label: "{{ __('admin.First Name (EN) *') }}" },
+        { entity: "Founder", field: "last_name_en", label: "{{ __('admin.Last Name (EN) *') }}" },
         { entity: "Founder", field: "gender", label: "{{ __('admin.Gender') }}" },
         { entity: "Founder", field: "phone", label: "{{ __('admin.Phone') }}" },
-        { entity: "Founder", field: "email", label: "{{ __('admin.Email') }}" },
+        { entity: "Founder", field: "email", label: "{{ __('admin.Email *') }}" },
+        { entity: "Founder", field: "country_code", label: "{{ __('admin.Country_Code') }}" }
     ];
 
     const dropZone = document.getElementById('drop-zone');
@@ -201,6 +212,7 @@
     const uploadSection = document.getElementById('upload-section');
     const mappingSection = document.getElementById('mapping-section');
     const reviewSection = document.getElementById('review-section');
+    const resultSection = document.getElementById('result-section');
     const mappingTableBodyCycle = document.getElementById('mapping-table-body-cycle');
     const mappingTableBodyCompany = document.getElementById('mapping-table-body-company');
     const mappingTableBodyFounder = document.getElementById('mapping-table-body-founder');
@@ -209,12 +221,15 @@
     const mappingSummaryDiv = document.getElementById('mapping-summary');
     const dataPreviewThead = document.getElementById('data-preview-thead');
     const dataPreviewTbody = document.getElementById('data-preview-tbody');
+    const resultSummaryDiv = document.getElementById('result-summary');
     const nextButton = document.getElementById('next-button');
     const backButton = document.getElementById('back-button');
     const importButton = document.getElementById('import-button');
     const statusMessageDiv = document.getElementById('status-message');
     const organizationSelect = document.getElementById('organization-select');
     const organizationError = document.getElementById('organization-error');
+    const validationErrorsDiv = document.getElementById('validation-errors');
+    const validationErrorsList = document.getElementById('validation-errors-list');
 
     organizationSelect.addEventListener('change', function() {
         organizationError.classList.add('d-none');
@@ -225,9 +240,10 @@
     let uploadedHeaders = [];
     let uploadedData = [];
     let columnMappings = {};
+    let validationErrors = [];
 
     browseButton.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent event from bubbling to dropZone
+        e.stopPropagation();
         fileInput.click();
     });
     dropZone.addEventListener('click', () => fileInput.click());
@@ -242,7 +258,6 @@
         if (e.target.files.length > 0) handleFile(e.target.files[0]);
     });
     autoMapButton.addEventListener('click', function() {
-        console.log("Auto map button clicked!");
         try {
             autoMapColumns();
         } catch (err) {
@@ -254,7 +269,6 @@
     backButton.addEventListener('click', handlePreviousStep);
     importButton.addEventListener('click', handleImport);
 
-    // Fetch organizations when entering Step 3
     function fetchOrganizations() {
         fetch('{{ route('importer.organizations') }}', {
             method: 'GET',
@@ -277,7 +291,7 @@
             });
         })
         .catch(error => {
-            alert('Fetch organizations error:', error);
+            console.error('Fetch organizations error:', error);
             updateStatusMessage('Failed to load organizations: ' + error.message, 'error');
             organizationSelect.innerHTML = '<option value="">-- {{ __('admin.Error loading organizations') }} --</option>';
         });
@@ -309,10 +323,10 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Upload response data:', data);
                 if (data.success) {
                     uploadedHeaders = data.headers;
                     uploadedData = data.data;
+                    validationErrors = data.errors || [];
                     displayDetectedHeaders();
                     populateMappingTable();
                     autoMapButton.disabled = false;
@@ -324,7 +338,7 @@
             })
             .catch(error => {
                 console.error('Upload fetch error:', error.message);
-                updateStatusMessage('{{ __('admin.Error uploading file') }}' + error.message, 'error');
+                updateStatusMessage('{{ __('admin.Error uploading file') }}: ' + error.message, 'error');
                 resetUploadState();
             });
         } else {
@@ -337,6 +351,7 @@
         uploadedFile = null;
         uploadedHeaders = [];
         uploadedData = [];
+        validationErrors = [];
         columnMappings = {};
         fileInput.value = '';
         fileInfoDiv.classList.add('d-none');
@@ -345,12 +360,16 @@
         nextButton.disabled = true;
         nextButton.classList.add('disabled');
         autoMapButton.disabled = true;
-        mappingTableBodyCycle.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">Program Details</th></tr>';
-        mappingTableBodyCompany.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">Company Details</th></tr>';
-        mappingTableBodyFounder.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">Founder Details</th></tr>';
+        mappingTableBodyCycle.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Program Details") }}</th></tr>';
+        mappingTableBodyCompany.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Company Details") }}</th></tr>';
+        mappingTableBodyFounder.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Founder Details") }}</th></tr>';
         detectedHeadersList.innerHTML = '';
+        validationErrorsDiv.classList.add('d-none');
+        validationErrorsList.innerHTML = '';
         updateStatusMessage('', 'info', 1);
-        organizationSelect.innerHTML = '<option value="">-- Select an Organization --</option>';
+        organizationSelect.innerHTML = '<option value="">-- {{ __('admin.Select Organization') }} --</option>';
+        resultSection.classList.add('d-none');
+        resultSummaryDiv.innerHTML = '';
     }
 
     function displayDetectedHeaders() {
@@ -363,12 +382,12 @@
                 detectedHeadersList.appendChild(span);
             });
         } else {
-            detectedHeadersList.textContent = 'No headers detected or file is empty.';
+            detectedHeadersList.textContent = '{{ __('admin.No headers detected or file is empty') }}';
         }
     }
 
     function populateMappingTable() {
-        mappingTableBodyCycle.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Cycle Details") }}</th></tr>';
+        mappingTableBodyCycle.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Program Details") }}</th></tr>';
         mappingTableBodyCompany.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Company Details") }}</th></tr>';
         mappingTableBodyFounder.innerHTML = '<tr class="table-light"><th colspan="2" class="text-primary">{{ __("admin.Founder Details") }}</th></tr>';
 
@@ -400,43 +419,77 @@
 
     function autoMapColumns() {
         const AUTO_MAP_DICTIONARY = {
-            'title': ['program name', 'cycle name', 'program title'],
-            'start': ['program start date', 'start date'],
-            'end': ['program end date', 'end date'],
-            'name_en': ['startup name', 'company name', 'business name', 'name'],
-            'address_en': ['address', 'location', 'company address'],
-            'country_id': ['country', 'country name'],
-            'state_id': ['governorate', 'state', 'region'],
-            'industries': ['industry', 'industries'],
-            'sector': ['sector'],
-            'years_of_operations': ['years of operations', 'years'],
-            'product_or_service': ['product or service', 'product', 'service'],
-            'targeted_market': ['target markets', 'market'],
-            'est_date': ['establishment date', 'founded date'],
-            'first_name_en': ['founder name', 'first name'],
-            'last_name_en': ['founder last name', 'last name'],
-            'gender': ['gender'],
-            'phone': ['phone', 'founder phone'],
-            'email': ['e-mail', 'email', 'founder email']
+            'title': ['Program Name', 'Cycle Name', 'Program Title'],
+            'start': ['Program Start Date', 'Start Date', 'Cycle Start Date'],
+            'end': ['Program End Date', 'End Date', 'Cycle End Date'],
+            'name_en': ['Startup Name', 'Company Name', 'Business Name', 'Name'],
+            'address_en': ['Address', 'Location', 'Company Address'],
+            'country_id': ['Country', 'Country Name'],
+            'state_id': ['Governorate', 'State', 'Region'],
+            'industries': ['industry', 'Industries'],
+            'sector': ['Sector'],
+            'years_of_operations': ['Years of Operations', 'Years'],
+            'product_or_service': ['Product or Service', 'Product', 'Service'],
+            'targeted_market': ['Target Markets', 'Market'],
+            'est_date': ['Establishment date', 'Founded Date'],
+            'first_name_en': ['Founder Name', 'First Name', 'First Name (EN)'],
+            'last_name_en': ['Founder Last Name', 'Last Name', 'Last Name (EN)'],
+            'gender': ['Gender'],
+            'phone': ['Phone', 'Founder Phone'],
+            'email': ['E-Mail', 'Email', 'Founder Email'],
+            'country_code': ['country code', 'Country Code']
         };
 
         const selects = document.querySelectorAll('.mapping-select');
+        const mappingLog = [];
+
         selects.forEach(select => {
-            const destLabel = select.dataset.destinationLabel.toLowerCase().replace(/[^a-z0-9]/gi, '');
             const destKey = select.dataset.destinationKey;
+            const destLabel = select.dataset.destinationLabel;
             let bestMatchIndex = -1;
+            let matchedHeader = '';
 
             const possibleMatches = AUTO_MAP_DICTIONARY[destKey] || [];
+
+            // Prioritize exact matches
             uploadedHeaders.forEach((sourceHeader, index) => {
-                const srcHeaderNormalized = sourceHeader.toLowerCase().replace(/[^a-z0-9]/gi, '');
-                if (destLabel === srcHeaderNormalized || possibleMatches.includes(sourceHeader.toLowerCase())) {
+                if (possibleMatches.includes(sourceHeader)) {
                     bestMatchIndex = index;
+                    matchedHeader = sourceHeader;
                 }
             });
 
-            select.value = (bestMatchIndex !== -1) ? bestMatchIndex.toString() : '';
+            // Fallback to normalized comparison if no exact match
+            if (bestMatchIndex === -1) {
+                const destLabelNormalized = destLabel.toLowerCase().replace(/[^a-z0-9]/gi, '');
+                uploadedHeaders.forEach((sourceHeader, index) => {
+                    const srcHeaderNormalized = sourceHeader.toLowerCase().replace(/[^a-z0-9]/gi, '');
+                    if (destLabelNormalized === srcHeaderNormalized || possibleMatches.some(match => match.toLowerCase() === sourceHeader.toLowerCase())) {
+                        if (bestMatchIndex === -1 || index < bestMatchIndex) {
+                            bestMatchIndex = index;
+                            matchedHeader = sourceHeader;
+                        }
+                    }
+                });
+            }
+
+            // Only set value if a valid match is found and select is not already mapped
+            if (bestMatchIndex !== -1 && bestMatchIndex < uploadedHeaders.length && select.value === '') {
+                select.value = bestMatchIndex.toString();
+            }
+
+            mappingLog.push({
+                destKey,
+                destLabel,
+                bestMatchIndex,
+                matchedHeader,
+                selectValue: select.value,
+                headers: uploadedHeaders
+            });
         });
-        updateStatusMessage('Auto-mapping completed. Please review the mappings.', 'info', 3000);
+
+        console.log('Auto-map completed:', mappingLog);
+        updateStatusMessage('{{ __('admin.Auto-mapping completed') }}', 'info', 3000);
     }
 
     function updateButtonStates() {
@@ -455,6 +508,18 @@
         uploadSection.classList.toggle('d-none', currentStep !== 1);
         mappingSection.classList.toggle('d-none', currentStep !== 2);
         reviewSection.classList.toggle('d-none', currentStep !== 3);
+        resultSection.classList.toggle('d-none', currentStep !== 4);
+        if (currentStep === 2 && validationErrors.length > 0) {
+            validationErrorsList.innerHTML = '';
+            validationErrors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                validationErrorsList.appendChild(li);
+            });
+            validationErrorsDiv.classList.remove('d-none');
+        } else {
+            validationErrorsDiv.classList.add('d-none');
+        }
         if (currentStep === 3) {
             fetchOrganizations();
         }
@@ -462,22 +527,35 @@
 
     function handleNextStep() {
         if (currentStep === 1 && (!uploadedFile || uploadedHeaders.length === 0)) {
-            alert(uploadedFile ? "Uploaded file seems empty or lacks headers." : "Please upload a file first.");
+            alert(uploadedFile ? "{{ __('admin.Uploaded file is empty or lacks headers') }}" : "{{ __('admin.Please upload a file first') }}");
             return;
         }
         if (currentStep === 2) {
             collectMappings();
-            populateMappingSummary();
-            populateDataPreview();
-            if (Object.keys(columnMappings).length === 0) {
-                if (!confirm("{{ __('admin.No columns are mapped') }}")) return;
-            }
-            const requiredFields = [{label: '{{ __('admin.name_en') }}', value: 'name_en'}, {label: '{{ __('admin.address_en') }}', value: 'address_en'}];
+            const requiredFields = [
+                {label: '{{ __('admin.Company Name (EN) *') }}', value: 'name_en'},
+                {label: '{{ __('admin.Address (EN) *') }}', value: 'address_en'},
+                {label: '{{ __('admin.Email *') }}', value: 'email'},
+                {label: '{{ __('admin.First Name (EN) *') }}', value: 'first_name_en'},
+                {label: '{{ __('admin.Last Name (EN) *') }}', value: 'last_name_en'},
+                {label: '{{ __('admin.Program Name *') }}', value: 'title'},
+                {label: '{{ __('admin.Program Start Date *') }}', value: 'start'},
+                {label: '{{ __('admin.Program End Date *') }}', value: 'end'}
+            ];
             const missingRequired = requiredFields.filter(field => !columnMappings.hasOwnProperty(field.value));
             if (missingRequired.length > 0) {
                 updateStatusMessage(`{{ __('admin.Please map the following required fields: ') }}${missingRequired.map(field => field.label).join(', ')}`, 'error', 5000);
                 return;
             }
+            if (Object.keys(columnMappings).length === 0) {
+                if (!confirm("{{ __('admin.No columns are mapped') }}")) return;
+            }
+            if (validationErrors.length > 0) {
+                updateStatusMessage('{{ __('admin.Please fix the validation errors below') }}', 'error', 5000);
+                return;
+            }
+            populateMappingSummary();
+            populateDataPreview();
         }
         if (currentStep < 3) {
             currentStep++;
@@ -500,15 +578,17 @@
         document.querySelectorAll('.mapping-select').forEach(select => {
             const destKey = select.dataset.destinationKey;
             const sourceHeaderIndex = select.value;
-            if (sourceHeaderIndex !== '') {
+            if (sourceHeaderIndex !== '' && sourceHeaderIndex < uploadedHeaders.length) {
                 columnMappings[destKey] = parseInt(sourceHeaderIndex, 10);
             }
         });
+        console.log('Column Mappings:', columnMappings);
+        console.log('Available Headers:', uploadedHeaders);
     }
 
     function populateMappingSummary() {
         mappingSummaryDiv.innerHTML = '';
-        let cycleHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Cycle Mappings') }}</h4><ul class="list-disc ps-4 mb-3 small">';
+        let cycleHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Program Mappings') }}</h4><ul class="list-disc ps-4 mb-3 small">';
         let companyHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Company Mappings') }}</h4><ul class="list-disc ps-4 mb-3 small">';
         let founderHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Founder Mappings') }}</h4><ul class="list-disc ps-4 mb-3 small">';
         let cycleMappingsExist = false;
@@ -538,7 +618,7 @@
         founderHtml += '</ul>';
 
         if (!cycleMappingsExist) {
-            cycleHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Cycle Mappings') }}:</h4><p class="text-muted ms-2 small">{{ __('admin.No cycle fields mapped.') }}</p>';
+            cycleHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Program Mappings') }}:</h4><p class="text-muted ms-2 small">{{ __('admin.No cycle fields mapped.') }}</p>';
         }
         if (!companyMappingsExist) {
             companyHtml = '<h4 class="h6 fw-semibold text-primary mb-2">{{ __('admin.Company Mappings') }}:</h4><p class="text-muted ms-2 small">{{ __('admin.No company fields mapped.') }}</p>';
@@ -550,7 +630,7 @@
         mappingSummaryDiv.innerHTML = cycleHtml + companyHtml + founderHtml;
 
         if (Object.keys(columnMappings).length === 0) {
-            mappingSummaryDiv.innerHTML = '<p class="text-muted">{{ __('admin.admin.No columns are currently mapped for import.') }}</p>';
+            mappingSummaryDiv.innerHTML = '<p class="text-muted">{{ __('admin.No columns are currently mapped for import.') }}</p>';
         }
     }
 
@@ -568,8 +648,6 @@
         }
 
         const headerRow = dataPreviewThead.insertRow();
-        // headerRow.className = "table-light";
-
         DESTINATION_FIELDS_STRUCTURED.forEach(dest => {
             if (columnMappings.hasOwnProperty(dest.field)) {
                 const th = document.createElement('th');
@@ -598,7 +676,7 @@
 
     function handleImport() {
         if (Object.keys(columnMappings).length === 0) {
-            updateStatusMessage("{{ __('admin.Cannot import: No columns are mapped.')}}", 'error');
+            updateStatusMessage("{{ __('admin.Cannot import: No columns are mapped.') }}", 'error');
             return;
         }
 
@@ -614,11 +692,6 @@
         backButton.classList.add('d-none');
         importButton.classList.add('d-none');
 
-        // console.log('Initiating import with mappings:', columnMappings);
-        // console.log('Selected organization_id:', organizationId);
-        // console.log('Data (first 3 rows):', uploadedData.slice(0, 3));
-        // console.log('Total data rows:', uploadedData.length);
-
         $.ajax({
             url: '{{ route('importer.import') }}',
             type: 'POST',
@@ -633,16 +706,12 @@
             }),
             success: function(result) {
                 if (result.success) {
-                    let message = `Successfully imported ${result.imported} records!`;
-                    updateStatusMessage(message, 'success', 10000);
-                    setTimeout(() => {
-                        currentStep = 1;
-                        updateSectionVisibility();
-                        updateButtonStates();
-                        resetUploadState();
-                    }, 3000);
+                    updateStatusMessage(`{{ __('admin.Successfully imported') }} ${result.imported} {{ __('admin.records') }}`, 'success', 10000);
+                    displayImportResult(result);
+                    currentStep = 4;
+                    updateSectionVisibility();
+                    updateButtonStates();
 
-                    // Display sweet alert
                     Swal.fire({
                         title: '{{ __('admin.Import Completed') }}',
                         text: '',
@@ -654,14 +723,14 @@
                         buttonsStyling: false
                     });
                 } else {
-                    updateStatusMessage(result.message || 'Error during import.', 'error');
+                    updateStatusMessage(result.message || '{{ __('admin.Error during import') }}', 'error');
                     nextButton.classList.remove('d-none');
                     backButton.classList.remove('d-none');
                     importButton.classList.remove('d-none');
-                    // Display sweet alert
+
                     Swal.fire({
                         title: '{{ __('admin.Import Failed') }}',
-                        text: '',
+                        text: result.message || '',
                         icon: 'error',
                         confirmButtonText: '{{ __('admin.OK') }}',
                         customClass: {
@@ -673,7 +742,7 @@
             },
             error: function(xhr, status, error) {
                 console.error('Import AJAX error:', error, xhr.status, 'Response:', xhr.responseText);
-                let errorMessage = 'Error during import.';
+                let errorMessage = '{{ __('admin.Error during import') }}';
                 try {
                     const response = JSON.parse(xhr.responseText);
                     errorMessage = response.message || `HTTP error! Status: ${xhr.status}`;
@@ -685,40 +754,75 @@
                 backButton.classList.remove('d-none');
                 importButton.classList.remove('d-none');
 
-                 // Display sweet alert
                 Swal.fire({
                     title: '{{ __('admin.Import Failed') }}',
-                    text: '',
+                    text: errorMessage,
                     icon: 'error',
                     confirmButtonText: '{{ __('admin.OK') }}',
                     customClass: {
                         confirmButton: 'btn btn-primary'
-                    },
-                    buttonsStyling: false
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            });
+        }
+
+        function displayImportResult(result) {
+            document.getElementById('total-rows').textContent = result.total_rows || 0;
+            document.getElementById('rows-attempted').textContent = result.attempted || 0;
+            document.getElementById('successful-imports').textContent = result.imported || 0;
+            document.getElementById('failed-rows').textContent = result.failed || 0;
+            document.getElementById('skipped-rows').textContent = result.skipped || 0;
+            document.getElementById('duplicates-found').textContent = result.duplicates || 0;
+
+            const detailsDiv = document.getElementById('result-details');
+            detailsDiv.innerHTML = '';
+
+            if (result.failed_rows && result.failed_rows.length > 0) {
+                detailsDiv.innerHTML += '<h6 class="mt-3">{{ __('admin.Failed Rows') }}:</h6><ul class="list-disc ps-4 text-danger">';
+                result.failed_rows.forEach(row => {
+                    detailsDiv.innerHTML += `<li>${row}</li>`;
                 });
+                detailsDiv.innerHTML += '</ul>';
             }
-        });
-    }
 
-    function updateStatusMessage(message, type = 'info', duration = 0) {
-        statusMessageDiv.innerHTML = message.replace(/\n/g, '<br>');
-        statusMessageDiv.className = 'mt-4 p-3 rounded';
-        
-        if (type === 'success') {
-            statusMessageDiv.classList.add('alert', 'alert-success');
-        } else if (type === 'error') {
-            statusMessageDiv.classList.add('alert', 'alert-danger');
-        } else {
-            statusMessageDiv.classList.add('alert', 'alert-info');
-        }
-        
-        statusMessageDiv.classList.toggle('d-none', !message);
-        if (duration > 0) {
-            setTimeout(() => { statusMessageDiv.classList.add('d-none'); }, duration);
-        }
-    }
+            if (result.skipped_rows && result.skipped_rows.length > 0) {
+                detailsDiv.innerHTML += '<h6 class="mt-3">{{ __('admin.Skipped Rows') }}:</h6><ul class="list-disc ps-4 text-warning">';
+                result.skipped_rows.forEach(row => {
+                    detailsDiv.innerHTML += `<li>${row}</li>`;
+                });
+                detailsDiv.innerHTML += '</ul>';
+            }
 
-    updateSectionVisibility();
-    updateButtonStates();
-</script>
+            if (result.duplicates_found && result.duplicates_found.length > 0) {
+                detailsDiv.innerHTML += '<h6 class="mt-3">{{ __('admin.Duplicates Found') }}:</h6><ul class="list-disc ps-4 text-warning">';
+                result.duplicates_found.forEach(row => {
+                    detailsDiv.innerHTML += `<li>${row}</li>`;
+                });
+                detailsDiv.innerHTML += '</ul>';
+            }
+        }
+
+        function updateStatusMessage(message, type = 'info', duration = 0) {
+            statusMessageDiv.innerHTML = message.replace(/\n/g, '<br>');
+            statusMessageDiv.className = 'mt-4 p-3 rounded';
+            
+            if (type === 'success') {
+                statusMessageDiv.classList.add('alert', 'alert-success');
+            } else if (type === 'error') {
+                statusMessageDiv.classList.add('alert', 'alert-danger');
+            } else {
+                statusMessageDiv.classList.add('alert', 'alert-info');
+            }
+            
+            statusMessageDiv.classList.toggle('d-none', !message);
+            if (duration > 0) {
+                setTimeout(() => { statusMessageDiv.classList.add('d-none'); }, duration);
+            }
+        }
+
+        updateSectionVisibility();
+        updateButtonStates();
+    </script>
 @stop
