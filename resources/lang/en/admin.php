@@ -1331,7 +1331,7 @@ return [
 	'Period_is_required' => 'Period is required',
 	'Period_must_be_an_integer' => 'Period must be an integer',
 	'Period_must_be_at_least_30_minutes' => 'Period must be at least 30 minutes',
-	'delete_project' => 'Are you sure you want tot Delete this Project?',
+	'delete_project' => 'Are you sure you want to Delete this Project?',
 	'delete_program' => 'Are you sure you want to unlink this program?',
 	'delete_team_member' => 'Are you sure you want to remove this team member?',
     'ProjectCannotBeDeleted' => 'Cannot Delete project. It has Linked Programs or Team Members!',
@@ -1740,4 +1740,6 @@ return [
 	'records' => 'records',
 	'Step Name' => 'Step Name',
 	'Mentor Zoom Date' => 'Mentor Zoom Date',
+	'Shareholder' => 'Shareholder',
+	'Investor' => 'Investor',
 ];

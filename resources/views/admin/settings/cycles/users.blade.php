@@ -151,7 +151,7 @@
                           <td>
                             <div class="d-flex align-items-center gap-1">
                               <input type="checkbox" class="chboxcyclesReg" do="{{ $company->id }}"
-                                userid="{{ $company->user->id }}" value="1" name="chboxcyclesReg[]">
+                                userid="{{ $company->user->id ?? '' }}" value="1" name="chboxcyclesReg[]">
                             </div>
                           </td>
                           <td>
