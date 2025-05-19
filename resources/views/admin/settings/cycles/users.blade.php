@@ -169,24 +169,24 @@
                           </td>
                           <td>
                             <div class="d-flex align-items-center">
-                              <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id }}/edit">
+                              <a class="media-left mr-50" href="/dashboard/users/{{ $company->user->id ?? '0'  }}/edit">
                                 <img src="/191014/{{ $company->user->img_url ?? '../images/placeholder.jpg' }}"
                                   alt="avatar" class="rounded-circle" height="40" width="40">
                               </a>
-                              <a href="/dashboard/users/{{ $company->user->id }}/edit">
+                              <a href="/dashboard/users/{{ $company->user->id ?? '0'  }}/edit">
                                 <div class="media-body">
-                                  <h6 class="media-heading mb-0">{{ $company->user->{'first_name_' . $l} }}
-                                    {{ $company->user->{'last_name_' . $l} }}</h6>
-                                  <span class="font-small-2">{{ $company->user->{'title_' . $l} }}</span>
+                                  <h6 class="media-heading mb-0">{{ $company->user->{'first_name_' . $l} ?? ''  }}
+                                    {{ $company->user->{'last_name_' . $l} ?? ''  }}</h6>
+                                  <span class="font-small-2">{{ $company->user->{'title_' . $l} ?? ''  }}</span>
                                 </div>
                               </a>
                             </div>
                           </td>
                           <td>
-                            {{ $company->user->phone }}
+                            {{ $company->user->phone ?? ''  }}
                           </td>
                           <td>
-                            {{ $company->user->email }}
+                            {{ $company->user->email ?? ''  }}
                           </td>
                           <td>
                             <div class="d-flex align-items-center gap-1">
