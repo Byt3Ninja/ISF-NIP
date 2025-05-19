@@ -175,13 +175,19 @@
     $('.delete-button').on('click', function(e) {
       e.preventDefault();
       var form = $(this).closest('form');
-      Swal.fire({
-        title: '{{ __('admin.delete_project') }}',
-        icon: 'warning',
+        Swal.fire({
+        title: "{{ __('admin.delete_project') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning", // استخدم icon بدلاً من type
         showCancelButton: true,
-        confirmButtonText: '{{ __('admin.Yes') }}',
-        cancelButtonText: '{{ __('admin.No') }}'
-      }).then((result) => {
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        customClass: {
+            confirmButton: 'btn btn-danger',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false
+    }).then((result) => {
         if (result.isConfirmed) {
           form.submit();
         }
