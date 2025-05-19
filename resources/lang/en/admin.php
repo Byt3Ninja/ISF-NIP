@@ -1740,4 +1740,6 @@ return [
 	'records' => 'records',
 	'Step Name' => 'Step Name',
 	'Mentor Zoom Date' => 'Mentor Zoom Date',
+	'Shareholder' => 'Shareholder',
+	'Investor' => 'Investor',
 ];

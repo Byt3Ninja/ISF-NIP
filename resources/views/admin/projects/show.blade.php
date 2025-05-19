@@ -224,7 +224,7 @@
                   <div class="form-check-select">
                     <select name="roles[{{ $member->id }}]" class="form-select form-select-sm">
                       @foreach($distinctRoles as $role)
-                      <option value="{{ $role }}">{{ $role }}</option>
+                      <option value="{{ $role }}">{{ __('admin.'.$role) }}</option>
                       @endforeach
                     </select>
                   </div>
