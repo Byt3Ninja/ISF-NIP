@@ -203,22 +203,30 @@ class CyclesController extends Controller
             $programGuidelineFile = null;
             if ($request->hasFile('program-guideline-pdf')) {
                 $programGuidelineFile = $request->file('program-guideline-pdf')->store('programs', 'public');
+            }else{
+                $programGuidelineFile = $cycle->program_guideline_file;
             }
 
             $financialGuidelineFile = null;
             if ($request->hasFile('financial_policy_pdf')) {
                 $financialGuidelineFile = $request->file('financial_policy_pdf')->store('financials', 'public');
+            }else{
+                $financialGuidelineFile = $cycle->financial_guideline_file;
             }
 
             $legalPolicyPath = null;
             if ($request->hasFile('legal_policy_pdf')) {
                 $legalPolicyPath = $request->file('legal_policy_pdf')->store('legal_policies', 'public');
+            }else{
+                $legalPolicyPath = $cycle->legal_guideline_file;
             }
 
 
             $delegationPdfPath = null;
             if ($request->delegation_option === 'yes' && $request->hasFile('delegation_pdf')) {
                 $delegationPdfPath = $request->file('delegation_pdf')->store('delegations', 'public');
+            }else{
+                $delegationPdfPath = $cycle->delegation_file;
             }
 
 
