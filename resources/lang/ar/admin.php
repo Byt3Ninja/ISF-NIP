@@ -1761,5 +1761,7 @@ return [
     'imported' => 'تم الاستيراد بنجاح',
     'Total Rows in CSV' => 'إجمالي الصفوف في ملف CSV',
     'records' => 'سجلات',
+	'Shareholder' => 'مساهم',
+	'Investor' => 'مستثمر',
 
 ];
