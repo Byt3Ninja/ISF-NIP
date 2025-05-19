@@ -144,7 +144,7 @@
                               @if( !in_array(env('APP_ENV', 'local'), ['local']) )
                               <img 
                                 onerror="this.src='/icons/account.svg'"
-                                src="{{ $session->mentor->image_url }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+                                src="{{ $session->mentor->image_url ?? '' }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
                                 @endif
                               {{ $session->mentor->name ?? '' }}
                             </div>
