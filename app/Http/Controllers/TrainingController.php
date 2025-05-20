@@ -794,7 +794,7 @@ if ($type == 'sessions' || $type == 'offline') {
 			$mail['type'] = 'sessions';
 			$mail['join_url'] = $join ?? 'Unknown Join URL';
 			$mail['organization_name_en'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_en ?? 'Unknown Organization';
-			$mail['organization_name_ar'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';;
+			$mail['organization_name_ar'] = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';
 			$MSG = new TrainerEmail($mail);
 			
             if( !in_array(env('APP_ENV', 'local'), ['local']) )
@@ -822,20 +822,13 @@ if ($type == 'sessions' || $type == 'offline') {
 					// } catch (\Throwable $th) {
 					// 	throw $th;
 					// }
+					$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';
 					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] .",
 Join Link : ". $data['join_url'] ."
-Thanks from " . env('APP_NAME');
-		// أو مع معالجة الخطأ بطريقة آمنة
-	// 	$response = Http::timeout(10)->get('https://wapi.growthlabs.app');
-	
-    //     // تحقق من حالة السيرفر
-    //     // إذا كان السيرفر يعمل، أرسل الرسالة
-    // if ($response->successful()) {
-	// 			$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-	// 			Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-	// 			}
+Thanks from " . $org_name;
+
             }
 		}
 			// ==========> End Notify <================
@@ -868,13 +861,11 @@ Thanks from " . env('APP_NAME');
 				} catch (\Throwable $th) {
 					// throw $th;
 				}
+				$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] ."
-Thanks from " . env('APP_NAME'); // should be from organization name not from APP Name
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				// instead of waiting of response it should be pushed to job queue and dispatched later on the server - for all whatsapp messages
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+Thanks from " . $org_name; 
 			}
 		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
@@ -944,14 +935,13 @@ Thanks from " . env('APP_NAME'); // should be from organization name not from AP
 					} catch (\Throwable $th) {
 						throw $th;
 					}
+				$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] .",
 Google Map Link: " . $data['join_url'] . ",
 Address: " . $data['Address'] . "
-Thanks from " . env('APP_NAME');
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+Thanks from " . $org_name;
 					
 				}
 			}
@@ -968,6 +958,16 @@ Thanks from " . env('APP_NAME');
 
 			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
 			$trainingSession->update(['QrCode' => $qrFilePath]);
+
+		// أو مع معالجة الخطأ بطريقة آمنة
+	// 	$response = Http::timeout(10)->get('https://wapi.growthlabs.app');
+    //     // تحقق من حالة السيرفر
+    //     // إذا كان السيرفر يعمل، أرسل الرسالة
+    // if ($response->successful()) {
+	// $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+	// Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+	// 			}
+
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 			
