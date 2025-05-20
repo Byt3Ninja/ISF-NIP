@@ -95,11 +95,11 @@
 				</div>
 				<div class="d-flex flex-column gap-3">
 					<div class="d-flex justify-content-between align-items-center gap-2">
-						<span class="fw-bold me-6">{{ __('admin.Step Name') }}</span>
+						<span class="fw-bold me-6">{{ __('admin.Current_Step') }}</span>
 						<div class="badge bg-label-primary">{{ $data['step_name'] }}</div>
 					</div>
 					<div class="d-flex justify-content-between align-items-center gap-2">
-						<span class="fw-bold me-6">{{ __('admin.Mentor Zoom Date') }}</span>
+						<span class="fw-bold me-6">{{ __('admin.Mentor_Session_Appointment') }}</span>
 						@if (!empty($data['mentor_zoom_date']))
 							<div class="badge bg-label-secondary">
 								<i class="ti ti-calendar ti-16px me-1"></i>
