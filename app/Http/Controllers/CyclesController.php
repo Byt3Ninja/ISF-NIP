@@ -569,7 +569,7 @@ class CyclesController extends Controller
       $user = User::where('id', Auth::user()->id)->first();
         // Check Company ---> forward to profile
         if (!$user->HaveCompany) {
-            return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+            return redirect()->route('user.profile_Edit')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
         }
         if (!$user->company) {
             return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
