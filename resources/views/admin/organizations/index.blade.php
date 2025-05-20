@@ -272,11 +272,11 @@
                   '_token': token
                 },
                 function(response) {
-                  Swal.fire({
-                    type: 'success',
-                    title: "{{ __('admin.Deleted') }}!",
-                    html: "{{ __('admin.FileDeleted') }}.",
-                  });
+                  // Swal.fire({
+                  //   type: 'success',
+                  //   title: "{{ __('admin.Deleted') }}!",
+                  //   html: "{{ __('admin.FileDeleted') }}.",
+                  // });
                   location.reload();
                 }
               ).fail(function(error) {
