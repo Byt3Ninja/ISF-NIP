@@ -163,7 +163,7 @@ class quizzesController extends Controller
 			$quiz->status = $request->status;
 			$quiz->save();
 
-			return back()->withInput()->with('success', 'StoredSuccessfully');
+			return redirect()->route('quizzes.index')->with('success', 'StoredSuccessfully');
 		}
 	}
 

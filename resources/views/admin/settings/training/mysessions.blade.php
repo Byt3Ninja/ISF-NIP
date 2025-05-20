@@ -472,11 +472,11 @@
             }
 
             // 7. Date
-            if (response.start_date) {
-              $sessionStartDate.text(response.start_date);
+            if (response.datetime) {
+              $sessionStartDate.text(response.datetime);
             }
-            if (response.end_date) {
-              $sessionEndDate.text(response.end_date);
+            if (response.enddatetime) {
+              $sessionEndDate.text(response.enddatetime);
             }
 
             // 8. Duration
