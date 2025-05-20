@@ -1742,4 +1742,6 @@ return [
 	'Mentor Zoom Date' => 'Mentor Zoom Date',
 	'Shareholder' => 'Shareholder',
 	'Investor' => 'Investor',
+	'Current_Step' => 'Current Step',
+	'Mentor_Session_Appointment' => 'Mentor Session Appointment',
 ];

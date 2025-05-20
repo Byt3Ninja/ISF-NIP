@@ -1763,5 +1763,7 @@ return [
     'records' => 'سجلات',
 	'Shareholder' => 'مساهم',
 	'Investor' => 'مستثمر',
+	'Current_Step' => 'المرحلة الحالية',
+	'Mentor_Session_Appointment' => 'موعد جلسة الارشاد',
 
 ];
