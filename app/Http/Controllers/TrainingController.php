@@ -720,7 +720,7 @@ class TrainingController extends Controller
 	{
 		$sessions = [];
 		if (Auth::user()->company) {
-			$sessions = TrainingSession::where('step_id', Auth::user()->company->step)->orderBy('datetime', 'ASC')->get();
+			$sessions = TrainingSession::where('step_id', Auth::user()->company->step)->orderBy('datetime', 'DESC')->get();
 		}
 		return view('admin/settings/training/mysessions', compact('sessions'));
 	}
