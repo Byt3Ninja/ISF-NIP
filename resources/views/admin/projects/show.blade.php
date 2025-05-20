@@ -328,11 +328,11 @@
               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-              Swal.fire(
-                '{{ __('admin.Deleted') }}',
-                response.message,
-                'success'
-              );
+              // Swal.fire(
+              //   '{{ __('admin.Deleted') }}',
+              //   response.message,
+              //   'success'
+              // );
 
               button.closest('tr').fadeOut(300, function() {
                 $(this).remove();
@@ -389,11 +389,11 @@
               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-              Swal.fire(
-                '{{ __('admin.Deleted') }}',
-                response.message,
-                'success'
-              );
+              // Swal.fire(
+              //   '{{ __('admin.Deleted') }}',
+              //   response.message,
+              //   'success'
+              // );
 
               button.closest('tr').fadeOut(300, function() {
                 $(this).remove();
