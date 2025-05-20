@@ -732,7 +732,7 @@ class TrainingController extends Controller
 		
 		$dateRange = $request->date_range; 
 		$type = $request->type;
-
+		$l = app()->getLocale();
 if ($type == 'sessions' || $type == 'offline') {
 		$startDate = $request->datetime;
 		$startTime = $request->starttime;   // وقت البداية
@@ -823,7 +823,7 @@ if ($type == 'sessions' || $type == 'offline') {
 					// } catch (\Throwable $th) {
 					// 	throw $th;
 					// }
-					$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';
+					$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->{'name_'. $l} ?? 'Unknown Organization';
 					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] .",
@@ -862,7 +862,7 @@ Thanks from " . $org_name;
 				} catch (\Throwable $th) {
 					// throw $th;
 				}
-				$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';
+				$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->{'name_'. $l} ?? 'Unknown Organization';
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] ."
@@ -936,7 +936,7 @@ Thanks from " . $org_name;
 					} catch (\Throwable $th) {
 						throw $th;
 					}
-				$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->name_ar ?? 'Unknown Organization';
+				$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->{'name_'. $l} ?? 'Unknown Organization';
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 New Training Session has been created: ". $data['title'] .",
@@ -1063,13 +1063,14 @@ $duration = $start->diffInMinutes($end);
 					// } catch (\Throwable $th) {
 					// 	throw $th;
 					// }
+					$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->{'name_'. $l} ?? 'Unknown Organization';
 					$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 Training Session has been Updated: ". $data['title'] .",
 Join Link : ". $data['join_url'] ."
-Thanks from " . env('APP_NAME');
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+Thanks from " . $org_name;
+				// $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				// Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 				}
 			}
 
@@ -1104,12 +1105,13 @@ Thanks from " . env('APP_NAME');
 				} catch (\Throwable $th) {
 					// throw $th;
 				}
+				$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->{'name_'. $l} ?? 'Unknown Organization';
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 Training Session has been Updated: ". $data['title'] ."
-Thanks from " . env('APP_NAME');
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+Thanks from " . $org_name;
+				// $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				// Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
 			}
 		}
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
@@ -1165,15 +1167,15 @@ Thanks from " . env('APP_NAME');
 					} catch (\Throwable $th) {
 						throw $th;
 					}
-				
+				$org_name = optional(optional(optional(Step::find($step))->cycle)->organization)->{'name_'. $l} ?? 'Unknown Organization';
 				$phoneNumber = $company->user->country_code_w_a . $company->user->whatsapp;
 				$Massage = "Dear " . $company->user->name . ",
 Training Session has been Updated: ". $data['title'] .",
 Google Map Link: " . $data['join_url'] . ",
 Address: " . $data['Address'] . "
-Thanks from " . env('APP_NAME');
-				$result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-				Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+Thanks from " . $org_name;
+				// $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
+				// Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
 
             }
@@ -1191,6 +1193,9 @@ Thanks from " . env('APP_NAME');
 
 			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
 			$session->update(['QrCode' => $qrFilePath]);
+
+			SendWhatsAppMessageJob::dispatch($phoneNumber, $Massage);
+
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
 		} else {
