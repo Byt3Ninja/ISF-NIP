@@ -62,6 +62,12 @@ return [
             'url' => env('APP_URL') . '/pitch_decks',
             'visibility' => 'public',
         ],
+        'program' => [
+            'driver' => 'local',
+            'root'   => public_path('program'),
+            'url' => env('APP_URL') . '/program',
+            'visibility' => 'public',
+        ],
 
         'public' => [
             'driver' => 'local',
