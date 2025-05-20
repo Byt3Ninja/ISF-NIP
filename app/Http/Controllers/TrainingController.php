@@ -40,6 +40,7 @@ use App\Factories\OnlineMeetingFactory;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Notifications\NewTrainingNotification;
+use App\Jobs\SendWhatsAppMessageJob;
 use Intervention\Image\ImageManagerStatic as Image;
 
 
@@ -959,14 +960,7 @@ Thanks from " . $org_name;
 			// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
 			$trainingSession->update(['QrCode' => $qrFilePath]);
 
-		// أو مع معالجة الخطأ بطريقة آمنة
-	// 	$response = Http::timeout(10)->get('https://wapi.growthlabs.app');
-    //     // تحقق من حالة السيرفر
-    //     // إذا كان السيرفر يعمل، أرسل الرسالة
-    // if ($response->successful()) {
-	// $result = $this->whatsAppService->sendMessage($phoneNumber, $Massage);
-	// Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-	// 			}
+		SendWhatsAppMessageJob::dispatch($phoneNumber, $Massage);
 
 			// ==========> End Notify <================
 			return back()->with(['message' => 'Saved', 'class' => 'success']);
