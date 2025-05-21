@@ -687,6 +687,16 @@
                 @endforeach
               </select>
             </div>
+            <label class="form-label fs-6 mb-1">{{ __('cycles.Session Title') }}</label>
+            <div class="form-group mb-3">
+              <input id="title" name="title" type="text" placeholder="{{ __('cycles.Session Title') }}"
+                class="form-control">
+            </div>
+            <label class="form-label fs-6 mb-1">{{ __('cycles.Add a description') }}:</label>
+            <div class="form-group mb-3">
+              <textarea class="form-control" id="dsc" name='dsc' rows="2"
+                placeholder="{{ __('cycles.Write your description here') }}."></textarea>
+            </div>
           </div>
           <div class="d-flex align-items-center gap-3 mt-4 p-4 p-md-0">
             <button type="button" class="btn btn-outline-secondary w-px-100" data-bs-dismiss="modal">
@@ -945,7 +955,7 @@
       const dateValue = $(`${formId} .flatpickr-date`).val();
       const timeFromValue = $(`${formId} #flatpickr-time-from`).val();
       const timeToValue = $(`${formId} #flatpickr-time-to`).val();
-      // const titleValue = $(`${formId} #title`).val();
+      const titleValue = $(`${formId} #title`).val();
       // console.log('titleValue', titleValue);
       
       let isValid = true;
@@ -955,10 +965,10 @@
           dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">Please select a date range for online sessions.</div>');
           isValid = false;
         }
-        // if (!titleValue) {
-        //   $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
-        //   isValid = false;
-        // }
+        if (!titleValue) {
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          isValid = false;
+        }
       }  
 
       if (typeValue === 'offline' || typeValue === 'sessions') {
@@ -974,10 +984,10 @@
           $(`${formId} #flatpickr-time-to`).addClass('is-invalid').after('<div class="invalid-feedback">Please select an end time.</div>');
           isValid = false;
         } 
-        // if (!titleValue) {
-        //   $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
-        //   isValid = false;
-        // }
+        if (!titleValue) {
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          isValid = false;
+        }
       }
       
       if (isValid) {
@@ -1203,9 +1213,11 @@
           const startDate = dateRange.split(' - ')[0];
           const endDate = dateRange.split(' - ')[1];
 
-          $('#editSessionForm #select-type').val(type).trigger('change').prop('readonly', true);
-          $('#editSessionForm #select-course').val(response?.courseId || '').trigger('change');
+          $('#editSessionForm #select-type').val(type).trigger('change').prop('readonly', true).prop('disabled', true);
+          $('#editSessionForm #select-course').val(response?.course_id || '').trigger('change');
 
+
+          $('#editSessionForm #title').show();
           $('#editSessionForm #title').val(response.title);
           $('#editSessionForm #dsc').val(response.dsc);
           $('#editSessionForm #select-type').val(response.type).trigger('change');
@@ -1233,17 +1245,6 @@
               $('#editSessionForm #start').val('');
               $('#editSessionForm #end').val('');
             });
-              // .on('apply.daterangepicker', function(ev, picker) {
-              //   $('#editSessionForm #start').val(picker.startDate.format('YYYY-MM-DD'));
-              //   $('#editSessionForm #end').val(picker.endDate.format('YYYY-MM-DD'));
-              //   $('#editSessionForm #date-range-picker').val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-              //   $('#editSessionForm #date-range-picker').removeClass('is-invalid');
-              //   $('#editSessionForm #date-range-picker').next('.invalid-feedback').remove();
-              // }).on('cancel.daterangepicker', function(ev, picker) {
-              //   // $('#editSessionForm #date-range-picker').val('');
-              //   // $('#editSessionForm #start').val('');
-              //   // $('#editSessionForm #end').val('');
-              // });      
             }
          
           if (type === 'offline') {
