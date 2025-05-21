@@ -3,9 +3,10 @@ $user = auth()->user();
 $notifications = collect();
 $all = 0;
 
-if ($user && $user->hasRole('Registered')) {
-    $notifications = $user->unreadNotifications()->latest()->take(5)->get();
-    $all = $notifications->count();
+if( $user )
+{
+  $notifications = $user->unreadNotifications()->latest()->take(10)->get();
+  $all = $notifications->count();
 }
 @endphp
 
@@ -16,17 +17,15 @@ if ($user && $user->hasRole('Registered')) {
     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
     <span class="position-relative">
       <i class="ti ti-bell ti-md"></i>
-      {{-- @if ($all > 0) --}}
-      <div id="notification-count-container">
-
-      </div>
-      {{-- @endif --}}
+      @if ($all > 0)
+      <div id="notification-count-container"> {{ $all }} </div>
+      @endif
     </span>
   </a>
 
   <!-- Notification Dropdown -->
   <ul class="dropdown-menu dropdown-menu-end p-0">
-    {{-- @if ($all > 0) --}}
+    @if ($all > 0)
       <li class="dropdown-menu-header border-bottom">
         <div class="dropdown-header d-flex align-items-center py-3">
           <h6 class="mb-0 me-auto" style="text-transform:capitalize;">Notification</h6>
@@ -39,12 +38,11 @@ if ($user && $user->hasRole('Registered')) {
           </div>
         </div>
       </li>
-    {{-- @endif --}}
+    @endif
 
     <!-- Notification List -->
     <li class="dropdown-notifications-list scrollable-container">
       <ul id="notification-list" class="list-group list-group-flush">
-        {{-- @role('Registered')
         @if ($notifications->isEmpty())
           <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">
             <span class="text-muted">No new notifications</span>
@@ -56,7 +54,6 @@ if ($user && $user->hasRole('Registered')) {
             </li>
           @endforeach
         @endif
-        @endrole --}}
 
         @if ($messages)
           <li class="list-group-item list-group-item-action dropdown-notifications-item">

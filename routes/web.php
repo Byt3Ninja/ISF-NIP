@@ -84,6 +84,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Judger
     Route::get('judger/screening','Judger\JudgerScreeningController@index');
+    Route::post('judger/screening/evaluation/save_draft', 'Judger\JudgerScreeningController@save_evaluation_draft')->name('screening.evaluate_save_draft');
+    Route::post('judger/screening/evaluation/publish', 'Judger\JudgerScreeningController@publish_evaluation')->name('screening.evaluate_publish');
    
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');

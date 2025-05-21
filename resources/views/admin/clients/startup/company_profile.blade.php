@@ -895,4 +895,66 @@ loadingTask.promise.then(function(pdf) {
     $('#warningModal').modal('show');
   });
 </script>
+@if($_user->hasRole('Judger'))
+  <script type="text/javascript">
+    $('#save_screening_btn').on('click', function(e) {
+      e.preventDefault();
+      submitJudgerScreeningForm('draft');
+    });
+
+    $('#publish_screening_btn').on('click', function(e) {
+      e.preventDefault();
+      submitJudgerScreeningForm('publish');
+    });
+
+    function submitJudgerScreeningForm(type)
+    {
+      let url = "{{ route('screening.evaluate_save_draft') }}";
+      if( type == 'publish' ) { url = "{{ route('screening.evaluate_publish') }}"; }
+      $.ajaxSetup({headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}});
+      var data = $('#screening_evaluation_form').serializeArray();
+      let result = {
+        id: null,
+        type: type,
+        program: null,
+        evaluation: [],
+        final_comment: ''
+      };
+      var tempEvalMap = {};
+      data.forEach(item => {
+        const name = item.name;
+        const value = item.value;
+        if (name === 'evaluation_form_id') {
+            result.id = parseInt(value);
+        } else if (name === 'evaluation_program_id') {
+            result.program = parseInt(value);
+        } else if (name === 'final_comments') {
+            result.final_comment = value;
+        } else if (name.startsWith('score_')) {
+            const evalId = name.split('_')[1];
+            tempEvalMap[evalId] = tempEvalMap[evalId] || { id: parseInt(evalId), score: null, comment: '' };
+            tempEvalMap[evalId].score = value ? parseInt(value) : null;
+        } else if (name.startsWith('comment_')) {
+            const evalId = name.split('_')[1];
+            tempEvalMap[evalId] = tempEvalMap[evalId] || { id: parseInt(evalId), score: null, comment: '' };
+            tempEvalMap[evalId].comment = value;
+        }
+      });
+      result.evaluation = Object.values(tempEvalMap).filter(entry => entry.score !== null || entry.comment !== '');
+
+
+      $.ajax({
+        type: 'POST',
+        url: url,
+        data: result,
+        success: function() {
+          //
+        },
+        error: function() { // if error occurred
+          console.log("DB Error occurred, please try again");
+        },
+      });
+    }
+  </script>
+@endif
 @stop
