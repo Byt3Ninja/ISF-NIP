@@ -82,6 +82,7 @@ class ClientCompanyController extends Controller
             $company_current_step = $company->step;
             $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
             $myResponses = ScreeningEvaluationResults::where('evaluation_id', $evaluationForm->id)->where('user_id', $user_id)->get();
+            $isResponsesPublished = $myResponses->where('status', true)->count() > 0 ? true : false;
             $myComment = ScreeningEvaluation::getMyFinalComment( $evaluationForm->id, $user_id );
             $evaluationForm->final_comment = $myComment->value;
             $evaluationForm->categories->map(function ( $category ) use ( $myResponses ) {
@@ -94,6 +95,7 @@ class ClientCompanyController extends Controller
                 });
                 return $category;
             });
+            $evaluationForm->isPublished = $isResponsesPublished;
             return view('admin/clients/startup/company_profile', compact('company', 'evaluationForm', 'Currencies', 'Achieved_Milestones', 'Planned_Milestones', 'icons', 'fonders', 'Shareholders', 'Investors', 'fileExists', 'pathToFile'));
         } catch (Exception $e) {
             //log what happend

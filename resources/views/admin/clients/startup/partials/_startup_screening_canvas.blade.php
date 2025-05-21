@@ -19,14 +19,24 @@
         <input type="hidden" id="evaluation_program_id" name="evaluation_program_id" value="{{ $company->id }}" />
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         <div class="d-flex align-items-center gap-3">
+          @if( $evaluationForm->isPublished == true )
+          <button onclick="event.preventDefault();" class="btn btn-primary disabled" disabled>
+            <i class="ti ti-check me-2"></i> Published
+          </button>
+          @else
+          @if( $_user->ableTo('screening.evaluate_publish', $permissions) )
           <button type="submit" class="btn btn-primary" id="publish_screening_btn">
             {{ __('admin.Publish')}}
             <i class="ti ti-world ms-2"></i>
           </button>
+          @endif
+          @if( $_user->ableTo('screening.evaluate_save_draft', $permissions) )
           <button type="button" class="btn btn-outline-primary" id="save_screening_btn">
             {{ __('admin.Save')}}
             <i class="ti ti-circle-check ms-2"></i>
           </button>
+          @endif
+          @endif
         </div>
       </div>
 
