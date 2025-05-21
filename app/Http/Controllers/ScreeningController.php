@@ -83,6 +83,7 @@ class ScreeningController extends Controller
 
 	public function update(Request $request)
 	{
+		// dd($request->all());
 		if (!$request->judges) {
 			return Redirect::back()->with('message2', __('Please_Choose_Judges'));
 		}
