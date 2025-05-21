@@ -635,7 +635,7 @@
         <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
           @csrf
           <div  style="height: 400px;">
-            <input type="hidden" name="step_id" value="{{ $id }}" id="id">
+            <input type="hidden" name="sid" value="{{ $id }}" id="id">
             <div class="form-group mb-4" id="ctype">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
               <select id="select-type" name="type" class="select2 form-control" required>
@@ -1203,7 +1203,7 @@
           const startDate = dateRange.split(' - ')[0];
           const endDate = dateRange.split(' - ')[1];
 
-          $('#editSessionForm #select-type').val(type).trigger('change').prop('disabled', true);
+          $('#editSessionForm #select-type').val(type).trigger('change').prop('readonly', true);
           $('#editSessionForm #select-course').val(response?.courseId || '').trigger('change');
 
           $('#editSessionForm #title').val(response.title);
