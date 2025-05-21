@@ -282,6 +282,7 @@ Group to group of users']
 
                         @endphp
                         <input type="hidden" value="{{ $panel }}" name="panel{{ $key }}">
+                        <input type="hidden" value="" name="judges">
                         <div class="col-md-1"><button type="button" class="btn btn-warning"
                             onclick="openusers({{ $key }})"><i class="ti ti-edit text-info"></i></button></div>
                       </div>
@@ -292,7 +293,7 @@ Group to group of users']
                       <p style="margin: 5px">{{ __('cycles.panel list') . ' ' . $key }}</p>
                       <div class="row col-md-12">
                         <div class="col-md-11">
-                          <select name="  [{{ $key }}][]" class="select2 form-control panel{{ $key }}"
+                          <select class="select2 form-control panel{{ $key }}"
                             multiple="multiple">
                             @foreach ($judges as $judge)
                             <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }}
