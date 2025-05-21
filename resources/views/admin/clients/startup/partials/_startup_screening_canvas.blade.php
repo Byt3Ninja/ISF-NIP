@@ -13,15 +13,17 @@
 <div class="offcanvas offcanvas-end {{ $showCanvas ? 'show' : '' }}" tabindex="-1" id="rightModalCanvas"
   aria-labelledby="rightModalCanvasLabel" style="width: 50vw;">
   <div class="offcanvas-body">
-    <form>
+    <form id="screening_evaluation_form">
       <div class="d-flex justify-content-between align-items-center mb-6">
+        <input type="hidden" id="evaluation_form_id" name="evaluation_form_id" value="{{ $evaluationForm->id }}" />
+        <input type="hidden" id="evaluation_program_id" name="evaluation_program_id" value="{{ $company->id }}" />
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         <div class="d-flex align-items-center gap-3">
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary" id="publish_screening_btn">
             {{ __('admin.Publish')}}
             <i class="ti ti-world ms-2"></i>
           </button>
-          <button type="button" class="btn btn-outline-primary" data-bs-dismiss="offcanvas">
+          <button type="button" class="btn btn-outline-primary" id="save_screening_btn">
             {{ __('admin.Save')}}
             <i class="ti ti-circle-check ms-2"></i>
           </button>
@@ -91,7 +93,7 @@
                               <h6 class="mb-0">{{ $criteria->name }}</h6>
                               <small>{{ __('admin.Provide your evaluation for') }} {{ $criteria->name }}.</small>
                             </div>
-                            <div class="accordion" id="accordionExample">
+                            <div class="accordion" id="criteria_{{ $key }}">
                               @foreach( $criteria->subCriteria as $sub_key => $subCriteria )
                               <div class="accordion-item">
                                 <h2 class="accordion-header">
@@ -99,19 +101,19 @@
                                     {{ $subCriteria->name }}
                                   </button>
                                 </h2>
-                                <div id="collapse{{ $key . '_' . $sub_key }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#accordionExample">
+                                <div id="collapse{{ $key . '_' . $sub_key }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#criteria_{{ $key }}">
                                   <div class="accordion-body">
                                     <div class="form-group mb-4">
-                                      <label for="{{ $key }}-score" class="form-label">{{ __('admin.Score') }}</label>
-                                      <select class="form-select" id="{{ $key }}-score" name="{{ $key }}_score">
+                                      <label for="score_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Score') }}</label>
+                                      <select class="form-select" id="score_{{ $subCriteria->id }}" name="score_{{ $subCriteria->id }}">
                                         <option value="">{{ __('admin.Select score') }}</option>
-                                        @for ($i = 1; $i <= 5; $i++) <option value="{{ $i }}">{{ $i }}</option> @endfor
+                                        @for ($i = 1; $i <= 5; $i++) <option value="{{ $i }}" {{ $subCriteria?->result?->score == $i ? 'selected' : '' }}>{{ $i }}</option> @endfor
                                       </select>
                                     </div>
                                     <div class="form-group">
-                                      <label for="{{ $key }}-comment" class="form-label">{{ __('admin.Comment') }}</label>
-                                      <textarea class="form-control" id="{{ $key }}-comment" name="{{ $key }}_comment" rows="3"
-                                        placeholder="{{ __('admin.Enter your comment here...') }}"></textarea>
+                                      <label for="comment_{{ $subCriteria->id }}" class="form-label">{{ __('admin.Comment') }}</label>
+                                      <textarea class="form-control" id="comment_{{ $subCriteria->id }}" name="comment_{{ $subCriteria->id }}" rows="3"
+                                        placeholder="{{ __('admin.Enter your comment here...') }}">{{ $subCriteria?->result?->comment ?? '' }}</textarea>
                                     </div>
                                   </div>
                                 </div>
@@ -141,15 +143,15 @@
             </div>
             <div class="tab-pane fade" id="pills-final-comments" role="tabpanel" aria-labelledby="pills-final-comments-tab">
               <div class="form-group">
-                <label for="final-comments" class="form-label">{{ __('admin.Final Comments')}}</label>
+                <label for="final_comments" class="form-label">{{ __('admin.Final Comments')}}</label>
                 <textarea 
                   oninput="this.value = this.value.replace(/^\s+/g, '')"
                   class="form-control" 
-                  id="final-comments" 
+                  id="final_comments" 
+                  name="final_comments" 
                   rows="16"
                   placeholder="{{ __('admin.Enter your comments here...')}}"
-                  >
-                </textarea>
+                  >{{ $evaluationForm->final_comment ?? '' }}</textarea>
               </div>
             </div>
             <div class="tab-pane fade" id="pills-view-evaluation" role="tabpanel" aria-labelledby="pills-view-evaluation-tab">

@@ -346,6 +346,8 @@
   {"name": "screening.evaluation_add_sub_criteria", "description": "Add Screening Evaluation Sub Criteria", "permission_group_id": "Screening", "guard_name": "web"},
   {"name": "screening.evaluation_edit_sub_criteria", "description": "Edit Screening Evaluation Sub Criteria", "permission_group_id": "Screening", "guard_name": "web"},
   {"name": "screening.evaluation_delete_sub_criteria", "description": "Delete Screening Evaluation Sub Criteria", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluate_save_draft", "description": "Save Screening Evaluation AS Draft (Judger)", "permission_group_id": "Screening", "guard_name": "web"},
+  {"name": "screening.evaluate_publish", "description": "Publish Screening Evaluation (Judger)", "permission_group_id": "Screening", "guard_name": "web"},
   {"name": "mentorships.surveys_list", "description": "List Mentorship Surveys", "permission_group_id": "Mentorship Management", "guard_name": "web"},
   {"name": "mentorships.surveys_create", "description": "Create Mentorship Survey Form", "permission_group_id": "Mentorship Management", "guard_name": "web"},
   {"name": "mentorships.surveys_store", "description": "Save New Mentorship Survey", "permission_group_id": "Mentorship Management", "guard_name": "web"},
