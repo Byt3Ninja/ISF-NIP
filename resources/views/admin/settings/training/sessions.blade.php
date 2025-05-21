@@ -624,6 +624,7 @@
   </div>
 </div>
 
+@foreach ($sessions as $session)
 <div class="modal fade text-left" id="editsession" tabindex="-1" role="dialog" aria-labelledby="editsession"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -702,6 +703,7 @@
     </div>
   </div>
 </div>
+@endforeach
 
 
 <!-- المودال نفسه -->
