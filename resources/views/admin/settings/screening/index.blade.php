@@ -132,8 +132,7 @@
 @stop
 
 @section('content')
-@php $types = ['onetoall'=>'Assign One to all users','grouptoall'=>'Assign Group to all users','grouptogroup'=>'Assign
-Group to group of users']
+@php $types = ['onetoall'=>'Assign One to all users','grouptoall'=>'Assign Group to all users','grouptogroup'=>'Assign Group to group of users']
 @endphp
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
