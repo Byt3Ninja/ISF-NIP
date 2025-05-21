@@ -876,6 +876,7 @@ if($start_datetime == null || $end_datetime == null){
 	return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 }
 
+		
 $step = $request->step_id;
 $title = $request->title;
 $dsc = $request->dsc;
