@@ -174,7 +174,7 @@
               <i class="ti ti-file fs-4 text-warning"></i>
               <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
             </div> 
-            <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
+            <a class="btn btn-label-primary btn-icon btn-sm" href="/program/${file}" target="_blank" download="${file}">
               <i class="ti ti-download fs-5"></i>
             </a>
           </div>`);

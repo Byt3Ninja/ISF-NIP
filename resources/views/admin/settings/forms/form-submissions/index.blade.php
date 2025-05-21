@@ -224,13 +224,17 @@ document.addEventListener('DOMContentLoaded', function (e) {
         initComplete: function (settings, json) {
           $('.card-header').after('<hr class="my-0">');
 
-          // Add custom filters for Organization and Program
-          const orgFilter = $(`<select class="form-select form-select-sm ms-12 me-3 w-px-150"><option value="">${t.allOrganizations}</option></select>`)
+            // Add custom filters for Organization and Program
+            @if(auth()->user()->hasRole('OrganizationManager'))
+            ''
+            @else
+            const orgFilter = $(`<select class="form-select form-select-sm ms-12 me-3 w-px-150"><option value="">${t.allOrganizations}</option></select>`)
             .appendTo('.dataTables_length')
             .on('change', function () {
               const val = $.fn.dataTable.util.escapeRegex($(this).val());
               dt_basic.column(3).search(val ? '^' + val + '$' : '', true, false).draw();
             });
+            @endif
 
           // Program filter
           const programFilter = $(`<select class="form-select form-select-sm w-px-150"><option value="">${t.allPrograms}</option></select>`)
