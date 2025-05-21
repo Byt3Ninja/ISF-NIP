@@ -987,8 +987,14 @@ $duration = $start->diffInMinutes($end);
 				$session['fromtime'] = date('h:i A', strtotime($sessionData->datetime));
 				$session['endtime'] = date('h:i A', strtotime($sessionData->enddatetime));
 			}
-			$session['training_Address'] = $sessionData->training_Address;
-			$session['training_location'] = $sessionData->training_location;
+			if($sessionData->type == 'sessions'){
+				$session['training_Address'] = $sessionData->training_Address;
+			}elseif($sessionData->type == 'offline'){
+				$session['training_Address'] = $sessionData->training_Address;
+				$session['training_location'] = $sessionData->training_location;
+			}elseif($sessionData->type == 'online'){
+				$session['course_id'] = $sessionData->training_Address;
+			}
 			$session['trainer_name'] = $sessionData->trainer_name;
 			$session['trainer_email'] = $sessionData->trainer_email;
 			$session['QrCode'] = $sessionData->QrCode;
