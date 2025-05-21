@@ -252,6 +252,7 @@ Group to group of users']
               <div class="">
                 <form action="/dashboard/screening/update" method="POST" enctype="multipart/form-data">
                   {!! csrf_field() !!}
+                  <input type="hidden" value="" name="judges" id="judges">
                   <input type="hidden" value="{{ $cstep->id }}" name="step">
                   <input type="hidden" name="fid" value="{{ $form->id ?? '' }}">
                   <div class="form-group">
@@ -282,7 +283,6 @@ Group to group of users']
 
                         @endphp
                         <input type="hidden" value="{{ $panel }}" name="panel{{ $key }}">
-                        <input type="hidden" value="" name="judges">
                         <div class="col-md-1"><button type="button" class="btn btn-warning"
                             onclick="openusers({{ $key }})"><i class="ti ti-edit text-info"></i></button></div>
                       </div>
@@ -308,7 +308,7 @@ Group to group of users']
                     </div>
                     @else
                     <label class="form-label fs-5">{{ __('cycles.Judges list') }}</label>
-                    <select name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' :
+                    <select id="judges-select" name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' :
                       'multiple="multiple"' }}>
                       {!! $cstep->data == 'onetoall'
                       ? '<option selected disabled>' . __('cycles.Please select one name') . '</option>'
@@ -1005,5 +1005,11 @@ Group to group of users']
       setTimeout(() => alert.remove(), 500); // Remove after fade-out
     });
   }, 20000);
+
+  $('#judges-select').on('change', function() {
+    const selectedJudgesIds = $(this).val();
+
+    $('#judges').val(selectedJudgesIds);
+  });
 </script>
 @stop
