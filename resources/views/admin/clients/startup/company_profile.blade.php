@@ -992,6 +992,7 @@ loadingTask.promise.then(function(pdf) {
             
           // You can use a toast or alert to show the success message
           alert(successMsg);
+          window.location.reload();
         },
         error: function(error) { 
           // Reset buttons

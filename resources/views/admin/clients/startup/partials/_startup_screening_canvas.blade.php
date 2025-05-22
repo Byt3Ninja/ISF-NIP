@@ -402,100 +402,40 @@
             </div>
             <div class="tab-pane fade" id="pills-view-evaluation" role="tabpanel" aria-labelledby="pills-view-evaluation-tab">
               <div class="row mb-6">
-                <div class="col-3">
+                @foreach( $evaluationForm->categories as $key => $criteria )
+                <div class="col-3 pb-3">
                   <div class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
+                    <h6 class="mb-0 text-secondary fw-semibold">{{ $criteria->name }}</h6>
                     <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
+                      <span class="fs-5 fw-bold mb-0 text-dark">
+                        {{ $criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) }} / {{ $criteria->subCriteria->count() * 5 }}
+                      </span>
                       <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
                     </div>
                   </div>
                 </div>
-                <div class="col-3">
-                  <div class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
-                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-3">
-                  <div class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
-                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-3">
-                  <div class="border border-dark rounded px-3 py-2">
-                    <h6 class="mb-0 text-secondary fw-semibold">{{ __('admin.Screening')}}</h6>
-                    <div class="d-flex justify-content-between align-items-center mt-1">
-                      <span class="fs-5 fw-bold mb-0 text-dark">24</span>
-                      <span class="fs-5 fw-bold text-primary mb-0">{{ __('admin.Point')}}</span>
-                    </div>
-                  </div>
-                </div>
+                @endforeach
               </div>
               
               <div class="row">
+                @foreach( $evaluationForm->categories as $key => $criteria )
                 <div class="col-12 mb-5 border-bottom pb-4">
-                  <h5 class="text-primary fw-semibold">{{ __('admin.All Comments')}}</h5>
+                  <h5 class="text-primary fw-semibold">{{ $criteria->name . ' ' . __('admin.Comments')}}</h5>
+                  @foreach( $criteria->subCriteria as $index => $subCriteria )
                   <div class="d-flex flex-column mb-4">
                     <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-primary rounded-pill">1</span>
-                      <span class="fs-5 mb-0 text-dark">Market Fit</span>
+                      <span class="badge bg-primary rounded-pill">{{ $index + 1 }}</span>
+                      <span class="fs-5 mb-0 text-dark">{{ $subCriteria->name }}</span>
                     </div>
-                    <small class="text-light line-clamp-3 mt-2 w-75">
-                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                      At expedita ab dolore odit et iure aperiam, quibusdam dolorum
-                    </small>
+                    <small class="text-light line-clamp-3 mt-2 w-75">{{ $subCriteria->result->comment }}</small>
                   </div>
-                  <div class="d-flex flex-column">
-                    <div class="d-flex align-items-center gap-2">
-                      <span class="badge bg-primary rounded-pill">2</span>
-                      <span class="fs-5 mb-0 text-dark">Financial Viability</span>
-                    </div>
-                    <small class="text-light line-clamp-3 mt-2 w-75">
-                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                      At expedita ab dolore odit et iure aperiam, quibusdam dolorum
-                    </small>
-                  </div>
+                  @endforeach
                 </div>
-              </div>
-              <div class="col-12 mb-5">
-                <h5 class="text-primary fw-semibold">{{ __('admin.All Notes')}}</h5>
-                <div class="d-flex flex-column mb-4">
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-pill">1</span>
-                    <span class="fs-5 mb-0 text-dark">Market Fit</span>
-                  </div>
-                  <small class="text-light line-clamp-3 mt-2 w-75">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    At expedita ab dolore odit et iure aperiam, quibusdam dolorum
-                  </small>
-                </div>
-                <div class="d-flex flex-column">
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-pill">2</span>
-                    <span class="fs-5 mb-0 text-dark">Financial Viability</span>
-                  </div>
-                  <small class="text-light line-clamp-3 mt-2 w-75">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    At expedita ab dolore odit et iure aperiam, quibusdam dolorum
-                  </small>
-                </div>
+                @endforeach
               </div>
               <div class="col-12">
                 <h5 class="text-primary fw-semibold mb-2">{{ __('admin.Final Comments')}}</h5>
-                <small class="text-light line-clamp-3 mt-2 w-75">
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                  Ad minus, optio repellat odit pariatur accusantium, quas,
-                  natus tenetur delectus voluptas tempora sint corporis. Autem omnis
-                  maxime cumque blanditiis labore perferendis.
-                </small>
+                <small class="text-light line-clamp-3 mt-2 w-75">{{ $evaluationForm->final_comment }}</small>
               </div>
             </div>
           </div>
