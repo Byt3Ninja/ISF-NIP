@@ -159,13 +159,13 @@
               </div>
 
               <div class="py-3 border-bottom">
-                <div class="info-label"><i class="fas fa-map-marker-alt me-2"></i>{{ __('admin.location_address') }}</div>
+                <div class="info-label" id="text-label"><i class="fas fa-map-marker-alt me-2"></i>{{ __('admin.location_address') }}</div>
                 <div id="session-location"></div>
                 <div id="session-address" class="text-muted"></div>
               </div>
 
               <div class="py-3 border-bottom">
-                <div class="info-label"><i class="fas fa-link me-2"></i>{{ __('admin.join_link') }}</div>
+                <div class="info-label" id="join-link-label"><i class="fas fa-link me-2"></i>{{ __('admin.join_link') }}</div>
                 <div class="d-flex align-items-center">
                   <a id="join-link" href="#" class="text-primary text-decoration-none"
                     target="_blank">
@@ -180,7 +180,7 @@
               </div>
 
               <div class="py-3 border-bottom">
-                <div class="info-label"><i class="fas fa-id-card me-2"></i>{{ __('admin.zoom_id') }}</div>
+                <div class="info-label" id="zoom-id-label"><i class="fas fa-id-card me-2"></i>{{ __('admin.zoom_id') }}</div>
                 <div id="zoom-id" class="text-truncate"></div>
               </div>
             </div>
@@ -455,9 +455,11 @@
             }
 
             // 4. Location
-            if (response.training_location || response.training_Address) {
+            if (response.type == 'offline') {
               $location.text(response.training_location || '');
               $address.text(response.training_Address || '');
+            }else{
+               $('#text-label').hide();
             }
 
             // 5. Trainer Details
@@ -485,19 +487,20 @@
             }
 
             // 9. Join Link
-            if (response.join_url) {
+            if (response.type == 'sessions') {
               $('#join-link').attr('href', response.join_url);
               $('#join-link').text(response.join_url);
               $('#join-button').show();
               $('#copy-link').show();
             } else {
-              $('#join-button').hide();
-              $('#copy-link').hide();
+              $('#join-link-label').hide();
             }
 
             // 10. Zoom ID
-            if (response.zoom_id) {
+            if (response.type == 'sessions') {
               $zoomId.text(response.zoom_id);
+            }else{
+              $('#zoom-id-label').hide();
             }
 
             $modal.modal('show');
