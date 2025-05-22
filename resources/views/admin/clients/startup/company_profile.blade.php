@@ -896,7 +896,7 @@ loadingTask.promise.then(function(pdf) {
   });
 </script>
 
-@if( $_user->hasRole('Judger') && $evaluationForm->isPublished == false )
+@if( $_user->hasRole('Judger') && !is_null( $evaluationForm ) && !empty( $evaluationForm ) && $evaluationForm->isPublished == false )
   <script type="text/javascript">
     $('#save_screening_btn').on('click', function(e) {
       e.preventDefault();
