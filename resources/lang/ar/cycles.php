@@ -317,5 +317,6 @@ return [
     'Create' => 'إنشاء',
     'View Report' => 'عرض التقرير',
     'Display course contents' => 'عرض محتويات الكورس التعليمي',
+    'Select judges' => 'حدد المحكمين',
   ];
 
