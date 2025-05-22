@@ -29,20 +29,35 @@ const translations = {
   }
 };
 
-$(document).ready(function() {
-    // Function to calculate the total time for a period row
-    function calculateTotalTime($periodRow) {
-      var fromTime = $periodRow.find('select[name$="[from][]"]').val();
-      var toTime = $periodRow.find('select[name$="[to][]"]').val();
-      if (fromTime && toTime) {
-        var from = new Date('1970-01-01T' + fromTime + 'Z');
-        var to = new Date('1970-01-01T' + toTime + 'Z');
-        var diff = (to - from) / 60000; // difference in minutes
-        $periodRow.find('.total-time').text(diff + ' ' + __('Min'));
-      } else {
-        $periodRow.find('.total-time').text('0 ' + __('Min'));
-      }
+// Function to calculate the total time for a period row
+function calculateTotalTime($periodRow) {
+  var fromTime = $periodRow.find('select[name$="[from][]"]').val();
+  var toTime = $periodRow.find('select[name$="[to][]"]').val();
+  
+  if (fromTime && toTime) {
+    // Parse the time values correctly
+    var [fromHours, fromMinutes] = fromTime.split(':').map(Number);
+    var [toHours, toMinutes] = toTime.split(':').map(Number);
+    
+    // Convert to total minutes
+    var fromTotalMinutes = (fromHours * 60) + fromMinutes;
+    var toTotalMinutes = (toHours * 60) + toMinutes;
+    
+    // Calculate the difference
+    var diff = toTotalMinutes - fromTotalMinutes;
+    
+    // Handle overnight schedules
+    if (diff < 0) {
+      diff += 24 * 60; // Add 24 hours in minutes
     }
+    
+    $periodRow.find('.total-time').text(diff + ' ' + __('Min'));
+  } else {
+    $periodRow.find('.total-time').text('0 ' + __('Min'));
+  }
+}
+
+$(document).ready(function() {
 
     // Function to check if any input has changed
     function checkFormChanges() {
@@ -332,11 +347,41 @@ function mentorSchedule(type, id, stat) {
                 const toSelect = document.querySelector(`#${toSelectId}`);
                 if (fromSelect) fromSelect.value = fromValue;
                 if (toSelect) toSelect.value = toValue;
-              }, 0);
+                
+                // Force a manual calculation of the duration based on the actual values
+                const from = dayPeriods[i].tfrom.substring(0, 5);  // Extract HH:MM from time string
+                const to = dayPeriods[i].tto.substring(0, 5);      // Extract HH:MM from time string
+                
+                // Calculate and update the time difference directly
+                if (from && to) {
+                  const [fromHours, fromMinutes] = from.split(':').map(Number);
+                  const [toHours, toMinutes] = to.split(':').map(Number);
+                  
+                  let fromTotalMinutes = (fromHours * 60) + fromMinutes;
+                  let toTotalMinutes = (toHours * 60) + toMinutes;
+                  
+                  // Handle overnight schedules
+                  if (toTotalMinutes < fromTotalMinutes) {
+                    toTotalMinutes += 24 * 60; // Add 24 hours in minutes
+                  }
+                  
+                  const diff = toTotalMinutes - fromTotalMinutes;
+                  $(`#${periodRowId} .total-time`).text(diff + ' ' + __('Min'));
+                }
+              }, 100);
             }
           }
         }
       });
+      
+      // After all periods have been created, recalculate all total times
+      setTimeout(() => {
+        // For each period row in the modal, calculate the total time
+        $('#availabilty-modal .period-row').each(function() {
+          calculateTotalTime($(this));
+        });
+      }, 100); // Give a little extra time for the DOM to update
+      
     } else if (type === 2) {
       location.reload();
     } else if (type === 3) {
