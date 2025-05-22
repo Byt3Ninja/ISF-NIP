@@ -130,7 +130,7 @@
         <input type="hidden" id="evaluation_program_id" name="evaluation_program_id" value="{{ $company->id }}" />
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         <div class="d-flex align-items-center gap-3">
-          @if( $evaluationForm->isPublished == true )
+          @if( !is_null( $evaluationForm ) && !empty( $evaluationForm ) && $evaluationForm->isPublished == true )
           <button onclick="event.preventDefault();" class="btn btn-primary disabled" disabled>
             <i class="ti ti-check me-2"></i> Published
           </button>
