@@ -202,8 +202,7 @@
                           {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
                           {{ $session->training_Address }} <br>
                           @else
-                          <a href="/dashboard/training/all/{{ $session->training_Address }}">{{ __('cycles.Display
-                            course contents') }}
+                          <a href="/dashboard/training/all/{{ $session->training_Address }}">{{ __('cycles.Display course contents') }}
                           </a>
                           @endif
 
@@ -527,6 +526,7 @@
         autocomplete="off">
         <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
           @csrf
+         
           <input type="hidden" name="step_id" value="{{ $id }}" id="id">
           <div class="form-group mb-4" id="ctype">
             <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
@@ -629,23 +629,22 @@
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content rounded p-0 p-md-6" id="modal-content">
-      <form id="editSessionForm" method="post" action="/dashboard/training/editsession" enctype="multipart/form-data"
+      <form id="editSessionForm" method="post" action="{{ route('trainings.sessions_edit',$session->id) }}" enctype="multipart/form-data"
         autocomplete="off">
         @include('partials.modal.modal-header', ['title' => __('cycles.Edit training session')])
         <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
           @csrf
+          @method('PUT')
           <div  style="height: 400px;">
             <input type="hidden" name="sid" value="{{ $id }}" id="id">
             <div class="form-group mb-4" id="ctype">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
               <select id="select-type" name="type" class="select2 form-control" required>
-                <option value="online" {{ old('type', $session->type) == 'online' ? 'selected' : '' }}>{{
-                  __('cycles.online') }}</option>
-                <option value="sessions" {{ old('type', $session->type) == 'sessions' ? 'selected' : '' }}>{{
-                  __('cycles.sessions') }}</option>
-                <option value="offline" {{ old('type', $session->type) == 'offline' ? 'selected' : '' }}>{{
-                  __('cycles.offline') }}</option>
-              </select>
+                    <option value="online" {{ old('type', $session->type) == 'online' ? 'selected' : '' }}>{{ __('cycles.online') }}</option>
+                    <option value="sessions" {{ old('type', $session->type) == 'sessions' ? 'selected' : '' }}>{{ __('cycles.sessions') }}</option>
+                    <option value="offline" {{ old('type', $session->type) == 'offline' ? 'selected' : '' }}>{{ __('cycles.offline') }}</option>
+             </select>
+             
             </div>
             <div class="row mb-4" id="date-only">
               <div class="col-12">
@@ -1213,7 +1212,7 @@
           const startDate = dateRange.split(' - ')[0];
           const endDate = dateRange.split(' - ')[1];
 
-          $('#editSessionForm #select-type').val(type).trigger('change').prop('readonly', true).prop('disabled', true);
+          $('#editSessionForm #select-type').val(type).trigger('change');
           $('#editSessionForm #select-course').val(response?.course_id || '').trigger('change');
 
 
