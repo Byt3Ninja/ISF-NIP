@@ -132,8 +132,7 @@
 @stop
 
 @section('content')
-@php $types = ['onetoall'=>'Assign One to all users','grouptoall'=>'Assign Group to all users','grouptogroup'=>'Assign
-Group to group of users']
+@php $types = ['onetoall'=>'Assign One to all users','grouptoall'=>'Assign Group to all users','grouptogroup'=>'Assign Group to group of users']
 @endphp
 <!-- BEGIN: Content-->
 <div class="content-wrapper">
@@ -252,6 +251,7 @@ Group to group of users']
               <div class="">
                 <form action="/dashboard/screening/update" method="POST" enctype="multipart/form-data">
                   {!! csrf_field() !!}
+                  <input type="hidden" value="" name="judges" id="judges">
                   <input type="hidden" value="{{ $cstep->id }}" name="step">
                   <input type="hidden" name="fid" value="{{ $form->id ?? '' }}">
                   <div class="form-group">
@@ -292,7 +292,7 @@ Group to group of users']
                       <p style="margin: 5px">{{ __('cycles.panel list') . ' ' . $key }}</p>
                       <div class="row col-md-12">
                         <div class="col-md-11">
-                          <select name="  [{{ $key }}][]" class="select2 form-control panel{{ $key }}"
+                          <select class="select2 form-control panel{{ $key }}"
                             multiple="multiple">
                             @foreach ($judges as $judge)
                             <option value="{{ $judge->id }}">{{ $judge->{'first_name_' . $l} }}
@@ -307,7 +307,7 @@ Group to group of users']
                     </div>
                     @else
                     <label class="form-label fs-5">{{ __('cycles.Judges list') }}</label>
-                    <select name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' :
+                    <select id="judges-select" name="judges[]" class="select2 form-control" {{ $cstep->data == 'onetoall' ? '' :
                       'multiple="multiple"' }}>
                       {!! $cstep->data == 'onetoall'
                       ? '<option selected disabled>' . __('cycles.Please select one name') . '</option>'
@@ -1004,5 +1004,11 @@ Group to group of users']
       setTimeout(() => alert.remove(), 500); // Remove after fade-out
     });
   }, 20000);
+
+  $('#judges-select').on('change', function() {
+    const selectedJudgesIds = $(this).val();
+
+    $('#judges').val(selectedJudgesIds);
+  });
 </script>
 @stop

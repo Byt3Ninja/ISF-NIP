@@ -14,6 +14,7 @@ class Permissions
     private $exceptNames = [
         'filemanager*',
         'dashboard',
+        'dashboard/dashboard',
         'login*',
         'cities*',
 		'LFMGet',

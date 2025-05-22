@@ -319,5 +319,6 @@ return [
     'Auto_Approve_Helper_Text' => 'If enabled, mentorship requests will be automatically approved based on mentor availability.',
     'Create' => 'Create',
     'View Report' => 'View Report',
+    'Display course contents' => 'Display course contents',
 ];
 

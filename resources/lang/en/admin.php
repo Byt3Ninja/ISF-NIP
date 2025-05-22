@@ -1744,4 +1744,8 @@ return [
 	'Investor' => 'Investor',
 	'Current_Step' => 'Current Step',
 	'Mentor_Session_Appointment' => 'Mentor Session Appointment',
+	'SelectedQuestionsMustBeArray' => 'Selected Questions Must Be An Array',
+	'InvalidQuestionSelected' => 'Invalid Question Selected',
+	'SurveyUpdatedSuccessfully' => 'Survey Updated Successfully',
+	'SurveyStoredSuccessfully' => 'Survey Created Successfully',
 ];

@@ -202,8 +202,7 @@
                           {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
                           {{ $session->training_Address }} <br>
                           @else
-                          <a href="/dashboard/training/all/{{ $session->training_Address }}">{{ __('cycles.Display
-                            course contents') }}
+                          <a href="/dashboard/training/all/{{ $session->training_Address }}">{{ __('cycles.Display course contents') }}
                           </a>
                           @endif
 
@@ -527,6 +526,7 @@
         autocomplete="off">
         <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
           @csrf
+         
           <input type="hidden" name="step_id" value="{{ $id }}" id="id">
           <div class="form-group mb-4" id="ctype">
             <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
@@ -629,23 +629,22 @@
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content rounded p-0 p-md-6" id="modal-content">
-      <form id="editSessionForm" method="post" action="/dashboard/training/editsession" enctype="multipart/form-data"
+      <form id="editSessionForm" method="post" action="{{ route('trainings.sessions_edit',$session->id) }}" enctype="multipart/form-data"
         autocomplete="off">
         @include('partials.modal.modal-header', ['title' => __('cycles.Edit training session')])
         <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
           @csrf
+          @method('PUT')
           <div  style="height: 400px;">
-            <input type="hidden" name="step_id" value="{{ $id }}" id="id">
+            <input type="hidden" name="sid" value="{{ $id }}" id="id">
             <div class="form-group mb-4" id="ctype">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
               <select id="select-type" name="type" class="select2 form-control" required>
-                <option value="online" {{ old('type', $session->type) == 'online' ? 'selected' : '' }}>{{
-                  __('cycles.online') }}</option>
-                <option value="sessions" {{ old('type', $session->type) == 'sessions' ? 'selected' : '' }}>{{
-                  __('cycles.sessions') }}</option>
-                <option value="offline" {{ old('type', $session->type) == 'offline' ? 'selected' : '' }}>{{
-                  __('cycles.offline') }}</option>
-              </select>
+                    <option value="online" {{ old('type', $session->type) == 'online' ? 'selected' : '' }}>{{ __('cycles.online') }}</option>
+                    <option value="sessions" {{ old('type', $session->type) == 'sessions' ? 'selected' : '' }}>{{ __('cycles.sessions') }}</option>
+                    <option value="offline" {{ old('type', $session->type) == 'offline' ? 'selected' : '' }}>{{ __('cycles.offline') }}</option>
+             </select>
+             
             </div>
             <div class="row mb-4" id="date-only">
               <div class="col-12">
@@ -686,6 +685,16 @@
                 <option value="{{ $tr->id }}">{{ $tr->title }}</option>
                 @endforeach
               </select>
+            </div>
+            <label class="form-label fs-6 mb-1">{{ __('cycles.Session Title') }}</label>
+            <div class="form-group mb-3">
+              <input id="title" name="title" type="text" placeholder="{{ __('cycles.Session Title') }}"
+                class="form-control">
+            </div>
+            <label class="form-label fs-6 mb-1">{{ __('cycles.Add a description') }}:</label>
+            <div class="form-group mb-3">
+              <textarea class="form-control" id="dsc" name='dsc' rows="2"
+                placeholder="{{ __('cycles.Write your description here') }}."></textarea>
             </div>
           </div>
           <div class="d-flex align-items-center gap-3 mt-4 p-4 p-md-0">
@@ -945,7 +954,7 @@
       const dateValue = $(`${formId} .flatpickr-date`).val();
       const timeFromValue = $(`${formId} #flatpickr-time-from`).val();
       const timeToValue = $(`${formId} #flatpickr-time-to`).val();
-      // const titleValue = $(`${formId} #title`).val();
+      const titleValue = $(`${formId} #title`).val();
       // console.log('titleValue', titleValue);
       
       let isValid = true;
@@ -955,10 +964,10 @@
           dateRangePicker.addClass('is-invalid').after('<div class="invalid-feedback">Please select a date range for online sessions.</div>');
           isValid = false;
         }
-        // if (!titleValue) {
-        //   $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
-        //   isValid = false;
-        // }
+        if (!titleValue) {
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          isValid = false;
+        }
       }  
 
       if (typeValue === 'offline' || typeValue === 'sessions') {
@@ -974,10 +983,10 @@
           $(`${formId} #flatpickr-time-to`).addClass('is-invalid').after('<div class="invalid-feedback">Please select an end time.</div>');
           isValid = false;
         } 
-        // if (!titleValue) {
-        //   $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
-        //   isValid = false;
-        // }
+        if (!titleValue) {
+          $(`${formId} #title`).addClass('is-invalid').after('<div class="invalid-feedback">Please enter a title.</div>');
+          isValid = false;
+        }
       }
       
       if (isValid) {
@@ -1203,9 +1212,11 @@
           const startDate = dateRange.split(' - ')[0];
           const endDate = dateRange.split(' - ')[1];
 
-          $('#editSessionForm #select-type').val(type).trigger('change').prop('disabled', true);
-          $('#editSessionForm #select-course').val(response?.courseId || '').trigger('change');
+          $('#editSessionForm #select-type').val(type).trigger('change');
+          $('#editSessionForm #select-course').val(response?.course_id || '').trigger('change');
 
+
+          $('#editSessionForm #title').show();
           $('#editSessionForm #title').val(response.title);
           $('#editSessionForm #dsc').val(response.dsc);
           $('#editSessionForm #select-type').val(response.type).trigger('change');
@@ -1233,17 +1244,6 @@
               $('#editSessionForm #start').val('');
               $('#editSessionForm #end').val('');
             });
-              // .on('apply.daterangepicker', function(ev, picker) {
-              //   $('#editSessionForm #start').val(picker.startDate.format('YYYY-MM-DD'));
-              //   $('#editSessionForm #end').val(picker.endDate.format('YYYY-MM-DD'));
-              //   $('#editSessionForm #date-range-picker').val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-              //   $('#editSessionForm #date-range-picker').removeClass('is-invalid');
-              //   $('#editSessionForm #date-range-picker').next('.invalid-feedback').remove();
-              // }).on('cancel.daterangepicker', function(ev, picker) {
-              //   // $('#editSessionForm #date-range-picker').val('');
-              //   // $('#editSessionForm #start').val('');
-              //   // $('#editSessionForm #end').val('');
-              // });      
             }
          
           if (type === 'offline') {

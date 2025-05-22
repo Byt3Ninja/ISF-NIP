@@ -84,6 +84,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Judger
     Route::get('judger/screening','Judger\JudgerScreeningController@index');
+    Route::post('judger/screening/evaluation/save_draft', 'Judger\JudgerScreeningController@save_evaluation_draft')->name('screening.evaluate_save_draft');
+    Route::post('judger/screening/evaluation/publish', 'Judger\JudgerScreeningController@publish_evaluation')->name('screening.evaluate_publish');
    
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
@@ -424,7 +426,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('training/addsession', 'TrainingController@addsession')->name('trainings.sessions_create');
     Route::post('training/delsession/{id}', 'TrainingController@delsession')->name('trainings.sessions_delete');
     Route::post('training/session', 'TrainingController@session')->name('trainings.sessions_view');
-    Route::post('training/editsession', 'TrainingController@editsession')->name('trainings.sessions_edit');
+    Route::put('training/editsession/{id}', 'TrainingController@editsession')->name('trainings.sessions_edit');
     Route::post('trainings/getdsc/{id}', 'TrainingController@getdsc')->name('trainings.descriptions_view');
     Route::get('/export-Tresult', 'TrainingController@exportTresult')->name('trainings.results_export');
     Route::post('trainings/change/Tresult', 'TrainingController@changAllTL')->name('trainings.tl_update_all');
