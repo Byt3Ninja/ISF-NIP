@@ -120,6 +120,7 @@ class JudgerScreeningController extends Controller
                     if( $have_published->count() > 0 ) { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'You have already published an evaluation form'], 200); }
                     else
                     {
+                        $final_comment = $request->final_comment;
                         $myComment = ScreeningEvaluation::getMyFinalComment( $evaluation_id, $user_id );
                         $myComment->value = $final_comment;
                         $myComment->save();
