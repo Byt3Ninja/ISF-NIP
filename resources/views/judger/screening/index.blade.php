@@ -51,8 +51,11 @@
         <div class="col-12 col-md-12 col-lg-12 col-xl-12 mb-6">
           <div class="card screening-card">
             <div class="card-body">
-              <table class="zero-configuration table border-top">
-                <thead>
+              <div class="table-responsive">
+
+              </div>
+              <table class="table mt-3">
+                <thead class="bg-label-light">
                   <tr>
                     <th>{{ __('admin.Program_name') }}</th>
                     <th>{{ __('admin.Step Name') }}</th>
@@ -84,7 +87,7 @@
 @stop
 
 @section('pagescripts')
-  <script>
+  <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function() {
       const searchInput = document.getElementById('searchInput');
       const cards = document.querySelectorAll('.screening-card');
@@ -118,6 +121,47 @@
             card.style.display = 'none';
           }
         });
+      });
+    });
+  </script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('.table').DataTable({
+        "responsive": true,
+        "searching": true,
+        "lengthChange": false,
+        "paging": true,
+        "bInfo": false,
+        "columnDefs": [{
+          "orderable": false,
+          "targets": [4]
+        }, ],
+        @if ($l == 'ar')
+          "language": {
+            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
+            "sLoadingRecords": "جارٍ التحميل...",
+            "sProcessing": "جارٍ التحميل...",
+            "sLengthMenu": "أظهر _MENU_ مدخلات",
+            "sZeroRecords": "لم يعثر على أية سجلات",
+            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+            "sInfoPostFix": "",
+            "sSearch": "ابحث:",
+            "sUrl": "",
+            "oPaginate": {
+              "sFirst": "الأول",
+              "sPrevious": "السابق",
+              "sNext": "التالي",
+              "sLast": "الأخير"
+            },
+            "oAria": {
+              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
+              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
+            }
+          }
+        @endif
       });
     });
   </script>
