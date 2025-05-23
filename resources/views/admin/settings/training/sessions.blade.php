@@ -530,7 +530,7 @@
           <input type="hidden" name="step_id" value="{{ $id }}" id="id">
           <div class="form-group mb-4" id="ctype">
             <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
-            <select id="select-type" name="type" class="select2 form-select" required {{--
+            <select id="select-type" name="type" class=" form-select" required {{--
               onchange="tchange(this.options[this.selectedIndex].value)" --}}>
               <option value="online">{{ __('cycles.online') }}</option>
               <option value="sessions">{{ __('cycles.sessions') }}</option>
@@ -571,7 +571,7 @@
 
           <div class="form-group mb-3" id="online-dropdown">
             <label class="form-label fs-6 mb-1">{{ __('cycles.select online') }}:</label>
-            <select name="online" id="select-course" class="select2 form-select">
+            <select name="online" id="select-course" class="form-select">
               @if (!$online)
               <option>{{ __('cycles.No saved training courses') }}</option>
               @endif
@@ -592,21 +592,21 @@
           </div>
           <div class="form-group mb-3" id="location" style="display: none;">
             <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
-            <input name="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
+            <input name="training_Address" id="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
               class="form-control">
           </div>
           <div class="form-group mb-3" id="address" style="display: none;">
             <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
-            <input name="training_location" type="text" placeholder="{{ __('cycles.training location') }}"
+            <input name="training_location" id="training_location" type="text" placeholder="{{ __('cycles.training location') }}"
               class="form-control">
           </div>
           <div class="form-group mb-3" id="trainer" style="display: none;">
             <label class="form-label fs-6 mb-1">{{ __('cycles.trainer name') }}</label>
-            <input name="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}" class="form-control">
+            <input name="trainer_name" id="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}" class="form-control">
           </div>
           <div class="form-group mb-3" id="trainer_email" style="display: none;">
             <label class="form-label fs-6 mb-1">{{ __('cycles.trainer email') }}</label>
-            <input name="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}" class="form-control">
+            <input name="trainer_email" id="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}" class="form-control">
           </div>
         </div>
         <div class="d-flex align-items-center gap-3 mt-4 p-4 p-md-0">
@@ -635,7 +635,7 @@
         <div class="rounded bg-white border-0 border-md-1 border-secondary p-4">
           @csrf
           @method('PUT')
-          <div  style="height: 400px;">
+          <div>
             <input type="hidden" name="sid" value="{{ $id }}" id="id">
             <div class="form-group mb-4" id="ctype">
               <label class="form-label fs-6 mb-1">{{ __('cycles.Type') }}:</label>
@@ -675,7 +675,7 @@
                 </div>
               </div>
             </div>
-            <div class="form-group mb-3" id="online">
+            <div class="form-group mb-3" id="online-dropdown" style="display: none;">
               <label class="form-label fs-6 mb-1">{{ __('cycles.select online') }}:</label>
               <select name="online" id="select-course" class="form-select" id="conline">
                 @if (!$online)
@@ -695,6 +695,24 @@
             <div class="form-group mb-3">
               <textarea class="form-control" id="dsc" name='dsc' rows="2"
                 placeholder="{{ __('cycles.Write your description here') }}."></textarea>
+            </div>
+            <div class="form-group mb-3" id="location" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.training Address') }}</label>
+              <input name="training_Address" id="training_Address" type="text" placeholder="{{ __('cycles.training Address') }}"
+                class="form-control">
+            </div>
+            <div class="form-group mb-3" id="address" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.training location') }}</label>
+              <input name="training_location" id="training_location" type="text" placeholder="{{ __('cycles.training location') }}"
+                class="form-control">
+            </div>
+            <div class="form-group mb-3" id="trainer" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.trainer name') }}</label>
+              <input name="trainer_name" id="trainer_name" type="text" placeholder="{{ __('cycles.trainer name') }}" class="form-control">
+            </div>
+            <div class="form-group mb-3" id="trainer_email" style="display: none;">
+              <label class="form-label fs-6 mb-1">{{ __('cycles.trainer email') }}</label>
+              <input name="trainer_email" id="trainer_email" type="text" placeholder="{{ __('cycles.trainer email') }}" class="form-control">
             </div>
           </div>
           <div class="d-flex align-items-center gap-3 mt-4 p-4 p-md-0">
@@ -763,24 +781,24 @@
 <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
 
 <script>
-  $(document).ready(function () {
-     function toggleOnlineDropdown() {
-        var selected = $('#select-type').val();
-     if (selected === 'online') {
-          $('#online-dropdown').show();
-     } else {
-       $('#online-dropdown').hide();
-     }
-   }
+    // $(document).ready(function () {
+    //    function toggleOnlineDropdown() {
+    //       var selected = $('#select-type').val();
+    //    if (selected === 'online') {
+    //         $('#online-dropdown').show();
+    //    } else {
+    //      $('#online-dropdown').hide();
+    //    }
+    //  }
 
-    $('.select2').select2();
+    //   $('.select2').select2();
 
-    toggleOnlineDropdown();
+    //   toggleOnlineDropdown();
 
-    $('#select-type').on('change', function () {
-      toggleOnlineDropdown();
-    });
-  });
+    //   $('#select-type').on('change', function () {
+    //     toggleOnlineDropdown();
+    //   });
+    // });
 
      $(`#addSessionForm .flatpickr-date`).on('change', function() {
       const dateValue = $(this).val();
@@ -888,10 +906,10 @@
     });
 
     $('#addSessionForm #select-type').on('change', function(e) {
-      console.log('value', e.target.value);
       const value = e.target.value;
 
       if (value === 'offline') {
+        $('#addSessionForm #online-dropdown').hide();
         $('#addSessionForm #date-only').hide();
         $('#addSessionForm #date-time').show();
         $('#addSessionForm #trainer').show();
@@ -899,6 +917,7 @@
         $('#addSessionForm #location').show();
         $('#addSessionForm #address').show();
       } else if (value === 'sessions') {
+        $('#addSessionForm #online-dropdown').hide(); 
         $('#addSessionForm #date-only').hide();
         $('#addSessionForm #date-time').show();
         $('#addSessionForm #trainer').show();
@@ -906,6 +925,7 @@
         $('#addSessionForm #location').hide();
         $('#addSessionForm #address').hide();
       } else if (value === 'online') {
+        $('#addSessionForm #online-dropdown').show();
         $('#addSessionForm #date-only').show();
         $('#addSessionForm #date-time').hide();
         $('#addSessionForm #trainer').hide();
@@ -996,7 +1016,6 @@
     });
 
     $('#editSessionForm #select-type').on('change', function(e) {
-      console.log('value', e.target.value);
       const value = e.target.value;
 
       if (value === 'offline') {
@@ -1213,7 +1232,6 @@
           const endDate = dateRange.split(' - ')[1];
 
           $('#editSessionForm #select-type').val(type).trigger('change');
-          $('#editSessionForm #select-course').val(response?.course_id || '').trigger('change');
 
 
           $('#editSessionForm #title').show();
@@ -1222,10 +1240,15 @@
           $('#editSessionForm #select-type').val(response.type).trigger('change');
           
           if(response.type != 'online'){
+            $('#editSessionForm #online-dropdown').hide();
             $('#editSessionForm .flatpickr-date').val(dateRange  || '');
             $('#editSessionForm #flatpickr-time-from').val(response.fromtime  || '');
             $('#editSessionForm #flatpickr-time-to').val(response.endtime  || '');
           } else{
+            $('#editSessionForm #select-course').val(response?.course_id || '').trigger('change');
+
+            $('#editSessionForm #online-dropdown').show();
+
             $('#editSessionForm #date-range-picker').daterangepicker({
               opens: isRtl ? 'left' : 'right',
               drops: 'up',
