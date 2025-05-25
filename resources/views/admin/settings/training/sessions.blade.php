@@ -1135,44 +1135,47 @@
     //   format: 'Y-m-d H:i'
     // });
 
-    function deleteme(id) {
-      let url = '/dashboard/training/delsession/' + id;
-      let token = '{{ csrf_token() }}';
-      Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonClass: "btn-primary",
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}",
-          reverseButtons: true,
-          customClass: {
+  function deleteme(id) {
+    let url = '/dashboard/training/delsession/' + id;
+    let token = '{{ csrf_token() }}';
+
+    Swal.fire({
+        title: "{{ __('admin.SureDelete') }}",
+        text: "{{ __('admin.Recover') }}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
             confirmButton: 'btn btn-primary',
             cancelButton: 'btn btn-secondary'
         },
-        buttonsStyling: false 
-        })
-        .then((result) => {
-          if (result.value) {
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
             $.post(url, {
                 '_method': 'POST',
                 '_token': token
-              },
-              function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.Course Deleted') }}.',
-                  'success');
-                window.location.href = '/dashboard/training/sessions/{{ $id }}';
-              }).fail(function(error) {
-              console.log(error);
+            }, function(response) {
+                Swal.fire({
+                    title: '{{ __('admin.Deleted') }}!',
+                    text: '{{ __('admin.Course Deleted') }}.',
+                    icon: 'success',
+                    showConfirmButton: false,      
+                    timer: 1500,                    
+                    timerProgressBar: true
+                }).then(() => {
+                    window.location.href = '/dashboard/training/sessions/{{ $id }}';
+                });
+            }).fail(function(error) {
+                console.error(error);
             });
-          } else {
-            console.log('Canceled')
-          }
-        });
-    }
+        } else {
+            console.log('Canceled');
+        }
+    });
+}
 
     // function tchange(training) {
     //   if (training === 'offline') {

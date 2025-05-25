@@ -335,72 +335,72 @@ class ProgramController extends Controller
         ->map(fn($group) => $group->count())
         ->toArray();
 
-    $mentorAvgRatings = $mentorshipRequests
+        $mentorAvgRatings = $mentorshipRequests
         ->groupBy('mentor_id')
         ->map(fn($group) => $group->avg('rating'))
         ->toArray();
 
-    // Top Mentors
-    $topMentors = collect($mentorSessions)
+     // Top Mentors
+        $topMentors = collect($mentorSessions)
         ->sortDesc()
         ->take(5)
         ->keys()
         ->all();
 
-    $topMentorNames = [];
-    $topMentorSessionsArray = [];
-    foreach ($topMentors as $mentorId) {
-        $mentorName = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor?->name;
-        if ($mentorName) {
-            $topMentorNames[] = $mentorName;
-            $topMentorSessionsArray[] = $mentorSessions[$mentorId] ?? 0;
+        $topMentorNames = [];
+        $topMentorSessionsArray = [];
+        foreach ($topMentors as $mentorId) {
+             $mentorName = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor?->name;
+            if ($mentorName) {
+                $topMentorNames[] = $mentorName;
+                $topMentorSessionsArray[] = $mentorSessions[$mentorId] ?? 0;
+             }
         }
-    }
 
-    $mentorAvgRatingsArray = [];
-    foreach ($mentorAvgRatings as $mentorId => $avgRating) {
-        $mentor = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor;
-        if ($mentor) {
-            $mentorAvgRatingsArray[$mentor->name] = round($avgRating, 2);
+        $mentorAvgRatingsArray = [];
+        foreach ($mentorAvgRatings as $mentorId => $avgRating) {
+            $mentor = $mentorshipRequests->firstWhere('mentor_id', $mentorId)?->mentor;
+             if ($mentor) {
+                $mentorAvgRatingsArray[$mentor->name] = round($avgRating, 2);
+            }
         }
-    }
 
 
-    $workshopsQuery = $cycle->trainingSessions();
+     $workshopsQuery = $cycle->trainingSessions();
 
-    if ($request->filled('trainer')) {
-        $workshopsQuery->where('trainer_name', $request->trainer);
-    }
+        if ($request->filled('trainer')) {
+            $workshopsQuery->where('trainer_name', $request->trainer);
+        }
 
-    if ($request->filled('workshop_name')) {
-       $workshopsQuery->where('training_sessions.title', 'like', '%' . $request->workshop_name . '%');
-    }
+        if ($request->filled('workshop_name')) {
+            $workshopsQuery->where('training_sessions.title', 'like', '%' . $request->workshop_name . '%');
+        }
 
-    if ($request->filled('type')) {
-        $workshopsQuery->where('type', $request->type);
-    }
+        if ($request->filled('type')) {
+            $workshopsQuery->where('type', $request->type);
+        }
 
-    $workshops = $workshopsQuery->where(function($query) {
-    $query->where('type', 'offline')
+        $workshops = $workshopsQuery->where(function($query) {
+        $query->where('type', 'offline')
           ->orWhere('type', 'online')
           ->orWhere('type', 'sessions');
-    })->get();
+        })->get();
 
-    $trainerNames = $cycle->trainingSessions()->pluck('trainer_name')->unique()->values();
+        $trainerNames = $cycle->trainingSessions()->pluck('trainer_name')->unique()->values();
 
-    $totalWorkshops = $workshops->count();
-    $totalMinutes = $workshops->sum('duration');
-    $totalSessionHours = round($totalMinutes / 60, 2);
-    $zoomWorkshops = $workshops->where('type', 'sessions')->count();
-    $inPersonWorkshops = $workshops->where('type', 'offline')->count();
-    $uploadedMaterials = $workshops->where('type', 'online')->count();
+        $totalWorkshops = $workshops->count();
+        $totalMinutes = $workshops->sum('duration');
+        $totalSessionHours = round($totalMinutes / 60, 2);
+        $zoomWorkshops = $workshops->where('type', 'sessions')->count();
+        $inPersonWorkshops = $workshops->where('type', 'offline')->count();
+        $uploadedMaterials = $workshops->where('type', 'online')->count();
 
-    $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
+        $surveyResponses = SurveyResponses::where('cycle_id', $id)->get()->unique('user_id')->WhereNotNull('responses');
 
-    $averageFinalScore = $cycle->mentorshipRequests()->avg('rating');
+        $averageFinalScore = $cycle->mentorshipRequests()->avg('rating');
 
      
-    return view('admin.programs.program-report', [
+        return view('admin.programs.program-report', [
            'cycle' => $cycle,
            'totalStartups' => $cycle->companies_count,
            'totalMentors' => $cycle->mentors_count,
