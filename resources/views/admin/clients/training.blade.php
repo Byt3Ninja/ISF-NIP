@@ -44,6 +44,20 @@
     <div class="container-xxl flex-grow-1 container-p-y">
       <div class="row">
         <div class="col-lg-8">
+          <div class="card card-body shadow-sm mb-4" style="border-radius: 1rem;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-2">{{ __('admin.Progress') }}</h6>
+              <div class="d-flex align-items-center">
+                <span class="badge bg-label-primary me-2">{{ $progressPercentage }} %</span>
+              </div>
+            </div>
+            <div style="width: 100%; height: 7px;" class="progress rounded-pill">
+              <div class="progress-bar bg-primary" role="progressbar"
+                style="width: {{ number_format($progressPercentage, 2) }}%;"
+                aria-valuenow="{{ number_format($progressPercentage, 2) }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+
           <div class="card" style="border-radius: 1rem;">
             <div class="card-body">
               <div class="d-flex flex-column">
@@ -52,7 +66,7 @@
                     <h5 class="mb-0">{{ $ccontent->title }}</h5>
                   </div>
                   <div class="d-flex align-items-center">
-                    <span class="badge bg-label-danger">Course type</span>
+                    {{-- <span class="badge bg-label-danger">Course type</span> --}}
                     <button 
                       id="shareButton"
                       class="btn btn-transparent btn-icon btn-sm shadow-none ms-2"
@@ -89,7 +103,7 @@
                   @endif
                   <div id="instructorsContainer">
                     <hr class="my-6" />
-                    <h5>{{ $l == 'en' ? 'Instructor' : 'المدرب' }}</h5>
+                    {{-- <h5>{{ $l == 'en' ? 'Instructor' : 'المدرب' }}</h5>
                     <div class="d-flex justify-content-start align-items-center user-name">
                       <div class="avatar-wrapper">
                         <div class="avatar me-4">
@@ -100,7 +114,7 @@
                         <h6 class="mb-1">Devonne Wallbridge</h6>
                         <small>Web Developer, Designer, and Teacher</small>
                       </div>
-                    </div>
+                    </div> --}}
                   </div>
                 </div>
               </div>
@@ -128,8 +142,14 @@
                           <i class='ti ti-check ti-28px;'></i>
                         </span>
                       @else
+                        <span 
+                          class="w-px-30 h-px-30 bg-light rounded-circle text-white"
+                          style="display: grid; place-items: center;"
+                        >
+                          <i class='ti ti-check ti-28px;'></i>
+                        </span>
                         <!-- Circular Progress -->
-                        <div
+                        {{-- <div
                           class="progress-circle p-3 position-relative d-flex align-items-center justify-content-center"
                           style="width: 40px; height: 40px;">
                           <span
@@ -152,7 +172,7 @@
                               stroke-width="2.5"
                               stroke-dasharray="{{ $progressPercentage }}, 100" />
                           </svg>
-                        </div>
+                        </div> --}}
                         <!-- Circular Progress -->
                       @endif
                     </div>
@@ -196,7 +216,7 @@
 @stop
 
 @section('pagescripts')
-  <script>
+ <script>
     console.log(@json($ccontent))
   </script>
   <script>
