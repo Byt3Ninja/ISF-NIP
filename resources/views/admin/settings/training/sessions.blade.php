@@ -183,14 +183,6 @@
                             <button title="Join only" type="button"
                               class="btn btn-icon btn-label-info rounded-circle waves-effect">
                               <i class="ti ti-user"></i></button></a> |
-                          {{-- @if ($session->reports->count() > 0)
-                          <button title="View Report" type="button" data-bs-toggle="modal"
-                            data-bs-target="#reportModal{{ $session->id }}"
-                            class="btn btn-icon btn-label-warning rounded-circle waves-effect">
-                            <i class="ti ti-file-text"></i>
-                          </button>
-                          @endif --}}
-
                           <button title="View Report" type="button" data-bs-toggle="modal"
                             data-bs-target="#reportModal{{ $session->id }}"
                             class="btn btn-icon btn-label-warning rounded-circle waves-effect">
@@ -226,11 +218,11 @@
                           <button title="Edit" onclick="editme({{ $session->id }})" type="button"
                             class="btn btn-icon btn-label-info rounded-circle waves-effect">
                             <i class="ti ti-edit text-info"></i></button>&nbsp;
-                          @if( $session->datetime >= now() )
+                          {{-- @if( $session->datetime >= now() ) --}}
                           <button title="Delete" onclick="deleteme({{ $session->id }})" type="button"
                             class="btn btn-label-danger btn-icon rounded-circle waves-effect">
                             <i class="ti ti-trash text-danger"></i></button>
-                          @endif
+                          {{-- @endif --}}
                         </td>
                       </tr>
                       <!-- المودال نفسه -->
@@ -1149,11 +1141,17 @@
       Swal.fire({
           title: "{{ __('admin.SureDelete') }}",
           text: "{{ __('admin.Recover') }}",
-          type: "warning",
+          icon: "warning",
           showCancelButton: true,
-          confirmButtonClass: "btn-danger",
+          confirmButtonClass: "btn-primary",
           confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
+          cancelButtonText: "{{ __('admin.No') }}",
+          reverseButtons: true,
+          customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-secondary'
+        },
+        buttonsStyling: false 
         })
         .then((result) => {
           if (result.value) {

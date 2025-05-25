@@ -713,7 +713,7 @@ return [
 	'all Tags' => 'all Tags',
 	'Add new Tags' => 'Add New Tags',
 	'Reset' => 'Reset',
-	'Course Deleted' => 'Course Deleted',
+	'Course Deleted' => 'Session Deleted Successfully',
 	'CountProgram' => 'Program Count',
 	'Enroll' => 'Enroll',
 	'Mentorship Avr Rating' => ' Mentorship Avrage Rating ',
