@@ -233,9 +233,16 @@
                   <dt class="col-sm-3 text-right">{{ __('cycles.Total registered') }}</dt>
                   <dd class="col-sm-9">{{ \App\Company::whereIn('step', [$form->id ?? '', $cstep->id])->count() }}</dd>
                 </dl>
-                <dl class="row">
+                   <dl class="row">
                   <dt class="col-sm-3 text-right">{{ __('cycles.Registered Judges') }}</dt>
-                  <dd class="col-sm-9">{{ $cstep->judgers }}</dd>
+                  <dd class="col-sm-9">
+                    @php
+                      $judgeCount = $cstep->data === 'grouptogroup'
+                        ? collect(json_decode($cstep->list ?? '[]', true))->flatten()->unique()->count()
+                        : $cstep->judgers;
+                          @endphp
+                         {{ $judgeCount }}
+                   </dd>
                 </dl>
               </div>
             </div>
